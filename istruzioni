@@ -1,0 +1,7 @@
+per avviare il server
+
+PS C:\Users\gengi\Desktop\StudioDimaAI> python -m server.app.run
+
+per il client
+
+PS C:\Users\gengi\Desktop\StudioDimaAI\client>  npm run dev
