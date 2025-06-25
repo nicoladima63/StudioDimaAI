@@ -96,3 +96,16 @@ Quando riprendi la discussione, puoi fornire questo riassunto per evitare di rip
 
 ---
 
+## 🚀 Come clonare il repository e aprirlo in Visual Studio Code
+
+1. Assicurati di avere installato:
+   - [Git](https://git-scm.com/downloads)
+   - [Visual Studio Code](https://code.visualstudio.com/)
+
+2. Apri il terminale (Prompt dei comandi, PowerShell, Terminale Mac/Linux).
+
+3. Clona il repository con il comando:
+   git clone https://github.com/nicoladima63/StudioDimaAI.git
+   cd StudioDimaAI
+   code .
+
