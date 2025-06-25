@@ -96,5 +96,3 @@ Quando riprendi la discussione, puoi fornire questo riassunto per evitare di rip
 
 ---
 
-Se ti serve altro fammi sapere!
-
