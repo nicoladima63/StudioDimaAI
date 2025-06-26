@@ -28,7 +28,7 @@ const Login: React.FC = () => {
       const data  = await login({ username, password })
       setToken(data.token, data.username)
       navigate('/')
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err?.response?.data?.message || 'Errore nel login')
     }
   }

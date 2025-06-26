@@ -43,6 +43,7 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
         # Configurazione
         app.config.from_object(config_class)
         logger.info("Configurazione applicazione caricata con successo")
+        logger.info(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
         
         # Configurazione CORS più sicura
         CORS(

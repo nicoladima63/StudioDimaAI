@@ -5,11 +5,13 @@ import ApiTest from '@/test/ApiTest';
 import NotFound from '@/pages/NotFound';
 import Login from '@/pages/auth/Login';
 import Register from '@/pages/auth/Register';
+import { useAuthStore } from '@/store/authStore';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-    const token = localStorage.getItem('token'); // o sessionStorage
-    return token ? children : <Navigate to="/login" />;
+  const token = useAuthStore((state) => state.token);
+  console.log("PrivateRoute token:", token);
+  return token ? children : <Navigate to="/login" />;
 };
 
 const AppRouter: React.FC = () => {

@@ -2,6 +2,7 @@
 
 # Importa tutte le costanti principali
 from .constants import *
+from .config import Config
 
 # Se in futuro dividerai le configurazioni in moduli specifici, puoi importarli qui:
 # from .google import GOOGLE

@@ -1,0 +1,3 @@
+2025-06-26 23:52:46,581 - app.run - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:52:46,581 - app.run - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///users.db
+2025-06-26 23:52:46,614 - app.run - INFO - Applicazione inizializzata con successo

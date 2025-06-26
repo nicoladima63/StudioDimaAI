@@ -1,0 +1,111 @@
+2025-06-26 22:19:58,798 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 22:19:58,882 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 22:19:58,935 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-26 22:19:58,936 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 22:19:58,939 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 22:19:59,485 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 22:19:59,534 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 22:19:59,552 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 22:19:59,563 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 22:34:58,423 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:34:58] "[33mOPTIONS /api/auth/register HTTP/1.1[0m" 404 -
+2025-06-26 22:41:13,376 - werkzeug - INFO -  * Detected change in 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\server\\app\\auth\\routes.py', reloading
+2025-06-26 22:41:13,436 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 22:41:14,232 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 22:41:14,297 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 22:41:14,319 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 22:41:14,327 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 22:41:32,489 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:41:32] "OPTIONS /api/auth/register HTTP/1.1" 200 -
+2025-06-26 22:41:32,747 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:41:32] "POST /api/auth/register HTTP/1.1" 200 -
+2025-06-26 22:41:39,846 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:41:39] "POST /api/auth/register HTTP/1.1" 200 -
+2025-06-26 22:46:53,995 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:46:53] "OPTIONS /api/auth/login HTTP/1.1" 200 -
+2025-06-26 22:46:54,304 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:46:54] "[35m[1mPOST /api/auth/login HTTP/1.1[0m" 500 -
+2025-06-26 22:47:24,605 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 22:47:24,647 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 22:47:24,678 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-26 22:47:24,678 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 22:47:24,680 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 22:47:25,195 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 22:47:25,238 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 22:47:25,258 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 22:47:25,266 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 22:49:09,675 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:49:09] "POST /api/auth/register HTTP/1.1" 200 -
+2025-06-26 22:49:14,343 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 22:49:14] "[35m[1mPOST /api/auth/login HTTP/1.1[0m" 500 -
+2025-06-26 23:29:33,679 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:29:33,731 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:29:33,763 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-26 23:29:33,763 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 23:29:33,765 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 23:29:34,301 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:29:34,344 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:29:34,359 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 23:29:34,367 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 23:29:53,645 - flask_cors.core - WARNING - Unknown option passed to Flask-CORS: origin
+2025-06-26 23:29:53,645 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:29:53] "GET /api/tests/ping HTTP/1.1" 200 -
+2025-06-26 23:29:53,741 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:29:53] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-06-26 23:29:59,521 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:29:59] "[31m[1mPOST /api/auth/register HTTP/1.1[0m" 400 -
+2025-06-26 23:35:29,118 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:35:29] "[31m[1mPOST /api/auth/register HTTP/1.1[0m" 400 -
+2025-06-26 23:37:31,850 - werkzeug - INFO -  * Detected change in 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\server\\app\\auth\\routes.py', reloading
+2025-06-26 23:37:31,953 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 23:37:32,606 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:37:32,656 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:37:32,671 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 23:37:32,679 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 23:37:47,626 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:37:47] "[35m[1mPOST /api/auth/register HTTP/1.1[0m" 500 -
+2025-06-26 23:38:11,443 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:38:11] "[35m[1mPOST /api/auth/register HTTP/1.1[0m" 500 -
+2025-06-26 23:54:17,042 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:54:17,042 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///users.db
+2025-06-26 23:54:17,096 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:54:17,125 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-26 23:54:17,125 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 23:54:17,127 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 23:54:17,636 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:54:17,636 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///users.db
+2025-06-26 23:54:17,692 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:54:17,705 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 23:54:17,712 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 23:54:31,820 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:54:31] "[35m[1mPOST /api/auth/login HTTP/1.1[0m" 500 -
+2025-06-26 23:58:11,334 - werkzeug - INFO -  * Detected change in 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\server\\app\\config\\config.py', reloading
+2025-06-26 23:58:11,435 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 23:58:12,073 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:58:12,073 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///users.db
+2025-06-26 23:58:12,114 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:58:12,132 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 23:58:12,141 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 23:58:17,856 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:58:17,858 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///users.db
+2025-06-26 23:58:17,901 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:58:17,926 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-26 23:58:17,926 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 23:58:17,928 - werkzeug - INFO -  * Restarting with stat
+2025-06-26 23:58:18,443 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:58:18,443 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///users.db
+2025-06-26 23:58:18,495 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-26 23:58:18,499 - werkzeug - WARNING -  * Debugger is active!
+2025-06-26 23:58:18,516 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-26 23:58:34,318 - flask_cors.core - WARNING - Unknown option passed to Flask-CORS: origin
+2025-06-26 23:58:34,318 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:58:34] "GET /api/tests/ping HTTP/1.1" 200 -
+2025-06-26 23:58:38,957 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:58:38] "[35m[1mPOST /api/auth/login HTTP/1.1[0m" 500 -
+2025-06-26 23:58:50,029 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:58:50] "[35m[1mPOST /api/auth/login HTTP/1.1[0m" 500 -
+2025-06-26 23:58:56,088 - werkzeug - INFO - 127.0.0.1 - - [26/Jun/2025 23:58:56] "[31m[1mGET /api/auth/login HTTP/1.1[0m" 405 -
+2025-06-27 00:00:05,014 - werkzeug - INFO -  * Detected change in 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\server\\app\\config\\config.py', reloading
+2025-06-27 00:00:05,112 - werkzeug - INFO -  * Restarting with stat
+2025-06-27 00:00:05,732 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-27 00:00:05,732 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-27 00:00:05,781 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-27 00:00:05,798 - werkzeug - WARNING -  * Debugger is active!
+2025-06-27 00:00:05,807 - werkzeug - INFO -  * Debugger PIN: 124-881-311

@@ -1,4 +1,3 @@
-// src/pages/Register.tsx
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import {
@@ -13,6 +12,8 @@ import {
 } from '@coreui/react'
 import { register } from '@/api/apiClient'
 
+const EMAIL_REGEX = /^[\w.-]+@[\w.-]+\.\w+$/
+
 const Register: React.FC = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -23,11 +24,17 @@ const Register: React.FC = () => {
     e.preventDefault()
     setError('')
 
+    if (!EMAIL_REGEX.test(username)) {
+      setError('Email non valida')
+      return
+    }
+
     try {
+      // Passa email come username al backend
       await register({ username, password })
       navigate('/login')
-    } catch (err: unknown) {
-      setError(err?.response?.data?.message || 'Errore nella registrazione')
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Errore nella registrazione')
     }
   }
 
@@ -51,7 +58,7 @@ const Register: React.FC = () => {
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(e) => { setPassword(e.target.value); }}
+              onChange={(e) => setPassword(e.target.value)}
               required
               label="Password"
             />

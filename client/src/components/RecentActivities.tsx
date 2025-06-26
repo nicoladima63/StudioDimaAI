@@ -1,5 +1,5 @@
 import React from 'react';
-import { CListGroup, CListGroupItem, CBadge } from '@coreui/react';
+import { CCard, CCardHeader, CCardBody, CListGroup, CListGroupItem, CBadge } from '@coreui/react';
 
 const RecentActivities: React.FC = () => {
   const activities = [
