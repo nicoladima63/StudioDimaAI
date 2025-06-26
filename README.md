@@ -69,7 +69,6 @@ StudioDimaAI/
 
 1. **Configurare `.env`** per backend e frontend (URL API, segreti, credenziali Google Calendar, ecc.)
 2. **Avviare il backend** con `python run.py` (porta 5000, accessibile in LAN)
-3. **Avviare il frontend vite react** con `npm run dev` (porta 5173)
 3. **Avviare il frontend react+vite** con `npm run dev` (porta 5173)
 4. **Accedere via browser** all’interfaccia utente, fare login e navigare nelle sezioni dashboard
 5. **Eseguire test automatici** tramite pagina dedicata `/tests`
