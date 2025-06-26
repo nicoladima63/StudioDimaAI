@@ -1,4 +1,4 @@
-# app/core/db_handler.py
+# server/app/core/db_handler.py
 
 import pandas as pd
 import logging
