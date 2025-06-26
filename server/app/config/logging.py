@@ -16,3 +16,16 @@ def setup_logging(level=logging.INFO):
     logger.addHandler(handler)
 
     logger.setLevel(level)
+
+
+
+#Come usarli insieme
+
+#Nel tuo main script o entrypoint:
+#from app.config.logging_config import setup_logging
+#setup_logging(level=logging.DEBUG)  # o INFO per produzione
+
+#In ogni modulo, ad esempio sync_utils.py, puoi fare:
+#import logging
+#logger = logging.getLogger(__name__)
+#logger.info("Messaggio di log")
