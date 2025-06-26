@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { CCol, CRow, CProgress, CButton, CSpinner } from '@coreui/react'
+import { CCol, CRow, CButton, CSpinner } from '@coreui/react'
 import { cilPeople, cilCalendar, cilChart, cilBell } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import Layout from '@/components/Layout'
