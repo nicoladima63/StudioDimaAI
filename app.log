@@ -109,3 +109,21 @@
 2025-06-27 00:00:05,781 - __main__ - INFO - Applicazione inizializzata con successo
 2025-06-27 00:00:05,798 - werkzeug - WARNING -  * Debugger is active!
 2025-06-27 00:00:05,807 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-27 00:00:10,178 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-27 00:00:10,178 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-27 00:00:10,236 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-27 00:00:10,271 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-27 00:00:10,271 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-27 00:00:10,273 - werkzeug - INFO -  * Restarting with stat
+2025-06-27 00:00:10,798 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-27 00:00:10,799 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-27 00:00:10,840 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-27 00:00:10,857 - werkzeug - WARNING -  * Debugger is active!
+2025-06-27 00:00:10,862 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-27 00:00:23,388 - werkzeug - INFO - 127.0.0.1 - - [27/Jun/2025 00:00:23] "POST /api/auth/login HTTP/1.1" 200 -
+2025-06-27 00:00:30,972 - werkzeug - INFO - 127.0.0.1 - - [27/Jun/2025 00:00:30] "[35m[1mPOST /api/auth/register HTTP/1.1[0m" 201 -
+2025-06-27 00:01:15,660 - werkzeug - INFO - 127.0.0.1 - - [27/Jun/2025 00:01:15] "POST /api/auth/login HTTP/1.1" 200 -
+2025-06-27 00:08:07,429 - werkzeug - INFO - 127.0.0.1 - - [27/Jun/2025 00:08:07] "POST /api/auth/login HTTP/1.1" 200 -
