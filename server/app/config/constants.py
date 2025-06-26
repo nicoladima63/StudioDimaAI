@@ -122,3 +122,11 @@ TWILIO_ACCOUNT_SID = TWILIO['account_sid']
 TWILIO_AUTH_TOKEN = TWILIO['auth_token']
 TWILIO_WHATSAPP_NUMBER = TWILIO['whatsapp_number']
 
+# --- Alias colonne standard per sincronizzazione (compatibili con sync_utils) ---
+COL_DATA = COLONNE['appuntamenti']['data']
+COL_ORA_INIZIO = COLONNE['appuntamenti']['ora_inizio']
+COL_ORA_FINE = COLONNE['appuntamenti']['ora_fine']
+COL_STUDIO = COLONNE['appuntamenti']['studio']
+COL_PAZIENTE = COLONNE['appuntamenti']['id_paziente']
+COL_DESCRIZIONE = COLONNE['appuntamenti']['descrizione']
+COL_NOTE = COLONNE['appuntamenti']['note']
