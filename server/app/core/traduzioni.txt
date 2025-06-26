@@ -1,1 +1,10 @@
 
+Mappatura Nomi Funzioni:
+Italiano (Originale)	Inglese (Nuovo)	Note
+leggi_tabella_dbf	_read_dbf_to_dataframe	Metodo privato (inizia con _)
+estrai_appuntamenti_domani	get_tomorrow_appointments	Più chiaro che "estrai" = "get"
+estrai_appuntamenti_mese	get_monthly_appointments	Stessa logica
+recupera_dati_pazienti	get_patients_data	Più conciso
+get_appointments	get_appointments_with_details	Rinominato per maggiore chiarezza
+test_connessione	test_connection	Traduzione diretta
+Perché questa modifica?
