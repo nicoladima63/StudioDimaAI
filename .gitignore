@@ -47,3 +47,6 @@ yarn-error.log*
 *.swp
 *~
 .DS_Store
+# Credenziali e token sensibili
+server/credentials.json
+server/token.json
