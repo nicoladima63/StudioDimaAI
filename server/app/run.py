@@ -6,6 +6,8 @@ from .config import Config
 from .extensions import db
 import logging
 from typing import Optional
+from .calendar.routes import calendar_bp
+
 
 def configure_logging() -> None:
     """Configura il logging per l'applicazione Flask."""
@@ -26,6 +28,8 @@ def register_blueprints(app: Flask) -> None:
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(tests_bp, url_prefix="/api/tests")
+    app.register_blueprint(calendar_bp, url_prefix="/api/calendar")
+
     
     # Aggiungi qui altri blueprint
 

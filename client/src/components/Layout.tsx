@@ -1,11 +1,11 @@
 // src/components/Layout.tsx
 import React from 'react';
 import { CContainer, CRow, CCol } from '@coreui/react';
+import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
 interface LayoutProps {
-  children: React.ReactNode;
   sidebarWidth?: number;
   contentClassName?: string;
 }
@@ -13,7 +13,6 @@ interface LayoutProps {
 const DEFAULT_SIDEBAR_WIDTH = 2;
 
 const Layout: React.FC<LayoutProps> = ({ 
-  children, 
   sidebarWidth = DEFAULT_SIDEBAR_WIDTH, 
   contentClassName = 'p-4' 
 }) => {
@@ -32,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({
           as="main"
         >
           <CContainer fluid className="h-100">
-            {children}
+            <Outlet />
           </CContainer>
         </CCol>
       </CRow>

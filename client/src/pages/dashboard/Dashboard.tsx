@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { CCol, CRow, CButton, CSpinner } from '@coreui/react'
 import { cilPeople, cilCalendar, cilChart, cilBell } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import Layout from '@/components/Layout'
 import DashboardCard from '@/components/DashboardCard'
 import StatWidget from '@/components/StatWidget'
 import RecentActivities from '@/components/RecentActivities'
@@ -29,7 +28,6 @@ const Dashboard: React.FC = () => {
   }, [])
 
   return (
-    <Layout>
       <DashboardCard 
         title="Dashboard" 
         headerAction={
@@ -98,7 +96,6 @@ const Dashboard: React.FC = () => {
           </>
         )}
       </DashboardCard>
-    </Layout>
   )
 }
 

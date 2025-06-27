@@ -6,7 +6,7 @@ const TOKEN_STORAGE_KEY = 'auth_token';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const DEFAULT_TIMEOUT = 10000;
 
-const apiClient = axios.create({
+ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: DEFAULT_TIMEOUT,
   headers: {
@@ -62,6 +62,28 @@ export async function register(credentials: LoginPayload) {
 
 export async function ping() {
   const response = await apiClient.get('/api/tests/ping');
+  return response.data;
+}
+
+// Ottiene i calendari disponibili
+export async function getCalendars() {
+  const response = await apiClient.get('/api/calendar/list');
+  return response.data;
+}
+
+// Sincronizza gli appuntamenti su un calendario per un intervallo di date
+export async function syncAppointmentsToCalendar(calendarId: string, start: Date, end: Date) {
+  const response = await apiClient.post('/api/calendar/sync', {
+    calendarId,
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+  });
+  return response.data;
+}
+
+// Cancella tutti gli eventi del calendario selezionato
+export async function clearCalendarEvents(calendarId: string) {
+  const response = await apiClient.delete(`/api/calendar/clear/${calendarId}`);
   return response.data;
 }
 
