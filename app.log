@@ -705,3 +705,21 @@
 2025-06-28 00:02:31,441 - __main__ - INFO - Applicazione inizializzata con successo
 2025-06-28 00:02:31,458 - werkzeug - WARNING -  * Debugger is active!
 2025-06-28 00:02:31,467 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-28 00:02:45,838 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-28 00:02:45,839 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-28 00:02:45,874 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-28 00:02:45,900 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-28 00:02:45,900 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-28 00:02:45,902 - werkzeug - INFO -  * Restarting with stat
+2025-06-28 00:02:47,159 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-28 00:02:47,160 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-28 00:02:47,195 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-28 00:02:47,212 - werkzeug - WARNING -  * Debugger is active!
+2025-06-28 00:02:47,221 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-28 00:02:56,320 - werkzeug - INFO - 127.0.0.1 - - [28/Jun/2025 00:02:56] "OPTIONS /api/calendar/list HTTP/1.1" 200 -
+2025-06-28 00:02:56,590 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-06-28 00:02:57,226 - server.app.calendar.service - INFO - Trovati 2 calendari pertinenti su 3 accessibili.
+2025-06-28 00:02:57,227 - werkzeug - INFO - 127.0.0.1 - - [28/Jun/2025 00:02:57] "GET /api/calendar/list HTTP/1.1" 200 -
