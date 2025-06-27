@@ -14,6 +14,10 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     HOST = "0.0.0.0"
     PORT = 5000
+    JWT_TOKEN_LOCATION = ["headers"]
+    JWT_HEADER_NAME = "Authorization"
+    JWT_HEADER_TYPE = "Bearer"
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "maremmamaialaimpestataladradelcazzoribellecomeuncinghiale")
 
     TWILIO = TWILIO
     GOOGLE = GOOGLE

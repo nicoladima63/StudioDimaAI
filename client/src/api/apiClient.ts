@@ -2,7 +2,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
-const TOKEN_STORAGE_KEY = 'auth_token';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const DEFAULT_TIMEOUT = 10000;
 
@@ -16,7 +15,8 @@ const DEFAULT_TIMEOUT = 10000;
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  // Recupera il token direttamente dallo store Zustand
+  const token = useAuthStore.getState().token;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -52,6 +52,12 @@ interface LoginPayload {
 
 export async function login(credentials: LoginPayload) {
   const response = await apiClient.post('/api/auth/login', credentials);
+  // La risposta ora contiene access_token, username, e role
+  const { access_token, username } = response.data;
+  if (access_token && username) {
+    // Salviamo il token e l'username nello store
+    useAuthStore.getState().setToken(access_token, username);
+  }
   return response.data;
 }
 
