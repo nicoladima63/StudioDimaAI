@@ -1,7 +1,13 @@
 python-dotenv==1.0.0
 Flask==2.3.3
 Flask-CORS==4.0.0
+flask_jwt_extended==4.4.4
 Flask-SQLAlchemy==3.0.5
 PyJWT==2.8.0
 bcrypt==4.0.1
 passlib==1.7.4
+
+# Pacchetti per l'integrazione con Google API
+google-api-python-client==2.113.0
+google-auth-oauthlib==1.2.0
+google-auth-httplib2==0.2.0

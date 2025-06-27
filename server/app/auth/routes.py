@@ -4,7 +4,8 @@ import re
 from flask import Blueprint, request, jsonify
 from ..extensions import db
 from .models import User
-from .utils import hash_password, verify_password, generate_token, token_required
+from .utils import hash_password, verify_password
+from flask_jwt_extended import create_access_token
 
 EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
 
@@ -21,8 +22,10 @@ def login():
     if not user or not verify_password(password, user.password_hash):
         return jsonify({"error": "Credenziali non valide"}), 401
 
-    token = generate_token(user.id, user.username, user.role)
-    return jsonify({"token": token, "role": user.role, "username": user.username})
+    # L'identità può essere un oggetto complesso, se necessario
+    identity = {"id": user.id, "role": user.role}
+    access_token = create_access_token(identity=identity)
+    return jsonify(access_token=access_token, username=user.username, role=user.role)
 
 @auth_bp.route("/register", methods=["POST"])
 def register():

@@ -12,24 +12,26 @@ import {
   CCardHeader
 } from '@coreui/react'
 import { login } from '@/api/apiClient'
-import { useAuthStore } from '@/store/authStore'
+import { AxiosError } from 'axios'
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const setToken = useAuthStore((state) => state.setToken)
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     try {
-      const data  = await login({ username, password })
-      setToken(data.token, data.username)
+      await login({ username, password })
       navigate('/')
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Errore nel login')
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setError(err.response?.data?.message || 'Errore nel login')
+      } else {
+        setError('Si è verificato un errore inatteso')
+      }
     }
   }
 

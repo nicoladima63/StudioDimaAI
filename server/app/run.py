@@ -3,7 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
-from .extensions import db
+from .extensions import db, jwt
 import logging
 from typing import Optional
 from .calendar.routes import calendar_bp
@@ -50,23 +50,11 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
         logger.info(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
         
         # Configurazione CORS più sicura
-        CORS(
-            app,
-            resources={r"/api/*": {
-                "origins": [
-                    "http://localhost:5173",
-                    "https://tuodominio.com"  # Aggiungi altri domini se necessario
-                ],
-                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                "allow_headers": ["Content-Type", "Authorization"],
-                "supports_credentials": True,
-                "max_age": 86400
-            }},
-            expose_headers=["X-Custom-Header"]
-        )
+        CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
         
         # Inizializzazione database
         db.init_app(app)
+        jwt.init_app(app)
         
         # Registrazione blueprint
         register_blueprints(app)
