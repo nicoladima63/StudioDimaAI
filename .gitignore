@@ -29,6 +29,10 @@ build/
 server/app/instance/
 server/instance/
 
+# Credenziali e token sensibili
+server/credentials.json
+server/token.json
+
 # Database DBF files
 server/windent/
 server/sync_state.json
@@ -51,6 +55,3 @@ yarn-error.log*
 *.swp
 *~
 .DS_Store
-# Credenziali e token sensibili
-server/credentials.json
-server/token.json
