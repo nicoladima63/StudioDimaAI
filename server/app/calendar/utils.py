@@ -1,40 +1,49 @@
 # app/core/calendar_utils.py
 
+import os
 from typing import List, Dict
 from datetime import datetime
 import logging
-
-# Dummy data for now
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
 from os import getenv
+from .exceptions import GoogleCredentialsNotFoundError
 
 logger = logging.getLogger(__name__)
 
-CALENDAR_IDS = [
-    getenv("CALENDAR_ID_STUDIO_1"),
-    getenv("CALENDAR_ID_STUDIO_2")
-]
+TOKEN_FILE = 'server/token.json'
+SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-def list_available_calendars() -> List[Dict[str, str]]:
-    """Restituisce la lista degli ID dei calendari disponibili."""
-    return [
-        {"id": cid, "name": f"Calendario {i+1}"}
-        for i, cid in enumerate(CALENDAR_IDS) if cid
-    ]
 
-def fetch_events(calendar_id: str, start: datetime, end: datetime) -> List[Dict]:
-    """Recupera eventi esistenti in un intervallo di date."""
-    logger.info(f"[GoogleCalendar] Recupero eventi per {calendar_id} da {start} a {end}")
-    # TODO: integrazione con Google Calendar API
-    return []
+def get_google_service():
+    """
+    Costruisce e restituisce un oggetto servizio di Google Calendar autenticato
+    caricando le credenziali dal file token.json.
+    """
+    creds = None
+    if os.path.exists(TOKEN_FILE):
+        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    
+    # Se non ci sono credenziali valide, solleva un'eccezione.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+                # Salva le credenziali aggiornate nel file token.json
+                with open(TOKEN_FILE, 'w') as token:
+                    token.write(creds.to_json())
+            except Exception as e:
+                logger.error(f"Errore durante il refresh del token Google: {e}")
+                raise GoogleCredentialsNotFoundError(
+                    "Impossibile aggiornare le credenziali Google. "
+                    f"Prova a cancellare il file '{TOKEN_FILE}' e a rieseguire lo script di autenticazione."
+                ) from e
+        else:
+            raise GoogleCredentialsNotFoundError(
+                f"Credenziali Google non trovate o non valide in '{TOKEN_FILE}'. "
+                "Esegui lo script 'server/authenticate_google.py' per ottenere le credenziali."
+            )
+            
+    return build('calendar', 'v3', credentials=creds)
 
-def sync_appointments_to_calendar(calendar_id: str, start: datetime, end: datetime) -> Dict:
-    """Sincronizza appuntamenti nel range specificato."""
-    logger.info(f"[Sync] Sincronizzazione appuntamenti verso {calendar_id} da {start} a {end}")
-    # TODO: estrai appuntamenti dal DB e crea eventi in Google Calendar
-    return {"synced": 0, "status": "OK"}
-
-def clear_calendar_events(calendar_id: str) -> Dict:
-    """Cancella tutti gli eventi da un calendario."""
-    logger.warning(f"[GoogleCalendar] Eliminazione eventi da {calendar_id}")
-    # TODO: chiamata alle API Google per eliminare eventi
-    return {"cleared": True}

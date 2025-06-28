@@ -1,8 +1,13 @@
-# analytics/init_db.py
-from app.run import create_app
-from app.extensions import db
-from app.auth.models import User
-from app.auth.utils import hash_password
+import sys
+import os
+
+# Aggiungi la directory principale del progetto al PYTHONPATH
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from server.app.run import create_app
+from server.app.extensions import db
+from server.app.auth.models import User
+from server.app.auth.utils import hash_password
 
 def init_database():
     """Inizializza il database con le tabelle e l'utente admin"""
