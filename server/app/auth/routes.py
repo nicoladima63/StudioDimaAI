@@ -5,7 +5,12 @@ from flask import Blueprint, request, jsonify
 from ..extensions import db
 from .models import User
 from .utils import hash_password, verify_password
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity,
+)
 
 EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
 
@@ -24,8 +29,14 @@ def login():
 
     # L'identità può essere un oggetto complesso, se necessario
     identity = {"id": user.id, "role": user.role}
-    access_token = create_access_token(identity=identity)
-    return jsonify(access_token=access_token, username=user.username, role=user.role)
+    access_token = create_access_token(identity=identity, fresh=True)
+    refresh_token = create_refresh_token(identity=identity)
+    return jsonify(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        username=user.username,
+        role=user.role,
+    )
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
@@ -60,3 +71,11 @@ def register():
         return jsonify({"error": "Errore interno, riprova"}), 500
 
     return jsonify({"message": "Registrazione avvenuta con successo"}), 201
+
+
+@auth_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity, fresh=False)
+    return jsonify(access_token=access_token)

@@ -4,7 +4,7 @@ import pandas as pd
 import logging
 from datetime import datetime, date, timedelta
 import dbf
-from config import PATHS_DBF, COLONNE
+from ..config.constants import PATHS_DBF, COLONNE
 
 logger = logging.getLogger(__name__)
 
@@ -98,20 +98,33 @@ class DBHandler:
         patients_dict = {}
 
         try:
+            logger.info(f"Avvio lettura appuntamenti per mese={month}, anno={year}")
+            logger.info(f"Percorso anagrafica: {self.path_anagrafica}")
+            logger.info(f"Percorso appuntamenti: {self.path_appuntamenti}")
+            
+            # Legge anagrafica pazienti
             with dbf.Table(self.path_anagrafica, codepage='cp1252') as pazienti:
+                pazienti_count = 0
                 for r in pazienti:
+                    pazienti_count += 1
                     pid = str(r[paz['id']]).strip()
                     name = str(r[paz['nome']]).strip() if r[paz['nome']] else ''
                     if pid:
                         patients_dict[pid] = name
+                logger.info(f"Letti {pazienti_count} pazienti dall'anagrafica, {len(patients_dict)} validi")
 
+            # Legge appuntamenti
             with dbf.Table(self.path_appuntamenti, codepage='cp1252') as apps:
+                apps_count = 0
+                filtered_count = 0
                 for r in apps:
+                    apps_count += 1
                     if not r[col['data']]:
                         continue
                     app_date = r[col['data']]
                     if month and year and (app_date.month != month or app_date.year != year):
                         continue
+                    filtered_count += 1
                     idpaz = str(r[col['id_paziente']]).strip()
                     appointments.append({
                         'DATA': app_date,
@@ -123,11 +136,13 @@ class DBHandler:
                         'DESCRIZIONE': r[col['descrizione']].strip() if r[col['descrizione']] else '',
                         'PAZIENTE': patients_dict.get(idpaz, '')
                     })
-            logger.info(f"Recuperati {len(appointments)} appuntamenti.")
+                logger.info(f"Letti {apps_count} appuntamenti totali, {filtered_count} filtrati per mese/anno")
+            
+            logger.info(f"Recuperati {len(appointments)} appuntamenti finali.")
             return appointments
 
         except Exception as e:
-            logger.error(f"Errore lettura appuntamenti: {e}")
+            logger.error(f"Errore lettura appuntamenti: {e}", exc_info=True)
             return []
 
     def test_connessione(self):
