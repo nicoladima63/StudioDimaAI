@@ -29,6 +29,10 @@ build/
 server/app/instance/
 server/instance/
 
+# Database DBF files
+server/windent/
+server/sync_state.json
+
 # Node
 node_modules/
 npm-debug.log*
@@ -47,3 +51,6 @@ yarn-error.log*
 *.swp
 *~
 .DS_Store
+# Credenziali e token sensibili
+server/credentials.json
+server/token.json

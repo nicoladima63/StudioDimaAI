@@ -50,7 +50,11 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
         logger.info(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
         
         # Configurazione CORS più sicura
-        CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+        CORS(app, resources={r"/api/*": {
+            "origins": "http://localhost:5173",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }})
         
         # Inizializzazione database
         db.init_app(app)

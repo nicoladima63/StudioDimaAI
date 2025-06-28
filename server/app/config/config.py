@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 from .constants import TWILIO, GOOGLE
 
@@ -18,6 +19,8 @@ class Config:
     JWT_HEADER_NAME = "Authorization"
     JWT_HEADER_TYPE = "Bearer"
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "maremmamaialaimpestataladradelcazzoribellecomeuncinghiale")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
     TWILIO = TWILIO
     GOOGLE = GOOGLE

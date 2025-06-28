@@ -3,14 +3,13 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 // Costanti per evitare magic strings
-const TOKEN_KEY = 'auth_token';
-const USERNAME_KEY = 'auth_username';
-
 interface AuthState {
   token: string | null;
+  refreshToken: string | null;
   username: string | null;
   isAuthenticated: boolean;
-  setToken: (token: string, username: string) => void;
+  setToken: (token: string, refreshToken: string, username: string) => void;
+  setAccessToken: (token: string) => void;
   clearToken: () => void;
 }
 
@@ -18,26 +17,33 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
+      refreshToken: null,
       username: null,
       isAuthenticated: false,
-      setToken: (token, username) => {
-        set({ token, username, isAuthenticated: true });
+      setToken: (token, refreshToken, username) => {
+        set({ token, refreshToken, username, isAuthenticated: true });
+      },
+      setAccessToken: (token) => {
+        set({ token });
       },
       clearToken: () => {
-        set({ token: null, username: null, isAuthenticated: false });
+        set({
+          token: null,
+          refreshToken: null,
+          username: null,
+          isAuthenticated: false,
+        });
       },
     }),
     {
       name: 'auth-storage', // chiave unica per lo storage
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
-        token: state.token, 
-        username: state.username 
+      // Salva tutto lo stato tranne 'isAuthenticated' che viene derivato
+      partialize: (state) => ({
+        token: state.token,
+        refreshToken: state.refreshToken,
+        username: state.username,
       }),
     }
   )
 );
-
-// Helper functions
-export const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
-export const getStoredUsername = () => localStorage.getItem(USERNAME_KEY);

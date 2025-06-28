@@ -17,14 +17,17 @@ def require_env(var_name: str) -> str:
         raise EnvironmentError(f"[CONFIG] Variabile '{var_name}' non trovata nel file .env")
     return value
 
+# Ottieni il percorso della directory del backend (server/)
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 # --- DBF Paths ---
 PATHS_DBF = {
     'appuntamenti': (
-        './windent/user/APPUNTA.DBF' if CURRENT_ENV == Environment.DEVELOPMENT
+        os.path.join(BACKEND_DIR, 'windent', 'USER', 'APPUNTA.DBF') if CURRENT_ENV == Environment.DEVELOPMENT
         else require_env('PATH_APPUNTAMENTI_DBF')
     ),
     'anagrafica': (
-        './windent/dati/PAZIENTI.DBF' if CURRENT_ENV == Environment.DEVELOPMENT
+        os.path.join(BACKEND_DIR, 'windent', 'DATI', 'PAZIENTI.DBF') if CURRENT_ENV == Environment.DEVELOPMENT
         else require_env('PATH_ANAGRAFICA_DBF')
     )
 }
