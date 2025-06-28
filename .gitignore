@@ -29,6 +29,10 @@ build/
 server/app/instance/
 server/instance/
 
+# Database DBF files
+server/windent/
+server/sync_state.json
+
 # Node
 node_modules/
 npm-debug.log*
