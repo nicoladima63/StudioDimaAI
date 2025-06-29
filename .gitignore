@@ -57,3 +57,5 @@ yarn-error.log*
 *.swp
 *~
 .DS_Store
+
+**/test*.py

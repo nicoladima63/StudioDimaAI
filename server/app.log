@@ -1,0 +1,26 @@
+2025-06-26 23:52:46,581 - app.run - INFO - Configurazione applicazione caricata con successo
+2025-06-26 23:52:46,581 - app.run - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///users.db
+2025-06-26 23:52:46,614 - app.run - INFO - Applicazione inizializzata con successo
+2025-06-27 21:51:18,845 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-27 21:51:18,845 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-27 21:51:18,907 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-27 21:51:18,956 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.167:5000
+2025-06-27 21:51:18,956 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-27 21:51:18,956 - werkzeug - INFO -  * Restarting with stat
+2025-06-27 21:51:20,188 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-27 21:51:20,188 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-27 21:51:20,224 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-27 21:51:20,240 - werkzeug - WARNING -  * Debugger is active!
+2025-06-27 21:51:20,248 - werkzeug - INFO -  * Debugger PIN: 124-881-311
+2025-06-27 22:09:53,424 - werkzeug - INFO - 127.0.0.1 - - [27/Jun/2025 22:09:53] "[35m[1mGET /api/calendar/list HTTP/1.1[0m" 500 -
+2025-06-27 22:09:53,677 - werkzeug - INFO - 127.0.0.1 - - [27/Jun/2025 22:09:53] "[35m[1mGET /api/calendar/list HTTP/1.1[0m" 500 -
+2025-06-27 22:11:33,728 - werkzeug - INFO -  * Detected change in 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\server\\app\\run.py', reloading
+2025-06-27 22:11:33,899 - werkzeug - INFO -  * Restarting with stat
+2025-06-27 22:11:35,463 - __main__ - INFO - Configurazione applicazione caricata con successo
+2025-06-27 22:11:35,463 - __main__ - INFO - SQLALCHEMY_DATABASE_URI: sqlite:///C:\Users\gengi\Desktop\StudioDimaAI\server\instance\users.db
+2025-06-27 22:11:35,518 - __main__ - INFO - Applicazione inizializzata con successo
+2025-06-27 22:11:35,545 - werkzeug - WARNING -  * Debugger is active!
+2025-06-27 22:11:35,554 - werkzeug - INFO -  * Debugger PIN: 124-881-311
