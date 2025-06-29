@@ -8,6 +8,7 @@ bcrypt==4.0.1
 passlib==1.7.4
 pandas==2.2.3
 dbf==0.99.0
+dbfread==2.0.7
 
 # Pacchetti per l'integrazione con Google API
 google-api-python-client==2.113.0

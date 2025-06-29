@@ -104,3 +104,81 @@ export type MutationConfig<TPayload> = RequestConfig & {
   data?: TPayload;
 };
 
+/**
+ * Tipi per i richiami pazienti
+ */
+export type Richiamo = {
+  id_paziente: string | null;
+  nome_completo: string;
+  telefono: string;
+  tipo_codice: string;
+  tipo_descrizione: string;
+  tipi_codice: string[];
+  tipi_descrizione: string[];
+  data_richiamo: string | null;
+  data_richiamo_2: string | null;
+  ultima_visita: string | null;
+  mesi_richiamo: number;
+  giorni_scadenza: number | null;
+  stato: 'scaduto' | 'in_scadenza' | 'futuro' | 'sconosciuto';
+  da_richiamare: boolean;
+};
+
+export type RichiamoStatistics = {
+  totale: number;
+  scaduti: number;
+  in_scadenza: number;
+  futuri: number;
+  per_tipo: Record<string, number>;
+};
+
+export type RichiamoMessage = {
+  paziente: string;
+  telefono: string;
+  messaggio: string;
+  tipo_richiamo: string;
+  data_scadenza: string;
+};
+
+export type RichiamoFilters = {
+  days_threshold?: number;
+  status?: 'scaduto' | 'in_scadenza' | 'futuro';
+  tipo?: string;
+};
+
+export type RichiamiResponse = {
+  success: boolean;
+  data: Richiamo[];
+  count: number;
+  filters: RichiamoFilters;
+};
+
+export type RichiamiStatisticsResponse = {
+  success: boolean;
+  data: RichiamoStatistics;
+  filters: { days_threshold: number };
+};
+
+export type RichiamoMessageResponse = {
+  success: boolean;
+  data: RichiamoMessage;
+};
+
+export type RichiamiExportResponse = {
+  success: boolean;
+  data: Richiamo[];
+  count: number;
+  export_format: string;
+  filters: { days_threshold: number };
+};
+
+export type RichiamiTestResponse = {
+  success: boolean;
+  test_results: {
+    richiami_trovati: number;
+    statistiche: RichiamoStatistics;
+    service_status: string;
+  };
+  message: string;
+};
+

@@ -7,6 +7,7 @@ import NotFound from '@/pages/NotFound';
 import Login from '@/pages/auth/Login';
 import Register from '@/pages/auth/Register';
 import Calendar from '@/pages/Calendar/CalendarPage';
+import RecallsPage from '@/pages/recalls/RecallsPage';
 import { useAuthStore } from '@/store/authStore';
 
 // Componente per le route private
@@ -34,6 +35,7 @@ const AppRouter: React.FC = () => {
         >
           <Route path="/" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/recalls" element={<RecallsPage />} />
           <Route path="/test/api" element={<ApiTest />} />
         </Route>
 

@@ -2,7 +2,7 @@
 
 from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin  # <-- aggiungi questa
-from ..auth.utils import token_required
+# from ..auth.utils import token_required  # RIMOSSO
 
 tests_bp = Blueprint("tests", __name__)
 

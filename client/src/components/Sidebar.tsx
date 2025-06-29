@@ -20,6 +20,11 @@ const Sidebar: React.FC = () => {
           </NavLink>
         </CNavItem>
         <CNavItem>
+          <NavLink to="/recalls" className="nav-link">
+            Richiami
+          </NavLink>
+        </CNavItem>
+        <CNavItem>
           <NavLink to="/pazienti" className="nav-link">
             Pazienti
           </NavLink>

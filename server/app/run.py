@@ -12,7 +12,7 @@ from .calendar.routes import calendar_bp
 def configure_logging() -> None:
     """Configura il logging per l'applicazione Flask."""
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.StreamHandler(),
@@ -24,11 +24,13 @@ def register_blueprints(app: Flask) -> None:
     """Registra tutti i blueprint dell'applicazione."""
     from .auth.routes import auth_bp
     from .routes.tests import tests_bp
+    from .recalls.controller import recalls_bp
     
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(tests_bp, url_prefix="/api/tests")
     app.register_blueprint(calendar_bp, url_prefix="/api/calendar")
+    app.register_blueprint(recalls_bp, url_prefix="/api/recalls")
 
     
     # Aggiungi qui altri blueprint
