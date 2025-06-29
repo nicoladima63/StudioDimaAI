@@ -39,7 +39,7 @@ const getTipoColor = (tipo: string) => COLORI_RICHIAMI[tipo] || '#888';
 interface RecallsTableProps {
   richiami: Richiamo[];
   loading?: boolean;
-  onSendSMS?: (richiamo: Richiamo) => void;
+  onSendSMS?: (richiamoId: string) => void;
   onViewMessage?: (richiamoId: string) => void;
   onMarkHandled?: (richiamoId: string) => void;
 }
@@ -56,7 +56,6 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedRichiamo, setSelectedRichiamo] = useState<RichiamoMessage | null>(null);
-  const [selectedRichiamoObj, setSelectedRichiamoObj] = useState<Richiamo | null>(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -147,7 +146,6 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
       tipo_richiamo: richiamo.tipo_descrizione,
       data_scadenza: richiamo.data_richiamo || 'Non specificata'
     });
-    setSelectedRichiamoObj(richiamo);
     setShowMessageModal(true);
   };
 
@@ -312,12 +310,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
                     <CButton
                       color="success"
                       size="sm"
-                      onClick={() => {
-                        if (selectedRichiamoObj) {
-                          onSendSMS?.(selectedRichiamoObj);
-                        }
-                        setShowMessageModal(false);
-                      }}
+                      onClick={() => onSendSMS?.(richiamo.id_paziente || '')}
                       title="Invia SMS"
                     >
                       <CIcon icon={cilEnvelopeClosed} />
@@ -404,8 +397,8 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
             Chiudi
           </CButton>
           <CButton color="success" onClick={() => {
-            if (selectedRichiamoObj) {
-              onSendSMS?.(selectedRichiamoObj);
+            if (selectedRichiamo) {
+              onSendSMS?.(selectedRichiamo.paziente);
             }
             setShowMessageModal(false);
           }}>
