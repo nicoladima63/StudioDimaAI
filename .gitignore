@@ -38,7 +38,6 @@ server/windent/
 server/sync_state.json
 server/oldfile
 
-
 # Node
 node_modules/
 npm-debug.log*
@@ -59,3 +58,5 @@ yarn-error.log*
 .DS_Store
 
 **/test*.py
+
+app.log

@@ -7,6 +7,7 @@ from .extensions import db, jwt
 import logging
 from typing import Optional
 from .calendar.routes import calendar_bp
+from .recalls.recall_db_controller import recall_db_bp
 
 
 def configure_logging() -> None:
@@ -31,6 +32,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(tests_bp, url_prefix="/api/tests")
     app.register_blueprint(calendar_bp, url_prefix="/api/calendar")
     app.register_blueprint(recalls_bp, url_prefix="/api/recalls")
+    app.register_blueprint(recall_db_bp)
 
     
     # Aggiungi qui altri blueprint
