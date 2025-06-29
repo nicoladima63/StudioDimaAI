@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CAlert, CButton, CToast, CToastBody, CToaster } from '@coreui/react';
+import { CAlert, CButton, CToast, CToastBody, CToaster, CRow, CCol, CFormInput, CSpinner } from '@coreui/react';
 import { cilReload, cilCloudDownload, cilCheck } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import DashboardCard from '@/components/DashboardCard';
@@ -7,6 +7,8 @@ import RecallsStatistics from '@/components/RecallsStatistics';
 import RecallsTable from '@/components/RecallsTable';
 import { recallsService } from '@/api/services/recalls.service';
 import type { Richiamo, RichiamoStatistics, RichiamoFilters } from '@/api/apiTypes';
+import MessageModal from '../../components/MessageModal';
+import { getRecallMessage, saveRecallMessage, sendRecallSMS, testRecallSMS } from '@/api/apiClient';
 
 const RecallsPage: React.FC = () => {
   const [richiami, setRichiami] = useState<Richiamo[]>([]);
@@ -19,11 +21,34 @@ const RecallsPage: React.FC = () => {
     message: string;
     color: 'success' | 'danger' | 'warning';
   }>({ visible: false, message: '', color: 'success' });
+  const [showModal, setShowModal] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageId, setMessageId] = useState<number | null>(null);
+  const [loadingMsg, setLoadingMsg] = useState(false);
+  const [savingMsg, setSavingMsg] = useState(false);
+  const [testNumber, setTestNumber] = useState('');
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const [testLoading, setTestLoading] = useState(false);
+  const [alert, setAlert] = useState<string | null>(null);
 
   // Carica i dati iniziali
   useEffect(() => {
     loadData();
   }, [filters]);
+
+  // Carica il messaggio di richiamo all'avvio
+  useEffect(() => {
+    setLoadingMsg(true);
+    getRecallMessage('richiamo')
+      .then(data => {
+        if (data.success && data.data.length > 0) {
+          setMessage(data.data[0][3]); // testo
+          setMessageId(data.data[0][0]); // id
+        }
+      })
+      .catch(() => setAlert('Errore nel caricamento del messaggio'))
+      .finally(() => setLoadingMsg(false));
+  }, []);
 
   const loadData = async () => {
     try {
@@ -149,9 +174,64 @@ const RecallsPage: React.FC = () => {
     }
   };
 
+  // Salva il messaggio modificato
+  const handleSaveMessage = (testo: string) => {
+    setSavingMsg(true);
+    saveRecallMessage({ id: messageId !== null ? messageId : undefined, tipo: 'richiamo', testo })
+      .then(data => {
+        if (data.success) {
+          setMessage(testo);
+          showTimedAlert('Messaggio salvato con successo');
+          setShowModal(false);
+        } else {
+          showTimedAlert('Errore nel salvataggio');
+        }
+      })
+      .catch(() => showTimedAlert('Errore nel salvataggio'))
+      .finally(() => setSavingMsg(false));
+  };
+
+  // Invio reale SMS (da tabella)
+  const handleSendSMSReal = (recall: Richiamo) => {
+    sendRecallSMS({
+      id_paziente: recall.id_paziente,
+      telefono: recall.telefono,
+      testo: message,
+      tipo: 'richiamo'
+    })
+      .then(data => {
+        if (data.success) showTimedAlert('SMS inviato con successo');
+        else showTimedAlert('Errore invio SMS');
+      })
+      .catch(() => showTimedAlert('Errore invio SMS'));
+  };
+
+  // Test SMS
+  const handleTestSMS = () => {
+    setTestLoading(true);
+    setTestResult(null);
+    testRecallSMS({ telefono: testNumber, testo: message })
+      .then(data => {
+        if (data.success) showTimedTestResult('SMS di test inviato!');
+        else showTimedTestResult('Errore invio SMS di test');
+      })
+      .catch(() => showTimedTestResult('Errore invio SMS di test'))
+      .finally(() => setTestLoading(false));
+  };
+
   const showToast = (message: string, color: 'success' | 'danger' | 'warning') => {
     setToast({ visible: true, message, color });
     setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+  };
+
+  const showTimedAlert = (msg: string) => {
+    setAlert(msg);
+    setTimeout(() => setAlert(null), 5000);
+  };
+
+  const showTimedTestResult = (msg: string) => {
+    setTestResult(msg);
+    setTimeout(() => setTestResult(null), 5000);
   };
 
   return (
@@ -252,7 +332,7 @@ const RecallsPage: React.FC = () => {
           <RecallsTable
             richiami={richiami}
             loading={loading}
-            onSendSMS={handleSendSMS}
+            onSendSMS={handleSendSMSReal}
             onViewMessage={handleViewMessage}
             onMarkHandled={handleMarkHandled}
           />
@@ -268,6 +348,45 @@ const RecallsPage: React.FC = () => {
             </p>
           </CAlert>
         )}
+
+        <CRow className="mb-3">
+          <CCol>
+            <CButton color="info" onClick={() => setShowModal(true)} disabled={loadingMsg}>
+              {loadingMsg ? <CSpinner size="sm" /> : 'Modifica messaggio'}
+            </CButton>
+          </CCol>
+        </CRow>
+        <MessageModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          onSave={handleSaveMessage}
+          tipo="richiamo"
+          messaggio={message}
+          loading={savingMsg}
+        />
+        {alert && <CAlert color="info" dismissible onClose={() => setAlert(null)}>{alert}</CAlert>}
+
+        {/* Esempio: <RecallsTable onSendSMS={handleSendSMS} ... /> */}
+        {/* Sezione test SMS */}
+        <div className="mt-4 p-3 border rounded bg-light">
+          <h6>Test invio SMS</h6>
+          <CRow className="align-items-end">
+            <CCol xs={12} md={6} lg={4}>
+              <CFormInput
+                label="Numero di telefono"
+                placeholder="Esempio: +393401234567"
+                value={testNumber}
+                onChange={e => setTestNumber(e.target.value)}
+              />
+            </CCol>
+            <CCol xs="auto">
+              <CButton color="primary" onClick={handleTestSMS} disabled={testLoading || !testNumber}>
+                {testLoading ? <CSpinner size="sm" /> : 'Invia test'}
+              </CButton>
+            </CCol>
+            <CCol>{testResult && <CAlert color="success">{testResult}</CAlert>}</CCol>
+          </CRow>
+        </div>
       </DashboardCard>
 
       {/* Toast per le notifiche */}

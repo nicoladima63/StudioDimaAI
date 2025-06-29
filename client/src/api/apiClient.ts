@@ -155,4 +155,30 @@ export async function clearCalendarEvents(calendarId: string) {
   return response.data;
 }
 
+// Messaggi richiamo
+export async function getRecallMessage(tipo: string = 'richiamo') {
+  const res = await apiClient.get(`/api/recall-messages/?tipo=${tipo}`);
+  return res.data;
+}
+
+export async function saveRecallMessage({ id, tipo, testo }: { id?: number, tipo: string, testo: string }) {
+  if (id) {
+    const res = await apiClient.put(`/api/recall-messages/${id}`, { testo, tipo });
+    return res.data;
+  } else {
+    const res = await apiClient.post('/api/recall-messages/', { testo, tipo });
+    return res.data;
+  }
+}
+
+export async function sendRecallSMS({ id_paziente, telefono, testo, tipo = 'richiamo' }: { id_paziente: string, telefono: string, testo: string, tipo?: string }) {
+  const res = await apiClient.post('/api/recall-messages/send-reminder', { id_paziente, telefono, testo, tipo });
+  return res.data;
+}
+
+export async function testRecallSMS({ telefono, testo }: { telefono: string, testo: string }) {
+  const res = await apiClient.post('/api/recall-messages/test-sms', { telefono, testo });
+  return res.data;
+}
+
 export default apiClient;

@@ -5,6 +5,7 @@ from typing import Dict, Any
 import sys
 import os
 from flask_jwt_extended import jwt_required
+from ..brevo.sms_service import send_sms_brevo
 
 # Aggiungi il path per gli import
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -203,4 +204,34 @@ def test_recalls():
             'success': False,
             'error': 'Errore nel test del servizio',
             'message': str(e)
-        }), 500 
+        }), 500
+
+
+@recalls_bp.route('/test-sms', methods=['POST'])
+@jwt_required()
+def test_sms():
+    """
+    POST /api/recalls/test-sms
+    Invia un SMS di test a un numero specificato o al primo richiamo valido
+    Body JSON: { "telefono": "+393401234567", "messaggio": "Test messaggio" }
+    """
+    try:
+        data = request.get_json() or {}
+        telefono = data.get('telefono')
+        messaggio = data.get('messaggio', 'Test SMS StudioDimaAI')
+        if not telefono:
+            # Se non specificato, prendi il primo richiamo valido
+            richiami = recall_service.get_all_recalls()
+            primo = next((r for r in richiami if r.get('telefono') and r.get('telefono') != '-'), None)
+            if not primo:
+                return jsonify({'success': False, 'error': 'Nessun richiamo valido trovato'}), 404
+            telefono = primo['telefono']
+            messaggio = f"Test SMS per {primo['nome_completo']} - StudioDimaAI"
+        # Invia SMS
+        sms_result = send_sms_brevo(telefono, messaggio)
+        if sms_result:
+            return jsonify({'success': True, 'result': str(sms_result), 'telefono': telefono, 'messaggio': messaggio}), 200
+        else:
+            return jsonify({'success': False, 'error': 'Errore invio SMS'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500 
