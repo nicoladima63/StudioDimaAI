@@ -340,7 +340,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
             disabled={page === 1}
             onClick={() => setPage(p => Math.max(1, p - 1))}
           >
-            &lt; Prev
+            &lt; Prec
           </CButton>
           <span className="mx-2">Pagina {page} di {totalPages}</span>
           <CButton
@@ -349,7 +349,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
             disabled={page === totalPages}
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
           >
-            Next &gt;
+            Succ &gt;
           </CButton>
         </div>
         <div>
