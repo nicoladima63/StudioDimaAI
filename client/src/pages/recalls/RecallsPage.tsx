@@ -3,8 +3,8 @@ import { CAlert, CButton, CToast, CToastBody, CToaster, CRow, CCol, CFormInput, 
 import { cilReload, cilCloudDownload, cilCheck } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import DashboardCard from '@/components/DashboardCard';
-import RecallsStatistics from '@/components/RecallsStatistics';
-import RecallsTable from '@/components/RecallsTable';
+import RecallsStatistics from './RecallsStatistics';
+import RecallsTable from './RecallsTable';
 import { recallsService } from '@/api/services/recalls.service';
 import type { Richiamo, RichiamoStatistics, RichiamoFilters } from '@/api/apiTypes';
 import MessageModal from '../../components/MessageModal';

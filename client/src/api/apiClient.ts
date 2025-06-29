@@ -181,4 +181,15 @@ export async function testRecallSMS({ telefono, testo }: { telefono: string, tes
   return res.data;
 }
 
+// Pazienti
+export async function getPazientiList() {
+  const response = await apiClient.get('/api/pazienti/');
+  return response.data;
+}
+
+export async function getPazientiStats() {
+  const response = await apiClient.get('/api/pazienti/statistiche');
+  return response.data;
+}
+
 export default apiClient;

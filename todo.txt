@@ -1,0 +1,64 @@
+pagina pazienti. 
+legge la tabella pazienti.dbf e esporta, 
+numero totale pazienti inseriti, 
+numero pazienti in cura, numero non in cura (differenza o vedi tu). 
+mostrati in una tabella con ordinameto e paginazione dei pazienti in base al nome, data ultima visita da richiamare
+
+
+
+significato campi tabella pazienti quelli senza spiega o non li uso o non conosco il contenuto.
+
+DB_CODE       *      id del paziente in formato stringa ZZZSDR 6 caratteri
+DB_PANOME     *      nome e cognome del paziente
+DB_PACODFI          codice fiscale
+DB_PASUFFI          sig, sig.ra ecc
+DB_PAINDIR  *        indirizzo di residenza
+DB_PACITTA    *      comune di residenza
+DB_PACAP      *      cap
+DB_PAPROVI   *       provincia
+DB_PATELEF   *       telefono fisso
+DB_PACELLU   *       cellulare senza prefisso internazionale
+DB_PADOCUM          stringa con dei numeri 0 0, 1 0, 0 1, 2 1
+DB_PASESSO          stringa M oF 
+DB_PADANAS   *       data di nascita
+DB_PALUNAS          luogo di nascita
+DB_PAPRNAS          provincia di nascita
+DB_PAPROFE          professione
+DB_PAULTEL          ultimo telefono?
+DB_PAMEDIC          io lo uso come campo mandato da
+DB_PAMETEL          telefono associato  al campo precedente
+DB_PAULTVI   *       data ultima visita
+DB_PACOLOR          colore dei denti, stringa
+DB_PAPESO           non usato
+DB_PAALTEZ          non usato
+DB_NOTE             note visibili nella scheda anagrafica del gestionale
+DB_PAFARMA          farmaco nr 1 usato
+DB_PAFARM2          farmaco nr 2 usato
+DB_PAFARM3          farmaco nr 3 usato
+DB_PAMOTIV          patologia per il farmaco 1
+DB_PAMOTI2          patologia per il farmaco 2
+DB_PAMOTI3          patologia per il farmaco 3
+DB_PARISCH          livello di rischio per salute o farmaci da 0 a 3
+DB_PARICHI  *        flag per il richiamo= strina S o vuoto
+DB_PACOSTO          non usato
+DB_PALIST           non usato
+DB_PADENTA          non usato
+DB_PAMALA           non usato
+DB_PAMEDI           non usato
+DB_PAIGENE          molti hanno 554
+DB_PAFOTO           flag se ha delle foto= S o vuoto
+DB_PARITAR  *        numero mesi di richiamo
+DB_PARIMOT   +       tipo di richiamo= vuoto o 11 o 21 ma stringa e non numeri come da legenda rtipi richiamo
+DB_PAMODA1
+DB_PAMODA2
+DB_PADEPRE          provenienza del paziente
+DB_PADEUVI          ci sono date  ma non so a cosa fanno riferimento
+DB_GUARDIA
+DB_PAVECI
+DB_PAANRIS
+DB_PAANNOT
+DB_PAVISO
+DB_PALAST
+DB_PACONSE
+DB_PANONCU    *      paziente non in cura, esempio i deceduti= S o vuoto
+DB_PAEMAIL    *      email del paziente

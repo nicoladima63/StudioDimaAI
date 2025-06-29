@@ -1,0 +1,1 @@
+export { default as PazientiPage } from './PazientiPage'; 

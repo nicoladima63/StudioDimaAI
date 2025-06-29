@@ -49,9 +49,19 @@ COLONNE = {
     'pazienti': {
         'id': 'DB_CODE',
         'nome': 'DB_PANOME',
-        'cognome': 'DB_PACOGNOME',
+        'indirizzo': 'DB_PAINDIR',
+        'comune': 'DB_PACITTA',
+        'cap': 'DB_PACAP',
+        'provincia': 'DB_PAPROVI',
+        'telefono': 'DB_PATELEF',
         'cellulare': 'DB_PACELLU',
-        'telefono': 'DB_PATELEF'
+        'data_nascita': 'DB_PADANAS',
+        'ultima_visita': 'DB_PAULTVI',
+        'richiamo': 'DB_PARICHI',
+        'mesi_richiamo': 'DB_PARITAR',
+        'tipo_richiamo': 'DB_PARIMOT',
+        'non_in_cura': 'DB_PANONCU',
+        'email': 'DB_PAEMAIL',
     },
     'richiami': {
         'id_paziente': 'DB_CODE',
