@@ -36,6 +36,8 @@ server/token.json
 # Database DBF files
 server/windent/
 server/sync_state.json
+server/oldfile
+
 
 # Node
 node_modules/
