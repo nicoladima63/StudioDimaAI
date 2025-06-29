@@ -10,6 +10,7 @@ import Calendar from '@/pages/Calendar/CalendarPage';
 import RecallsPage from '@/pages/recalls/RecallsPage';
 import { PazientiPage } from '@/pages/pazienti';
 import { useAuthStore } from '@/store/authStore';
+import SettingsPage from '@/pages/settings/SettingsPage';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -39,6 +40,7 @@ const AppRouter: React.FC = () => {
           <Route path="/recalls" element={<RecallsPage />} />
           <Route path="/pazienti" element={<PazientiPage />} />
           <Route path="/test/api" element={<ApiTest />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
         {/* Route fallback */}

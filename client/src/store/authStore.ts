@@ -47,3 +47,22 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Store per la modalità ambiente (dev/prod)
+interface EnvState {
+  mode: 'dev' | 'prod';
+  setMode: (mode: 'dev' | 'prod') => void;
+}
+
+export const useEnvStore = create<EnvState>()(
+  persist(
+    (set) => ({
+      mode: 'dev',
+      setMode: (mode) => set({ mode }),
+    }),
+    {
+      name: 'env-mode',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

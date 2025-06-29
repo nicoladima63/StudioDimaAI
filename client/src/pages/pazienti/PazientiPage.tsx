@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PazientiTable from './PazientiTable';
 import PazientiStats from './PazientiStats';
-import { CButton, CRow, CCol, CSpinner, CAlert } from '@coreui/react';
+import { CButton, CRow, CCol, CSpinner, CAlert, CCard, CCardBody, CCardHeader } from '@coreui/react';
 import { getPazientiList, getPazientiStats } from '@/api/apiClient';
 
 const PazientiPage: React.FC = () => {
@@ -26,19 +26,25 @@ const PazientiPage: React.FC = () => {
 
   return (
     <div>
-      <h2 className="mb-4">Pazienti</h2>
-      {error && <CAlert color="danger">{error}</CAlert>}
-      {stats && <PazientiStats stats={stats} />}
-      <CRow className="mb-3">
-        <CCol>
-          <CButton color="primary" disabled>Esporta (coming soon)</CButton>
-        </CCol>
-      </CRow>
-      {loading ? (
-        <div className="text-center py-5"><CSpinner color="primary" /></div>
-      ) : (
-        <PazientiTable pazienti={pazienti} />
-      )}
+      <CCard className="mb-4">
+        <CCardHeader>
+          <h4>Gestione Pazienti</h4>
+        </CCardHeader>
+        <CCardBody>
+          {error && <CAlert color="danger">{error}</CAlert>}
+          {stats && <PazientiStats stats={stats} />}
+          <CRow className="mb-3">
+            <CCol>
+              <CButton color="primary" disabled>Esporta (coming soon)</CButton>
+            </CCol>
+          </CRow>
+          {loading ? (
+            <div className="text-center py-5"><CSpinner color="primary" /></div>
+          ) : (
+            <PazientiTable pazienti={pazienti} />
+          )}
+        </CCardBody>
+      </CCard>
     </div>
   );
 };

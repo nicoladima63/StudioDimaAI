@@ -1,17 +1,34 @@
 // src/api/apiClient.ts
 import axios from 'axios';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore, useEnvStore } from '@/store/authStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL_DEV = import.meta.env.VITE_API_BASE_URL_DEV || 'http://localhost:5000';
+const API_BASE_URL_PROD = import.meta.env.VITE_API_BASE_URL_PROD || 'https://studio.server.prod';
+
+function getBaseUrl() {
+  const mode = useEnvStore.getState().mode;
+  return mode === 'prod' ? API_BASE_URL_PROD : API_BASE_URL_DEV;
+}
+
 const DEFAULT_TIMEOUT = 10000;
 
- const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+const apiClient = axios.create({
+  baseURL: getBaseUrl(),
   timeout: DEFAULT_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+});
+
+// Aggiorna dinamicamente la baseURL quando cambia la modalità
+type Mode = 'dev' | 'prod';
+let currentMode: Mode = useEnvStore.getState().mode;
+useEnvStore.subscribe((state) => {
+  if (state.mode !== currentMode) {
+    apiClient.defaults.baseURL = getBaseUrl();
+    currentMode = state.mode;
+  }
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -73,7 +90,7 @@ apiClient.interceptors.response.use(
       }
 
       try {
-        const { data } = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {}, {
+        const { data } = await axios.post(`${getBaseUrl()}/api/auth/refresh`, {}, {
           headers: { Authorization: `Bearer ${refreshToken}` }
         });
         

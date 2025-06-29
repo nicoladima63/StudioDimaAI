@@ -237,7 +237,7 @@ const RecallsPage: React.FC = () => {
   return (
     <div className="recalls-page">
       <DashboardCard
-        title="Gestione Richiami Pazienti"
+        title="Gestione Richiami"
         headerAction={
           <div className="d-flex gap-2">
             <CButton
