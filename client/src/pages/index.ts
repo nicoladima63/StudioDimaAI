@@ -1,0 +1,1 @@
+export { default as FatturePage } from './fatture/FatturePage'; 

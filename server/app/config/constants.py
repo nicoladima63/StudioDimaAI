@@ -24,7 +24,8 @@ BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__
 # NB: I percorsi vanno gestiti solo tramite DBHandler, non usare queste shortcut!
 PATHS_DBF = {
     'appuntamenti': os.path.join(BACKEND_DIR, 'windent', 'USER', 'APPUNTA.DBF'),
-    'anagrafica': os.path.join(BACKEND_DIR, 'windent', 'DATI', 'PAZIENTI.DBF')
+    'anagrafica': os.path.join(BACKEND_DIR, 'windent', 'DATI', 'PAZIENTI.DBF'),
+    'fatture': os.path.join(BACKEND_DIR, 'windent', 'DATI', 'FATTURE.DBF')
 }
 
 # --- Colonne DBF ---
