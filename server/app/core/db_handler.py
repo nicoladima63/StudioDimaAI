@@ -20,9 +20,25 @@ def get_current_mode():
         pass
     return 'dev'
 
+def check_network_and_switch_mode(mode):
+    """Se in prod ma la rete non è raggiungibile, passa a dev e aggiorna mode.txt."""
+    if mode == 'prod':
+        if not os.path.exists(r"\\\serverdima"):
+            # Switch to dev mode
+            try:
+                with open(MODE_FILE_PATH, "w") as f:
+                    f.write("dev")
+                logger.warning("Rete studio non raggiungibile: passo a modalità DEV")
+            except Exception as e:
+                logger.error(f"Impossibile aggiornare mode.txt: {e}")
+            return 'dev', True
+    return mode, False
+
 class DBHandler:
     def __init__(self, path_appuntamenti=None, path_anagrafica=None):
         mode = get_current_mode()
+        mode, mode_changed = check_network_and_switch_mode(mode)
+        self.mode_changed = mode_changed
         if mode == 'prod':
             # In produzione, prendi i percorsi dalle variabili d'ambiente
             self.path_appuntamenti = os.environ.get('PATH_APPUNTAMENTI_DBF')

@@ -21,12 +21,26 @@ def write_mode(mode):
     with open(MODE_FILE_PATH, 'w') as f:
         f.write(mode)
 
+def check_prod_mode_available():
+    if not os.path.exists(r"\\\serverdima"):
+        return False, "Impossibile passare a produzione: rete studio non raggiungibile."
+    return True, ""
+
+@settings_bp.route('/api/settings/check-prod', methods=['GET'])
+def check_prod():
+    allowed, message = check_prod_mode_available()
+    return jsonify({'allowed': allowed, 'message': message})
+
 @settings_bp.route('/api/settings/mode', methods=['POST'])
 def set_mode():
     data = request.get_json()
     mode = data.get('mode')
     if mode not in ['dev', 'prod']:
         return jsonify({'error': 'Modalità non valida'}), 400
+    if mode == 'prod':
+        allowed, message = check_prod_mode_available()
+        if not allowed:
+            return jsonify({'error': message}), 400
     write_mode(mode)
     return jsonify({'success': True, 'mode': mode})
 

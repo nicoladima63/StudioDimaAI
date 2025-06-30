@@ -224,7 +224,11 @@ def get_appointments_for_month():
         appointments = db_handler.get_appointments(month=month, year=year)
         logger.info(f"Letti {len(appointments)} appuntamenti dal DBF")
         
-        return jsonify({'appointments': appointments})
+        response = {'appointments': appointments}
+        if getattr(db_handler, 'mode_changed', False):
+            response['mode_changed'] = True
+            response['mode_warning'] = 'Modalità cambiata automaticamente a SVILUPPO: rete studio non raggiungibile.'
+        return jsonify(response)
     except Exception as e:
         logger.error(f"Errore in get_appointments_for_month: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500

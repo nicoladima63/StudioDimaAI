@@ -1,6 +1,7 @@
 // src/api/apiClient.ts
 import axios from 'axios';
 import { useAuthStore, useEnvStore } from '@/store/authStore';
+import { triggerModeWarning } from '@/utils/modeWarning';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -207,14 +208,50 @@ export async function getPazientiStats() {
   return response.data;
 }
 
+export async function trySwitchToProd() {
+  // Chiede al backend se è possibile passare a prod
+  const res = await apiClient.get('/api/settings/check-prod');
+  if (!res.data.allowed) {
+    triggerModeWarning(res.data.message || 'Impossibile passare a produzione.');
+    return { success: false, message: res.data.message };
+  }
+  // Se allowed, cambia modalità
+  await setApiMode('prod');
+  return { success: true };
+}
+
 export async function setApiMode(mode: 'dev' | 'prod') {
   const res = await apiClient.post('/api/settings/mode', { mode });
+  // Se errore, mostra warning
+  if (res.data.error) {
+    triggerModeWarning(res.data.error);
+    return { success: false, message: res.data.error };
+  }
   return res.data;
 }
 
 export async function getApiMode() {
   const res = await apiClient.get('/api/settings/mode');
   return res.data.mode as 'dev' | 'prod';
+}
+
+// Appuntamenti con gestione warning cambio modalità
+export async function getAppointmentsWithModeWarning(month: number, year: number) {
+  const response = await apiClient.get('/api/calendar/appointments', { params: { month, year } });
+  // Se il backend ha cambiato modalità, mostra il warning globale
+  if (response.data.mode_changed && response.data.mode_warning) {
+    triggerModeWarning(response.data.mode_warning);
+  }
+  return {
+    appointments: response.data.appointments,
+    modeChanged: response.data.mode_changed || false,
+    modeWarning: response.data.mode_warning || null
+  };
+}
+
+export async function syncModeWithBackend() {
+  const res = await getApiMode();
+  useEnvStore.getState().setMode(res);
 }
 
 export default apiClient;

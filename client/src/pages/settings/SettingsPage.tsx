@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardCard from '@/components/DashboardCard';
 import { CFormSwitch, CButton, CToast, CToastBody, CToaster } from '@coreui/react';
 import { useEnvStore } from '@/store/authStore';
-import { setApiMode, getApiMode } from '@/api/apiClient';
+import { setApiMode, getApiMode, getAppointmentsWithModeWarning, trySwitchToProd } from '@/api/apiClient';
 
 const SettingsPage: React.FC = () => {
   const mode = useEnvStore((state) => state.mode);
@@ -10,16 +10,26 @@ const SettingsPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<'dev' | 'prod'>(mode);
   const [showToast, setShowToast] = useState(false);
   const [errorToast, setErrorToast] = useState(false);
+  const [modeWarning, setModeWarning] = useState<string | null>(null);
 
   useEffect(() => {
     getApiMode().then((backendMode) => {
       setSelectedMode(backendMode);
       setMode(backendMode);
     });
+    checkAppointments();
   }, []);
 
   const handleApply = async () => {
     try {
+      if (selectedMode === 'prod') {
+        const res = await trySwitchToProd();
+        if (!res.success) return;
+        setMode('prod');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2000);
+        return;
+      }
       await setApiMode(selectedMode);
       setMode(selectedMode);
       setShowToast(true);
@@ -27,6 +37,15 @@ const SettingsPage: React.FC = () => {
     } catch {
       setErrorToast(true);
       setTimeout(() => setErrorToast(false), 3000);
+    }
+  };
+
+  const checkAppointments = async () => {
+    const now = new Date();
+    const res = await getAppointmentsWithModeWarning(now.getMonth() + 1, now.getFullYear());
+    if (res.modeChanged && res.modeWarning) {
+      setModeWarning(res.modeWarning);
+      setTimeout(() => setModeWarning(null), 5000);
     }
   };
 
@@ -66,6 +85,11 @@ const SettingsPage: React.FC = () => {
       <CToaster placement="top-end">
         {showToast && toast}
         {errorToast && error}
+        {modeWarning && (
+          <CToast autohide visible color="warning" key="mode-warning">
+            <CToastBody>{modeWarning}</CToastBody>
+          </CToast>
+        )}
       </CToaster>
     </DashboardCard>
   );
