@@ -2,7 +2,7 @@ import os
 from dbfread import DBF
 from datetime import date
 from typing import List, Dict, Any
-from ..config.constants import PATH_ANAGRAFICA_DBF
+from server.app.core.db_handler import DBHandler
 
 # Campi da mostrare nella tabella (quelli con asterisco)
 PAZIENTI_FIELDS = [
@@ -13,7 +13,8 @@ PAZIENTI_FIELDS = [
 
 class PazientiService:
     def __init__(self):
-        self.dbf_path = PATH_ANAGRAFICA_DBF
+        self.db_handler = DBHandler()
+        self.dbf_path = self.db_handler.path_anagrafica
 
     def get_all_pazienti(self) -> List[Dict[str, Any]]:
         pazienti = []

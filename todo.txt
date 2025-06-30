@@ -62,3 +62,7 @@ DB_PALAST
 DB_PACONSE
 DB_PANONCU    *      paziente non in cura, esempio i deceduti= S o vuoto
 DB_PAEMAIL    *      email del paziente
+
+
+DB_APDATAI data inserimento appuntamento--> creato il
+DB_DATATIM data inserimento modificato il

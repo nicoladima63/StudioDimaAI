@@ -9,7 +9,9 @@ from typing import Optional
 from .calendar.routes import calendar_bp
 from .recalls.recall_db_controller import recall_db_bp
 from .pazienti.controller import pazienti_bp
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def configure_logging() -> None:
     """Configura il logging per l'applicazione Flask."""
@@ -29,6 +31,7 @@ def register_blueprints(app: Flask) -> None:
     from .recalls.controller import recalls_bp
     from .recalls.recall_db_controller import recall_db_bp
     from .pazienti.controller import pazienti_bp
+    from .routes.settings import settings_bp
     
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -37,7 +40,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(recalls_bp, url_prefix="/api/recalls")
     app.register_blueprint(recall_db_bp)
     app.register_blueprint(pazienti_bp)
-
+    app.register_blueprint(settings_bp)
     
     # Aggiungi qui altri blueprint
 

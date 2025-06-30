@@ -2,12 +2,10 @@
 import axios from 'axios';
 import { useAuthStore, useEnvStore } from '@/store/authStore';
 
-const API_BASE_URL_DEV = import.meta.env.VITE_API_BASE_URL_DEV || 'http://localhost:5000';
-const API_BASE_URL_PROD = import.meta.env.VITE_API_BASE_URL_PROD || 'https://studio.server.prod';
+const API_BASE_URL = 'http://localhost:5000';
 
 function getBaseUrl() {
-  const mode = useEnvStore.getState().mode;
-  return mode === 'prod' ? API_BASE_URL_PROD : API_BASE_URL_DEV;
+  return API_BASE_URL;
 }
 
 const DEFAULT_TIMEOUT = 10000;
@@ -207,6 +205,16 @@ export async function getPazientiList() {
 export async function getPazientiStats() {
   const response = await apiClient.get('/api/pazienti/statistiche');
   return response.data;
+}
+
+export async function setApiMode(mode: 'dev' | 'prod') {
+  const res = await apiClient.post('/api/settings/mode', { mode });
+  return res.data;
+}
+
+export async function getApiMode() {
+  const res = await apiClient.get('/api/settings/mode');
+  return res.data.mode as 'dev' | 'prod';
 }
 
 export default apiClient;

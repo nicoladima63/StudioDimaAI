@@ -5,13 +5,43 @@ import logging
 from datetime import datetime, date, timedelta
 import dbf
 from ..config.constants import PATHS_DBF, COLONNE
+import os
 
 logger = logging.getLogger(__name__)
 
+MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/mode.txt')
+def get_current_mode():
+    try:
+        with open(MODE_FILE_PATH, 'r') as f:
+            mode = f.read().strip()
+            if mode in ['dev', 'prod']:
+                return mode
+    except Exception:
+        pass
+    return 'dev'
+
 class DBHandler:
     def __init__(self, path_appuntamenti=None, path_anagrafica=None):
-        self.path_appuntamenti = path_appuntamenti or PATHS_DBF['appuntamenti']
-        self.path_anagrafica = path_anagrafica or PATHS_DBF['anagrafica']
+        mode = get_current_mode()
+        if mode == 'prod':
+            # In produzione, prendi i percorsi dalle variabili d'ambiente
+            self.path_appuntamenti = os.environ.get('PATH_APPUNTAMENTI_DBF')
+            self.path_anagrafica = os.environ.get('PATH_ANAGRAFICA_DBF')
+        else:
+            # In sviluppo, usa i percorsi di default
+            self.path_appuntamenti = PATHS_DBF['appuntamenti']
+            self.path_anagrafica = PATHS_DBF['anagrafica']
+        # Permetti override manuale
+        if path_appuntamenti:
+            self.path_appuntamenti = path_appuntamenti
+        if path_anagrafica:
+            self.path_anagrafica = path_anagrafica
+
+        logger.info(f"MODE: {mode}")
+        logger.info(f"ENV PATH_APPUNTAMENTI_DBF: {os.environ.get('PATH_APPUNTAMENTI_DBF')}")
+        logger.info(f"ENV PATH_ANAGRAFICA_DBF: {os.environ.get('PATH_ANAGRAFICA_DBF')}")
+        logger.info(f"self.path_appuntamenti: {self.path_appuntamenti}")
+        logger.info(f"self.path_anagrafica: {self.path_anagrafica}")
 
     def leggi_tabella_dbf(self, percorso_file: str) -> pd.DataFrame:
         try:

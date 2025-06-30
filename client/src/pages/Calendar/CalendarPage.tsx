@@ -91,6 +91,9 @@ const CalendarPage: React.FC = () => {
   const [syncStatus, setSyncStatus] = useState<'idle' | 'in_progress' | 'completed' | 'error'>('idle');
   const syncPollingRef = React.useRef<number | null>(null);
 
+  // Stati per il tipo di azione che ha causato il warning
+  const [calendarWarningAction, setCalendarWarningAction] = useState<'sync' | 'clear' | null>(null);
+
   // Funzione per caricare i calendari
   const fetchCalendars = async () => {
     setIsLoadingCalendars(true);
@@ -143,8 +146,12 @@ const CalendarPage: React.FC = () => {
 
   // Funzione per sincronizzazione e pulizia
   const handleSync = async () => {
+    if (!selectedCalendar) {
+      setCalendarWarningAction('sync');
+      setShowCalendarWarning(true);
+      return;
+    }
     if (!previewStats) return;
-    
     // Apri subito la modal di sincronizzazione
     setSyncModalMessage(`Sincronizzazione in corso per il calendario '${selectedCalendar}'...`);
     setShowSyncModal(true);
@@ -154,8 +161,9 @@ const CalendarPage: React.FC = () => {
     setSyncTotal(0);
 
     try {
-      // Avvia la sincronizzazione asincrona
+      // Avvia la sincronizzazione asincrona SOLO sul calendario selezionato
       const response = await apiClient.post('/api/calendar/sync', {
+        calendarId: selectedCalendar,
         month: selectedMonth + 1,
         year: currentYear
       });
@@ -195,25 +203,25 @@ const CalendarPage: React.FC = () => {
           
           // Continua il polling
           syncPollingRef.current = window.setTimeout(pollSyncStatus, 1000);
-        } catch (err) {
+        } catch {
           setSyncStatus('error');
-          setSyncModalMessage('Errore durante il monitoraggio della sincronizzazione');
+          setSyncModalMessage('Errore durante la sincronizzazione');
         }
       };
       
       // Avvia il polling
       pollSyncStatus();
       
-    } catch (err) {
+    } catch {
       setSyncStatus('error');
-      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
-      setSyncModalMessage(`Errore durante la sincronizzazione: ${errorMessage}`);
+      setSyncModalMessage('Errore durante la sincronizzazione');
     }
   };
 
   // Funzione per cancellazione asincrona
   const handleClear = async () => {
     if (!selectedCalendar) {
+      setCalendarWarningAction('clear');
       setShowCalendarWarning(true);
       return;
     }
@@ -262,20 +270,20 @@ const CalendarPage: React.FC = () => {
           
           // Continua il polling
           clearPollingRef.current = window.setTimeout(pollClearStatus, 1000);
-        } catch (err) {
+        } catch {
           setClearStatus('error');
-          setClearError('Errore durante il monitoraggio della cancellazione');
+          setClearError('Errore durante la cancellazione');
+          toast.error('❌ Errore durante la cancellazione');
         }
       };
       
       // Avvia il polling
       pollClearStatus();
       
-    } catch (err) {
+    } catch {
       setClearStatus('error');
-      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
-      setClearError(errorMessage);
-      toast.error(`❌ Errore durante la cancellazione: ${errorMessage}`);
+      setClearError('Errore durante la cancellazione');
+      toast.error('❌ Errore durante la cancellazione');
     }
   };
 
@@ -290,6 +298,15 @@ const CalendarPage: React.FC = () => {
       }
     };
   }, []);
+
+  // Reset stato cancellazione al cambio calendario
+  useEffect(() => {
+    setClearStatus('idle');
+    setClearProgress(0);
+    setClearDeleted(0);
+    setClearTotal(0);
+    setClearError(null);
+  }, [selectedCalendar]);
 
   const selectedCalendarName = calendars.find(cal => cal.id === selectedCalendar)?.name || selectedCalendar;
 
@@ -423,33 +440,63 @@ const CalendarPage: React.FC = () => {
                 </CButton>
               </div>
 
-              {clearStatus === 'in_progress' && (
-                <div className="mb-3">
-                  <CAlert color="warning">
-                    <strong>Cancellazione in corso...</strong><br />
-                    Progresso: {clearProgress}%<br />
-                    Eliminati: {clearDeleted} / {clearTotal}
+              {/* Modal di cancellazione in corso/completata/errore */}
+              <CModal
+                visible={clearStatus !== 'idle'}
+                onClose={() => clearStatus === 'error' || clearStatus === 'completed' ? setClearStatus('idle') : null}
+                backdrop={clearStatus === 'error' || clearStatus === 'completed' ? "static" : "static"}
+              >
+                <CModalHeader>
+                  <h5>{
+                    clearStatus === 'error' ? 'Risultato Cancellazione' :
+                    clearStatus === 'completed' ? 'Cancellazione Completata' :
+                    'Cancellazione in corso'
+                  }</h5>
+                </CModalHeader>
+                <CModalBody>
+                  <CAlert color={clearStatus === 'error' ? 'danger' : clearStatus === 'completed' ? 'success' : 'warning'}>
+                    {clearStatus !== 'error' && clearStatus !== 'completed' && (
+                      <div className="d-flex align-items-center">
+                        <CSpinner size="sm" className="me-2" />
+                        <span>Cancellazione in corso...</span>
+                      </div>
+                    )}
+                    {clearStatus === 'error' && (
+                      <div>
+                        <span>{clearError}</span>
+                      </div>
+                    )}
+                    {clearStatus === 'completed' && (
+                      <div>
+                        <span>{clearDeleted} eventi eliminati con successo.</span>
+                      </div>
+                    )}
+                    {clearStatus === 'in_progress' && clearTotal > 0 && (
+                      <div className="mt-2">
+                        <div className="progress">
+                          <div 
+                            className="progress-bar" 
+                            style={{ width: `${clearProgress}%` }}
+                          ></div>
+                        </div>
+                        <small className="text-muted">
+                          Progresso: {clearProgress}% ({clearDeleted}/{clearTotal})
+                        </small>
+                      </div>
+                    )}
                   </CAlert>
-                </div>
-              )}
-
-              {clearStatus === 'completed' && (
-                <div className="mb-3">
-                  <CAlert color="success">
-                    <strong>Cancellazione completata!</strong><br />
-                    {clearDeleted} eventi eliminati con successo.
-                  </CAlert>
-                </div>
-              )}
-
-              {clearStatus === 'error' && (
-                <div className="mb-3">
-                  <CAlert color="danger">
-                    <strong>Errore durante la cancellazione:</strong><br />
-                    {clearError}
-                  </CAlert>
-                </div>
-              )}
+                </CModalBody>
+                {(clearStatus === 'error' || clearStatus === 'completed') && (
+                  <CModalFooter>
+                    <CButton
+                      color="primary"
+                      onClick={() => setClearStatus('idle')}
+                    >
+                      Chiudi
+                    </CButton>
+                  </CModalFooter>
+                )}
+              </CModal>
             </CCol>
           </CRow>
         </CCardBody>
@@ -497,7 +544,9 @@ const CalendarPage: React.FC = () => {
           <h5>Calendario Non Selezionato</h5>
         </CModalHeader>
         <CModalBody>
-          <p>Devi selezionare un calendario prima di procedere con la cancellazione.</p>
+          {calendarWarningAction === 'sync'
+            ? 'Devi selezionare un calendario prima della sincronizzazione!'
+            : 'Devi selezionare un calendario prima della cancellazione!'}
         </CModalBody>
         <CModalFooter>
           <CButton

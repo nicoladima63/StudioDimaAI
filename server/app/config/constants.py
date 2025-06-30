@@ -21,15 +21,10 @@ def require_env(var_name: str) -> str:
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # --- DBF Paths ---
+# NB: I percorsi vanno gestiti solo tramite DBHandler, non usare queste shortcut!
 PATHS_DBF = {
-    'appuntamenti': (
-        os.path.join(BACKEND_DIR, 'windent', 'USER', 'APPUNTA.DBF') if CURRENT_ENV == Environment.DEVELOPMENT
-        else require_env('PATH_APPUNTAMENTI_DBF')
-    ),
-    'anagrafica': (
-        os.path.join(BACKEND_DIR, 'windent', 'DATI', 'PAZIENTI.DBF') if CURRENT_ENV == Environment.DEVELOPMENT
-        else require_env('PATH_ANAGRAFICA_DBF')
-    )
+    'appuntamenti': os.path.join(BACKEND_DIR, 'windent', 'USER', 'APPUNTA.DBF'),
+    'anagrafica': os.path.join(BACKEND_DIR, 'windent', 'DATI', 'PAZIENTI.DBF')
 }
 
 # --- Colonne DBF ---
@@ -128,9 +123,7 @@ GOOGLE = {
 }
 
 # --- Shortcut costanti ---
-PATH_APPUNTAMENTI_DBF = PATHS_DBF['appuntamenti']
-PATH_ANAGRAFICA_DBF = PATHS_DBF['anagrafica']
-
+# (RIMOSSE: usare solo DBHandler per i percorsi)
 TWILIO_ACCOUNT_SID = TWILIO['account_sid']
 TWILIO_AUTH_TOKEN = TWILIO['auth_token']
 TWILIO_WHATSAPP_NUMBER = TWILIO['whatsapp_number']

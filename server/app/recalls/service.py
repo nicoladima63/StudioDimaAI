@@ -4,12 +4,13 @@ from typing import List, Dict, Any, Optional
 from dbfread import DBF
 import sys
 import os
+from server.app.core.db_handler import DBHandler
 
 # Aggiungi il path per gli import
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from app.config.constants import PATH_ANAGRAFICA_DBF, COLONNE
+    from app.config.constants import COLONNE
     from app.recalls.utils import (
         normalizza_numero_telefono,
         costruisci_messaggio_richiamo,
@@ -18,7 +19,7 @@ try:
     )
 except ImportError:
     # Fallback per esecuzione diretta
-    from config.constants import PATH_ANAGRAFICA_DBF, COLONNE
+    from config.constants import COLONNE
     from recalls.utils import (
         normalizza_numero_telefono,
         costruisci_messaggio_richiamo,
@@ -34,6 +35,8 @@ class RecallService:
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.db_handler = DBHandler()
+        self.dbf_path = self.db_handler.path_anagrafica
     
     def get_all_recalls(self, days_threshold: int = 90) -> List[Dict[str, Any]]:
         """
@@ -47,7 +50,7 @@ class RecallService:
         """
         try:
             # Legge i dati dal DBF
-            pazienti_dbf = DBF(PATH_ANAGRAFICA_DBF, encoding='latin-1')
+            pazienti_dbf = DBF(self.dbf_path, encoding='latin-1')
             col = COLONNE['richiami']
             col_paz = COLONNE['pazienti']
             
@@ -185,7 +188,7 @@ class RecallService:
             Statistiche dell'aggiornamento
         """
         try:
-            pazienti_dbf = DBF(PATH_ANAGRAFICA_DBF, encoding='latin-1')
+            pazienti_dbf = DBF(self.dbf_path, encoding='latin-1')
             col = COLONNE['richiami']
             
             aggiornati = 0
