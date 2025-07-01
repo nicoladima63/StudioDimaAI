@@ -22,8 +22,6 @@ def write_mode(mode):
         f.write(mode)
 
 def check_prod_mode_available():
-    if not os.path.exists(r"\\\serverdima"):
-        return False, "Impossibile passare a produzione: rete studio non raggiungibile."
     return True, ""
 
 @settings_bp.route('/api/settings/check-prod', methods=['GET'])

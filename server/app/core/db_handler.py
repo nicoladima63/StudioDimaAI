@@ -23,7 +23,7 @@ def get_current_mode():
 def check_network_and_switch_mode(mode):
     """Se in prod ma la rete non è raggiungibile, passa a dev e aggiorna mode.txt."""
     if mode == 'prod':
-        if not os.path.exists(r"\\\serverdima"):
+        if not os.path.exists(r"\\SERVERDIMA\Pixel\WINDENT\\"):
             # Switch to dev mode
             try:
                 with open(MODE_FILE_PATH, "w") as f:
