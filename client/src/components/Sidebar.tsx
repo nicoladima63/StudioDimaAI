@@ -4,10 +4,11 @@ import { CSidebar, CSidebarNav, CNavItem, CNavTitle } from '@coreui/react'
 import { NavLink } from 'react-router-dom'
 import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
+import '../components/css/custom-css.css'
 
 const Sidebar: React.FC = () => {
   return (
-    <CSidebar className="bg-light vh-100">
+    <CSidebar className="bg-light vh-100 custom-sidebar">
       <CSidebarNav>
         <CNavItem>
           <NavLink to="/" className="nav-link">

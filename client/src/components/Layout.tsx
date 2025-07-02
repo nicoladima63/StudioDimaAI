@@ -10,7 +10,7 @@ interface LayoutProps {
   contentClassName?: string;
 }
 
-const DEFAULT_SIDEBAR_WIDTH = 2;
+const DEFAULT_SIDEBAR_WIDTH = 1;
 
 const Layout: React.FC<LayoutProps> = ({ 
   sidebarWidth = DEFAULT_SIDEBAR_WIDTH, 
