@@ -4,7 +4,8 @@ import pandas as pd
 import logging
 from datetime import datetime, date, timedelta
 import dbf
-from ..config.constants import PATHS_DBF, COLONNE
+from server.app.config.constants import COLONNE, get_dbf_path
+
 import os
 
 logger = logging.getLogger(__name__)
@@ -39,23 +40,15 @@ class DBHandler:
         mode = get_current_mode()
         mode, mode_changed = check_network_and_switch_mode(mode)
         self.mode_changed = mode_changed
-        if mode == 'prod':
-            # In produzione, prendi i percorsi dalle variabili d'ambiente
-            self.path_appuntamenti = os.environ.get('PATH_APPUNTAMENTI_DBF')
-            self.path_anagrafica = os.environ.get('PATH_ANAGRAFICA_DBF')
-        else:
-            # In sviluppo, usa i percorsi di default
-            self.path_appuntamenti = PATHS_DBF['appuntamenti']
-            self.path_anagrafica = PATHS_DBF['anagrafica']
-        # Permetti override manuale
+        # Percorsi DBF centralizzati tramite mapping
+        self.path_appuntamenti = get_dbf_path('agenda')
+        self.path_anagrafica = get_dbf_path('pazienti')
+        # Permetti override manuale (per test o casi particolari)
         if path_appuntamenti:
             self.path_appuntamenti = path_appuntamenti
         if path_anagrafica:
             self.path_anagrafica = path_anagrafica
-
         logger.info(f"MODE: {mode}")
-        logger.info(f"ENV PATH_APPUNTAMENTI_DBF: {os.environ.get('PATH_APPUNTAMENTI_DBF')}")
-        logger.info(f"ENV PATH_ANAGRAFICA_DBF: {os.environ.get('PATH_ANAGRAFICA_DBF')}")
         logger.info(f"self.path_appuntamenti: {self.path_appuntamenti}")
         logger.info(f"self.path_anagrafica: {self.path_anagrafica}")
 
@@ -200,13 +193,7 @@ class DBHandler:
         """Legge tutte le fatture dal DBF e restituisce solo i campi utili."""
         # Percorso file fatture
         if not path_fatture:
-            # Scegli percorso in base alla modalità
-            mode = get_current_mode()
-            if mode == 'prod':
-                path_fatture = os.environ.get('PATH_FATTURE_DBF')
-            else:
-                from ..config.constants import PATHS_DBF
-                path_fatture = PATHS_DBF.get('fatture')
+            path_fatture = get_dbf_path('fatture')
         if not path_fatture or not os.path.exists(path_fatture):
             logger.error(f"File fatture non trovato: {path_fatture}")
             return []
