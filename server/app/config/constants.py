@@ -20,12 +20,38 @@ def require_env(var_name: str) -> str:
 # Ottieni il percorso della directory del backend (server/)
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# --- DBF Paths ---
-# NB: I percorsi vanno gestiti solo tramite DBHandler, non usare queste shortcut!
-PATHS_DBF = {
-    'appuntamenti': os.path.join(BACKEND_DIR, 'windent', 'USER', 'APPUNTA.DBF'),
-    'anagrafica': os.path.join(BACKEND_DIR, 'windent', 'DATI', 'PAZIENTI.DBF')
+# --- Funzione centralizzata per determinare la modalità corrente (dev/prod) ---
+MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/mode.txt')
+def get_current_mode():
+    try:
+        with open(MODE_FILE_PATH, 'r') as f:
+            mode = f.read().strip()
+            if mode in ['dev', 'prod']:
+                return mode
+    except Exception:
+        pass
+    return 'dev'
+
+# --- DBF Table Mapping ---
+DBF_TABLES = {
+    "agenda":     {"file": "APPUNTA.DBF",    "categoria": "USER"},
+    "promemoria": {"file": "APPUNTA.DBF",    "categoria": "USER"},
+    "pazienti":   {"file": "PAZIENTI.DBF",   "categoria": "DATI"},
+    "fatture":    {"file": "FATTURE.DBF",    "categoria": "DATI"},
+    "richiami":   {"file": "PAZIENTI.DBF",   "categoria": "DATI"},
+    # AGGIUNGERE QUI EVENTUALI TABELLE MANCANTI
 }
+
+def get_dbf_path(nome_logico):
+    mode = get_current_mode()
+    if mode == 'prod':
+        base = r'\\SERVERDIMA\Pixel\WINDENT'
+    else:
+        base = os.path.join(BACKEND_DIR, 'windent')
+    if nome_logico not in DBF_TABLES:
+        raise ValueError(f"Tabella DBF logica '{nome_logico}' non trovata nel mapping. Aggiorna DBF_TABLES in constants.py.")
+    info = DBF_TABLES[nome_logico]
+    return os.path.join(base, info["categoria"], info["file"])
 
 # --- Colonne DBF ---
 COLONNE = {

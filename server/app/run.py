@@ -32,6 +32,7 @@ def register_blueprints(app: Flask) -> None:
     from .recalls.recall_db_controller import recall_db_bp
     from .pazienti.controller import pazienti_bp
     from .routes.settings import settings_bp
+    from .routes.fatture import fatture_bp
     
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -41,6 +42,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(recall_db_bp)
     app.register_blueprint(pazienti_bp)
     app.register_blueprint(settings_bp)
+    app.register_blueprint(fatture_bp, url_prefix="/api/fatture")
     
     # Aggiungi qui altri blueprint
 

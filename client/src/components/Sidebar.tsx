@@ -2,14 +2,13 @@
 import React from 'react'
 import { CSidebar, CSidebarNav, CNavItem, CNavTitle } from '@coreui/react'
 import { NavLink } from 'react-router-dom'
-import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings } from '@coreui/icons'
+import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import { useEnvStore } from '@/store/authStore'
+import '../components/css/custom-css.css'
 
 const Sidebar: React.FC = () => {
-  const mode = useEnvStore((state) => state.mode)
   return (
-    <CSidebar className="bg-light vh-100">
+    <CSidebar className="bg-light vh-100 custom-sidebar">
       <CSidebarNav>
         <CNavItem>
           <NavLink to="/" className="nav-link">
@@ -40,6 +39,11 @@ const Sidebar: React.FC = () => {
         <CNavItem>
           <NavLink to="/settings" className="nav-link">
             <CIcon icon={cilSettings} className="me-2" />Settings
+          </NavLink>
+        </CNavItem>
+        <CNavItem>
+          <NavLink to="/fatture" className="nav-link">
+            <CIcon icon={cilCreditCard} className="me-2" />Fatture
           </NavLink>
         </CNavItem>
       </CSidebarNav>

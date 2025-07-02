@@ -10,7 +10,7 @@ from server.app.core.db_handler import DBHandler
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from app.config.constants import COLONNE
+    from app.config.constants import COLONNE, get_dbf_path
     from app.recalls.utils import (
         normalizza_numero_telefono,
         costruisci_messaggio_richiamo,
@@ -19,7 +19,7 @@ try:
     )
 except ImportError:
     # Fallback per esecuzione diretta
-    from config.constants import COLONNE
+    from config.constants import COLONNE, get_dbf_path
     from recalls.utils import (
         normalizza_numero_telefono,
         costruisci_messaggio_richiamo,
@@ -35,8 +35,9 @@ class RecallService:
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        # Percorso DBF centralizzato tramite mapping
+        self.dbf_path = get_dbf_path('pazienti')
         self.db_handler = DBHandler()
-        self.dbf_path = self.db_handler.path_anagrafica
     
     def get_all_recalls(self, days_threshold: int = 90) -> List[Dict[str, Any]]:
         """

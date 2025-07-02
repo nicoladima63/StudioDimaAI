@@ -254,4 +254,10 @@ export async function syncModeWithBackend() {
   useEnvStore.getState().setMode(res);
 }
 
+// Fatture
+export async function getAllFatture() {
+  const response = await apiClient.get('/api/fatture/all');
+  return response.data; // { fatture: [...], last_update: ... }
+}
+
 export default apiClient;

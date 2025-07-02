@@ -4,7 +4,8 @@ import pandas as pd
 import logging
 from datetime import datetime, date, timedelta
 import dbf
-from ..config.constants import PATHS_DBF, COLONNE
+from server.app.config.constants import COLONNE, get_dbf_path
+
 import os
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ def get_current_mode():
 def check_network_and_switch_mode(mode):
     """Se in prod ma la rete non è raggiungibile, passa a dev e aggiorna mode.txt."""
     if mode == 'prod':
-        if not os.path.exists(r"\\\serverdima"):
+        if not os.path.exists(r"\\SERVERDIMA\Pixel\WINDENT\\"):
             # Switch to dev mode
             try:
                 with open(MODE_FILE_PATH, "w") as f:
@@ -39,23 +40,15 @@ class DBHandler:
         mode = get_current_mode()
         mode, mode_changed = check_network_and_switch_mode(mode)
         self.mode_changed = mode_changed
-        if mode == 'prod':
-            # In produzione, prendi i percorsi dalle variabili d'ambiente
-            self.path_appuntamenti = os.environ.get('PATH_APPUNTAMENTI_DBF')
-            self.path_anagrafica = os.environ.get('PATH_ANAGRAFICA_DBF')
-        else:
-            # In sviluppo, usa i percorsi di default
-            self.path_appuntamenti = PATHS_DBF['appuntamenti']
-            self.path_anagrafica = PATHS_DBF['anagrafica']
-        # Permetti override manuale
+        # Percorsi DBF centralizzati tramite mapping
+        self.path_appuntamenti = get_dbf_path('agenda')
+        self.path_anagrafica = get_dbf_path('pazienti')
+        # Permetti override manuale (per test o casi particolari)
         if path_appuntamenti:
             self.path_appuntamenti = path_appuntamenti
         if path_anagrafica:
             self.path_anagrafica = path_anagrafica
-
         logger.info(f"MODE: {mode}")
-        logger.info(f"ENV PATH_APPUNTAMENTI_DBF: {os.environ.get('PATH_APPUNTAMENTI_DBF')}")
-        logger.info(f"ENV PATH_ANAGRAFICA_DBF: {os.environ.get('PATH_ANAGRAFICA_DBF')}")
         logger.info(f"self.path_appuntamenti: {self.path_appuntamenti}")
         logger.info(f"self.path_anagrafica: {self.path_anagrafica}")
 
@@ -195,3 +188,33 @@ class DBHandler:
         """Debug connessione DBF"""
         self.leggi_tabella_dbf(self.path_appuntamenti)
         self.leggi_tabella_dbf(self.path_anagrafica)
+
+    def leggi_fatture(self, path_fatture=None):
+        """Legge tutte le fatture dal DBF e restituisce solo i campi utili."""
+        # Percorso file fatture
+        if not path_fatture:
+            path_fatture = get_dbf_path('fatture')
+        if not path_fatture or not os.path.exists(path_fatture):
+            logger.error(f"File fatture non trovato: {path_fatture}")
+            return []
+        try:
+            with dbf.Table(path_fatture, codepage='cp1252') as table:
+                records = []
+                for r in table:
+                    try:
+                        records.append({
+                            'id': str(r['DB_FACODICE']).strip() if 'DB_FACODICE' in table.field_names else '',
+                            'data_incasso': r['DB_FADATAT'],
+                            'importo': float(r['DB_FAINCAS'] or 0),
+                            'metodo': r['DB_FAPAGAM'].strip() if r['DB_FAPAGAM'] else '',
+                            'banca_cassa': r['DB_FABANCA'].strip() if r['DB_FABANCA'] else '',
+                            'esenzione_iva': bool(r['DB_FAESIVA']) if 'DB_FAESIVA' in table.field_names else False,
+                            'marca_bollo': float(r['DB_FAIVA'] or 0) if 'DB_FAIVA' in table.field_names else 0.0
+                        })
+                    except Exception as e:
+                        logger.warning(f"Errore lettura record fattura: {e}")
+                logger.info(f"Letti {len(records)} record fatture da {path_fatture}")
+                return records
+        except Exception as e:
+            logger.error(f"Errore lettura DBF fatture: {e}")
+            return []
