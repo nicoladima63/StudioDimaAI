@@ -260,4 +260,14 @@ export async function getAllFatture() {
   return response.data; // { fatture: [...], last_update: ... }
 }
 
+export async function getAppuntamentiStats() {
+  const response = await apiClient.get('/api/appuntamenti/statistiche');
+  return response.data;
+}
+
+export async function getPrimeVisiteStats() {
+  const response = await apiClient.get('/api/appuntamenti/prime-visite');
+  return response.data;
+}
+
 export default apiClient;

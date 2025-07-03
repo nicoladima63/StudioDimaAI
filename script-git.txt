@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# === Step 1: Richiesta nome branch ===
+read -p "Nome del nuovo branch da creare (es: feature-login): " BRANCH
+
+# === Step 2: Creazione del branch da main ===
+echo "⚙️  Cambio su 'main' e aggiorno..."
+git checkout main && git pull origin main
+
+echo "🌱 Creo il nuovo branch '$BRANCH'..."
+git checkout -b "$BRANCH"
+
+echo "✅ Fatto. Ora puoi lavorare sul branch '$BRANCH'"
+echo "✍️  Ricordati di fare:"
+echo "    git add ."
+echo "    git commit -m 'Descrizione modifiche'"
+echo "    git push origin $BRANCH"
+echo "Poi crea la Pull Request su GitHub."
+
+# === Step finale ===
+read -p "Vuoi che ti ricordi anche i comandi post-merge (y/n)? " POST
+if [[ "$POST" =~ ^[Yy]$ ]]; then
+  echo
+  echo "🧭 Quando la pull request è stata mergiata:"
+  echo "  git checkout main"
+  echo "  git pull origin main"
+  echo "  git branch -d $BRANCH"
+  echo "  git push origin --delete $BRANCH"
+fi

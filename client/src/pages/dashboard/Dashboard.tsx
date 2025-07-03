@@ -7,24 +7,51 @@ import StatWidget from '@/components/StatWidget'
 import RecentActivities from '@/components/RecentActivities'
 import MonthlyChart from '@/components/MonthlyChart'
 import CompletionStats from '@/components/CompletionStats'
-import { mockDashboardData } from '@/mocks/dashboard'
+import { getPazientiStats, getAppuntamentiStats, getPrimeVisiteStats } from '@/api/apiClient'
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [stats, setStats] = useState({
-    users: 0,
-    appointments: 0,
-    growth: 0,
-    notifications: 0
+    pazienti: 0,
+    inCura: 0,
+    meseCorrente: 0,
+    meseProssimo: 0,
+    crescita: 0,
+    nuoveVisite: null
   })
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setStats(mockDashboardData)
+    async function fetchStats() {
+      setLoading(true)
+      try {
+        const pazData = await getPazientiStats()
+        const appData = await getAppuntamentiStats()
+        const primeData = await getPrimeVisiteStats()
+        const crescita = appData.data.mese_corrente
+          ? Math.round(((appData.data.mese_prossimo - appData.data.mese_corrente) / appData.data.mese_corrente) * 100)
+          : 0
+        setStats({
+          pazienti: pazData.data.totale,
+          inCura: pazData.data.in_cura,
+          meseCorrente: appData.data.mese_corrente,
+          meseProssimo: appData.data.mese_prossimo,
+          crescita,
+          nuoveVisite: primeData.data.nuove_visite
+        })
+      } catch {
+        // fallback o errore
+        setStats({
+          pazienti: 0,
+          inCura: 0,
+          meseCorrente: 0,
+          meseProssimo: 0,
+          crescita: 0,
+          nuoveVisite: null
+        })
+      }
       setLoading(false)
-    }, 1500)
-
-    return () => clearTimeout(timer)
+    }
+    fetchStats()
   }, [])
 
   return (
@@ -48,32 +75,32 @@ const Dashboard: React.FC = () => {
               <CCol sm={6} lg={3}>
                 <StatWidget 
                   color="primary"
-                  value={stats.users}
-                  title="Utenti"
+                  value={`${stats.pazienti} | ${stats.inCura}`}
+                  title="Pazienti | In cura"
                   icon={cilPeople}
                 />
               </CCol>
               <CCol sm={6} lg={3}>
                 <StatWidget 
                   color="info"
-                  value={stats.appointments}
-                  title="Appuntamenti"
+                  value={`${stats.meseCorrente} | ${stats.meseProssimo}`}
+                  title="App. mese | prossimo"
                   icon={cilCalendar}
                 />
               </CCol>
               <CCol sm={6} lg={3}>
                 <StatWidget 
                   color="warning"
-                  value={`${stats.growth}%`}
-                  title="Crescita"
+                  value={`${stats.crescita}%`}
+                  title="Crescita %"
                   icon={cilChart}
                 />
               </CCol>
               <CCol sm={6} lg={3}>
                 <StatWidget 
                   color="danger"
-                  value={stats.notifications}
-                  title="Notifiche"
+                  value={stats.nuoveVisite !== null ? stats.nuoveVisite : 'Nuove visite nel mese='}
+                  title="Prime visite"
                   icon={cilBell}
                 />
               </CCol>

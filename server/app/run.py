@@ -1,15 +1,15 @@
 # server/app/run.py
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 from .extensions import db, jwt
 import logging
 from typing import Optional
-from .calendar.routes import calendar_bp
-from .recalls.recall_db_controller import recall_db_bp
-from .pazienti.controller import pazienti_bp
+from server.app.calendar.routes import calendar_bp
+from server.app.recalls.recall_db_controller import recall_db_bp
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -33,6 +33,7 @@ def register_blueprints(app: Flask) -> None:
     from .pazienti.controller import pazienti_bp
     from .routes.settings import settings_bp
     from .routes.fatture import fatture_bp
+    from .routes.appuntamenti import appuntamenti_bp
     
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -43,6 +44,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(pazienti_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(fatture_bp, url_prefix="/api/fatture")
+    app.register_blueprint(appuntamenti_bp)
     
     # Aggiungi qui altri blueprint
 
@@ -72,6 +74,13 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
         # Inizializzazione database
         db.init_app(app)
         jwt.init_app(app)
+
+        # Aggiungi questi handler per debug
+        @jwt.invalid_token_loader
+        def invalid_token_callback(error):
+            logger.error(f"Token non valido: {error}")
+            return jsonify({'success': False, 'error': f'Token non valido: {error}'}), 422
+
         
         # Registrazione blueprint
         register_blueprints(app)
