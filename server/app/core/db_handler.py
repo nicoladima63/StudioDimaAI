@@ -63,7 +63,7 @@ class DBHandler:
                     except Exception as e:
                         logger.warning(f"Errore lettura record in {percorso_file}: {e}")
                 df = pd.DataFrame(records)
-                logger.info(f"DBF letto: {percorso_file} → {len(df)} record.")
+                logger.info(f"DBF letto: {percorso_file} -> {len(df)} record.")
                 return df
 
         except dbf.DbfError as e:

@@ -15,6 +15,8 @@ from .exceptions import GoogleCredentialsNotFoundError
 import threading
 import uuid
 import time
+import pandas as pd
+from server.app.config.constants import COLONNE
 
 calendar_bp = Blueprint("calendar", __name__)
 logger = logging.getLogger(__name__)
@@ -232,3 +234,28 @@ def get_appointments_for_month():
     except Exception as e:
         logger.error(f"Errore in get_appointments_for_month: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
+
+@calendar_bp.route('/appointments/year', methods=['GET'])
+@jwt_required()
+def get_appointments_for_year():
+    from datetime import datetime
+    import pandas as pd
+    db_handler = DBHandler()
+    df = db_handler.leggi_tabella_dbf(db_handler.path_appuntamenti)
+    # Usa la colonna corretta dal mapping
+    col_data = COLONNE['appuntamenti']['data']
+    if df.empty or col_data not in df.columns:
+        anni = [datetime.now().year - i for i in range(2, -1, -1)]
+        return jsonify({'success': True, 'data': {str(anno): [{'month': m, 'count': 0} for m in range(1, 13)] for anno in anni}})
+    df[col_data] = pd.to_datetime(df[col_data], errors='coerce')
+    # Anni: corrente e due precedenti
+    anno_corrente = datetime.now().year
+    anni = [anno_corrente - i for i in range(2, -1, -1)]  # es: [2023, 2024, 2025]
+    result = {}
+    for anno in anni:
+        df_anno = df[df[col_data].dt.year == anno]
+        result[str(anno)] = []
+        for month in range(1, 13):
+            count = df_anno[df_anno[col_data].dt.month == month].shape[0]
+            result[str(anno)].append({'month': month, 'count': int(count)})
+    return jsonify({'success': True, 'data': result})

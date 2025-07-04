@@ -5,20 +5,25 @@ import CIcon from '@coreui/icons-react'
 import DashboardCard from '@/components/DashboardCard'
 import StatWidget from '@/components/StatWidget'
 import RecentActivities from '@/components/RecentActivities'
-import MonthlyChart from '@/components/MonthlyChart'
-import CompletionStats from '@/components/CompletionStats'
-import { getPazientiStats, getAppuntamentiStats, getPrimeVisiteStats } from '@/api/apiClient'
+import AppuntamentiCoreUICard from '@/components/AppuntamentiCoreUICard'
+import AppuntamentiChart from '@/components/AppuntamentiChart'
+import AppuntamentiTotaliBar from '@/components/AppuntamentiTotaliBar'
+import { getPazientiStats, getAppuntamentiStats, getPrimeVisiteStats, getAppuntamentiPerAnno } from '@/api/apiClient'
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [stats, setStats] = useState({
     pazienti: 0,
     inCura: 0,
+    mesePrecedente: 0,
     meseCorrente: 0,
     meseProssimo: 0,
     crescita: 0,
     nuoveVisite: null
   })
+  const [datiGrafico, setDatiGrafico] = useState<{ [anno: string]: { month: number; count: number }[] }>({})
+
+  const colori = ['#3399ff', '#8884d8', '#b0b0b0']
 
   useEffect(() => {
     async function fetchStats() {
@@ -27,27 +32,40 @@ const Dashboard: React.FC = () => {
         const pazData = await getPazientiStats()
         const appData = await getAppuntamentiStats()
         const primeData = await getPrimeVisiteStats()
-        const crescita = appData.data.mese_corrente
-          ? Math.round(((appData.data.mese_prossimo - appData.data.mese_corrente) / appData.data.mese_corrente) * 100)
-          : 0
+        let crescita = 0;
+        if (appData.data.mese_precedente === 0 && appData.data.mese_corrente > 0) {
+          crescita = 100;
+        } else if (appData.data.mese_precedente === 0 && appData.data.mese_corrente === 0) {
+          crescita = 0;
+        } else if (appData.data.mese_precedente > 0 && appData.data.mese_corrente === 0) {
+          crescita = -100;
+        } else if (appData.data.mese_precedente > 0) {
+          crescita = Math.round(((appData.data.mese_corrente - appData.data.mese_precedente) / appData.data.mese_precedente) * 100);
+        }
         setStats({
           pazienti: pazData.data.totale,
           inCura: pazData.data.in_cura,
+          mesePrecedente: appData.data.mese_precedente,
           meseCorrente: appData.data.mese_corrente,
           meseProssimo: appData.data.mese_prossimo,
           crescita,
           nuoveVisite: primeData.data.nuove_visite
         })
+        // Carica dati per il grafico appuntamenti 3 anni
+        const datiAnni = await getAppuntamentiPerAnno()
+        setDatiGrafico(datiAnni.data)
       } catch {
         // fallback o errore
         setStats({
           pazienti: 0,
           inCura: 0,
+          mesePrecedente: 0,
           meseCorrente: 0,
           meseProssimo: 0,
           crescita: 0,
           nuoveVisite: null
         })
+        setDatiGrafico({})
       }
       setLoading(false)
     }
@@ -72,7 +90,7 @@ const Dashboard: React.FC = () => {
         ) : (
           <>
             <CRow>
-              <CCol sm={6} lg={3}>
+              <CCol sm={6} lg={2}>
                 <StatWidget 
                   color="primary"
                   value={`${stats.pazienti} | ${stats.inCura}`}
@@ -80,15 +98,15 @@ const Dashboard: React.FC = () => {
                   icon={cilPeople}
                 />
               </CCol>
-              <CCol sm={6} lg={3}>
+              <CCol sm={6} lg={2}>
                 <StatWidget 
                   color="info"
-                  value={`${stats.meseCorrente} | ${stats.meseProssimo}`}
-                  title="App. mese | prossimo"
+                  value={`${stats.mesePrecedente} | ${stats.meseCorrente} | ${stats.meseProssimo}`}
+                  title="Prec. | In corso | Prossimo"
                   icon={cilCalendar}
                 />
               </CCol>
-              <CCol sm={6} lg={3}>
+              <CCol sm={6} lg={2}>
                 <StatWidget 
                   color="warning"
                   value={`${stats.crescita}%`}
@@ -96,7 +114,7 @@ const Dashboard: React.FC = () => {
                   icon={cilChart}
                 />
               </CCol>
-              <CCol sm={6} lg={3}>
+              <CCol sm={6} lg={2}>
                 <StatWidget 
                   color="danger"
                   value={stats.nuoveVisite !== null ? stats.nuoveVisite : 'Nuove visite nel mese='}
@@ -104,14 +122,30 @@ const Dashboard: React.FC = () => {
                   icon={cilBell}
                 />
               </CCol>
+              <CCol sm={12} lg={3}>
+                 <AppuntamentiCoreUICard
+                   value={stats.meseCorrente}
+                   percent={stats.crescita}
+                   data={datiGrafico[String(new Date().getFullYear())] || []}
+                   color="#3399ff"
+                 />
+              </CCol>
             </CRow>
 
             <CRow className="mt-4">
               <CCol md={8}>
-                <MonthlyChart />
+                <AppuntamentiChart 
+                    data={datiGrafico}
+                  />
               </CCol>
               <CCol md={4}>
-                <CompletionStats />
+                <AppuntamentiTotaliBar
+                  totali={Object.keys(datiGrafico).sort().map((anno, idx) => ({
+                    anno,
+                    totale: (datiGrafico[anno] || []).reduce((sum, m) => sum + m.count, 0),
+                    colore: colori[idx % colori.length]
+                  }))}
+                />
               </CCol>
             </CRow>
 
@@ -120,6 +154,7 @@ const Dashboard: React.FC = () => {
                 <RecentActivities />
               </CCol>
             </CRow>
+
           </>
         )}
       </DashboardCard>

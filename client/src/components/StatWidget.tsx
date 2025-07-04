@@ -2,29 +2,39 @@ import React from 'react'
 import { CWidgetStatsA } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
-type IconType = string | string[] | Record<string, any>
-
 interface StatWidgetProps {
   color: string
-  value: string | number
+  value: string | number | React.ReactNode
   title: string
-  icon: IconType
+  icon?: any // accetta anche CIcon
+  children?: React.ReactNode
 }
 
-const StatWidget: React.FC<StatWidgetProps> = ({ color, value, title, icon }) => {
+const StatWidget: React.FC<StatWidgetProps> = ({ color, value, title, icon, children }) => {
   // Se value contiene "|", mostro i due valori su due righe
   let displayValue = value
   if (typeof value === 'string' && value.includes('|')) {
-    const [val1, val2] = value.split('|').map(v => v.trim())
-    displayValue = <><span style={{fontWeight:600}}>{val1}</span> <span style={{color:'#888'}}>|</span> <span style={{fontWeight:600}}>{val2}</span></>
+    const parts = value.split('|').map(v => v.trim())
+    displayValue = (
+      <span style={{fontWeight:600}}>
+        {parts.map((part, idx) => (
+          <React.Fragment key={idx}>
+            {part}
+            {idx < parts.length - 1 && <span style={{color:'#888', margin:'0 6px'}}>|</span>}
+          </React.Fragment>
+        ))}
+      </span>
+    )
   }
   return (
     <CWidgetStatsA
       color={color}
       value={displayValue}
       title={title}
-      icon={<CIcon icon={icon} height={36} />}
-    />
+      icon={icon ? <CIcon icon={icon} height={36} /> : undefined}
+    >
+      {children}
+    </CWidgetStatsA>
   )
 }
 

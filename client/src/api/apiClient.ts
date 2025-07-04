@@ -262,11 +262,18 @@ export async function getAllFatture() {
 
 export async function getAppuntamentiStats() {
   const response = await apiClient.get('/api/appuntamenti/statistiche');
+  // La risposta ora contiene: { success, data: { mese_precedente, mese_corrente, mese_prossimo, percentuale_corrente, percentuale_prossimo } }
   return response.data;
 }
 
 export async function getPrimeVisiteStats() {
   const response = await apiClient.get('/api/appuntamenti/prime-visite');
+  return response.data;
+}
+
+export async function getAppuntamentiPerAnno() {
+  const response = await apiClient.get(`/api/calendar/appointments/year`);
+  // Restituisce: { success, data: { anno: [ { month, count }, ... ], ... } }
   return response.data;
 }
 
