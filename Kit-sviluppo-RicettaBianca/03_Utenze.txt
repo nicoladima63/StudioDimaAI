@@ -1,0 +1,21 @@
+### MEDICO #######################################################
+cfMedico: PROVAX00X00X000Y
+password: Salve123
+pincode cifrato: LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=
+pincode chiaro: 1234567890
+
+PROVAX00X00X000Y	
+Reg: 020
+Asl: 101
+CodSsa: 000000
+
+
+### FARMACIA #####################################################
+utenza: UV386Q5B
+password: SALVE
+pincode cifrato: V32MgmSgqebDBi+KCAwlDHCq4QsmCjK/OBtkRyMjbzoFQpFBKmS16dY7r98k4LaC3UT7h7oL0dKZbLsuOmFj/F8+oC0DRcBQdTZPGsbkb+vFrY1G0Y9NGDxJMrYMeEt2yeG9UuzUt7ouLW9A+iw91HyxOoZtZ73J+HK33bKu6cc=
+
+UV386Q5B	
+Reg: 130
+Asl: 204
+CodSsa: 78909

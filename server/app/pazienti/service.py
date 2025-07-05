@@ -9,7 +9,7 @@ from server.app.config.constants import get_dbf_path
 PAZIENTI_FIELDS = [
     'DB_CODE', 'DB_PANOME', 'DB_PAINDIR', 'DB_PACITTA', 'DB_PACAP', 'DB_PAPROVI',
     'DB_PATELEF', 'DB_PACELLU', 'DB_PADANAS', 'DB_PAULTVI', 'DB_PARICHI',
-    'DB_PARITAR', 'DB_PARIMOT', 'DB_PANONCU', 'DB_PAEMAIL'
+    'DB_PARITAR', 'DB_PARIMOT', 'DB_PANONCU', 'DB_PAEMAIL', 'DB_PACODFI'
 ]
 
 class PazientiService:

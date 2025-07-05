@@ -46,6 +46,11 @@ const Sidebar: React.FC = () => {
             <CIcon icon={cilCreditCard} className="me-2" />Fatture
           </NavLink>
         </CNavItem>
+        <CNavItem>
+          <NavLink to="/ricetta" className="nav-link">
+            <CIcon icon={cilCreditCard} className="me-2" />Ricetta Elettronica
+          </NavLink>
+        </CNavItem>
       </CSidebarNav>
     </CSidebar>
   )

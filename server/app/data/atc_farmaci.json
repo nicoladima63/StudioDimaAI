@@ -1,0 +1,32 @@
+[
+  {
+    "codice": "J01CA04",
+    "principio_attivo": "Amoxicillina",
+    "forma": "Compressa",
+    "descrizione": "Antibiotico betalattamico"
+  },
+  {
+    "codice": "J01CR02",
+    "principio_attivo": "Amoxicillina e acido clavulanico",
+    "forma": "Compressa",
+    "descrizione": "Antibiotico ad ampio spettro"
+  },
+  {
+    "codice": "M01AE01",
+    "principio_attivo": "Ibuprofene",
+    "forma": "Compressa",
+    "descrizione": "Antinfiammatorio non steroideo"
+  },
+  {
+    "codice": "N02BE01",
+    "principio_attivo": "Paracetamolo",
+    "forma": "Compressa",
+    "descrizione": "Antipiretico e analgesico"
+  },
+  {
+    "codice": "A01AB03",
+    "principio_attivo": "Clorexidina",
+    "forma": "Collutorio",
+    "descrizione": "Antisettico orale"
+  }
+]

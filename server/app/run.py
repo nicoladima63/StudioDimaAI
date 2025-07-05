@@ -8,6 +8,8 @@ import logging
 from typing import Optional
 from server.app.calendar.routes import calendar_bp
 from server.app.recalls.recall_db_controller import recall_db_bp
+from server.app.routes.prescrizione import prescrizione_bp
+
 from dotenv import load_dotenv
 
 
@@ -34,6 +36,7 @@ def register_blueprints(app: Flask) -> None:
     from .routes.settings import settings_bp
     from .routes.fatture import fatture_bp
     from .routes.appuntamenti import appuntamenti_bp
+    from .routes.prescrizione import prescrizione_bp
     
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -45,6 +48,8 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(settings_bp)
     app.register_blueprint(fatture_bp, url_prefix="/api/fatture")
     app.register_blueprint(appuntamenti_bp)
+    app.register_blueprint(prescrizione_bp)
+
     
     # Aggiungi qui altri blueprint
 
@@ -100,7 +105,9 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
 
 if __name__ == "__main__":
     app = create_app()
-    
+    print("ROUTES DISPONIBILI:")
+    for rule in app.url_map.iter_rules():
+        print(rule)
     try:
         app.run(
             host=app.config.get("HOST", "0.0.0.0"),

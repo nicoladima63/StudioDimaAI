@@ -17,6 +17,7 @@
     "@coreui/react-chartjs": "^3.0.0",
     "axios": "^1.10.0",
     "date-fns": "^4.1.0",
+    "lodash": "^4.17.21",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.2",

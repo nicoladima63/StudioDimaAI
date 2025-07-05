@@ -124,6 +124,28 @@ interface LoginPayload {
   password: string;
 }
 
+interface RicettaPayload {
+  paziente: {
+    id: string;
+    nome: string;
+    cognome: string;
+    codiceFiscale?: string;
+    indirizzo?: string;
+  };
+  diagnosi: {
+    codice: string;
+    descrizione: string;
+  };
+  farmaco: {
+    codice: string;
+    principio_attivo: string;
+    descrizione: string;
+  };
+  posologia: string;
+  durata: string;
+  note: string;
+}
+
 export async function login(credentials: LoginPayload) {
   const response = await apiClient.post('/api/auth/login', credentials);
   // La risposta ora contiene access_token, username, e role
@@ -277,4 +299,22 @@ export async function getAppuntamentiPerAnno() {
   return response.data;
 }
 
+// Ricette elettroniche (diagnosi + farmaci + invio)
+export async function searchDiagnosi(q: string) {
+  const res = await apiClient.get('/api/diagnosi', { params: { q } });
+  return res.data;
+}
+
+export async function searchFarmaci(q: string) {
+  const res = await apiClient.get('/api/farmaci', { params: { q } });
+  return res.data;
+}
+
+export async function inviaRicetta(payload: RicettaPayload) {
+  const res = await apiClient.post('/api/ricetta/send', payload);
+  return res.data;
+}
+
+// Export apiClient sia come default che come named export per compatibilità
+export { apiClient };
 export default apiClient;
