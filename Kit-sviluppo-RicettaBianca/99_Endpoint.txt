@@ -1,7 +1,0 @@
-AMBIENTE DI TEST:
----------------------------------------------------------------------------------------------------------------------------
-https://ricettabiancaservicetest.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service
-
-AMBIENTE DI PRODUZIONE:
----------------------------------------------------------------------------------------------------------------------------
-https://ricettabiancaservice.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service

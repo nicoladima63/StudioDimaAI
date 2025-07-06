@@ -62,4 +62,6 @@ yarn-error.log*
 app.log
 
 /certs/
-/reentri/
+/rentri-doc/
+/ricetta-bianca-doc/
+/testRE/
