@@ -1,0 +1,1 @@
+# Schemas (Pydantic models) per il servizio codifiche RENTRI 

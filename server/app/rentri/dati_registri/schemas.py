@@ -1,0 +1,1 @@
+# Schemas (Pydantic models) per il servizio dati_registri RENTRI 
