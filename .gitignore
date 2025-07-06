@@ -60,3 +60,5 @@ yarn-error.log*
 **/test*.py
 
 app.log
+
+/certs
