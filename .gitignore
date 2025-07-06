@@ -61,4 +61,5 @@ yarn-error.log*
 
 app.log
 
-/certs
+/certs/
+/reentri/
