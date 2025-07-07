@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="9355129c-caf8-4195-a943-a0280c0b2bd5" activeEnvironment="Default" name="sts-a2f-service" resourceRoot="" soapui-version="5.7.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" id="3a563e6a-8ba6-448a-9e4c-1a1e5f1928fd" wsaVersion="NONE" name="authentication-service-binding" type="wsdl" bindingName="{http://wsdl.auth.a2f.sts.sanita.finanze.it}authentication-service-binding" soapVersion="1_1" anonymous="optional" definition="C:/temp/a2f-kit-sviluppo/Kit per lo sviluppo - A2F Ricetta Bianca Elettronica non a carico SSN - ver. 20231127/wsdl/sts-a2f-service.wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="file:/C:/temp/a2f-kit-sviluppo/Kit%20per%20lo%20sviluppo%20-%20A2F%20Ricetta%20Bianca%20Elettronica%20non%20a%20carico%20SSN%20-%20ver.%2020231127/wsdl/sts-a2f-service.wsdl"><con:part><con:url>file:/C:/temp/a2f-kit-sviluppo/Kit%20per%20lo%20sviluppo%20-%20A2F%20Ricetta%20Bianca%20Elettronica%20non%20a%20carico%20SSN%20-%20ver.%2020231127/wsdl/sts-a2f-service.wsdl</con:url><con:content><![CDATA[<wsdl:definitions name="authentication-service-port-type" targetNamespace="http://wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:as="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">
+  <wsdl:documentation>Versione 0.0.4</wsdl:documentation>
+  <wsdl:types>
+    <xsd:schema elementFormDefault="qualified">
+      <xsd:import namespace="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" schemaLocation="sts-a2f-service.xsd"/>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="createReq">
+    <wsdl:part element="as:CreateAuthReq" name="CreateAuthReq"/>
+  </wsdl:message>
+  <wsdl:message name="createRes">
+    <wsdl:part element="as:CreateAuthRes" name="CreateAuthRes"/>
+  </wsdl:message>
+  <wsdl:message name="revokeReq">
+    <wsdl:part element="as:RevokeAuthReq" name="RevokeAuthReq"/>
+  </wsdl:message>
+  <wsdl:message name="revokeRes">
+    <wsdl:part element="as:RevokeAuthRes" name="RevokeAuthRes"/>
+  </wsdl:message>
+  <wsdl:message name="checkTokenReq">
+    <wsdl:part element="as:CheckTokenReq" name="CheckTokenReq"/>
+  </wsdl:message>
+  <wsdl:message name="checkTokenRes">
+    <wsdl:part element="as:CheckTokenRes" name="CheckTokenRes"/>
+  </wsdl:message>
+  <wsdl:portType name="authentication-service-port-type">
+    <wsdl:operation name="create">
+      <wsdl:input message="tns:createReq"/>
+      <wsdl:output message="tns:createRes"/>
+    </wsdl:operation>
+    <wsdl:operation name="revoke">
+      <wsdl:input message="tns:revokeReq"/>
+      <wsdl:output message="tns:revokeRes"/>
+    </wsdl:operation>
+    <wsdl:operation name="checkToken">
+      <wsdl:input message="tns:checkTokenReq"/>
+      <wsdl:output message="tns:checkTokenRes"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="authentication-service-binding" type="tns:authentication-service-port-type">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="create">
+      <soap:operation soapAction="http://wsdl.auth.a2f.sts.sanita.finanze.it/create"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="revoke">
+      <soap:operation soapAction="http://wsdl.auth.a2f.sts.sanita.finanze.it/revoke"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="checkToken">
+      <soap:operation soapAction="http://wsdl.auth.a2f.sts.sanita.finanze.it/checkToken"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="authentication-service">
+    <wsdl:port binding="tns:authentication-service-binding" name="authentication-service-port">
+      <soap:address location="http://localhost:9080/sts-a2f-auth-ws/soap/v1/authentication-service"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part><con:part><con:url>file:\C:\temp\a2f-kit-sviluppo\Kit%20per%20lo%20sviluppo%20-%20A2F%20Ricetta%20Bianca%20Elettronica%20non%20a%20carico%20SSN%20-%20ver.%2020231127\wsdl\sts-a2f-service.xsd</con:url><con:content><![CDATA[<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:dt="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">
+  <xs:import namespace="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" schemaLocation="sts-a2f-service-data-type.xsd"/>
+  <xs:annotation>
+    <xs:documentation>Versione 0.0.4</xs:documentation>
+  </xs:annotation>
+  <xs:element name="CreateAuthReq" type="CreateAuthReq"></xs:element>
+  <xs:element name="CreateAuthRes" type="CreateAuthRes"></xs:element>
+  <xs:element name="RevokeAuthReq" type="RevokeAuthReq"></xs:element>
+  <xs:element name="RevokeAuthRes" type="RevokeAuthRes"></xs:element>
+  <xs:element name="CheckTokenReq" type="CheckTokenReq"></xs:element>
+  <xs:element name="CheckTokenRes" type="CheckTokenRes"></xs:element>
+  <xs:complexType name="CreateAuthReq">
+    <xs:sequence>
+      <xs:element name="pinCode" type="dt:stringTypeMax256" minOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice PIN (in possesso del soggetto abilitato all’invio) cifrato.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="cfUtente" type="dt:cfType">
+        <xs:annotation>
+          <xs:documentation>In base alla richiesta specifica può essere valorizzato con codice fiscale del medico o del titolare dell’erogatore.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codRegione" type="dt:codRegioneType">
+        <xs:annotation>
+          <xs:documentation>Codice Regione / Provincia Autonoma di appartenenza del soggetto indicato in cfUtente.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codAslAo" type="dt:codAslType">
+        <xs:annotation>
+          <xs:documentation>Codice ASL di appartenenza del soggetto indicato in cfUtente.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codiceStruttura" type="dt:codStrutturaType">
+        <xs:annotation>
+          <xs:documentation>Codice della struttura di appartenenza del soggetto indicato in userId. Nel caso in cui il codice struttura non sia presente è necessario valorizzare con un a stringa di lunghezza 0.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="opzioni" type="dt:opzioni">
+        <xs:annotation>
+          <xs:documentation>Elenco campi opzionali.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CreateAuthRes">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="codEsito" type="dt:esitoType">
+        <xs:annotation>
+          <xs:documentation>Esito della transazione: 0000=Esito positivo e restituzione dati, 0001=Esito positivo (con comunicazioni/warning) e restituzione dati, 9999=errore di sistema.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="errori" type="dt:errori"/>
+      <xs:element minOccurs="0" name="comunicazioni" type="dt:comunicazioni"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RevokeAuthReq">
+    <xs:sequence>
+      <xs:element name="pinCode" type="dt:stringTypeMax256" minOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice PIN (in possesso del soggetto abilitato all’invio) cifrato.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="cfUtente" type="dt:cfType">
+        <xs:annotation>
+          <xs:documentation>In base alla richiesta specifica può essere valorizzato con codice fiscale del medico o del titolare dell’erogatore.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codRegione" type="dt:codRegioneType">
+        <xs:annotation>
+          <xs:documentation>Codice Regione / Provincia Autonoma di appartenenza del soggetto indicato in cfUtente.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codAslAo" type="dt:codAslType">
+        <xs:annotation>
+          <xs:documentation>Codice ASL di appartenenza del soggetto indicato in cfUtente.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codiceStruttura" type="dt:codStrutturaType">
+        <xs:annotation>
+          <xs:documentation>Codice della struttura di appartenenza del soggetto indicato in userId. Nel caso in cui il codice struttura non sia presente è necessario valorizzare con un a stringa di lunghezza 0.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="token" type="dt:tokenType">
+        <xs:annotation>
+          <xs:documentation>ID sessione ricevuto tramite l'operazione "create".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="opzioni" type="dt:opzioni">
+        <xs:annotation>
+          <xs:documentation>Elenco campi opzionali.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RevokeAuthRes">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="codEsito" type="dt:esitoType">
+        <xs:annotation>
+          <xs:documentation>Esito della transazione: 0000=Esito positivo e restituzione dati, 0001=Esito positivo (con comunicazioni/warning) e restituzione dati, 9999=errore di sistema.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="errori" type="dt:errori"/>
+      <xs:element minOccurs="0" name="comunicazioni" type="dt:comunicazioni"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CheckTokenReq">
+    <xs:sequence>
+      <xs:element name="pinCode" type="dt:stringTypeMax256" minOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Codice PIN (in possesso del soggetto abilitato all’invio) cifrato.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="cfUtente" type="dt:cfType">
+        <xs:annotation>
+          <xs:documentation>In base alla richiesta specifica può essere valorizzato con codice fiscale del medico o del titolare dell’erogatore.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codRegione" type="dt:codRegioneType">
+        <xs:annotation>
+          <xs:documentation>Codice Regione / Provincia Autonoma di appartenenza del soggetto indicato in cfUtente.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codAslAo" type="dt:codAslType">
+        <xs:annotation>
+          <xs:documentation>Codice ASL di appartenenza del soggetto indicato in cfUtente.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="codiceStruttura" type="dt:codStrutturaType">
+        <xs:annotation>
+          <xs:documentation>Codice della struttura di appartenenza del soggetto indicato in userId. Nel caso in cui il codice struttura non sia presente è necessario valorizzare con un a stringa di lunghezza 0.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="1" name="token" type="dt:tokenType">
+        <xs:annotation>
+          <xs:documentation>ID sessione ricevuto tramite l'operazione "create".</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="opzioni" type="dt:opzioni">
+        <xs:annotation>
+          <xs:documentation>Elenco campi opzionali.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CheckTokenRes">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="codEsito" type="dt:esitoType">
+        <xs:annotation>
+          <xs:documentation>Esito della transazione: 0000=Esito positivo e restituzione dati, 0001=Esito positivo (con comunicazioni/warning) e restituzione dati, 9999=errore di sistema.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="errori" type="dt:errori"/>
+      <xs:element minOccurs="0" name="comunicazioni" type="dt:comunicazioni"/>
+      <xs:element minOccurs="1" maxOccurs="1" name="infoToken" type="dt:infoToken"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>]]></con:content><con:type>http://www.w3.org/2001/XMLSchema</con:type></con:part><con:part><con:url>file:\C:\temp\a2f-kit-sviluppo\Kit%20per%20lo%20sviluppo%20-%20A2F%20Ricetta%20Bianca%20Elettronica%20non%20a%20carico%20SSN%20-%20ver.%2020231127\wsdl\sts-a2f-service-data-type.xsd</con:url><con:content><![CDATA[<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">
+  <xs:annotation>
+    <xs:documentation>Versione 0.0.4</xs:documentation>
+  </xs:annotation>
+  <!--### SIMPLE TYPE  ###################################-->
+  <xs:simpleType name="stringTypeMax256">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="0"/>
+      <xs:maxLength value="256"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="codRegioneType">
+    <xs:restriction base="stringType3"/>
+  </xs:simpleType>
+  <xs:simpleType name="codAslType">
+    <xs:restriction base="stringType3"/>
+  </xs:simpleType>
+  <xs:simpleType name="stringType3">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="3"/>
+      <xs:maxLength value="3"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="codStrutturaType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="0"/>
+      <xs:maxLength value="10"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="cfType">
+    <xs:restriction base="stringTypeCf"/>
+  </xs:simpleType>
+  <xs:simpleType name="stringTypeCf">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="16"/>
+      <xs:maxLength value="16"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="esitoType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{4}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="tokenType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="36"/>
+      <xs:maxLength value="36"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="stringTypeMax1">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!--####################################################-->
+  <!--### COMPLEX TYPE  ###################################-->
+  <xs:complexType name="errori">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="errore" type="errore"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="errore">
+    <xs:sequence>
+      <xs:element name="tipoErrore" minOccurs="0" type="stringTypeMax1"/>
+      <xs:element name="codEsito" type="esitoType"/>
+      <xs:element name="descrEsito" minOccurs="0" type="stringTypeMax256"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="comunicazioni">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="comunicazione" type="comunicazione"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="comunicazione">
+    <xs:sequence>
+      <xs:element name="codice" type="stringTypeMax256">
+        <xs:annotation>
+          <xs:documentation>Codice della comunicazione di servizio.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="messaggio" type="stringTypeMax256">
+        <xs:annotation>
+          <xs:documentation>Testo comunicazione di servizio.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="opzioni">
+    <xs:sequence>
+      <xs:element maxOccurs="10" name="opzione" type="opzione"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="opzione">
+    <xs:sequence>
+      <xs:element minOccurs="1" name="chiave" type="stringTypeMax256">
+        <xs:annotation>
+          <xs:documentation>Chiave del campo</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" name="valore" type="stringTypeMax256">
+        <xs:annotation>
+          <xs:documentation>Valore del campo</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="infoToken">
+    <xs:sequence>
+      <xs:element minOccurs="1" name="dataInizioValidita" type="xs:dateTime">
+        <xs:annotation>
+          <xs:documentation>Data inizio validità</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="1" name="dataFineValidita" type="xs:dateTime">
+        <xs:annotation>
+          <xs:documentation>Data fine validità</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!--####################################################-->
+</xs:schema>]]></con:content><con:type>http://www.w3.org/2001/XMLSchema</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:9080/sts-a2f-auth-ws/soap/v1/authentication-service</con:endpoint></con:endpoints><con:operation id="9411a2e6-bfa8-4d92-be5a-ee712a70e6ad" isOneWay="false" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/create" name="create" bindingOperationName="create" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="aab45576-6f30-402e-87d1-6b72dce0e63d" name="Req MEDICO"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://ricettabiancaservicetest.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:aut="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:dat="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <aut:CreateAuthReq>\r
+         <aut:pinCode>LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=</aut:pinCode>
+         <aut:cfUtente>PROVAX00X00X000Y</aut:cfUtente>
+         <aut:codRegione>120</aut:codRegione>
+         <aut:codAslAo>201</aut:codAslAo>
+         <aut:codiceStruttura></aut:codiceStruttura>
+         <!--Optional:
+         <aut:opzioni>\r
+            <dat:opzione>\r
+               <dat:chiave>?</dat:chiave>\r
+               <dat:valore>?</dat:valore>\r
+            </dat:opzione>\r
+         </aut:opzioni>\r -->
+      </aut:CreateAuthReq>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:username>PROVAX00X00X000Y</con:username><con:password>Salve123</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/create"/><con:wsrmConfig version="1.2"/></con:call><con:call id="f1d062af-a0d6-45cb-8aa6-ce0222652839" name="Req FARMACIA"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://ricettabiancaservicetest.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:aut="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:dat="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <aut:CreateAuthReq>\r
+         <aut:pinCode>V32MgmSgqebDBi+KCAwlDHCq4QsmCjK/OBtkRyMjbzoFQpFBKmS16dY7r98k4LaC3UT7h7oL0dKZbLsuOmFj/F8+oC0DRcBQdTZPGsbkb+vFrY1G0Y9NGDxJMrYMeEt2yeG9UuzUt7ouLW9A+iw91HyxOoZtZ73J+HK33bKu6cc=</aut:pinCode>
+         <aut:cfUtente>BBTMRZ54L19H501T</aut:cfUtente>
+         <aut:codRegione>130</aut:codRegione>
+         <aut:codAslAo>204</aut:codAslAo>
+         <aut:codiceStruttura>78909</aut:codiceStruttura>
+         <!--Optional:
+         <aut:opzioni>\r
+            <dat:opzione>\r
+               <dat:chiave>?</dat:chiave>\r
+               <dat:valore>?</dat:valore>\r
+            </dat:opzione>\r
+         </aut:opzioni>\r -->
+      </aut:CreateAuthReq>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:username>UV386Q5B</con:username><con:password>SALVE</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/create"/><con:wsrmConfig version="1.2"/></con:call></con:operation><con:operation id="ae6fc668-74eb-4177-9bec-dcb41dd6a0c3" isOneWay="false" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/revoke" name="revoke" bindingOperationName="revoke" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="d1772e1f-b16c-40fe-8c56-a72ca368e869" name="Req MEDICO"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://ricettabiancaservicetest.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:aut="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:dat="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <aut:RevokeAuthReq>\r
+         <aut:pinCode>LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=</aut:pinCode>
+         <aut:cfUtente>PROVAX00X00X000Y</aut:cfUtente>
+         <aut:codRegione>120</aut:codRegione>
+         <aut:codAslAo>201</aut:codAslAo>
+         <aut:codiceStruttura></aut:codiceStruttura>
+         <aut:token>?</aut:token>\r
+         <!--Optional:
+         <aut:opzioni>\r
+            <dat:opzione>\r
+               <dat:chiave>?</dat:chiave>\r
+               <dat:valore>?</dat:valore>\r
+            </dat:opzione>\r
+         </aut:opzioni>\r-->
+      </aut:RevokeAuthReq>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:username>PROVAX00X00X000Y</con:username><con:password>Salve123</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/revoke"/><con:wsrmConfig version="1.2"/></con:call><con:call id="1f176b3c-6a61-41d2-9cc8-4eaa32d5e04a" name="Req FARMACIA"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://ricettabiancaservicetest.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:aut="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:dat="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <aut:RevokeAuthReq>\r
+         <aut:pinCode>V32MgmSgqebDBi+KCAwlDHCq4QsmCjK/OBtkRyMjbzoFQpFBKmS16dY7r98k4LaC3UT7h7oL0dKZbLsuOmFj/F8+oC0DRcBQdTZPGsbkb+vFrY1G0Y9NGDxJMrYMeEt2yeG9UuzUt7ouLW9A+iw91HyxOoZtZ73J+HK33bKu6cc=</aut:pinCode>
+         <aut:cfUtente>BBTMRZ54L19H501T</aut:cfUtente>
+         <aut:codRegione>130</aut:codRegione>
+         <aut:codAslAo>204</aut:codAslAo>
+         <aut:codiceStruttura>78909</aut:codiceStruttura>
+         <aut:token>?</aut:token>\r
+         <!--Optional:
+         <aut:opzioni>\r
+            <dat:opzione>\r
+               <dat:chiave>?</dat:chiave>\r
+               <dat:valore>?</dat:valore>\r
+            </dat:opzione>\r
+         </aut:opzioni>\r -->
+      </aut:RevokeAuthReq>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/revoke"/><con:wsrmConfig version="1.2"/></con:call></con:operation><con:operation id="c9b0ad38-e7bc-4076-adac-37bf80abfb11" isOneWay="false" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/checkToken" name="checkToken" bindingOperationName="checkToken" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call id="70c7640c-3892-46f1-a3b3-74740bfddef9" name="Req MEDICO"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://ricettabiancaservicetest.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:aut="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:dat="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <aut:CheckTokenReq>\r
+         <aut:pinCode>LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=</aut:pinCode>
+         <aut:cfUtente>PROVAX00X00X000Y</aut:cfUtente>
+         <aut:codRegione>120</aut:codRegione>
+         <aut:codAslAo>201</aut:codAslAo>
+         <aut:codiceStruttura></aut:codiceStruttura>
+         <aut:token>?</aut:token>\r
+         <!--Optional:
+         <aut:opzioni>\r
+            <dat:opzione>\r
+               <dat:chiave>?</dat:chiave>\r
+               <dat:valore>?</dat:valore>\r
+            </dat:opzione>\r
+         </aut:opzioni>\r -->
+      </aut:CheckTokenReq>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:username>PROVAX00X00X000Y</con:username><con:password>Salve123</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/checkToken"/><con:wsrmConfig version="1.2"/></con:call><con:call id="cc90ece3-641a-44c3-aaa7-d81584676034" name="Req FARMACIA"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>https://ricettabiancaservicetest.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:aut="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" xmlns:dat="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">\r
+   <soapenv:Header/>\r
+   <soapenv:Body>\r
+      <aut:CheckTokenReq>\r
+         <aut:pinCode>V32MgmSgqebDBi+KCAwlDHCq4QsmCjK/OBtkRyMjbzoFQpFBKmS16dY7r98k4LaC3UT7h7oL0dKZbLsuOmFj/F8+oC0DRcBQdTZPGsbkb+vFrY1G0Y9NGDxJMrYMeEt2yeG9UuzUt7ouLW9A+iw91HyxOoZtZ73J+HK33bKu6cc=</aut:pinCode>
+         <aut:cfUtente>BBTMRZ54L19H501T</aut:cfUtente>
+         <aut:codRegione>130</aut:codRegione>
+         <aut:codAslAo>204</aut:codAslAo>
+         <aut:codiceStruttura>78909</aut:codiceStruttura>
+         <aut:token>?</aut:token>\r
+         <!--Optional:
+         <aut:opzioni>\r
+            <dat:opzione>\r
+               <dat:chiave>?</dat:chiave>\r
+               <dat:valore>?</dat:valore>\r
+            </dat:opzione>\r
+         </aut:opzioni>\r -->
+      </aut:CheckTokenReq>\r
+   </soapenv:Body>\r
+</soapenv:Envelope>]]></con:request><con:credentials><con:username>UV386Q5B</con:username><con:password>SALVE</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://wsdl.auth.a2f.sts.sanita.finanze.it/checkToken"/><con:wsrmConfig version="1.2"/></con:call></con:operation></con:interface><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>

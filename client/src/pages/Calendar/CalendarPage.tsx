@@ -94,6 +94,11 @@ const CalendarPage: React.FC = () => {
   // Stati per il tipo di azione che ha causato il warning
   const [calendarWarningAction, setCalendarWarningAction] = useState<'sync' | 'clear' | null>(null);
 
+  // Stato per la modale di ri-autenticazione Google
+  const [showReauthModal, setShowReauthModal] = useState(false);
+  const [reauthMessage, setReauthMessage] = useState('');
+  const [reauthLoading, setReauthLoading] = useState(false);
+
   // Funzione per caricare i calendari
   const fetchCalendars = async () => {
     setIsLoadingCalendars(true);
@@ -103,10 +108,15 @@ const CalendarPage: React.FC = () => {
       if (data.length === 0) {
         toast.info('Nessun calendario trovato.');
       }
-    } catch (err) {
+    } catch (err: any) {
       const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
-      console.error('Errore caricamento calendari', err);
-      toast.error(`Errore caricamento calendari: ${errorMessage}`);
+      if (err?.response?.data?.error_code === 'GLOBAL_GOOGLE_AUTH_REQUIRED') {
+        setReauthMessage(err.response.data.message);
+        setShowReauthModal(true);
+      } else {
+        console.error('Errore caricamento calendari', err);
+        toast.error(`Errore caricamento calendari: ${errorMessage}`);
+      }
     } finally {
       setIsLoadingCalendars(false);
     }
@@ -605,6 +615,46 @@ const CalendarPage: React.FC = () => {
             </CButton>
           </CModalFooter>
         )}
+      </CModal>
+
+      {/* Modal di ri-autenticazione Google */}
+      <CModal
+        visible={showReauthModal}
+        onClose={() => setShowReauthModal(false)}
+      >
+        <CModalHeader>
+          <h5>Riautorizza Google Calendar</h5>
+        </CModalHeader>
+        <CModalBody>
+          <p>{reauthMessage || 'Le credenziali di accesso a Google Calendar sono scadute o corrotte.'}</p>
+          <p className="text-danger">
+            Clicca su <strong>Riautorizza</strong> per eseguire una nuova autorizzazione. Si aprirà la pagina Google per completare l'operazione.<br/>
+            Dopo aver autorizzato, torna qui e aggiorna la pagina.
+          </p>
+        </CModalBody>
+        <CModalFooter>
+          <CButton
+            color="primary"
+            disabled={reauthLoading}
+            onClick={async () => {
+              setReauthLoading(true);
+              try {
+                const res = await apiClient.get('/api/calendar/reauth-url');
+                window.open(res.data.auth_url, '_blank');
+                toast.success('Procedura di autorizzazione avviata. Completa la procedura nella finestra aperta, poi aggiorna la pagina.');
+              } catch (e) {
+                toast.error('Errore durante la richiesta di riautorizzazione.');
+              } finally {
+                setReauthLoading(false);
+              }
+            }}
+          >
+            Riautorizza
+          </CButton>
+          <CButton color="secondary" onClick={() => setShowReauthModal(false)}>
+            Chiudi
+          </CButton>
+        </CModalFooter>
       </CModal>
     </div>
   );

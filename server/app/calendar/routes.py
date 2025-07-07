@@ -1,5 +1,8 @@
 # server/app/calendar/routes.py
 
+import os
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 from flask import Blueprint, request, jsonify, url_for
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
@@ -17,6 +20,9 @@ import uuid
 import time
 import pandas as pd
 from server.app.config.constants import COLONNE
+from google_auth_oauthlib.flow import Flow
+from flask import redirect
+from .utils import TOKEN_FILE, SCOPES
 
 calendar_bp = Blueprint("calendar", __name__)
 logger = logging.getLogger(__name__)
@@ -38,7 +44,7 @@ def list_calendars():
         return jsonify({
             "message": "Credenziali Google per lo studio non trovate. IMPORTANTE: assicurarsi di essere loggati nell'account Google corretto (studiodrnicoladimartino@gmail.com) prima di procedere con l'autorizzazione.",
             "error_code": "GLOBAL_GOOGLE_AUTH_REQUIRED",
-            "authorization_url": url_for('auth_google.login', _external=True)
+            "authorization_url": url_for('auth.login', _external=True)
         }), 401
     except Exception as e:
         logger.error(f"Errore nel recupero calendari: {e}")
@@ -259,3 +265,32 @@ def get_appointments_for_year():
             count = df_anno[df_anno[col_data].dt.month == month].shape[0]
             result[str(anno)].append({'month': month, 'count': int(count)})
     return jsonify({'success': True, 'data': result})
+
+@calendar_bp.route('/reauth-url', methods=['GET'])
+@jwt_required()
+def get_google_oauth_url():
+    if os.path.exists(TOKEN_FILE):
+        os.remove(TOKEN_FILE)
+    flow = Flow.from_client_secrets_file(
+        'server/credentials.json',
+        scopes=SCOPES,
+        redirect_uri='http://localhost:5000/api/calendar/oauth2callback'
+    )
+    auth_url, _ = flow.authorization_url(
+        access_type='offline',
+        prompt='select_account consent'
+    )
+    return jsonify({"auth_url": auth_url})
+
+@calendar_bp.route('/oauth2callback')
+def oauth2callback():
+    flow = Flow.from_client_secrets_file(
+        'server/credentials.json',
+        scopes=SCOPES,
+        redirect_uri='http://localhost:5000/api/calendar/oauth2callback'
+    )
+    flow.fetch_token(authorization_response=request.url)
+    creds = flow.credentials
+    with open(TOKEN_FILE, 'w') as token:
+        token.write(creds.to_json())
+    return "Autorizzazione Google completata! Puoi chiudere questa finestra e tornare all'applicazione."
