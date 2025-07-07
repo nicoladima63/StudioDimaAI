@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified"
+	targetNamespace="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" 
+	xmlns="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">
+	
+	<xs:annotation>
+		<xs:documentation>Versione 0.0.4</xs:documentation>
+	</xs:annotation>
+	
+	<!--  ### SIMPLE TYPE  ###################################-->
+	<xs:simpleType name="stringTypeMax256">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="256"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="codRegioneType">
+		<xs:restriction base="stringType3"/>
+	</xs:simpleType>
+	<xs:simpleType name="codAslType">
+		<xs:restriction base="stringType3"/>
+	</xs:simpleType>
+	<xs:simpleType name="stringType3">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="3"/>
+			<xs:maxLength value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="codStrutturaType">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="10"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="cfType">
+		<xs:restriction base="stringTypeCf"/>
+	</xs:simpleType>
+	<xs:simpleType name="stringTypeCf">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="16"/>
+			<xs:maxLength value="16"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="esitoType">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[0-9]{4}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="tokenType">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="36"/>
+			<xs:maxLength value="36"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="stringTypeMax1">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<!--  ####################################################-->
+	
+	
+	<!--  ### COMPLEX TYPE  ###################################-->
+	<xs:complexType name="errori">
+		<xs:sequence>
+			<xs:element maxOccurs="unbounded" name="errore" type="errore"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="errore">
+		<xs:sequence>
+			<xs:element name="tipoErrore" minOccurs="0" type="stringTypeMax1"/>
+			<xs:element name="codEsito" type="esitoType"/>
+			<xs:element name="descrEsito" minOccurs="0" type="stringTypeMax256"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="comunicazioni">
+		<xs:sequence>
+			<xs:element maxOccurs="unbounded" name="comunicazione" type="comunicazione"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="comunicazione">
+		<xs:sequence>
+			<xs:element name="codice" type="stringTypeMax256">
+				<xs:annotation>
+					<xs:documentation>Codice della comunicazione di servizio.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="messaggio" type="stringTypeMax256">
+				<xs:annotation>
+					<xs:documentation>Testo comunicazione di servizio.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="opzioni">
+		<xs:sequence>
+			<xs:element maxOccurs="10" name="opzione" type="opzione"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="opzione">
+		<xs:sequence>
+			<xs:element minOccurs="1" name="chiave" type="stringTypeMax256">
+				<xs:annotation>
+					<xs:documentation>Chiave del campo</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="1" name="valore" type="stringTypeMax256">
+				<xs:annotation>
+					<xs:documentation>Valore del campo</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="infoToken">
+		<xs:sequence>
+			<xs:element minOccurs="1" name="dataInizioValidita" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Data inizio validità</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="1" name="dataFineValidita" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Data fine validità</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<!--  ####################################################-->
+	
+</xs:schema>
