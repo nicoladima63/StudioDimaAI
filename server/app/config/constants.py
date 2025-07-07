@@ -39,6 +39,7 @@ DBF_TABLES = {
     "pazienti":   {"file": "PAZIENTI.DBF",   "categoria": "DATI"},
     "fatture":    {"file": "FATTURE.DBF",    "categoria": "DATI"},
     "richiami":   {"file": "PAZIENTI.DBF",   "categoria": "DATI"},
+    "acconti":    {"file": "ACCONTI.DBF",    "categoria":"DATI"},
     # AGGIUNGERE QUI EVENTUALI TABELLE MANCANTI
 }
 
@@ -52,6 +53,8 @@ def get_dbf_path(nome_logico):
         raise ValueError(f"Tabella DBF logica '{nome_logico}' non trovata nel mapping. Aggiorna DBF_TABLES in constants.py.")
     info = DBF_TABLES[nome_logico]
     return os.path.join(base, info["categoria"], info["file"])
+
+
 
 # --- Colonne DBF ---
 COLONNE = {
@@ -92,6 +95,23 @@ COLONNE = {
         'data1': 'DB_PAMODA1',
         'data2': 'DB_PAMODA2',
         'ultima_visita': 'DB_PAULTVI'
+    },
+    'fatture' : {
+        'fatturaid':'DB_CODE',
+        'fatturapazienteid':'DB_FAPACOD',
+        'fatturanumero':'DB_FANUMER',
+        'fatturadata':'DB_FADATA',
+        'fatturatipopagamento':'DB_FABANCA',
+        'fatturamodopagamento':'DB_FAPAGAM',
+        'fatturaimporto':'DB_FAIMPON',
+        'fatturabollo':'DB_FAIVA',
+        'fatturatitolopaziente':'DB_FASUFFI',
+        'fatturanomepaziente':'DB_FANOME',
+        'fatturacodicefiscale':'DB_FACODFI',
+        'fatturaindirizzo':'DB_FAINDIR',
+        'fatturacitta':'DB_FACITTA',
+        'fatturacap':'DB_FACAP',
+        'fatturaprovincia':'DB_FAPROVI'
     }
 }
 

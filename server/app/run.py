@@ -9,6 +9,8 @@ from typing import Optional
 from server.app.calendar.routes import calendar_bp
 from server.app.recalls.recall_db_controller import recall_db_bp
 from server.app.routes.prescrizione import prescrizione_bp
+from server.app.incassi.controller import incassi_bp
+
 
 from dotenv import load_dotenv
 
@@ -37,6 +39,7 @@ def register_blueprints(app: Flask) -> None:
     from .routes.fatture import fatture_bp
     from .routes.appuntamenti import appuntamenti_bp
     from .routes.prescrizione import prescrizione_bp
+
     
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -49,7 +52,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(fatture_bp, url_prefix="/api/fatture")
     app.register_blueprint(appuntamenti_bp)
     app.register_blueprint(prescrizione_bp)
-
+    app.register_blueprint(incassi_bp)
     
     # Aggiungi qui altri blueprint
 
