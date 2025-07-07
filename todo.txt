@@ -66,3 +66,13 @@ DB_PAEMAIL    *      email del paziente
 
 DB_APDATAI data inserimento appuntamento--> creato il
 DB_DATATIM data inserimento modificato il
+
+
+PS C:\Users\gengi\Desktop\StudioDimaAI>      python server/app/rentri/estrai_cert_rentri.py
+Inserisci la password del file .p12: 
+C:\Users\gengi\Desktop\StudioDimaAI\server\app\rentri\estrai_cert_rentri.py:15: UserWarning: PKCS#12 bundle could not be parsed as DER, falling back to parsing as BER. Please file an issue at https://github.com/pyca/cryptography/issues explaining how your PKCS#12 bundle was created. In the future, this may become an exception.
+  private_key, cert, additional_certs = pkcs12.load_key_and_certificates(
+
+👉 Tipo chiave privata: <class 'cryptography.hazmat.bindings._rust.openssl.ec.ECPrivateKey'>       
+👉 Nome classe: ECPrivateKey
+❌ La chiave è EC (ellittica) → NON compatibile con RS256 (RENTRI).
