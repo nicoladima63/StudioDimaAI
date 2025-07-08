@@ -6,6 +6,7 @@ import { CButton, CRow, CCol, CSpinner, CAlert, CCard, CCardBody, CCardHeader } 
 import { getPazientiList, getPazientiStats } from '@/api/apiClient';
 
 const PazientiPage: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
   const [pazienti, setPazienti] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -25,6 +26,11 @@ const PazientiPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Filtro in base a nome o cognome (case-insensitive)
+  const pazientiFiltrati = pazienti.filter(p =>
+    p.DB_PANOME.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Card title="Gestione Pazienti">
       <CCard className="mb-4">
@@ -36,10 +42,17 @@ const PazientiPage: React.FC = () => {
               <CButton color="primary" disabled>Esporta (coming soon)</CButton>
             </CCol>
           </CRow>
+          <input
+            type="text"
+            placeholder="Cerca per nome o cognome..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{ marginBottom: 16, padding: 8, width: 300 }}
+          />
           {loading ? (
             <div className="text-center py-5"><CSpinner color="primary" /></div>
           ) : (
-            <PazientiTable pazienti={pazienti} />
+            <PazientiTable pazienti={pazientiFiltrati} />
           )}
         </CCardBody>
       </CCard>
