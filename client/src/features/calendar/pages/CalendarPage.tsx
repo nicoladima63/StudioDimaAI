@@ -22,7 +22,7 @@ import {
   clearCalendarEvents
 } from '@/api/apiClient';
 import apiClient from '@/api/apiClient';
-import type { Calendar } from '../../types';
+import type { Calendar } from '@/lib/apiTypes';
 
 const MONTHS = [
   'Gennaio',

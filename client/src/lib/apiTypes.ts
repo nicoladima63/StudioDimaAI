@@ -182,3 +182,8 @@ export type RichiamiTestResponse = {
   message: string;
 };
 
+export interface Calendar {
+  id: string;
+  name: string;
+}
+

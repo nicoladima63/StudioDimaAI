@@ -8,7 +8,7 @@ import ApiTest from '@/test/ApiTest';
 import NotFound from '@/pages/NotFound';
 import LoginPage from '@/features/auth/pages/LoginPage';
 import RegisterPage from '@/features/auth/pages/RegisterPage';
-import Calendar from '@/pages/Calendar/CalendarPage';
+import Calendar from '@/features/calendar/pages/CalendarPage';
 import RecallsPage from '@/pages/recalls/RecallsPage';
 import PazientiPage from '@/features/pazienti/pages/PazientiPage';
 import SettingsPage from '@/features/settings/pages/SettingsPage';
