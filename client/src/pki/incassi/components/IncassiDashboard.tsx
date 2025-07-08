@@ -4,7 +4,7 @@ import IncassiAggregati from './IncassiAggregati';
 import IncassiTable from './IncassiTable';
 import { getIncassiByPeriodo } from '../services/incassi.service';
 import { CAlert, CSpinner, CRow, CCol } from '@coreui/react';
-import DashboardCard from '@/components/DashboardCard';
+import Card from '@/components/DashboardCard';
 
 type Incasso = {
   data: string;
@@ -41,7 +41,7 @@ const IncassiDashboard: React.FC = () => {
   };
 
   return (
-    <DashboardCard title="Gestione Incassi">
+    <Card title="Gestione Incassi">
       <CRow>
         <CCol md={12} lg={6} className="mb-3">
           <IncassiPeriodoForm onSubmit={handleSubmit} />
@@ -62,7 +62,7 @@ const IncassiDashboard: React.FC = () => {
           {dati && <IncassiTable incassi={dati.incassi} />}
         </CCol>
       </CRow>
-    </DashboardCard>
+    </Card>
   );
 };
 

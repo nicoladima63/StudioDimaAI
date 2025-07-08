@@ -53,7 +53,7 @@ const Sidebar: React.FC = () => {
           </NavLink>
         </CNavItem>
         <CNavItem>
-          <NavLink to="/settings" className="nav-link">
+          <NavLink to="/rentri" className="nav-link">
             <CIcon icon={cilList} className="me-2" />RENTRI
           </NavLink>
         </CNavItem>
