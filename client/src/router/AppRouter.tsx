@@ -14,6 +14,7 @@ import PazientiPage from '@/features/pazienti/pages/PazientiPage';
 import SettingsPage from '@/features/settings/pages/SettingsPage';
 import { FatturePage } from '@/pages';
 import RicettaElettronicaPage from '@/pages/RicettaElettronica/RicettaElettronicaPage';
+import HomePage from '@/pages/HomePage';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -27,6 +28,7 @@ const AppRouter: React.FC = () => {
     <BrowserRouter>
       <Routes>
         {/* Route pubbliche */}
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
@@ -38,7 +40,7 @@ const AppRouter: React.FC = () => {
             </PrivateRoute>
           }
         >
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/recalls" element={<RecallsPage />} />
           <Route path="/pazienti" element={<PazientiPage />} />
