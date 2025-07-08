@@ -1,0 +1,1 @@
+export { default as RentriPage } from './pages/RentriPage'; 

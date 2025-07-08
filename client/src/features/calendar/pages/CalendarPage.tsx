@@ -14,13 +14,10 @@ import {
   CModalFooter,
   CAlert
 } from '@coreui/react';
-import { format } from 'date-fns';
+import Card from '@/components/ui/Card';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {
-  getCalendars,
-  clearCalendarEvents
-} from '@/api/apiClient';
+import {  getCalendars,  clearCalendarEvents} from '@/api/apiClient';
 import apiClient from '@/api/apiClient';
 import type { Calendar } from '@/lib/apiTypes';
 
@@ -308,13 +305,9 @@ const CalendarPage: React.FC = () => {
   const selectedCalendarName = calendars.find(cal => cal.id === selectedCalendar)?.name || selectedCalendar;
 
   return (
-    <div className="calendar-page">
-      <ToastContainer />
-      
+    <Card title="Gestione Agenda su Calendar">
+      <ToastContainer />      
       <CCard>
-        <CCardHeader>
-          <h4>Gestione Calendario</h4>
-        </CCardHeader>
         <CCardBody>
           <CRow>
             <CCol md={6}>
@@ -643,7 +636,7 @@ const CalendarPage: React.FC = () => {
           </CButton>
         </CModalFooter>
       </CModal>
-    </div>
+    </Card>
   );
 };
 

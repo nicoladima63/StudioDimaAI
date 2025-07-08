@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Card from '@/components/ui/Card';
 import PazientiTable from '../components/PazientiTable';
 import PazientiStats from '../components/PazientiStats';
 import { CButton, CRow, CCol, CSpinner, CAlert, CCard, CCardBody, CCardHeader } from '@coreui/react';
@@ -25,11 +26,8 @@ const PazientiPage: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <Card title="Gestione Pazienti">
       <CCard className="mb-4">
-        <CCardHeader>
-          <h4>Gestione Pazienti</h4>
-        </CCardHeader>
         <CCardBody>
           {error && <CAlert color="danger">{error}</CAlert>}
           {stats && <PazientiStats stats={stats} />}
@@ -45,7 +43,7 @@ const PazientiPage: React.FC = () => {
           )}
         </CCardBody>
       </CCard>
-    </div>
+    </Card>
   );
 };
 

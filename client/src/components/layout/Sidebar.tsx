@@ -2,7 +2,7 @@
 import React from 'react'
 import { CSidebar, CSidebarNav, CNavItem, CNavTitle } from '@coreui/react'
 import { NavLink, Link } from 'react-router-dom'
-import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard, cilList, cilEuro } from '@coreui/icons'
+import { cilSpeedometer, cilCalendar, cilBell, cilUser,  cilSettings, cilCreditCard, cilList, cilEuro } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import "@/components/common/css/custom-css.css";
 

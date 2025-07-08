@@ -1,4 +1,5 @@
 import React from 'react';
+import Card from '@/components/ui/Card';
 import RicettaElettronica from '../components/RicettaElettronica';
 
 // Placeholder: dati fittizi per pazienti e medico
@@ -21,7 +22,11 @@ const datiMedico = {
 };
 
 const RicettaElettronicaPage: React.FC = () => {
-  return <RicettaElettronica pazienti={pazienti} datiMedico={datiMedico} />;
+  return (
+    <Card title="Ricetta Elettronica ">
+      <RicettaElettronica pazienti={pazienti} datiMedico={datiMedico} />;
+    </Card>
+  )
 };
 
 export default RicettaElettronicaPage; 

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Card from '@/components/ui/Card';
 import RecallsStatistics from '../components/RecallsStatistics';
 import RecallsTable from '../components/RecallsTable';
 import { recallsService } from '@/api/services/recalls.service';
@@ -23,15 +24,14 @@ const RecallsPage: React.FC = () => {
     });
   }, []);
 
-  return (
-    <div className="recalls-page">
-      <h4>Gestione Richiami</h4>
-      {statistics && (
-        <RecallsStatistics statistics={statistics} loading={loadingStats} />
-      )}
-      <RecallsTable richiami={richiami} loading={loading} />
-    </div>
-  );
+    return (
+      <Card title="Gestione Richiami">
+        {statistics && (
+          <RecallsStatistics statistics={statistics} loading={loadingStats} />
+        )}
+        <RecallsTable richiami={richiami} loading={loading} />
+      </Card>
+    )
 };
 
 export default RecallsPage; 
