@@ -26,21 +26,6 @@ const Sidebar: React.FC = () => {
             <CIcon icon={cilUser} className="me-2" />Pazienti
           </NavLink>
         </CNavItem>
-        <CNavItem>
-          <NavLink to="/studio" className="nav-link">
-            <CIcon icon={cilHome} className="me-2" />Studio
-          </NavLink>
-        </CNavItem>
-        <CNavItem>
-          <NavLink to="/fatture" className="nav-link">
-            <CIcon icon={cilCreditCard} className="me-2" />Fatture
-          </NavLink>
-        </CNavItem>
-        <CNavItem>
-          <Link to="/incassi" className="nav-link">
-            <CIcon icon={cilEuro} className="me-2" />Incassi
-          </Link>
-        </CNavItem>
         <CNavTitle>Automazioni</CNavTitle>
         <CNavItem>
           <NavLink to="/calendar" className="nav-link">
@@ -57,6 +42,18 @@ const Sidebar: React.FC = () => {
             <CIcon icon={cilList} className="me-2" />RENTRI
           </NavLink>
         </CNavItem>
+        <CNavTitle>Studio</CNavTitle>
+        <CNavItem>
+          <Link to="/incassi" className="nav-link">
+            <CIcon icon={cilEuro} className="me-2" />Incassi
+          </Link>
+        </CNavItem>
+        <CNavItem>
+          <NavLink to="/fatture" className="nav-link">
+            <CIcon icon={cilCreditCard} className="me-2" />Fatture
+          </NavLink>
+        </CNavItem>
+
         <CNavTitle>Impostazioni</CNavTitle>
         <CNavItem>
           <NavLink to="/settings" className="nav-link">

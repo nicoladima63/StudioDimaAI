@@ -1,12 +1,12 @@
 import React from 'react';
-import DashboardCard from '@/components/DashboardCard';
+import Card from '@/components/ui/Card';
 import IncassiDashboard from './components/IncassiDashboard';
 
 const IncassiPage: React.FC = () => {
   return (
-    <DashboardCard title="Gestione Incassi">
+    <Card title="Gestione Incassi">
       <IncassiDashboard />
-    </DashboardCard>
+    </Card>
   );
 };
 

@@ -15,6 +15,7 @@ import SettingsPage from '@/features/settings/pages/SettingsPage';
 import FatturePage from '@/features/fatture/pages/FatturePage';
 import RicettaElettronicaPage from '@/features/ricetta-elettronica/pages/RicettaElettronicaPage';
 import HomePage from '@/pages/HomePage';
+import IncassiPage from '@/features/pki/incassi/IncassiPage';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {

@@ -1,4 +1,4 @@
-import apiClient from '../../../api/apiClient';
+import apiClient from '../../../../api/apiClient';
 
 export const getIncassiByDate = (anno: string, mese?: string) => {
   const params: any = { anno };
