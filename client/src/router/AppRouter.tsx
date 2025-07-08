@@ -9,7 +9,7 @@ import NotFound from '@/pages/NotFound';
 import LoginPage from '@/features/auth/pages/LoginPage';
 import RegisterPage from '@/features/auth/pages/RegisterPage';
 import Calendar from '@/features/calendar/pages/CalendarPage';
-import RecallsPage from '@/pages/recalls/RecallsPage';
+import RecallsPage from '@/features/recalls/pages/RecallsPage';
 import PazientiPage from '@/features/pazienti/pages/PazientiPage';
 import SettingsPage from '@/features/settings/pages/SettingsPage';
 import FatturePage from '@/features/fatture/pages/FatturePage';
