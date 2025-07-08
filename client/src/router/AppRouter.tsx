@@ -13,7 +13,7 @@ import RecallsPage from '@/features/recalls/pages/RecallsPage';
 import PazientiPage from '@/features/pazienti/pages/PazientiPage';
 import SettingsPage from '@/features/settings/pages/SettingsPage';
 import FatturePage from '@/features/fatture/pages/FatturePage';
-import RicettaElettronicaPage from '@/pages/RicettaElettronica/RicettaElettronicaPage';
+import RicettaElettronicaPage from '@/features/ricetta-elettronica/pages/RicettaElettronicaPage';
 import HomePage from '@/pages/HomePage';
 
 // Componente per le route private
