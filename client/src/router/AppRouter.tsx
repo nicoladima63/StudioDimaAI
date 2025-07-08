@@ -12,7 +12,7 @@ import Calendar from '@/features/calendar/pages/CalendarPage';
 import RecallsPage from '@/pages/recalls/RecallsPage';
 import PazientiPage from '@/features/pazienti/pages/PazientiPage';
 import SettingsPage from '@/features/settings/pages/SettingsPage';
-import { FatturePage } from '@/pages';
+import FatturePage from '@/features/fatture/pages/FatturePage';
 import RicettaElettronicaPage from '@/pages/RicettaElettronica/RicettaElettronicaPage';
 import HomePage from '@/pages/HomePage';
 
