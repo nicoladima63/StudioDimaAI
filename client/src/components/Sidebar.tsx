@@ -1,8 +1,8 @@
 // src/components/Sidebar.tsx
 import React from 'react'
 import { CSidebar, CSidebarNav, CNavItem, CNavTitle } from '@coreui/react'
-import { NavLink } from 'react-router-dom'
-import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard } from '@coreui/icons'
+import { NavLink, Link } from 'react-router-dom'
+import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard, cilList, cilEuro } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import '../components/css/custom-css.css'
 
@@ -16,11 +16,6 @@ const Sidebar: React.FC = () => {
           </NavLink>
         </CNavItem>
         <CNavTitle>Pagine</CNavTitle>
-        <CNavItem>
-          <NavLink to="/calendar" className="nav-link">
-            <CIcon icon={cilCalendar} className="me-2" />Calendar
-          </NavLink>
-        </CNavItem>
         <CNavItem>
           <NavLink to="/recalls" className="nav-link">
             <CIcon icon={cilBell} className="me-2" />Richiami
@@ -37,18 +32,35 @@ const Sidebar: React.FC = () => {
           </NavLink>
         </CNavItem>
         <CNavItem>
-          <NavLink to="/settings" className="nav-link">
-            <CIcon icon={cilSettings} className="me-2" />Settings
-          </NavLink>
-        </CNavItem>
-        <CNavItem>
           <NavLink to="/fatture" className="nav-link">
             <CIcon icon={cilCreditCard} className="me-2" />Fatture
           </NavLink>
         </CNavItem>
         <CNavItem>
+          <Link to="/incassi" className="nav-link">
+            <CIcon icon={cilEuro} className="me-2" />Incassi
+          </Link>
+        </CNavItem>
+        <CNavTitle>Automazioni</CNavTitle>
+        <CNavItem>
+          <NavLink to="/calendar" className="nav-link">
+            <CIcon icon={cilCalendar} className="me-2" />Calendar
+          </NavLink>
+        </CNavItem>
+        <CNavItem>
           <NavLink to="/ricetta" className="nav-link">
-            <CIcon icon={cilCreditCard} className="me-2" />Ricetta Elettronica
+            <CIcon icon={cilList} className="me-2" />NRE
+          </NavLink>
+        </CNavItem>
+        <CNavItem>
+          <NavLink to="/settings" className="nav-link">
+            <CIcon icon={cilList} className="me-2" />RENTRI
+          </NavLink>
+        </CNavItem>
+        <CNavTitle>Impostazioni</CNavTitle>
+        <CNavItem>
+          <NavLink to="/settings" className="nav-link">
+            <CIcon icon={cilSettings} className="me-2" />Settings
           </NavLink>
         </CNavItem>
       </CSidebarNav>

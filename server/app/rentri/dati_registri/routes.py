@@ -1,0 +1,1 @@
+# Definizione delle rotte per il servizio dati_registri RENTRI 

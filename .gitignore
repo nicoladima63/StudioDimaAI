@@ -61,4 +61,10 @@ yarn-error.log*
 
 app.log
 
-/certs
+/certs/
+/rentri-doc/
+/ricetta-bianca-doc/
+/testRE/
+
+# Certificati RENTRI (non versionare mai)
+/server/app/rentri/certs/

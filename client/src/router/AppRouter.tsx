@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/authStore';
 import SettingsPage from '@/pages/settings/SettingsPage';
 import { FatturePage } from '@/pages';
 import RicettaElettronicaPage from '@/pages/RicettaElettronica/RicettaElettronicaPage';
+import { IncassiPage } from '@/pages';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -45,6 +46,7 @@ const AppRouter: React.FC = () => {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/fatture" element={<FatturePage />} />
           <Route path="/ricetta" element={<RicettaElettronicaPage />} />
+          <Route path="/incassi" element={<IncassiPage />} />
         </Route>
 
         {/* Route fallback */}
