@@ -7,20 +7,20 @@ const HomePage: React.FC = () => {
   const token = useAuthStore((state) => state.token);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (token) {
-        navigate('/'); // Dashboard
-      } else {
-        navigate('/login');
-      }
-    }, 5000);
-    return () => clearTimeout(timer);
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    } else {
+      navigate('/login', { replace: true });
+    }
   }, [token, navigate]);
 
   return (
     <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       <h1>Benvenuto in StudioDima</h1>
-      <p>Controllo autenticazione in corso... verrai reindirizzato tra pochi secondi.</p>
+      <p>Controllo autenticazione in corso...</p>
+      <div className="spinner-border text-primary mt-3" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </div>
     </div>
   );
 };

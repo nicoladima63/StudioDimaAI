@@ -19,7 +19,7 @@ import HomePage from '@/pages/HomePage';
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = useAuthStore((state) => state.token);
-  console.log("PrivateRoute token:", token);
+  //console.log("PrivateRoute token:", token);
   return token ? children : <Navigate to="/login" />;
 };
 

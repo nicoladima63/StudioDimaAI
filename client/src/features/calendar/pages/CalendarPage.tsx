@@ -24,20 +24,7 @@ import {
 import apiClient from '@/api/apiClient';
 import type { Calendar } from '@/lib/apiTypes';
 
-const MONTHS = [
-  'Gennaio',
-  'Febbraio',
-  'Marzo',
-  'Aprile',
-  'Maggio',
-  'Giugno',
-  'Luglio',
-  'Agosto',
-  'Settembre',
-  'Ottobre',
-  'Novembre',
-  'Dicembre',
-];
+const MONTHS = [  'Gennaio',  'Febbraio',  'Marzo',  'Aprile',  'Maggio',  'Giugno',  'Luglio',  'Agosto',  'Settembre',  'Ottobre',  'Novembre',  'Dicembre',];
 
 // Definizione tipo per gli appuntamenti
 interface Appointment {
