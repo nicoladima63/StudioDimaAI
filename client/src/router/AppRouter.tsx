@@ -1,24 +1,25 @@
 import React, { type JSX } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
-import Dashboard from '@/pages/dashboard/Dashboard';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
+
+import {Layout} from '@/components/layout';
+import Dashboard from '@/features/dashboard/pages/Dashboard';
 import ApiTest from '@/test/ApiTest';
 import NotFound from '@/pages/NotFound';
-import Login from '@/pages/auth/Login';
-import Register from '@/pages/auth/Register';
-import Calendar from '@/pages/Calendar/CalendarPage';
-import RecallsPage from '@/pages/recalls/RecallsPage';
-import { PazientiPage } from '@/pages/pazienti';
-import { useAuthStore } from '@/store/authStore';
-import SettingsPage from '@/pages/settings/SettingsPage';
-import { FatturePage } from '@/pages';
-import RicettaElettronicaPage from '@/pages/RicettaElettronica/RicettaElettronicaPage';
-import { IncassiPage } from '@/pages';
+import LoginPage from '@/features/auth/pages/LoginPage';
+import RegisterPage from '@/features/auth/pages/RegisterPage';
+import Calendar from '@/features/calendar/pages/CalendarPage';
+import RecallsPage from '@/features/recalls/pages/RecallsPage';
+import PazientiPage from '@/features/pazienti/pages/PazientiPage';
+import SettingsPage from '@/features/settings/pages/SettingsPage';
+import FatturePage from '@/features/fatture/pages/FatturePage';
+import RicettaElettronicaPage from '@/features/ricetta-elettronica/pages/RicettaElettronicaPage';
+import HomePage from '@/pages/HomePage';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = useAuthStore((state) => state.token);
-  console.log("PrivateRoute token:", token);
+  //console.log("PrivateRoute token:", token);
   return token ? children : <Navigate to="/login" />;
 };
 
@@ -27,8 +28,9 @@ const AppRouter: React.FC = () => {
     <BrowserRouter>
       <Routes>
         {/* Route pubbliche */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Route protette con Layout */}
         <Route 
@@ -38,7 +40,7 @@ const AppRouter: React.FC = () => {
             </PrivateRoute>
           }
         >
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/recalls" element={<RecallsPage />} />
           <Route path="/pazienti" element={<PazientiPage />} />
