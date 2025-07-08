@@ -1,8 +1,8 @@
 // src/components/Sidebar.tsx
 import React from 'react'
 import { CSidebar, CSidebarNav, CNavItem, CNavTitle } from '@coreui/react'
-import { NavLink } from 'react-router-dom'
-import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard,cilList } from '@coreui/icons'
+import { NavLink, Link } from 'react-router-dom'
+import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard, cilList, cilEuro } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import '../components/css/custom-css.css'
 
@@ -35,6 +35,11 @@ const Sidebar: React.FC = () => {
           <NavLink to="/fatture" className="nav-link">
             <CIcon icon={cilCreditCard} className="me-2" />Fatture
           </NavLink>
+        </CNavItem>
+        <CNavItem>
+          <Link to="/incassi" className="nav-link">
+            <CIcon icon={cilEuro} className="me-2" />Incassi
+          </Link>
         </CNavItem>
         <CNavTitle>Automazioni</CNavTitle>
         <CNavItem>
