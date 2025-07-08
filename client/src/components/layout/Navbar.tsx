@@ -1,9 +1,8 @@
 // src/components/Navbar.tsx
 import React from 'react'
 import { CNavbar, CContainer, CNavbarBrand, CButton, CBadge } from '@coreui/react'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore, useEnvStore } from '@/features/auth/store/useAuthStore';
 import { useNavigate } from 'react-router-dom'
-import { useEnvStore } from '@/store/authStore'
 
 const Navbar: React.FC = () => {
   const { token, clearToken, username } = useAuthStore()

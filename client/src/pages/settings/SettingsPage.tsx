@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardCard } from '@/components/ui';
 import { CFormSwitch, CButton, CToast, CToastBody, CToaster } from '@coreui/react';
-import { useEnvStore } from '@/store/authStore';
+import { useEnvStore } from '@/features/auth/store/useAuthStore';
 import { setApiMode, getApiMode, getAppointmentsWithModeWarning, trySwitchToProd } from '@/api/apiClient';
 
 const SettingsPage: React.FC = () => {

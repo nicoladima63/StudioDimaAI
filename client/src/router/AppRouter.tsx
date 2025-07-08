@@ -4,12 +4,12 @@ import {Layout} from '@/components/layout';
 import Dashboard from '@/pages/dashboard/Dashboard';
 import ApiTest from '@/test/ApiTest';
 import NotFound from '@/pages/NotFound';
-import Login from '@/pages/auth/Login';
-import Register from '@/pages/auth/Register';
+import LoginPage from '@/features/auth/pages/LoginPage';
+import RegisterPage from '@/features/auth/pages/RegisterPage';
 import Calendar from '@/pages/Calendar/CalendarPage';
 import RecallsPage from '@/pages/recalls/RecallsPage';
 import { PazientiPage } from '@/pages/pazienti';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import SettingsPage from '@/pages/settings/SettingsPage';
 import { FatturePage } from '@/pages';
 import RicettaElettronicaPage from '@/pages/RicettaElettronica/RicettaElettronicaPage';
@@ -26,8 +26,8 @@ const AppRouter: React.FC = () => {
     <BrowserRouter>
       <Routes>
         {/* Route pubbliche */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Route protette con Layout */}
         <Route 

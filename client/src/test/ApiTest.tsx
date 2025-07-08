@@ -1,7 +1,7 @@
 // src/test/ApiTest.tsx
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { ping } from '@/api/apiClient';
 
 const ApiTest: React.FC = () => {
