@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { getAllFatture } from '@/api/apiClient';
-import { DashboardCard, StatWidget } from '@/components/ui';
+import { Card, StatWidget } from '@/components/ui';
 import { CRow, CCol, CButton, CSpinner, CPagination, CPaginationItem, CFormSelect } from '@coreui/react';
 import { cilCreditCard, cilMoney } from '@coreui/icons';
 
@@ -49,10 +49,6 @@ const FatturePage: React.FC = () => {
   const [mese, setMese] = useState<string>('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-
-  // Statistiche rapide
-  const totaleFatture = fatture.length;
-  const totaleIncassi = fatture.reduce((sum, f) => sum + (f.importo || 0), 0);
 
   // Anni disponibili (solo anni validi)
   const anniDisponibili = useMemo(() => {
@@ -129,7 +125,7 @@ const FatturePage: React.FC = () => {
   }, [anno, mese, pageSize]);
 
   return (
-    <DashboardCard
+    <Card
       title="Fatture"
       headerAction={
         <CButton color="primary" size="sm" onClick={aggiorna} disabled={loading}>
@@ -229,7 +225,7 @@ const FatturePage: React.FC = () => {
           </div>
         </>
       )}
-    </DashboardCard>
+    </Card>
   );
 };
 

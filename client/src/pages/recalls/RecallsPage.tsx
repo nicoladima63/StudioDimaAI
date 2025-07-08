@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CAlert, CButton, CToast, CToastBody, CToaster, CRow, CCol, CFormInput, CSpinner } from '@coreui/react';
 import { cilReload, cilCloudDownload, cilCheck } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import { DashboardCard } from '@/components/ui';
+import { Card } from '@/components/ui';
 import RecallsStatistics from './RecallsStatistics';
 import RecallsTable from './RecallsTable';
 import { recallsService } from '@/api/services/recalls.service';
@@ -75,20 +75,6 @@ const RecallsPage: React.FC = () => {
     } finally {
       setLoading(false);
       setStatisticsLoading(false);
-    }
-  };
-
-  const handleSendSMS = async (richiamoId: string) => {
-    try {
-      const result = await recallsService.sendSMS(richiamoId);
-      if (result.success) {
-        showToast(result.message, 'success');
-      } else {
-        showToast('Errore nell\'invio SMS', 'danger');
-      }
-    } catch (error) {
-      console.error('Errore nell\'invio SMS:', error);
-      showToast('Errore nell\'invio SMS', 'danger');
     }
   };
 
@@ -236,7 +222,7 @@ const RecallsPage: React.FC = () => {
 
   return (
     <div className="recalls-page">
-      <DashboardCard
+      <Card
         title="Gestione Richiami"
         headerAction={
           <div className="d-flex gap-2">
@@ -387,7 +373,7 @@ const RecallsPage: React.FC = () => {
             <CCol>{testResult && <CAlert color="success">{testResult}</CAlert>}</CCol>
           </CRow>
         </div>
-      </DashboardCard>
+      </Card>
 
       {/* Toast per le notifiche */}
       <CToaster placement="top-end">
