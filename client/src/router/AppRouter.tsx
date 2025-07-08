@@ -1,5 +1,7 @@
 import React, { type JSX } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthStore } from '@/features/auth/store/useAuthStore';
+
 import {Layout} from '@/components/layout';
 import Dashboard from '@/pages/dashboard/Dashboard';
 import ApiTest from '@/test/ApiTest';
@@ -8,8 +10,7 @@ import LoginPage from '@/features/auth/pages/LoginPage';
 import RegisterPage from '@/features/auth/pages/RegisterPage';
 import Calendar from '@/pages/Calendar/CalendarPage';
 import RecallsPage from '@/pages/recalls/RecallsPage';
-import { PazientiPage } from '@/pages/pazienti';
-import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import PazientiPage from '@/features/pazienti/pages/PazientiPage';
 import SettingsPage from '@/pages/settings/SettingsPage';
 import { FatturePage } from '@/pages';
 import RicettaElettronicaPage from '@/pages/RicettaElettronica/RicettaElettronicaPage';

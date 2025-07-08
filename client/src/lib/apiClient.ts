@@ -1,7 +1,7 @@
 // src/api/apiClient.ts
 import axios from 'axios';
 import { useAuthStore,useEnvStore } from '@/features/auth/store/useAuthStore';
-import { triggerModeWarning } from '@/lib/utils';
+import { triggerModeWarning } from '@/utils/modeWarning';
 
 const API_BASE_URL = 'http://localhost:5000';
 

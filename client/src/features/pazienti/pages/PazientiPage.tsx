@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import PazientiTable from './PazientiTable';
-import PazientiStats from './PazientiStats';
+import PazientiTable from '../components/PazientiTable';
+import PazientiStats from '../components/PazientiStats';
 import { CButton, CRow, CCol, CSpinner, CAlert, CCard, CCardBody, CCardHeader } from '@coreui/react';
 import { getPazientiList, getPazientiStats } from '@/api/apiClient';
 
