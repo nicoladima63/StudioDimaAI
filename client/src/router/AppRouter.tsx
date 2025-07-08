@@ -1,6 +1,6 @@
 import React, { type JSX } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
+import {Layout} from '@/components/layout';
 import Dashboard from '@/pages/dashboard/Dashboard';
 import ApiTest from '@/test/ApiTest';
 import NotFound from '@/pages/NotFound';

@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { CCol, CRow, CButton, CSpinner } from '@coreui/react'
-import { cilPeople, cilCalendar, cilChart, cilBell } from '@coreui/icons'
-import CIcon from '@coreui/icons-react'
-import DashboardCard from '@/components/DashboardCard'
-import StatWidget from '@/components/StatWidget'
-import RecentActivities from '@/components/RecentActivities'
-import AppuntamentiCoreUICard from '@/components/AppuntamentiCoreUICard'
-import AppuntamentiChart from '@/components/AppuntamentiChart'
-import AppuntamentiTotaliBar from '@/components/AppuntamentiTotaliBar'
-import { getPazientiStats, getAppuntamentiStats, getPrimeVisiteStats, getAppuntamentiPerAnno } from '@/api/apiClient'
+import { cilPeople, cilCalendar, cilChart, cilBell } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
+import { DashboardCard, StatWidget } from '@/components/ui';
+import { RecentActivities, AppuntamentiCoreUICard, AppuntamentiChart, AppuntamentiTotaliBar } from '@/components/common';
+import { getPazientiStats, getAppuntamentiStats, getPrimeVisiteStats, getAppuntamentiPerAnno } from '@/api/apiClient';
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)

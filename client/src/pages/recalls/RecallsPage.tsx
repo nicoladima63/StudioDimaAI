@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { CAlert, CButton, CToast, CToastBody, CToaster, CRow, CCol, CFormInput, CSpinner } from '@coreui/react';
 import { cilReload, cilCloudDownload, cilCheck } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import DashboardCard from '@/components/DashboardCard';
+import { DashboardCard } from '@/components/ui';
 import RecallsStatistics from './RecallsStatistics';
 import RecallsTable from './RecallsTable';
 import { recallsService } from '@/api/services/recalls.service';
 import type { Richiamo, RichiamoStatistics, RichiamoFilters } from '@/api/apiTypes';
-import MessageModal from '../../components/MessageModal';
+import { MessageModal } from '@/components/ui';
 import { getRecallMessage, saveRecallMessage, sendRecallSMS, testRecallSMS } from '@/api/apiClient';
 
 const RecallsPage: React.FC = () => {

@@ -4,7 +4,7 @@ import { CSidebar, CSidebarNav, CNavItem, CNavTitle } from '@coreui/react'
 import { NavLink } from 'react-router-dom'
 import { cilSpeedometer, cilCalendar, cilBell, cilUser, cilHome, cilSettings, cilCreditCard } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import '../components/css/custom-css.css'
+import "@/components/common/css/custom-css.css";
 
 const Sidebar: React.FC = () => {
   return (

@@ -3,7 +3,7 @@ import React from 'react';
 import { CContainer, CRow, CCol } from '@coreui/react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
-import Sidebar from './Sidebar';
+import { Sidebar } from '@/components/layout';
 
 interface LayoutProps {
   sidebarWidth?: number;

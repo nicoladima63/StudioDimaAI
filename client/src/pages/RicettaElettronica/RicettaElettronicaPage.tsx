@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CRow, CCol, CButton, CSpinner } from '@coreui/react';
 import { cilPlus } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import DashboardCard from '@/components/DashboardCard'
+import { DashboardCard } from '@/components/ui';
 
 import RicettaElettronica from './RicettaElettronica';
 import { getPazientiList } from '@/api/apiClient';

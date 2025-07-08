@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { getAllFatture } from '@/api/apiClient';
-import DashboardCard from '@/components/DashboardCard';
-import StatWidget from '@/components/StatWidget';
+import { DashboardCard, StatWidget } from '@/components/ui';
 import { CRow, CCol, CButton, CSpinner, CPagination, CPaginationItem, CFormSelect } from '@coreui/react';
 import { cilCreditCard, cilMoney } from '@coreui/icons';
 

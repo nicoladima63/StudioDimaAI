@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import DashboardCard from '@/components/DashboardCard';
+import { DashboardCard } from '@/components/ui';
 import { CFormSwitch, CButton, CToast, CToastBody, CToaster } from '@coreui/react';
 import { useEnvStore } from '@/store/authStore';
 import { setApiMode, getApiMode, getAppointmentsWithModeWarning, trySwitchToProd } from '@/api/apiClient';
