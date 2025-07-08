@@ -266,6 +266,34 @@ def get_appointments_for_year():
             result[str(anno)].append({'month': month, 'count': int(count)})
     return jsonify({'success': True, 'data': result})
 
+@calendar_bp.route('/appointments_by_range', methods=['GET'])
+@jwt_required()
+def get_appointments_by_range():
+    from datetime import datetime
+    import pandas as pd
+    db_handler = DBHandler()
+    df = db_handler.leggi_tabella_dbf(db_handler.path_appuntamenti)
+    col_data = COLONNE['appuntamenti']['data']
+
+    start_str = request.args.get('start')
+    end_str = request.args.get('end')
+    if not start_str or not end_str:
+        return jsonify({'error': 'start e end sono obbligatori'}), 400
+
+    try:
+        start = datetime.strptime(start_str, '%d/%m/%Y')
+        end = datetime.strptime(end_str, '%d/%m/%Y')
+    except Exception:
+        return jsonify({'error': 'Formato data non valido. Usa DD/MM/YYYY'}), 400
+
+    if df.empty or col_data not in df.columns:
+        return jsonify({'success': True, 'count': 0})
+
+    df[col_data] = pd.to_datetime(df[col_data], errors='coerce')
+    mask = (df[col_data] >= start) & (df[col_data] <= end)
+    count = df[mask].shape[0]
+    return jsonify({'success': True, 'count': int(count)})
+
 @calendar_bp.route('/reauth-url', methods=['GET'])
 @jwt_required()
 def get_google_oauth_url():

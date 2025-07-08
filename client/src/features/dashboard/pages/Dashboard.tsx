@@ -3,8 +3,14 @@ import { CCol, CRow, CButton, CSpinner } from '@coreui/react'
 import { cilPeople, cilCalendar, cilChart, cilBell } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { Card, StatWidget } from '@/components/ui';
-import { RecentActivities, AppuntamentiCoreUICard, AppuntamentiChart, AppuntamentiTotaliBar } from '@/components/common';
+import { RecentActivities } from '@/components/common';
+import {
+  AppuntamentiChart,
+  AppuntamentiCoreUICard,
+  AppuntamentiTotaliBar
+} from '../components';
 import { getPazientiStats, getAppuntamentiStats, getPrimeVisiteStats, getAppuntamentiPerAnno } from '@/api/apiClient';
+import { getAppointmentsByRange } from '@/lib/apiClient'; // o '@/api/apiClient' se usi l'altro path
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
@@ -18,6 +24,7 @@ const Dashboard: React.FC = () => {
     nuoveVisite: null
   })
   const [datiGrafico, setDatiGrafico] = useState<{ [anno: string]: { month: number; count: number }[] }>({})
+  const [totali, setTotali] = useState<any[]>([]);
 
   const colori = ['#3399ff', '#8884d8', '#b0b0b0']
 
@@ -68,9 +75,51 @@ const Dashboard: React.FC = () => {
     fetchStats()
   }, [])
 
+  useEffect(() => {
+    async function fetchTotaliBar() {
+      if (!datiGrafico || Object.keys(datiGrafico).length === 0) return;
+
+      const today = new Date();
+      const currentDay = String(today.getDate()).padStart(2, '0');
+      const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+
+      // Prendi gli anni dal backend (già ordinati)
+      const anni = Object.keys(datiGrafico).sort();
+
+      // Colori come già usi tu
+      const colori = ['#3399ff', '#8884d8', '#b0b0b0'];
+
+      // Fai le chiamate in parallelo per ogni anno
+      const progressivi = await Promise.all(
+        anni.map(async (anno) => {
+          const start = `01/01/${anno}`;
+          // end: giorno/mese attuale ma per quell'anno
+          const end = `${currentDay}/${currentMonth}/${anno}`;
+          try {
+            const count = await getAppointmentsByRange(start, end);
+            return count;
+          } catch {
+            return 0;
+          }
+        })
+      );
+
+      // Prepara l'array totali
+      const nuoviTotali = anni.map((anno, idx) => ({
+        anno,
+        totale: (datiGrafico[anno] || []).reduce((sum, m) => sum + m.count, 0),
+        colore: colori[idx % colori.length],
+        progressivo: progressivi[idx]
+      }));
+
+      setTotali(nuoviTotali);
+    }
+
+    fetchTotaliBar();
+  }, [datiGrafico]);
+
   return (
-      <Card 
-        title="Dashboard" 
+      <Card title="Dashboard" 
         headerAction={
           <CButton color="primary" size="sm">
             <CIcon icon={cilBell} className="me-1" />
@@ -136,12 +185,7 @@ const Dashboard: React.FC = () => {
               </CCol>
               <CCol md={4}>
                 <AppuntamentiTotaliBar
-                  totali={Object.keys(datiGrafico).sort().map((anno, idx) => ({
-                    anno,
-                    totale: (datiGrafico[anno] || []).reduce((sum, m) => sum + m.count, 0),
-                    colore: colori[idx % colori.length],
-                    progressivo: idx + 1
-                  }))}
+                  totali={totali}
                 />
               </CCol>
             </CRow>

@@ -1,7 +1,7 @@
 // src/api/apiClient.ts
 import axios from 'axios';
 import { useAuthStore,useEnvStore } from '@/features/auth/store/useAuthStore';
-import { triggerModeWarning } from '@/utils/modeWarning';
+import { triggerModeWarning } from './utils';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -313,6 +313,17 @@ export async function searchFarmaci(q: string) {
 export async function inviaRicetta(payload: RicettaPayload) {
   const res = await apiClient.post('/api/ricetta/send', payload);
   return res.data;
+}
+
+// Ottiene il numero di appuntamenti in un intervallo di date (inclusi)
+export async function getAppointmentsByRange(start: string, end: string): Promise<number> {
+  const response = await apiClient.get('/api/calendar/appointments_by_range', {
+    params: { start, end }
+  });
+  if (response.data && response.data.success) {
+    return response.data.count;
+  }
+  throw new Error('Errore nel recupero appuntamenti per intervallo');
 }
 
 // Export apiClient sia come default che come named export per compatibilità
