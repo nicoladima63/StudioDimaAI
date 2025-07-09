@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { getApiMode, getRentriMode, getRicettaMode } from '@/api/apiClient';
+import { getMode } from '@/api/apiClient';
 import { useEnvStore } from '@/features/auth/store/useAuthStore';
 
 const HomePage: React.FC = () => {
@@ -14,13 +14,13 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     // Sincronizza le modalità con il backend
     Promise.all([
-      getApiMode(),
-      getRentriMode(),
-      getRicettaMode()
+      getMode('database'),
+      getMode('rentri'),
+      getMode('ricetta')
     ]).then(([db, rentri, ricetta]) => {
-      setMode(db);
-      setRentriMode(rentri);
-      setRicettaMode(ricetta);
+      setMode(db as 'dev' | 'prod');
+      setRentriMode(rentri as 'dev' | 'prod');
+      setRicettaMode(ricetta as 'dev' | 'prod');
     });
   }, [setMode, setRentriMode, setRicettaMode]);
 

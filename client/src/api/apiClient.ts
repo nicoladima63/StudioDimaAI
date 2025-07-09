@@ -238,50 +238,19 @@ export async function trySwitchToProd() {
     return { success: false, message: res.data.message };
   }
   // Se allowed, cambia modalità
-  await setApiMode('prod');
+  await setMode('database', 'prod');
   return { success: true };
 }
 
-export async function setApiMode(mode: 'dev' | 'prod') {
-  const res = await apiClient.post('/api/settings/mode', { mode });
-  // Se errore, mostra warning
-  if (res.data.error) {
-    triggerModeWarning(res.data.error);
-    return { success: false, message: res.data.error };
-  }
-  return res.data;
+// Funzione generica per ottenere la modalità
+export async function getMode(tipo: 'database' | 'rentri' | 'ricetta'): Promise<'dev' | 'prod' | 'test'> {
+  const res = await apiClient.get(`/api/settings/${tipo}-mode`);
+  return res.data.mode as 'dev' | 'prod' | 'test';
 }
 
-export async function getApiMode() {
-  const res = await apiClient.get('/api/settings/mode');
-  return res.data.mode as 'dev' | 'prod';
-}
-
-export async function getRentriMode() {
-  const res = await apiClient.get('/api/settings/rentri-mode');
-  return res.data.mode as 'dev' | 'prod';
-}
-
-export async function setRentriMode(mode: 'dev' | 'prod') {
-  const res = await apiClient.post('/api/settings/rentri-mode', { mode });
-  if (res.data.error) {
-    triggerModeWarning(res.data.error);
-    return { success: false, message: res.data.error };
-  }
-  return res.data;
-}
-
-export async function getRicettaMode() {
-  const res = await apiClient.get('/api/settings/ricetta-mode');
-  return res.data.mode as 'dev' | 'prod';
-}
-
-export async function setRicettaMode(mode: 'dev' | 'prod') {
-  const res = await apiClient.post('/api/settings/ricetta-mode', { mode });
-  if (res.data.error) {
-    triggerModeWarning(res.data.error);
-    return { success: false, message: res.data.error };
-  }
+// Funzione generica per impostare la modalità
+export async function setMode(tipo: 'database' | 'rentri' | 'ricetta', mode: 'dev' | 'prod' | 'test') {
+  const res = await apiClient.post(`/api/settings/${tipo}-mode`, { mode });
   return res.data;
 }
 
@@ -300,8 +269,8 @@ export async function getAppointmentsWithModeWarning(month: number, year: number
 }
 
 export async function syncModeWithBackend() {
-  const res = await getApiMode();
-  useEnvStore.getState().setMode(res);
+  const res = await getMode('database');
+  useEnvStore.getState().setMode(res as 'dev' | 'prod');
 }
 
 // Fatture

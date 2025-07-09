@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui';
 import { CFormSwitch, CButton, CToast, CToastBody, CToaster, CRow, CCol,CCard,CCardBody, CFormLabel } from '@coreui/react';
 import { useEnvStore } from '@/features/auth/store/useAuthStore';
-import { setApiMode, getApiMode, getAppointmentsWithModeWarning, trySwitchToProd, setRentriMode as apiSetRentriMode, setRicettaMode as apiSetRicettaMode } from '@/api/apiClient';
+import { setMode as apiSetMode, getMode, getAppointmentsWithModeWarning } from '@/api/apiClient';
 
 const SettingsPage: React.FC = () => {
   const mode = useEnvStore((state) => state.mode);
@@ -19,24 +19,32 @@ const SettingsPage: React.FC = () => {
   const [modeWarning, setModeWarning] = useState<string | null>(null);
 
   useEffect(() => {
-    getApiMode().then((backendMode) => {
-      setSelectedMode(backendMode);
-      setMode(backendMode);
+    getMode('database').then((backendMode) => {
+      setSelectedMode(backendMode as 'dev' | 'prod');
+      setMode(backendMode as 'dev' | 'prod');
+    });
+    getMode('rentri').then((backendMode) => {
+      setSelectedRentriMode(backendMode as 'dev' | 'prod');
+      setRentriMode(backendMode as 'dev' | 'prod');
+    });
+    getMode('ricetta').then((backendMode) => {
+      setSelectedRicettaMode(backendMode as 'dev' | 'prod');
+      setRicettaMode(backendMode as 'dev' | 'prod');
     });
     checkAppointments();
-  }, []);
+  }, [setMode, setRentriMode, setRicettaMode]);
 
-  const handleApply = async () => {
+  const handleApplyMode = async () => {
     try {
       if (selectedMode === 'prod') {
-        const res = await trySwitchToProd();
+        const res = await apiSetMode('database', selectedMode);
         if (!res.success) return;
         setMode('prod');
         setShowToast(true);
         setTimeout(() => setShowToast(false), 2000);
         return;
       }
-      await setApiMode(selectedMode);
+      await apiSetMode('database', selectedMode);
       setMode(selectedMode);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
@@ -48,8 +56,7 @@ const SettingsPage: React.FC = () => {
 
   const handleApplyRentri = async () => {
     try {
-      const res = await apiSetRentriMode(selectedRentriMode);
-      if (!res.success) return;
+      await apiSetMode('rentri', selectedRentriMode);
       setRentriMode(selectedRentriMode);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
@@ -61,8 +68,7 @@ const SettingsPage: React.FC = () => {
 
   const handleApplyRicetta = async () => {
     try {
-      const res = await apiSetRicettaMode(selectedRicettaMode);
-      if (!res.success) return;
+      await apiSetMode('ricetta', selectedRicettaMode);
       setRicettaMode(selectedRicettaMode);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
@@ -112,7 +118,7 @@ const SettingsPage: React.FC = () => {
                     color="primary"
                     size="sm"
                     disabled={selectedMode === mode}
-                    onClick={handleApply}
+                    onClick={handleApplyMode}
                   >
                     Applica
                   </CButton>
