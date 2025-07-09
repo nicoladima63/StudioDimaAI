@@ -4,18 +4,21 @@ import pandas as pd
 import logging
 from datetime import datetime, date, timedelta
 import dbf
-from server.app.config.constants import COLONNE, get_dbf_path, get_database_mode
+from server.app.config.constants import COLONNE, get_dbf_path, DATABASE_MODE_FILE_PATH
+from server.app.core.mode_manager import get_mode
 
 import os
+import getpass
 
 logger = logging.getLogger(__name__)
-
-DATABASE_MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/database_mode.txt')
 
 def check_network_and_switch_mode(mode):
     """Se in prod ma la rete non è raggiungibile, passa a dev e aggiorna database_mode.txt."""
     if mode == 'prod':
-        if not os.path.exists(r"\\SERVERDIMA\Pixel\WINDENT\\"):
+        network_path = r"\\SERVERDIMA\Pixel\WINDENT"
+        print(f"DEBUG: Controllo esistenza path di rete: {network_path}")
+        print("DEBUG: os.path.exists:", os.path.exists(network_path))
+        if not os.path.exists(network_path):
             # Switch to dev mode
             try:
                 with open(DATABASE_MODE_FILE_PATH, "w") as f:
@@ -28,12 +31,13 @@ def check_network_and_switch_mode(mode):
 
 class DBHandler:
     def __init__(self, path_appuntamenti=None, path_anagrafica=None):
-        mode = get_database_mode()
+        mode = get_mode('database')
         mode, mode_changed = check_network_and_switch_mode(mode)
+        self.mode = mode
         self.mode_changed = mode_changed
         # Percorsi DBF centralizzati tramite mapping
-        self.path_appuntamenti = get_dbf_path('agenda')
-        self.path_anagrafica = get_dbf_path('pazienti')
+        self.path_appuntamenti = get_dbf_path('agenda', mode)
+        self.path_anagrafica = get_dbf_path('pazienti', mode)
         # Permetti override manuale (per test o casi particolari)
         if path_appuntamenti:
             self.path_appuntamenti = path_appuntamenti
@@ -184,7 +188,7 @@ class DBHandler:
         """Legge tutte le fatture dal DBF e restituisce solo i campi utili."""
         # Percorso file fatture
         if not path_fatture:
-            path_fatture = get_dbf_path('fatture')
+            path_fatture = get_dbf_path('fatture', self.mode)
         if not path_fatture or not os.path.exists(path_fatture):
             logger.error(f"File fatture non trovato: {path_fatture}")
             return []

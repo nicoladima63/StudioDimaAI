@@ -3,16 +3,71 @@ import React from 'react'
 import { CNavbar, CContainer, CNavbarBrand, CButton, CBadge } from '@coreui/react'
 import { useAuthStore, useEnvStore } from '@/features/auth/store/useAuthStore';
 import { useNavigate } from 'react-router-dom'
+import { setApiMode, trySwitchToProd, setRentriMode as apiSetRentriMode, setRicettaMode as apiSetRicettaMode } from '@/api/apiClient';
+import { useState } from 'react';
+import { CToast, CToastBody, CToaster } from '@coreui/react';
 
 const Navbar: React.FC = () => {
   const { token, clearToken, username } = useAuthStore()
   const navigate = useNavigate()
-  const mode = useEnvStore((state) => state.mode)
+  const dbmode = useEnvStore((state) => state.mode)
+  const rentriMode = useEnvStore((state) => state.rentriMode)
+  const ricettaMode = useEnvStore((state) => state.ricettaMode)
+  const { setMode, setRentriMode, setRicettaMode } = useEnvStore.getState();
+
+  const [errorToast, setErrorToast] = useState(false);
+  const [successToast, setSuccessToast] = useState(false);
 
   const handleLogout = () => {
     clearToken()
     navigate('/login')
   }
+
+  const handleDbBadgeClick = async () => {
+    try {
+      const newMode = dbmode === 'prod' ? 'dev' : 'prod';
+      if (newMode === 'prod') {
+        const res = await trySwitchToProd();
+        if (!res.success) return;
+      } else {
+        await setApiMode(newMode);
+      }
+      setMode(newMode);
+      setSuccessToast(true);
+      setTimeout(() => setSuccessToast(false), 1500);
+    } catch {
+      setErrorToast(true);
+      setTimeout(() => setErrorToast(false), 2000);
+    }
+  };
+
+  const handleRentriBadgeClick = async () => {
+    try {
+      const newMode = rentriMode === 'prod' ? 'dev' : 'prod';
+      const res = await apiSetRentriMode(newMode);
+      if (!res.success) return;
+      setRentriMode(newMode);
+      setSuccessToast(true);
+      setTimeout(() => setSuccessToast(false), 1500);
+    } catch {
+      setErrorToast(true);
+      setTimeout(() => setErrorToast(false), 2000);
+    }
+  };
+
+  const handleRicettaBadgeClick = async () => {
+    try {
+      const newMode = ricettaMode === 'prod' ? 'dev' : 'prod';
+      const res = await apiSetRicettaMode(newMode);
+      if (!res.success) return;
+      setRicettaMode(newMode);
+      setSuccessToast(true);
+      setTimeout(() => setSuccessToast(false), 1500);
+    } catch {
+      setErrorToast(true);
+      setTimeout(() => setErrorToast(false), 2000);
+    }
+  };
 
   return (
     <CNavbar colorScheme="light" className="bg-light">
@@ -22,14 +77,59 @@ const Navbar: React.FC = () => {
             <CNavbarBrand href="/" className="mb-0">
               Studio Di Martino
             </CNavbarBrand>
+          </div>
+
+          {/* Sezione centrale: riepilogo modalità */}
+          <div className="d-flex align-items-center gap-4 mx-auto">
+            <span className="fw-semibold">DB</span>
             <CBadge
-              color={mode === 'prod' ? 'success' : 'warning'}
-              className="fw-normal ms-2"
-              style={{ fontWeight: 400, fontSize: '1rem' }}
+              color={dbmode === 'prod' ? 'success' : 'warning'}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+              title="Cambia modalità DB"
+              onClick={handleDbBadgeClick}
+              role="button"
+              tabIndex={0}
             >
-              {mode === 'prod' ? 'Studio' : 'Casa'}
+              {dbmode === 'prod' ? 'Studio' : 'Casa'}
+            </CBadge>
+            <span className="vr mx-2" style={{ height: 24 }} />
+            <span className="fw-semibold">RENTRI</span>
+            <CBadge
+              color={rentriMode === 'prod' ? 'success' : 'warning'}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+              title="Cambia modalità RENTRI"
+              onClick={handleRentriBadgeClick}
+              role="button"
+              tabIndex={0}
+            >
+              {rentriMode === 'prod' ? 'Prod' : 'Test'}
+            </CBadge>
+            <span className="vr mx-2" style={{ height: 24 }} />
+            <span className="fw-semibold">RNE</span>
+            <CBadge
+              color={ricettaMode === 'prod' ? 'success' : 'warning'}
+              style={{ cursor: 'pointer', userSelect: 'none' }}
+              title="Cambia modalità RNE"
+              onClick={handleRicettaBadgeClick}
+              role="button"
+              tabIndex={0}
+            >
+              {ricettaMode === 'prod' ? 'Prod' : 'Test'}
             </CBadge>
           </div>
+          <CToaster placement="top-end">
+            {successToast && (
+              <CToast autohide visible color="success" key="toast">
+                <CToastBody>Modalità aggiornata con successo!</CToastBody>
+              </CToast>
+            )}
+            {errorToast && (
+              <CToast autohide visible color="danger" key="error-toast">
+                <CToastBody>Errore nel cambio modalità!</CToastBody>
+              </CToast>
+            )}
+          </CToaster>
+
           {token && (
             <div className="d-flex align-items-center gap-3">
               <span className="text-muted">Ciao {username}</span>

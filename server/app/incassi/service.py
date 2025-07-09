@@ -6,12 +6,14 @@ from typing import List, Dict, Any
 from server.app.core.db_handler import DBHandler
 from server.app.config.constants import get_dbf_path, COLONNE
 from server.app.core.estrattore import estrai_dati
+from server.app.core.mode_manager import get_mode
 
 class IncassiService:
     def __init__(self):
-        self.acconti_path = get_dbf_path('acconti')
-        self.pazienti_path = get_dbf_path('pazienti')
-        self.fatture_path = get_dbf_path('fatture')
+        mode = get_mode('database')
+        self.acconti_path = get_dbf_path('acconti', mode)
+        self.pazienti_path = get_dbf_path('pazienti', mode)
+        self.fatture_path = get_dbf_path('fatture', mode)
         self.db_handler = DBHandler()
         
     def get_all_incassi(self) -> List[Dict[str, Any]]:

@@ -1,59 +1,13 @@
 from flask import Blueprint, request, jsonify
 import os
+from server.app.core.mode_manager import get_mode, set_mode
 
 settings_bp = Blueprint('settings', __name__)
 
-MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/mode.txt')
-RENTRI_MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/rentri_mode.txt')
-RICETTA_MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/ricetta_mode.txt')
-DATABASE_MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/database_mode.txt')
-
-# Funzione di utilità per leggere la modalità
-def read_mode():
-    try:
-        with open(MODE_FILE_PATH, 'r') as f:
-            mode = f.read().strip()
-            if mode in ['dev', 'prod']:
-                return mode
-    except Exception:
-        pass
-    return 'dev'  # default
-
-# Funzione di utilità per scrivere la modalità
-def write_mode(mode):
-    with open(MODE_FILE_PATH, 'w') as f:
-        f.write(mode)
-
-def read_mode_file(path):
-    try:
-        with open(path, 'r') as f:
-            mode = f.read().strip()
-            if mode in ['dev', 'prod']:
-                return mode
-    except Exception:
-        pass
-    return 'dev'
-
-def write_mode_file(path, mode):
-    with open(path, 'w') as f:
-        f.write(mode)
-
-def check_prod_mode_available():
-    return True, ""
-
-def read_database_mode():
-    try:
-        with open(DATABASE_MODE_FILE_PATH, 'r') as f:
-            mode = f.read().strip()
-            if mode in ['dev', 'prod']:
-                return mode
-    except Exception:
-        pass
-    return 'dev'  # default
-
-def write_database_mode(mode):
-    with open(DATABASE_MODE_FILE_PATH, 'w') as f:
-        f.write(mode)
+INSTANCE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../instance'))
+DATABASE_MODE_FILE_PATH = os.path.join(INSTANCE_DIR, 'database_mode.txt')
+RENTRI_MODE_FILE_PATH = os.path.join(INSTANCE_DIR, 'rentri_mode.txt')
+RICETTA_MODE_FILE_PATH = os.path.join(INSTANCE_DIR, 'ricetta_mode.txt')
 
 @settings_bp.route('/api/settings/check-prod', methods=['GET'])
 def check_prod():
@@ -78,30 +32,16 @@ def get_mode():
     mode = read_database_mode()
     return jsonify({'mode': mode})
 
-@settings_bp.route('/api/settings/rentri-mode', methods=['POST'])
-def set_rentri_mode():
+@settings_bp.route('/api/settings/<tipo>-mode', methods=['POST'])
+def set_any_mode(tipo):
     data = request.get_json()
-    mode = data.get('mode')
-    if mode not in ['dev', 'prod']:
+    modo = data.get('mode')
+    if modo not in ['dev', 'prod', 'test']:
         return jsonify({'error': 'Modalità non valida'}), 400
-    write_mode_file(RENTRI_MODE_FILE_PATH, mode)
-    return jsonify({'success': True, 'mode': mode})
+    set_mode(tipo, modo)
+    return jsonify({'success': True, 'mode': modo})
 
-@settings_bp.route('/api/settings/rentri-mode', methods=['GET'])
-def get_rentri_mode():
-    mode = read_mode_file(RENTRI_MODE_FILE_PATH)
-    return jsonify({'mode': mode})
-
-@settings_bp.route('/api/settings/ricetta-mode', methods=['POST'])
-def set_ricetta_mode():
-    data = request.get_json()
-    mode = data.get('mode')
-    if mode not in ['dev', 'prod']:
-        return jsonify({'error': 'Modalità non valida'}), 400
-    write_mode_file(RICETTA_MODE_FILE_PATH, mode)
-    return jsonify({'success': True, 'mode': mode})
-
-@settings_bp.route('/api/settings/ricetta-mode', methods=['GET'])
-def get_ricetta_mode():
-    mode = read_mode_file(RICETTA_MODE_FILE_PATH)
+@settings_bp.route('/api/settings/<tipo>-mode', methods=['GET'])
+def get_any_mode(tipo):
+    mode = get_mode(tipo)
     return jsonify({'mode': mode}) 

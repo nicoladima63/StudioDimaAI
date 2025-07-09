@@ -21,16 +21,8 @@ def require_env(var_name: str) -> str:
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # --- Funzione centralizzata per determinare la modalità corrente (dev/prod) ---
-DATABASE_MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/database_mode.txt')
-def get_database_mode():
-    try:
-        with open(DATABASE_MODE_FILE_PATH, 'r') as f:
-            mode = f.read().strip()
-            if mode in ['dev', 'prod']:
-                return mode
-    except Exception:
-        pass
-    return 'dev'
+INSTANCE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../instance'))
+DATABASE_MODE_FILE_PATH = os.path.join(INSTANCE_DIR, 'database_mode.txt')
 
 # --- DBF Table Mapping ---
 DBF_TABLES = {
@@ -43,8 +35,7 @@ DBF_TABLES = {
     # AGGIUNGERE QUI EVENTUALI TABELLE MANCANTI
 }
 
-def get_dbf_path(nome_logico):
-    mode = get_database_mode()
+def get_dbf_path(nome_logico, mode):
     if mode == 'prod':
         base = r'\\SERVERDIMA\Pixel\WINDENT'
     else:

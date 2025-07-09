@@ -5,6 +5,7 @@ from datetime import date
 from typing import List, Dict, Any
 from server.app.core.db_handler import DBHandler
 from server.app.config.constants import get_dbf_path
+from server.app.core.mode_manager import get_mode
 
 # Campi da mostrare nella tabella (quelli con asterisco)
 PAZIENTI_FIELDS = [
@@ -15,8 +16,8 @@ PAZIENTI_FIELDS = [
 
 class PazientiService:
     def __init__(self):
-        # Percorso DBF centralizzato tramite mapping
-        self.dbf_path = get_dbf_path('pazienti')
+        mode = get_mode('database')
+        self.dbf_path = get_dbf_path('pazienti', mode)
         self.db_handler = DBHandler()
 
     def get_all_pazienti(self) -> List[Dict[str, Any]]:

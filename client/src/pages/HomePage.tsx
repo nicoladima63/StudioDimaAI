@@ -1,10 +1,28 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
+import { getApiMode, getRentriMode, getRicettaMode } from '@/api/apiClient';
+import { useEnvStore } from '@/features/auth/store/useAuthStore';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
+  const setMode = useEnvStore((state) => state.setMode);
+  const setRentriMode = useEnvStore((state) => state.setRentriMode);
+  const setRicettaMode = useEnvStore((state) => state.setRicettaMode);
+
+  useEffect(() => {
+    // Sincronizza le modalità con il backend
+    Promise.all([
+      getApiMode(),
+      getRentriMode(),
+      getRicettaMode()
+    ]).then(([db, rentri, ricetta]) => {
+      setMode(db);
+      setRentriMode(rentri);
+      setRicettaMode(ricetta);
+    });
+  }, [setMode, setRentriMode, setRicettaMode]);
 
   useEffect(() => {
     if (token) {

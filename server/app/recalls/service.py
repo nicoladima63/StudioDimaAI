@@ -5,6 +5,7 @@ from dbfread import DBF
 import sys
 import os
 from server.app.core.db_handler import DBHandler
+from server.app.core.mode_manager import get_mode
 
 # Aggiungi il path per gli import
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -35,8 +36,8 @@ class RecallService:
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        # Percorso DBF centralizzato tramite mapping
-        self.dbf_path = get_dbf_path('pazienti')
+        mode = get_mode('database')
+        self.dbf_path = get_dbf_path('pazienti', mode)
         self.db_handler = DBHandler()
     
     def get_all_recalls(self, days_threshold: int = 90) -> List[Dict[str, Any]]:
