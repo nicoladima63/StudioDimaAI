@@ -39,8 +39,8 @@ def register_blueprints(app: Flask) -> None:
     from .routes.fatture import fatture_bp
     from .routes.appuntamenti import appuntamenti_bp
     from .routes.prescrizione import prescrizione_bp
+    from .routes.network import network_bp
 
-    
     # Blueprint principali
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(tests_bp, url_prefix="/api/tests")
@@ -53,7 +53,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(appuntamenti_bp)
     app.register_blueprint(prescrizione_bp)
     app.register_blueprint(incassi_bp)
-    
+    app.register_blueprint(network_bp)
     # Aggiungi qui altri blueprint
 
 def create_app(config_class: Optional[object] = Config) -> Flask:

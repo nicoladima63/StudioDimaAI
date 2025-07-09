@@ -3,6 +3,7 @@ import { Card } from '@/components/ui';
 import { CFormSwitch, CButton, CToast, CToastBody, CToaster, CRow, CCol,CCard,CCardBody, CFormLabel } from '@coreui/react';
 import { useEnvStore } from '@/features/auth/store/useAuthStore';
 import { setMode as apiSetMode, getMode, getAppointmentsWithModeWarning } from '@/api/apiClient';
+import NetworkModal from '@/components/ui/MessageModal';
 
 const SettingsPage: React.FC = () => {
   const mode = useEnvStore((state) => state.mode);
@@ -17,6 +18,9 @@ const SettingsPage: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [errorToast, setErrorToast] = useState(false);
   const [modeWarning, setModeWarning] = useState<string | null>(null);
+  const [showNetworkModal, setShowNetworkModal] = useState(false);
+  const [networkMsg, setNetworkMsg] = useState('');
+  const [networkLoading, setNetworkLoading] = useState(false);
 
   useEffect(() => {
     getMode('database').then((backendMode) => {
@@ -36,12 +40,23 @@ const SettingsPage: React.FC = () => {
 
   const handleApplyMode = async () => {
     try {
+      setNetworkLoading(false);
+      setShowNetworkModal(false);
       if (selectedMode === 'prod') {
+        setNetworkLoading(true);
+        setShowNetworkModal(true);
+        setNetworkMsg('Ricerca della rete in corso...');
         const res = await apiSetMode('database', selectedMode);
+        setNetworkLoading(false);
+        if (res.error === 'network_unreachable') {
+          setNetworkMsg(res.message + '\nSe richiesto, effettua il login alla risorsa di rete.');
+          return;
+        }
         if (!res.success) return;
         setMode('prod');
         setShowToast(true);
         setTimeout(() => setShowToast(false), 2000);
+        setShowNetworkModal(false);
         return;
       }
       await apiSetMode('database', selectedMode);
@@ -51,6 +66,7 @@ const SettingsPage: React.FC = () => {
     } catch {
       setErrorToast(true);
       setTimeout(() => setErrorToast(false), 3000);
+      setShowNetworkModal(false);
     }
   };
 
@@ -189,6 +205,13 @@ const SettingsPage: React.FC = () => {
           </CToast>
         )}
       </CToaster>
+      <NetworkModal
+        open={showNetworkModal}
+        onClose={() => setShowNetworkModal(false)}
+        message={networkMsg}
+        loading={networkLoading}
+        link={networkMsg.includes('rete') ? 'file://SERVERDIMA/Pixel/WINDENT' : undefined}
+      />
     </Card>
   );
 };

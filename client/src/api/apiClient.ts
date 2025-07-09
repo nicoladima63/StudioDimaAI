@@ -279,6 +279,11 @@ export async function getAllFatture() {
   return response.data; // { fatture: [...], last_update: ... }
 }
 
+export async function getAnniFatture(): Promise<number[]> {
+  const res = await apiClient.get('/api/fatture/anni');
+  return res.data;
+}
+
 export async function getAppuntamentiStats() {
   const response = await apiClient.get('/api/appuntamenti/statistiche');
   // La risposta ora contiene: { success, data: { mese_precedente, mese_corrente, mese_prossimo, percentuale_corrente, percentuale_prossimo } }

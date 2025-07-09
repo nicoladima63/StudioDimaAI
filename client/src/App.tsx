@@ -3,6 +3,7 @@ import AppRouter from "./router/AppRouter"
 import { CToaster, CToast, CToastBody } from '@coreui/react';
 import { useState, useEffect } from 'react';
 import { registerModeWarningSetter } from '@/lib/utils';
+import { NetworkStatusProvider } from '@/context/NetworkStatusProvider';
 
 export default function App() {
   const [modeWarning, setModeWarning] = useState<string | null>(null);
@@ -10,14 +11,16 @@ export default function App() {
     registerModeWarningSetter(setModeWarning);
   }, []);
 
-  return <>
-    <AppRouter />
-    <CToaster placement="top-end">
-      {modeWarning && (
-        <CToast autohide visible color="warning" key="mode-warning">
-          <CToastBody>{modeWarning}</CToastBody>
-        </CToast>
-      )}
-    </CToaster>
-  </>;
+  return (
+    <NetworkStatusProvider>
+      <AppRouter />
+      <CToaster placement="top-end">
+        {modeWarning && (
+          <CToast autohide visible color="warning" key="mode-warning">
+            <CToastBody>{modeWarning}</CToastBody>
+          </CToast>
+        )}
+      </CToaster>
+    </NetworkStatusProvider>
+  );
 }

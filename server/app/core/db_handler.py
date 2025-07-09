@@ -199,7 +199,7 @@ class DBHandler:
                     try:
                         records.append({
                             'id': str(r['DB_FACODICE']).strip() if 'DB_FACODICE' in table.field_names else '',
-                            'data_incasso': r['DB_FADATAT'],
+                            'data_incasso': r['DB_FADATA'],
                             'importo': float(r['DB_FAINCAS'] or 0),
                             'metodo': r['DB_FAPAGAM'].strip() if r['DB_FAPAGAM'] else '',
                             'banca_cassa': r['DB_FABANCA'].strip() if r['DB_FABANCA'] else '',

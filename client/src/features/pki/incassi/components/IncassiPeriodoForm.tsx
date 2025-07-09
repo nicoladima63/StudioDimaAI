@@ -1,19 +1,36 @@
 import React, { useState } from 'react';
-import { CForm, CRow, CCol, CFormInput, CFormSelect, CButton } from '@coreui/react';
+import { CForm, CRow, CCol, CFormSelect, CButton } from '@coreui/react';
+import Select from 'react-select';
 
 interface IncassiPeriodoFormProps {
-  onSubmit: (params: { anno: string; tipo: string; numero: string }) => void;
+  onSubmit: (params: { anni: number[]; tipo: string; numero: string }) => void;
+  anniDisponibili: number[];
 }
 
-const IncassiPeriodoForm: React.FC<IncassiPeriodoFormProps> = ({ onSubmit }) => {
-  const [anno, setAnno] = useState('');
+const IncassiPeriodoForm: React.FC<IncassiPeriodoFormProps> = ({ onSubmit, anniDisponibili }) => {
+  const [anni, setAnni] = useState<number[]>([]);
   const [tipo, setTipo] = useState('mese');
   const [numero, setNumero] = useState('');
 
+  const getNumeroOptions = () => {
+    switch (tipo) {
+      case 'mese':
+        return Array.from({ length: 12 }, (_, i) => i + 1);
+      case 'trimestre':
+        return [1, 2, 3, 4];
+      case 'quadrimestre':
+        return [1, 2, 3];
+      case 'semestre':
+        return [1, 2];
+      default:
+        return [];
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (anno && tipo && numero) {
-      onSubmit({ anno, tipo, numero });
+    if (anni.length > 0 && tipo && numero) {
+      onSubmit({ anni, tipo, numero });
     }
   };
 
@@ -21,39 +38,47 @@ const IncassiPeriodoForm: React.FC<IncassiPeriodoFormProps> = ({ onSubmit }) => 
     <CForm onSubmit={handleSubmit} className="mb-3">
       <CRow className="g-2 align-items-end">
         <CCol xs={12} md={4}>
-          <CFormInput
-            type="number"
-            label="Anno"
-            placeholder="Anno"
-            value={anno}
-            onChange={e => setAnno(e.target.value)}
-            min="2000"
-            max="2100"
-            required
+          <label className="form-label">Anno</label>
+          <Select
+            isMulti
+            options={anniDisponibili.map(a => ({ value: a, label: a }))}
+            value={anni.map(a => ({ value: a, label: a }))}
+            onChange={opts => setAnni(opts.map(o => o.value))}
+            placeholder="Seleziona anni"
+            closeMenuOnSelect={false}
+            styles={{
+              control: base => ({ ...base, minHeight: 38, fontSize: 16 }),
+              multiValue: base => ({ ...base, fontSize: 15 })
+            }}
           />
         </CCol>
         <CCol xs={12} md={4}>
           <CFormSelect
             label="Tipo"
             value={tipo}
-            onChange={e => setTipo(e.target.value)}
+            onChange={e => {
+              setTipo(e.target.value);
+              setNumero(''); // reset numero quando cambia tipo
+            }}
           >
             <option value="mese">Mese</option>
             <option value="trimestre">Trimestre</option>
             <option value="quadrimestre">Quadrimestre</option>
+            <option value="semestre">Semestre</option>
           </CFormSelect>
         </CCol>
         <CCol xs={12} md={3}>
-          <CFormInput
-            type="number"
+          <CFormSelect
             label="Numero"
-            placeholder="Numero"
             value={numero}
             onChange={e => setNumero(e.target.value)}
-            min="1"
-            max={tipo === 'mese' ? '12' : tipo === 'trimestre' ? '4' : '3'}
             required
-          />
+          >
+            <option value="">Seleziona</option>
+            {getNumeroOptions().map(opt => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </CFormSelect>
         </CCol>
         <CCol xs={12} md={1}>
           <CButton color="primary" type="submit" className="w-100">Cerca</CButton>

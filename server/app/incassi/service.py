@@ -95,7 +95,7 @@ class IncassiService:
 
     def get_incassi_by_periodo(self, anno: str, tipo: str, numero: int) -> dict:
         """
-        tipo: 'mese', 'trimestre', 'quadrimestre'
+        tipo: 'mese', 'trimestre', 'quadrimestre', 'semestre'
         numero: 1, 2, 3, 4 (a seconda del tipo)
         """
         incassi = []
@@ -122,6 +122,15 @@ class IncassiService:
                     data_fine = date(anno + 1, (mese_inizio + 4) % 12, 1)
                 else:
                     data_fine = date(anno, mese_inizio + 4, 1)
+            elif tipo == 'semestre':
+                if numero == 1:
+                    data_inizio = date(anno, 1, 1)
+                    data_fine = date(anno, 7, 1)
+                elif numero == 2:
+                    data_inizio = date(anno, 7, 1)
+                    data_fine = date(anno + 1, 1, 1)
+                else:
+                    raise ValueError("Numero semestre non valido")
             else:
                 raise ValueError("Tipo periodo non valido")
         except Exception as e:
