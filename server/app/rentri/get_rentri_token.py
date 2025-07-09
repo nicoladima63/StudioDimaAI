@@ -4,13 +4,22 @@ import requests
 import jwt
 from dotenv import load_dotenv
 from cryptography.hazmat.primitives import serialization
+from server.app.rentri.utils import get_rentri_mode
 
 load_dotenv()
 
-PRIVATE_KEY_PATH = os.getenv("PRIVATE_KEY_PATH")
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_AUDIENCE = os.getenv("CLIENT_AUDIENCE")
-RENTRI_TOKEN_URL = "https://api.rentri.gov.it/auth/token"  # Adatta se diverso
+mode = get_rentri_mode()
+
+if mode == 'prod':
+    PRIVATE_KEY_PATH = os.getenv("RENTRI_PRIVATE_KEY_PATH_PROD")
+    CLIENT_ID = os.getenv("RENTRI_CLIENT_ID_PROD")
+    CLIENT_AUDIENCE = os.getenv("RENTRI_CLIENT_AUDIENCE_PROD")
+    RENTRI_TOKEN_URL = os.getenv("RENTRI_TOKEN_URL_PROD", "https://api.rentri.gov.it/auth/token")
+else:
+    PRIVATE_KEY_PATH = os.getenv("RENTRI_PRIVATE_KEY_PATH_TEST")
+    CLIENT_ID = os.getenv("RENTRI_CLIENT_ID_TEST")
+    CLIENT_AUDIENCE = os.getenv("RENTRI_CLIENT_AUDIENCE_TEST")
+    RENTRI_TOKEN_URL = os.getenv("RENTRI_TOKEN_URL_TEST", "https://demoapi.rentri.gov.it/token")
 
 # 1. Carica la chiave privata
 with open(PRIVATE_KEY_PATH, "rb") as f:

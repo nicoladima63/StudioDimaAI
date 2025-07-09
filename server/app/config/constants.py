@@ -21,10 +21,10 @@ def require_env(var_name: str) -> str:
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # --- Funzione centralizzata per determinare la modalità corrente (dev/prod) ---
-MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/mode.txt')
-def get_current_mode():
+DATABASE_MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/database_mode.txt')
+def get_database_mode():
     try:
-        with open(MODE_FILE_PATH, 'r') as f:
+        with open(DATABASE_MODE_FILE_PATH, 'r') as f:
             mode = f.read().strip()
             if mode in ['dev', 'prod']:
                 return mode
@@ -44,7 +44,7 @@ DBF_TABLES = {
 }
 
 def get_dbf_path(nome_logico):
-    mode = get_current_mode()
+    mode = get_database_mode()
     if mode == 'prod':
         base = r'\\SERVERDIMA\Pixel\WINDENT'
     else:

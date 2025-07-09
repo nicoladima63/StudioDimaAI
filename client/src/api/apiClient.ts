@@ -257,6 +257,34 @@ export async function getApiMode() {
   return res.data.mode as 'dev' | 'prod';
 }
 
+export async function getRentriMode() {
+  const res = await apiClient.get('/api/settings/rentri-mode');
+  return res.data.mode as 'dev' | 'prod';
+}
+
+export async function setRentriMode(mode: 'dev' | 'prod') {
+  const res = await apiClient.post('/api/settings/rentri-mode', { mode });
+  if (res.data.error) {
+    triggerModeWarning(res.data.error);
+    return { success: false, message: res.data.error };
+  }
+  return res.data;
+}
+
+export async function getRicettaMode() {
+  const res = await apiClient.get('/api/settings/ricetta-mode');
+  return res.data.mode as 'dev' | 'prod';
+}
+
+export async function setRicettaMode(mode: 'dev' | 'prod') {
+  const res = await apiClient.post('/api/settings/ricetta-mode', { mode });
+  if (res.data.error) {
+    triggerModeWarning(res.data.error);
+    return { success: false, message: res.data.error };
+  }
+  return res.data;
+}
+
 // Appuntamenti con gestione warning cambio modalità
 export async function getAppointmentsWithModeWarning(month: number, year: number) {
   const response = await apiClient.get('/api/calendar/appointments', { params: { month, year } });

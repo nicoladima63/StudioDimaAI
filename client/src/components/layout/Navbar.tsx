@@ -23,11 +23,11 @@ const Navbar: React.FC = () => {
               Studio Di Martino
             </CNavbarBrand>
             <CBadge
-              color={mode === 'prod' ? 'success' : 'primary'}
+              color={mode === 'prod' ? 'success' : 'warning'}
               className="fw-normal ms-2"
               style={{ fontWeight: 400, fontSize: '1rem' }}
             >
-              {mode === 'prod' ? 'Prod' : 'Dev'}
+              {mode === 'prod' ? 'Studio' : 'Casa'}
             </CBadge>
           </div>
           {token && (

@@ -4,40 +4,31 @@ import pandas as pd
 import logging
 from datetime import datetime, date, timedelta
 import dbf
-from server.app.config.constants import COLONNE, get_dbf_path
+from server.app.config.constants import COLONNE, get_dbf_path, get_database_mode
 
 import os
 
 logger = logging.getLogger(__name__)
 
-MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/mode.txt')
-def get_current_mode():
-    try:
-        with open(MODE_FILE_PATH, 'r') as f:
-            mode = f.read().strip()
-            if mode in ['dev', 'prod']:
-                return mode
-    except Exception:
-        pass
-    return 'dev'
+DATABASE_MODE_FILE_PATH = os.path.join(os.path.dirname(__file__), '../../instance/database_mode.txt')
 
 def check_network_and_switch_mode(mode):
-    """Se in prod ma la rete non è raggiungibile, passa a dev e aggiorna mode.txt."""
+    """Se in prod ma la rete non è raggiungibile, passa a dev e aggiorna database_mode.txt."""
     if mode == 'prod':
         if not os.path.exists(r"\\SERVERDIMA\Pixel\WINDENT\\"):
             # Switch to dev mode
             try:
-                with open(MODE_FILE_PATH, "w") as f:
+                with open(DATABASE_MODE_FILE_PATH, "w") as f:
                     f.write("dev")
                 logger.warning("Rete studio non raggiungibile: passo a modalità DEV")
             except Exception as e:
-                logger.error(f"Impossibile aggiornare mode.txt: {e}")
+                logger.error(f"Impossibile aggiornare database_mode.txt: {e}")
             return 'dev', True
     return mode, False
 
 class DBHandler:
     def __init__(self, path_appuntamenti=None, path_anagrafica=None):
-        mode = get_current_mode()
+        mode = get_database_mode()
         mode, mode_changed = check_network_and_switch_mode(mode)
         self.mode_changed = mode_changed
         # Percorsi DBF centralizzati tramite mapping

@@ -52,6 +52,10 @@ export const useAuthStore = create<AuthState>()(
 interface EnvState {
   mode: 'dev' | 'prod';
   setMode: (mode: 'dev' | 'prod') => void;
+  rentriMode: 'dev' | 'prod';
+  setRentriMode: (mode: 'dev' | 'prod') => void;
+  ricettaMode: 'dev' | 'prod';
+  setRicettaMode: (mode: 'dev' | 'prod') => void;
 }
 
 export const useEnvStore = create<EnvState>()(
@@ -59,6 +63,10 @@ export const useEnvStore = create<EnvState>()(
     (set) => ({
       mode: 'dev',
       setMode: (mode) => set({ mode }),
+      rentriMode: 'dev',
+      setRentriMode: (mode) => set({ rentriMode: mode }),
+      ricettaMode: 'dev',
+      setRicettaMode: (mode) => set({ ricettaMode: mode }),
     }),
     {
       name: 'env-mode',
