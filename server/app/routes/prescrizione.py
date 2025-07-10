@@ -4,7 +4,7 @@ import server.app.core.prescrizione_data as mod
 print("DEBUG: attributi disponibili in prescrizione_data:", dir(mod))
 
 from flask import Blueprint, request, jsonify
-from server.app.core.prescrizione_data import cerca_diagnosi, cerca_farmaci
+from server.app.ricetta_elettronica.utils import cerca_diagnosi, cerca_farmaci
 
 prescrizione_bp = Blueprint("prescrizione", __name__, url_prefix="/api")
 

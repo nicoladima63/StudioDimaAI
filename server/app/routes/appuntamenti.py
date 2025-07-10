@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from server.app.core.db_handler import DBHandler
+from server.app.core.db_appuntamenti import get_appuntamenti_mese, get_appuntamenti_domani
 from server.app.config.constants import COLONNE
 from datetime import date, timedelta, datetime
 import pandas as pd
@@ -20,8 +20,6 @@ def get_month_range(dt):
 def get_stats():
     try:
         print("DEBUG: Inizio get_stats")
-        db = DBHandler()
-        print(f"DEBUG: DBHandler creato. Path appuntamenti: {db.path_appuntamenti}")
         oggi = date.today()
         mese_corrente = oggi.month
         anno_corrente = oggi.year
@@ -41,9 +39,9 @@ def get_stats():
             anno_prossimo = anno_corrente
         print(f"DEBUG: Mesi/Anni: prec={mese_precedente}/{anno_precedente}, curr={mese_corrente}/{anno_corrente}, next={mese_prossimo}/{anno_prossimo}")
         # Usa la stessa logica del calendario
-        appuntamenti_precedente = db.get_appointments(month=mese_precedente, year=anno_precedente)
-        appuntamenti_corrente = db.get_appointments(month=mese_corrente, year=anno_corrente)
-        appuntamenti_prossimo = db.get_appointments(month=mese_prossimo, year=anno_prossimo)
+        appuntamenti_precedente = get_appuntamenti_mese(month=mese_precedente, year=anno_precedente)
+        appuntamenti_corrente = get_appuntamenti_mese(month=mese_corrente, year=anno_corrente)
+        appuntamenti_prossimo = get_appuntamenti_mese(month=mese_prossimo, year=anno_prossimo)
         n_precedente = len(appuntamenti_precedente)
         n_corrente = len(appuntamenti_corrente)
         n_prossimo = len(appuntamenti_prossimo)

@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from app.config.constants import COLONNE, TIPO_RICHIAMI
+    from server.app.config.constants import COLONNE, TIPO_RICHIAMI
 except ImportError:
     # Fallback per esecuzione diretta
     from config.constants import COLONNE, TIPO_RICHIAMI

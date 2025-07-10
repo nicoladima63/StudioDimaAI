@@ -5,7 +5,7 @@ import time
 from googleapiclient.errors import HttpError
 from .utils import get_google_service
 from ..core.db_handler import DBHandler
-from ..config.constants import GOOGLE, GOOGLE_COLOR_MAP
+from server.app.config.constants import GOOGLE_COLOR_MAP
 from datetime import datetime, timedelta, time as dt_time
 import json
 import hashlib

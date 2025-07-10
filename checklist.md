@@ -23,7 +23,15 @@
 4. (Opzionale) Entry point
 [ ] server/app/main.py (o lascia run.py nella root di server/)
 
-
+Ordine consigliato per il refactor
+config/
+constants.py
+utils/
+core/ ⬅️ (prossimo step consigliato!)
+extensions.py
+models/
+services/
+api/
 
 OPZIONALI
 Aggiunte consigliate

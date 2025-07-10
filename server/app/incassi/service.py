@@ -4,7 +4,8 @@ from dbfread import DBF
 from datetime import datetime, date
 from typing import List, Dict, Any
 from server.app.core.db_handler import DBHandler
-from server.app.config.constants import get_dbf_path, COLONNE
+from server.app.utils.db_utils import get_dbf_path
+from server.app.config.constants import COLONNE
 from server.app.core.estrattore import estrai_dati
 from server.app.core.mode_manager import get_mode
 

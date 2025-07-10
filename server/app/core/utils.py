@@ -4,7 +4,7 @@ import re
 import pandas as pd
 from datetime import datetime, date, timedelta, time
 
-from config.constants import TIPI_APPUNTAMENTO, MEDICI, COLONNE
+from server.app.config.constants import TIPI_APPUNTAMENTO, MEDICI, COLONNE
 import logging
 
 logger = logging.getLogger(__name__)

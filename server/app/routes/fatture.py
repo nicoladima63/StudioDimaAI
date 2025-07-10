@@ -1,13 +1,12 @@
 from flask import Blueprint, jsonify
 from datetime import datetime
-from server.app.core.db_handler import DBHandler
+from server.app.core.db_fatture import get_fatture
 
 fatture_bp = Blueprint('fatture', __name__)
 
 @fatture_bp.route('/all', methods=['GET'])
 def get_all_fatture():
-    db = DBHandler()
-    fatture = db.leggi_fatture()
+    fatture = get_fatture()
     last_update = datetime.now().isoformat(timespec='seconds')
     return jsonify({
         'fatture': fatture,
@@ -16,8 +15,7 @@ def get_all_fatture():
 
 @fatture_bp.route('/anni', methods=['GET'])
 def get_anni_fatture():
-    db = DBHandler()
-    fatture = db.leggi_fatture()
+    fatture = get_fatture()
     anni = set()
     for f in fatture:
         data = f.get('data_incasso')

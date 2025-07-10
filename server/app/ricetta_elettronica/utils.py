@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-BASE_PATH = Path(__file__).resolve().parent.parent / "data"
+BASE_PATH = Path(__file__).resolve().parent / "data"
 
 def load_json_file(filename):
     file_path = BASE_PATH / filename
@@ -22,4 +22,4 @@ def cerca_farmaci(query: str):
         if query.lower() in item["principio_attivo"].lower()
         or query.lower() in item["descrizione"].lower()
         or query in item["codice"]
-    ]
+    ] 

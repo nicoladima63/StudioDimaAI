@@ -6,6 +6,8 @@ import sys
 import os
 from server.app.core.db_handler import DBHandler
 from server.app.core.mode_manager import get_mode
+from server.app.config.constants import COLONNE
+from server.app.utils.db_utils import get_dbf_path
 
 # Aggiungi il path per gli import
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
