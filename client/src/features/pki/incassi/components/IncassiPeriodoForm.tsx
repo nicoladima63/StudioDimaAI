@@ -66,7 +66,10 @@ const IncassiPeriodoForm: React.FC<IncassiPeriodoFormProps> = ({ onSubmit, anniD
           <label className="form-label">Anno</label>
           <Select
             isMulti
-            options={anniDisponibili.map(a => ({ value: a, label: a }))}
+            options={anniDisponibili
+              .slice() // copia per non mutare la prop
+              .sort((a, b) => b - a) // ordina decrescente
+              .map(a => ({ value: a, label: a }))}
             value={anni.map(a => ({ value: a, label: a }))}
             onChange={opts => setAnni(opts.map(o => o.value))}
             placeholder="Seleziona anni"
