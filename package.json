@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "@types/lodash": "^4.17.20"
+  },
+  "dependencies": {
+    "react-select": "^5.10.1"
   }
 }

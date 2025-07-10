@@ -15,13 +15,38 @@ const IncassiPeriodoForm: React.FC<IncassiPeriodoFormProps> = ({ onSubmit, anniD
   const getNumeroOptions = () => {
     switch (tipo) {
       case 'mese':
-        return Array.from({ length: 12 }, (_, i) => i + 1);
+        return [
+          { value: 1, label: 'Gennaio' },
+          { value: 2, label: 'Febbraio' },
+          { value: 3, label: 'Marzo' },
+          { value: 4, label: 'Aprile' },
+          { value: 5, label: 'Maggio' },
+          { value: 6, label: 'Giugno' },
+          { value: 7, label: 'Luglio' },
+          { value: 8, label: 'Agosto' },
+          { value: 9, label: 'Settembre' },
+          { value: 10, label: 'Ottobre' },
+          { value: 11, label: 'Novembre' },
+          { value: 12, label: 'Dicembre' },
+        ];
       case 'trimestre':
-        return [1, 2, 3, 4];
+        return [
+          { value: 1, label: 'Primo trimestre' },
+          { value: 2, label: 'Secondo trimestre' },
+          { value: 3, label: 'Terzo trimestre' },
+          { value: 4, label: 'Quarto trimestre' },
+        ];
       case 'quadrimestre':
-        return [1, 2, 3];
+        return [
+          { value: 1, label: 'Primo quadrimestre' },
+          { value: 2, label: 'Secondo quadrimestre' },
+          { value: 3, label: 'Terzo quadrimestre' },
+        ];
       case 'semestre':
-        return [1, 2];
+        return [
+          { value: 1, label: 'Primo semestre' },
+          { value: 2, label: 'Secondo semestre' },
+        ];
       default:
         return [];
     }
@@ -76,7 +101,7 @@ const IncassiPeriodoForm: React.FC<IncassiPeriodoFormProps> = ({ onSubmit, anniD
           >
             <option value="">Seleziona</option>
             {getNumeroOptions().map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </CFormSelect>
         </CCol>
