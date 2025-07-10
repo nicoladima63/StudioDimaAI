@@ -51,4 +51,4 @@ def main():
     print(f"Autenticazione completata. File '{TOKEN_FILE}' creato con successo.")
 
 if __name__ == '__main__':
-    main()
+    main() 

@@ -37,7 +37,7 @@ def sync_calendar():
     month = data.get("month")
     year = data.get("year")
     if not (month and year):
-        return jsonify({"message": "Fornire month e year"}), 400
+        return jsonify({"message": "Fornire mese e anno"}), 400
     job_id = str(uuid.uuid4())
     sync_jobs[job_id] = {
         "status": "in_progress",

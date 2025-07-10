@@ -6,8 +6,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from server.app.run import create_app
 from server.app.extensions import db
-from server.app.models.user import User
-from server.app.auth.utils import hash_password
+from server.app.auth.models import User
+from server.app.utils.auth_utils import hash_password
 
 def init_database():
     """Inizializza il database con le tabelle e l'utente admin"""
@@ -42,4 +42,4 @@ def init_database():
             print(f"   - {user.username} ({user.role})")
 
 if __name__ == "__main__":
-    init_database()
+    init_database() 
