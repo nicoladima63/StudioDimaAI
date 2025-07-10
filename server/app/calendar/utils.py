@@ -2,13 +2,16 @@
 
 import os
 from typing import List, Dict
-from datetime import datetime
+from datetime import datetime, time as dt_time
 import logging
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from os import getenv
 from .exceptions import GoogleCredentialsNotFoundError
+import hashlib
+import json
+from server.app.config.constants import GOOGLE_COLOR_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -46,4 +49,42 @@ def get_google_service():
             )
             
     return build('calendar', 'v3', credentials=creds)
+
+# Funzioni di utilità per il calendario
+
+def _decimal_to_time(decimal_time):
+    hours = int(decimal_time)
+    minutes = int(round((decimal_time - hours) * 100))
+    return dt_time(hours, minutes)
+
+def _safe_to_time(val):
+    if isinstance(val, dt_time):
+        return val
+    try:
+        return _decimal_to_time(val)
+    except Exception:
+        return dt_time(8, 0)
+
+def _get_google_color_id(tipo):
+    return GOOGLE_COLOR_MAP.get(tipo, '1')
+
+def _appointment_id(app):
+    return f"{app['DATA']}_{app['ORA_INIZIO']}_{app['STUDIO']}_{(app.get('PAZIENTE') or app.get('DESCRIZIONE') or '').replace(' ', '')}"
+
+def _appointment_hash(app):
+    s = f"{app['DATA']}|{app['ORA_INIZIO']}|{app['ORA_FINE']}|{app['TIPO']}|{app['STUDIO']}|{app['NOTE']}|{app['DESCRIZIONE']}|{app['PAZIENTE']}"
+    return hashlib.sha256(s.encode('utf-8')).hexdigest()
+
+SYNC_STATE_FILE = 'server/sync_state.json'
+
+def _load_sync_state():
+    try:
+        with open(SYNC_STATE_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_sync_state(state):
+    with open(SYNC_STATE_FILE, 'w', encoding='utf-8') as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
 
