@@ -62,9 +62,7 @@ yarn-error.log*
 app.log
 
 /certs/
-/rentri-doc/
-/ricetta-bianca-doc/
-/testRE/
 
 # Certificati RENTRI (non versionare mai)
 /server/app/rentri/certs/
+/AAA-istruzioni-e-test/
