@@ -142,4 +142,17 @@ def map_appointment(app):
             'SPECIAL': 'APP_SERVIZIO',
         }
 
-    summary =
+    summary = f"Appuntamento {tipo} - {paziente}"
+    description = descrizione or note or f"Appuntamento di tipo {tipo}"
+    return {
+        COL_PAZIENTE: paziente,
+        COL_DATA: data,
+        COL_ORA_INIZIO: t_inizio,
+        COL_ORA_FINE: t_fine,
+        COL_STUDIO: studio_int,
+        COL_DESCRIZIONE: summary,
+        COL_NOTE: description,
+        'TIPO': tipo,
+        'DOTTORE': dottore_int,
+        'SPECIAL': '',
+    }
