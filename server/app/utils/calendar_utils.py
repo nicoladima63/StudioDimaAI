@@ -1,5 +1,3 @@
-# app/core/calendar_utils.py
-
 import os
 from typing import List, Dict
 from datetime import datetime, time as dt_time
@@ -7,16 +5,16 @@ import logging
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
-from os import getenv
-from .exceptions import GoogleCredentialsNotFoundError
 import hashlib
 import json
 from server.app.config.constants import GOOGLE_COLOR_MAP
+from server.app.utils.exceptions import GoogleCredentialsNotFoundError
 
 logger = logging.getLogger(__name__)
 
 TOKEN_FILE = 'server/token.json'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+SYNC_STATE_FILE = 'server/sync_state.json'
 
 
 def get_google_service():
@@ -27,13 +25,10 @@ def get_google_service():
     creds = None
     if os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
-    
-    # Se non ci sono credenziali valide, solleva un'eccezione.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             try:
                 creds.refresh(Request())
-                # Salva le credenziali aggiornate nel file token.json
                 with open(TOKEN_FILE, 'w') as token:
                     token.write(creds.to_json())
             except Exception as e:
@@ -47,7 +42,6 @@ def get_google_service():
                 f"Credenziali Google non trovate o non valide in '{TOKEN_FILE}'. "
                 "Esegui lo script 'server/authenticate_google.py' per ottenere le credenziali."
             )
-            
     return build('calendar', 'v3', credentials=creds)
 
 # Funzioni di utilità per il calendario
@@ -75,8 +69,6 @@ def _appointment_hash(app):
     s = f"{app['DATA']}|{app['ORA_INIZIO']}|{app['ORA_FINE']}|{app['TIPO']}|{app['STUDIO']}|{app['NOTE']}|{app['DESCRIZIONE']}|{app['PAZIENTE']}"
     return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
-SYNC_STATE_FILE = 'server/sync_state.json'
-
 def _load_sync_state():
     try:
         with open(SYNC_STATE_FILE, 'r', encoding='utf-8') as f:
@@ -86,5 +78,4 @@ def _load_sync_state():
 
 def _save_sync_state(state):
     with open(SYNC_STATE_FILE, 'w', encoding='utf-8') as f:
-        json.dump(state, f, ensure_ascii=False, indent=2)
-
+        json.dump(state, f, ensure_ascii=False, indent=2) 

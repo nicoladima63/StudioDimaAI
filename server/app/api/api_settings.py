@@ -11,7 +11,6 @@ def set_any_mode(tipo):
     modo = data.get('mode')
     if modo not in ['dev', 'prod', 'test']:
         return jsonify({'error': 'Modalità non valida'}), 400
-    # Solo per database: controllo raggiungibilità rete se si chiede prod
     if tipo == 'database' and modo == 'prod':
         mode, mode_changed = check_network_and_switch_mode('prod')
         if mode != 'prod':

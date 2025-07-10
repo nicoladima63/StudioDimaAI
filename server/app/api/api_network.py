@@ -5,10 +5,8 @@ network_bp = Blueprint('network', __name__)
 
 @network_bp.route('/api/network/status', methods=['GET'])
 def network_status():
-    # Ping server
     response = os.system("ping -n 1 SERVERDIMA >nul 2>&1")
     network_ok = (response == 0)
-    # Check cartella condivisa
     share_ok = os.path.exists(r'\\SERVERDIMA\Pixel\WINDENT')
     return jsonify({
         'network': 'ok' if network_ok else 'unreachable',

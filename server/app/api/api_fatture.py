@@ -1,12 +1,13 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from datetime import datetime
-from server.app.core.db_fatture import get_fatture
+from server.app.services.incassi_service import IncassiService
 
-fatture_bp = Blueprint('fatture', __name__)
+fatture_bp = Blueprint('fatture', __name__, url_prefix='/api/fatture')
+service = IncassiService()
 
 @fatture_bp.route('/all', methods=['GET'])
 def get_all_fatture():
-    fatture = get_fatture()
+    fatture = service.get_all_incassi()
     last_update = datetime.now().isoformat(timespec='seconds')
     return jsonify({
         'fatture': fatture,
@@ -15,10 +16,10 @@ def get_all_fatture():
 
 @fatture_bp.route('/anni', methods=['GET'])
 def get_anni_fatture():
-    fatture = get_fatture()
+    fatture = service.get_all_incassi()
     anni = set()
     for f in fatture:
-        data = f.get('data_incasso')
+        data = f.get('data')
         if data:
             try:
                 # Gestione formato stringa 'gg/mm/aaaa'

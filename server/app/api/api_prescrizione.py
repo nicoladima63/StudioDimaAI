@@ -1,8 +1,3 @@
-import os
-print("DEBUG: sto importando da", os.path.abspath(__file__))
-import server.app.core.prescrizione_data as mod
-print("DEBUG: attributi disponibili in prescrizione_data:", dir(mod))
-
 from flask import Blueprint, request, jsonify
 from server.app.ricetta_elettronica.utils import cerca_diagnosi, cerca_farmaci
 
@@ -12,7 +7,7 @@ prescrizione_bp = Blueprint("prescrizione", __name__, url_prefix="/api")
 def get_diagnosi():
     query = request.args.get("q", "").strip()
     if not query:
-        return jsonify([])  # oppure errore 400
+        return jsonify([])
     risultati = cerca_diagnosi(query)
     return jsonify(risultati)
 
@@ -22,4 +17,4 @@ def get_farmaci():
     if not query:
         return jsonify([])
     risultati = cerca_farmaci(query)
-    return jsonify(risultati)
+    return jsonify(risultati) 

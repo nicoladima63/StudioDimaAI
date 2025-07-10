@@ -1,10 +1,8 @@
-# analytics/app/auth/routes.py
-
 import re
 from flask import Blueprint, request, jsonify
-from ..extensions import db
-from .models import User
-from .utils import hash_password, verify_password
+from server.app.extensions import db
+from server.app.models.user import User
+from server.app.utils.auth_utils import hash_password, verify_password
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -27,7 +25,6 @@ def login():
     if not user or not verify_password(password, user.password_hash):
         return jsonify({"error": "Credenziali non valide"}), 401
 
-    # L'identità può essere un oggetto complesso, se necessario
     identity = {"id": user.id, "role": user.role}
     access_token = create_access_token(identity=identity, fresh=True)
     refresh_token = create_refresh_token(identity=identity)
@@ -45,22 +42,16 @@ def register():
     username = data.get("username")
     password = data.get("password")
 
-    # Validazione base
     if not username or not password:
         return jsonify({"error": "Username, password e email sono obbligatori"}), 400
 
-    # Validazione email
     if not EMAIL_REGEX.match(username):
         return jsonify({"error": "Email non valida"}), 400
 
-    # Controllo username/email esistenti
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username già utilizzato"}), 409
 
-    # Hash della password
     password_hash = hash_password(password)
-
-    # Crea nuovo utente
     new_user = User(username=username, password_hash=password_hash)
 
     try:
@@ -72,10 +63,9 @@ def register():
 
     return jsonify({"message": "Registrazione avvenuta con successo"}), 201
 
-
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
     identity = get_jwt_identity()
     access_token = create_access_token(identity=identity, fresh=False)
-    return jsonify(access_token=access_token)
+    return jsonify(access_token=access_token) 

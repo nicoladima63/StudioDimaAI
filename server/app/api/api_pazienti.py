@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
-from ..pazienti.service import PazientiService
+from server.app.services.pazienti_service import PazientiService
 
 pazienti_bp = Blueprint('pazienti', __name__, url_prefix='/api/pazienti')
 service = PazientiService()
@@ -27,8 +27,10 @@ def get_stats():
 @pazienti_bp.route('/test', methods=['GET'])
 def test_endpoint():
     try:
+        import logging
+        logger = logging.getLogger(__name__)
         logger.info("Test endpoint chiamato")
         return jsonify({'success': True, 'message': 'Endpoint funzionante'})
     except Exception as e:
         logger.error(f"Errore in test_endpoint: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500 
