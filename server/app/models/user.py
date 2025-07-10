@@ -1,7 +1,5 @@
-# analytics/app/auth/models.py
-
 from datetime import datetime
-from ..extensions import db
+from server.app.extensions import db
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -11,5 +9,4 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
-        return f"<User {self.username} ({self.role})>"
-
+        return f"<User {self.username} ({self.role})>" 

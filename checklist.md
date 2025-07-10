@@ -33,6 +33,33 @@ models/
 services/
 api/
 
+
+
+✅ Checklist Step: services/
+1. Crea/aggiorna la cartella server/app/services/
+Qui vanno tutti i servizi di business logic, uno per area/feature.
+2. Organizza i servizi per area
+Un file per ogni area/feature:
+user_service.py
+pazienti_service.py
+appuntamenti_service.py
+fatture_service.py
+recalls_service.py
+incassi_service.py
+(ecc.)
+3. Sposta le classi/funzioni di servizio
+Sposta le classi come RecallService, PazientiService, IncassiService nei rispettivi file in services/.
+Se una feature ha molta logica, puoi suddividere ulteriormente (es. services/pazienti/).
+4. Aggiorna gli import
+Nei controller/API/importa sempre da server.app.services.<nome_servizio>.
+5. Mantieni i servizi “slim”
+I servizi dovrebbero:
+Usare i modelli (se esistono) o i mapping.
+Usare le utility centralizzate (db_utils, ecc.).
+Non contenere logica di routing o di presentazione (solo business logic).
+6. Documenta
+Aggiungi docstring alle classi/funzioni principali per chiarire la responsabilità di ogni servizio.
+
 OPZIONALI
 Aggiunte consigliate
 1. Cartelle per static e templates (se usi Flask con HTML):

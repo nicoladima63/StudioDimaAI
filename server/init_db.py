@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from server.app.run import create_app
 from server.app.extensions import db
-from server.app.auth.models import User
+from server.app.models.user import User
 from server.app.auth.utils import hash_password
 
 def init_database():
