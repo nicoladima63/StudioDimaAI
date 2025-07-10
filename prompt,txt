@@ -1,0 +1,10 @@
+Sto lavorando al progetto StudioDimaAI. Voglio testare tutti gli endpoint API del backend (Flask) in modo sistematico, sia quelli pubblici che quelli protetti (autenticazione, pazienti, richiami, incassi, calendario, prescrizione, settings, ecc).
+Voglio:
+Un elenco di tutti gli endpoint disponibili, con metodo e path (es: GET /api/pazienti/, POST /api/auth/login, ecc)
+Per ogni endpoint, un esempio di chiamata HTTP (curl o Python requests) con payload di esempio se serve
+Per gli endpoint protetti, includi l’autenticazione (es: login → ottieni token → usalo nelle chiamate successive)
+Se ci sono parametri obbligatori, mostra un esempio valido e uno con errore
+Se ci sono test automatici già presenti, dimmi come eseguirli e dove vedere i risultati
+Se possibile, suggerisci una strategia per automatizzare i test (es: con pytest, Postman, ecc)
+Rispondi in italiano, sii pratico e schematico.
+Se ti servono dettagli sulla struttura delle API, chiedimeli subito!
