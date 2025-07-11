@@ -1,109 +1,74 @@
-# server/app/run.py
-from flask import Flask, jsonify
-from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from .config import Config
-from .extensions import db, jwt
+import os
 import logging
+from flask import Flask, jsonify
+from server.app.config.config import Config
+from server.app.extensions import db, jwt, cors
 from typing import Optional
-from server.app.calendar.routes import calendar_bp
-from server.app.recalls.recall_db_controller import recall_db_bp
-from server.app.routes.prescrizione import prescrizione_bp
-from server.app.incassi.controller import incassi_bp
-
-
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
 def configure_logging() -> None:
-    """Configura il logging per l'applicazione Flask."""
+    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+    log_dir = 'logs'
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, 'app.log')
     logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler('app.log')
-        ]
+        level=getattr(logging, log_level, logging.INFO),
+        format='%(asctime)s %(levelname)s %(name)s %(message)s',
+        handlers=[logging.StreamHandler(), logging.FileHandler(log_file)]
     )
 
-def register_blueprints(app: Flask) -> None:
-    """Registra tutti i blueprint dell'applicazione."""
-    from .auth.routes import auth_bp
-    from .routes.tests import tests_bp
-    from .recalls.controller import recalls_bp
-    from .recalls.recall_db_controller import recall_db_bp
-    from .pazienti.controller import pazienti_bp
-    from .routes.settings import settings_bp
-    from .routes.fatture import fatture_bp
-    from .routes.appuntamenti import appuntamenti_bp
-    from .routes.prescrizione import prescrizione_bp
-    from .routes.network import network_bp
+def check_critical_config(app: Flask) -> None:
+    for key in ['SQLALCHEMY_DATABASE_URI', 'JWT_SECRET_KEY']:
+        if not app.config.get(key):
+            raise RuntimeError(f"Config mancante: {key}")
 
-    # Blueprint principali
-    app.register_blueprint(auth_bp, url_prefix="/api/auth")
-    app.register_blueprint(tests_bp, url_prefix="/api/tests")
-    app.register_blueprint(calendar_bp, url_prefix="/api/calendar")
-    app.register_blueprint(recalls_bp, url_prefix="/api/recalls")
-    app.register_blueprint(recall_db_bp)
-    app.register_blueprint(pazienti_bp)
-    app.register_blueprint(settings_bp)
-    app.register_blueprint(fatture_bp, url_prefix="/api/fatture")
-    app.register_blueprint(appuntamenti_bp)
-    app.register_blueprint(prescrizione_bp)
-    app.register_blueprint(incassi_bp)
-    app.register_blueprint(network_bp)
-    # Aggiungi qui altri blueprint
+def register_blueprints(app: Flask) -> None:
+    from server.app.api.api_auth import auth_bp
+    from server.app.api.api_settings import settings_bp
+    from server.app.api.api_richiami import recalls_bp
+    from server.app.api.api_prescrizione import prescrizione_bp
+    from server.app.api.api_pazienti import pazienti_bp
+    from server.app.api.api_network import network_bp
+    from server.app.api.api_kpi import kpi_bp
+    from server.app.api.api_incassi import incassi_bp
+    from server.app.api.api_fatture import fatture_bp
+    from server.app.api.api_calendar import calendar_bp
+    blueprints = [
+        auth_bp, settings_bp, recalls_bp, prescrizione_bp, pazienti_bp, network_bp,
+        kpi_bp, incassi_bp, fatture_bp, calendar_bp
+    ]
+    for bp in blueprints:
+        app.register_blueprint(bp)
 
 def create_app(config_class: Optional[object] = Config) -> Flask:
-    """Factory per creare e configurare l'applicazione Flask."""
-    
-    # Configurazione logging
     configure_logging()
     logger = logging.getLogger(__name__)
-    
-    # Creazione app Flask
     app = Flask(__name__)
-    
-    try:
-        # Configurazione
-        app.config.from_object(config_class)
-        logger.info("Configurazione applicazione caricata con successo")
-        logger.info(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
-        
-        # Configurazione CORS più sicura
-        CORS(app, resources={r"/api/*": {
-            "origins": "http://localhost:5173",
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"]
-        }})
-        
-        # Inizializzazione database
-        db.init_app(app)
-        jwt.init_app(app)
-
-        # Aggiungi questi handler per debug
-        @jwt.invalid_token_loader
-        def invalid_token_callback(error):
-            logger.error(f"Token non valido: {error}")
-            return jsonify({'success': False, 'error': f'Token non valido: {error}'}), 422
-
-        
-        # Registrazione blueprint
-        register_blueprints(app)
-        
-        # Health check endpoint
-        @app.route('/health')
-        def health_check():
-            return {'status': 'healthy'}, 200
-            
-        logger.info("Applicazione inizializzata con successo")
-        
-    except Exception as e:
-        logger.error(f"Errore durante l'inizializzazione dell'app: {str(e)}")
-        raise
-    
+    app.config.from_object(config_class)
+    check_critical_config(app)
+    cors.init_app(app, resources={r"/api/*": {
+        "origins": os.getenv("CORS_ORIGINS", "http://localhost:5173"),
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }})
+    db.init_app(app)
+    jwt.init_app(app)
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        logger.error(f"Token non valido: {error}")
+        return jsonify({'success': False, 'error': f'Token non valido: {error}'}), 422
+    register_blueprints(app)
+    @app.route('/health')
+    def health_check():
+        try:
+            db.session.execute('SELECT 1')
+            db_status = 'ok'
+        except Exception:
+            db_status = 'error'
+        return {'status': 'healthy', 'db': db_status}, 200
+    logger.info("Applicazione inizializzata")
     return app
 
 if __name__ == "__main__":

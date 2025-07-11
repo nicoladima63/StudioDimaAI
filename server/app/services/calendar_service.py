@@ -2,7 +2,7 @@ import logging
 import os
 import time
 from googleapiclient.errors import HttpError
-from server.app.calendar.utils import get_google_service, _decimal_to_time, _safe_to_time, _get_google_color_id, _appointment_id, _appointment_hash, _load_sync_state, _save_sync_state
+from server.app.utils.calendar_utils import get_google_service, _decimal_to_time, _safe_to_time, _get_google_color_id, _appointment_id, _appointment_hash, _load_sync_state, _save_sync_state
 from server.app.config.constants import GOOGLE_COLOR_MAP
 from datetime import datetime, timedelta, time as dt_time
 import json

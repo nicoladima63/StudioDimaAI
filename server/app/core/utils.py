@@ -108,3 +108,46 @@ def costruisci_messaggio_richiamo(richiamo):
         logger.error(f"Errore costruzione messaggio richiamo: {e}")
         return "Gentile paziente, è il momento di programmare un richiamo. Contattaci per fissare l'appuntamento."
 
+
+def calcola_data_richiamo(ultima_visita, mesi_richiamo):
+    """
+    Calcola la data del prossimo richiamo a partire dalla data dell'ultima visita e dal numero di mesi di intervallo.
+    """
+    if not ultima_visita or not isinstance(ultima_visita, (datetime, date)) or not mesi_richiamo:
+        return None
+    try:
+        return ultima_visita + timedelta(days=int(mesi_richiamo) * 30)
+    except Exception as e:
+        logger.warning(f"Errore calcolo data richiamo: {e}")
+        return None
+
+def formatta_richiamo_per_frontend(record):
+    """
+    Trasforma un record DBF di richiamo in un dict pronto per il frontend.
+    """
+    col = COLONNE['richiami']
+    col_paz = COLONNE['pazienti']
+    id_paziente = record.get(col['id_paziente'])
+    tipo_codice = record.get(col['tipo'], '')
+    tipi_descrizione = []
+    if tipo_codice:
+        tipi_descrizione.append(str(tipo_codice))
+    telefono = record.get(col_paz.get('telefono', ''), '') or record.get(col_paz.get('cellulare', ''), '')
+    stato = 'futuro'
+    data_richiamo = record.get(col['data1'])
+    oggi = date.today()
+    if data_richiamo:
+        if data_richiamo < oggi:
+            stato = 'scaduto'
+        elif (data_richiamo - oggi).days <= 30:
+            stato = 'in_scadenza'
+    return {
+        'id_paziente': id_paziente,
+        'tipo_codice': tipo_codice,
+        'tipi_descrizione': tipi_descrizione,
+        'telefono': normalizza_numero_telefono(telefono),
+        'stato': stato,
+        'data_richiamo': data_richiamo.strftime('%Y-%m-%d') if isinstance(data_richiamo, (datetime, date)) else data_richiamo,
+        # altri campi utili...
+    }
+

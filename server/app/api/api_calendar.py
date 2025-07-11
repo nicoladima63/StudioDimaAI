@@ -4,7 +4,7 @@ import logging
 import uuid
 import threading
 from server.app.services.calendar_service import CalendarService
-from server.app.calendar.utils import GoogleCredentialsNotFoundError
+from server.app.utils.exceptions import GoogleCredentialsNotFoundError
 
 calendar_bp = Blueprint('calendar', __name__, url_prefix='/api/calendar')
 logger = logging.getLogger(__name__)

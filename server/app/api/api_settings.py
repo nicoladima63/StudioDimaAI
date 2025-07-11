@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 import os
 from server.app.core.mode_manager import get_mode, set_mode
-from server.app.core.db_handler import check_network_and_switch_mode
 
 settings_bp = Blueprint('settings', __name__)
 
@@ -12,8 +11,10 @@ def set_any_mode(tipo):
     if modo not in ['dev', 'prod', 'test']:
         return jsonify({'error': 'Modalità non valida'}), 400
     if tipo == 'database' and modo == 'prod':
-        mode, mode_changed = check_network_and_switch_mode('prod')
-        if mode != 'prod':
+        response = os.system("ping -n 1 SERVERDIMA >nul 2>&1")
+        network_ok = (response == 0)
+        share_ok = os.path.exists(r'\\SERVERDIMA\Pixel\WINDENT')
+        if not (network_ok and share_ok):
             return jsonify({
                 'error': 'network_unreachable',
                 'message': 'La rete studio non è raggiungibile. Impossibile passare a produzione. Assicurati di essere connesso alla risorsa di rete o effettua il login.'
