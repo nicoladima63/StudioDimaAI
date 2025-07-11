@@ -8,3 +8,48 @@ Se ci sono test automatici già presenti, dimmi come eseguirli e dove vedere i r
 Se possibile, suggerisci una strategia per automatizzare i test (es: con pytest, Postman, ecc)
 Rispondi in italiano, sii pratico e schematico.
 Se ti servono dettagli sulla struttura delle API, chiedimeli subito!
+
+
+Autenticazione
+POST /api/auth/login
+POST /api/auth/register
+POST /api/auth/refresh
+Pazienti
+GET /api/pazienti/
+GET /api/pazienti/stats
+GET /api/pazienti/test
+Richiami
+GET /api/recalls/
+GET /api/recalls/statistics
+GET /api/recalls/<richiamo_id>/message
+POST /api/recalls/update-dates
+GET /api/recalls/export
+GET /api/recalls/test
+Incassi
+GET /api/incassi/get
+GET /api/incassi/all
+GET /api/incassi/trend
+GET /api/incassi/by_date
+GET /api/incassi/by_periodo
+Fatture
+GET /api/fatture/all
+GET /api/fatture/anni
+Calendario
+GET /api/calendar/list
+POST /api/calendar/sync
+GET /api/calendar/sync_status
+POST /api/calendar/clear
+GET /api/calendar/clear_status
+DELETE /api/calendar/clear/<calendar_id>
+Prescrizione
+GET /api/prescrizione/diagnosi
+GET /api/prescrizione/farmaci
+Settings
+GET /api/settings/<tipo>-mode
+POST /api/settings/<tipo>-mode
+Network
+GET /api/network/status
+KPI
+GET /api/kpi/stats
+GET /api/kpi/prime-visite
+GET /api/kpi/totale-fino-a
