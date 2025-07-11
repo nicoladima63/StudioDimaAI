@@ -23,9 +23,10 @@ coverage.xml
 dist/
 build/
 
-# Database
+# Database (ignora solo quelli runtime)
 *.db
 *.sqlite3
+/instance/
 server/app/instance/
 server/instance/
 
@@ -65,4 +66,9 @@ app.log
 
 # Certificati RENTRI (non versionare mai)
 /server/app/rentri/certs/
+
+# AAA test e istruzioni (ignorata come richiesto)
 /AAA-istruzioni-e-test/
+
+# Log di sistema (ignorata come richiesto)
+/logs/
