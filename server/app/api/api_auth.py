@@ -44,10 +44,10 @@ def register():
     password = data.get("password")
 
     if not username or not password:
-        return jsonify({"error": "Username, password e email sono obbligatori"}), 400
+        return jsonify({"error": "Username e Password sono obbligatori"}), 400
 
     if not EMAIL_REGEX.match(username):
-        return jsonify({"error": "Email non valida"}), 400
+        return jsonify({"error": "Username (la tua email) non valida"}), 400
 
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username già utilizzato"}), 409
