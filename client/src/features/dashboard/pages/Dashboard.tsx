@@ -24,9 +24,7 @@ const Dashboard: React.FC = () => {
     nuoveVisite: null
   })
   const [datiGrafico, setDatiGrafico] = useState<{ [anno: string]: { month: number; count: number }[] }>({})
-  const [totali, setTotali] = useState<any[]>([]);
-
-  const colori = ['#3399ff', '#8884d8', '#b0b0b0']
+  const [totali, setTotali] = useState<{ anno: string; totale: number; colore: string; progressivo: number }[]>([]);
 
   useEffect(() => {
     async function fetchStats() {
@@ -162,13 +160,14 @@ const Dashboard: React.FC = () => {
               <CCol sm={6} lg={2}>
                 <StatWidget 
                   color="danger"
-                  value={stats.nuoveVisite !== null ? stats.nuoveVisite : 'Nuove visite nel mese='}
+                  value={stats.nuoveVisite ?? 0}
                   title="Prime visite"
                   icon={cilBell}
                 />
               </CCol>
-              <CCol sm={12} lg={3}>
+              <CCol sm={6} lg={2}>
                  <AppuntamentiCoreUICard
+                   title="Appuntamenti"
                    value={stats.meseCorrente}
                    percent={stats.crescita}
                    data={datiGrafico[String(new Date().getFullYear())] || []}

@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { getAllFatture } from '@/api/apiClient';
+import { getAllFatture, getAnniFatture } from '@/api/apiClient';
 import { Card, StatWidget } from '@/components/ui';
 import { CRow, CCol, CButton, CSpinner, CPagination, CPaginationItem, CFormSelect } from '@coreui/react';
 import { cilCreditCard, cilMoney } from '@coreui/icons';
 
 interface Fattura {
-  id: string;
-  data_incasso: string;
-  importo: number;
-  metodo: string;
-  banca_cassa: string;
-  esenzione_iva: boolean;
-  marca_bollo: number;
+  fatturaid: string;
+  fatturadata: string;
+  fatturaimporto: number;
+  fatturamodopagamento: string;
+  fatturabanca: string;
+  fatturabollo: number;
+  // Aggiungi altri campi se necessario, basandoti su `COLONNE`
 }
 
 const ORE_OBSOLESCENZA = 48;
@@ -49,43 +49,44 @@ const FatturePage: React.FC = () => {
   const [mese, setMese] = useState<string>('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [anniDisponibili, setAnniDisponibili] = useState<number[]>([]);
 
-  // Anni disponibili (solo anni validi)
-  const anniDisponibili = useMemo(() => {
-    const anni = new Set<number>();
-    fatture.forEach(f => {
-      const d = new Date(f.data_incasso);
-      if (!isNaN(d.getTime()) && d.getFullYear() > 2000) anni.add(d.getFullYear());
-    });
-    return Array.from(anni).sort((a, b) => b - a);
-  }, [fatture]);
-
-  // Imposta anno di default appena arrivano i dati
+  // Carica gli anni disponibili all'avvio
   useEffect(() => {
-    if (anniDisponibili.length > 0 && (anno === null || !anniDisponibili.includes(anno))) {
-      setAnno(anniDisponibili[0]);
-    }
-  }, [anniDisponibili, anno]);
+    setLoading(true);
+    getAnniFatture()
+      .then(anni => {
+        setAnniDisponibili(anni);
+        if (anni.length > 0) {
+          setAnno(anni[0]); // Imposta l'anno più recente come default
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setErrore('Errore nel recupero degli anni');
+        setLoading(false);
+      });
+  }, []);
 
   // Filtro e ordinamento
   const fattureFiltrate = useMemo(() => {
     let filtered = fatture;
     if (anno) {
       filtered = filtered.filter(f => {
-        const d = new Date(f.data_incasso);
+        const d = new Date(f.fatturadata);
         return !isNaN(d.getTime()) && d.getFullYear() === anno;
       });
     }
     if (mese) {
       filtered = filtered.filter(f => {
-        const d = new Date(f.data_incasso);
+        const d = new Date(f.fatturadata);
         return !isNaN(d.getTime()) && (d.getMonth() + 1) === parseInt(mese);
       });
     }
     // Ordina decrescente per data
     filtered = filtered.slice().sort((a, b) => {
-      const da = new Date(a.data_incasso).getTime();
-      const db = new Date(b.data_incasso).getTime();
+      const da = new Date(a.fatturadata).getTime();
+      const db = new Date(b.fatturadata).getTime();
       return db - da;
     });
     return filtered;
@@ -96,9 +97,13 @@ const FatturePage: React.FC = () => {
   const paginatedFatture = fattureFiltrate.slice((page - 1) * pageSize, page * pageSize);
 
   const aggiorna = () => {
+    if (!anno) {
+      setErrore("Seleziona un anno per aggiornare i dati.");
+      return;
+    }
     setLoading(true);
     setErrore(null);
-    getAllFatture()
+    getAllFatture(anno, mese)
       .then(({ fatture, last_update }) => {
         setFatture(fatture);
         setLastUpdate(last_update);
@@ -114,10 +119,11 @@ const FatturePage: React.FC = () => {
       });
   };
 
-  useEffect(() => {
-    aggiorna();
-    // eslint-disable-next-line
-  }, []);
+  // Non caricare tutto all'inizio, ma solo su richiesta
+  // useEffect(() => {
+  //   aggiorna();
+  //   // eslint-disable-next-line
+  // }, []);
 
   // Reset pagina quando cambiano filtri
   useEffect(() => {
@@ -138,7 +144,7 @@ const FatturePage: React.FC = () => {
           <StatWidget color="primary" value={fattureFiltrate.length} title="Numero fatture" icon={cilCreditCard} />
         </CCol>
         <CCol sm={6} lg={3}>
-          <StatWidget color="success" value={fattureFiltrate.reduce((sum, f) => sum + (f.importo || 0), 0).toFixed(2) + ' €'} title="Totale incassi" icon={cilMoney} />
+          <StatWidget color="success" value={fattureFiltrate.reduce((sum, f) => sum + (f.fatturaimporto || 0), 0).toFixed(2) + ' €'} title="Totale incassi" icon={cilMoney} />
         </CCol>
       </CRow>
       <CRow className="mb-3">
@@ -190,24 +196,22 @@ const FatturePage: React.FC = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Data incasso</th>
+                  <th>Data</th>
                   <th>Importo</th>
                   <th>Metodo</th>
                   <th>Banca/Cassa</th>
-                  <th>Esenzione IVA</th>
-                  <th>Marca bollo</th>
+                  <th>Bollo</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedFatture.map((f, idx) => (
-                  <tr key={`${f.id || 'noid'}_${f.data_incasso || 'nodate'}_${idx}`} className={f.importo === 0 ? 'table-danger' : ''}>
-                    <td>{f.id}</td>
-                    <td>{formatDateIT(f.data_incasso)}</td>
-                    <td>{f.importo.toFixed(2)}</td>
-                    <td>{f.metodo}</td>
-                    <td>{f.banca_cassa}</td>
-                    <td>{f.esenzione_iva ? 'Sì' : 'No'}</td>
-                    <td>{f.marca_bollo}</td>
+                  <tr key={`${f.fatturaid || 'noid'}_${f.fatturadata || 'nodate'}_${idx}`} className={f.fatturaimporto === 0 ? 'table-danger' : ''}>
+                    <td>{f.fatturaid}</td>
+                    <td>{formatDateIT(f.fatturadata)}</td>
+                    <td>{f.fatturaimporto.toFixed(2)}</td>
+                    <td>{f.fatturamodopagamento}</td>
+                    <td>{f.fatturabanca}</td>
+                    <td>{f.fatturabollo}</td>
                   </tr>
                 ))}
               </tbody>

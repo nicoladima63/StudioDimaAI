@@ -2,6 +2,7 @@
 
 import re
 import pandas as pd
+import json
 from datetime import datetime, date, timedelta, time
 
 from server.app.config.constants import TIPI_APPUNTAMENTO, MEDICI, COLONNE
@@ -38,7 +39,7 @@ def calcola_giorni_prenotazione(data_inserimento):
         return 0
 
 
-def normalizza_numero_telefono(numero_telefono):
+def normalizza_numero_telefono_old(numero_telefono):
     if pd.isna(numero_telefono):
         return None
     numero_pulito = re.sub(r"[^\d+]", "", str(numero_telefono)).lstrip("+")
@@ -48,6 +49,50 @@ def normalizza_numero_telefono(numero_telefono):
         numero_pulito = "39" + numero_pulito
     if len(numero_pulito) < 11 or len(numero_pulito) > 13:
         logger.warning(f"Numero {numero_telefono} → {numero_pulito} ha lunghezza anomala")
+    return "+" + numero_pulito
+
+def normalizza_numero_telefono(numero_telefono, origine='cellulare'):
+    if pd.isna(numero_telefono):
+        return None
+
+    numero_str = str(numero_telefono).strip()
+
+    # Escludi segnaposto palesi
+    if numero_str in {".", "-", "", "0"}:
+        return None
+
+    # Rimuove tutto ciò che non è cifra o +
+    numero_pulito = re.sub(r"[^\d+]", "", numero_str).lstrip("+")
+
+    # Gestione prefisso internazionale
+    if numero_pulito.startswith("00"):
+        numero_pulito = numero_pulito[2:]
+    if not numero_pulito.startswith("39"):
+        numero_pulito = "39" + numero_pulito
+
+    # Validazione comune
+    def is_falso(n):
+        return len(set(n)) <= 2  # Es: solo zeri o ripetuti
+
+    # Logica differenziata per origine
+    if origine == 'telefono' or numero_str.startswith("0"):
+        if len(numero_pulito) < 11 or len(numero_pulito) > 13:
+            logger.warning(f"[FISSO ANOMALO] Orig: '{numero_telefono}' -> '{numero_pulito}'")
+            return None
+        if is_falso(numero_pulito):
+            logger.warning(f"[FISSO FASULLO] '{numero_telefono}' ->'{numero_pulito}'")
+            return None
+        return "+" + numero_pulito
+
+    # Caso default: cellulare
+    if len(numero_pulito) < 11 or len(numero_pulito) > 13:
+        logger.warning(f"[CELL ANOMALO] Orig: '{numero_telefono}' -> '{numero_pulito}'")
+        return None
+
+    if is_falso(numero_pulito):
+        logger.warning(f"[CELL FASULLO] '{numero_telefono}' -> '{numero_pulito}'")
+        return None
+
     return "+" + numero_pulito
 
 
@@ -121,7 +166,7 @@ def calcola_data_richiamo(ultima_visita, mesi_richiamo):
         logger.warning(f"Errore calcolo data richiamo: {e}")
         return None
 
-def formatta_richiamo_per_frontend(record):
+def formatta_richiamo_per_frontend_2(record):
     """
     Trasforma un record DBF di richiamo in un dict pronto per il frontend.
     """
@@ -151,3 +196,61 @@ def formatta_richiamo_per_frontend(record):
         # altri campi utili...
     }
 
+def formatta_richiamo_per_frontend(record):
+    """
+    Trasforma un record DBF di richiamo in un dict pronto per il frontend.
+    """
+    col = COLONNE['richiami']
+    col_paz = COLONNE['pazienti']
+    id_paziente = record.get(col['id_paziente'])
+    tipo_codice = record.get(col['tipo'], '')
+    tipi_descrizione = [str(tipo_codice)] if tipo_codice else []
+
+    # Recupera telefono e cellulare separatamente
+    telefono_raw = record.get(col_paz.get('telefono', ''), '')
+    cellulare_raw = record.get(col_paz.get('cellulare', ''), '')
+
+    # Prima prova a normalizzare il fisso (origine='telefono'), poi il cellulare
+    numero_telefono = normalizza_numero_telefono(telefono_raw, origine='telefono') or \
+                      normalizza_numero_telefono(cellulare_raw, origine='cellulare')
+
+    # Calcolo stato richiamo
+    stato = 'futuro'
+    data_richiamo = record.get(col['data1'])
+    oggi = date.today()
+    giorni_scadenza = None
+    if data_richiamo:
+        if data_richiamo < oggi:
+            stato = 'scaduto'
+            giorni_scadenza = (oggi - data_richiamo).days
+        elif (data_richiamo - oggi).days <= 30:
+            stato = 'in_scadenza'
+            giorni_scadenza = (data_richiamo - oggi).days
+        else:
+            giorni_scadenza = (data_richiamo - oggi).days
+
+    nome_paziente = record.get(col_paz.get('nome', ''), 'Paziente non specificato').strip()
+
+    mesi_richiamo = record.get(col.get('mesi'), 0)
+
+    risultato = {
+        'id_paziente': id_paziente,
+        'nome_completo': nome_paziente,
+        'tipo_codice': tipo_codice,
+        'tipi_descrizione': tipi_descrizione,
+        'telefono': numero_telefono,
+        'stato': stato,
+        'data_richiamo': data_richiamo.strftime('%Y-%m-%d') if isinstance(data_richiamo, (datetime, date)) else None,
+        'giorni_scadenza': giorni_scadenza,
+        'ultima_visita': record.get(col_paz.get('ultima_visita')).strftime('%Y-%m-%d') if isinstance(record.get(col_paz.get('ultima_visita')), (datetime, date)) else None,
+        'mesi_richiamo': int(mesi_richiamo) if mesi_richiamo else 0
+    }
+
+    # Debug: salvataggio su file JSON
+    try:
+        with open("debug_richiamo.json", "a", encoding="utf-8") as f:
+            f.write(json.dumps(risultato, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print(f"[DEBUG FILE ERROR] {e}")
+
+    return risultato

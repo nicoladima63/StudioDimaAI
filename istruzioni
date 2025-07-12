@@ -1,0 +1,18 @@
+per avviare il server
+dalla root StudioDimaAI
+.\venv\Scripts\Activate
+python -m server.app.run
+
+
+
+per il client
+
+cd client
+npm run dev
+
+
+“Analizza a fondo il file X: cerca incoerenze, errori, duplicazioni, import inutili, errori di stile, e suggerisci miglioramenti strutturali e di best practice. Non fermarti alla prima cosa che trovi, ma controlla tutto il file.”
+Oppure:
+“Fai una code review completa di X come farebbe un senior: ogni dettaglio, ogni funzione, ogni import, ogni commento, ogni naming, ogni logica.”
+O ancora:
+“Voglio una revisione totale di X: trova tutto ciò che non va, anche dettagli minori, e proponi la versione migliore possibile.”

@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
 import uuid
 import threading
+from datetime import datetime
 from server.app.services.calendar_service import CalendarService
 from server.app.utils.exceptions import GoogleCredentialsNotFoundError
 
@@ -117,4 +118,56 @@ def clear_calendar(calendar_id: str):
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-# (Altri endpoint come appointments, reauth-url, oauth2callback possono essere aggiunti qui con la stessa logica) 
+
+@calendar_bp.route('/appointments', methods=['GET'])
+@jwt_required()
+def get_db_appointments_for_month():
+    """Restituisce gli appuntamenti del mese richiesto dal DBF."""
+    try:
+        month = request.args.get('month', type=int)
+        year = request.args.get('year', type=int)
+        
+        if not month or not year:
+            return jsonify({'error': 'I parametri month e year sono obbligatori'}), 400
+        
+        appointments = CalendarService.get_db_appointments_for_month(month, year)
+        return jsonify({'appointments': appointments})
+        
+    except FileNotFoundError as e:
+        logger.error(f"Errore file non trovato in get_db_appointments_for_month: {str(e)}")
+        return jsonify({'error': str(e)}), 404
+    except Exception as e:
+        logger.error(f"Errore in get_db_appointments_for_month: {str(e)}", exc_info=True)
+        return jsonify({'error': "Errore interno del server"}), 500
+
+
+@calendar_bp.route('/appointments/year', methods=['GET'])
+@jwt_required()
+def get_db_appointments_stats_for_year():
+    """Restituisce le statistiche degli appuntamenti per anno/mese."""
+    try:
+        stats = CalendarService.get_db_appointments_stats_for_year()
+        return jsonify({'success': True, 'data': stats})
+    except Exception as e:
+        logger.error(f"Errore in get_db_appointments_stats_for_year: {str(e)}", exc_info=True)
+        return jsonify({'error': "Errore interno del server"}), 500
+
+
+@calendar_bp.route('/appointments_by_range', methods=['GET'])
+@jwt_required()
+def get_db_appointments_by_range():
+    """Restituisce il conteggio degli appuntamenti in un range di date."""
+    start_str = request.args.get('start')
+    end_str = request.args.get('end')
+    
+    if not start_str or not end_str:
+        return jsonify({'error': 'I parametri start e end sono obbligatori'}), 400
+
+    try:
+        count = CalendarService.get_db_appointments_count_by_range(start_str, end_str)
+        return jsonify({'success': True, 'count': count})
+    except ValueError:
+        return jsonify({'error': 'Formato data non valido. Usa DD/MM/YYYY'}), 400
+    except Exception as e:
+        logger.error(f"Errore in get_db_appointments_by_range: {str(e)}", exc_info=True)
+        return jsonify({'error': "Errore interno del server"}), 500

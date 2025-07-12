@@ -274,8 +274,12 @@ export async function syncModeWithBackend() {
 }
 
 // Fatture
-export async function getAllFatture() {
-  const response = await apiClient.get('/api/fatture/all');
+export async function getAllFatture(anno?: number | null, mese?: string | null) {
+  const params = new URLSearchParams();
+  if (anno) params.append('anno', String(anno));
+  if (mese) params.append('mese', mese);
+  
+  const response = await apiClient.get('/api/fatture/all', { params });
   return response.data; // { fatture: [...], last_update: ... }
 }
 

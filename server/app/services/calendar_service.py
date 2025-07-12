@@ -11,6 +11,8 @@ import hashlib
 logger = logging.getLogger(__name__)
 SYNC_STATE_FILE = 'server/sync_state.json'
 
+from server.app.core import db_appuntamenti
+
 class CalendarService:
     @staticmethod
     def google_list_calendars():
@@ -192,4 +194,25 @@ class CalendarService:
                     break
             except Exception as e:
                 logger.error(f"Errore generico durante creazione evento: {e}")
-                break 
+                break
+
+    @staticmethod
+    def get_db_appointments_for_month(month: int, year: int):
+        """
+        Wrapper del servizio per recuperare appuntamenti per mese dal modulo dati.
+        """
+        return db_appuntamenti.get_appointments_for_month(month, year)
+
+    @staticmethod
+    def get_db_appointments_stats_for_year():
+        """
+        Wrapper del servizio per recuperare statistiche annuali dal modulo dati.
+        """
+        return db_appuntamenti.get_appointments_stats_for_year()
+
+    @staticmethod
+    def get_db_appointments_count_by_range(start_date: str, end_date: str):
+        """
+        Wrapper del servizio per contare appuntamenti in un range dal modulo dati.
+        """
+        return db_appuntamenti.get_appointments_count_by_range(start_date, end_date)

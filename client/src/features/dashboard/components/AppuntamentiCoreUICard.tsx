@@ -4,13 +4,14 @@ import { BarChart, Bar, ResponsiveContainer } from 'recharts'
 
 
 interface Props {
+  title: string
   value: number
   percent: number
   data: { month: number, count: number }[]
   color?: string
 }
 
-const AppuntamentiCoreUICard: React.FC<Props> = ({ value, percent, data, color = '#ef4444' }) => {
+const AppuntamentiCoreUICard: React.FC<Props> = ({ title, value, percent, data, color = '#ef4444' }) => {
   console.log(data)
   const isPositive = percent >= 0
   // Prepara i dati per la mini-barra (ultimi 12 mesi)
@@ -24,10 +25,10 @@ const AppuntamentiCoreUICard: React.FC<Props> = ({ value, percent, data, color =
             ({isPositive ? '+' : ''}{percent}% {isPositive ? '↑' : '↓'})
           </span>
         </div>
-        <div style={{ fontSize: 15, opacity: 0.9, marginTop: 2, marginBottom: 8 }}>Appuntamentixxx</div>
+        <div style={{ fontSize: 15, opacity: 0.9, marginTop: 2, marginBottom: 8 }}>{title}</div>
         <div style={{ width: '100%', height: 40, position: 'absolute', left: 0, bottom: 0, opacity: 0.5 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart width={150} height={40} data={data}>
+            <BarChart width={150} height={40} data={chartData}>
               <Bar dataKey="value" fill="#fff" />
             </BarChart>
           </ResponsiveContainer>

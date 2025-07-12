@@ -9,7 +9,7 @@ recalls_bp = Blueprint('recalls', __name__, url_prefix='/api/recalls')
 recall_service = RecallService()
 
 @recalls_bp.route('/', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def get_recalls():
     try:
         days_threshold = request.args.get('days', 90, type=int)
@@ -40,7 +40,7 @@ def get_recalls():
         }), 500
 
 @recalls_bp.route('/statistics', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def get_recall_statistics():
     try:
         days_threshold = request.args.get('days', 90, type=int)

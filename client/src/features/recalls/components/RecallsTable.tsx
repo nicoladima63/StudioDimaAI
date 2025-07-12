@@ -34,6 +34,20 @@ const COLORI_RICHIAMI: Record<string, string> = {
   'Controllo': '#ADD8E6', // azzurro
 };
 
+const TIPO_RICHIAMI_MAP: Record<string, string> = {
+  '1': 'Generico',
+  '2': 'Igiene',
+  '3': 'Rx Impianto',
+  '4': 'Controllo',
+  '5': 'Impianto',
+  '6': 'Ortodonzia'
+};
+
+const decodeTipiRichiamo = (codici: string | null | undefined): string[] => {
+  if (!codici) return [];
+  return codici.split('').map(code => TIPO_RICHIAMI_MAP[code] || 'Sconosciuto');
+};
+
 const getTipoColor = (tipo: string) => COLORI_RICHIAMI[tipo] || '#888';
 
 interface RecallsTableProps {
@@ -101,9 +115,14 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
   };
 
   const filteredRichiami = richiami.filter(richiamo => {
-    const matchesSearch = richiamo.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         richiamo.telefono.includes(searchTerm) ||
-                         richiamo.tipo_descrizione.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchTermLower = searchTerm.toLowerCase();
+    const tipiDecodificati = decodeTipiRichiamo(richiamo.tipo_codice);
+
+    const matchesSearch = (
+      (richiamo.nome_completo || '').toLowerCase().includes(searchTermLower) ||
+      (richiamo.telefono || '').includes(searchTerm) ||
+      tipiDecodificati.some(desc => desc.toLowerCase().includes(searchTermLower))
+    );
     
     const matchesStatus = !statusFilter || richiamo.stato === statusFilter;
     
@@ -142,8 +161,8 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
     setSelectedRichiamo({
       paziente: richiamo.nome_completo,
       telefono: richiamo.telefono,
-      messaggio: `Gentile ${richiamo.nome_completo}, la ricordiamo per il suo appuntamento di ${richiamo.tipo_descrizione}. La contatteremo presto per confermare.`,
-      tipo_richiamo: richiamo.tipo_descrizione,
+      messaggio: `Gentile ${richiamo.nome_completo}, la ricordiamo per il suo appuntamento di ${decodeTipiRichiamo(richiamo.tipo_codice).join(', ')}. La contatteremo presto per confermare.`,
+      tipo_richiamo: decodeTipiRichiamo(richiamo.tipo_codice).join(', '),
       data_scadenza: richiamo.data_richiamo || 'Non specificata'
     });
     setShowMessageModal(true);
@@ -259,7 +278,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
                 </CTableDataCell>
                 <CTableDataCell>
                   <div className="d-flex flex-wrap gap-1">
-                    {richiamo.tipi_descrizione.map((tipo, i) => (
+                    {decodeTipiRichiamo(richiamo.tipo_codice).map((tipo, i) => (
                       <span
                         key={i}
                         style={{
@@ -281,7 +300,11 @@ const RecallsTable: React.FC<RecallsTableProps> = ({
                   {richiamo.mesi_richiamo ? `${richiamo.mesi_richiamo} mesi` : '-'}
                 </CTableDataCell>
                 <CTableDataCell>
-                  {richiamo.data_richiamo ? (
+                  {richiamo.data_richiamo && richiamo.data_richiamo === richiamo.ultima_visita ? (
+                    <CBadge color="warning" shape="rounded-pill">
+                      Impostare Richiamo
+                    </CBadge>
+                  ) : richiamo.data_richiamo ? (
                     <div>
                       <div>{formatDate(richiamo.data_richiamo)}</div>
                     </div>

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   CCard,
   CCardBody,
-  CCardHeader,
   CFormSelect,
   CButton,
   CRow,
@@ -17,8 +16,15 @@ import {
 import Card from '@/components/ui/Card';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {  getCalendars,  clearCalendarEvents} from '@/api/apiClient';
-import apiClient from '@/api/apiClient';
+import {
+  getCalendars,
+  getAppointments,
+  startSync,
+  getSyncStatus,
+  clearCalendar,
+  getClearStatus,
+  getReauthUrl
+} from '@/api/services/calendar.service';
 import type { Calendar } from '@/lib/apiTypes';
 
 const MONTHS = [  'Gennaio',  'Febbraio',  'Marzo',  'Aprile',  'Maggio',  'Giugno',  'Luglio',  'Agosto',  'Settembre',  'Ottobre',  'Novembre',  'Dicembre',];
@@ -40,13 +46,9 @@ const CalendarPage: React.FC = () => {
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [selectedCalendar, setSelectedCalendar] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth()); // 0-based
-  const [isLoadingClear, setIsLoadingClear] = useState<boolean>(false);
   const [isLoadingCalendars, setIsLoadingCalendars] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState(false);
   const [showCalendarWarning, setShowCalendarWarning] = useState(false);
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
-  const [showClearWarning, setShowClearWarning] = useState(false);
-  const [clearJobId, setClearJobId] = useState<string | null>(null);
   const [clearProgress, setClearProgress] = useState(0);
   const [clearDeleted, setClearDeleted] = useState(0);
   const [clearTotal, setClearTotal] = useState(0);
@@ -63,6 +65,7 @@ const CalendarPage: React.FC = () => {
     studioGiallo: number;
     nonSincronizzabili: number;
   } | null>(null);
+  const [loadTrigger, setLoadTrigger] = useState(0);
 
   // Stati per la modal di sincronizzazione in corso
   const [showSyncModal, setShowSyncModal] = useState(false);
@@ -92,10 +95,11 @@ const CalendarPage: React.FC = () => {
       if (data.length === 0) {
         toast.info('Nessun calendario trovato.');
       }
-    } catch (err: any) {
-      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
-      if (err?.response?.data?.error_code === 'GLOBAL_GOOGLE_AUTH_REQUIRED') {
-        setReauthMessage(err.response.data.message);
+    } catch (err) {
+      const error = err as { response?: { data?: { error_code?: string; message?: string } }; message?: string };
+      const errorMessage = error.message || 'Errore sconosciuto';
+      if (error?.response?.data?.error_code === 'GLOBAL_GOOGLE_AUTH_REQUIRED') {
+        setReauthMessage(error.response.data.message || 'Autenticazione Google richiesta.');
         setShowReauthModal(true);
       } else {
         console.error('Errore caricamento calendari', err);
@@ -110,33 +114,50 @@ const CalendarPage: React.FC = () => {
     fetchCalendars();
   }, []);
 
-  // Funzione per caricare preview degli appuntamenti
-  const handleLoadAppointments = async () => {
-    setIsLoadingPreview(true);
-    try {
-      const response = await apiClient.get('/api/calendar/appointments', {
-        params: { month: selectedMonth + 1, year: currentYear }
-      });
-      const appointments: Appointment[] = response.data.appointments || [];
-      
-      // Calcola statistiche
-      const stats = {
-        total: appointments.length,
-        studioBlu: appointments.filter((app: Appointment) => app.STUDIO === 1).length,
-        studioGiallo: appointments.filter((app: Appointment) => app.STUDIO === 2).length,
-        nonSincronizzabili: appointments.filter((app: Appointment) => !app.STUDIO || ![1, 2].includes(app.STUDIO)).length
-      };
-      
-      setPreviewStats(stats);
-      toast.success(`✅ Caricati ${stats.total} appuntamenti per ${MONTHS[selectedMonth]} ${currentYear}`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
-      console.error('Errore caricamento appuntamenti', err);
-      toast.error(`❌ Errore caricamento appuntamenti: ${errorMessage}`);
-    } finally {
-      setIsLoadingPreview(false);
-    }
-  };
+  // Effetto per caricare gli appuntamenti quando il trigger cambia
+  useEffect(() => {
+    if (loadTrigger === 0) return; // Non eseguire al primo render
+
+    const controller = new AbortController();
+
+    const fetchAppointments = async () => {
+      setIsLoadingPreview(true);
+      setPreviewStats(null);
+      try {
+        const data = await getAppointments(selectedMonth + 1, currentYear, controller.signal);
+        const appointments: Appointment[] = data.appointments || [];
+
+        const stats = {
+          total: appointments.length,
+          studioBlu: appointments.filter((app: Appointment) => app.STUDIO === 1).length,
+          studioGiallo: appointments.filter((app: Appointment) => app.STUDIO === 2).length,
+          nonSincronizzabili: appointments.filter((app: Appointment) => !app.STUDIO || ![1, 2].includes(app.STUDIO)).length,
+        };
+
+        setPreviewStats(stats);
+        if (stats.total > 0) {
+            toast.success(`✅ Caricati ${stats.total} appuntamenti per ${MONTHS[selectedMonth]} ${currentYear}`);
+        } else {
+            toast.info(`Nessun appuntamento trovato per ${MONTHS[selectedMonth]} ${currentYear}`);
+        }
+      } catch (err) {
+        const error = err as { name?: string; message?: string };
+        if (error.name !== 'CanceledError') {
+          const errorMessage = error.message || 'Errore sconosciuto';
+          console.error('Errore caricamento appuntamenti', err);
+          toast.error(`❌ Errore caricamento appuntamenti: ${errorMessage}`);
+        }
+      } finally {
+        setIsLoadingPreview(false);
+      }
+    };
+
+    fetchAppointments();
+
+    return () => {
+      controller.abort();
+    };
+  }, [loadTrigger, selectedMonth, currentYear]);
 
   // Funzione per sincronizzazione e pulizia
   const handleSync = async () => {
@@ -156,20 +177,14 @@ const CalendarPage: React.FC = () => {
 
     try {
       // Avvia la sincronizzazione asincrona SOLO sul calendario selezionato
-      const response = await apiClient.post('/api/calendar/sync', {
-        calendarId: selectedCalendar,
-        month: selectedMonth + 1,
-        year: currentYear
-      });
+      const response = await startSync(selectedCalendar, selectedMonth + 1, currentYear);
 
       const { job_id } = response.data;
       
       // Inizia il polling per monitorare il progresso
       const pollSyncStatus = async () => {
         try {
-          const statusResponse = await apiClient.get('/api/calendar/sync_status', {
-            params: { job_id }
-          });
+          const statusResponse = await getSyncStatus(job_id);
           
           const { status, progress, synced, total, message, error } = statusResponse.data;
           
@@ -232,19 +247,14 @@ const CalendarPage: React.FC = () => {
     setClearError(null);
 
     try {
-      const response = await apiClient.post('/api/calendar/clear', {
-        calendarId: selectedCalendar
-      });
+      const response = await clearCalendar(selectedCalendar);
 
       const { job_id } = response.data;
-      setClearJobId(job_id);
 
       // Inizia il polling per monitorare il progresso
       const pollClearStatus = async () => {
         try {
-          const statusResponse = await apiClient.get('/api/calendar/clear_status', {
-            params: { job_id }
-          });
+          const statusResponse = await getClearStatus(job_id);
           
           const { status, progress, deleted, total, error } = statusResponse.data;
           
@@ -360,7 +370,7 @@ const CalendarPage: React.FC = () => {
               <div className="mb-3">
                 <CButton
                   color="primary"
-                  onClick={handleLoadAppointments}
+                  onClick={() => setLoadTrigger(c => c + 1)}
                   disabled={isLoadingPreview}
                   className="me-2"
                 >
@@ -619,10 +629,11 @@ const CalendarPage: React.FC = () => {
             onClick={async () => {
               setReauthLoading(true);
               try {
-                const res = await apiClient.get('/api/calendar/reauth-url');
-                window.open(res.data.auth_url, '_blank');
+                const res = await getReauthUrl();
+                window.open(res.auth_url, '_blank');
                 toast.success('Procedura di autorizzazione avviata. Completa la procedura nella finestra aperta, poi aggiorna la pagina.');
-              } catch (e) {
+              } catch (error) {
+                console.error("Errore riautorizzazione", error);
                 toast.error('Errore durante la richiesta di riautorizzazione.');
               } finally {
                 setReauthLoading(false);

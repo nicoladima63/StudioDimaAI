@@ -6,10 +6,9 @@ from server.app.core.mode_manager import get_mode
 from server.app.config.constants import COLONNE
 from server.app.utils.db_utils import get_dbf_path
 from server.app.core.utils import (
-    normalizza_numero_telefono,
-    costruisci_messaggio_richiamo
-    # formatta_richiamo_per_frontend,  # NON ESISTE PIÙ
-    # calcola_data_richiamo  # NON ESISTE PIÙ
+    costruisci_messaggio_richiamo,
+    formatta_richiamo_per_frontend,
+    calcola_data_richiamo
 )
 
 class RecallService:

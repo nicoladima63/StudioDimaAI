@@ -16,8 +16,60 @@ class IncassiService:
         self.pazienti_path = get_dbf_path('pazienti', mode)
         self.fatture_path = get_dbf_path('fatture', mode)
         
-    def get_all_incassi(self) -> List[Dict[str, Any]]:
-        return estrai_dati(self.fatture_path, 'fatture')
+    def get_anni_disponibili(self) -> List[int]:
+        anni = set()
+        try:
+            for record in DBF(self.fatture_path, encoding='latin-1'):
+                data_fattura = record.get('DB_FADATA')
+                if not data_fattura:
+                    continue
+
+                anno = None
+                if isinstance(data_fattura, date):
+                    anno = data_fattura.year
+                elif isinstance(data_fattura, str):
+                    # Tenta di parsare formati stringa comuni, per robustezza
+                    try:
+                        anno = datetime.strptime(data_fattura, '%Y-%m-%d').year
+                    except ValueError:
+                        try:
+                            anno = int(data_fattura.split('/')[-1])
+                        except (ValueError, IndexError):
+                            continue  # Ignora formati non validi
+                
+                if anno and anno > 1990: # Aggiunge un controllo di validità
+                    anni.add(anno)
+
+        except Exception as e:
+            logger.error(f"Errore critico durante la lettura degli anni dal file DBF: {e}")
+            return [] # Ritorna vuoto in caso di errore grave
+            
+        return sorted(list(anni), reverse=True)
+
+    def get_all_incassi(self, anno: int = None, mese: int = None) -> List[Dict[str, Any]]:
+        """
+        Estrae i dati delle fatture, con possibilità di filtrare per anno e mese.
+        """
+        all_records = estrai_dati(self.fatture_path, 'fatture')
+
+        if not anno:
+            return all_records
+
+        filtered_records = []
+        for record in all_records:
+            data_fattura = record.get('fatturadata')
+            if not isinstance(data_fattura, date):
+                continue
+
+            if data_fattura.year != anno:
+                continue
+            
+            if mese and data_fattura.month != mese:
+                continue
+            
+            filtered_records.append(record)
+            
+        return filtered_records
 
     def get_incassi_trend(self, date_from=None, date_to=None):
         incassi = []
