@@ -21,7 +21,6 @@ def create_app():
     with app.app_context():
         # Import and register blueprints
         from .api.api_auth import auth_bp
-        from .api.api_calendar import calendar_bp
         from .api.api_fatture import fatture_bp
         from .api.api_incassi import incassi_bp
         from .api.api_kpi import kpi_bp
@@ -30,11 +29,10 @@ def create_app():
         from .api.api_prescrizione import prescrizione_bp
         from .api.api_richiami import richiami_bp
         from .api.api_settings import settings_bp
-        from .api.api_appuntamenti import appuntamenti_bp
+        from .api.api_appointments import appointments_bp
 
         app.register_blueprint(auth_bp)
-        app.register_blueprint(calendar_bp)
-        app.register_blueprint(appuntamenti_bp)
+        app.register_blueprint(appointments_bp)
         app.register_blueprint(fatture_bp)
         app.register_blueprint(incassi_bp)
         app.register_blueprint(kpi_bp)

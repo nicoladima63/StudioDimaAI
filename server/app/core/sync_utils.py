@@ -45,8 +45,9 @@ def _normalize_for_hash(app):
 
 
 def compute_appointment_hash(app):
+    """Calcola un hash univoco per un appuntamento."""
     norm = _normalize_for_hash(app)
-    relevant = f"{norm[COL_DATA]}_{norm[COL_ORA_INIZIO]}_{norm[COL_ORA_FINE]}_{norm[COL_STUDIO]}_{norm.get(COL_PAZIENTE,'')}_{norm.get(COL_DESCRIZIONE,'')}_{norm.get(COL_NOTE,'')}"
+    relevant = f"{norm['DATA']}_{norm['ORA_INIZIO']}_{norm['ORA_FINE']}_{norm['STUDIO']}_{norm.get('PAZIENTE','')}_{norm.get('DESCRIZIONE','')}_{norm.get('NOTE','')}"
     return hashlib.md5(relevant.encode('utf-8')).hexdigest()
 
 
@@ -69,6 +70,7 @@ def save_sync_map(sync_map, sync_map_file=SYNC_MAP_FILE):
 
 
 def map_appointment(app):
+    """Mappa un appuntamento in un formato standardizzato."""
     paziente = app.get(COL_PAZIENTE, '').strip()
     data = app.get(COL_DATA)
     tipo = app.get('TIPO', '').strip() or app.get('DB_APPACOD', '').strip()

@@ -12,7 +12,6 @@ interface Props {
 }
 
 const AppuntamentiTotaliBar: React.FC<Props> = ({ totali }) => {
-  // Trova il massimo per normalizzare la lunghezza delle barre
   const max = Math.max(...totali.map(t => t.totale), 1);
 
   return (
@@ -21,9 +20,10 @@ const AppuntamentiTotaliBar: React.FC<Props> = ({ totali }) => {
         const progressivoPerc = Math.round((progressivo / max) * 100);
         return (
           <div key={anno} style={{ marginBottom: 32, position: 'relative' }}>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Appuntamenti per l'anno {anno}</div>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+              Appuntamenti per l&apos;anno {anno}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', position: 'relative', height: 30 }}>
-              {/* Barra orizzontale */}
               <div style={{
                 height: 18,
                 width: `${Math.round((totale / max) * 100)}%`,
@@ -33,9 +33,9 @@ const AppuntamentiTotaliBar: React.FC<Props> = ({ totali }) => {
                 minWidth: 24,
                 position: 'relative'
               }} />
-              {/* Valore totale */}
-              <span style={{ marginLeft: 12, fontWeight: 500, fontSize: 18 }}>{totale}</span>
-              {/* Linea verticale e valore progressivo */}
+              <span style={{ marginLeft: 12, fontWeight: 500, fontSize: 18 }}>
+                {totale}
+              </span>
               <div style={{
                 position: 'absolute',
                 left: `calc(${progressivoPerc}% - 1px)`,
@@ -46,7 +46,6 @@ const AppuntamentiTotaliBar: React.FC<Props> = ({ totali }) => {
                 zIndex: 2,
                 borderRadius: 1
               }}>
-                {/* Numero progressivo sopra la linea */}
                 <div style={{
                   position: 'absolute',
                   top: -22,

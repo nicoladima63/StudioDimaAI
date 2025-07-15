@@ -9,14 +9,12 @@ import {
   Legend,
 } from 'recharts';
 
-// Nuovo tipo dati: oggetto con chiave anno e array di {month, count}
 type Props = {
   data?: { [anno: string]: { count: number; month: number }[] };
 };
 
 const mesi = [
-  '', // per avere mesi[1] = "Gen"
-  'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
+  '', 'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
   'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'
 ];
 
@@ -24,9 +22,18 @@ const colori = ['#3399ff', '#8884d8', '#b0b0b0'];
 
 const AppuntamentiChart: React.FC<Props> = ({ data }) => {
   if (!data || Object.keys(data).length === 0) {
-    return <div style={{height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Nessun dato disponibile</div>;
+    return (
+      <div style={{
+        height: 300, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center'
+      }}>
+        Nessun dato disponibile
+      </div>
+    );
   }
-  // Ricostruisco i dati per mese: [{mese, anno1, anno2, anno3}]
+
   const anni = Object.keys(data).sort();
   const chartData = Array.from({ length: 12 }, (_, i) => {
     const mese = mesi[i + 1];
@@ -45,7 +52,12 @@ const AppuntamentiChart: React.FC<Props> = ({ data }) => {
         <Tooltip />
         <Legend />
         {anni.map((anno, idx) => (
-          <Bar key={anno} dataKey={anno} fill={colori[idx % colori.length]} name={anno} />
+          <Bar 
+            key={anno} 
+            dataKey={anno} 
+            fill={colori[idx % colori.length]} 
+            name={anno} 
+          />
         ))}
       </BarChart>
     </ResponsiveContainer>

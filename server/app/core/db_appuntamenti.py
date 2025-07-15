@@ -1,9 +1,8 @@
 import pandas as pd
 import logging
-from datetime import date, timedelta, datetime
+from datetime import datetime
 from server.app.config.constants import COLONNE, DBF_TABLES
 from server.app.core.mode_manager import get_mode
-from server.app.core.sync_utils import map_appointment
 import os
 import dbf
 
@@ -108,18 +107,7 @@ def get_appointments_for_month(month: int, year: int):
                     'PAZIENTE': patients_dict.get(idpaz, '')
                 }
                 
-                # Mappa e formatta il record
-                mapped_app = map_appointment(raw_appointment)
-                
-                # Converte le date per la serializzazione JSON
-                if isinstance(mapped_app.get('DATA'), datetime):
-                    mapped_app['DATA'] = mapped_app['DATA'].isoformat()
-                if hasattr(mapped_app.get('ORA_INIZIO'), 'isoformat'):
-                    mapped_app['ORA_INIZIO'] = mapped_app['ORA_INIZIO'].isoformat()
-                if hasattr(mapped_app.get('ORA_FINE'), 'isoformat'):
-                    mapped_app['ORA_FINE'] = mapped_app['ORA_FINE'].isoformat()
-
-                appointments.append(mapped_app)
+                appointments.append(raw_appointment)
 
     except Exception as e:
         logger.error(f"Errore durante la lettura del DBF appuntamenti {path_appuntamenti}: {e}")

@@ -1,224 +1,122 @@
-import React, { useState, useEffect } from 'react'
-import { CCol, CRow, CButton, CAlert } from '@coreui/react'
-import { cilPeople, cilCalendar, cilChart, cilBell,cilReload } from '@coreui/icons';
-import CIcon from '@coreui/icons-react';
-import { Card, StatWidget } from '@/components/ui';
-import { RecentActivities } from '@/components/common';
+import React, { useState, useEffect } from 'react';
+import { CCol, CRow } from '@coreui/react';
 import {
   AppuntamentiChart,
   AppuntamentiCoreUICard,
   AppuntamentiTotaliBar
 } from '../components';
-import { 
-  getPazientiStats
-} from '@/api/services/pazienti.service'; 
+import { getPazientiStats } from '@/api/services/pazienti.service'; 
 import { 
   getAppuntamentiStats, 
   getPrimeVisiteStats, 
   getAppuntamentiPerAnno,
-  getAppointmentsByRange 
+  getAppuntamentiTotali
 } from '@/api/services/calendar.service'; 
-import { useDashboardLoader } from '@/store/dashboardLoaderStore';
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState({
-    pazienti: 0,
-    inCura: 0,
-    mesePrecedente: 0,
-    meseCorrente: 0,
-    meseProssimo: 0,
-    crescita: 0,
-    nuoveVisite: null
+    pazienti: { totale: 0, inCura: 0 },
+    appuntamenti: { corrente: 0, crescita: 0, prossimo: 0 },
+    primeVisite: 0
   });
-  const [datiGrafico, setDatiGrafico] = useState<{ [anno: string]: { month: number; count: number }[] }>({});
+  const [datiGrafico, setDatiGrafico] = useState<{ [anno: string]: { count: number; month: number }[] }>({});
   const [totali, setTotali] = useState<{ anno: string; totale: number; colore: string; progressivo: number }[]>([]);
 
-  const loadingStep = useDashboardLoader((s) => s.loadingStep);
-  const setStep = useDashboardLoader((s) => s.setStep);
-  const refreshKey = useDashboardLoader((s) => s.refreshKey);
-const triggerRefresh = useDashboardLoader((s) => s.triggerRefresh);
-
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchData() {
       try {
-        setStep('loading_appointments');
-        const pazData = await getPazientiStats();
+        // Fetch pazienti stats
+        const pazientiData = await getPazientiStats();
+        
+        // Fetch appuntamenti stats
+        const appuntamentiData = await getAppuntamentiStats();
+        
+        // Fetch prime visite
+        const primeVisite = await getPrimeVisiteStats();
+        
+        // Fetch dati grafico
+        const datiGraficoData = await getAppuntamentiPerAnno();
+        
+        // Fetch totali
+        const totaliData = await getAppuntamentiTotali();
 
-        setStep('loading_stats');
-        const appData = await getAppuntamentiStats();
-        const primeData = await getPrimeVisiteStats();
-
-        let crescita = 0;
-        if (appData.data.mese_precedente === 0 && appData.data.mese_corrente > 0) {
-          crescita = 100;
-        } else if (appData.data.mese_precedente === 0 && appData.data.mese_corrente === 0) {
-          crescita = 0;
-        } else if (appData.data.mese_precedente > 0 && appData.data.mese_corrente === 0) {
-          crescita = -100;
-        } else if (appData.data.mese_precedente > 0) {
-          crescita = Math.round(((appData.data.mese_corrente - appData.data.mese_precedente) / appData.data.mese_precedente) * 100);
-        }
-
+        // Aggiorna lo stato con tutti i dati
         setStats({
-          pazienti: pazData.data.totale,
-          inCura: pazData.data.in_cura,
-          mesePrecedente: appData.data.mese_precedente,
-          meseCorrente: appData.data.mese_corrente,
-          meseProssimo: appData.data.mese_prossimo,
-          crescita,
-          nuoveVisite: primeData.data.nuove_visite
+          pazienti: {
+            totale: pazientiData.data.totale,
+            inCura: pazientiData.data.in_cura
+          },
+          appuntamenti: {
+            corrente: appuntamentiData.meseCorrente,
+            crescita: appuntamentiData.crescita,
+            prossimo: appuntamentiData.meseProssimo
+          },
+          primeVisite
         });
 
-        const datiAnni = await getAppuntamentiPerAnno();
-        setDatiGrafico(datiAnni.data);
+        setDatiGrafico(datiGraficoData);
+        setTotali(totaliData);
+
       } catch (error) {
-        setStats({
-          pazienti: 0,
-          inCura: 0,
-          mesePrecedente: 0,
-          meseCorrente: 0,
-          meseProssimo: 0,
-          crescita: 0,
-          nuoveVisite: null
-        });
-        setDatiGrafico({});
-        setStep('done');
+        console.error('Error fetching dashboard data:', error);
       }
     }
 
-    fetchStats();
-  }, [setStep, refreshKey]);
-
-  useEffect(() => {
-    async function fetchTotaliBar() {
-      if (!datiGrafico || Object.keys(datiGrafico).length === 0) return;
-
-      const today = new Date();
-      const currentDay = String(today.getDate()).padStart(2, '0');
-      const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
-
-      const anni = Object.keys(datiGrafico).sort();
-      const colori = ['#3399ff', '#8884d8', '#b0b0b0'];
-
-      const progressivi = await Promise.all(
-        anni.map(async (anno) => {
-          const start = `01/01/${anno}`;
-          const end = `${currentDay}/${currentMonth}/${anno}`;
-          try {
-            const count = await getAppointmentsByRange(start, end);
-            return count;
-          } catch {
-            return 0;
-          }
-        })
-      );
-
-      const nuoviTotali = anni.map((anno, idx) => ({
-        anno,
-        totale: (datiGrafico[anno] || []).reduce((sum, m) => sum + m.count, 0),
-        colore: colori[idx % colori.length],
-        progressivo: progressivi[idx]
-      }));
-
-      setTotali(nuoviTotali);
-      setStep('done');
-    }
-
-    fetchTotaliBar();
-  }, [datiGrafico, setStep, refreshKey]);
-
-  const isLoading = loadingStep !== 'done';
-
-  const loadingMessage: Record<string, string> = {
-    loading_appointments: 'Caricamento appuntamenti...',
-    loading_stats: 'Caricamento statistiche...',
-    done: ''
-  }[loadingStep];
+    fetchData();
+  }, []);
 
   return (
-    <Card title="Dashboard"
-      headerAction={
-      <CButton color="primary" size="sm" onClick={triggerRefresh}>
-        <CIcon icon={cilReload} className="me-1" />
-        Ricarica
-      </CButton>        
-      }
-    >
-      {isLoading && loadingMessage && (
-        <div className="d-flex justify-content-center py-3">
-          <CAlert color="info" className="text-center px-4 py-2 shadow-sm">
-            {loadingMessage}
-          </CAlert>
-        </div>
-      )}
+    <div>
+      <CRow>
+        <CCol xs={12} sm={6} lg={3}>
+          <AppuntamentiCoreUICard
+            title="Pazienti totali"
+            value={stats.pazienti.totale}
+            crescita={0}
+            color="#3399ff"
+          />
+        </CCol>
+        <CCol xs={12} sm={6} lg={3}>
+          <AppuntamentiCoreUICard
+            title="Appuntamenti del mese"
+            value={stats.appuntamenti.corrente}
+            crescita={stats.appuntamenti.crescita}
+            color="#4be38a"
+          />
+        </CCol>
+        <CCol xs={12} sm={6} lg={3}>
+          <AppuntamentiCoreUICard
+            title="Prime visite"
+            value={stats.primeVisite}
+            crescita={0}
+            color="#ff7676"
+          />
+        </CCol>
+        <CCol xs={12} sm={6} lg={3}>
+          <AppuntamentiCoreUICard
+            title="Pazienti in cura"
+            value={stats.pazienti.inCura}
+            crescita={0}
+            color="#8884d8"
+          />
+        </CCol>
+      </CRow>
 
-      {!isLoading && (
-        <>
-          <CRow>
-            <CCol sm={6} lg={2}>
-              <StatWidget 
-                color="primary"
-                value={`${stats.pazienti} | ${stats.inCura}`}
-                title="Pazienti | In cura"
-                icon={cilPeople}
-              />
-            </CCol>
-            <CCol sm={6} lg={2}>
-              <StatWidget 
-                color="info"
-                value={`${stats.mesePrecedente} | ${stats.meseCorrente} | ${stats.meseProssimo}`}
-                title="Prec. | In corso | Prossimo"
-                icon={cilCalendar}
-              />
-            </CCol>
-            <CCol sm={6} lg={2}>
-              <StatWidget 
-                color="warning"
-                value={`${stats.crescita}%`}
-                title="Crescita %"
-                icon={cilChart}
-              />
-            </CCol>
-            <CCol sm={6} lg={2}>
-              <StatWidget 
-                color="danger"
-                value={stats.nuoveVisite ?? 0}
-                title="Prime visite"
-                icon={cilBell}
-              />
-            </CCol>
-            <CCol sm={6} lg={2}>
-              <AppuntamentiCoreUICard
-                title="Appuntamenti"
-                value={stats.meseCorrente}
-                percent={stats.crescita}
-                data={datiGrafico[String(new Date().getFullYear())] || []}
-                color="#3399ff"
-              />
-            </CCol>
-          </CRow>
+      <CRow className="mt-4">
+        <CCol xs={12}>
+          <div style={{ background: '#fff', padding: 20, borderRadius: 8 }}>
+            <h4>Appuntamenti per mese</h4>
+            <AppuntamentiChart data={datiGrafico} />
+          </div>
+        </CCol>
+      </CRow>
 
-          <CRow className="mt-4">
-            <CCol md={8}>
-              <AppuntamentiChart 
-                data={datiGrafico}
-              />
-            </CCol>
-            <CCol md={4}>
-              <AppuntamentiTotaliBar
-                totali={totali}
-              />
-            </CCol>
-          </CRow>
-
-          <CRow className="mt-4">
-            <CCol>
-              <RecentActivities />
-            </CCol>
-          </CRow>
-        </>
-      )}
-    </Card>
+      <CRow className="mt-4">
+        <CCol xs={12}>
+          <AppuntamentiTotaliBar totali={totali} />
+        </CCol>
+      </CRow>
+    </div>
   );
 };
 

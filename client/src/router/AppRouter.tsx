@@ -4,6 +4,7 @@ import { useAuthStore } from '@/features/auth/store/useAuthStore';
 
 import {Layout} from '@/components/layout';
 import Dashboard from '@/features/dashboard/pages/Dashboard';
+import DashboardDebug from '@/features/dashboard/pages/DashboardDebug';
 import ApiTest from '@/test/ApiTest';
 import NotFound from '@/pages/NotFound';
 import LoginPage from '@/features/auth/pages/LoginPage';
@@ -43,6 +44,7 @@ const AppRouter: React.FC = () => {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/debug" element={<DashboardDebug />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/recalls" element={<RecallsPage />} />
           <Route path="/pazienti" element={<PazientiPage />} />

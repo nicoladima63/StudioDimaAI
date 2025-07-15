@@ -3,6 +3,7 @@ import logging
 from flask import Flask, jsonify
 from server.app.config.config import Config
 from server.app.extensions import db, jwt, cors
+from server.app.routes import register_routes
 from typing import Optional
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -25,34 +26,6 @@ def check_critical_config(app: Flask) -> None:
         if not app.config.get(key):
             raise RuntimeError(f"Config mancante: {key}")
 
-def register_blueprints(app: Flask) -> None:
-    from server.app.api import (
-        api_auth, api_settings, api_richiami, api_prescrizione,
-        api_pazienti, api_network, api_kpi, api_incassi,
-        api_fatture, api_calendar, api_appuntamenti 
-    )
-
-    blueprints = [
-        api_auth.auth_bp,
-        api_settings.settings_bp,
-        api_richiami.recalls_bp,
-        api_prescrizione.prescrizione_bp,
-        api_pazienti.pazienti_bp,
-        api_network.network_bp,
-        api_kpi.kpi_bp,
-        api_incassi.incassi_bp,
-        api_fatture.fatture_bp,
-        api_calendar.calendar_bp,
-        api_appuntamenti.appuntamenti_bp
-    ]
-
-    for bp in blueprints:
-        if bp.name in app.blueprints:
-            app.logger.warning(f"Blueprint già registrato: {bp.name}")
-        else:
-            app.register_blueprint(bp)
-            #app.logger.info(f"Blueprint registrato: {bp.name}")
-
 def create_app(config_class: Optional[object] = Config) -> Flask:
     configure_logging()
     logger = logging.getLogger(__name__)
@@ -73,7 +46,7 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
         logger.error(f"Token non valido: {error}")
         return jsonify({'success': False, 'error': f'Token non valido: {error}'}), 422
     
-    register_blueprints(app)
+    register_routes(app)
     
     @app.route('/health')
     def health_check():
