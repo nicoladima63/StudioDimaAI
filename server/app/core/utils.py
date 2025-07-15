@@ -16,13 +16,11 @@ def decodifica_tipo_appuntamento(codice_guardia):
         return "Sconosciuto"
     return TIPI_APPUNTAMENTO.get(str(codice_guardia).strip().upper(), "Sconosciuto")
 
-
 def decodifica_medico(numero_medico):
     try:
         return MEDICI.get(int(numero_medico), "Sconosciuto")
     except (ValueError, TypeError):
         return "Sconosciuto"
-
 
 def calcola_giorni_prenotazione(data_inserimento):
     if pd.isna(data_inserimento):
@@ -37,7 +35,6 @@ def calcola_giorni_prenotazione(data_inserimento):
     except Exception as e:
         logger.warning(f"Errore calcolo giorni prenotazione: {e}")
         return 0
-
 
 def normalizza_numero_telefono_old(numero_telefono):
     if pd.isna(numero_telefono):
@@ -95,7 +92,6 @@ def normalizza_numero_telefono(numero_telefono, origine='cellulare'):
 
     return "+" + numero_pulito
 
-
 def costruisci_messaggio_promemoria(appuntamento):
     col = COLONNE["appuntamenti"]
     try:
@@ -130,7 +126,6 @@ def costruisci_messaggio_promemoria(appuntamento):
         logger.error(f"Errore costruzione messaggio promemoria: {e}")
         return "Ciao! Ti ricordiamo un appuntamento programmato per domani. Contattaci per conferma. Grazie."
 
-
 def costruisci_messaggio_richiamo(richiamo):
     col = COLONNE["richiami"]
     try:
@@ -152,7 +147,6 @@ def costruisci_messaggio_richiamo(richiamo):
     except Exception as e:
         logger.error(f"Errore costruzione messaggio richiamo: {e}")
         return "Gentile paziente, è il momento di programmare un richiamo. Contattaci per fissare l'appuntamento."
-
 
 def calcola_data_richiamo(ultima_visita, mesi_richiamo):
     """

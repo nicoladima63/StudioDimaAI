@@ -10,19 +10,19 @@ interface AppointmentStats {
 
 export const CalendarService = {
   async getCalendars() {
-    const response = await apiClient.get('/api/appointments/calendar/list');
+    const response = await apiClient.get('/api/calendar/list');
     return response.data;
   },
 
   async getAppointments(month: number, year: number) {
-    const response = await apiClient.get('/api/appointments/calendar/appointments', {
+    const response = await apiClient.get('/api/calendar/appointments', {
       params: { month, year }
     });
     return response.data;
   },
 
   async startSync(month: number, year: number) {
-    const response = await apiClient.post('/api/appointments/calendar/sync', {
+    const response = await apiClient.post('/api/calendar/sync', {
       month,
       year
     });
@@ -30,7 +30,7 @@ export const CalendarService = {
   },
 
   async getSyncStatus(jobId: string) {
-    const response = await apiClient.get('/api/appointments/calendar/sync-status', {
+    const response = await apiClient.get('/api/calendar/sync-status', {
       params: { jobId }
     });
     return response.data;
@@ -38,25 +38,25 @@ export const CalendarService = {
 
   async clearCalendar(calendarId: string) {
     const encodedCalendarId = encodeURIComponent(calendarId);
-    const response = await apiClient.delete(`/api/appointments/calendar/clear/${encodedCalendarId}`);
+    const response = await apiClient.delete(`/api/calendar/clear/${encodedCalendarId}`);
     return response.data;
   },
 
   async getClearStatus(jobId: string) {
-    const response = await apiClient.get('/api/appointments/calendar/clear-status', {
+    const response = await apiClient.get('/api/calendar/clear-status', {
       params: { jobId }
     });
     return response.data;
   },
 
   async getReauthUrl() {
-    const response = await apiClient.get('/api/appointments/calendar/reauth-url');
+    const response = await apiClient.get('/api/calendar/reauth-url');
     return response.data;
   },
 
   // Metodi statistiche
   async getAppuntamentiStats() {
-    const response = await apiClient.get('/api/appointments/stats/summary');
+    const response = await apiClient.get('/api/calendar/stats/summary');
     const data = response.data.data;
     if (!data) return { meseCorrente: 0, mesePrecedente: 0, meseProssimo: 0, crescita: 0 };
     
@@ -74,18 +74,18 @@ export const CalendarService = {
   },
 
   async getPrimeVisiteStats() {
-    const response = await apiClient.get('/api/appointments/stats/first-visits');
+    const response = await apiClient.get('/api/calendar/stats/first-visits');
     return response.data.data?.nuove_visite || 0;
   },
 
   async getAppuntamentiPerAnno() {
-    const response = await apiClient.get('/api/appointments/stats/year');
+    const response = await apiClient.get('/api/calendar/stats/year');
     // Restituisce direttamente l'oggetto data che contiene già gli anni come chiavi
     return response.data.data;
   },
 
   async getAppuntamentiTotali() {
-    const response = await apiClient.get('/api/appointments/stats/year');
+    const response = await apiClient.get('/api/calendar/stats/year');
     const data = response.data.data;
     const anni = Object.keys(data).sort();
     
@@ -105,14 +105,14 @@ export const CalendarService = {
   },
 
   async getAppointmentsByRange(start: string, end: string) {
-    const response = await apiClient.get('/api/appointments/stats/range', {
+    const response = await apiClient.get('/api/calendar/stats/range', {
       params: { start, end }
     });
     return response.data;
   },
 
   async getAppointmentsWithModeWarning(month: number, year: number) {
-    const response = await apiClient.get('/api/appointments/calendar/appointments', {
+    const response = await apiClient.get('/api/calendar/appointments', {
       params: { month, year }
     });
     if (response.data && response.data.warning) {

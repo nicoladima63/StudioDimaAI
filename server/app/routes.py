@@ -2,7 +2,7 @@ from flask import Flask
 from server.app.api import (
     api_auth, api_settings, api_richiami, api_prescrizione,
     api_pazienti, api_network, api_kpi, api_incassi,
-    api_fatture, api_appointments
+    api_fatture, api_calendar
 )
 
 def register_routes(app: Flask):
@@ -16,7 +16,7 @@ def register_routes(app: Flask):
         api_kpi.kpi_bp,
         api_incassi.incassi_bp,
         api_fatture.fatture_bp,
-        api_appointments.appointments_bp
+        api_calendar.calendar_bp
     ]
 
     for bp in blueprints:

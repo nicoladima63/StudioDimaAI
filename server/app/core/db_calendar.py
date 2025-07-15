@@ -1,10 +1,12 @@
+import dbf
+import os
 import pandas as pd
 import logging
 from datetime import datetime
+from typing import List, Dict, Any
+from dbfread import DBF
 from server.app.config.constants import COLONNE, DBF_TABLES
 from server.app.core.mode_manager import get_mode
-import os
-import dbf
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +18,7 @@ def _get_dbf_path(table_name: str):
     """
     mode = get_mode('database')
     table_info = DBF_TABLES.get(table_name)
+
     if not table_info:
         raise ValueError(f"Tabella '{table_name}' non definita in DBF_TABLES.")
 
@@ -41,6 +44,7 @@ def _get_dbf_path(table_name: str):
     file_name = table_info['file']
     
     return os.path.join(base_path, category_path, file_name)
+
 
 def _leggi_tabella_dbf(percorso_file: str) -> pd.DataFrame:
     try:
@@ -175,3 +179,17 @@ def get_appointments_count_by_range(start_date: str, end_date: str):
     count = df[mask].shape[0]
     
     return int(count)
+
+def estrai_dati(dbf_path: str, tabella: str) -> List[Dict[str, Any]]:
+    """Estrae dati da un file .DBF secondo la mappatura di COLONNE[tabella]."""
+    colonne_tabella = COLONNE.get(tabella)
+    if not colonne_tabella:
+        raise ValueError(f"Tabella '{tabella}' non trovata in COLONNE")
+    return [
+        {
+            nome_logico: record.get(nome_dbf, '')
+            for nome_logico, nome_dbf in colonne_tabella.items()
+        }
+        for record in DBF(dbf_path, encoding='latin-1')
+    ] 
+

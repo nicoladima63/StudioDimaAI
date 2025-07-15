@@ -14,10 +14,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-appointments_bp = Blueprint('appointments', __name__, url_prefix='/api/appointments')
+calendar_bp = Blueprint('calendar', __name__, url_prefix='/api/calendar')
 
 # Sezione 1: Route per statistiche e report appuntamenti
-@appointments_bp.route('/stats/year', methods=['GET'])
+@calendar_bp.route('/stats/year', methods=['GET'])
 @jwt_required()
 def get_appointments_stats_for_year():
     """Restituisce le statistiche degli appuntamenti per anno/mese."""
@@ -28,7 +28,7 @@ def get_appointments_stats_for_year():
         logger.error(f"Errore in get_appointments_stats_for_year: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@appointments_bp.route('/stats/range', methods=['GET'])
+@calendar_bp.route('/stats/range', methods=['GET'])
 @jwt_required()
 def get_appointments_by_range():
     """Restituisce il conteggio degli appuntamenti in un range di date."""
@@ -42,7 +42,8 @@ def get_appointments_by_range():
         }), 400
 
     try:
-        count = CalendarService.get_db_appointments_count_by_range(start_str, end_str)
+        from server.app.core import db_calendar
+        count = db_calendar.get_appointments_count_by_range(start_str, end_str)
         return jsonify({'success': True, 'count': count})
     except ValueError as e:
         logger.error(f"Errore nel formato delle date: {str(e)}")
@@ -53,8 +54,8 @@ def get_appointments_by_range():
     except Exception as e:
         logger.error(f"Errore in get_appointments_by_range: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
-
-@appointments_bp.route('/stats/summary', methods=['GET'])
+    
+@calendar_bp.route('/stats/summary', methods=['GET'])
 @jwt_required()
 def get_appointments_stats():
     """Restituisce statistiche per mese precedente, corrente e successivo."""
@@ -85,7 +86,7 @@ def get_appointments_stats():
         logger.error(f"Errore in get_appointments_stats: {str(e)}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@appointments_bp.route('/stats/first-visits', methods=['GET'])
+@calendar_bp.route('/stats/first-visits', methods=['GET'])
 @jwt_required()
 def get_first_visits_stats():
     """Statistiche prime visite del mese corrente."""
@@ -102,7 +103,7 @@ def get_first_visits_stats():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # Sezione 2: Route per Google Calendar
-@appointments_bp.route('/calendar/list', methods=['GET'])
+@calendar_bp.route('/list', methods=['GET'])
 @jwt_required()
 def list_calendars():
     """Lista dei calendari Google disponibili."""
@@ -112,7 +113,7 @@ def list_calendars():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@appointments_bp.route('/calendar/sync', methods=['POST'])
+@calendar_bp.route('/sync', methods=['POST'])
 @jwt_required()
 def sync_calendar():
     """Sincronizza gli appuntamenti con Google Calendar."""
@@ -127,7 +128,7 @@ def sync_calendar():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@appointments_bp.route('/calendar/sync-status', methods=['GET'])
+@calendar_bp.route('/sync-status', methods=['GET'])
 @jwt_required()
 def sync_status():
     """Controlla lo stato di una sincronizzazione in corso."""
@@ -140,7 +141,7 @@ def sync_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@appointments_bp.route('/calendar/clear/<path:calendar_id>', methods=['DELETE'])
+@calendar_bp.route('/clear/<path:calendar_id>', methods=['DELETE'])
 @jwt_required()
 def clear_calendar(calendar_id: str):
     """Cancella tutti gli eventi da un calendario Google."""
@@ -150,7 +151,7 @@ def clear_calendar(calendar_id: str):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@appointments_bp.route('/calendar/clear-status', methods=['GET'])
+@calendar_bp.route('/clear-status', methods=['GET'])
 @jwt_required()
 def clear_status():
     """Controlla lo stato di una pulizia calendario in corso."""
@@ -163,7 +164,7 @@ def clear_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@appointments_bp.route('/calendar/reauth-url', methods=['GET'])
+@calendar_bp.route('/reauth-url', methods=['GET'])
 @jwt_required()
 def get_google_oauth_url():
     """Genera l'URL di riautorizzazione Google."""
@@ -173,3 +174,43 @@ def get_google_oauth_url():
     except Exception as e:
         logger.error(f"Errore nella generazione dell'URL OAuth: {e}")
         return jsonify({"error": str(e)}), 500
+
+@calendar_bp.route('/appointments', methods=['GET'])
+@jwt_required()
+def get_appointments_for_month():
+    """Restituisce gli appuntamenti del mese richiesto dal DBF"""
+    try:
+        month = request.args.get('month', type=int)
+        year = request.args.get('year', type=int)
+        logger.info(f"Richiesta appuntamenti per mese={month}, anno={year}")
+        
+        if not month or not year:
+            logger.error("Parametri month e year mancanti")
+            return jsonify({'error': 'month e year sono obbligatori'}), 400
+        
+        # Usa la nuova funzione dal modulo db_calendar
+        from server.app.core import db_calendar  # o il path corretto
+        appointments = db_calendar.get_appointments_for_month(month, year)
+        
+        logger.info(f"Letti {len(appointments)} appuntamenti dal DBF")
+        
+        response = {'appointments': appointments}
+        # Note: la logica del mode_changed non è più presente nella nuova versione
+        # Se serve, dovrai implementarla separatamente
+        return jsonify(response)
+        
+    except Exception as e:
+        logger.error(f"Errore in get_appointments_for_month: {str(e)}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+@calendar_bp.route('/appointments/year', methods=['GET'])
+@jwt_required()
+def get_appointments_for_year():
+    """Restituisce statistiche appuntamenti per anno"""
+    try:
+        from server.app.core import db_calendar  # o il path corretto
+        data = db_calendar.get_appointments_stats_for_year()
+        return jsonify({'success': True, 'data': data})
+    except Exception as e:
+        logger.error(f"Errore in get_appointments_for_year: {str(e)}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500

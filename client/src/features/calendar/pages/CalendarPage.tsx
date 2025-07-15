@@ -16,15 +16,7 @@ import {
 import Card from '@/components/ui/Card';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {
-  getCalendars,
-  getAppointments,
-  startSync,
-  getSyncStatus,
-  clearCalendar,
-  getClearStatus,
-  getReauthUrl
-} from '@/api/services/calendar.service';
+import { CalendarService } from '@/api/services/calendar.service';
 import type { Calendar } from '@/lib/types';
 
 const MONTHS = [  'Gennaio',  'Febbraio',  'Marzo',  'Aprile',  'Maggio',  'Giugno',  'Luglio',  'Agosto',  'Settembre',  'Ottobre',  'Novembre',  'Dicembre',];
@@ -90,7 +82,7 @@ const CalendarPage: React.FC = () => {
   const fetchCalendars = async () => {
     setIsLoadingCalendars(true);
     try {
-      const data: Calendar[] = await getCalendars();
+      const data: Calendar[] = await CalendarService.getCalendars();
       setCalendars(data);
       if (data.length === 0) {
         toast.info('Nessun calendario trovato.');
@@ -124,7 +116,7 @@ const CalendarPage: React.FC = () => {
       setIsLoadingPreview(true);
       setPreviewStats(null);
       try {
-        const data = await getAppointments(selectedMonth + 1, currentYear, controller.signal);
+        const data = await CalendarService.getAppointments(selectedMonth + 1, currentYear, controller.signal);
         const appointments: Appointment[] = data.appointments || [];
 
         const stats = {
@@ -177,14 +169,14 @@ const CalendarPage: React.FC = () => {
 
     try {
       // Avvia la sincronizzazione asincrona SOLO sul calendario selezionato
-      const response = await startSync(selectedCalendar, selectedMonth + 1, currentYear);
+      const response = await CalendarService.startSync(selectedCalendar, selectedMonth + 1, currentYear);
 
       const { job_id } = response.data;
       
       // Inizia il polling per monitorare il progresso
       const pollSyncStatus = async () => {
         try {
-          const statusResponse = await getSyncStatus(job_id);
+          const statusResponse = await CalendarService.getSyncStatus(job_id);
           
           const { status, progress, synced, total, message, error } = statusResponse.data;
           
@@ -247,14 +239,14 @@ const CalendarPage: React.FC = () => {
     setClearError(null);
 
     try {
-      const response = await clearCalendar(selectedCalendar);
+      const response = await CalendarService.clearCalendar(selectedCalendar);
 
       const { job_id } = response.data;
 
       // Inizia il polling per monitorare il progresso
       const pollClearStatus = async () => {
         try {
-          const statusResponse = await getClearStatus(job_id);
+          const statusResponse = await CalendarService.getClearStatus(job_id);
           
           const { status, progress, deleted, total, error } = statusResponse.data;
           
@@ -629,7 +621,7 @@ const CalendarPage: React.FC = () => {
             onClick={async () => {
               setReauthLoading(true);
               try {
-                const res = await getReauthUrl();
+                const res = await CalendarService.getReauthUrl();
                 window.open(res.auth_url, '_blank');
                 toast.success('Procedura di autorizzazione avviata. Completa la procedura nella finestra aperta, poi aggiorna la pagina.');
               } catch (error) {

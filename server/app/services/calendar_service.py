@@ -1,29 +1,110 @@
+"""
+Servizio centralizzato per la gestione del calendario.
+Include:
+- Autenticazione e interazione con Google Calendar
+- Gestione degli appuntamenti dal DBF
+- Sincronizzazione e utilità
+"""
 import logging
 import os
 import time
 import dbf
-
-from googleapiclient.errors import HttpError
-from google_auth_oauthlib.flow import Flow
-from server.app.utils.calendar_utils import get_google_service, _decimal_to_time, _safe_to_time, _get_google_color_id, _appointment_id, _appointment_hash, _load_sync_state, _save_sync_state
-from server.app.core.sync_utils import map_appointment, compute_appointment_hash
-from server.app.config.constants import COLONNE, DBF_TABLES, GOOGLE_COLOR_MAP
-from server.app.core.mode_manager import get_mode
-from server.app.core.db_appuntamenti import _get_dbf_path
-
+from typing import List, Dict
 from datetime import datetime, timedelta, time as dt_time
 import json
 import hashlib
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
+from googleapiclient.errors import HttpError
+from google_auth_oauthlib.flow import Flow
+
+from server.app.config.constants import COLONNE, DBF_TABLES, GOOGLE_COLOR_MAP
+from server.app.core.mode_manager import get_mode
+from server.app.utils.exceptions import GoogleCredentialsNotFoundError
 
 logger = logging.getLogger(__name__)
-SYNC_STATE_FILE = 'server/sync_state.json'
 
+# Costanti
 TOKEN_FILE = 'server/token.json'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+SYNC_STATE_FILE = 'server/sync_state.json'
 
-from server.app.core import db_appuntamenti
+# Funzioni di utilità per Google Calendar
+def get_google_service():
+    """
+    Costruisce e restituisce un oggetto servizio di Google Calendar autenticato
+    caricando le credenziali dal file token.json.
+    """
+    creds = None
+    if os.path.exists(TOKEN_FILE):
+        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+                with open(TOKEN_FILE, 'w') as token:
+                    token.write(creds.to_json())
+            except Exception as e:
+                logger.error(f"Errore durante il refresh del token Google: {e}")
+                raise GoogleCredentialsNotFoundError(
+                    "Impossibile aggiornare le credenziali Google. "
+                    f"Prova a cancellare il file '{TOKEN_FILE}' e a rieseguire lo script di autenticazione."
+                ) from e
+        else:
+            raise GoogleCredentialsNotFoundError(
+                f"Credenziali Google non trovate o non valide in '{TOKEN_FILE}'. "
+                "Esegui lo script 'server/authenticate_google.py' per ottenere le credenziali."
+            )
+    return build('calendar', 'v3', credentials=creds)
 
+def _decimal_to_time(decimal_time):
+    """Converte un orario decimale (es: 14.30) in oggetto time."""
+    hours = int(decimal_time)
+    minutes = int(round((decimal_time - hours) * 100))
+    return dt_time(hours, minutes)
+
+def _safe_to_time(val):
+    """Converte un valore in time in modo sicuro."""
+    if isinstance(val, dt_time):
+        return val
+    try:
+        return _decimal_to_time(val)
+    except Exception:
+        return dt_time(8, 0)
+
+def _get_google_color_id(tipo):
+    """Ottiene l'ID del colore Google Calendar per un tipo di appuntamento."""
+    return GOOGLE_COLOR_MAP.get(tipo, '1')
+
+def _appointment_id(app):
+    """Genera un ID univoco per un appuntamento."""
+    return f"{app['DATA']}_{app['ORA_INIZIO']}_{app['STUDIO']}_{(app.get('PAZIENTE') or app.get('DESCRIZIONE') or '').replace(' ', '')}"
+
+def _appointment_hash(app):
+    """Genera un hash per verificare se un appuntamento è cambiato."""
+    s = f"{app['DATA']}|{app['ORA_INIZIO']}|{app['ORA_FINE']}|{app['TIPO']}|{app['STUDIO']}|{app['NOTE']}|{app['DESCRIZIONE']}|{app['PAZIENTE']}"
+    return hashlib.sha256(s.encode('utf-8')).hexdigest()
+
+def _load_sync_state():
+    """Carica lo stato di sincronizzazione dal file."""
+    try:
+        with open(SYNC_STATE_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def _save_sync_state(state):
+    """Salva lo stato di sincronizzazione su file."""
+    with open(SYNC_STATE_FILE, 'w', encoding='utf-8') as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+
+# Servizio principale per la gestione del calendario
 class CalendarService:
+    """
+    Servizio centralizzato per la gestione del calendario.
+    Gestisce tutte le operazioni relative a Google Calendar e appuntamenti DBF.
+    """
 
     @staticmethod
     def google_list_calendars():
