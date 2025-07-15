@@ -3,7 +3,7 @@ import React from 'react'
 import { CNavbar, CContainer, CNavbarBrand, CButton, CBadge } from '@coreui/react'
 import { useAuthStore, useEnvStore } from '@/features/auth/store/useAuthStore';
 import { useNavigate } from 'react-router-dom'
-import { setMode as apiSetMode } from '@/api/apiClient';
+import { setMode as apiSetMode } from '@/api/services/settings.service';
 import { useState } from 'react';
 import { CToast, CToastBody, CToaster } from '@coreui/react';
 

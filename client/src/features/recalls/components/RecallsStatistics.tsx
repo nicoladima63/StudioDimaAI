@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CCard, CCardBody, CCardHeader, CRow, CCol, CProgress, CCollapse, CButton } from '@coreui/react';
 import { cilBell, cilClock, cilCheckCircle, cilWarning, cilChevronBottom, cilChevronTop } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import type { RichiamoStatistics } from '@/api/apiTypes';
+import type { RichiamoStatistics } from '@/lib/apiTypes';
 
 interface RecallsStatisticsProps {
   statistics: RichiamoStatistics;

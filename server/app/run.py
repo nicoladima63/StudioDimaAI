@@ -29,7 +29,7 @@ def register_blueprints(app: Flask) -> None:
     from server.app.api import (
         api_auth, api_settings, api_richiami, api_prescrizione,
         api_pazienti, api_network, api_kpi, api_incassi,
-        api_fatture, api_calendar
+        api_fatture, api_calendar, api_appuntamenti 
     )
 
     blueprints = [
@@ -43,6 +43,7 @@ def register_blueprints(app: Flask) -> None:
         api_incassi.incassi_bp,
         api_fatture.fatture_bp,
         api_calendar.calendar_bp,
+        api_appuntamenti.appuntamenti_bp
     ]
 
     for bp in blueprints:

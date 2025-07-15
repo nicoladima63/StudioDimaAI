@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Card from '@/components/ui/Card';
 import PazientiTable from '../components/PazientiTable';
 import PazientiStats from '../components/PazientiStats';
-import { CButton, CRow, CCol, CSpinner, CAlert, CCard, CCardBody, CCardHeader } from '@coreui/react';
-import { getPazientiList, getPazientiStats } from '@/api/apiClient';
+import { CButton, CRow, CCol, CSpinner, CAlert, CCard, CCardBody } from '@coreui/react';
+import { getPazientiList, getPazientiStats } from '@/api/services/pazienti.service';
 
 const PazientiPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

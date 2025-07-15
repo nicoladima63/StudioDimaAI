@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import NetworkModal from '../components/ui/MessageModal';
 import { NetworkStatusContext } from './NetworkStatusContext';
 import type { ReactNode } from 'react';
-import { getMode } from '../api/apiClient';
+import { getMode } from '@/api/services/settings.service';
 
 export const NetworkStatusProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [status, setStatus] = useState<'checking' | 'ok' | 'network-unreachable' | 'share-unreachable'>('checking');

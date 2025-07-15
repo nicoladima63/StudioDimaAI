@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getIncassiByPeriodo } from '../services/incassi.service';
-import { getAnniFatture } from '@/api/apiClient';
+import { getAnniFatture } from '@/api/services/fatture.service';
 import { useFattureStore } from '../store/useFattureStore';
-import { CAlert, CSpinner, CButton, CFormInput, CFormSelect, CBadge, CRow, CCol } from '@coreui/react';
+import { CAlert, CSpinner, CBadge, CRow, CCol } from '@coreui/react';
 import IncassiPeriodoForm from './IncassiPeriodoForm';
 // import IncassiTable from './IncassiTable';
 

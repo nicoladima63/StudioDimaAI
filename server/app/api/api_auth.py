@@ -16,7 +16,6 @@ auth_bp = Blueprint("auth", __name__, url_prefix='/api/auth')
 
 
 @auth_bp.route("/login", methods=["POST"])
-@jwt_required()
 def login():
     data = request.get_json()
     username = data.get("username")
@@ -38,7 +37,6 @@ def login():
     )
 
 @auth_bp.route("/register", methods=["POST"])
-@jwt_required()
 def register():
     data = request.get_json()
 

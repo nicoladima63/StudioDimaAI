@@ -171,3 +171,27 @@ def get_db_appointments_by_range():
     except Exception as e:
         logger.error(f"Errore in get_db_appointments_by_range: {str(e)}", exc_info=True)
         return jsonify({'error': "Errore interno del server"}), 500
+
+
+@calendar_bp.route('/reauth-url', methods=['GET'])
+@jwt_required()
+def get_google_oauth_url():
+    """Genera l'URL di riautorizzazione Google"""
+    try:
+        auth_url = CalendarService.get_google_oauth_url()
+        return jsonify({"auth_url": auth_url})
+    except Exception as e:
+        logger.error(f"Errore nella generazione dell'URL OAuth: {e}")
+        return jsonify({"message": "Errore nella generazione dell'URL di autorizzazione."}), 500
+
+@calendar_bp.route('/oauth2callback')
+def oauth2callback():
+    """Gestisce il callback di autorizzazione Google"""
+    try:
+        # Forza HTTPS nell'authorization_response
+        authorization_response = request.url.replace('http://', 'https://')
+        CalendarService.handle_oauth2_callback(authorization_response)
+        return "Autorizzazione Google completata! Puoi chiudere questa finestra e tornare all'applicazione."
+    except Exception as e:
+        logger.error(f"Errore nel callback OAuth: {e}")
+        return f"Errore durante l'autorizzazione: {str(e)}", 500

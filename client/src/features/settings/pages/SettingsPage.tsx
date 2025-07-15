@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui';
 import { CFormSwitch, CButton, CToast, CToastBody, CToaster, CRow, CCol,CCard,CCardBody, CFormLabel } from '@coreui/react';
 import { useEnvStore } from '@/features/auth/store/useAuthStore';
-import { setMode as apiSetMode, getMode, getAppointmentsWithModeWarning } from '@/api/apiClient';
+import { setMode as apiSetMode, getMode } from '@/api/services/settings.service';
+import { getAppointmentsWithModeWarning } from '@/api/services/calendar.service';
+
 import NetworkModal from '@/components/ui/MessageModal';
 
 const SettingsPage: React.FC = () => {

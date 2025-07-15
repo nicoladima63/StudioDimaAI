@@ -7,7 +7,7 @@ BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__
 
 def get_dbf_path(nome_logico, mode):
     if mode == 'prod':
-        base = r'\SERVERDIMA\Pixel\WINDENT'
+        base = r'\\SERVERDIMA\Pixel\WINDENT'
     else:
         base = os.path.join(BACKEND_DIR, 'windent')
     if nome_logico not in DBF_TABLES:

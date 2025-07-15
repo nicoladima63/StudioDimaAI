@@ -18,7 +18,8 @@ const AppuntamentiCoreUICard: React.FC<Props> = ({ title, value, percent, data, 
   const chartData = data.slice(-12).map(d => ({ value: d.count }))
   return (
     <CCard className="mb-4" style={{ background: color, color: '#fff', minWidth: 220, border: 'none' }}>
-      <CCardBody style={{ position: 'relative', paddingBottom: 0 }}>
+      <CCardBody style={{ position: 'relative', paddingBottom: 0, minHeight: 80 }}>
+
         <div style={{ fontSize: 28, fontWeight: 700 }}>
           {value}{' '}
           <span style={{ fontSize: 16, color: isPositive ? '#4be38a' : '#ff7676', fontWeight: 500 }}>
@@ -26,13 +27,20 @@ const AppuntamentiCoreUICard: React.FC<Props> = ({ title, value, percent, data, 
           </span>
         </div>
         <div style={{ fontSize: 15, opacity: 0.9, marginTop: 2, marginBottom: 8 }}>{title}</div>
-        <div style={{ width: '100%', height: 40, position: 'absolute', left: 0, bottom: 0, opacity: 0.5 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart width={150} height={40} data={chartData}>
-              <Bar dataKey="value" fill="#fff" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+
+        {data.length > 0 ? (
+          <div style={{ width: '100%', height: 40, position: 'absolute', left: 0, bottom: 0, opacity: 0.5 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart width={150} height={40} data={chartData}>
+                <Bar dataKey="value" fill="#fff" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div style={{ fontSize: 12, opacity: 0.7, marginTop: 20 }}>
+            Nessun dato disponibile
+          </div>
+        )}      
       </CCardBody>
     </CCard>
   )

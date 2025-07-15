@@ -10,7 +10,7 @@ import {
   CCardBody,
   CCardHeader
 } from '@coreui/react'
-import { register } from '@/api/apiClient'
+import { register } from '@/api/services/auth.service';
 
 const EMAIL_REGEX = /^[\w.-]+@[\w.-]+\.\w+$/
 

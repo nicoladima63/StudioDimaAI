@@ -1,9 +1,16 @@
 import logging
 import os
 import time
+import dbf
+
 from googleapiclient.errors import HttpError
+from google_auth_oauthlib.flow import Flow
 from server.app.utils.calendar_utils import get_google_service, _decimal_to_time, _safe_to_time, _get_google_color_id, _appointment_id, _appointment_hash, _load_sync_state, _save_sync_state
-from server.app.config.constants import GOOGLE_COLOR_MAP
+from server.app.core.sync_utils import map_appointment, compute_appointment_hash
+from server.app.config.constants import COLONNE, DBF_TABLES, GOOGLE_COLOR_MAP
+from server.app.core.mode_manager import get_mode
+from server.app.core.db_appuntamenti import _get_dbf_path
+
 from datetime import datetime, timedelta, time as dt_time
 import json
 import hashlib
@@ -11,9 +18,13 @@ import hashlib
 logger = logging.getLogger(__name__)
 SYNC_STATE_FILE = 'server/sync_state.json'
 
+TOKEN_FILE = 'server/token.json'
+SCOPES = ['https://www.googleapis.com/auth/calendar']
+
 from server.app.core import db_appuntamenti
 
 class CalendarService:
+
     @staticmethod
     def google_list_calendars():
         service = get_google_service()
@@ -86,7 +97,7 @@ class CalendarService:
             raise
 
     @staticmethod
-    def google_sync_appointments_incremental_for_month(month, year, studio_calendar_ids, appointments, progress_callback=None):
+    def sync_appointments_for_month(month, year, studio_calendar_ids, appointments, progress_callback=None):
         service = get_google_service()
         sync_state = _load_sync_state()
         now = datetime.now().isoformat()
@@ -199,9 +210,109 @@ class CalendarService:
     @staticmethod
     def get_db_appointments_for_month(month: int, year: int):
         """
-        Wrapper del servizio per recuperare appuntamenti per mese dal modulo dati.
+        Legge il DBF degli appuntamenti record per record e restituisce quelli del mese/anno specificato.
+        Utilizza map_appointment per normalizzare i dati.
         """
-        return db_appuntamenti.get_appointments_for_month(month, year)
+        try:
+            path_appuntamenti = _get_dbf_path('agenda')
+            path_pazienti = _get_dbf_path('pazienti')
+        except (ValueError, FileNotFoundError) as e:
+            logger.error(f"Errore nel recuperare il percorso del DBF: {e}")
+            raise e
+
+        # 1. Carica i pazienti in un dizionario per un accesso rapido
+        patients_dict = {}
+        col_paz = COLONNE['pazienti']
+        try:
+            with dbf.Table(path_pazienti, codepage='cp1252') as pazienti_table:
+                pazienti_count = 0
+                for record in pazienti_table:
+                    pazienti_count += 1
+                    pid = str(record[col_paz['id']]).strip()
+                    name = str(record[col_paz['nome']]).strip() if record[col_paz['nome']] else ''
+                    if pid:
+                        patients_dict[pid] = name
+                logger.info(f"Letti {pazienti_count} pazienti, {len(patients_dict)} validi")
+        except Exception as e:
+            logger.error(f"Errore durante la lettura del DBF pazienti {path_pazienti}: {e}")
+            raise IOError(f"Impossibile leggere il file dei pazienti.")
+
+        # 2. Legge gli appuntamenti record per record e filtra
+        appointments = []
+        col_app = COLONNE['appuntamenti']
+        try:
+            with dbf.Table(path_appuntamenti, codepage='cp1252') as apps_table:
+                apps_count = 0
+                filtered_count = 0
+                processed_count = 0
+                
+                for r in apps_table:
+                    apps_count += 1
+                    
+                    # Controlla se la data è valida
+                    if not r[col_app['data']]:
+                        continue
+                        
+                    app_date = r[col_app['data']]
+                    
+                    # Filtra per mese/anno
+                    if app_date.month != month or app_date.year != year:
+                        continue
+                        
+                    filtered_count += 1
+                    idpaz = str(r[col_app['id_paziente']]).strip()
+                    
+                    # Crea il record grezzo (come nel db_handler originale)
+                    raw_appointment = {
+                        'DATA': app_date,
+                        'ORA_INIZIO': float(r[col_app['ora_inizio']] or 0),
+                        'ORA_FINE': float(r[col_app['ora_fine']] or 0),
+                        'TIPO': r[col_app['tipo']].strip() if r[col_app['tipo']] else '',
+                        'STUDIO': r[col_app['studio']] or 1,
+                        'NOTE': r[col_app['note']].strip() if r[col_app['note']] else '',
+                        'DESCRIZIONE': r[col_app['descrizione']].strip() if r[col_app['descrizione']] else '',
+                        'PAZIENTE': patients_dict.get(idpaz, '')
+                    }
+                    
+                    # Applica il mapping con gestione errori
+                    try:
+                        mapped_app = map_appointment(raw_appointment)
+                        processed_count += 1
+                    except Exception as e:
+                        logger.error(f"Errore in map_appointment per record {idpaz}: {e}")
+                        # Usa il record raw se il mapping fallisce
+                        mapped_app = raw_appointment
+                    
+                    # Converte le date per la serializzazione JSON
+                    try:
+                        if isinstance(mapped_app.get('DATA'), datetime):
+                            mapped_app['DATA'] = mapped_app['DATA'].isoformat()
+                        
+                        # Gestione time objects per ora_inizio e ora_fine
+                        if hasattr(mapped_app.get('ORA_INIZIO'), 'strftime'):
+                            mapped_app['ORA_INIZIO'] = mapped_app['ORA_INIZIO'].strftime('%H:%M')
+                        elif hasattr(mapped_app.get('ORA_INIZIO'), 'isoformat'):
+                            mapped_app['ORA_INIZIO'] = mapped_app['ORA_INIZIO'].isoformat()
+                        
+                        if hasattr(mapped_app.get('ORA_FINE'), 'strftime'):
+                            mapped_app['ORA_FINE'] = mapped_app['ORA_FINE'].strftime('%H:%M')
+                        elif hasattr(mapped_app.get('ORA_FINE'), 'isoformat'):
+                            mapped_app['ORA_FINE'] = mapped_app['ORA_FINE'].isoformat()
+                            
+                    except Exception as e:
+                        logger.error(f"Errore conversione date per record {idpaz}: {e}")
+                        # Continua comunque
+
+                    appointments.append(mapped_app)
+
+                logger.info(f"Letti {apps_count} appuntamenti totali, {filtered_count} filtrati, {processed_count} processati")
+
+        except Exception as e:
+            logger.error(f"Errore durante la lettura del DBF appuntamenti {path_appuntamenti}: {e}")
+            raise IOError(f"Impossibile leggere il file degli appuntamenti.")
+            
+        logger.info(f"Trovati e processati {len(appointments)} appuntamenti per {month}/{year}")
+        return appointments
 
     @staticmethod
     def get_db_appointments_stats_for_year():
@@ -216,3 +327,41 @@ class CalendarService:
         Wrapper del servizio per contare appuntamenti in un range dal modulo dati.
         """
         return db_appuntamenti.get_appointments_count_by_range(start_date, end_date)
+    
+    @staticmethod
+    def get_google_oauth_url():
+        """Genera l'URL di autorizzazione Google OAuth"""
+        # Rimuovi il token esistente se presente
+        if os.path.exists(TOKEN_FILE):
+            os.remove(TOKEN_FILE)
+        
+        flow = Flow.from_client_secrets_file(
+            'server/credentials.json',  # Adatta il percorso se necessario
+            scopes=SCOPES,
+            redirect_uri='http://localhost:5000/api/calendar/oauth2callback'
+        )
+        
+        auth_url, _ = flow.authorization_url(
+            access_type='offline',
+            prompt='select_account consent'
+        )
+        print(f"Generated auth URL: {auth_url}")  # Debug
+        return auth_url
+    
+    @staticmethod
+    def handle_oauth2_callback(authorization_response):
+        """Gestisce il callback di autorizzazione Google"""
+        flow = Flow.from_client_secrets_file(
+            'server/credentials.json',  # Adatta il percorso se necessario
+            scopes=SCOPES,
+            redirect_uri='http://localhost:5000/api/calendar/oauth2callback'
+        )
+        
+        flow.fetch_token(authorization_response=authorization_response)
+        creds = flow.credentials
+        
+        # Salva le credenziali
+        with open(TOKEN_FILE, 'w') as token:
+            token.write(creds.to_json())
+        
+        return True

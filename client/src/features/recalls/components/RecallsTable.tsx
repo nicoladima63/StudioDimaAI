@@ -22,7 +22,7 @@ import {
 } from '@coreui/react';
 import { cilPhone, cilEnvelopeClosed, cilCheck, cilInfo } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import type { Richiamo, RichiamoMessage } from '@/api/apiTypes';
+import type { Richiamo, RichiamoMessage } from '@/lib/apiTypes';
 
 // Mappa colori tipo richiamo (usando COLORI_APPUNTAMENTO)
 const COLORI_RICHIAMI: Record<string, string> = {

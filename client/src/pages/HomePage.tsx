@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { getMode } from '@/api/apiClient';
+import { getMode } from '@/api/services/settings.service';
 import { useEnvStore } from '@/features/auth/store/useAuthStore';
 
 const HomePage: React.FC = () => {

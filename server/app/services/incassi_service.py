@@ -5,16 +5,15 @@ logger = logging.getLogger(__name__)
 from dbfread import DBF
 from datetime import datetime, date
 from typing import List, Dict, Any
-from server.app.utils.db_utils import get_dbf_path, estrai_dati
+from server.app.core.db_utils import get_dbf_path, estrai_dati
 from server.app.config.constants import COLONNE
 from server.app.core.mode_manager import get_mode
 
 class IncassiService:
     def __init__(self):
-        mode = get_mode('database')
-        self.acconti_path = get_dbf_path('acconti', mode)
-        self.pazienti_path = get_dbf_path('pazienti', mode)
-        self.fatture_path = get_dbf_path('fatture', mode)
+        self.acconti_path = get_dbf_path('acconti')
+        self.pazienti_path = get_dbf_path('pazienti')
+        self.fatture_path = get_dbf_path('fatture')
         
     def get_anni_disponibili(self) -> List[int]:
         anni = set()

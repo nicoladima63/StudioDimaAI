@@ -25,7 +25,7 @@ import {
   getClearStatus,
   getReauthUrl
 } from '@/api/services/calendar.service';
-import type { Calendar } from '@/lib/apiTypes';
+import type { Calendar } from '@/lib/types';
 
 const MONTHS = [  'Gennaio',  'Febbraio',  'Marzo',  'Aprile',  'Maggio',  'Giugno',  'Luglio',  'Agosto',  'Settembre',  'Ottobre',  'Novembre',  'Dicembre',];
 

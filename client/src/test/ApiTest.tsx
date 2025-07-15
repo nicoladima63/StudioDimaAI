@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { ping } from '@/api/apiClient';
+import { ping } from '@/api/services/settings.service';
 
 const ApiTest: React.FC = () => {
   const [message, setMessage] = useState<string>('');

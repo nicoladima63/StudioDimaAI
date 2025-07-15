@@ -11,7 +11,7 @@ import {
   CCardBody,
   CCardHeader
 } from '@coreui/react'
-import { login } from '@/api/apiClient'
+import { login } from '@/api/services/auth.service';
 import { AxiosError } from 'axios'
 
 const Login: React.FC = () => {

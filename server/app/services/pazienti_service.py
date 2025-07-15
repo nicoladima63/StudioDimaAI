@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 from dbfread import DBF
 from datetime import date
 from typing import List, Dict, Any
-from server.app.utils.db_utils import get_dbf_path
+from server.app.core.db_utils import get_dbf_path
 from server.app.core.mode_manager import get_mode
 
 PAZIENTI_FIELDS = [
@@ -16,8 +16,7 @@ PAZIENTI_FIELDS = [
 
 class PazientiService:
     def __init__(self):
-        mode = get_mode('database')
-        self.dbf_path = get_dbf_path('pazienti', mode)
+        self.dbf_path = get_dbf_path('pazienti')
 
     def get_all_pazienti(self) -> List[Dict[str, Any]]:
         pazienti = []
@@ -25,6 +24,13 @@ class PazientiService:
             paz = {field: record.get(field, '') for field in PAZIENTI_FIELDS}
             pazienti.append(paz)
         return pazienti
+    
+    def get_pazienti_count(self):
+        """Restituisce solo il conteggio dei pazienti dal DBF"""
+        # ✅ Usa la tua logica esistente ma conta solo i record
+        pazienti = self.get_all_pazienti()  # Riusa il metodo che hai già
+        return len(pazienti)
+
 
     def get_stats(self) -> Dict[str, int]:
         tot = 0

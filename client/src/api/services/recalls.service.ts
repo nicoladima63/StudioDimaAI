@@ -1,4 +1,6 @@
-import apiClient from '../apiClient';
+// src/api/services/recalls.service.ts
+
+import { apiClient } from '../client';
 import type {
   RichiamiResponse,
   RichiamiStatisticsResponse,
@@ -9,103 +11,74 @@ import type {
 } from '../apiTypes';
 
 /**
- * Servizio API per la gestione dei richiami pazienti
+ * Ottiene tutti i richiami con filtri opzionali (giorni, stato, tipo)
  */
-export class RecallsService {
-  private baseUrl = '/api/recalls';
+export async function getRecalls(filters?: RichiamoFilters): Promise<RichiamiResponse> {
+  const params = new URLSearchParams();
 
-  /**
-   * Ottiene tutti i richiami con filtri opzionali
-   */
-  async getRecalls(filters?: RichiamoFilters): Promise<RichiamiResponse> {
-    const params = new URLSearchParams();
-    
-    if (filters?.days_threshold) {
-      params.append('days', filters.days_threshold.toString());
-    }
-    if (filters?.status) {
-      params.append('status', filters.status);
-    }
-    if (filters?.tipo) {
-      params.append('tipo', filters.tipo);
-    }
-
-    const response = await apiClient.get<RichiamiResponse>(
-      `${this.baseUrl}/?${params.toString()}`
-    );
-    return response.data;
+  if (filters?.days_threshold) {
+    params.append('days', filters.days_threshold.toString());
+  }
+  if (filters?.status) {
+    params.append('status', filters.status);
+  }
+  if (filters?.tipo) {
+    params.append('tipo', filters.tipo);
   }
 
-  /**
-   * Ottiene le statistiche sui richiami
-   */
-  async getStatistics(daysThreshold: number = 90): Promise<RichiamiStatisticsResponse> {
-    const response = await apiClient.get<RichiamiStatisticsResponse>(
-      `${this.baseUrl}/statistics?days=${daysThreshold}`
-    );
-    return response.data;
-  }
-
-  /**
-   * Ottiene il messaggio preparato per un richiamo specifico
-   */
-  async getRecallMessage(richiamoId: string): Promise<RichiamoMessageResponse> {
-    const response = await apiClient.get<RichiamoMessageResponse>(
-      `${this.baseUrl}/${richiamoId}/message`
-    );
-    return response.data;
-  }
-
-  /**
-   * Aggiorna le date dei richiami basandosi sull'ultima visita
-   */
-  async updateRecallDates(): Promise<{ success: boolean; data: Record<string, unknown>; message: string }> {
-    const response = await apiClient.post(`${this.baseUrl}/update-dates`);
-    return response.data;
-  }
-
-  /**
-   * Esporta i richiami
-   */
-  async exportRecalls(daysThreshold: number = 90): Promise<RichiamiExportResponse> {
-    const response = await apiClient.get<RichiamiExportResponse>(
-      `${this.baseUrl}/export?days=${daysThreshold}`
-    );
-    return response.data;
-  }
-
-  /**
-   * Test del servizio richiami
-   */
-  async testService(): Promise<RichiamiTestResponse> {
-    const response = await apiClient.get<RichiamiTestResponse>(
-      `${this.baseUrl}/test`
-    );
-    return response.data;
-  }
-
-  /**
-   * Invia SMS per un richiamo (per implementazione futura)
-   */
-  async sendSMS(richiamoId: string): Promise<{ success: boolean; message: string }> {
-    // Per ora restituisce un mock, in futuro si integrerà con Twilio
-    return {
-      success: true,
-      message: `SMS inviato con successo per il richiamo ${richiamoId}`
-    };
-  }
-
-  /**
-   * Marca un richiamo come gestito
-   */
-  async markAsHandled(richiamoId: string): Promise<{ success: boolean; message: string }> {
-    // Per ora restituisce un mock, in futuro si aggiornerà il DBF
-    return {
-      success: true,
-      message: `Richiamo ${richiamoId} marcato come gestito`
-    };
-  }
+  const response = await apiClient.get<RichiamiResponse>(`/api/recalls/?${params.toString()}`);
+  return response.data;
 }
 
-// Esporta un'istanza singleton del servizio
-export const recallsService = new RecallsService(); 
+/**
+ * Ottiene le statistiche sui richiami
+ */
+export async function getRecallStatistics(daysThreshold: number = 90): Promise<RichiamiStatisticsResponse> {
+  const response = await apiClient.get<RichiamiStatisticsResponse>(
+    `/api/recalls/statistics?days=${daysThreshold}`
+  );
+  return response.data;
+}
+
+/**
+ * Ottiene il messaggio associato a un richiamo specifico
+ */
+export async function getRecallMessageById(richiamoId: string): Promise<RichiamoMessageResponse> {
+  const response = await apiClient.get<RichiamoMessageResponse>(`/api/recalls/${richiamoId}/message`);
+  return response.data;
+}
+
+/**
+ * Aggiorna le date dei richiami in base all’ultima visita
+ */
+export async function updateRecallDates(): Promise<{ success: boolean; data: Record<string, unknown>; message: string }> {
+  const response = await apiClient.post(`/api/recalls/update-dates`);
+  return response.data;
+}
+
+/**
+ * Esporta i richiami in formato CSV o altro
+ */
+export async function exportRecalls(daysThreshold: number = 90): Promise<RichiamiExportResponse> {
+  const response = await apiClient.get<RichiamiExportResponse>(`/api/recalls/export?days=${daysThreshold}`);
+  return response.data;
+}
+
+/**
+ * Esegue un test del servizio richiami (healthcheck o simile)
+ */
+export async function testRecallsService(): Promise<RichiamiTestResponse> {
+  const response = await apiClient.get<RichiamiTestResponse>(`/api/recalls/test`);
+  return response.data;
+}
+
+/**
+ * Marca un richiamo come gestito (mock temporaneo)
+ */
+export async function markRecallAsHandled(richiamoId: string): Promise<{ success: boolean; message: string }> {
+  // In futuro andrà fatto via PATCH/PUT al backend
+  return {
+    success: true,
+    message: `Richiamo ${richiamoId} marcato come gestito`
+  };
+}

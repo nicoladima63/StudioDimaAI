@@ -11,40 +11,51 @@ logger = logging.getLogger(__name__)
 
 def _get_dbf_path(table_name: str):
     """
-    Costruisce il percorso completo per un file DBF in base alla modalità e alla configurazione.
+    Costruisce il percorso per un file DBF usando:
+    - PATH specifico (es. PATH_APPUNTAMENTI_DBF) se disponibile
+    - oppure struttura base_path/categoria/nomefile
     """
     mode = get_mode('database')
     table_info = DBF_TABLES.get(table_name)
     if not table_info:
         raise ValueError(f"Tabella '{table_name}' non definita in DBF_TABLES.")
 
+    # 1. Prova a cercare una variabile specifica per la tabella
+    env_var = f"PATH_{table_name.upper()}_DBF"
+    direct_path = os.getenv(env_var)
+    if direct_path:
+        return direct_path
+
+    # 2. Se non c'è, costruisci il path classico
     base_path_env = "PROD_DB_BASE_PATH" if mode == 'prod' else "DEV_DB_BASE_PATH"
     base_path = os.getenv(base_path_env)
-    
+
     if not base_path:
         if mode == 'dev':
-            # Fallback per l'ambiente di sviluppo se la variabile non è impostata
             fallback_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'windent'))
-            logger.warning(f"Variabile d'ambiente '{base_path_env}' non impostata. Utilizzo il percorso di fallback: {fallback_path}")
+            logger.warning(f"Variabile d'ambiente '{base_path_env}' non impostata. Uso fallback: {fallback_path}")
             base_path = fallback_path
         else:
-            # In produzione, la variabile è obbligatoria
             raise ValueError(f"Variabile d'ambiente '{base_path_env}' non impostata. Obbligatoria in modalità produzione.")
 
-    # La categoria determina la sottocartella (es. DATI, USER)
     category_path = table_info['categoria']
     file_name = table_info['file']
     
     return os.path.join(base_path, category_path, file_name)
 
-
-def _leggi_tabella_dbf(percorso_file):
-    """Legge una tabella DBF e la restituisce come DataFrame pandas."""
+def _leggi_tabella_dbf(percorso_file: str) -> pd.DataFrame:
     try:
         with dbf.Table(percorso_file, codepage='cp1252') as table:
-            return pd.DataFrame(iter(table))
+            records = []
+            for record in table:
+                try:
+                    records.append({field: record[field] for field in table.field_names})
+                except Exception as e:
+                    logger.warning(f"Errore nel record: {e}")
+            logger.info(f"Letti {len(records)} record da {percorso_file}")
+            return pd.DataFrame(records)
     except Exception as e:
-        logger.error(f"Errore durante la lettura del file DBF {percorso_file}: {e}")
+        logger.error(f"Errore lettura tabella DBF '{percorso_file}': {e}")
         return pd.DataFrame()
 
 def get_appointments_for_month(month: int, year: int):

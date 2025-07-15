@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from dbfread import DBF
 from server.app.core.mode_manager import get_mode
 from server.app.config.constants import COLONNE
-from server.app.utils.db_utils import get_dbf_path
+from server.app.core.db_utils import get_dbf_path
 from server.app.core.utils import (
     costruisci_messaggio_richiamo,
     formatta_richiamo_per_frontend,
@@ -18,8 +18,7 @@ class RecallService:
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        mode = get_mode('database')
-        self.dbf_path = get_dbf_path('pazienti', mode)
+        self.dbf_path = get_dbf_path('pazienti')
     
     def get_all_recalls(self, days_threshold: int = 90) -> List[Dict[str, Any]]:
         try:

@@ -5,7 +5,7 @@ import {
   searchDiagnosi,
   searchFarmaci,
   inviaRicetta,
-} from '@/api/apiClient';
+} from '@/api/services/ricette.service';
 
 interface Paziente {
   id: string;
