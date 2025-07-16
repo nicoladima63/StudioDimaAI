@@ -45,7 +45,6 @@ def _get_dbf_path(table_name: str):
     
     return os.path.join(base_path, category_path, file_name)
 
-
 def _leggi_tabella_dbf(percorso_file: str) -> pd.DataFrame:
     try:
         with dbf.Table(percorso_file, codepage='cp1252') as table:
@@ -61,7 +60,7 @@ def _leggi_tabella_dbf(percorso_file: str) -> pd.DataFrame:
         logger.error(f"Errore lettura tabella DBF '{percorso_file}': {e}")
         return pd.DataFrame()
 
-def get_appointments_for_month(month: int, year: int):
+def _get_appointments_for_month(month: int, year: int):
     """
     Legge il DBF degli appuntamenti record per record e restituisce quelli del mese/anno specificato.
     Questo approccio è ottimizzato per file di grandi dimensioni.

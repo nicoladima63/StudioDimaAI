@@ -21,27 +21,50 @@ export const CalendarService = {
     return response.data;
   },
 
-  async startSync(month: number, year: number) {
+  async startSync(calendarId: string, month: number, year: number, studioId: number) {
     const response = await apiClient.post('/api/calendar/sync', {
+      calendar_id: calendarId,
       month,
-      year
+      year,
+      studio_id: studioId
     });
     return response.data;
   },
 
   async getSyncStatus(jobId: string) {
+    console.log('📞 Chiamata getSyncStatus per job:', jobId);
     const response = await apiClient.get('/api/calendar/sync-status', {
       params: { jobId }
     });
+    console.log('📨 Risposta getSyncStatus:', response.data);
     return response.data;
   },
 
   async clearCalendar(calendarId: string) {
-    const encodedCalendarId = encodeURIComponent(calendarId);
-    const response = await apiClient.delete(`/api/calendar/clear/${encodedCalendarId}`);
-    return response.data;
+    try {
+      const encodedCalendarId = encodeURIComponent(calendarId);
+      const response = await apiClient.delete(`/api/calendar/clear/${encodedCalendarId}`);
+      return response.data;
+    } catch (error) {
+      // Gestione migliorata degli errori
+      if (error.response?.data?.message) {
+        // Propaga l'errore con il messaggio dal server
+        const errorObj = {
+          message: error.response.data.message,
+          error: true,
+          deleted_count: 0
+        };
+        throw errorObj;
+      }
+      // Per errori di rete o altri errori non previsti
+      throw {
+        message: "Impossibile contattare il server. Verifica la tua connessione e riprova.",
+        error: true,
+        deleted_count: 0
+      };
+    }
   },
-
+  
   async getClearStatus(jobId: string) {
     const response = await apiClient.get('/api/calendar/clear-status', {
       params: { jobId }

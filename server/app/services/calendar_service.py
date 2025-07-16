@@ -18,9 +18,11 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import Flow
-
+from server.app.core import db_calendar
+from server.app.core.db_utils import get_dbf_path
 from server.app.config.constants import COLONNE, DBF_TABLES, GOOGLE_COLOR_MAP
 from server.app.core.mode_manager import get_mode
+from server.app.core.sync_utils import map_appointment
 from server.app.utils.exceptions import GoogleCredentialsNotFoundError
 
 logger = logging.getLogger(__name__)
@@ -58,12 +60,43 @@ def get_google_service():
             )
     return build('calendar', 'v3', credentials=creds)
 
-def _decimal_to_time(decimal_time):
-    """Converte un orario decimale (es: 14.30) in oggetto time."""
-    hours = int(decimal_time)
-    minutes = int(round((decimal_time - hours) * 100))
-    return dt_time(hours, minutes)
-
+def _decimal_to_time(time_value):
+    """
+    Converte un valore orario in oggetto time.
+    Supporta sia formato decimale (es: 8.40 = 8:40) che formato stringa (es: "18:30").
+    """
+    if time_value is None or time_value == 0:
+        return dt_time(8, 0)  # Default
+    
+    try:
+        # Gestisce il caso in cui time_value è già una stringa nel formato "HH:MM"
+        if isinstance(time_value, str) and ":" in time_value:
+            parts = time_value.split(":")
+            hours = int(parts[0])
+            minutes = int(parts[1])
+        else:
+            # Converte in float se è una stringa numerica
+            if isinstance(time_value, str):
+                time_value = float(time_value)
+                
+            # Separa ore e minuti (metodo originale)
+            hours = int(time_value)
+            decimal_part = time_value - hours
+            minutes = int(round(decimal_part * 100))  # Moltiplica per 100 per ottenere i minuti
+        
+        # Valida i valori
+        if hours < 0 or hours > 23:
+            logger.warning(f"Ore non valide: {hours}, uso 8")
+            hours = 8
+        if minutes < 0 or minutes > 59:
+            logger.warning(f"Minuti non validi: {minutes}, uso 0")
+            minutes = 0
+            
+        return dt_time(hours, minutes)
+    except Exception as e:
+        logger.error(f"Errore nella conversione dell'orario decimale {time_value}: {e}")
+        return dt_time(8, 0)
+    
 def _safe_to_time(val):
     """Converte un valore in time in modo sicuro."""
     if isinstance(val, dt_time):
@@ -130,52 +163,130 @@ class CalendarService:
         logger.info(f"Avvio pulizia calendario per l'ID: {calendar_id}")
         service = get_google_service()
         deleted_count = 0
+        skipped_count = 0
         page_token = None
+        
         try:
+            # Prima verifica se ci sono eventi nel calendario
+            try:
+                initial_check = service.events().list(
+                    calendarId=calendar_id,
+                    maxResults=1  # Chiediamo solo un evento per verificare se il calendario ha contenuti
+                ).execute()
+                
+                if not initial_check.get('items', []):
+                    logger.info(f"Calendario {calendar_id} è già vuoto. Nessun evento da cancellare.")
+                    return {
+                        "message": "Il calendario è già vuoto. Nessun evento da cancellare.",
+                        "deleted_count": 0
+                    }
+            except HttpError as e:
+                if e.resp.status == 404:
+                    raise ValueError("Il calendario selezionato non esiste o non è accessibile.")
+                elif e.resp.status == 403:
+                    raise ValueError("Non hai i permessi necessari per modificare questo calendario.")
+                else:
+                    raise  # Rilancia altre eccezioni HTTP
+            
+            # Continua con la cancellazione se ci sono eventi
             while True:
                 events_result = service.events().list(
                     calendarId=calendar_id,
                     pageToken=page_token,
-                    maxResults=2500
+                    maxResults=100
                 ).execute()
                 events = events_result.get('items', [])
+                
                 if not events:
                     logger.info(f"Nessun altro evento da cancellare per il calendario {calendar_id}.")
                     break
+                
                 logger.info(f"Trovati {len(events)} eventi in questo batch. Inizio cancellazione...")
+                
                 for event in events:
                     event_id = event['id']
                     try:
+                        logger.info(f"Cancellazione evento ID: {event_id}")
                         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
                         deleted_count += 1
-                        time.sleep(0.05)
+                        time.sleep(0.2)  # Pausa tra le cancellazioni
+                        
+                        if deleted_count % 10 == 0:
+                            logger.info(f"Cancellati {deleted_count} eventi finora...")
+                            
                     except HttpError as e:
-                        if e.resp.status == 403 and 'rateLimitExceeded' in str(e.content):
+                        if e.resp.status == 410:
+                            logger.info(f"Evento {event_id} già cancellato, ignoro")
+                            skipped_count += 1
+                        elif e.resp.status == 403 and 'rateLimitExceeded' in str(e.content):
                             logger.warning(f"Rate limit raggiunto. Attendo 5 secondi prima di riprovare l'evento {event_id}.")
                             time.sleep(5)
-                            service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
-                            deleted_count += 1
+                            try:
+                                service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
+                                deleted_count += 1
+                                time.sleep(0.2)
+                            except HttpError as retry_e:
+                                if retry_e.resp.status == 410:
+                                    logger.info(f"Evento {event_id} già cancellato durante retry, ignoro")
+                                    skipped_count += 1
+                                else:
+                                    logger.error(f"Errore durante retry per evento {event_id}: {retry_e}")
                         elif e.resp.status == 404:
                             logger.warning(f"Evento {event_id} non trovato (già cancellato?). Continuo.")
+                            skipped_count += 1
                         else:
                             logger.error(f"Errore HTTP non gestito durante la cancellazione dell'evento {event_id}: {e}")
-                            continue
+                    except Exception as e:
+                        logger.error(f"Errore generico durante la cancellazione dell'evento {event_id}: {e}")
+                
                 page_token = events_result.get('nextPageToken')
                 if not page_token:
                     break
-            logger.info(f"Pulizia completata. Cancellati un totale di {deleted_count} eventi dal calendario {calendar_id}")
-            return deleted_count
+                
+                time.sleep(1)  # Pausa tra le pagine
+            
+            # Aggiorna il file di stato JSON
+            sync_state = _load_sync_state()
+            updated_sync_state = {app_id: state for app_id, state in sync_state.items() 
+                                if state.get('calendar_id') != calendar_id}
+            
+            if len(updated_sync_state) != len(sync_state):
+                logger.info(f"Aggiornamento file di stato sincronizzazione: rimossi {len(sync_state) - len(updated_sync_state)} riferimenti a eventi del calendario {calendar_id}")
+                _save_sync_state(updated_sync_state)
+            
+            message = f"Cancellazione completata. Cancellati {deleted_count} eventi."
+            if skipped_count > 0:
+                message += f" {skipped_count} eventi erano già stati cancellati."
+                
+            logger.info(message)
+            
+            return {
+                "message": message,
+                "deleted_count": deleted_count,
+                "skipped_count": skipped_count
+            }
+        
         except HttpError as e:
             if e.resp.status == 404:
-                logger.error(f"Errore critico: Calendario con ID '{calendar_id}' non trovato.")
+                error_msg = "Il calendario selezionato non esiste o non è accessibile."
+                logger.error(f"Errore HTTP 404: {error_msg}")
+                raise ValueError(error_msg)
             elif e.resp.status == 403:
-                logger.error(f"Errore critico: Permessi insufficienti per accedere o modificare il calendario '{calendar_id}'.")
+                error_msg = "Non hai i permessi necessari per modificare questo calendario."
+                logger.error(f"Errore HTTP 403: {error_msg}")
+                raise ValueError(error_msg)
+            elif 'rateLimitExceeded' in str(e.content):
+                error_msg = "Troppe richieste in breve tempo. Riprova tra qualche minuto."
+                logger.error(f"Rate limit: {error_msg}")
+                raise ValueError(error_msg)
             else:
-                logger.error(f"Errore HTTP critico durante la pulizia del calendario {calendar_id}: {e}")
-            raise
+                error_msg = f"Errore durante la comunicazione con Google Calendar: {str(e)}"
+                logger.error(f"Errore HTTP non gestito: {error_msg}")
+                raise ValueError(error_msg)
         except Exception as e:
-            logger.error(f"Errore generico e imprevisto durante la pulizia del calendario {calendar_id}: {e}")
-            raise
+            error_msg = "Si è verificato un errore durante la cancellazione. Riprova più tardi o contatta l'assistenza."
+            logger.error(f"Errore generico: {e}")
+            raise ValueError(error_msg)
 
     @staticmethod
     def sync_appointments_for_month(month, year, studio_calendar_ids, appointments, progress_callback=None):
@@ -246,8 +357,11 @@ class CalendarService:
         t_fine = _safe_to_time(app.get('ORA_FINE'))
         dt_inizio = datetime.combine(data_evento, t_inizio)
         dt_fine = datetime.combine(data_evento, t_fine) if t_fine > t_inizio else dt_inizio + timedelta(minutes=10)
-        summary = app.get('PAZIENTE') or app.get('DESCRIZIONE') or "Appuntamento"
-        event = {
+        if t_inizio.hour == 8 and t_inizio.minute == 0 and (not app.get('PAZIENTE') and not app.get('DESCRIZIONE')):
+            summary = "Nota giornaliera"
+        else:
+            summary = app.get('PAZIENTE') or app.get('DESCRIZIONE') or "Appuntamento"
+            event = {
             'summary': summary.strip(),
             'description': app.get('NOTE', ''),
             'start': {
@@ -295,8 +409,8 @@ class CalendarService:
         Utilizza map_appointment per normalizzare i dati.
         """
         try:
-            path_appuntamenti = _get_dbf_path('agenda')
-            path_pazienti = _get_dbf_path('pazienti')
+            path_appuntamenti = get_dbf_path('agenda')
+            path_pazienti = get_dbf_path('pazienti')
         except (ValueError, FileNotFoundError) as e:
             logger.error(f"Errore nel recuperare il percorso del DBF: {e}")
             raise e
@@ -366,7 +480,10 @@ class CalendarService:
                     
                     # Converte le date per la serializzazione JSON
                     try:
+                        # Converte la data solo come data (senza orario)
                         if isinstance(mapped_app.get('DATA'), datetime):
+                            mapped_app['DATA'] = mapped_app['DATA'].date().isoformat()
+                        elif hasattr(mapped_app.get('DATA'), 'isoformat'):
                             mapped_app['DATA'] = mapped_app['DATA'].isoformat()
                         
                         # Gestione time objects per ora_inizio e ora_fine
@@ -382,7 +499,11 @@ class CalendarService:
                             
                     except Exception as e:
                         logger.error(f"Errore conversione date per record {idpaz}: {e}")
-                        # Continua comunque
+                        # Se c'è un errore, prova a convertire manualmente
+                        if isinstance(mapped_app.get('DATA'), datetime):
+                            mapped_app['DATA'] = mapped_app['DATA'].strftime('%Y-%m-%d')
+                        elif hasattr(mapped_app.get('DATA'), 'strftime'):
+                            mapped_app['DATA'] = mapped_app['DATA'].strftime('%Y-%m-%d')
 
                     appointments.append(mapped_app)
 
@@ -400,14 +521,14 @@ class CalendarService:
         """
         Wrapper del servizio per recuperare statistiche annuali dal modulo dati.
         """
-        return db_appuntamenti.get_appointments_stats_for_year()
+        return db_calendar.get_appointments_stats_for_year()
 
     @staticmethod
     def get_db_appointments_count_by_range(start_date: str, end_date: str):
         """
         Wrapper del servizio per contare appuntamenti in un range dal modulo dati.
         """
-        return db_appuntamenti.get_appointments_count_by_range(start_date, end_date)
+        return db_calendar.get_appointments_count_by_range(start_date, end_date)
     
     @staticmethod
     def get_google_oauth_url():
@@ -446,3 +567,12 @@ class CalendarService:
             token.write(creds.to_json())
         
         return True
+    
+
+    # Nel CalendarService, aggiungi questo metodo temporaneo per test
+    @staticmethod
+    def test_time_conversion():
+        test_times = [8.40, 11.30, 15.00, 9.15, 14.45, 10.20, 11.50]
+        for time_val in test_times:
+            converted = _decimal_to_time(time_val)
+            logger.info(f"Conversione: {time_val} -> {converted}")

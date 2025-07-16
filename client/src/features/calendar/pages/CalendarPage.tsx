@@ -152,73 +152,117 @@ const CalendarPage: React.FC = () => {
   }, [loadTrigger, selectedMonth, currentYear]);
 
   // Funzione per sincronizzazione e pulizia
-  const handleSync = async () => {
-    if (!selectedCalendar) {
-      setCalendarWarningAction('sync');
-      setShowCalendarWarning(true);
-      return;
+const handleSync = async () => {
+  if (!selectedCalendar) {
+    setCalendarWarningAction('sync');
+    setShowCalendarWarning(true);
+    return;
+  }
+  if (!previewStats) return;
+  
+  // Determina lo studio basato sul nome del calendario selezionato
+  let studioId = null;
+  const calendarName = selectedCalendarName.toLowerCase();
+  
+  if (calendarName.includes('giallo')) {
+    studioId = 2;
+  } else if (calendarName.includes('blu')) {
+    studioId = 1;
+  } else {
+    // Chiedi all'utente quale studio sincronizzare se non è chiaro dal nome
+    const userStudio = window.confirm(
+      "Non è chiaro a quale studio appartenga questo calendario.\n" +
+      "Vuoi sincronizzare lo Studio Giallo?\n" +
+      "(Seleziona OK per Studio Giallo, Annulla per Studio Blu)"
+    );
+    studioId = userStudio ? 2 : 1;
+  }
+  
+  // Apri subito la modal di sincronizzazione
+  setSyncModalMessage(`Sincronizzazione appuntamenti Studio ${studioId === 1 ? 'Blu' : 'Giallo'} in corso...`);
+  setShowSyncModal(true);
+  setSyncStatus('in_progress');
+  setSyncProgress(0);
+  setSyncSynced(0);
+  setSyncTotal(0);
+
+  try {
+    console.log(`🚀 Avvio sincronizzazione Studio ${studioId} su calendario:`, selectedCalendar);
+    
+    // Avvia la sincronizzazione asincrona con il parametro studio_id
+    const response = await CalendarService.startSync(selectedCalendar, selectedMonth + 1, currentYear, studioId);
+    
+    console.log('📋 Risposta sync:', response);
+    const { job_id } = response;  // Nota: non response.data ma response direttamente
+    
+    if (!job_id) {
+      throw new Error('Job ID non ricevuto dal server');
     }
-    if (!previewStats) return;
-    // Apri subito la modal di sincronizzazione
-    setSyncModalMessage(`Sincronizzazione in corso per il calendario '${selectedCalendar}'...`);
-    setShowSyncModal(true);
-    setSyncStatus('in_progress');
-    setSyncProgress(0);
-    setSyncSynced(0);
-    setSyncTotal(0);
-
-    try {
-      // Avvia la sincronizzazione asincrona SOLO sul calendario selezionato
-      const response = await CalendarService.startSync(selectedCalendar, selectedMonth + 1, currentYear);
-
-      const { job_id } = response.data;
-      
-      // Inizia il polling per monitorare il progresso
-      const pollSyncStatus = async () => {
-        try {
-          const statusResponse = await CalendarService.getSyncStatus(job_id);
-          
-          const { status, progress, synced, total, message, error } = statusResponse.data;
-          
-          setSyncProgress(progress || 0);
-          setSyncSynced(synced || 0);
-          setSyncTotal(total || 0);
-          
-          if (message) {
-            setSyncModalMessage(message);
-          }
-          
-          if (status === 'completed') {
-            setSyncStatus('completed');
-            // Chiudi automaticamente la modal dopo 2 secondi
-            setTimeout(() => {
-              setShowSyncModal(false);
-              setSyncStatus('idle');
-            }, 2000);
-            return;
-          } else if (status === 'error') {
-            setSyncStatus('error');
-            setSyncModalMessage(`Errore: ${error || 'Errore sconosciuto'}`);
-            return;
-          }
-          
-          // Continua il polling
-          syncPollingRef.current = window.setTimeout(pollSyncStatus, 1000);
-        } catch {
-          setSyncStatus('error');
-          setSyncModalMessage('Errore durante la sincronizzazione');
+    
+    console.log('🔑 Job ID ricevuto:', job_id);
+    
+    // Inizia il polling per monitorare il progresso
+    const pollSyncStatus = async () => {
+      try {
+        console.log('🔄 Polling status per job:', job_id);
+        const statusResponse = await CalendarService.getSyncStatus(job_id);
+        console.log('📊 Status ricevuto:', statusResponse);
+        
+        // Controlla se statusResponse ha la struttura corretta
+        if (!statusResponse || typeof statusResponse !== 'object') {
+          throw new Error('Risposta status non valida');
         }
-      };
-      
-      // Avvia il polling
-      pollSyncStatus();
-      
-    } catch {
-      setSyncStatus('error');
-      setSyncModalMessage('Errore durante la sincronizzazione');
-    }
-  };
+        
+        const { status, progress, synced, total, message, error } = statusResponse;
+        
+        setSyncProgress(progress || 0);
+        setSyncSynced(synced || 0);
+        setSyncTotal(total || 0);
+        
+        if (message) {
+          setSyncModalMessage(message);
+        }
+        
+        if (status === 'completed') {
+          console.log('✅ Sincronizzazione completata');
+          setSyncStatus('completed');
+          setSyncModalMessage('Sincronizzazione completata con successo!');
+          // Chiudi automaticamente la modal dopo 2 secondi
+          setTimeout(() => {
+            setShowSyncModal(false);
+            setSyncStatus('idle');
+          }, 2000);
+          return;
+        } else if (status === 'error') {
+          console.error('❌ Errore nella sincronizzazione:', error);
+          setSyncStatus('error');
+          setSyncModalMessage(`Errore: ${error || 'Errore sconosciuto'}`);
+          return;
+        }
+        
+        // Continua il polling solo se lo stato è ancora in_progress
+        if (status === 'in_progress') {
+          syncPollingRef.current = window.setTimeout(pollSyncStatus, 1000);
+        }
+        
+      } catch (pollError) {
+        console.error('❌ Errore nel polling:', pollError);
+        setSyncStatus('error');
+        setSyncModalMessage('Errore durante il monitoraggio della sincronizzazione');
+      }
+    };
+    
+    // Avvia il polling
+    pollSyncStatus();
+    
+  } catch (syncError) {
+    console.error('❌ Errore nell\'avvio della sincronizzazione:', syncError);
+    setSyncStatus('error');
+    setSyncModalMessage('Errore durante l\'avvio della sincronizzazione');
+  }
+};
 
+  
   // Funzione per cancellazione asincrona
   const handleClear = async () => {
     if (!selectedCalendar) {
@@ -240,49 +284,37 @@ const CalendarPage: React.FC = () => {
 
     try {
       const response = await CalendarService.clearCalendar(selectedCalendar);
-
-      const { job_id } = response.data;
-
-      // Inizia il polling per monitorare il progresso
-      const pollClearStatus = async () => {
-        try {
-          const statusResponse = await CalendarService.getClearStatus(job_id);
-          
-          const { status, progress, deleted, total, error } = statusResponse.data;
-          
-          setClearProgress(progress || 0);
-          setClearDeleted(deleted || 0);
-          setClearTotal(total || 0);
-          
-          if (status === 'completed') {
-            setClearStatus('completed');
-            toast.success(`✅ Cancellazione completata! ${deleted} eventi eliminati.`);
-            return;
-          } else if (status === 'error') {
-            setClearStatus('error');
-            setClearError(error || 'Errore sconosciuto');
-            return;
-          }
-          
-          // Continua il polling
-          clearPollingRef.current = window.setTimeout(pollClearStatus, 1000);
-        } catch {
-          setClearStatus('error');
-          setClearError('Errore durante la cancellazione');
-          toast.error('❌ Errore durante la cancellazione');
-        }
-      };
       
-      // Avvia il polling
-      pollClearStatus();
+      // Gestione risposta di successo
+      setClearStatus('completed');
+      setClearDeleted(response.deleted_count);
       
-    } catch {
+      // Mostra messaggio appropriato in base al risultato
+      if (response.deleted_count === 0 && !response.error) {
+        // Calendario già vuoto
+        toast.info(response.message);
+      } else {
+        // Cancellazione completata con successo
+        toast.success(response.message);
+      }
+    } catch (error) {
       setClearStatus('error');
-      setClearError('Errore durante la cancellazione');
-      toast.error('❌ Errore durante la cancellazione');
+      
+      // Gestisci i vari tipi di errore
+      if (error.message) {
+        // Usa il messaggio di errore dal server
+        setClearError(error.message);
+        toast.error(error.message);
+      } else {
+        // Fallback per errori imprevisti
+        const genericError = "Si è verificato un errore durante la cancellazione. Riprova più tardi.";
+        setClearError(genericError);
+        toast.error(genericError);
+      }
+      
+      console.error('Errore durante la cancellazione:', error);
     }
   };
-
   // Cleanup dei polling quando il componente viene smontato
   useEffect(() => {
     return () => {
@@ -377,21 +409,22 @@ const CalendarPage: React.FC = () => {
                 </CButton>
               </div>
 
-              {previewStats && (
-                <div className="mb-3">
-                  <CAlert color="info">
-                    <strong>Preview Appuntamenti:</strong><br />
-                    Totale: {previewStats.total}<br />
-                    Studio Blu: {previewStats.studioBlu}<br />
-                    Studio Giallo: {previewStats.studioGiallo}<br />
-                    {previewStats.nonSincronizzabili > 0 && (
-                      <span className="text-warning">
-                        Non sincronizzabili: {previewStats.nonSincronizzabili}
-                      </span>
-                    )}
-                  </CAlert>
+            {previewStats && (
+              <div className="mb-3">
+                <CAlert color="info">
+                  <strong>Preview Appuntamenti:</strong><br />
+                  Totale: {previewStats.total}<br />
+                  Studio Blu: {previewStats.studioBlu}<br />
+                  Studio Giallo: {previewStats.studioGiallo}<br />
+                  {previewStats.nonSincronizzabili > 0 && (
+                    <span className="text-warning">
+                      Non sincronizzabili: {previewStats.nonSincronizzabili}
+                    </span>
+                  )}
+                </CAlert>
 
-                  {previewStats.total > 0 && (
+                {previewStats.total > 0 && (
+                  <>
                     <CButton
                       color="success"
                       onClick={handleSync}
@@ -407,9 +440,23 @@ const CalendarPage: React.FC = () => {
                         'Sincronizza'
                       )}
                     </CButton>
-                  )}
-                </div>
-              )}
+                    
+                    {/* Indicazione studio da sincronizzare */}
+                    {selectedCalendar && (
+                      <div className="mt-2">
+                        <CAlert color="info" className="p-2 small">
+                          {selectedCalendarName.toLowerCase().includes('giallo') ? 
+                            'Questo calendario sincronizzerà gli appuntamenti dello Studio Giallo' : 
+                            selectedCalendarName.toLowerCase().includes('blu') ?
+                            'Questo calendario sincronizzerà gli appuntamenti dello Studio Blu' :
+                            'Attenzione: Non è chiaro quale studio verrà sincronizzato su questo calendario. Ti verrà chiesto prima della sincronizzazione.'}
+                        </CAlert>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
             </CCol>
 
             <CCol md={6}>
