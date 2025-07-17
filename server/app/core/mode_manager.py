@@ -5,6 +5,7 @@ MODE_FILES = {
     'database': 'database_mode.txt',
     'rentri': 'rentri_mode.txt',
     'ricetta': 'ricetta_mode.txt',
+    'sms': 'sms_mode.txt',  # Aggiunto supporto SMS
 }
 
 VALID_MODES = ['dev', 'prod', 'test']
@@ -27,8 +28,9 @@ def set_mode(tipo: str, modo: str):
         f.write(modo)
 
 def get_env_params(tipo: str, modo: str) -> dict:
-    # Esempio: centralizza qui la logica per rentri, ricetta, ecc.
+    """Centralizza qui la logica per rentri, ricetta, sms, ecc."""
     params = {}
+    
     if tipo == 'rentri':
         if modo == 'prod':
             params['PRIVATE_KEY_PATH'] = os.getenv('RENTRI_PRIVATE_KEY_PATH_PROD')
@@ -40,5 +42,15 @@ def get_env_params(tipo: str, modo: str) -> dict:
             params['CLIENT_ID'] = os.getenv('RENTRI_CLIENT_ID_TEST')
             params['CLIENT_AUDIENCE'] = os.getenv('RENTRI_CLIENT_AUDIENCE_TEST')
             params['TOKEN_URL'] = os.getenv('RENTRI_TOKEN_URL_TEST', 'https://demoapi.rentri.gov.it/token')
-    # Aggiungi logica per altri tipi...
-    return params 
+    
+    elif tipo == 'sms':
+        if modo == 'prod':
+            params['API_KEY'] = os.getenv('BREVO_API_KEY')
+            params['SENDER'] = os.getenv('SMS_SENDER_PROD', 'StudioDima')
+            params['ENABLED'] = True
+        else:  # dev
+            params['API_KEY'] = os.getenv('BREVO_API_KEY')
+            params['SENDER'] = os.getenv('SMS_SENDER_TEST', 'TestSMS')
+            params['ENABLED'] = True
+    
+    return params

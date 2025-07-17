@@ -1,0 +1,13 @@
+CALENDAR
+creare automazione per sync calendario
+se possibile barra in cancellazione come in sincronizza
+tasto per cancellare sync per interrompere il job avviato
+
+RENTRI
+
+
+
+RICETTA
+
+
+SMS
