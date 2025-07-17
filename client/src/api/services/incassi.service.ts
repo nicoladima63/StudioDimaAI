@@ -1,5 +1,5 @@
 // src/api/incassi/incassiApi.ts
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 
 /**
  * API per la gestione degli incassi

@@ -1,5 +1,5 @@
 // src/services/auth.service.ts
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import type { LoginPayload, RegisterPayload } from '@/lib/types';
 

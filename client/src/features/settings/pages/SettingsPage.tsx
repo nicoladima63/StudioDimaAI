@@ -12,10 +12,15 @@ import {
   CCardBody, 
   CFormLabel,
   CSpinner,
-  CBadge
+  CBadge,
+  CNav,
+  CNavItem,
+  CNavLink,
+  CTabContent,
+  CTabPane
 } from '@coreui/react';
-import { useEnvStore } from '@/features/auth/store/useAuthStore';  // Il tuo store esistente
-import { useSMSStore } from '@/store/smsStore';   // Nuovo store SMS dedicato
+import { useEnvStore } from '@/features/auth/store/useAuthStore';
+import { useSMSStore } from '@/store/smsStore';
 import { 
   setMode as apiSetMode, 
   getMode, 
@@ -23,9 +28,9 @@ import {
   testSMSConnection,
 } from '@/api/services/settings.service';
 import { getAppointmentsWithModeWarning } from '@/api/services/calendar.service';
+import TemplateEditor from '@/components/ui/TemplateEditor';
 
 import NetworkModal from '@/components/ui/MessageModal';
-
 
 const SettingsPage: React.FC = () => {
   // Store esistente per database, rentri, ricetta
@@ -50,11 +55,14 @@ const SettingsPage: React.FC = () => {
     canSendSMS
   } = useSMSStore();
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState('settings');
+
   // State esistente
   const [selectedMode, setSelectedMode] = useState<'dev' | 'prod'>(mode);
   const [selectedRentriMode, setSelectedRentriMode] = useState<'dev' | 'prod'>(rentriMode);
   const [selectedRicettaMode, setSelectedRicettaMode] = useState<'dev' | 'prod'>(ricettaMode);
-  const [selectedSmsMode, setSelectedSmsMode] = useState< 'test' | 'prod'>(smsMode);
+  const [selectedSmsMode, setSelectedSmsMode] = useState<'test' | 'prod'>(smsMode);
 
   // Toast state esistente
   const [showToast, setShowToast] = useState(false);
@@ -81,8 +89,8 @@ const SettingsPage: React.FC = () => {
     
     // Carica modalità SMS
     getMode('sms').then((backendMode) => {
-      setSelectedSmsMode(backendMode);
-      setSmsMode(backendMode);
+      setSelectedSmsMode(backendMode as 'test' | 'prod');
+      setSmsMode(backendMode as 'test' | 'prod');
     });
     
     // Carica stato SMS
@@ -103,7 +111,7 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  // Handler esistenti (invariati)
+  // Handler esistenti (mantenuti identici)
   const handleApplyMode = async () => {
     try {
       setNetworkLoading(false);
@@ -160,7 +168,6 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  // Handler SMS con store dedicato
   const handleApplySms = async () => {
     try {
       setSmsLoading(true);
@@ -176,7 +183,7 @@ const SettingsPage: React.FC = () => {
       }
 
       setSmsMode(selectedSmsMode);
-      await loadSMSStatus(); // Ricarica lo stato dopo il cambio
+      await loadSMSStatus();
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
     } catch (error) {
@@ -193,13 +200,11 @@ const SettingsPage: React.FC = () => {
       setSmsLoading(true);
       const result = await testSMSConnection();
       
-      // Salva il risultato nel store
       setLastTestResult({
         success: result.success,
         message: result.success ? result.message : result.error || 'Test fallito'
       });
 
-      // Mostra il toast
       if (result.success) {
         setModeWarning(`✅ ${result.message}`);
       } else {
@@ -230,12 +235,16 @@ const SettingsPage: React.FC = () => {
   };
 
   // Funzioni helper
-  const getSMSModeLabel = (mode:  'test' | 'prod') => {
-    switch (mode) {
-      case 'test': return 'Test';
-      case 'prod': return 'Produzione';
-      default: return mode;
-    }
+  const getDatabaseBadgeColor = (mode: 'dev' | 'prod') => {
+    return mode === 'prod' ? 'success' : 'secondary';
+  };
+
+  const getRentriBadgeColor = (mode: 'dev' | 'prod') => {
+    return mode === 'prod' ? 'success' : 'warning';
+  };
+
+  const getRicettaBadgeColor = (mode: 'dev' | 'prod') => {
+    return mode === 'prod' ? 'success' : 'warning';
   };
 
   const getSMSBadgeColor = (enabled: boolean, mode: 'test' | 'prod') => {
@@ -243,6 +252,14 @@ const SettingsPage: React.FC = () => {
     switch (mode) {
       case 'test': return 'warning';
       case 'prod': return 'success';
+      default: return 'secondary';
+    }
+  };
+
+  const getSMSModeLabel = (mode: 'test' | 'prod') => {
+    switch (mode) {
+      case 'test': return 'Test';
+      case 'prod': return 'Produzione';
       default: return mode;
     }
   };
@@ -259,189 +276,252 @@ const SettingsPage: React.FC = () => {
     </CToast>
   );
 
- const getDatabaseBadgeColor = (mode: 'dev' | 'prod') => {
-    return mode === 'prod' ? 'success' : 'secondary';
-  };
-
-  const getRentriBadgeColor = (mode: 'dev' | 'prod') => {
-    return mode === 'prod' ? 'success' : 'warning';
-  };
-
-  const getRicettaBadgeColor = (mode: 'dev' | 'prod') => {
-    return mode === 'prod' ? 'success' : 'warning';
-  };
-
   return (
     <Card title="Impostazioni">
-      <CRow className="mt-4">
-        {/* Prima colonna - DATABASE */}
-        <CCol md={3}>
-          <CCard>
-            <CCardBody>
-              <div className="d-flex align-items-center justify-content-evenly mb-3 w-100">
-                <div className="d-flex align-items-center">
-                  <CFormLabel className="fw-semibold mb-0 me-2">DATABASE</CFormLabel>
-                  <CBadge 
-                    color={getDatabaseBadgeColor(selectedMode)}
-                    className="ms-1"
-                  >
-                    {selectedMode === 'prod' ? '🏢' : '🏠'}
-                  </CBadge>
-                </div>
-                
-                <CFormSwitch
-                  id="mode-switch"
-                  label={selectedMode === 'prod' ? 'Studio' : 'Casa'}
-                  checked={selectedMode === 'prod'}
-                  onChange={() => setSelectedMode(selectedMode === 'prod' ? 'dev' : 'prod')}
-                  color={selectedMode === 'prod' ? 'success' : 'primary'}
-                />
-                
-                <CButton
-                  color="primary"
-                  size="sm"
-                  disabled={selectedMode === mode}
-                  onClick={handleApplyMode}
-                >
-                  Applica
-                </CButton>
-              </div>
-            </CCardBody>
-          </CCard>
-        </CCol>
+      {/* Navigation Tabs */}
+      <CNav variant="tabs" className="mb-4">
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 'settings'}
+            onClick={() => setActiveTab('settings')}
+            style={{ cursor: 'pointer' }}
+          >
+            ⚙️ Modalità Sistema
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 'templates'}
+            onClick={() => setActiveTab('templates')}
+            style={{ cursor: 'pointer' }}
+          >
+            📱 Template SMS
+          </CNavLink>
+        </CNavItem>
+      </CNav>
 
-        {/* Seconda colonna - RENTRI */}
-        <CCol md={3}>
-          <CCard>
-            <CCardBody>
-              <div className="d-flex align-items-center justify-content-evenly mb-3">
-                <div className="d-flex align-items-center">
-                  <CFormLabel className="fw-semibold mb-0 me-2">RENTRI</CFormLabel>
-                  <CBadge 
-                    color={getRentriBadgeColor(selectedRentriMode)}
-                    className="ms-1"
-                  >
-                    {selectedRentriMode === 'prod' ? '🟢' : '🟡'}
-                  </CBadge>
-                </div>
-                
-                <CFormSwitch
-                  id="rentri-mode-switch"
-                  label={selectedRentriMode === 'prod' ? 'Prod' : 'Test'}
-                  checked={selectedRentriMode === 'prod'}
-                  onChange={() => setSelectedRentriMode(selectedRentriMode === 'prod' ? 'dev' : 'prod')}
-                  color={selectedRentriMode === 'prod' ? 'success' : 'primary'}
-                />
-                
-                <CButton
-                  color="primary"
-                  size="sm"
-                  disabled={selectedRentriMode === rentriMode}
-                  onClick={handleApplyRentri}
-                >
-                  Applica
-                </CButton>
-              </div>
-            </CCardBody>
-          </CCard>
-        </CCol>
-
-        {/* Terza colonna - RNE */}
-        <CCol md={3}>
-          <CCard>
-            <CCardBody>
-              <div className="d-flex align-items-center justify-content-evenly mb-3">
-                <div className="d-flex align-items-center">
-                  <CFormLabel className="fw-semibold mb-0 me-2">RNE</CFormLabel>
-                  <CBadge 
-                    color={getRicettaBadgeColor(selectedRicettaMode)}
-                    className="ms-1"
-                  >
-                    {selectedRicettaMode === 'prod' ? '💊' : '🧪'}
-                  </CBadge>
-                </div>
-                
-                <CFormSwitch
-                  id="ricetta-mode-switch"
-                  label={selectedRicettaMode === 'prod' ? 'Prod' : 'Test'}
-                  checked={selectedRicettaMode === 'prod'}
-                  onChange={() => setSelectedRicettaMode(selectedRicettaMode === 'prod' ? 'dev' : 'prod')}
-                  color={selectedRicettaMode === 'prod' ? 'success' : 'primary'}
-                />
-                
-                <CButton
-                  color="primary"
-                  size="sm"
-                  disabled={selectedRicettaMode === ricettaMode}
-                  onClick={handleApplyRicetta}
-                >
-                  Applica
-                </CButton>
-              </div>
-            </CCardBody>
-          </CCard>
-        </CCol>
-
-        {/* Quarta colonna - SMS */}
-        <CCol md={3}>
-          <CCard>
-            <CCardBody>
-              <div className="d-flex align-items-center justify-content-evenly mb-3">
-                <div className="d-flex align-items-center">
-                  <CFormLabel className="fw-semibold mb-0 me-2">SMS</CFormLabel>
-                  {smsStatus && (
-                    <CBadge 
-                      color={getSMSBadgeColor(smsStatus.enabled, smsStatus.mode)}
-                      className="ms-1"
+      {/* Tab Content */}
+      <CTabContent>
+        {/* Settings Tab */}
+        <CTabPane visible={activeTab === 'settings'}>
+          <CRow className="mt-4">
+            {/* DATABASE */}
+            <CCol md={3}>
+              <CCard>
+                <CCardBody>
+                  <div className="d-flex align-items-center justify-content-evenly mb-3 w-100">
+                    <div className="d-flex align-items-center">
+                      <CFormLabel className="fw-semibold mb-0 me-2">DATABASE</CFormLabel>
+                      <CBadge 
+                        color={getDatabaseBadgeColor(selectedMode)}
+                        className="ms-1"
+                      >
+                        {selectedMode === 'prod' ? '🏢' : '🏠'}
+                      </CBadge>
+                    </div>
+                    
+                    <CFormSwitch
+                      id="mode-switch"
+                      label={selectedMode === 'prod' ? 'Studio' : 'Casa'}
+                      checked={selectedMode === 'prod'}
+                      onChange={() => setSelectedMode(selectedMode === 'prod' ? 'dev' : 'prod')}
+                      color={selectedMode === 'prod' ? 'success' : 'primary'}
+                    />
+                    
+                    <CButton
+                      color="primary"
+                      size="sm"
+                      disabled={selectedMode === mode}
+                      onClick={handleApplyMode}
                     >
-                      {smsStatus.enabled ? '🟢' : '🔴'}
-                    </CBadge>
+                      Applica
+                    </CButton>
+                  </div>
+                </CCardBody>
+              </CCard>
+            </CCol>
+
+            {/* RENTRI */}
+            <CCol md={3}>
+              <CCard>
+                <CCardBody>
+                  <div className="d-flex align-items-center justify-content-evenly mb-3">
+                    <div className="d-flex align-items-center">
+                      <CFormLabel className="fw-semibold mb-0 me-2">RENTRI</CFormLabel>
+                      <CBadge 
+                        color={getRentriBadgeColor(selectedRentriMode)}
+                        className="ms-1"
+                      >
+                        {selectedRentriMode === 'prod' ? '🟢' : '🟡'}
+                      </CBadge>
+                    </div>
+                    
+                    <CFormSwitch
+                      id="rentri-mode-switch"
+                      label={selectedRentriMode === 'prod' ? 'Prod' : 'Test'}
+                      checked={selectedRentriMode === 'prod'}
+                      onChange={() => setSelectedRentriMode(selectedRentriMode === 'prod' ? 'dev' : 'prod')}
+                      color={selectedRentriMode === 'prod' ? 'success' : 'primary'}
+                    />
+                    
+                    <CButton
+                      color="primary"
+                      size="sm"
+                      disabled={selectedRentriMode === rentriMode}
+                      onClick={handleApplyRentri}
+                    >
+                      Applica
+                    </CButton>
+                  </div>
+                </CCardBody>
+              </CCard>
+            </CCol>
+
+            {/* RNE */}
+            <CCol md={3}>
+              <CCard>
+                <CCardBody>
+                  <div className="d-flex align-items-center justify-content-evenly mb-3">
+                    <div className="d-flex align-items-center">
+                      <CFormLabel className="fw-semibold mb-0 me-2">RNE</CFormLabel>
+                      <CBadge 
+                        color={getRicettaBadgeColor(selectedRicettaMode)}
+                        className="ms-1"
+                      >
+                        {selectedRicettaMode === 'prod' ? '💊' : '🧪'}
+                      </CBadge>
+                    </div>
+                    
+                    <CFormSwitch
+                      id="ricetta-mode-switch"
+                      label={selectedRicettaMode === 'prod' ? 'Prod' : 'Test'}
+                      checked={selectedRicettaMode === 'prod'}
+                      onChange={() => setSelectedRicettaMode(selectedRicettaMode === 'prod' ? 'dev' : 'prod')}
+                      color={selectedRicettaMode === 'prod' ? 'success' : 'primary'}
+                    />
+                    
+                    <CButton
+                      color="primary"
+                      size="sm"
+                      disabled={selectedRicettaMode === ricettaMode}
+                      onClick={handleApplyRicetta}
+                    >
+                      Applica
+                    </CButton>
+                  </div>
+                </CCardBody>
+              </CCard>
+            </CCol>
+
+            {/* SMS */}
+            <CCol md={3}>
+              <CCard>
+                <CCardBody>
+                  <div className="d-flex align-items-center justify-content-evenly mb-3">
+                    <div className="d-flex align-items-center">
+                      <CFormLabel className="fw-semibold mb-0 me-2">SMS</CFormLabel>
+                      {smsStatus && (
+                        <CBadge 
+                          color={getSMSBadgeColor(smsStatus.enabled, smsStatus.mode as 'test' | 'prod')}
+                          className="ms-1"
+                        >
+                          {smsStatus.enabled ? '🟢' : '🔴'}
+                        </CBadge>
+                      )}
+                    </div>
+                    
+                    <CFormSwitch
+                      id="sms-mode-switch"
+                      label={selectedSmsMode === 'prod' ? 'Prod' : 'Test'}
+                      checked={selectedSmsMode === 'prod'}
+                      onChange={() => setSelectedSmsMode(selectedSmsMode === 'prod' ? 'test' : 'prod')}
+                      color={selectedSmsMode === 'prod' ? 'success' : 'warning'}
+                      disabled={smsLoading}
+                    />
+
+                    <div className="d-flex gap-1">
+                      <CButton
+                        color="primary"
+                        size="sm"
+                        disabled={selectedSmsMode === smsMode || smsLoading}
+                        onClick={handleApplySms}
+                      >
+                        {smsLoading ? <CSpinner size="sm" /> : 'Applica'}
+                      </CButton>
+                      
+                      <CButton
+                        color="info"
+                        size="sm"
+                        disabled={!isSMSEnabled() || smsLoading}
+                        onClick={handleTestSMS}
+                        title="Test connessione"
+                      >
+                        {smsLoading ? <CSpinner size="sm" /> : '🧪'}
+                      </CButton>
+                    </div>
+                  </div>
+
+                  {/* Info aggiuntive SMS */}
+                  {smsStatus && (
+                    <div className="text-center">
+                      <small className="text-muted">
+                        {smsStatus.sender} | {getSMSModeLabel(smsStatus.mode as 'test' | 'prod')}
+                      </small>
+                    </div>
                   )}
-                </div>
-                
-                <CFormSwitch
-                  id="sms-mode-switch"
-                  label={selectedSmsMode === 'prod' ? 'Prod' : 'Test'}
-                  checked={selectedSmsMode === 'prod'}
-                  onChange={() => setSelectedSmsMode(selectedSmsMode === 'prod' ? 'test' : 'prod')}
-                  color={selectedSmsMode === 'prod' ? 'success' : 'warning'}
-                  disabled={smsLoading}
-                />
 
-                <div className="d-flex gap-1">
-                  <CButton
-                    color="primary"
-                    size="sm"
-                    disabled={selectedSmsMode === smsMode || smsLoading}
-                    onClick={handleApplySms}
-                  >
-                    {smsLoading ? <CSpinner size="sm" /> : 'Applica'}
-                  </CButton>
-                  
-                  <CButton
-                    color="info"
-                    size="sm"
-                    disabled={!isSMSEnabled() || smsLoading}
-                    onClick={handleTestSMS}
-                    title="Test connessione"
-                  >
-                    {smsLoading ? <CSpinner size="sm" /> : '🧪'}
-                  </CButton>
-                </div>
-              </div>
+                  {/* Risultato ultimo test */}
+                  {lastTestResult && (
+                    <div className="text-center mt-2">
+                      <small className={lastTestResult.success ? 'text-success' : 'text-danger'}>
+                        {lastTestResult.success ? '✅' : '❌'} Test: {new Date(lastTestResult.timestamp).toLocaleTimeString()}
+                      </small>
+                    </div>
+                  )}
+                </CCardBody>
+              </CCard>
+            </CCol>
+          </CRow>
+        </CTabPane>
 
-              {/* Risultato ultimo test */}
-              {lastTestResult && (
-                <div className="text-center mt-2">
-                  <small className={lastTestResult.success ? 'text-success' : 'text-danger'}>
-                    {lastTestResult.success ? '✅' : '❌'} Test: {new Date(lastTestResult.timestamp).toLocaleTimeString()}
-                  </small>
-                </div>
-              )}
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
+        {/* Templates Tab */}
+        <CTabPane visible={activeTab === 'templates'}>
+          <CRow>
+            <CCol md={6} className="mb-4">
+              <TemplateEditor
+                tipo="richiamo"
+                title="📋 Template SMS Richiamo"
+                defaultVariables={['nome_completo', 'tipo_richiamo', 'data_richiamo']}
+              />
+            </CCol>
+            <CCol md={6} className="mb-4">
+              <TemplateEditor
+                tipo="promemoria"
+                title="📅 Template SMS Promemoria"
+                defaultVariables={['nome_completo', 'data_appuntamento', 'ora_appuntamento', 'tipo_appuntamento', 'medico']}
+              />
+            </CCol>
+          </CRow>
+          
+          {/* Info Template */}
+          <CRow>
+            <CCol>
+              <CCard color="light">
+                <CCardBody>
+                  <h6>💡 Come usare i template</h6>
+                  <ul className="mb-0">
+                    <li><strong>Variabili:</strong> Usa <code>{'{nome_completo}'}</code> per inserire il nome del paziente</li>
+                    <li><strong>Lunghezza SMS:</strong> Un SMS standard è di 160 caratteri. Template più lunghi verranno divisi</li>
+                    <li><strong>Anteprima:</strong> L'anteprima mostra come apparirà il messaggio con dati di esempio</li>
+                    <li><strong>Reset:</strong> Ripristina il template ai valori di default del sistema</li>
+                  </ul>
+                </CCardBody>
+              </CCard>
+            </CCol>
+          </CRow>
+        </CTabPane>
+      </CTabContent>
+
       <CToaster placement="top-end">
         {showToast && toast}
         {errorToast && error}
@@ -461,7 +541,6 @@ const SettingsPage: React.FC = () => {
       />
     </Card>
   );
-
 };
 
 export default SettingsPage;

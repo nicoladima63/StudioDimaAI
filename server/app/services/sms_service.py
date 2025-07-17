@@ -1,3 +1,5 @@
+# server/app/services/sms_service.py - Updated with Template Support
+
 import os
 import logging
 from typing import Dict, Optional
@@ -6,7 +8,7 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 
 from server.app.core.mode_manager import get_mode, get_env_params
-from server.app.core.utils import costruisci_messaggio_richiamo
+from server.app.core.template_manager import template_manager
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
 
 class SMSService:
-    """Servizio per l'invio di SMS tramite Brevo con gestione modalità"""
+    """Servizio per l'invio di SMS tramite Brevo con gestione modalità e template"""
     
     def __init__(self):
         self.mode = get_mode('sms')
@@ -119,12 +121,13 @@ class SMSService:
                 'mode': self.mode
             }
     
-    def send_recall_sms(self, richiamo_data: Dict) -> Dict:
+    def send_recall_sms(self, richiamo_data: Dict, custom_message: Optional[str] = None) -> Dict:
         """
         Invia un SMS di richiamo basato sui dati del richiamo
         
         Args:
             richiamo_data: Dizionario con dati del richiamo
+            custom_message: Messaggio personalizzato (opzionale, usa template se None)
             
         Returns:
             Dict con risultato dell'invio
@@ -143,16 +146,151 @@ class SMSService:
             }
         
         try:
-            messaggio = costruisci_messaggio_richiamo(richiamo_data)
+            # Usa messaggio personalizzato o genera da template
+            if custom_message:
+                messaggio = custom_message
+            else:
+                messaggio = self.generate_recall_message(richiamo_data)
+            
             return self.send_sms(telefono, messaggio)
             
         except Exception as e:
-            error_msg = f"Errore costruzione messaggio richiamo: {e}"
+            error_msg = f"Errore invio SMS richiamo: {e}"
             logger.error(error_msg)
             
             return {
                 'success': False,
                 'error': error_msg
+            }
+    
+    def send_appointment_reminder_sms(self, appuntamento_data: Dict, custom_message: Optional[str] = None) -> Dict:
+        """
+        Invia un SMS promemoria appuntamento
+        
+        Args:
+            appuntamento_data: Dizionario con dati dell'appuntamento
+            custom_message: Messaggio personalizzato (opzionale, usa template se None)
+            
+        Returns:
+            Dict con risultato dell'invio
+        """
+        if not appuntamento_data:
+            return {
+                'success': False,
+                'error': 'Dati appuntamento mancanti'
+            }
+        
+        telefono = appuntamento_data.get('telefono')
+        if not telefono:
+            return {
+                'success': False,
+                'error': 'Numero telefono non trovato nell\'appuntamento'
+            }
+        
+        try:
+            # Usa messaggio personalizzato o genera da template
+            if custom_message:
+                messaggio = custom_message
+            else:
+                messaggio = self.generate_appointment_reminder_message(appuntamento_data)
+            
+            return self.send_sms(telefono, messaggio)
+            
+        except Exception as e:
+            error_msg = f"Errore invio SMS promemoria: {e}"
+            logger.error(error_msg)
+            
+            return {
+                'success': False,
+                'error': error_msg
+            }
+    
+    def generate_recall_message(self, richiamo_data: Dict) -> str:
+        """
+        Genera messaggio di richiamo usando i template
+        
+        Args:
+            richiamo_data: Dati del richiamo
+            
+        Returns:
+            Messaggio renderizzato
+        """
+        try:
+            return template_manager.render_template('richiamo', richiamo_data)
+        except Exception as e:
+            logger.error(f"Errore generazione messaggio richiamo: {e}")
+            # Fallback a messaggio di base
+            nome = richiamo_data.get('nome_completo', 'Gentile paziente')
+            return f"Ciao {nome}, è tempo per il tuo richiamo. Contattaci per fissare un appuntamento. Studio Dima"
+    
+    def generate_appointment_reminder_message(self, appuntamento_data: Dict) -> str:
+        """
+        Genera messaggio promemoria appuntamento usando i template
+        
+        Args:
+            appuntamento_data: Dati dell'appuntamento
+            
+        Returns:
+            Messaggio renderizzato
+        """
+        try:
+            return template_manager.render_template('promemoria', appuntamento_data)
+        except Exception as e:
+            logger.error(f"Errore generazione messaggio promemoria: {e}")
+            # Fallback a messaggio di base
+            nome = appuntamento_data.get('nome_completo', 'Gentile paziente')
+            return f"Ciao {nome}, ti ricordiamo l'appuntamento di domani. Studio Dima"
+    
+    def preview_recall_message(self, richiamo_data: Dict) -> Dict:
+        """
+        Genera anteprima messaggio richiamo senza inviarlo
+        
+        Args:
+            richiamo_data: Dati del richiamo
+            
+        Returns:
+            Dict con messaggio e statistiche
+        """
+        try:
+            message = self.generate_recall_message(richiamo_data)
+            
+            return {
+                'success': True,
+                'message': message,
+                'length': len(message),
+                'estimated_sms_parts': (len(message) // 160) + 1,
+                'variables_used': list(richiamo_data.keys())
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Errore generazione anteprima: {str(e)}'
+            }
+    
+    def preview_appointment_reminder_message(self, appuntamento_data: Dict) -> Dict:
+        """
+        Genera anteprima messaggio promemoria senza inviarlo
+        
+        Args:
+            appuntamento_data: Dati dell'appuntamento
+            
+        Returns:
+            Dict con messaggio e statistiche
+        """
+        try:
+            message = self.generate_appointment_reminder_message(appuntamento_data)
+            
+            return {
+                'success': True,
+                'message': message,
+                'length': len(message),
+                'estimated_sms_parts': (len(message) // 160) + 1,
+                'variables_used': list(appuntamento_data.keys())
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Errore generazione anteprima: {str(e)}'
             }
     
     def test_connection(self) -> Dict:
@@ -171,16 +309,13 @@ class SMSService:
         
         try:
             # Test con un numero di telefono fittizio per verificare la configurazione
-            # (non verrà inviato davvero perché il numero non è valido)
             test_sms = sib_api_v3_sdk.SendTransacSms(
                 sender=self.params.get('SENDER', 'StudioDima'),
-                recipient="+390000000000",  # Numero di test non valido
+                recipient="+390000000000",
                 content="Test connessione",
                 type="transactional"
             )
             
-            # Questo dovrebbe fallire con un errore specifico sul numero non valido
-            # Ma conferma che l'API key è corretta
             self.api_instance.send_transac_sms(test_sms)
             
             return {
@@ -190,7 +325,6 @@ class SMSService:
             }
             
         except ApiException as e:
-            # Se l'errore è sul numero non valido, la connessione funziona
             if "invalid" in str(e).lower() and "recipient" in str(e).lower():
                 return {
                     'success': True,
@@ -218,6 +352,6 @@ def send_sms_brevo(to_number: str, message: str, sender: str = "StudioDima"):
     """Funzione di compatibilità per il codice esistente"""
     return sms_service.send_sms(to_number, message, sender)
 
-def send_recall_sms(richiamo_data: Dict) -> Dict:
+def send_recall_sms(richiamo_data: Dict, custom_message: str = None) -> Dict:
     """Funzione di compatibilità per l'invio richiami"""
-    return sms_service.send_recall_sms(richiamo_data)
+    return sms_service.send_recall_sms(richiamo_data, custom_message)

@@ -1,7 +1,7 @@
 // src/api/services/recall-messages.service.ts
 // Gestione messaggi di richiamo e invio SMS
 
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 
 export async function getRecallMessage(tipo: string = 'richiamo') {
   const response = await apiClient.get(`/api/recall-messages/?tipo=${tipo}`);

@@ -1,5 +1,5 @@
 // src/api/ricette/ricetteApi.ts
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 
 export interface RicettaPayload {
   paziente: {

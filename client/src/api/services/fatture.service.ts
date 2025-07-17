@@ -1,5 +1,5 @@
 // src/api/services/fatture.service.ts
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 
 export async function getAllFatture() {
   const response = await apiClient.get('/api/fatture/all');

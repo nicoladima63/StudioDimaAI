@@ -1,5 +1,5 @@
 // src/api/rentri/rentriApi.ts
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 
 /**
  * API per la gestione dei rentri (controlli/visite di controllo)

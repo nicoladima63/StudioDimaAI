@@ -1,6 +1,6 @@
 // src/api/services/recalls.service.ts
 
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 import type {
   RichiamiResponse,
   RichiamiStatisticsResponse,

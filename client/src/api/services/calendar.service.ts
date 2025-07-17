@@ -1,5 +1,5 @@
 // src/api/services/calendar.service.ts
-import { apiClient } from '../client';
+import apiClient from '@/api/client';
 import { triggerModeWarning } from '@/lib/utils';
 
 interface AppointmentStats {
