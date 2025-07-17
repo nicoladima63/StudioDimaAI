@@ -1,57 +1,69 @@
-// src/api/settings/settingsApi.ts
-import { apiClient } from '../client';
-import { useEnvStore } from '@/features/auth/store/useAuthStore';
-import { triggerModeWarning } from '@/lib/utils';
+// @/api/services/settings.service.ts
 
-export async function trySwitchToProd() {
-  // Chiede al backend se è possibile passare a prod
-  const response = await apiClient.get('/api/settings/check-prod');
+export interface ModeResponse {
+  mode: 'dev' | 'test' | 'prod';
+  success?: boolean;
+  error?: string;
+  message?: string;
+}
+
+export interface SMSStatusResponse {
+  mode: 'dev' | 'test' | 'prod';
+  enabled: boolean;
+  sender: string;
+  api_configured?: boolean;
+}
+
+export interface SMSTestResponse {
+  success: boolean;
+  message: string;
+  mode: string;
+  error?: string;
+}
+
+export const getMode = async (tipo: 'database' | 'rentri' | 'ricetta' | 'sms'): Promise<'dev' | 'test' | 'prod'> => {
+  const response = await fetch(`/api/settings/${tipo}-mode`);
+  const data: ModeResponse = await response.json();
+  return data.mode;
+};
+
+export const setMode = async (
+  tipo: 'database' | 'rentri' | 'ricetta' | 'sms', 
+  mode: 'dev' | 'test' | 'prod'
+): Promise<ModeResponse> => {
+  const response = await fetch(`/api/settings/${tipo}-mode`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ mode }),
+  });
   
-  if (!response.data.allowed) {
-    triggerModeWarning(response.data.message || 'Impossibile passare a produzione.');
-    return { success: false, message: response.data.message };
+  const data: ModeResponse = await response.json();
+  return data;
+};
+
+// Nuove funzioni specifiche per SMS
+export const getSMSStatus = async (): Promise<SMSStatusResponse> => {
+  const response = await fetch('/api/settings/sms/status');
+  if (!response.ok) {
+    throw new Error('Failed to get SMS status');
   }
+  return response.json();
+};
+
+export const testSMSConnection = async (): Promise<SMSTestResponse> => {
+  const response = await fetch('/api/settings/sms/test', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
   
-  // Se allowed, cambia modalità
-  await setApiMode('prod');
-  return { success: true };
-}
+  return response.json();
+};
 
-export async function setApiMode(mode: 'dev' | 'prod') {
-  const response = await apiClient.post('/api/settings/mode', { mode });
-  
-  // Se errore, mostra warning
-  if (response.data.error) {
-    triggerModeWarning(response.data.error);
-    return { success: false, message: response.data.error };
-  }
-  
-  return response.data;
-}
-
-export async function getApiMode() {
-  const response = await apiClient.get('/api/settings/mode');
-  return response.data.mode as 'dev' | 'prod';
-}
-
-export async function syncModeWithBackend() {
-  const mode = await getApiMode();
-  useEnvStore.getState().setMode(mode);
-}
-
-// Funzione generica per ottenere la modalità
-export async function getMode(tipo: 'database' | 'rentri' | 'ricetta'): Promise<'dev' | 'prod' | 'test'> {
-  const res = await apiClient.get(`/api/settings/${tipo}-mode`);
-  return res.data.mode as 'dev' | 'prod' | 'test';
-}
-
-// Funzione generica per impostare la modalità
-export async function setMode(tipo: 'database' | 'rentri' | 'ricetta', mode: 'dev' | 'prod' | 'test') {
-  const res = await apiClient.post(`/api/settings/${tipo}-mode`, { mode });
-  return res.data;
-}
-
-export async function ping() {
-  const response = await apiClient.get('/api/tests/ping');
-  return response.data;
-}
+export const ping = async () => {
+  const response = await fetch('/api/ping');
+  return response.json();
+};

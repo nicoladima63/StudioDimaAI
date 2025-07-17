@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// Store per la modalità ambiente (dev/prod)
+// Store per la modalità ambiente (dev/prod) - AGGIORNATO
 interface EnvState {
   mode: 'dev' | 'prod';
   setMode: (mode: 'dev' | 'prod') => void;
@@ -56,6 +56,8 @@ interface EnvState {
   setRentriMode: (mode: 'dev' | 'prod') => void;
   ricettaMode: 'dev' | 'prod';
   setRicettaMode: (mode: 'dev' | 'prod') => void;
+  smsMode:  'test' | 'prod';  // AGGIUNTO
+  setSmsMode: (mode:  'test' | 'prod') => void;  // AGGIUNTO
 }
 
 export const useEnvStore = create<EnvState>()(
@@ -67,6 +69,8 @@ export const useEnvStore = create<EnvState>()(
       setRentriMode: (mode) => set({ rentriMode: mode }),
       ricettaMode: 'dev',
       setRicettaMode: (mode) => set({ ricettaMode: mode }),
+      smsMode: 'dev',  // AGGIUNTO
+      setSmsMode: (mode) => set({ smsMode: mode }),  // AGGIUNTO
     }),
     {
       name: 'env-mode',
