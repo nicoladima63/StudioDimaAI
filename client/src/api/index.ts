@@ -8,7 +8,6 @@ export { apiClient } from './client';
 export * from './services/auth.service';
 export * from './services/pazienti.service';
 export * from './services/recalls.service';
-export * from './services/recall-messages.service'
 export * from './services/fatture.service';
 export * from './services/incassi.service';
 export * from './services/calendar.service';

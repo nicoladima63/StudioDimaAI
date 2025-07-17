@@ -1,5 +1,7 @@
 import React from 'react';
 import { CRow, CCol, CCard, CCardBody } from '@coreui/react';
+import { CIcon } from '@coreui/icons-react';
+import { cilPeople, cilCheckCircle, cilXCircle, cilPhone } from '@coreui/icons';
 
 interface PazientiStatsProps {
   stats: {
@@ -11,7 +13,7 @@ interface PazientiStatsProps {
 
 const widgetStyle = {
   borderRadius: 12,
-  color: '#fff',
+
   minHeight: 60,
   display: 'flex',
   flexDirection: 'column' as const,
@@ -21,35 +23,61 @@ const widgetStyle = {
   fontSize: 20,
   marginBottom: 8,
   padding: 0,
+  borderWidth: 1,
+  borderStyle: 'solid' as const,
 };
 
 const PazientiStats: React.FC<PazientiStatsProps> = ({ stats }) => (
-  <CRow className="mb-4 g-3">
-    <CCol xs={12} md={4}>
-      <CCard style={{ ...widgetStyle, background: '#6f42c1' }}>
-        <CCardBody className="text-center p-2">
-          <div style={{ fontSize: 24 }}>{stats.totale}</div>
-          <div style={{ fontSize: 13, fontWeight: 400, color: '#e0d7f7' }}>Totale pazienti</div>
-        </CCardBody>
-      </CCard>
-    </CCol>
-    <CCol xs={12} md={4}>
-      <CCard style={{ ...widgetStyle, background: '#198754' }}>
-        <CCardBody className="text-center p-2">
-          <div style={{ fontSize: 24 }}>{stats.in_cura}</div>
-          <div style={{ fontSize: 13, fontWeight: 400, color: '#b6e7c9' }}>In cura</div>
-        </CCardBody>
-      </CCard>
-    </CCol>
-    <CCol xs={12} md={4}>
-      <CCard style={{ ...widgetStyle, background: '#dc3545' }}>
-        <CCardBody className="text-center p-2">
-          <div style={{ fontSize: 24 }}>{stats.non_in_cura}</div>
-          <div style={{ fontSize: 13, fontWeight: 400, color: '#f7c6ce' }}>Non in cura</div>
-        </CCardBody>
-      </CCard>
-    </CCol>
-  </CRow>
-);
+<CCard className="mb-4">
+  <CCardBody className="d-flex align-items-center justify-content-around">
+    <div className="d-flex align-items-center">
+      <CIcon icon={cilPeople} size="xl" className="text-primary me-3" />
+      <div className="text-center">
+        <div className="fs-5 fw-semibold text-primary">
+          {stats.totale_pazienti}
+        </div>
+        <div className="text-muted text-uppercase fw-semibold small">
+          Totale Pazienti
+        </div>
+      </div>
+    </div>
+    
+    <div className="d-flex align-items-center">
+      <CIcon icon={cilCheckCircle} size="xl" className="text-success me-3" />
+      <div className="text-center">
+        <div className="fs-5 fw-semibold text-success">
+          {stats.in_cura}
+        </div>
+        <div className="text-muted text-uppercase fw-semibold small">
+          In Cura
+        </div>
+      </div>
+    </div>
+    
+    <div className="d-flex align-items-center">
+      <CIcon icon={cilXCircle} size="xl" className="text-danger me-3" />
+      <div className="text-center">
+        <div className="fs-5 fw-semibold text-danger">
+          {stats.non_in_cura}
+        </div>
+        <div className="text-muted text-uppercase fw-semibold small">
+          Non in Cura
+        </div>
+      </div>
+    </div>
+    
+    <div className="d-flex align-items-center">
+      <CIcon icon={cilPhone} size="xl" className="text-info me-3" />
+      <div className="text-center">
+        <div className="fs-5 fw-semibold text-info">
+          {stats.con_cellulare}
+        </div>
+        <div className="text-muted text-uppercase fw-semibold small">
+          Con Cellulare
+        </div>
+      </div>
+    </div>
+  </CCardBody>
+</CCard>);
 
 export default PazientiStats; 

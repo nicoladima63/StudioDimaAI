@@ -1,6 +1,124 @@
 /**
- * Tipi base per le risposte API
+ * Tipi per i pazienti unificati - AGGIUNGI AL TUO types.ts
  */
+
+export interface PazienteCompleto {
+  // Dati base DBF
+  DB_CODE: string;
+  DB_PANOME: string;
+  DB_PAINDIR: string;
+  DB_PACITTA: string;
+  DB_PACAP: string;
+  DB_PAPROVI: string;
+  DB_PATELEF: string;
+  DB_PACELLU: string;
+  DB_PADANAS: string;
+  DB_PAULTVI: string | null;
+  DB_PARICHI: string;
+  DB_PARITAR: number;
+  DB_PARIMOT: string;
+  DB_PANONCU: string;
+  DB_PAEMAIL: string;
+  DB_PACODFI: string;
+  
+  // Dati elaborati
+  nome_completo: string;
+  numero_contatto: string;
+  citta_clean: string;
+  cap_clean: string;
+  provincia_clean: string;
+  
+  // Stato richiami
+  needs_recall: boolean;
+  data_richiamo: string | null;
+  tipo_richiamo: string;
+  tipo_richiamo_desc: string;
+  mesi_richiamo: number;
+  ultima_visita: string | null;
+  giorni_ultima_visita: number | null;
+  recall_priority: 'none' | 'low' | 'medium' | 'high';
+  recall_status: 'none' | 'futuro' | 'in_scadenza' | 'scaduto';
+}
+
+export interface StatistichePazienti {
+  totale_pazienti: number;
+  in_cura: number;
+  non_in_cura: number;
+  con_cellulare: number;
+  con_email: number;
+  richiami: {
+    totale_da_richiamare: number;
+    priorita_alta: number;
+    priorita_media: number;
+    priorita_bassa: number;
+    scaduti: number;
+    in_scadenza: number;
+    futuri: number;
+    per_tipo: Record<string, number>;
+  };
+  geografia: {
+    totale_citta: number;
+    totale_province: number;
+    top_citta: Record<string, number>;
+    distribuzione_citta: Record<string, number>;
+    distribuzione_province: Record<string, number>;
+  };
+  aggiornato_il: string;
+}
+
+export interface CittaData {
+  citta: string;
+  totale_pazienti: number;
+  richiami_necessari: number;
+  con_cellulare: number;
+  con_email: number;
+  in_cura: number;
+}
+
+export type ViewType = 'all' | 'recalls' | 'cities';
+export type PriorityFilter = 'high' | 'medium' | 'low';
+export type StatusFilter = 'scaduto' | 'in_scadenza' | 'futuro';
+
+/**
+ * Tipi per le risposte API pazienti
+ */
+export type PazientiResponse = {
+  success: boolean;
+  data: PazienteCompleto[];
+  count: number;
+  view?: ViewType;
+  filters?: {
+    priority?: PriorityFilter;
+    status?: StatusFilter;
+  };
+  message?: string;
+};
+
+export type PazientiStatisticsResponse = {
+  success: boolean;
+  data: StatistichePazienti;
+  message?: string;
+};
+
+export type CittaDataResponse = {
+  success: boolean;
+  data: CittaData[];
+  count: number;
+  message?: string;
+};
+
+export type RecallMessageResponse = {
+  success: boolean;
+  data: {
+    paziente: PazienteCompleto;
+    messaggio: string;
+    telefono: string;
+    tipo_richiamo: string;
+    data_richiamo: string | null;
+  };
+  message?: string;
+};
+
 export type ApiResponse<T = unknown> = {
   data: T;
   status: number;
