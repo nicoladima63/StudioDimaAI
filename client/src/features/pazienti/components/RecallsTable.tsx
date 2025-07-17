@@ -349,10 +349,8 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
                         Richiama
                       </CDropdownToggle>
                       <CDropdownMenu>
-                        <CDropdownItem onClick={() => {
-                          console.log('Chiamata telefonica:', richiamo.DB_CODE);
-                        }}>
-                          📞 Chiama
+                        <CDropdownItem onClick={() => handleSendSMS(richiamo)}>
+                          📱 Invia SMS
                         </CDropdownItem>
                         <CDropdownItem onClick={() => {
                           console.log('Email paziente:', richiamo.DB_CODE);

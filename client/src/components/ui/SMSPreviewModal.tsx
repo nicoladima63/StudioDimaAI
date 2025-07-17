@@ -88,8 +88,11 @@ const SMSPreviewModal: React.FC<SMSPreviewModalProps> = ({
       const response = await apiClient.post('/api/sms/templates/richiamo/preview', { data: richiamo_data });
 
       if (response.data.success) {
-        setMessage(response.data.preview);
-        setOriginalMessage(response.data.preview);
+        let msg = response.data.preview;
+        // Rimuovi la parentesi con Sconosciuto o con il placeholder
+        msg = msg.replace(/\s*\(Sconosciuto\)/g, '').replace(/\s*\(\{tipo_richiamo\}\)/g, '');
+        setMessage(msg);
+        setOriginalMessage(msg);
         setPreviewStats(response.data.stats);
       } else {
         throw new Error(response.data.error || 'Errore generazione messaggio');
@@ -99,15 +102,10 @@ const SMSPreviewModal: React.FC<SMSPreviewModalProps> = ({
       console.error('Errore caricamento preview:', error);
       setError(error instanceof Error ? error.message : 'Errore sconosciuto');
       
-      // Fallback message
-      const fallbackMessage = `Ciao ${paziente.nome_completo},
-
-Ti ricordiamo che è tempo per il tuo controllo.
-Contattaci per fissare un appuntamento.
-
-Studio Dima`;
-      setMessage(fallbackMessage);
-      setOriginalMessage(fallbackMessage);
+      // Generazione messaggio SMS semplificata in fallback
+      const messaggioBase = `Ciao ${paziente?.nome_completo},\n\nTi ricordo che è tempo per il tuo richiamo.`;
+      setMessage(messaggioBase);
+      setOriginalMessage(messaggioBase);
     } finally {
       setLoading(false);
     }
