@@ -1,8 +1,22 @@
 // src/features/pazienti/components/RecallsStatistics.tsx
-import React from 'react';
-import { CRow, CCol, CCard, CCardBody, CCardHeader, CSpinner } from '@coreui/react';
-import { CIcon } from '@coreui/icons-react';
-import { cilPhone, cilClock, cilWarning, cilCheckCircle, cilChart } from '@coreui/icons';
+import React from "react";
+import {
+  CRow,
+  CCol,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CSpinner,
+} from "@coreui/react";
+import { CIcon } from "@coreui/icons-react";
+import {
+  cilPhone,
+  cilClock,
+  cilWarning,
+  cilCheckCircle,
+  cilChart,
+} from "@coreui/icons";
+import RecallsSMSActionsCard from "./RecallsSMSActionsCard";
 
 interface RecallsStatisticsProps {
   statistics: {
@@ -16,9 +30,21 @@ interface RecallsStatisticsProps {
     per_tipo: Record<string, number>;
   };
   loading: boolean;
+  isSMSEnabled: boolean;
+  patientsWithPhone: number;
+  allWithPhoneSelected: boolean;
+  selectedPatients: string[];
+  handleSelectAll: () => void;
+  bulkLoading: boolean;
+  smsMode: boolean;
+  handleBulkSMS: () => void;
 }
 
-const RecallsStatistics: React.FC<RecallsStatisticsProps> = ({ statistics, loading }) => {
+const RecallsStatistics: React.FC<RecallsStatisticsProps> = ({
+  statistics,
+  loading,
+  ...props
+}) => {
   if (loading) {
     return (
       <div className="text-center py-3">
@@ -46,7 +72,7 @@ const RecallsStatistics: React.FC<RecallsStatisticsProps> = ({ statistics, loadi
             </CCardBody>
           </CCard>
         </CCol>
-        
+
         <CCol md={2}>
           <CCard>
             <CCardBody className="d-flex align-items-center">
@@ -62,7 +88,7 @@ const RecallsStatistics: React.FC<RecallsStatisticsProps> = ({ statistics, loadi
             </CCardBody>
           </CCard>
         </CCol>
-        
+
         <CCol md={2}>
           <CCard>
             <CCardBody className="d-flex align-items-center">
@@ -78,37 +104,59 @@ const RecallsStatistics: React.FC<RecallsStatisticsProps> = ({ statistics, loadi
             </CCardBody>
           </CCard>
         </CCol>
-        
-        <CCol md={2}>
+
+        <CCol md={3}>
           <CCard>
-            <CCardBody className="d-flex align-items-center">
-              <CIcon icon={cilCheckCircle} size="xl" className="text-success me-3" />
-              <div>
-                <div className="fs-5 fw-semibold text-success">
-                  {statistics.in_scadenza}
+            <CCardBody className="d-flex align-items-center justify-content-around">
+              <div className="d-flex align-items-center">
+                <CIcon
+                  icon={cilCheckCircle}
+                  size="xl"
+                  className="text-primary me-3"
+                />
+                <div className="text-center">
+                  <div className="fs-5 fw-semibold text-primary">
+                    {statistics.in_scadenza}
+                  </div>
+                  <div className="text-muted text-uppercase fw-semibold small">
+                    Totale Pazienti
+                  </div>
                 </div>
-                <div className="text-muted text-uppercase fw-semibold small">
-                  In Scadenza
+              </div>
+
+              <div className="d-flex align-items-center">
+                <CIcon
+                  icon={cilChart}
+                  size="xl"
+                  className="text-primary me-3"
+                />
+                <div className="text-center">
+                  <div className="text-muted text-uppercase fw-semibold small">
+                    <div className="fs-5 fw-semibold text-info">
+                      {Object.entries(statistics.per_tipo)[0]?.[1] || 0}
+                    </div>
+                    <div className="text-muted text-uppercase fw-semibold small">
+                      {Object.entries(statistics.per_tipo)[0]?.[0] ||
+                        "Sconosciuto"}
+                    </div>
+                  </div>
                 </div>
               </div>
             </CCardBody>
           </CCard>
         </CCol>
 
-        <CCol md={2}>
-          <CCard>
-            <CCardBody className="d-flex align-items-center">
-              <CIcon icon={cilChart} size="xl" className="text-info me-3" />
-              <div>
-                <div className="fs-5 fw-semibold text-info">
-                  {Object.entries(statistics.per_tipo)[0]?.[1] || 0}
-                </div>
-                <div className="text-muted text-uppercase fw-semibold small">
-                  {Object.entries(statistics.per_tipo)[0]?.[0] || 'Sconosciuto'}
-                </div>
-              </div>
-            </CCardBody>
-          </CCard>
+        <CCol md={3}>
+          <RecallsSMSActionsCard
+            isSMSEnabled={props.isSMSEnabled}
+            patientsWithPhone={props.patientsWithPhone}
+            allWithPhoneSelected={props.allWithPhoneSelected}
+            selectedPatients={props.selectedPatients}
+            handleSelectAll={props.handleSelectAll}
+            bulkLoading={props.bulkLoading}
+            smsMode={props.smsMode}
+            handleBulkSMS={props.handleBulkSMS}
+          />
         </CCol>
       </CRow>
     </>

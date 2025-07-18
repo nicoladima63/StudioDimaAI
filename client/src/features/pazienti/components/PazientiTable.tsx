@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CFormInput, CFormSelect, CRow, CCol, CTooltip, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter } from '@coreui/react';
-import { cilCheck, cilX, cilCheckCircle, cilXCircle } from '@coreui/icons';
+import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CFormInput, CFormSelect, CRow, CCol, CTooltip, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CInputGroup, CInputGroupText } from '@coreui/react';
+import { cilCheck, cilX, cilCheckCircle, cilXCircle, cilSearch, cilLocationPin, cilFilter, cilReload, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import type { PazienteCompleto } from '@/lib/types';
 
@@ -133,31 +133,83 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
   return (
     <div>
       {/* Barra di ricerca */}
-      <div className="mb-3">
-        <CRow>
-          <CCol md={6}>
+      <CRow className="mb-3 align-items-center">
+        <CCol md={6}>
+          <CInputGroup>
+            <CInputGroupText>
+              <CIcon icon={cilSearch} />
+            </CInputGroupText>
             <CFormInput
-              type="text"
               placeholder="Cerca per nome, codice, email, città..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-          </CCol>
-          <CCol md={3}>
-            <CFormSelect
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPage(1);
-              }}
-            >
-              {PAGE_SIZE_OPTIONS.map(size => (
-                <option key={size} value={size}>{size} per pagina</option>
-              ))}
-            </CFormSelect>
-          </CCol>
-        </CRow>
-      </div>
+            {search && (
+              <CButton
+                color="outline-secondary"
+                onClick={() => setSearch('')}
+                style={{ borderLeft: 'none' }}
+              >
+                ✕
+              </CButton>
+            )}
+          </CInputGroup>
+        </CCol>
+        <CCol md="auto" className="d-flex gap-2 align-items-center">
+          <CDropdown>
+            <CDropdownToggle color="outline-secondary" size="sm">
+              <CIcon icon={cilLocationPin} className="me-1" /> Città
+            </CDropdownToggle>
+            <CDropdownMenu><CDropdownItem disabled>Tutte le città</CDropdownItem></CDropdownMenu>
+          </CDropdown>
+          <CDropdown>
+            <CDropdownToggle color="outline-secondary" size="sm">
+              <CIcon icon={cilFilter} className="me-1" /> Priorità
+            </CDropdownToggle>
+            <CDropdownMenu><CDropdownItem disabled>Tutte</CDropdownItem></CDropdownMenu>
+          </CDropdown>
+          <CDropdown>
+            <CDropdownToggle color="outline-secondary" size="sm">
+              <CIcon icon={cilFilter} className="me-1" /> Stato
+            </CDropdownToggle>
+            <CDropdownMenu><CDropdownItem disabled>Tutti</CDropdownItem></CDropdownMenu>
+          </CDropdown>
+          <CButton color="outline-primary" size="sm" disabled>
+            <CIcon icon={cilReload} className="me-1" /> Aggiorna
+          </CButton>
+          <CButton color="outline-primary" size="sm" disabled>
+            <CIcon icon={cilCloudDownload} className="me-1" /> Esporta
+          </CButton>
+        </CCol>
+        <CCol className="d-flex justify-content-end align-items-center gap-2">
+          <CFormSelect
+            value={pageSize}
+            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            style={{ width: 140 }}
+          >
+            {PAGE_SIZE_OPTIONS.map(size => (
+              <option key={size} value={size}>{size} per pagina</option>
+            ))}
+          </CFormSelect>
+          <CButton
+            color="light"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+          >
+            &lt;
+          </CButton>
+          <span className="mx-1">{page} / {totalPages}</span>
+          <CButton
+            color="light"
+            size="sm"
+            disabled={page === totalPages}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+          >
+            &gt;
+          </CButton>
+        </CCol>
+      </CRow>
 
       <CTable hover responsive bordered small>
         <CTableHead>

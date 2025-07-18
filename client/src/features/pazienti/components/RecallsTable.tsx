@@ -1,20 +1,12 @@
 // src/features/pazienti/components/RecallsTable.tsx
 
-import React, { useState } from 'react';
-import { 
-  CSpinner, 
-  CBadge, 
-  CButton, 
-  CToast, 
-  CToastBody, 
-  CToaster,
-  CButtonGroup,
-  CFormCheck,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem
+import React, { useState, useMemo } from 'react';
+import {
+  CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell,
+  CButton, CFormInput, CFormSelect, CRow, CCol, CBadge, CButtonGroup, CFormCheck, CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CToaster, CToast, CToastBody, CTooltip, CSpinner, CInputGroup, CInputGroupText
 } from '@coreui/react';
+import { cilCheck, cilEnvelopeClosed, cilInfo, cilSearch, cilLocationPin, cilFilter, cilReload, cilCloudDownload } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 import { useSMSStore } from '@/store/smsStore';
 import SMSPreviewModal from '@/components/ui/SMSPreviewModal';
 import type { PazienteCompleto } from '@/lib/types';
@@ -23,9 +15,79 @@ import type { SMSResponse } from '@/api/services/sms.service';
 interface RecallsTableProps {
   richiami: PazienteCompleto[];
   loading: boolean;
+  selectedPatients: Set<string>;
+  setSelectedPatients: (s: Set<string>) => void;
 }
 
-const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+
+const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading, selectedPatients, setSelectedPatients }) => {
+  // Ricerca, ordinamento, paginazione
+  const [searchTerm, setSearchTerm] = useState('');
+  const [pageSize, setPageSize] = useState(20);
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<'nome' | 'citta' | 'priorita' | 'stato'>('nome');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+  // Filtro richiami in base alla ricerca
+  const filteredRichiami = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return richiami.filter(r =>
+      (r.nome_completo || '').toLowerCase().includes(term) ||
+      (r.citta_clean || '').toLowerCase().includes(term) ||
+      (r.numero_contatto || '').includes(term)
+    );
+  }, [richiami, searchTerm]);
+
+  // Ordinamento
+  const sortedRichiami = useMemo(() => {
+    const arr = [...filteredRichiami];
+    if (sortBy === 'nome') {
+      arr.sort((a, b) => {
+        const nA = a.nome_completo.toLowerCase();
+        const nB = b.nome_completo.toLowerCase();
+        return sortDir === 'asc' ? nA.localeCompare(nB) : nB.localeCompare(nA);
+      });
+    } else if (sortBy === 'citta') {
+      arr.sort((a, b) => {
+        const cA = (a.citta_clean || '').toLowerCase();
+        const cB = (b.citta_clean || '').toLowerCase();
+        return sortDir === 'asc' ? cA.localeCompare(cB) : cB.localeCompare(cA);
+      });
+    } else if (sortBy === 'priorita') {
+      arr.sort((a, b) => {
+        const pA = a.recall_priority || '';
+        const pB = b.recall_priority || '';
+        return sortDir === 'asc' ? pA.localeCompare(pB) : pB.localeCompare(pA);
+      });
+    } else if (sortBy === 'stato') {
+      arr.sort((a, b) => {
+        const sA = a.recall_status || '';
+        const sB = b.recall_status || '';
+        return sortDir === 'asc' ? sA.localeCompare(sB) : sB.localeCompare(sA);
+      });
+    }
+    return arr;
+  }, [filteredRichiami, sortBy, sortDir]);
+
+  // Paginazione
+  const paginatedRichiami = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return sortedRichiami.slice(start, start + pageSize);
+  }, [sortedRichiami, page, pageSize]);
+
+  const totalPages = Math.ceil(filteredRichiami.length / pageSize) || 1;
+
+  // Gestione cambio ordinamento
+  const handleSort = (col: typeof sortBy) => {
+    if (sortBy === col) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(col);
+      setSortDir('asc');
+    }
+  };
+
   // SMS Store
   const { mode: smsMode, isEnabled: isSMSEnabled, canSendSMS } = useSMSStore();
 
@@ -34,7 +96,6 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
   const [selectedPatient, setSelectedPatient] = useState<PazienteCompleto | null>(null);
 
   // Bulk selection state
-  const [selectedPatients, setSelectedPatients] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
 
   // Toast state
@@ -159,8 +220,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
   };
 
   const patientsWithPhone = richiami.filter(r => r.numero_contatto);
-  const allWithPhoneSelected = patientsWithPhone.length > 0 && 
-    patientsWithPhone.every(r => selectedPatients.has(r.DB_CODE));
+  const allWithPhoneSelected = patientsWithPhone.length > 0 && patientsWithPhone.every(r => selectedPatients.has(r.DB_CODE));
 
   if (loading) {
     return (
@@ -171,103 +231,156 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
     );
   }
 
-  if (richiami.length === 0) {
-    return (
-      <div className="text-center py-5">
-        <p className="text-muted">Nessun richiamo trovato</p>
-      </div>
-    );
-  }
-
   return (
-    <>
+    <div>
+
       {/* Bulk Actions Bar */}
-      {isSMSEnabled() && patientsWithPhone.length > 0 && (
-        <div className="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
-          <div className="d-flex align-items-center gap-3">
-            <CFormCheck
-              id="select-all"
-              checked={allWithPhoneSelected}
-              indeterminate={selectedPatients.size > 0 && !allWithPhoneSelected}
-              onChange={(e) => handleSelectAll(e.target.checked)}
-              label={`Seleziona tutti (${patientsWithPhone.length} con telefono)`}
+      {/* This section is now handled by RecallsSMSActionsCard */}
+
+
+      {/* Barra di ricerca e selettore pagina */}
+      <CRow className="mb-3 align-items-center">
+        <CCol md={6}>
+          <CInputGroup>
+            <CInputGroupText>
+              <CIcon icon={cilSearch} />
+            </CInputGroupText>
+            <CFormInput
+              placeholder="Cerca per nome, città o telefono..."
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
             />
-            
-            {selectedPatients.size > 0 && (
-              <CBadge color="info">
-                {selectedPatients.size} selezionati
-              </CBadge>
+            {searchTerm && (
+              <CButton
+                color="outline-secondary"
+                onClick={() => { setSearchTerm(''); setPage(1); }}
+                style={{ borderLeft: 'none' }}
+              >
+                ✕
+              </CButton>
             )}
-          </div>
+          </CInputGroup>
+        </CCol>
+        <CCol md="auto" className="d-flex gap-2 align-items-center">
+          <CDropdown>
+            <CDropdownToggle color="outline-secondary" size="sm">
+              <CIcon icon={cilLocationPin} className="me-1" /> Città
+            </CDropdownToggle>
+            <CDropdownMenu><CDropdownItem disabled>Tutte le città</CDropdownItem></CDropdownMenu>
+          </CDropdown>
+          <CDropdown>
+            <CDropdownToggle color="outline-secondary" size="sm">
+              <CIcon icon={cilFilter} className="me-1" /> Priorità
+            </CDropdownToggle>
+            <CDropdownMenu><CDropdownItem disabled>Tutte</CDropdownItem></CDropdownMenu>
+          </CDropdown>
+          <CDropdown>
+            <CDropdownToggle color="outline-secondary" size="sm">
+              <CIcon icon={cilFilter} className="me-1" /> Stato
+            </CDropdownToggle>
+            <CDropdownMenu><CDropdownItem disabled>Tutti</CDropdownItem></CDropdownMenu>
+          </CDropdown>
+          <CButton color="outline-primary" size="sm" disabled>
+            <CIcon icon={cilReload} className="me-1" /> Aggiorna
+          </CButton>
+          <CButton color="outline-primary" size="sm" disabled>
+            <CIcon icon={cilCloudDownload} className="me-1" /> Esporta
+          </CButton>
+        </CCol>
+        <CCol className="d-flex justify-content-end align-items-center gap-2">
+          <CFormSelect
+            value={pageSize}
+            onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
+            style={{ width: 140 }}
+          >
+            {PAGE_SIZE_OPTIONS.map(opt => (
+              <option key={opt} value={opt}>{opt} per pagina</option>
+            ))}
+          </CFormSelect>
+          <CButton
+            color="light"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+          >
+            &lt;
+          </CButton>
+          <span className="mx-1">{page} / {totalPages}</span>
+          <CButton
+            color="light"
+            size="sm"
+            disabled={page === totalPages}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+          >
+            &gt;
+          </CButton>
+        </CCol>
+      </CRow>
 
-          <div className="d-flex gap-2 align-items-center">
-            <CBadge color={smsMode === 'prod' ? 'success' : 'warning'}>
-              SMS: {smsMode === 'prod' ? 'Produzione' : 'Test'}
-            </CBadge>
-            
-            <CButton
-              color="primary"
-              size="sm"
-              disabled={selectedPatients.size === 0 || bulkLoading}
-              onClick={handleBulkSMS}
-            >
-              {bulkLoading ? (
-                <>
-                  <CSpinner size="sm" className="me-2" />
-                  Invio...
-                </>
-              ) : (
-                `📤 Invia SMS (${selectedPatients.size})`
-              )}
-            </CButton>
-          </div>
-        </div>
-      )}
 
-      {/* Table */}
-      <div className="table-responsive">
-        <table className="table table-striped table-hover">
-          <thead>
-            <tr>
-              {isSMSEnabled() && <th width="40">✓</th>}
-              <th>Paziente</th>
-              <th>Città</th>
-              <th>Contatto</th>
-              <th>Ultima Visita</th>
-              <th>Giorni</th>
-              <th>Tipo Richiamo</th>
-              <th>Priorità</th>
-              <th>Stato</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {richiami.map((richiamo) => (
-              <tr key={richiamo.DB_CODE}>
-                {/* Selection Checkbox */}
-                {isSMSEnabled() && (
-                  <td>
-                    {richiamo.numero_contatto && (
-                      <CFormCheck
-                        checked={selectedPatients.has(richiamo.DB_CODE)}
-                        onChange={(e) => handleSelectPatient(richiamo.DB_CODE, e.target.checked)}
-                      />
-                    )}
-                  </td>
-                )}
-
-                {/* Patient Info */}
-                <td>
-                  <strong>{richiamo.nome_completo}</strong>
-                  <br />
-                  <small className="text-muted">{richiamo.DB_CODE}</small>
-                </td>
-
-                {/* City */}
-                <td>{richiamo.citta_clean}</td>
-
-                {/* Contact */}
-                <td>
+      <CTable hover responsive bordered small>
+        <CTableHead>
+          <CTableRow>
+            <CTableHeaderCell className="text-center" width={40}>
+              <CFormCheck
+                checked={allWithPhoneSelected}
+                indeterminate={selectedPatients.size > 0 && !allWithPhoneSelected}
+                onChange={e => handleSelectAll(e.target.checked)}
+                title="Seleziona tutti"
+              />
+            </CTableHeaderCell>
+            <CTableHeaderCell style={{ cursor: 'pointer' }} onClick={() => handleSort('nome')}>
+              Paziente {sortBy === 'nome' && (sortDir === 'asc' ? '▲' : '▼')}
+            </CTableHeaderCell>
+            <CTableHeaderCell style={{ cursor: 'pointer' }} onClick={() => handleSort('citta')}>
+              Città {sortBy === 'citta' && (sortDir === 'asc' ? '▲' : '▼')}
+            </CTableHeaderCell>
+            <CTableHeaderCell className="text-center">Contatto</CTableHeaderCell>
+            <CTableHeaderCell className="text-center">Ultima Visita</CTableHeaderCell>
+            <CTableHeaderCell className="text-center">Giorni</CTableHeaderCell>
+            <CTableHeaderCell className="text-center">Tipo Richiamo</CTableHeaderCell>
+            <CTableHeaderCell style={{ cursor: 'pointer' }} onClick={() => handleSort('priorita')}>
+              Priorità {sortBy === 'priorita' && (sortDir === 'asc' ? '▲' : '▼')}
+            </CTableHeaderCell>
+            <CTableHeaderCell style={{ cursor: 'pointer' }} onClick={() => handleSort('stato')}>
+              Stato {sortBy === 'stato' && (sortDir === 'asc' ? '▲' : '▼')}
+            </CTableHeaderCell>
+            <CTableHeaderCell className="text-center">Azioni</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {paginatedRichiami.length === 0 ? (
+            <CTableRow>
+              <CTableDataCell colSpan={9} className="text-center py-4">
+                Nessun richiamo trovato
+              </CTableDataCell>
+            </CTableRow>
+          ) : (
+            paginatedRichiami.map((richiamo) => (
+              <CTableRow key={richiamo.DB_CODE}>
+                {/* Paziente column */}
+                <CTableDataCell className="text-center">
+                  {richiamo.numero_contatto && (
+                    <CFormCheck
+                      checked={selectedPatients.has(richiamo.DB_CODE)}
+                      onChange={e => {
+                        const newSet = new Set(selectedPatients);
+                        if (e.target.checked) newSet.add(richiamo.DB_CODE);
+                        else newSet.delete(richiamo.DB_CODE);
+                        setSelectedPatients(newSet);
+                      }}
+                    />
+                  )}
+                </CTableDataCell>
+                <CTableDataCell>
+                  <div>
+                    <strong>{richiamo.nome_completo}</strong>
+                    <br />
+                    <small className="text-muted">{richiamo.DB_CODE}</small>
+                  </div>
+                </CTableDataCell>
+                <CTableDataCell>{richiamo.citta_clean}</CTableDataCell>
+                <CTableDataCell className="text-center">
                   {richiamo.numero_contatto ? (
                     <div>
                       <span className="text-success">{richiamo.numero_contatto}</span>
@@ -278,19 +391,15 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
                   ) : (
                     <span className="text-muted">Nessun contatto</span>
                   )}
-                </td>
-
-                {/* Last Visit */}
-                <td>
+                </CTableDataCell>
+                <CTableDataCell className="text-center">
                   {richiamo.ultima_visita ? (
                     new Date(richiamo.ultima_visita).toLocaleDateString('it-IT')
                   ) : (
                     <span className="text-muted">-</span>
                   )}
-                </td>
-
-                {/* Days */}
-                <td>
+                </CTableDataCell>
+                <CTableDataCell className="text-center">
                   {richiamo.giorni_ultima_visita ? (
                     <CBadge color={richiamo.giorni_ultima_visita > 180 ? 'danger' : 'warning'}>
                       {richiamo.giorni_ultima_visita}
@@ -298,31 +407,23 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
                   ) : (
                     <span className="text-muted">-</span>
                   )}
-                </td>
-
-                {/* Recall Type */}
-                <td>
+                </CTableDataCell>
+                <CTableDataCell className="text-center">
                   <CBadge color="info">
                     {richiamo.tipo_richiamo_desc}
                   </CBadge>
-                </td>
-
-                {/* Priority */}
-                <td>
+                </CTableDataCell>
+                <CTableDataCell className="text-center">
                   <CBadge color={getPriorityColor(richiamo.recall_priority)}>
                     {richiamo.recall_priority}
                   </CBadge>
-                </td>
-
-                {/* Status */}
-                <td>
+                </CTableDataCell>
+                <CTableDataCell className="text-center">
                   <CBadge color={getStatusColor(richiamo.recall_status)}>
                     {richiamo.recall_status}
                   </CBadge>
-                </td>
-
-                {/* Actions */}
-                <td>
+                </CTableDataCell>
+                <CTableDataCell className="text-center">
                   <CButtonGroup size="sm">
                     {/* SMS Button */}
                     {canSendSMSToPatient(richiamo) ? (
@@ -342,8 +443,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
                         📱
                       </CButton>
                     ) : null}
-
-                    {/* Other Actions Dropdown */}
+                    {/* Dropdown azioni */}
                     <CDropdown>
                       <CDropdownToggle color="primary" caret>
                         Richiama
@@ -362,7 +462,10 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
                         }}>
                           ✅ Segna contattato
                         </CDropdownItem>
-                        <CDropdownItem divider />
+                        {/* Divider */}
+                        <CDropdownItem disabled style={{ pointerEvents: 'none', background: 'transparent', border: 'none', height: 1, padding: 0 }}>
+                          <hr className='my-1' />
+                        </CDropdownItem>
                         <CDropdownItem onClick={() => {
                           console.log('Visualizza paziente:', richiamo.DB_CODE);
                         }}>
@@ -371,11 +474,34 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
                       </CDropdownMenu>
                     </CDropdown>
                   </CButtonGroup>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </CTableDataCell>
+              </CTableRow>
+            ))
+          )}
+        </CTableBody>
+      </CTable>
+
+      {/* Paginazione */}
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          <CButton
+            color="light"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+          >
+            &lt; Prec
+          </CButton>
+          <span className="mx-2">Pagina {page} di {totalPages}</span>
+          <CButton
+            color="light"
+            size="sm"
+            disabled={page === totalPages}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+          >
+            Succ &gt;
+          </CButton>
+        </div>
       </div>
 
       {/* SMS Preview Modal */}
@@ -397,7 +523,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading }) => {
           </CToast>
         ))}
       </CToaster>
-    </>
+    </div>
   );
 };
 

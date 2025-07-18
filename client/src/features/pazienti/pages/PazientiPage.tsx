@@ -40,6 +40,7 @@ import PazientiStats from '../components/PazientiStats';
 import RecallsTable from '../components/RecallsTable';
 import RecallsStatistics from '../components/RecallsStatistics';
 import CittaTable from '../components/CittaTable';
+import RecallsSMSActionsCard from '../components/RecallsSMSActionsCard';
 import { 
   usePazientiStore, 
   type ViewType, 
@@ -53,6 +54,7 @@ import {
   exportPazienti,
   getRichiami
 } from '@/api/services/pazienti.service';
+import { useSMSStore } from '@/store/smsStore';
 
 const PazientiPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ViewType>('all');
@@ -86,6 +88,47 @@ const PazientiPage: React.FC = () => {
     getFilteredRichiami,
     getFilteredCitta
   } = usePazientiStore();
+
+  const { mode: smsMode, isEnabled: isSMSEnabled, canSendSMS } = useSMSStore();
+  const [selectedPatients, setSelectedPatients] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Calcola i pazienti con telefono ogni volta che cambiano i richiami
+  const patientsWithPhone = getFilteredRichiami().filter(r => r.numero_contatto);
+  const allWithPhoneSelected = patientsWithPhone.length > 0 && patientsWithPhone.every(r => selectedPatients.has(r.DB_CODE));
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedPatients(new Set(patientsWithPhone.map(r => r.DB_CODE)));
+    } else {
+      setSelectedPatients(new Set());
+    }
+  };
+
+  const handleBulkSMS = async () => {
+    if (!isSMSEnabled || !canSendSMS) {
+      setError('SMS non abilitato o non disponibile.');
+      return;
+    }
+
+    if (selectedPatients.size === 0) {
+      setError('Nessun paziente selezionato.');
+      return;
+    }
+
+    setBulkLoading(true);
+    try {
+      await sendBulkSMS(Array.from(selectedPatients));
+      setSelectedPatients(new Set());
+      setAllWithPhoneSelected(false);
+      setError('SMS inviati con successo!');
+    } catch (err) {
+      setError('Errore nell\'invio dei SMS.');
+      console.error('Errore invio SMS:', err);
+    } finally {
+      setBulkLoading(false);
+    }
+  };
   
   // Carica dati iniziali
   useEffect(() => {
@@ -246,157 +289,6 @@ const PazientiPage: React.FC = () => {
             </div>
           )}
           
-          {/* Toolbar */}
-          <CRow className="mb-3">
-            <CCol md={6}>
-              <CInputGroup>
-                <CInputGroupText>
-                  <CIcon icon={cilSearch} />
-                </CInputGroupText>
-                <CFormInput
-                  placeholder={
-                    currentView === 'cities' 
-                      ? 'Cerca città...' 
-                      : 'Cerca per nome...'
-                  }
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {searchTerm && (
-                  <CButton
-                    color="outline-secondary"
-                    onClick={() => setSearchTerm('')}
-                    style={{ borderLeft: 'none' }}
-                  >
-                    ✕
-                  </CButton>
-                )}
-              </CInputGroup>
-            </CCol>
-            
-            <CCol md={6} className="d-flex justify-content-end gap-2">
-              {/* Filtri per richiami */}
-              {currentView === 'recalls' && (
-                <>
-                  <CDropdown>
-                    <CDropdownToggle color="outline-secondary" size="sm">
-                      <CIcon icon={cilFilter} className="me-1" />
-                      Priorità
-                      {priorityFilter && (
-                        <CBadge color="primary" className="ms-1">
-                          {priorityFilter}
-                        </CBadge>
-                      )}
-                    </CDropdownToggle>
-                    <CDropdownMenu>
-                      <CDropdownItem onClick={() => setPriorityFilter(null)}>
-                        Tutte
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => setPriorityFilter('high')}>
-                        Alta
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => setPriorityFilter('medium')}>
-                        Media
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => setPriorityFilter('low')}>
-                        Bassa
-                      </CDropdownItem>
-                    </CDropdownMenu>
-                  </CDropdown>
-                  
-                  <CDropdown>
-                    <CDropdownToggle color="outline-secondary" size="sm">
-                      <CIcon icon={cilFilter} className="me-1" />
-                      Stato
-                      {statusFilter && (
-                        <CBadge color="primary" className="ms-1">
-                          {statusFilter}
-                        </CBadge>
-                      )}
-                    </CDropdownToggle>
-                    <CDropdownMenu>
-                      <CDropdownItem onClick={() => setStatusFilter(null)}>
-                        Tutti
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => setStatusFilter('scaduto')}>
-                        Scaduti
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => setStatusFilter('in_scadenza')}>
-                        In Scadenza
-                      </CDropdownItem>
-                      <CDropdownItem onClick={() => setStatusFilter('futuro')}>
-                        Futuri
-                      </CDropdownItem>
-                    </CDropdownMenu>
-                  </CDropdown>
-                </>
-              )}
-              
-              {/* Filtro città per tutte le viste */}
-              {currentView !== 'cities' && (
-                <CDropdown>
-                  <CDropdownToggle color="outline-secondary" size="sm">
-                    <CIcon icon={cilLocationPin} className="me-1" />
-                    Città
-                    {selectedCitta && (
-                      <CBadge color="primary" className="ms-1">
-                        {selectedCitta}
-                      </CBadge>
-                    )}
-                  </CDropdownToggle>
-                  <CDropdownMenu style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                    <CDropdownItem onClick={() => setSelectedCitta(null)}>
-                      Tutte le città
-                    </CDropdownItem>
-                    {statistiche?.geografia.top_citta && 
-                      Object.entries(statistiche.geografia.top_citta).map(([citta, count]) => (
-                        <CDropdownItem 
-                          key={citta} 
-                          onClick={() => setSelectedCitta(citta)}
-                        >
-                          {citta} ({count})
-                        </CDropdownItem>
-                      ))
-                    }
-                  </CDropdownMenu>
-                </CDropdown>
-              )}
-              
-              {/* Clear filters */}
-              {hasActiveFilters && (
-                <CButton 
-                  color="outline-warning" 
-                  size="sm" 
-                  onClick={handleClearFilters}
-                >
-                  Cancella Filtri
-                </CButton>
-              )}
-              
-              {/* Refresh */}
-              <CButton 
-                color="outline-primary" 
-                size="sm" 
-                onClick={handleRefresh}
-                disabled={isLoading}
-              >
-                <CIcon icon={cilReload} className="me-1" />
-                {isLoading ? 'Aggiornando...' : 'Aggiorna'}
-              </CButton>
-              
-              {/* Export */}
-              <CButton 
-                color="primary" 
-                size="sm"
-                onClick={handleExport}
-                disabled={isExporting}
-              >
-                <CIcon icon={cilCloudDownload} className="me-1" />
-                {isExporting ? 'Esportando...' : 'Esporta'}
-              </CButton>
-            </CCol>
-          </CRow>
-          
           {/* Tab Content */}
           <CTabContent>
             {/* Tutti i Pazienti */}
@@ -434,9 +326,17 @@ const PazientiPage: React.FC = () => {
                   {/* Statistiche richiami */}
                   {statistiche && (
                     <div className="mb-4">
-                      <RecallsStatistics 
-                        statistics={statistiche.richiami} 
+                      <RecallsStatistics
+                        statistics={statistiche.richiami}
                         loading={isLoading}
+                        isSMSEnabled={isSMSEnabled}
+                        patientsWithPhone={patientsWithPhone}
+                        allWithPhoneSelected={allWithPhoneSelected}
+                        selectedPatients={selectedPatients}
+                        handleSelectAll={handleSelectAll}
+                        bulkLoading={bulkLoading}
+                        smsMode={smsMode}
+                        handleBulkSMS={handleBulkSMS}
                       />
                     </div>
                   )}
@@ -451,6 +351,8 @@ const PazientiPage: React.FC = () => {
                   <RecallsTable 
                     richiami={getFilteredRichiami()}
                     loading={isLoading}
+                    selectedPatients={selectedPatients || new Set()}
+                    setSelectedPatients={setSelectedPatients}
                   />
                 </>
               )}
