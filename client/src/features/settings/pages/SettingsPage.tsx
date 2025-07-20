@@ -11,25 +11,21 @@ import {
   CCard,
   CCardBody, 
   CFormLabel,
-  CSpinner,
-  CBadge,
   CNav,
   CNavItem,
   CNavLink,
   CTabContent,
-  CTabPane
+  CTabPane, CBadge
 } from '@coreui/react';
 import { useEnvStore } from '@/features/auth/store/useAuthStore';
-import { useSMSStore } from '@/store/smsStore';
 import { 
   setMode as apiSetMode, 
-  getMode, 
-  getSMSStatus, 
-  testSMSConnection,
+  getMode
 } from '@/api/services/settings.service';
 import { getAppointmentsWithModeWarning } from '@/api/services/calendar.service';
-import TemplateEditor from '@/components/ui/TemplateEditor';
-
+import TemplateEditor from '../components/TemplateEditor';
+import AutomationReminderSettings from '../components/AutomationReminderSettings';
+import AutomationRecallSettings from '../components/AutomationRecallSettings';
 import NetworkModal from '@/components/ui/MessageModal';
 
 const SettingsPage: React.FC = () => {
@@ -40,20 +36,7 @@ const SettingsPage: React.FC = () => {
   const setRentriMode = useEnvStore((state) => state.setRentriMode);
   const ricettaMode = useEnvStore((state) => state.ricettaMode);
   const setRicettaMode = useEnvStore((state) => state.setRicettaMode);
-  const smsMode = useEnvStore((state) => state.smsMode);
   const setSmsMode = useEnvStore((state) => state.setSmsMode);
-
-  // Store SMS dedicato
-  const {
-    status: smsStatus,
-    setStatus: setSmsStatus,
-    isLoading: smsLoading,
-    setLoading: setSmsLoading,
-    lastTestResult,
-    setLastTestResult,
-    isEnabled: isSMSEnabled,
-    canSendSMS
-  } = useSMSStore();
 
   // Tab state
   const [activeTab, setActiveTab] = useState('settings');
@@ -62,7 +45,6 @@ const SettingsPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<'dev' | 'prod'>(mode);
   const [selectedRentriMode, setSelectedRentriMode] = useState<'dev' | 'prod'>(rentriMode);
   const [selectedRicettaMode, setSelectedRicettaMode] = useState<'dev' | 'prod'>(ricettaMode);
-  const [selectedSmsMode, setSelectedSmsMode] = useState<'test' | 'prod'>(smsMode);
 
   // Toast state esistente
   const [showToast, setShowToast] = useState(false);
@@ -89,27 +71,11 @@ const SettingsPage: React.FC = () => {
     
     // Carica modalità SMS
     getMode('sms').then((backendMode) => {
-      setSelectedSmsMode(backendMode as 'test' | 'prod');
       setSmsMode(backendMode as 'test' | 'prod');
     });
     
-    // Carica stato SMS
-    loadSMSStatus();
-    
     checkAppointments();
   }, [setMode, setRentriMode, setRicettaMode, setSmsMode]);
-
-  const loadSMSStatus = async () => {
-    try {
-      setSmsLoading(true);
-      const status = await getSMSStatus();
-      setSmsStatus(status);
-    } catch (error) {
-      console.error('Errore caricamento stato SMS:', error);
-    } finally {
-      setSmsLoading(false);
-    }
-  };
 
   // Handler esistenti (mantenuti identici)
   const handleApplyMode = async () => {
@@ -168,63 +134,6 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const handleApplySms = async () => {
-    try {
-      setSmsLoading(true);
-      const result = await apiSetMode('sms', selectedSmsMode);
-      
-      if (!result.success) {
-        if (result.error === 'missing_credentials') {
-          setNetworkMsg(result.message || 'Credenziali Brevo mancanti');
-          setShowNetworkModal(true);
-          return;
-        }
-        throw new Error(result.error || 'Errore sconosciuto');
-      }
-
-      setSmsMode(selectedSmsMode);
-      await loadSMSStatus();
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
-    } catch (error) {
-      console.error('Errore cambio modalità SMS:', error);
-      setErrorToast(true);
-      setTimeout(() => setErrorToast(false), 3000);
-    } finally {
-      setSmsLoading(false);
-    }
-  };
-
-  const handleTestSMS = async () => {
-    try {
-      setSmsLoading(true);
-      const result = await testSMSConnection();
-      
-      setLastTestResult({
-        success: result.success,
-        message: result.success ? result.message : result.error || 'Test fallito'
-      });
-
-      if (result.success) {
-        setModeWarning(`✅ ${result.message}`);
-      } else {
-        setModeWarning(`❌ Test fallito: ${result.error}`);
-      }
-      
-      setTimeout(() => setModeWarning(null), 5000);
-    } catch (error) {
-      const errorMsg = 'Errore test connessione SMS';
-      setLastTestResult({
-        success: false,
-        message: errorMsg
-      });
-      setModeWarning(`❌ ${errorMsg}`);
-      setTimeout(() => setModeWarning(null), 5000);
-    } finally {
-      setSmsLoading(false);
-    }
-  };
-
   const checkAppointments = async () => {
     const now = new Date();
     const res = await getAppointmentsWithModeWarning(now.getMonth() + 1, now.getFullYear());
@@ -247,63 +156,49 @@ const SettingsPage: React.FC = () => {
     return mode === 'prod' ? 'success' : 'warning';
   };
 
-  const getSMSBadgeColor = (enabled: boolean, mode: 'test' | 'prod') => {
-    if (!enabled) return 'secondary';
-    switch (mode) {
-      case 'test': return 'warning';
-      case 'prod': return 'success';
-      default: return 'secondary';
-    }
-  };
-
-  const getSMSModeLabel = (mode: 'test' | 'prod') => {
-    switch (mode) {
-      case 'test': return 'Test';
-      case 'prod': return 'Produzione';
-      default: return mode;
-    }
-  };
-
   const toast = (
     <CToast autohide visible color="success" key="toast">
       <CToastBody>Modalità aggiornata con successo!</CToastBody>
     </CToast>
   );
   
-  const error = (
-    <CToast autohide visible color="danger" key="error-toast">
-      <CToastBody>Errore nel cambio modalità!</CToastBody>
-    </CToast>
-  );
-
   return (
     <Card title="Impostazioni">
       {/* Navigation Tabs */}
-      <CNav variant="tabs" className="mb-4">
+      <CNav variant="tabs" role="tablist">
         <CNavItem>
           <CNavLink
             active={activeTab === 'settings'}
             onClick={() => setActiveTab('settings')}
-            style={{ cursor: 'pointer' }}
+            role="tab"
           >
-            ⚙️ Modalità Sistema
+            Impostazioni Generali
           </CNavLink>
         </CNavItem>
         <CNavItem>
           <CNavLink
-            active={activeTab === 'templates'}
-            onClick={() => setActiveTab('templates')}
-            style={{ cursor: 'pointer' }}
+            active={activeTab === 'reminder'}
+            onClick={() => setActiveTab('reminder')}
+            role="tab"
           >
-            📱 Template SMS
+            Automazione Appuntamenti
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 'recalls'}
+            onClick={() => setActiveTab('recalls')}
+            role="tab"
+          >
+           Automazione Richiami
           </CNavLink>
         </CNavItem>
       </CNav>
 
       {/* Tab Content */}
-      <CTabContent>
+      <CTabContent className="mt-4">
         {/* Settings Tab */}
-        <CTabPane visible={activeTab === 'settings'}>
+        <CTabPane visible={activeTab === 'settings'} role="tabpanel">
           <CRow className="mt-4">
             {/* DATABASE */}
             <CCol md={3}>
@@ -412,101 +307,51 @@ const SettingsPage: React.FC = () => {
                 </CCardBody>
               </CCard>
             </CCol>
+          </CRow>
+        </CTabPane>
 
-            {/* SMS */}
-            <CCol md={3}>
-              <CCard>
+        {/* Promemoria Appuntamenti Tab */}
+        <CTabPane visible={activeTab === 'reminder'} role="tabpanel">
+          <CRow>
+            <CCol md={4}>
+              <AutomationReminderSettings />
+            </CCol>
+            <CCol md={8}>
+              <TemplateEditor 
+                tipo="promemoria" 
+                title="Template SMS Promemoria Appuntamento" 
+                defaultVariables={["nome", "data", "ora", "telefono"]} 
+              />
+              {/* Spiegazione solo qui */}
+              <CCard color="light" className="mt-3">
                 <CCardBody>
-                  <div className="d-flex align-items-center justify-content-evenly mb-3">
-                    <div className="d-flex align-items-center">
-                      <CFormLabel className="fw-semibold mb-0 me-2">SMS</CFormLabel>
-                      {smsStatus && (
-                        <CBadge 
-                          color={getSMSBadgeColor(smsStatus.enabled, smsStatus.mode as 'test' | 'prod')}
-                          className="ms-1"
-                        >
-                          {smsStatus.enabled ? '🟢' : '🔴'}
-                        </CBadge>
-                      )}
-                    </div>
-                    
-                    <CFormSwitch
-                      id="sms-mode-switch"
-                      label={selectedSmsMode === 'prod' ? 'Prod' : 'Test'}
-                      checked={selectedSmsMode === 'prod'}
-                      onChange={() => setSelectedSmsMode(selectedSmsMode === 'prod' ? 'test' : 'prod')}
-                      color={selectedSmsMode === 'prod' ? 'success' : 'warning'}
-                      disabled={smsLoading}
-                    />
-
-                    <div className="d-flex gap-1">
-                      <CButton
-                        color="primary"
-                        size="sm"
-                        disabled={selectedSmsMode === smsMode || smsLoading}
-                        onClick={handleApplySms}
-                      >
-                        {smsLoading ? <CSpinner size="sm" /> : 'Applica'}
-                      </CButton>
-                      
-                      <CButton
-                        color="info"
-                        size="sm"
-                        disabled={!isSMSEnabled() || smsLoading}
-                        onClick={handleTestSMS}
-                        title="Test connessione"
-                      >
-                        {smsLoading ? <CSpinner size="sm" /> : '🧪'}
-                      </CButton>
-                    </div>
-                  </div>
-
-                  {/* Info aggiuntive SMS */}
-                  {smsStatus && (
-                    <div className="text-center">
-                      <small className="text-muted">
-                        {smsStatus.sender} | {getSMSModeLabel(smsStatus.mode as 'test' | 'prod')}
-                      </small>
-                    </div>
-                  )}
-
-                  {/* Risultato ultimo test */}
-                  {lastTestResult && (
-                    <div className="text-center mt-2">
-                      <small className={lastTestResult.success ? 'text-success' : 'text-danger'}>
-                        {lastTestResult.success ? '✅' : '❌'} Test: {new Date(lastTestResult.timestamp).toLocaleTimeString()}
-                      </small>
-                    </div>
-                  )}
+                  <h6>💡 Come usare i template</h6>
+                  <ul className="mb-0">
+                    <li><strong>Variabili:</strong> Usa <code>{'{nome_completo}'}</code> per inserire il nome del paziente</li>
+                    <li><strong>Lunghezza SMS:</strong> Un SMS standard è di 160 caratteri. Template più lunghi verranno divisi</li>
+                    <li><strong>Anteprima:</strong> L'anteprima mostra come apparirà il messaggio con dati di esempio</li>
+                    <li><strong>Reset:</strong> Ripristina il template ai valori di default del sistema</li>
+                  </ul>
                 </CCardBody>
               </CCard>
             </CCol>
           </CRow>
         </CTabPane>
 
-        {/* Templates Tab */}
-        <CTabPane visible={activeTab === 'templates'}>
+        {/* Richiami Tab */}
+        <CTabPane visible={activeTab === 'recalls'} role="tabpanel">
           <CRow>
-            <CCol md={6} className="mb-4">
+            <CCol md={4}>
+              <AutomationRecallSettings />
+            </CCol>
+            <CCol md={8}>
               <TemplateEditor
                 tipo="richiamo"
-                title="📋 Template SMS Richiamo"
+                title="Template SMS Richiamo"
                 defaultVariables={['nome_completo', 'tipo_richiamo', 'data_richiamo']}
               />
-            </CCol>
-            <CCol md={6} className="mb-4">
-              <TemplateEditor
-                tipo="promemoria"
-                title="📅 Template SMS Promemoria"
-                defaultVariables={['nome_completo', 'data_appuntamento', 'ora_appuntamento', 'tipo_appuntamento', 'medico']}
-              />
-            </CCol>
-          </CRow>
-          
-          {/* Info Template */}
-          <CRow>
-            <CCol>
-              <CCard color="light">
+              {/* Spiegazione solo qui */}
+              <CCard color="light" className="mt-3">
                 <CCardBody>
                   <h6>💡 Come usare i template</h6>
                   <ul className="mb-0">
@@ -524,7 +369,11 @@ const SettingsPage: React.FC = () => {
 
       <CToaster placement="top-end">
         {showToast && toast}
-        {errorToast && error}
+        {errorToast && (
+          <CToast autohide visible color="danger" key="error-toast">
+            <CToastBody>Errore nel cambio modalità!</CToastBody>
+          </CToast>
+        )}
         {modeWarning && (
           <CToast autohide visible color="warning" key="mode-warning">
             <CToastBody>{modeWarning}</CToastBody>

@@ -2,11 +2,14 @@ import dbf
 import os
 import pandas as pd
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from typing import List, Dict, Any
 from dbfread import DBF
 from server.app.config.constants import COLONNE, DBF_TABLES
 from server.app.core.mode_manager import get_mode
+from server.app.services.sms_service import sms_service
+import json
+from server.app.core.automation_config import get_automation_settings
 
 logger = logging.getLogger(__name__)
 
@@ -191,4 +194,100 @@ def estrai_dati(dbf_path: str, tabella: str) -> List[Dict[str, Any]]:
         }
         for record in DBF(dbf_path, encoding='latin-1')
     ] 
+
+def get_tomorrow_appointments_for_reminder():
+    """
+    Estrae gli appuntamenti di domani e invia (o simula) i promemoria SMS.
+    Non invia nulla se domani è sabato o domenica.
+    Restituisce un log riassuntivo.
+    """
+    log = []
+    today = date.today()
+    tomorrow = today + timedelta(days=1)
+    weekday = tomorrow.weekday()  # 0=lun, 5=sab, 6=dom
+
+    if weekday == 5:
+        log.append("Domani è sabato: nessun promemoria inviato.")
+        return log
+    if weekday == 6:
+        log.append("Domani è domenica: nessun promemoria inviato.")
+        return log
+
+    # Estrai appuntamenti di domani
+    try:
+        path_appuntamenti = _get_dbf_path('agenda')
+    except Exception as e:
+        log.append(f"Errore nel recuperare il percorso DBF: {e}")
+        return log
+
+    df = _leggi_tabella_dbf(path_appuntamenti)
+    col_data = COLONNE['appuntamenti']['data']
+    if df.empty or col_data not in df.columns:
+        log.append("Nessun appuntamento trovato per domani.")
+        return log
+
+    df[col_data] = pd.to_datetime(df[col_data], errors='coerce')
+    mask = (df[col_data].dt.date == tomorrow)
+    apps = df[mask].to_dict(orient='records')
+
+    if not apps:
+        log.append("Nessun appuntamento trovato per domani.")
+        return log
+
+    settings = get_automation_settings()
+    mode = settings.get('sms_promemoria_mode', 'prod')
+    count = 0
+    success = 0
+    errors = []
+    for app in apps:
+        # Prepara i dati per l'SMS (adatta se serve)
+        sms_data = {
+            'nome_completo': app.get('PAZIENTE', 'Gentile paziente'),
+            'telefono': app.get('TELEFONO', ''),
+            'data_appuntamento': tomorrow.strftime('%d/%m/%Y'),
+            'ora_appuntamento': str(app.get('ORA_INIZIO', '')),
+            'tipo_appuntamento': app.get('TIPO', ''),
+            'medico': app.get('DOTTORE', '')
+        }
+        if not sms_data['telefono']:
+            log.append(f"Appuntamento per {sms_data['nome_completo']} senza telefono: nessun SMS.")
+            errors.append({
+                'paziente': sms_data['nome_completo'],
+                'numero': '',
+                'errore': 'Telefono mancante'
+            })
+            continue
+        if mode == 'test':
+            msg = sms_service.generate_appointment_reminder_message(sms_data)
+            log.append(f"[TEST] {sms_data['nome_completo']} ({sms_data['telefono']}): {msg}")
+            success += 1
+        else:
+            result = sms_service.send_appointment_reminder_sms(sms_data)
+            if result.get('success'):
+                log.append(f"[INVIO] SMS inviato a {sms_data['nome_completo']} ({sms_data['telefono']})")
+                success += 1
+            else:
+                log.append(f"[ERRORE] {sms_data['nome_completo']} ({sms_data['telefono']}): {result.get('error')}")
+                errors.append({
+                    'paziente': sms_data['nome_completo'],
+                    'numero': sms_data['telefono'],
+                    'errore': result.get('error')
+                })
+        count += 1
+    log.append(f"Totale appuntamenti processati: {count}")
+
+    # Scrivi log dettagliato su file
+    log_entry = {
+        'timestamp': datetime.now().isoformat(),
+        'sent': count,
+        'success': success,
+        'errors': errors
+    }
+    try:
+        with open('automation_reminder.log', 'a', encoding='utf-8') as f:
+            f.write(json.dumps(log_entry, ensure_ascii=False) + '\n')
+    except Exception as e:
+        logger.error(f"Errore scrittura log automazione: {e}")
+
+    return log 
 

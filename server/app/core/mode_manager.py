@@ -5,12 +5,18 @@ MODE_FILES = {
     'database': 'database_mode.txt',
     'rentri': 'rentri_mode.txt',
     'ricetta': 'ricetta_mode.txt',
-    'sms': 'sms_mode.txt',  # Aggiunto supporto SMS
+    'sms': 'sms_mode.txt',
 }
 
 VALID_MODES = ['dev', 'prod', 'test']
 
 def get_mode(tipo: str) -> str:
+    tipo = tipo.replace('-', '_')
+    if tipo in ['sms_promemoria', 'sms_richiami']:
+        from server.app.core.automation_config import get_automation_settings
+        settings = get_automation_settings()
+        key = f'{tipo}_mode'
+        return settings.get(key, 'prod')
     path = os.path.join(INSTANCE_DIR, MODE_FILES[tipo])
     try:
         with open(path, 'r') as f:
@@ -21,7 +27,16 @@ def get_mode(tipo: str) -> str:
         pass
     return 'dev'
 
+
 def set_mode(tipo: str, modo: str):
+    tipo = tipo.replace('-', '_')
+    if tipo in ['sms_promemoria', 'sms_richiami']:
+        from server.app.core.automation_config import set_automation_settings, get_automation_settings
+        settings = get_automation_settings()
+        key = f'{tipo}_mode'
+        settings[key] = modo
+        set_automation_settings(settings)
+        return
     os.makedirs(INSTANCE_DIR, exist_ok=True)
     path = os.path.join(INSTANCE_DIR, MODE_FILES[tipo])
     with open(path, 'w') as f:
