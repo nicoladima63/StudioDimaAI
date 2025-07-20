@@ -75,15 +75,7 @@ export default function RicettaElettronica({ datiMedico }: { datiMedico: DatiMed
       getPazientiAll().then(res => {
         if (res.success) setPazienti(res.data);
       });
-    } else {
-      // Logga la struttura del primo paziente per debug
-      console.log('Esempio paziente:', allPazienti[0]);
     }
-    // eslint-disable-next-line
-  }, [allPazienti]);
-
-  useEffect(() => {
-    console.log('Pazienti caricati:', allPazienti);
   }, [allPazienti]);
 
   // Filtro live su nome, cognome, codice fiscale ecc.
@@ -166,12 +158,10 @@ export default function RicettaElettronica({ datiMedico }: { datiMedico: DatiMed
   const fetchPazienti = async (q: string): Promise<PazienteCompleto[]> => {
     const ql = q.toLowerCase();
     const pazienti = usePazientiStore.getState().pazienti;
-    console.log('Query:', ql, 'Primi 5 nomi:', pazienti.slice(0, 5).map(p => p.DB_PANOME));
     const result = pazienti.filter(p =>
       (p.DB_PANOME && p.DB_PANOME.toLowerCase().includes(ql)) ||
       (p.DB_PACODFI && p.DB_PACODFI.toLowerCase().includes(ql))
     );
-    console.log('Filtro pazienti:', { query: q, risultati: result.length, sample: result.slice(0, 5) });
     return result;
   };
 

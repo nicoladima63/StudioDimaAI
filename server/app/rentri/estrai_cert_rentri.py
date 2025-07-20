@@ -16,15 +16,7 @@ while True:
             p12_data,
             password.encode() if password else None
         )
-        print("\n👉 Tipo chiave privata:", type(private_key))
-        print("👉 Nome classe:", private_key.__class__.__name__)
-
-        if "RSA" in private_key.__class__.__name__:
-            print("✅ La chiave è RSA, puoi usarla con RS256.")
-        elif "EC" in private_key.__class__.__name__:
-            print("❌ La chiave è EC (ellittica) → NON compatibile con RS256 (RENTRI).")
-        else:
-            print("⚠️ Tipo di chiave sconosciuto o non supportato.")
+        # Rimuovo tutti i print di debug
 
         break
     except Exception as e:

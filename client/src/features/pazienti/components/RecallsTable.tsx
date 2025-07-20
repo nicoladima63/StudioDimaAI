@@ -453,12 +453,10 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading, selected
                           📱 Invia SMS
                         </CDropdownItem>
                         <CDropdownItem onClick={() => {
-                          console.log('Email paziente:', richiamo.DB_CODE);
                         }}>
                           📧 Email
                         </CDropdownItem>
                         <CDropdownItem onClick={() => {
-                          console.log('Segna come contattato:', richiamo.DB_CODE);
                         }}>
                           ✅ Segna contattato
                         </CDropdownItem>
@@ -467,7 +465,6 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading, selected
                           <hr className='my-1' />
                         </CDropdownItem>
                         <CDropdownItem onClick={() => {
-                          console.log('Visualizza paziente:', richiamo.DB_CODE);
                         }}>
                           👤 Visualizza paziente
                         </CDropdownItem>

@@ -23,23 +23,18 @@ const DashboardDebug: React.FC = () => {
       try {
         // Fetch pazienti stats
         const pazientiData = await getPazientiStats();
-        console.log('Pazienti Stats Raw:', pazientiData);
 
         // Fetch appuntamenti stats
         const appuntamentiData = await getAppuntamentiStats();
-        console.log('Appuntamenti Stats Raw:', appuntamentiData);
 
         // Fetch prime visite
         const primeVisiteData = await getPrimeVisiteStats();
-        console.log('Prime Visite Raw:', primeVisiteData);
 
         // Fetch appuntamenti per anno
         const appuntamentiAnnoData = await getAppuntamentiPerAnno();
-        console.log('Appuntamenti Anno Raw:', appuntamentiAnnoData);
 
         // Fetch appuntamenti totali
         const appuntamentiTotaliData = await getAppuntamentiTotali();
-        console.log('Appuntamenti Totali Raw:', appuntamentiTotaliData);
 
         setData({
           pazientiStats: pazientiData,

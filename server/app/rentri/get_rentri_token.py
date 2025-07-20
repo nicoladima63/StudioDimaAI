@@ -27,7 +27,6 @@ with open(PRIVATE_KEY_PATH, "rb") as f:
 
 with open("server/app/rentri/certs/rentri_private.pem", "rb") as f:
     key = serialization.load_pem_private_key(f.read(), password=None)
-    print("Tipo chiave privata:", type(key))
 
 # 2. Crea il JWT firmato
 now = int(time.time())
@@ -46,14 +45,11 @@ data = {
     "client_assertion": jwt_assertion
 }
 response = requests.post(RENTRI_TOKEN_URL, data=data)
-print("Status code:", response.status_code)
-print("Response:", response.text)
 
 if response.status_code == 200:
     access_token = response.json()["access_token"]
     # Salva il token per usi successivi
     with open("rentri-doc/rentri_access_token.txt", "w") as f:
         f.write(access_token)
-    print("Access token salvato in rentri-doc/rentri_access_token.txt")
 else:
     print("Errore nell'autenticazione!")

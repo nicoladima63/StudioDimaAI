@@ -240,11 +240,5 @@ def formatta_richiamo_per_frontend(record):
         'mesi_richiamo': int(mesi_richiamo) if mesi_richiamo else 0
     }
 
-    # Debug: salvataggio su file JSON
-    try:
-        with open("debug_richiamo.json", "a", encoding="utf-8") as f:
-            f.write(json.dumps(risultato, ensure_ascii=False) + "\n")
-    except Exception as e:
-        print(f"[DEBUG FILE ERROR] {e}")
-
+    # Rimuovo print di debug file error
     return risultato

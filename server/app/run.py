@@ -65,9 +65,6 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
         return {'status': 'healthy', 'db': db_status, **details}, 200
     logger.info("Applicazione inizializzata")
 
-    print("RUN.PY - Working directory:", os.getcwd())
-    print("RUN.PY - DB PATH:", app.config["SQLALCHEMY_DATABASE_URI"])
-
     return app
 
 if __name__ == "__main__":

@@ -9,6 +9,4 @@ db_uri = f"sqlite:///{db_path}"
 engine = create_engine(db_uri)
 inspector = inspect(engine)
 
-print(f"DB Path: {db_path}")
-print("Tabelle nel DB:")
-print(inspector.get_table_names())
+# Rimuovo tutti i print di debug
