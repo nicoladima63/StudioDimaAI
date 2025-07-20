@@ -11,3 +11,54 @@ RICETTA
 
 
 SMS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+adesso un task difficilissimo, devo inserire l'automazione di inviare il promemoria degli appuntamenti, e poi dei richiami, ma intanto facciamo i promemoria degli appuntamenti.
+come deve funzionare : pagina settigs, sezione per impostare orario di lettura degli appuntamenti e quindi inviare i messaggi. ho in mente di farlo alle 15 del giorno, (oggi per domani) dobbiamo creare l'automazione che poi posso attivare o disativare dalla pagina settings
+
+Perfetto, ecco un piano dettagliato per implementare l’automazione dell’invio promemoria appuntamenti:
+Funzionalità richiesta
+Automazione che ogni giorno alle 15:00 legge gli appuntamenti del giorno dopo e invia i promemoria SMS.
+Configurazione dalla pagina Settings:
+Orario di invio (default: 15:00, ma modificabile)
+Attivazione/disattivazione dell’automazione
+Step di implementazione
+1. Backend: Automazione e API
+Schedulazione: usa un task scheduler (es. APScheduler, Celery beat, cron) per eseguire uno script ogni giorno alle 15:00.
+Script:
+Legge gli appuntamenti del giorno dopo.
+Per ogni appuntamento, invia il promemoria SMS (usando la logica già presente per l’invio singolo).
+Configurazione:
+Salva orario e stato (attivo/disattivo) in un file di config, database o variabile d’ambiente.
+Espone API per leggere/modificare questi parametri (usate dalla pagina Settings).
+2. Frontend: Pagina Settings
+Nuova sezione “Automazione Promemoria Appuntamenti”:
+Switch ON/OFF per attivare/disattivare l’automazione.
+Input per scegliere l’orario (es. time picker, default 15:00).
+Salva le impostazioni tramite API.
+Mostra stato attuale (attivo/disattivo, orario impostato).
+3. Collegamento
+Quando l’automazione è attiva, il backend esegue il job all’orario scelto.
+Se disattivata, il job non viene eseguito.
+Prossimo passo
+Vuoi partire dal backend (scheduler + API) o dal frontend (UI settings)?
+Se vuoi vedere subito la UI, posso aggiungere la sezione in Settings e le chiamate API fittizie.
+Se vuoi la logica server, posso preparare lo script schedulato e le API di configurazione.
+Dimmi da dove vuoi iniziare!
+
+
+prima controlla approfonditamente se nel BE hai tutto per automatizzare il processo. mi piace sempre partire dal be, cosi dopo inseriamo le rotte nuove, se ci sono, o altri endpoint da comunicare al FE evitando di fare due o tre volte il FE
