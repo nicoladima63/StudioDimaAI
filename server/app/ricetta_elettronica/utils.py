@@ -10,16 +10,43 @@ def load_json_file(filename):
 
 def cerca_diagnosi(query: str):
     data = load_json_file("icd9_odontoiatria.json")
-    return [
-        item for item in data
-        if query.lower() in item["descrizione"].lower() or query in item["codice"]
-    ]
+    risultati = []
+    query_lower = query.lower()
+    for codice, item in data.items():
+        # Cerca nella descrizione principale
+        if query_lower in item["descrizione"].lower() or query in codice:
+            risultati.append({"codice": codice, "descrizione": item["descrizione"]})
+        # Cerca nei sottocodici
+        for sub_codice, sub_descr in item.get("sottocodici", {}).items():
+            if query_lower in sub_descr.lower() or query in sub_codice:
+                risultati.append({"codice": sub_codice, "descrizione": sub_descr})
+    return risultati
 
 def cerca_farmaci(query: str):
     data = load_json_file("atc_farmaci.json")
-    return [
-        item for item in data
-        if query.lower() in item["principio_attivo"].lower()
-        or query.lower() in item["descrizione"].lower()
-        or query in item["codice"]
-    ] 
+    risultati = []
+    query_lower = query.lower()
+    for codice_macro, macro in data.items():
+        # Cerca nella descrizione macro
+        if query_lower in macro["descrizione"].lower() or query in codice_macro:
+            risultati.append({
+                "codice": codice_macro,
+                "principio_attivo": "",
+                "descrizione": macro["descrizione"]
+            })
+        for codice_gruppo, gruppo in macro.get("gruppi_rilevanti", {}).items():
+            # Cerca nel nome del gruppo
+            if query_lower in gruppo["nome"].lower() or query in codice_gruppo:
+                risultati.append({
+                    "codice": codice_gruppo,
+                    "principio_attivo": "",
+                    "descrizione": gruppo["nome"]
+                })
+            for codice_pa, pa_nome in gruppo.get("principi_attivi", {}).items():
+                if query_lower in pa_nome.lower() or query in codice_pa:
+                    risultati.append({
+                        "codice": codice_pa,
+                        "principio_attivo": pa_nome,
+                        "descrizione": gruppo["nome"]
+                    })
+    return risultati 

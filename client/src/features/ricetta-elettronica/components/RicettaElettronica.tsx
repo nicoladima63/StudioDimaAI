@@ -1,22 +1,14 @@
-import React, { useState } from "react";
-import debounce from "lodash/debounce";
+import React, { useState, useEffect } from "react";
 import { CButton, CForm, CFormInput, CFormLabel, CFormTextarea, CModal, CModalHeader, CModalBody, CModalFooter, CRow, CCol, CCard, CCardBody } from '@coreui/react';
 import {
   searchDiagnosi,
   searchFarmaci,
   inviaRicetta,
 } from '@/api/services/ricette.service';
-
-interface Paziente {
-  id: string;
-  nome: string;
-  cognome: string;
-  codiceFiscale?: string;
-  indirizzo?: string;
-  cap?: string;
-  citta?: string;
-  provincia?: string;
-}
+import { getPazientiAll } from '@/api/services/pazienti.service';
+import { usePazientiStore } from '@/store/pazienti.store';
+import type { PazienteCompleto } from '@/lib/types';
+import AutoComplete from '@/components/common/AutoComplete';
 
 interface Diagnosi {
   codice: string;
@@ -40,11 +32,6 @@ interface DatiMedico {
   cap: string;
   citta: string;
   provincia: string;
-}
-
-interface RicettaElettronicaProps {
-  pazienti: Paziente[];
-  datiMedico: DatiMedico;
 }
 
 // Utility per localStorage suggerimenti
@@ -78,24 +65,44 @@ function rimuoviSuggerimento(key: string, valore: string, setState: (arr: string
   setState(suggerimenti);
 }
 
-export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElettronicaProps) {
-  const [pazienteSelezionato, setPazienteSelezionato] = useState<Paziente | null>(null);
+export default function RicettaElettronica({ datiMedico }: { datiMedico: DatiMedico }) {
+  // Pazienti reali dallo store Zustand
+  const allPazienti = usePazientiStore(state => state.pazienti);
+  const setPazienti = usePazientiStore(state => state.setPazienti);
+  // Carica i pazienti solo al primo mount se la lista è vuota
+  useEffect(() => {
+    if (allPazienti.length === 0) {
+      getPazientiAll().then(res => {
+        if (res.success) setPazienti(res.data);
+      });
+    } else {
+      // Logga la struttura del primo paziente per debug
+      console.log('Esempio paziente:', allPazienti[0]);
+    }
+    // eslint-disable-next-line
+  }, [allPazienti]);
+
+  useEffect(() => {
+    console.log('Pazienti caricati:', allPazienti);
+  }, [allPazienti]);
+
+  // Filtro live su nome, cognome, codice fiscale ecc.
   const [search, setSearch] = useState('');
-  const [showList, setShowList] = useState(false);
+  const [pazienteSelezionato, setPazienteSelezionato] = useState<PazienteCompleto | null>(null);
   const [showConferma, setShowConferma] = useState(false);
 
-  // Filtro pazienti per nome
-  const filtered = search.trim() === '' ? pazienti : pazienti.filter(p => {
-    const q = search.toLowerCase();
-    return p.nome.toLowerCase().includes(q);
-  });
-
-  const [diagnosiList, setDiagnosiList] = useState<Diagnosi[]>([]);
-  const [farmaciList, setFarmaciList] = useState<Farmaco[]>([]);
   const [diagnosiSelezionata, setDiagnosiSelezionata] = useState<Diagnosi | null>(null);
-  const [farmacoSelezionato, setFarmacoSelezionato] = useState<Farmaco | null>(null);
   const [diagnosiInput, setDiagnosiInput] = useState('');
+  const fetchDiagnosi = async (q: string): Promise<Diagnosi[]> => {
+    return await searchDiagnosi(q);
+  };
+
+  const [farmacoSelezionato, setFarmacoSelezionato] = useState<Farmaco | null>(null);
   const [farmacoInput, setFarmacoInput] = useState('');
+  const fetchFarmaci = async (q: string): Promise<Farmaco[]> => {
+    return await searchFarmaci(q);
+  };
+
   const [posologia, setPosologia] = useState("una cpr ogni 12h");
   const [durata, setDurata] = useState("6gg");
   const [note, setNote] = useState("");
@@ -104,20 +111,6 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
   const [suggDurata, setSuggDurata] = useState<string[]>(getSuggerimenti(SUGG_DURATA_KEY));
   const [showSuggPosologia, setShowSuggPosologia] = useState(false);
   const [showSuggDurata, setShowSuggDurata] = useState(false);
-
-  const fetchDiagnosi = debounce((q: string) => {
-    if (!q) return;
-    searchDiagnosi(q)
-      .then(setDiagnosiList)
-      .catch(err => console.error("Errore fetch diagnosi:", err));
-  }, 400);
-
-  const fetchFarmaci = debounce((q: string) => {
-    if (!q) return;
-    searchFarmaci(q)
-      .then(setFarmaciList)
-      .catch(err => console.error("Errore fetch farmaci:", err));
-  }, 400);
 
   const handleInvia = () => {
     if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato) {
@@ -141,10 +134,18 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
       alert("Dati mancanti per l'invio della ricetta.");
       return;
     }
-    
     const payload = {
       medico: datiMedico,
-      paziente: pazienteSelezionato,
+      paziente: {
+        id: pazienteSelezionato.DB_CODE,
+        nome: pazienteSelezionato.DB_PANOME,
+        cognome: '', // Se serve, estrai da nome_completo o aggiungi campo
+        codiceFiscale: pazienteSelezionato.DB_PACODFI,
+        indirizzo: pazienteSelezionato.DB_PAINDIR,
+        cap: pazienteSelezionato.DB_PACAP,
+        citta: pazienteSelezionato.DB_PACITTA,
+        provincia: pazienteSelezionato.DB_PAPROVI,
+      },
       diagnosi: diagnosiSelezionata,
       farmaco: farmacoSelezionato,
       posologia,
@@ -162,6 +163,18 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
       });
   };
 
+  const fetchPazienti = async (q: string): Promise<PazienteCompleto[]> => {
+    const ql = q.toLowerCase();
+    const pazienti = usePazientiStore.getState().pazienti;
+    console.log('Query:', ql, 'Primi 5 nomi:', pazienti.slice(0, 5).map(p => p.DB_PANOME));
+    const result = pazienti.filter(p =>
+      (p.DB_PANOME && p.DB_PANOME.toLowerCase().includes(ql)) ||
+      (p.DB_PACODFI && p.DB_PACODFI.toLowerCase().includes(ql))
+    );
+    console.log('Filtro pazienti:', { query: q, risultati: result.length, sample: result.slice(0, 5) });
+    return result;
+  };
+
   return (
     <CRow>
       {/* Prima colonna - Selezione paziente */}
@@ -171,47 +184,17 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
             <h5 className="mb-3">Selezione Paziente</h5>
             
             {/* Autocomplete paziente */}
-            <div style={{ marginBottom: 16, position: 'relative' }}>
-              <CFormInput
-                type="text"
-                placeholder="Digita nome..."
-                value={pazienteSelezionato ? pazienteSelezionato.nome : search}
-                onChange={e => {
-                  setSearch(e.target.value);
-                  setShowList(true);
-                  setPazienteSelezionato(null);
-                }}
-                onFocus={() => setShowList(true)}
-                autoComplete="off"
-              />
-              {showList && filtered.length > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  zIndex: 10,
-                  background: '#fff',
-                  border: '1px solid #ccc',
-                  width: '100%',
-                  maxHeight: 200,
-                  overflowY: 'auto',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                }}>
-                  {filtered.map(p => (
-                    <div
-                      key={p.id}
-                      style={{ padding: 8, cursor: 'pointer' }}
-                      onMouseDown={e => {
-                        e.preventDefault();
-                        setPazienteSelezionato(p);
-                        setSearch(p.nome);
-                        setShowList(false);
-                      }}
-                    >
-                      {p.nome}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <AutoComplete<PazienteCompleto>
+              value={pazienteSelezionato ? pazienteSelezionato.nome_completo : search}
+              onChange={setSearch}
+              onSelect={(p: PazienteCompleto) => {
+                setPazienteSelezionato(p);
+                setSearch(p.nome_completo);
+              }}
+              fetchSuggestions={fetchPazienti}
+              getOptionLabel={(p: PazienteCompleto) => `${p.DB_PANOME} (${p.DB_PACODFI})`}
+              placeholder="Digita nome..."
+            />
 
             {/* Box riepilogativo paziente */}
             {pazienteSelezionato && (
@@ -219,12 +202,12 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
                 <CCardBody>
                   <h6 className="mb-2">Dati Paziente</h6>
                   <div className="small">
-                    <div><strong>Nome:</strong> {pazienteSelezionato.nome}</div>
-                    <div><strong>Codice fiscale:</strong> {pazienteSelezionato.codiceFiscale || '-'}</div>
-                    <div><strong>Indirizzo:</strong> {pazienteSelezionato.indirizzo || '-'}</div>
-                    <div><strong>CAP:</strong> {pazienteSelezionato.cap || '-'}</div>
-                    <div><strong>Città:</strong> {pazienteSelezionato.citta || '-'}</div>
-                    <div><strong>Provincia:</strong> {pazienteSelezionato.provincia || '-'}</div>
+                    <div><strong>Nome:</strong> {pazienteSelezionato.DB_PANOME}</div>
+                    <div><strong>Codice fiscale:</strong> {pazienteSelezionato.DB_PACODFI || '-'}</div>
+                    <div><strong>Indirizzo:</strong> {pazienteSelezionato.DB_PAINDIR || '-'}</div>
+                    <div><strong>CAP:</strong> {pazienteSelezionato.DB_PACAP || '-'}</div>
+                    <div><strong>Città:</strong> {pazienteSelezionato.DB_PACITTA || '-'}</div>
+                    <div><strong>Provincia:</strong> {pazienteSelezionato.DB_PAPROVI || '-'}</div>
                   </div>
                 </CCardBody>
               </CCard>
@@ -248,16 +231,19 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
                 {/* Ricerca Diagnosi */}
                 <div style={{ marginBottom: '1rem', position: 'relative' }}>
                   <CFormLabel>Diagnosi</CFormLabel>
-                  <CFormInput
+                  <AutoComplete<Diagnosi>
                     value={diagnosiInput}
-                    placeholder="Cerca diagnosi..."
-                    onChange={e => {
-                      setDiagnosiInput(e.target.value);
-                      fetchDiagnosi(e.target.value);
+                    onChange={setDiagnosiInput}
+                    onSelect={(d: Diagnosi) => {
+                      setDiagnosiSelezionata(d);
+                      setDiagnosiInput(`${d.codice} - ${d.descrizione}`);
                     }}
-                    autoComplete="off"
+                    fetchSuggestions={fetchDiagnosi}
+                    getOptionLabel={(d: Diagnosi) => `${d.codice} - ${d.descrizione}`}
+                    placeholder="Cerca diagnosi..."
                   />
-                  {diagnosiList.length > 0 && (
+                  {/* The following block was removed as per the edit hint */}
+                  {/* {diagnosiList.length > 0 && (
                     <div style={{ 
                       border: '1px solid #ccc', 
                       marginTop: '0.25rem', 
@@ -289,54 +275,23 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
                         </div>
                       ))}
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 {/* Ricerca Farmaco */}
                 <div style={{ marginBottom: '1rem', position: 'relative' }}>
                   <CFormLabel>Farmaco</CFormLabel>
-                  <CFormInput
+                  <AutoComplete<Farmaco>
                     value={farmacoInput}
-                    placeholder="Cerca farmaco..."
-                    onChange={e => {
-                      setFarmacoInput(e.target.value);
-                      fetchFarmaci(e.target.value);
+                    onChange={setFarmacoInput}
+                    onSelect={(f: Farmaco) => {
+                      setFarmacoSelezionato(f);
+                      setFarmacoInput(`${f.principio_attivo} - ${f.descrizione}`);
                     }}
-                    autoComplete="off"
+                    fetchSuggestions={fetchFarmaci}
+                    getOptionLabel={(f: Farmaco) => `${f.principio_attivo} - ${f.descrizione}`}
+                    placeholder="Cerca farmaco..."
                   />
-                  {farmaciList.length > 0 && (
-                    <div style={{ 
-                      border: '1px solid #ccc', 
-                      marginTop: '0.25rem', 
-                      maxHeight: '160px', 
-                      overflowY: 'auto',
-                      fontSize: '0.875rem',
-                      position: 'absolute',
-                      width: '100%',
-                      zIndex: 100,
-                      background: '#fff',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                    }}>
-                      {farmaciList.map(f => (
-                        <div
-                          key={f.codice}
-                          style={{ 
-                            padding: '0.25rem', 
-                            cursor: 'pointer',
-                            borderBottom: '1px solid #eee'
-                          }}
-                          onMouseDown={e => {
-                            e.preventDefault();
-                            setFarmacoSelezionato(f);
-                            setFarmacoInput(`${f.principio_attivo} - ${f.descrizione}`);
-                            setFarmaciList([]);
-                          }}
-                        >
-                          {f.principio_attivo} - {f.descrizione}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {/* Posologia con suggerimenti */}
@@ -486,7 +441,7 @@ export default function RicettaElettronica({ pazienti, datiMedico }: RicettaElet
         </CModalHeader>
         <CModalBody>
           <div><b>Medico:</b> {datiMedico.specializzazione} ({datiMedico.regioneOrdine})</div>
-          <div><b>Paziente:</b> {pazienteSelezionato?.nome} - {pazienteSelezionato?.codiceFiscale}</div>
+          <div><b>Paziente:</b> {pazienteSelezionato?.nome_completo || pazienteSelezionato?.nome} - {pazienteSelezionato?.codiceFiscale || pazienteSelezionato?.DB_PACODFI}</div>
           <div><b>Diagnosi:</b> {diagnosiSelezionata ? `${diagnosiSelezionata.codice} - ${diagnosiSelezionata.descrizione}` : '-'}</div>
           <div><b>Farmaco:</b> {farmacoSelezionato ? `${farmacoSelezionato.principio_attivo} - ${farmacoSelezionato.descrizione}` : '-'}</div>
           <div><b>Posologia:</b> {posologia}</div>

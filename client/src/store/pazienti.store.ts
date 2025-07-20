@@ -9,6 +9,7 @@ import type {
   PriorityFilter, 
   StatusFilter 
 } from '@/lib/types';
+import apiClient from '@/api/client';
 
 interface PazientiStore {
   // Dati
@@ -196,13 +197,14 @@ export const usePazientiStore = create<PazientiStore>()(
       },
       
       // Utilities
-      refreshData: () => {
-        set({ 
-          pazienti: [],
-          statistiche: null,
-          cittaData: [],
-          lastKnownCount: 0
-        });
+      refreshData: async () => {
+        set({ isLoading: true });
+        try {
+          const res = await apiClient.get('/api/pazienti?view=all');
+          set({ pazienti: res.data.data, isLoading: false, lastKnownCount: res.data.data.length });
+        } catch (e) {
+          set({ isLoading: false });
+        }
       }
     }),
     {
