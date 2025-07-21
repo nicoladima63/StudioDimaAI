@@ -69,6 +69,7 @@ app.log
 
 # AAA test e istruzioni (ignorata come richiesto)
 /AAA-istruzioni-e-test/
+/rentri/
 
 # Log di sistema (ignorata come richiesto)
 /logs/
