@@ -1,10 +1,13 @@
 from flask import Blueprint, request, jsonify
 import os
+import logging
 from server.app.core.mode_manager import get_mode, set_mode
 from server.app.core.automation_config import get_automation_settings, set_automation_settings
 from server.app.scheduler import reschedule_reminder_job
 from flask_jwt_extended import jwt_required
 import json
+
+logger = logging.getLogger(__name__)
 
 settings_bp = Blueprint('settings', __name__)
 
@@ -217,3 +220,197 @@ def get_recall_automation_log():
         return jsonify({'logs': logs[::-1]})
     except Exception as e:
         return jsonify({'error': f'Errore lettura log: {str(e)}'}), 500
+
+@settings_bp.route('/api/settings/calendar-sync', methods=['GET'])
+@jwt_required()
+def get_calendar_sync_settings():
+    """Ottiene le impostazioni della sincronizzazione automatica calendario"""
+    settings = get_automation_settings()
+    return jsonify({
+        'calendar_sync_enabled': settings.get('calendar_sync_enabled', True),
+        'calendar_sync_hour': settings.get('calendar_sync_hour', 21),
+        'calendar_sync_minute': settings.get('calendar_sync_minute', 0),
+        'calendar_studio_blu_id': settings.get('calendar_studio_blu_id', ''),
+        'calendar_studio_giallo_id': settings.get('calendar_studio_giallo_id', '')
+    })
+
+@settings_bp.route('/api/settings/calendar-sync', methods=['POST'])
+@jwt_required()
+def set_calendar_sync_settings():
+    """Imposta le impostazioni della sincronizzazione automatica calendario"""
+    data = request.get_json() or {}
+    
+    # Validazione dati
+    if 'calendar_sync_hour' in data:
+        hour = data.get('calendar_sync_hour')
+        if not isinstance(hour, int) or hour < 0 or hour > 23:
+            return jsonify({'error': 'Ora non valida (0-23)'}), 400
+            
+    if 'calendar_sync_minute' in data:
+        minute = data.get('calendar_sync_minute')
+        if not isinstance(minute, int) or minute < 0 or minute > 59:
+            return jsonify({'error': 'Minuto non valido (0-59)'}), 400
+    
+    set_automation_settings(data)
+    
+    # Import locale per evitare import circolari
+    try:
+        from server.app.scheduler import reschedule_calendar_sync_job
+        reschedule_calendar_sync_job()
+    except ImportError as e:
+        logger.error(f"Errore import reschedule_calendar_sync_job: {e}")
+    
+    return jsonify({'success': True, 'settings': get_automation_settings()})
+
+@settings_bp.route('/api/settings/calendar-sync/log', methods=['GET']) 
+@jwt_required()
+def get_calendar_sync_log():
+    """Restituisce gli ultimi 20 log di sincronizzazione calendario automatica"""
+    log_path = 'automation_calendar_sync.log'
+    logs = []
+    try:
+        if os.path.exists(log_path):
+            with open(log_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                # Prendi le ultime 20 righe (log più recenti)
+                for line in lines[-20:]:
+                    try:
+                        logs.append(json.loads(line))
+                    except Exception:
+                        continue
+        return jsonify({'logs': logs[::-1]})  # Più recente per primo
+    except Exception as e:
+        return jsonify({'error': f'Errore lettura log: {str(e)}'}), 500
+
+@settings_bp.route('/api/settings/calendar-sync/clear-all', methods=['POST'])
+@jwt_required()
+def clear_all_calendars():
+    """Cancella tutti gli eventi da entrambi i calendari configurati"""
+    from server.app.services.calendar_service import CalendarService
+    from server.app.core.automation_config import get_automation_settings
+    
+    settings = get_automation_settings()
+    studio_blu_calendar = settings.get('calendar_studio_blu_id')
+    studio_giallo_calendar = settings.get('calendar_studio_giallo_id')
+    
+    if not studio_blu_calendar or not studio_giallo_calendar:
+        return jsonify({'error': 'ID calendari non configurati'}), 400
+    
+    results = []
+    total_deleted = 0
+    
+    # Cancella Studio Blu
+    try:
+        result_blu = CalendarService.google_clear_calendar(studio_blu_calendar)
+        results.append({
+            'studio': 'blu',
+            'success': True,
+            'deleted_count': result_blu.get('deleted_count', 0),
+            'message': result_blu.get('message', 'Completato')
+        })
+        total_deleted += result_blu.get('deleted_count', 0)
+    except Exception as e:
+        results.append({
+            'studio': 'blu',
+            'success': False,
+            'error': str(e)
+        })
+    
+    # Cancella Studio Giallo
+    try:
+        result_giallo = CalendarService.google_clear_calendar(studio_giallo_calendar)
+        results.append({
+            'studio': 'giallo',
+            'success': True,
+            'deleted_count': result_giallo.get('deleted_count', 0),
+            'message': result_giallo.get('message', 'Completato')
+        })
+        total_deleted += result_giallo.get('deleted_count', 0)
+    except Exception as e:
+        results.append({
+            'studio': 'giallo',
+            'success': False,
+            'error': str(e)
+        })
+    
+    return jsonify({
+        'success': True,
+        'total_deleted': total_deleted,
+        'results': results
+    })
+
+@settings_bp.route('/api/settings/calendar-sync/sync-all', methods=['POST'])
+@jwt_required()
+def sync_all_calendars():
+    """Sincronizza entrambi i calendari per il mese corrente"""
+    from server.app.services.calendar_service import CalendarService
+    from server.app.core.automation_config import get_automation_settings
+    from datetime import datetime
+    
+    settings = get_automation_settings()
+    studio_blu_calendar = settings.get('calendar_studio_blu_id')
+    studio_giallo_calendar = settings.get('calendar_studio_giallo_id')
+    
+    if not studio_blu_calendar or not studio_giallo_calendar:
+        return jsonify({'error': 'ID calendari non configurati'}), 400
+    
+    now = datetime.now()
+    current_month = now.month
+    current_year = now.year
+    
+    results = []
+    total_synced = 0
+    
+    # Ottieni tutti gli appuntamenti del mese corrente
+    all_appointments = CalendarService.get_db_appointments_for_month(current_month, current_year)
+    
+    # Sincronizza Studio Blu
+    try:
+        studio_blu_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 1]
+        result_blu = CalendarService.sync_appointments_for_month(
+            current_month, current_year,
+            {1: studio_blu_calendar},
+            studio_blu_appointments
+        )
+        results.append({
+            'studio': 'blu',
+            'success': True,
+            'synced_count': result_blu.get('success', 0),
+            'message': result_blu.get('message', 'Completato')
+        })
+        total_synced += result_blu.get('success', 0)
+    except Exception as e:
+        results.append({
+            'studio': 'blu',
+            'success': False,
+            'error': str(e)
+        })
+    
+    # Sincronizza Studio Giallo
+    try:
+        studio_giallo_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 2]
+        result_giallo = CalendarService.sync_appointments_for_month(
+            current_month, current_year,
+            {2: studio_giallo_calendar},
+            studio_giallo_appointments
+        )
+        results.append({
+            'studio': 'giallo',
+            'success': True,
+            'synced_count': result_giallo.get('success', 0),
+            'message': result_giallo.get('message', 'Completato')
+        })
+        total_synced += result_giallo.get('success', 0)
+    except Exception as e:
+        results.append({
+            'studio': 'giallo',
+            'success': False,
+            'error': str(e)
+        })
+    
+    return jsonify({
+        'success': True,
+        'total_synced': total_synced,
+        'results': results,
+        'month': f"{current_month:02d}/{current_year}"
+    })

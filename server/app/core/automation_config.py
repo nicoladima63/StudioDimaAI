@@ -13,7 +13,12 @@ DEFAULT_AUTOMATION_SETTINGS = {
     'sms_richiami_mode': 'prod',
     'recall_enabled': True,
     'recall_hour': 16,
-    'recall_minute': 0
+    'recall_minute': 0,
+    'calendar_sync_enabled': True,
+    'calendar_sync_hour': 21,
+    'calendar_sync_minute': 0,
+    'calendar_studio_blu_id': 'studiodrnicoladimartino@gmail.com',
+    'calendar_studio_giallo_id': '6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com'
 }
 
 def get_automation_settings() -> Dict[str, Any]:

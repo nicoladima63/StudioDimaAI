@@ -26,6 +26,7 @@ import { getAppointmentsWithModeWarning } from '@/api/services/calendar.service'
 import TemplateEditor from '../components/TemplateEditor';
 import AutomationReminderSettings from '../components/AutomationReminderSettings';
 import AutomationRecallSettings from '../components/AutomationRecallSettings';
+import AutomationCalendarSyncSettings from '../components/AutomationCalendarSyncSettings';
 import NetworkModal from '@/components/ui/MessageModal';
 
 const SettingsPage: React.FC = () => {
@@ -191,6 +192,15 @@ const SettingsPage: React.FC = () => {
             role="tab"
           >
            Automazione Richiami
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 'calendar'}
+            onClick={() => setActiveTab('calendar')}
+            role="tab"
+          >
+            Automazione Calendario
           </CNavLink>
         </CNavItem>
       </CNav>
@@ -359,6 +369,30 @@ const SettingsPage: React.FC = () => {
                     <li><strong>Lunghezza SMS:</strong> Un SMS standard è di 160 caratteri. Template più lunghi verranno divisi</li>
                     <li><strong>Anteprima:</strong> L'anteprima mostra come apparirà il messaggio con dati di esempio</li>
                     <li><strong>Reset:</strong> Ripristina il template ai valori di default del sistema</li>
+                  </ul>
+                </CCardBody>
+              </CCard>
+            </CCol>
+          </CRow>
+        </CTabPane>
+
+        {/* Calendar Sync Tab */}
+        <CTabPane visible={activeTab === 'calendar'} role="tabpanel">
+          <CRow>
+            <CCol md={6}>
+              <AutomationCalendarSyncSettings />
+            </CCol>
+            <CCol md={6}>
+              <CCard color="light">
+                <CCardBody>
+                  <h6>📅 Sincronizzazione Automatica Calendario</h6>
+                  <ul className="mb-0">
+                    <li><strong>Automatica:</strong> Sincronizza ogni sera alle 21:00 (configurabile)</li>
+                    <li><strong>Calendari:</strong> Studio Blu e Studio Giallo configurati automaticamente</li>
+                    <li><strong>Periodo:</strong> Sincronizza mese corrente + prossimo mese</li>
+                    <li><strong>Weekend:</strong> Salta automaticamente sabato e domenica</li>
+                    <li><strong>Azioni Rapide:</strong> Sincronizza o cancella tutti i calendari manualmente</li>
+                    <li><strong>Log:</strong> Tutte le operazioni vengono registrate per il monitoraggio</li>
                   </ul>
                 </CCardBody>
               </CCard>
