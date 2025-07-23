@@ -6,7 +6,8 @@
       "Bash(python:*)",
       "Bash(taskkill:*)",
       "WebFetch(domain:demoapi.rentri.gov.it)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
