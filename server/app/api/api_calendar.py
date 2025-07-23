@@ -110,9 +110,24 @@ def list_calendars():
     """Lista dei calendari Google disponibili."""
     try:
         calendars = CalendarService.google_list_calendars()
-        return jsonify(calendars), 200
+        return jsonify({"success": True, "calendars": calendars}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        from server.app.utils.exceptions import GoogleCredentialsNotFoundError
+        logger.error(f"Errore in list_calendars: {str(e)}", exc_info=True)
+        
+        if isinstance(e, GoogleCredentialsNotFoundError):
+            return jsonify({
+                "success": False,
+                "error": "google_auth_required",
+                "message": "Autenticazione Google richiesta. Script automatico eseguito.",
+                "action_required": "Riprova la richiesta tra qualche secondo"
+            }), 401
+        else:
+            return jsonify({
+                "success": False,
+                "error": "server_error", 
+                "message": str(e)
+            }), 500
 
 @calendar_bp.route('/sync', methods=['POST'])
 @jwt_required()
@@ -290,6 +305,7 @@ def get_google_oauth_url():
     except Exception as e:
         logger.error(f"Errore nella generazione dell'URL OAuth: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 
 @calendar_bp.route('/appointments', methods=['GET'])

@@ -9,6 +9,7 @@ import logging
 import os
 import time
 import dbf
+import subprocess
 from typing import List, Dict
 from datetime import datetime, timedelta, time as dt_time
 import json
@@ -35,29 +36,32 @@ SYNC_STATE_FILE = 'server/sync_state.json'
 # Funzioni di utilità per Google Calendar
 def get_google_service():
     """
-    Costruisce e restituisce un oggetto servizio di Google Calendar autenticato
-    caricando le credenziali dal file token.json.
+    Costruisce e restituisce un oggetto servizio di Google Calendar autenticato.
+    Se il token è scaduto o corrotto, lancia automaticamente lo script di autenticazione.
     """
     creds = None
     if os.path.exists(TOKEN_FILE):
-        creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+        try:
+            creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+        except Exception as e:
+            logger.error(f"Token corrotto: {e}")
+            CalendarService._run_authentication_script()
+            
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             try:
+                logger.info("Token scaduto, tentativo di refresh...")
                 creds.refresh(Request())
                 with open(TOKEN_FILE, 'w') as token:
                     token.write(creds.to_json())
+                logger.info("Token refreshato con successo")
             except Exception as e:
-                logger.error(f"Errore durante il refresh del token Google: {e}")
-                raise GoogleCredentialsNotFoundError(
-                    "Impossibile aggiornare le credenziali Google. "
-                    f"Prova a cancellare il file '{TOKEN_FILE}' e a rieseguire lo script di autenticazione."
-                ) from e
+                logger.error(f"Refresh fallito: {e}")
+                CalendarService._run_authentication_script()
         else:
-            raise GoogleCredentialsNotFoundError(
-                f"Credenziali Google non trovate o non valide in '{TOKEN_FILE}'. "
-                "Esegui lo script 'server/authenticate_google.py' per ottenere le credenziali."
-            )
+            logger.info("Nessun token valido trovato")
+            CalendarService._run_authentication_script()
+    
     return build('calendar', 'v3', credentials=creds)
 
 def _decimal_to_time(time_value):
@@ -138,6 +142,25 @@ class CalendarService:
     Servizio centralizzato per la gestione del calendario.
     Gestisce tutte le operazioni relative a Google Calendar e appuntamenti DBF.
     """
+
+    @staticmethod
+    def _run_authentication_script():
+        """Lancia lo script di autenticazione Google."""
+        logger.info("Lancio script di autenticazione Google...")
+        try:
+            result = subprocess.run(['python', 'server/scripts/authenticate_google.py'], 
+                                  capture_output=True, text=True, timeout=60)
+            if result.returncode == 0:
+                logger.info("Script di autenticazione completato con successo")
+            else:
+                logger.error(f"Script di autenticazione fallito: {result.stderr}")
+                raise GoogleCredentialsNotFoundError("Autenticazione Google fallita")
+        except subprocess.TimeoutExpired:
+            logger.error("Script di autenticazione timeout")
+            raise GoogleCredentialsNotFoundError("Timeout durante l'autenticazione Google")
+        except Exception as e:
+            logger.error(f"Errore durante l'esecuzione dello script: {e}")
+            raise GoogleCredentialsNotFoundError(f"Errore autenticazione: {str(e)}")
 
     @staticmethod
     def google_list_calendars():

@@ -7,7 +7,9 @@
       "Bash(taskkill:*)",
       "WebFetch(domain:demoapi.rentri.gov.it)",
       "Bash(git fetch:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(ls:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

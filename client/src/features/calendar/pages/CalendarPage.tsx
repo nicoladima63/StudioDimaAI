@@ -78,13 +78,23 @@ const CalendarPage: React.FC = () => {
   const [reauthMessage, setReauthMessage] = useState('');
   const [reauthLoading, setReauthLoading] = useState(false);
 
+  //stato per il calendario selezionato
+  const selectedCalendarName = (calendars && Array.isArray(calendars)) 
+    ? (calendars.find(cal => cal.id === selectedCalendar)?.name || selectedCalendar)
+    : selectedCalendar;
+
   // Funzione per caricare i calendari
   const fetchCalendars = async () => {
     setIsLoadingCalendars(true);
     try {
-      const data: Calendar[] = await CalendarService.getCalendars();
-      setCalendars(data);
-      if (data.length === 0) {
+      const response = await CalendarService.getCalendars(); // Ricevi la risposta completa
+      
+      // Estrai l'array calendars dalla risposta
+      const calendarsArray = response.calendars || [];
+      
+      setCalendars(calendarsArray);
+      
+      if (calendarsArray.length === 0) {
         toast.info('Nessun calendario trovato.');
       }
     } catch (err) {
@@ -101,7 +111,7 @@ const CalendarPage: React.FC = () => {
       setIsLoadingCalendars(false);
     }
   };
-
+  
   useEffect(() => {
     fetchCalendars();
   }, []);
@@ -336,7 +346,6 @@ const handleSync = async () => {
     setClearError(null);
   }, [selectedCalendar]);
 
-  const selectedCalendarName = calendars.find(cal => cal.id === selectedCalendar)?.name || selectedCalendar;
 
   return (
     <Card title="Gestione Agenda su Calendar">
