@@ -1,76 +1,181 @@
-// src/api/rentri/rentriApi.ts
 import apiClient from '@/api/client';
 
-/**
- * API per la gestione dei rentri (controlli/visite di controllo)
- * 
- * Logica da implementare:
- * - getAllRentri() - recupera tutti i rentri
- * - getRentriByPaziente(pazienteId) - rentri per paziente
- * - getRentriByDate(start: string, end: string) - rentri per periodo
- * - createRentri(data) - crea nuovo rentri
- * - updateRentri(id, data) - aggiorna rentri
- * - deleteRentri(id) - elimina rentri
- * - getRentriStats() - statistiche rentri
- * - getRentriScaduti() - rentri scaduti
- * - getRentriInScadenza(days: number) - rentri in scadenza
- * - scheduleRentri(pazienteId, date) - programma rentri
- */
+// RENTRI API Types
+export interface Operatore {
+  identificativo: string;
+  codice_fiscale: string;
+  denominazione: string;
+  sede_legale: string;
+}
 
-// Placeholder functions - da implementare
-export async function getAllRentri() {
-  const response = await apiClient.get('/api/rentri/all');
+export interface SitoOperatore {
+  id: string;
+  denominazione: string;
+  indirizzo: string;
+  comune: string;
+  provincia: string;
+}
+
+export interface Registro {
+  id_registro: string;
+  denominazione: string;
+  tipo: string;
+  stato: 'attivo' | 'sospeso' | 'cessato';
+  data_creazione: string;
+}
+
+export interface Movimento {
+  id_movimento: string;
+  tipo_operazione: string;
+  data_movimento: string;
+  codice_rifiuto: string;
+  quantita: number;
+  unita_misura: string;
+}
+
+export interface FIR {
+  id_fir: string;
+  numero: string;
+  data_compilazione: string;
+  stato: string;
+  produttore: string;
+  trasportatore: string;
+  destinatario: string;
+}
+
+// Operatori API
+export async function getCurrentOperatore() {
+  const response = await apiClient.get('/api/rentri/operatori/me');
   return response.data;
 }
 
-export async function getRentriByPaziente(pazienteId: string) {
-  const response = await apiClient.get(`/api/rentri/paziente/${pazienteId}`);
-  return response.data;
-}
-
-export async function getRentriByDate(start: string, end: string) {
-  const response = await apiClient.get('/api/rentri/by-date', {
-    params: { start, end }
+export async function getOperatori(demo: boolean = false) {
+  const response = await apiClient.get('/api/rentri/operatori', {
+    params: { demo }
   });
   return response.data;
 }
 
-export async function createRentri(data: any) {
-  const response = await apiClient.post('/api/rentri', data);
-  return response.data;
-}
-
-export async function updateRentri(id: string, data: any) {
-  const response = await apiClient.put(`/api/rentri/${id}`, data);
-  return response.data;
-}
-
-export async function deleteRentri(id: string) {
-  const response = await apiClient.delete(`/api/rentri/${id}`);
-  return response.data;
-}
-
-export async function getRentriStats() {
-  const response = await apiClient.get('/api/rentri/stats');
-  return response.data;
-}
-
-export async function getRentriScaduti() {
-  const response = await apiClient.get('/api/rentri/scaduti');
-  return response.data;
-}
-
-export async function getRentriInScadenza(days: number = 30) {
-  const response = await apiClient.get('/api/rentri/in-scadenza', {
-    params: { days }
+export async function checkOperatoreIscrizione(identificativo: string, demo: boolean = false) {
+  const response = await apiClient.get(`/api/rentri/operatori/${identificativo}/controllo-iscrizione`, {
+    params: { demo }
   });
   return response.data;
 }
 
-export async function scheduleRentri(pazienteId: string, date: string) {
-  const response = await apiClient.post('/api/rentri/schedule', {
-    pazienteId,
-    date
+export async function getOperatoreSiti(numIscr: string, demo: boolean = false) {
+  const response = await apiClient.get(`/api/rentri/operatori/${numIscr}/siti`, {
+    params: { demo }
   });
   return response.data;
+}
+
+export async function createOperatoreRegistro(data: any, demo: boolean = false) {
+  const response = await apiClient.post('/api/rentri/operatori/registri', data, {
+    params: { demo }
+  });
+  return response.data;
+}
+
+// Anagrafiche API
+export async function getAnagraficheStatus(demo: boolean = false) {
+  const response = await apiClient.get('/api/rentri/anagrafiche/status', {
+    params: { demo }
+  });
+  return response.data;
+}
+
+export async function getOperatoreAnagrafica(codiceFiscale: string, demo: boolean = false) {
+  const response = await apiClient.get(`/api/rentri/anagrafiche/operatori/${codiceFiscale}`, {
+    params: { demo }
+  });
+  return response.data;
+}
+
+// Registri API
+export async function getRegistri(demo: boolean = false) {
+  const response = await apiClient.get('/api/rentri/registri', {
+    params: { demo }
+  });
+  return response.data;
+}
+
+export async function getRegistro(idRegistro: string, demo: boolean = false) {
+  const response = await apiClient.get(`/api/rentri/registri/${idRegistro}`, {
+    params: { demo }
+  });
+  return response.data;
+}
+
+export async function createRegistro(data: any, demo: boolean = false) {
+  const response = await apiClient.post('/api/rentri/registri', data, {
+    params: { demo }
+  });
+  return response.data;
+}
+
+// Movimenti API
+export async function createMovimento(data: any, demo: boolean = false) {
+  const response = await apiClient.post('/api/rentri/movimenti', data, {
+    params: { demo }
+  });
+  return response.data;
+}
+
+export async function getMovimento(idMovimento: string, demo: boolean = false) {
+  const response = await apiClient.get(`/api/rentri/movimenti/${idMovimento}`, {
+    params: { demo }
+  });
+  return response.data;
+}
+
+// FIR API
+export async function getFIR(idFir: string, demo: boolean = false) {
+  const response = await apiClient.get(`/api/rentri/fir/${idFir}`, {
+    params: { demo }
+  });
+  return response.data;
+}
+
+export async function getFIRPDF(idFir: string, demo: boolean = false) {
+  const response = await apiClient.get(`/api/rentri/fir/${idFir}/pdf`, {
+    params: { demo },
+    responseType: 'blob'
+  });
+  return response.data;
+}
+
+// Documenti API
+export async function uploadDocumento(formData: FormData, demo: boolean = false) {
+  const response = await apiClient.post('/api/rentri/documenti/upload', formData, {
+    params: { demo },
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return response.data;
+}
+
+// Mode Management
+export async function getRentriMode() {
+  const response = await apiClient.get('/api/settings/rentri-mode');
+  return response.data.mode;
+}
+
+export async function setRentriMode(mode: 'dev' | 'prod') {
+  const response = await apiClient.post('/api/settings/rentri-mode', { mode });
+  return response.data;
+}
+
+// Test Authorization
+export async function testRentriAuthorization() {
+  try {
+    const response = await apiClient.post('/api/rentri/auth-test');
+    return response.data;
+  } catch (error) {
+    console.error('🔴 Frontend: Errore nella chiamata:', error);
+    console.error('🔴 Frontend: Dettagli errore:', error.response?.status, error.response?.data);
+    console.error('🔴 Frontend: URL effettivo:', error.config?.url);
+    throw error;
+  }
 }

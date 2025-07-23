@@ -66,10 +66,12 @@ app.log
 
 # Certificati RENTRI (non versionare mai)
 /server/app/rentri/certs/
+/server/data/
 
 # AAA test e istruzioni (ignorata come richiesto)
 /AAA-istruzioni-e-test/
 /rentri/
+/poppler/
 
 # Log di sistema (ignorata come richiesto)
 /logs/

@@ -1,6 +1,6 @@
 // src/api/services/auth.service.ts
-import { apiClient } from '../apiClient';
-import type { LoginPayload, AuthResponse, RegisterPayload, UserProfile } from '../apiTypes';
+import apiClient from '@/api/client';
+import type { LoginPayload, AuthResponse, RegisterPayload, UserProfile } from '@/lib/apiTypes';
 
 export const AuthService = {
   login: async (credentials: LoginPayload) => {

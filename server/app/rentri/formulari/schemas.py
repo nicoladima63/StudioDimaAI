@@ -1,1 +1,0 @@
-# Schemas (Pydantic models) per il servizio formulari RENTRI 

@@ -1,0 +1,246 @@
+# 📌 Progetto: Automazione Registrazione Smaltimento Rifiuti - RENTRI
+
+## 🎯 Obiettivo
+
+Costruire un'applicazione Python che automatizzi la registrazione dei movimenti di smaltimento rifiuti per uno studio odontoiatrico, a partire dalla ricezione PEC del FIR, fino all'inserimento nel portale RENTRI.
+
+---
+
+## 🧱 Stack Tecnologico
+
+* Python 3.10+
+* Librerie: `imaplib`, `email`, `pdfplumber`/`PyMuPDF`, `requests`, `dotenv`, `schedule`, `openpyxl`, `pandas`
+* Storage: File system locale + opzionale SQLite o Excel
+* Sicurezza: Gestione token OAuth2 (RENTRI)
+* IDE: Visual Studio Code
+
+---
+
+## 🔁 Endpoint RENTRI Utili (da documentazione ufficiale)
+
+### 🔐 Autenticazione
+
+* `POST /oauth2/token` – Ottieni token OAuth2 (grant\_type client\_credentials)
+
+### 📘 Anagrafiche
+
+* `GET /anagrafiche/v1.0/status` – Verifica stato anagrafico
+* `GET /anagrafiche/v1.0/aziende` – Dati anagrafici dell’azienda
+
+
+### 📋 Registri
+
+* `GET /registri/v1.0` – Elenco registri
+* `POST /registri/v1.0` – Creazione nuovo registro
+* `GET /registri/v1.0/{id}` – Dettagli registro specifico
+
+### 🔄 Movimenti
+
+* `POST /registri/v1.0/{idRegistro}/movimenti` – Inserimento movimento carico/scarico
+* `GET /registri/v1.0/{idRegistro}/movimenti` – Elenco movimenti del registro
+* `GET /registri/v1.0/{idRegistro}/movimenti/{idMovimento}` – Dettaglio singolo movimento
+
+### 📄 Formulari (FIR)
+
+* `GET /formulari/v1.0` – Elenco FIR
+* `GET /formulari/v1.0/{id}` – Dettagli FIR specifico
+* `GET /formulari/v1.0/{id}/pdf` – Scarica PDF FIR
+
+*(Gli endpoint sono soggetti a variazione secondo versione ufficiale. Verifica documentazione aggiornata su [https://api.rentri.gov.it](https://api.rentri.gov.it))*
+
+---
+
+## 🔄 Fasi del Progetto
+
+### 1. Configurazione ambiente
+
+#### 🔑 Ottenere le credenziali API RENTRI
+
+Per ottenere `client_id` e `client_secret` da usare con le API RENTRI:
+
+1. Vai su [https://www.rentri.gov.it](https://www.rentri.gov.it)
+2. Accedi con SPID o CNS come titolare dello studio
+3. Entra nella sezione "Accesso API" o "Credenziali applicative"
+4. Richiedi una nuova applicazione (es. `automazione-smaltimento`)
+5. Salva i valori generati e aggiungili nel file `.env`:
+
+   ```
+   RENTRI_CLIENT_ID=tuo_client_id
+   RENTRI_CLIENT_SECRET=tuo_client_secret
+   RENTRI_TOKEN_URL=https://api.rentri.gov.it/oauth2/token
+   ```
+
+* Creare file `.env` con:
+
+  * Credenziali PEC (email, password)
+  * Parametri IMAP server
+  * Client ID e Secret RENTRI
+* Setup struttura progetto:
+
+  * `src/`
+
+    * `pec_reader.py`
+    * `rentri_client.py`
+    * `parser.py`
+    * `logger.py`
+    * `main.py`
+  * `data/` per i PDF scaricati
+  * `logs/` per log automatici
+  * `output/` per Excel o DB
+
+---
+
+### 2. Lettura PEC
+
+* Connettersi via IMAP
+* Cercare PEC con oggetto contenente "FIR" o mittente noto
+* Scaricare allegato PDF nella cartella `data/`
+* Rinominare con formato: `YYYYMMDD_FIR_NUMERO.pdf`
+* Loggare evento
+
+### 3. Parsing del PDF
+
+* Estrarre:
+
+  * Numero FIR
+  * Data
+  * Codice CER
+  * Quantità in kg
+  * Trasportatore / Smaltitore
+* Salvare i dati in un dizionario Python
+* Opzionale: Validare firma digitale (futuro)
+
+---
+
+### 4. Autenticazione RENTRI (OAuth2 / JWT con CNS o certificato dominio)
+
+> Esistono due modalità principali per autenticarsi con le API RENTRI:
+>
+> ✅ Modalità semplificata (Client ID + Secret)
+> 🔐 Modalità avanzata (firma con certificato CNS o P12)
+
+#### ✅ Metodo 1 – OAuth2 con `client_id` e `client_secret`
+
+* Endpoint: `POST /oauth2/token`
+* Flow: `grant_type=client_credentials`
+* Usare token ricevuto come Bearer nei successivi header
+* Salvare token temporaneamente in file `.json`
+* Funzione di refresh token automatico se 401 Unauthorized
+
+#### 🔐 Metodo 2 – JWT firmato con CNS / certificato P12
+
+Richiede:
+
+* Lettura del certificato CNS installato oppure file `.p12`
+* Firma digitale del JWT con chiave privata
+* Digest del corpo della richiesta
+* Header `Authorization`, `Digest`, `Agid-JWT-Signature`
+
+**Header richiesti:**
+
+```http
+Authorization: Bearer <JWT>
+Digest: SHA-256=<digest base64>
+Agid-JWT-Signature: <JWT firmato per integrità>
+```
+
+**Esempio base flusso:**
+
+1. Costruzione del JWT (con jti, issuer, audience)
+2. Firma con RSA o ECDSA in base al certificato
+3. Calcolo SHA256 del corpo della richiesta
+4. Costruzione secondo token `idAuth` e `integrity`
+5. Invio della richiesta con i 3 header
+
+*(Vedi esempi dettagliati su [https://api.rentri.gov.it/docs?page=esempi](https://api.rentri.gov.it/docs?page=esempi))*
+
+* Endpoint: `POST /oauth2/token`
+* Ottenere token con `client_id` e `client_secret`
+* Salvare token temporaneamente in file `.json`
+* Funzione di refresh token automatico se 401 Unauthorized
+
+### 5. Verifica o creazione registro attivo
+
+* Endpoint: `GET /registri` → controlla se c'è registro attivo
+* Se non esiste, crealo (opzionale)
+
+### 6. Inserimento movimento di scarico
+
+* Endpoint: `POST /registri/{id}/movimenti`
+* Usare i dati estratti dal PDF
+* Inviare richiesta JSON con i dati smaltimento
+* Verificare risposta e loggare esito
+
+### 7. Gestione degli errori
+
+* Gestione automatica errori:
+
+  * Token scaduto → refresh
+  * Mancanza dati PDF → log warning
+  * Errori API → retry/backoff o alert
+
+---
+
+### 8. Reportistica e archivio
+
+* Creare Excel mensile o file `.csv` con i movimenti registrati
+* Archiviare i FIR PDF in sottocartelle per anno/mese
+* Inviare email periodica o notifiche (opzionale)
+
+### 9. Scheduler
+
+* Usare `schedule` o `cron` per:
+
+  * Controllo PEC ogni X ore
+  * Invio notifica se FIR non registrato entro 3 giorni
+
+---
+
+## ✅ Output atteso
+
+* FIR scaricati in cartella `data/`
+* Registrazione completata nel portale RENTRI
+* Log automatico delle operazioni
+* Excel mensile con i movimenti FIR
+
+---
+
+## 🚀 Fasi successive (opzionali)
+
+* Firma digitale FIR (integrazione con software firma)
+* Interfaccia web locale (es. Flask/Tauri)
+* Backup su cloud (Nextcloud, NAS)
+* Integrazione Telegram o email per alert
+
+---
+
+## 🔐 Note GDPR & Privacy
+
+* Tutti i dati gestiti localmente
+* Nessuna condivisione con terze parti
+* File temporanei criptabili con `cryptography`
+
+---
+
+## ✳️ Prompt da usare in VS Code per inizializzazione progetto
+
+```bash
+mkdir rentri-automation && cd rentri-automation
+python -m venv venv
+source venv/bin/activate  # o .\venv\Scripts\activate su Windows
+pip install -r requirements.txt
+```
+
+**requirements.txt**:
+
+```
+imap_tools
+python-dotenv
+pdfplumber
+requests
+schedule
+pandas
+openpyxl
+```
+
+---

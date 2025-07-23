@@ -1,1 +1,0 @@
-# Service per il servizio dati_registri RENTRI 

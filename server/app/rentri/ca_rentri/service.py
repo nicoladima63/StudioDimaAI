@@ -1,1 +1,0 @@
-# Service per il servizio ca_rentri RENTRI 

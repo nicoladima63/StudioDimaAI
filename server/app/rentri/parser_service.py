@@ -7,18 +7,24 @@ from PIL import Image
 import json
 from datetime import datetime
 from pyzbar.pyzbar import decode as decode_qr
+from pathlib import Path
 
-def estrai_testo_con_ocr(pdf_path, tesseract_path=None, poppler_path=None):
-    if tesseract_path:
-        pytesseract.pytesseract.tesseract_cmd = tesseract_path
-    immagini = convert_from_path(pdf_path, poppler_path=poppler_path)
+# Path assoluto di Poppler rispetto alla root del progetto
+POPLER_PATH = str(Path(__file__).resolve().parents[3] / 'poppler' / 'Library' / 'bin')
+TESSERACT_PATH = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+def estrai_testo_con_ocr(pdf_path):
+    print(f"DEBUG: poppler_path = {POPLER_PATH}")
+    print(f"DEBUG: tesseract_path = {TESSERACT_PATH}")
+    pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
+    immagini = convert_from_path(pdf_path, poppler_path=POPLER_PATH)
     testo = ""
     for img in immagini:
         testo += pytesseract.image_to_string(img, lang='ita+eng') + "\n"
     return testo
 
-def estrai_qrcode_da_pdf(pdf_path, poppler_path=None):
-    immagini = convert_from_path(pdf_path, poppler_path=poppler_path)
+def estrai_qrcode_da_pdf(pdf_path):
+    immagini = convert_from_path(pdf_path, poppler_path=POPLER_PATH)
     risultati = []
     for img in immagini:
         qr_codes = decode_qr(img)
@@ -26,10 +32,7 @@ def estrai_qrcode_da_pdf(pdf_path, poppler_path=None):
             risultati.append(qr.data.decode('utf-8'))
     return risultati
 
-def estrai_dati_fir(pdf_path, config=None):
-    config = config or {}
-    tesseract_path = config.get('TESSERACT_PATH')
-    poppler_path = config.get('POPPLER_PATH')
+def estrai_dati_fir(pdf_path):
     dati = {
         'numero_fir': None,
         'data': None,
@@ -42,7 +45,7 @@ def estrai_dati_fir(pdf_path, config=None):
     with pdfplumber.open(pdf_path) as pdf:
         testo = "\n".join(page.extract_text() or '' for page in pdf.pages)
     if not testo.strip():
-        testo = estrai_testo_con_ocr(pdf_path, tesseract_path, poppler_path)
+        testo = estrai_testo_con_ocr(pdf_path)
     m = re.search(r'emissione\|\s*([0-9]{2}/[0-9]{2}/[0-9]{4})\s*([A-Z0-9 ]{8,})', testo, re.IGNORECASE)
     if m:
         dati['data'] = m.group(1)
@@ -64,14 +67,13 @@ def estrai_dati_fir(pdf_path, config=None):
     m = re.search(r'DESTINATARIO\s*Denominazione\s*([A-Z0-9 .\-]+)', testo)
     if m:
         dati['smaltitore'] = m.group(1).strip()
-    qrcodes = estrai_qrcode_da_pdf(pdf_path, poppler_path)
+    qrcodes = estrai_qrcode_da_pdf(pdf_path)
     if qrcodes:
         dati['qrcode'] = qrcodes[0] if len(qrcodes) == 1 else qrcodes
     return dati
 
-def estrai_tutti_i_fir(data_dir, config=None):
-    config = config or {}
-    registro_path = config.get('REGISTRO_PATH', os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'output', 'registro_fir.json')))
+def estrai_tutti_i_fir(data_dir):
+    registro_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'output', 'registro_fir.json'))
     def carica_registro():
         if os.path.exists(registro_path):
             try:
@@ -85,6 +87,8 @@ def estrai_tutti_i_fir(data_dir, config=None):
                 return {}
         return {}
     def salva_registro(registro):
+        # Crea la cartella se non esiste
+        os.makedirs(os.path.dirname(registro_path), exist_ok=True)
         with open(registro_path, 'w', encoding='utf-8') as f:
             json.dump(registro, f, ensure_ascii=False, indent=2)
     risultati = []
@@ -97,7 +101,7 @@ def estrai_tutti_i_fir(data_dir, config=None):
         if nome_file in registro:
             continue
         path = os.path.join(data_dir, nome_file)
-        dati = estrai_dati_fir(path, config)
+        dati = estrai_dati_fir(path)
         if not dati.get('numero_fir'):
             continue
         risultati.append(dati)

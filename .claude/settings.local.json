@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "WebFetch(domain:api.rentri.gov.it)",
+      "Bash(python:*)",
+      "Bash(taskkill:*)",
+      "WebFetch(domain:demoapi.rentri.gov.it)",
+      "Bash(git fetch:*)"
     ],
     "deny": []
   }

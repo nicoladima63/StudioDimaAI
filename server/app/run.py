@@ -46,8 +46,30 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
         logger.error(f"Token non valido: {error}")
         return jsonify({'success': False, 'error': f'Token non valido: {error}'}), 422
     
+    # Test routes BEFORE blueprint registration
+    @app.route('/test-before-bp')
+    def test_before_blueprints():
+        return {'message': 'Route added BEFORE blueprints!'}, 200
+
     register_routes(app)
     
+    @app.errorhandler(500)
+    def internal_error(error):
+        logger.error(f"Internal server error: {error}")
+        print(f"Internal server error: {error}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Internal server error', 'details': str(error)}), 500
+    
+    # Test routes AFTER blueprint registration
+    @app.route('/api/rentri-test')
+    def rentri_direct_test():
+        return {'message': 'Direct route works!'}, 200
+
+    @app.route('/test-direct')
+    def simple_direct_test():
+        return {'message': 'Simple direct route works!'}, 200
+
     @app.route('/health')
     def health_check():
         try:
@@ -63,15 +85,24 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
             details = {'error': str(e)}
             app.logger.error(f"Health check DB error: {e}")
         return {'status': 'healthy', 'db': db_status, **details}, 200
-    logger.info("Applicazione inizializzata")
+    # logger.info("Applicazione inizializzata")
 
     return app
 
 if __name__ == "__main__":
     app = create_app()
 
+    # print("DEBUG: Lista completa delle regole registrate:")
     # for rule in app.url_map.iter_rules():
-    #     print(rule)
+    #     print(f"  {rule} -> {rule.endpoint}")
+    #     if 'rentri' in str(rule):
+    #         print(f"    RENTRI route found: {rule.methods} {rule}")
+    
+    # print(f"DEBUG: Blueprints registrati: {list(app.blueprints.keys())}")
+    # if 'rentri' in app.blueprints:
+    #     print(f"SUCCESS: Blueprint RENTRI trovato in app.blueprints")
+    # else:
+    #     print(f"ERROR: Blueprint RENTRI NON trovato in app.blueprints")
     try:
         app.run(
             host=app.config.get("HOST", "0.0.0.0"),

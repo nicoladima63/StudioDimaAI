@@ -15,7 +15,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       refreshToken: null,
       username: null,
@@ -24,7 +24,7 @@ export const useAuthStore = create<AuthState>()(
         set({ token, refreshToken, username, isAuthenticated: true });
       },
       setAccessToken: (token) => {
-        set({ token });
+        set({ token, isAuthenticated: Boolean(token) });
       },
       clearToken: () => {
         set({
@@ -36,14 +36,19 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage', // chiave unica per lo storage
+      name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
-      // Salva tutto lo stato tranne 'isAuthenticated' che viene derivato
       partialize: (state) => ({
         token: state.token,
         refreshToken: state.refreshToken,
         username: state.username,
       }),
+      onRehydrate: (state) => {
+        // Ricostruisce isAuthenticated dopo il caricamento dal localStorage
+        if (state?.token) {
+          state.isAuthenticated = true;
+        }
+      },
     }
   )
 );

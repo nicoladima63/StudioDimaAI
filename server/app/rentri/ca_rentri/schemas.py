@@ -1,1 +1,0 @@
-# Schemas (Pydantic models) per il servizio ca_rentri RENTRI 
