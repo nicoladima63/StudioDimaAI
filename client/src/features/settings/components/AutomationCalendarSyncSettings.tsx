@@ -31,11 +31,11 @@ const AutomationCalendarSyncSettings: React.FC = () => {
   const [log, setLog] = useState<
     { message: string; type: "info" | "success" | "error"; timestamp: Date }[]
   >([]);
-  
+
   // Stati per azioni rapide
   const [clearingAll, setClearingAll] = useState(false);
   const [syncingAll, setSyncingAll] = useState(false);
-  
+
   // Stati per le modal di conferma
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showSyncConfirm, setShowSyncConfirm] = useState(false);
@@ -64,7 +64,8 @@ const AutomationCalendarSyncSettings: React.FC = () => {
       setMinute(res.data.calendar_sync_minute ?? 0);
       addLog("Impostazioni calendario caricate con successo", "success");
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || "Errore nel recupero delle impostazioni";
+      const errorMsg =
+        err.response?.data?.error || "Errore nel recupero delle impostazioni";
       setError(errorMsg);
       addLog(errorMsg, "error");
     } finally {
@@ -74,16 +75,27 @@ const AutomationCalendarSyncSettings: React.FC = () => {
 
   const handleEnabledChange = async (newEnabled: boolean) => {
     setEnabled(newEnabled);
-    addLog(`${newEnabled ? 'Attivazione' : 'Disattivazione'} automazione calendario...`, "info");
+    addLog(
+      `${
+        newEnabled ? "Attivazione" : "Disattivazione"
+      } automazione calendario...`,
+      "info"
+    );
     try {
       await apiClient.post("/api/settings/calendar-sync", {
         calendar_sync_enabled: newEnabled,
         calendar_sync_hour: hour,
         calendar_sync_minute: minute,
       });
-      addLog(`Automazione calendario ${newEnabled ? 'attivata' : 'disattivata'} con successo`, "success");
+      addLog(
+        `Automazione calendario ${
+          newEnabled ? "attivata" : "disattivata"
+        } con successo`,
+        "success"
+      );
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || "Errore nel salvataggio dello stato";
+      const errorMsg =
+        err.response?.data?.error || "Errore nel salvataggio dello stato";
       setError(errorMsg);
       addLog(errorMsg, "error");
       // Ripristina lo stato precedente in caso di errore
@@ -105,7 +117,8 @@ const AutomationCalendarSyncSettings: React.FC = () => {
       setSuccess("Orario sincronizzazione salvato con successo!");
       addLog("Orario sincronizzazione salvato con successo", "success");
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || "Errore nel salvataggio dell'orario";
+      const errorMsg =
+        err.response?.data?.error || "Errore nel salvataggio dell'orario";
       setError(errorMsg);
       addLog(errorMsg, "error");
     } finally {
@@ -120,7 +133,7 @@ const AutomationCalendarSyncSettings: React.FC = () => {
     try {
       const res = await apiClient.post("/api/settings/calendar-sync/clear-all");
       const { total_deleted, results } = res.data;
-      
+
       let successMsg = `Cancellati ${total_deleted} eventi totali.`;
       results.forEach((result: any) => {
         if (result.success) {
@@ -129,11 +142,12 @@ const AutomationCalendarSyncSettings: React.FC = () => {
           addLog(`Errore Studio ${result.studio}: ${result.error}`, "error");
         }
       });
-      
+
       addLog(successMsg, "success");
       setSuccess(successMsg);
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || "Errore nella cancellazione dei calendari";
+      const errorMsg =
+        err.response?.data?.error || "Errore nella cancellazione dei calendari";
       setError(errorMsg);
       addLog(errorMsg, "error");
     } finally {
@@ -148,7 +162,7 @@ const AutomationCalendarSyncSettings: React.FC = () => {
     try {
       const res = await apiClient.post("/api/settings/calendar-sync/sync-all");
       const { total_synced, results, month } = res.data;
-      
+
       let successMsg = `Sincronizzati ${total_synced} appuntamenti per ${month}.`;
       results.forEach((result: any) => {
         if (result.success) {
@@ -157,11 +171,13 @@ const AutomationCalendarSyncSettings: React.FC = () => {
           addLog(`Errore Studio ${result.studio}: ${result.error}`, "error");
         }
       });
-      
+
       addLog(successMsg, "success");
       setSuccess(successMsg);
     } catch (err: any) {
-      const errorMsg = err.response?.data?.error || "Errore nella sincronizzazione dei calendari";
+      const errorMsg =
+        err.response?.data?.error ||
+        "Errore nella sincronizzazione dei calendari";
       setError(errorMsg);
       addLog(errorMsg, "error");
     } finally {
@@ -171,13 +187,13 @@ const AutomationCalendarSyncSettings: React.FC = () => {
 
   return (
     <>
-      <CCard className="mb-4">
+      <CCard className="mb-2">
         <CCardBody>
           <h5 className="mb-3">📅 Automazione Sincronizzazione Calendario</h5>
-          
+
           {error && <CAlert color="danger">{error}</CAlert>}
           {success && <CAlert color="success">{success}</CAlert>}
-          
+
           {loading ? (
             <CSpinner color="primary" />
           ) : (
@@ -226,7 +242,10 @@ const AutomationCalendarSyncSettings: React.FC = () => {
                     </CFormSelect>
                   </div>
                 </CCol>
-                <CCol md={4} className="d-flex align-items-end justify-content-end">
+                <CCol
+                  md={4}
+                  className="d-flex align-items-end justify-content-end"
+                >
                   <CButton
                     color="primary"
                     onClick={handleSave}
@@ -236,58 +255,68 @@ const AutomationCalendarSyncSettings: React.FC = () => {
                   </CButton>
                 </CCol>
               </CRow>
-
-              {/* Azioni rapide */}
-              <CRow className="mt-4">
-                <CCol md={12}>
-                  <CFormLabel className="fw-semibold mb-2">Azioni Rapide:</CFormLabel>
-                  <div className="d-flex gap-2 flex-wrap">
-                    <CButton
-                      color="success"
-                      size="sm"
-                      onClick={() => setShowSyncConfirm(true)}
-                      disabled={syncingAll || clearingAll}
-                    >
-                      {syncingAll ? (
-                        <>
-                          <CSpinner size="sm" className="me-1" />
-                          Sincronizzando...
-                        </>
-                      ) : (
-                        "🔄 Sincronizza Tutti i Calendari"
-                      )}
-                    </CButton>
-                    <CButton
-                      color="danger"
-                      size="sm"
-                      onClick={() => setShowClearConfirm(true)}
-                      disabled={syncingAll || clearingAll}
-                    >
-                      {clearingAll ? (
-                        <>
-                          <CSpinner size="sm" className="me-1" />
-                          Cancellando...
-                        </>
-                      ) : (
-                        "🗑️ Cancella Tutti i Calendari"
-                      )}
-                    </CButton>
-                  </div>
-                </CCol>
-              </CRow>
             </>
           )}
-          
+
           <div className="text-muted small mt-3">
             L'automazione sincronizza ogni giorno alle{" "}
             {hour.toString().padStart(2, "0")}:
-            {minute.toString().padStart(2, "0")} gli appuntamenti di entrambi gli studi 
-            sui rispettivi calendari Google (esclusi sabato e domenica).
-            Sincronizza il mese corrente e il prossimo mese.
+            {minute.toString().padStart(2, "0")} gli appuntamenti di entrambi
+            gli studi sui rispettivi calendari Google (esclusi sabato e
+            domenica). Sincronizza il mese corrente e il prossimo mese.
           </div>
         </CCardBody>
       </CCard>
-      
+
+      <CCard className="mt-2">
+      <CCardBody
+          style={{ maxHeight: 180, overflowY: "auto", fontSize: "0.95em" }}
+        >
+          <CRow className="mt-2">
+          <CCol md={4}>
+            <strong>Azioni Rapide:</strong>
+            </CCol>
+
+            <CCol md={4}>
+              <CButton
+                color="success"
+                size="sm"
+                onClick={() => setShowSyncConfirm(true)}
+                disabled={syncingAll || clearingAll}
+                className="w-100"
+              >
+                {syncingAll ? (
+                  <>
+                    <CSpinner size="sm" className="me-1" />
+                    Sincronizzando...
+                  </>
+                ) : (
+                  "🔄 Sincronizza Tutti i Calendari"
+                )}
+              </CButton>
+            </CCol>
+            <CCol md={4}>
+              <CButton
+                color="danger"
+                size="sm"
+                onClick={() => setShowClearConfirm(true)}
+                disabled={syncingAll || clearingAll}
+                className="w-100"
+              >
+                {clearingAll ? (
+                  <>
+                    <CSpinner size="sm" className="me-1" />
+                    Cancellando...
+                  </>
+                ) : (
+                  "🗑️ Cancella Tutti i Calendari"
+                )}
+              </CButton>
+            </CCol>
+          </CRow>
+        </CCardBody>
+      </CCard>
+
       {/* Log delle azioni */}
       <CCard className="mt-2">
         <CCardBody
@@ -330,24 +359,25 @@ const AutomationCalendarSyncSettings: React.FC = () => {
         </CModalHeader>
         <CModalBody>
           <p>
-            Sincronizzare <strong>tutti i calendari</strong> con gli appuntamenti del mese corrente?
+            Sincronizzare <strong>tutti i calendari</strong> con gli
+            appuntamenti del mese corrente?
           </p>
-          <p>
-            Questa operazione aggiornerà:
-          </p>
+          <p>Questa operazione aggiornerà:</p>
           <ul>
-            <li><strong>📘 Studio Blu</strong> - Calendario aziendale</li>
-            <li><strong>📒 Studio Giallo</strong> - Calendario principale</li>
+            <li>
+              <strong>📘 Studio Blu</strong> - Calendario aziendale
+            </li>
+            <li>
+              <strong>📒 Studio Giallo</strong> - Calendario principale
+            </li>
           </ul>
           <p className="text-muted">
-            Gli appuntamenti verranno sincronizzati automaticamente sui rispettivi calendari Google.
+            Gli appuntamenti verranno sincronizzati automaticamente sui
+            rispettivi calendari Google.
           </p>
         </CModalBody>
         <CModalFooter>
-          <CButton
-            color="secondary"
-            onClick={() => setShowSyncConfirm(false)}
-          >
+          <CButton color="secondary" onClick={() => setShowSyncConfirm(false)}>
             Annulla
           </CButton>
           <CButton
@@ -378,27 +408,29 @@ const AutomationCalendarSyncSettings: React.FC = () => {
         </CModalHeader>
         <CModalBody>
           <CAlert color="danger">
-            <strong>⚠️ ATTENZIONE:</strong> Questa operazione non può essere annullata!
+            <strong>⚠️ ATTENZIONE:</strong> Questa operazione non può essere
+            annullata!
           </CAlert>
           <p>
-            Sei sicuro di voler cancellare <strong>TUTTI gli eventi</strong> da entrambi i calendari?
+            Sei sicuro di voler cancellare <strong>TUTTI gli eventi</strong> da
+            entrambi i calendari?
           </p>
-          <p>
-            Verranno eliminati gli eventi da:
-          </p>
+          <p>Verranno eliminati gli eventi da:</p>
           <ul>
-            <li><strong>📘 Studio Blu</strong> - Tutti gli eventi presenti</li>
-            <li><strong>📒 Studio Giallo</strong> - Tutti gli eventi presenti</li>
+            <li>
+              <strong>📘 Studio Blu</strong> - Tutti gli eventi presenti
+            </li>
+            <li>
+              <strong>📒 Studio Giallo</strong> - Tutti gli eventi presenti
+            </li>
           </ul>
           <p className="text-danger fw-semibold">
-            Questa azione eliminerà definitivamente tutti gli appuntamenti dai calendari Google.
+            Questa azione eliminerà definitivamente tutti gli appuntamenti dai
+            calendari Google.
           </p>
         </CModalBody>
         <CModalFooter>
-          <CButton
-            color="secondary"
-            onClick={() => setShowClearConfirm(false)}
-          >
+          <CButton color="secondary" onClick={() => setShowClearConfirm(false)}>
             Annulla
           </CButton>
           <CButton

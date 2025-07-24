@@ -379,10 +379,10 @@ const SettingsPage: React.FC = () => {
         {/* Calendar Sync Tab */}
         <CTabPane visible={activeTab === 'calendar'} role="tabpanel">
           <CRow>
-            <CCol md={6}>
+            <CCol md={4}>
               <AutomationCalendarSyncSettings />
             </CCol>
-            <CCol md={6}>
+            <CCol md={8}>
               <CCard color="light">
                 <CCardBody>
                   <h6>📅 Sincronizzazione Automatica Calendario</h6>

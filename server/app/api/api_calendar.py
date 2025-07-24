@@ -157,7 +157,8 @@ def sync_calendar():
         "synced": 0,
         "total": 0,
         "message": "Avvio sincronizzazione...",
-        "error": None
+        "error": None,
+        "cancelled": False
     }
 
     def sync_job():
@@ -179,6 +180,10 @@ def sync_calendar():
 
             # Funzione callback per aggiornare il progresso
             def update_sync_progress(synced, total, message=""):
+                # Controlla se il job è stato cancellato
+                if sync_jobs[job_id]["cancelled"]:
+                    raise Exception("Sincronizzazione interrotta dall'utente")
+                    
                 logger.info(f"Progresso sync: {synced}/{total} - {message}")
                 sync_jobs[job_id]["progress"] = int(100 * synced / max(1, total)) if total > 0 else 0
                 sync_jobs[job_id]["synced"] = synced
@@ -206,10 +211,15 @@ def sync_calendar():
             sync_jobs[job_id]["progress"] = 100
 
         except Exception as e:
-            logger.error(f"Errore nella sincronizzazione: {e}", exc_info=True)
-            sync_jobs[job_id]["status"] = "error"
-            sync_jobs[job_id]["error"] = str(e)
-            sync_jobs[job_id]["message"] = f"Errore: {str(e)}"
+            if "interrotta dall'utente" in str(e):
+                logger.info(f"Sincronizzazione cancellata dall'utente: {e}")
+                sync_jobs[job_id]["status"] = "cancelled"
+                sync_jobs[job_id]["message"] = "Sincronizzazione interrotta dall'utente"
+            else:
+                logger.error(f"Errore nella sincronizzazione: {e}", exc_info=True)
+                sync_jobs[job_id]["status"] = "error"
+                sync_jobs[job_id]["error"] = str(e)
+                sync_jobs[job_id]["message"] = f"Errore: {str(e)}"
 
     # Avvia il thread asincrono
     import threading
@@ -235,6 +245,27 @@ def sync_status():
     status = sync_jobs[job_id]
     logger.info(f"Status job {job_id}: {status}")
     return jsonify(status), 200
+
+@calendar_bp.route('/sync/cancel', methods=['POST'])
+@jwt_required()
+def cancel_sync_job():
+    """Cancella un job di sincronizzazione in corso."""
+    data = request.get_json()
+    job_id = data.get("job_id")
+    
+    if not job_id:
+        return jsonify({"error": "job_id è obbligatorio"}), 400
+    
+    if job_id not in sync_jobs:
+        return jsonify({"error": "Job non trovato"}), 404
+    
+    # Marca il job come cancellato
+    if sync_jobs[job_id]["status"] == "in_progress":
+        sync_jobs[job_id]["cancelled"] = True
+        logger.info(f"Job {job_id} marcato per cancellazione")
+        return jsonify({"message": "Job cancellato con successo"}), 200
+    else:
+        return jsonify({"error": "Il job non è in corso"}), 400
 
 @calendar_bp.route('/clear', methods=['POST'])
 @jwt_required()

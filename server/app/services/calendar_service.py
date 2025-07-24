@@ -314,7 +314,19 @@ class CalendarService:
     @staticmethod
     def sync_appointments_for_month(month, year, studio_calendar_ids, appointments, progress_callback=None):
         service = get_google_service()
-        sync_state = _load_sync_state()
+        full_sync_state = _load_sync_state()
+        
+        # FILTRA il sync_state per contenere SOLO eventi degli studi che stiamo sincronizzando
+        studios_being_synced = set(studio_calendar_ids.keys())
+        sync_state = {}
+        for app_id, sync_data in full_sync_state.items():
+            try:
+                studio_from_id = int(app_id.split('_')[2])
+                if studio_from_id in studios_being_synced:
+                    sync_state[app_id] = sync_data
+            except (IndexError, ValueError):
+                continue
+        
         now = datetime.now().isoformat()
         current_ids = set()
         nuovi_o_modificati = 0
@@ -338,7 +350,12 @@ class CalendarService:
             else:
                 CalendarService._create_and_save_event_with_retry(service, app, studio_calendar_ids, sync_state, app_id, app_hash, now)
                 nuovi_o_modificati += 1
-        to_delete = [app_id for app_id in sync_state if sync_state[app_id]['month']==month and sync_state[app_id]['year']==year and app_id not in current_ids]
+        # Ora sync_state contiene SOLO eventi dello studio selezionato
+        # Quindi possiamo cancellare semplicemente gli eventi che non sono più nel DB
+        to_delete = [app_id for app_id in sync_state 
+                    if sync_state[app_id]['month']==month 
+                    and sync_state[app_id]['year']==year 
+                    and app_id not in current_ids]
         deleted_count = 0
         if progress_callback:
             progress_callback(nuovi_o_modificati, len(appointments), f"Pulizia appuntamenti rimossi... ({deleted_count}/{len(to_delete)})")
@@ -352,7 +369,10 @@ class CalendarService:
             except Exception as e:
                 logger.warning(f"Errore cancellazione evento rimosso: {e}")
             del sync_state[app_id]
-        _save_sync_state(sync_state)
+        
+        # Ricombina il sync_state filtrato con quello completo per mantenere gli eventi degli altri studi
+        full_sync_state.update(sync_state)
+        _save_sync_state(full_sync_state)
         if progress_callback:
             progress_callback(nuovi_o_modificati, len(appointments), "Sincronizzazione completata")
         if nuovi_o_modificati == 0 and len(to_delete) == 0:

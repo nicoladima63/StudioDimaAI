@@ -67,7 +67,9 @@ const CalendarPage: React.FC = () => {
   const [syncProgress, setSyncProgress] = useState(0);
   const [syncSynced, setSyncSynced] = useState(0);
   const [syncTotal, setSyncTotal] = useState(0);
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'in_progress' | 'completed' | 'error'>('idle');
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'in_progress' | 'completed' | 'error' | 'cancelled'>('idle');
+  const [syncJobId, setSyncJobId] = useState<string | null>(null);
+  const [syncCancelling, setSyncCancelling] = useState(false);
   const syncPollingRef = React.useRef<number | null>(null);
 
   // Stati per il tipo di azione che ha causato il warning
@@ -210,6 +212,7 @@ const handleSync = async () => {
     }
     
     console.log('🔑 Job ID ricevuto:', job_id);
+    setSyncJobId(job_id);
     
     // Inizia il polling per monitorare il progresso
     const pollSyncStatus = async () => {
@@ -248,6 +251,12 @@ const handleSync = async () => {
           setSyncStatus('error');
           setSyncModalMessage(`Errore: ${error || 'Errore sconosciuto'}`);
           return;
+        } else if (status === 'cancelled') {
+          console.log('❌ Sincronizzazione cancellata');
+          setSyncStatus('cancelled');
+          setSyncModalMessage('Sincronizzazione interrotta dall\'utente');
+          setSyncCancelling(false);
+          return;
         }
         
         // Continua il polling solo se lo stato è ancora in_progress
@@ -272,6 +281,20 @@ const handleSync = async () => {
   }
 };
 
+  // Funzione per cancellare la sincronizzazione
+  const handleCancelSync = async () => {
+    if (!syncJobId) return;
+    
+    setSyncCancelling(true);
+    try {
+      await CalendarService.cancelSyncJob(syncJobId);
+      console.log('🛑 Richiesta di cancellazione inviata');
+    } catch (error) {
+      console.error('❌ Errore durante la cancellazione:', error);
+      setSyncCancelling(false);
+      setSyncModalMessage('Errore durante la cancellazione del job');
+    }
+  };
   
   // Funzione per cancellazione asincrona
   const handleClear = async () => {
@@ -337,13 +360,21 @@ const handleSync = async () => {
     };
   }, []);
 
-  // Reset stato cancellazione al cambio calendario
+  // Reset stato cancellazione e sincronizzazione al cambio calendario
   useEffect(() => {
     setClearStatus('idle');
     setClearProgress(0);
     setClearDeleted(0);
     setClearTotal(0);
     setClearError(null);
+    
+    // Reset anche degli stati di sincronizzazione
+    setSyncStatus('idle');
+    setSyncProgress(0);
+    setSyncSynced(0);
+    setSyncTotal(0);
+    setSyncJobId(null);
+    setSyncCancelling(false);
   }, [selectedCalendar]);
 
 
@@ -609,21 +640,25 @@ const handleSync = async () => {
       {/* Modal di sincronizzazione in corso */}
       <CModal
         visible={showSyncModal}
-        onClose={() => syncStatus === 'error' ? setShowSyncModal(false) : null}
-        backdrop={syncStatus === 'error' ? "static" : "static"}
+        onClose={() => (syncStatus === 'error' || syncStatus === 'cancelled') ? setShowSyncModal(false) : null}
+        backdrop="static"
       >
         <CModalHeader>
-          <h5>{syncStatus === 'error' ? 'Risultato Sincronizzazione' : 'Sincronizzazione in corso'}</h5>
+          <h5>
+            {syncStatus === 'error' ? 'Risultato Sincronizzazione' : 
+             syncStatus === 'cancelled' ? 'Sincronizzazione Interrotta' :
+             'Sincronizzazione in corso'}
+          </h5>
         </CModalHeader>
         <CModalBody>
-          <CAlert color={syncStatus === 'error' ? 'warning' : 'info'}>
-            {syncStatus !== 'error' && (
+          <CAlert color={syncStatus === 'error' ? 'warning' : syncStatus === 'cancelled' ? 'secondary' : 'info'}>
+            {syncStatus === 'in_progress' && (
               <div className="d-flex align-items-center">
                 <CSpinner size="sm" className="me-2" />
                 <span>{syncModalMessage}</span>
               </div>
             )}
-            {syncStatus === 'error' && (
+            {(syncStatus === 'error' || syncStatus === 'cancelled') && (
               <div>
                 <span>{syncModalMessage}</span>
               </div>
@@ -643,16 +678,32 @@ const handleSync = async () => {
             )}
           </CAlert>
         </CModalBody>
-        {syncStatus === 'error' && (
-          <CModalFooter>
+        <CModalFooter>
+          {syncStatus === 'in_progress' && (
+            <CButton
+              color="danger"
+              onClick={handleCancelSync}
+              disabled={syncCancelling}
+            >
+              {syncCancelling ? (
+                <>
+                  <CSpinner size="sm" className="me-2" />
+                  Interruzione...
+                </>
+              ) : (
+                'Interrompi'
+              )}
+            </CButton>
+          )}
+          {(syncStatus === 'error' || syncStatus === 'cancelled') && (
             <CButton
               color="primary"
               onClick={() => setShowSyncModal(false)}
             >
               Chiudi
             </CButton>
-          </CModalFooter>
-        )}
+          )}
+        </CModalFooter>
       </CModal>
 
       {/* Modal di ri-autenticazione Google */}

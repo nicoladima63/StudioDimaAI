@@ -77,6 +77,11 @@ export const CalendarService = {
     return response.data;
   },
 
+  async cancelSyncJob(jobId: string) {
+    const response = await apiClient.post('/api/calendar/sync/cancel', { job_id: jobId });
+    return response.data;
+  },
+
   // Metodi statistiche
   async getAppuntamentiStats() {
     const response = await apiClient.get('/api/calendar/stats/summary');
@@ -154,6 +159,7 @@ export const {
   clearCalendar,
   getClearStatus,
   getReauthUrl,
+  cancelSyncJob,
   getAppuntamentiStats,
   getPrimeVisiteStats,
   getAppuntamentiPerAnno,
