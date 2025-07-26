@@ -12,6 +12,9 @@ from server.app.core.template_manager import template_manager
 
 logger = logging.getLogger(__name__)
 
+# Cache per evitare messaggi ripetuti
+_api_key_warned_service = False
+
 # Carica le variabili d'ambiente dal file .env
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
 
@@ -32,7 +35,10 @@ class SMSService:
             
         api_key = self.params.get('API_KEY')
         if not api_key:
-            logger.error(f"API Key Brevo non trovata per modalità {self.mode}")
+            global _api_key_warned_service
+            if not _api_key_warned_service:
+                logger.error(f"API Key Brevo non trovata per modalità {self.mode}")
+                _api_key_warned_service = True
             self.api_instance = None
             return
             

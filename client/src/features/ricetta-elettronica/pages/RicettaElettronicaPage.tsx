@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import Card from '@/components/ui/Card';
-import RicettaElettronica from '../components/RicettaElettronica';
 import RicettaAvanzata from '../components/RicettaAvanzata';
 import RicettaAuthStatus from '../components/RicettaAuthStatus';
 import GestioneProtocolli from '../components/GestioneProtocolli';
-import { CButton, CButtonGroup, CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react';
+import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react';
 
 // Dati reali del medico
 const datiMedico = {
@@ -23,69 +22,43 @@ const datiMedico = {
 };
 
 const RicettaElettronicaPage: React.FC = () => {
-  const [modalitaAvanzata, setModalitaAvanzata] = useState(true);
   const [activeTab, setActiveTab] = useState('ricette');
 
   return (
     <div>
-      <RicettaAuthStatus />
-      
-      {/* Tabs principali */}
-      <Card>
-        <CNav variant="tabs" className="mb-3">
+      <Card 
+        title="Ricette Elettroniche"
+        headerAction={<RicettaAuthStatus />}
+      >
+        {/* Navigation Tabs */}
+        <CNav variant="tabs" role="tablist">
           <CNavItem>
-            <CNavLink 
+            <CNavLink
               active={activeTab === 'ricette'}
               onClick={() => setActiveTab('ricette')}
-              style={{ cursor: 'pointer' }}
+              role="tab"
             >
-              📋 Ricette Elettroniche
+              📋 Compilazione Ricette
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink 
+            <CNavLink
               active={activeTab === 'protocolli'}
               onClick={() => setActiveTab('protocolli')}
-              style={{ cursor: 'pointer' }}
+              role="tab"
             >
               ⚙️ Gestione Protocolli
             </CNavLink>
           </CNavItem>
         </CNav>
 
-        <CTabContent>
-          <CTabPane visible={activeTab === 'ricette'}>
-            {/* Switch modalità */}
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="mb-0">
-                {modalitaAvanzata ? '🤖 Modalità Protocolli Intelligenti' : '📝 Modalità Compilazione Libera'}
-              </h5>
-              <CButtonGroup role="group">
-                <CButton 
-                  color={modalitaAvanzata ? "primary" : "outline-primary"}
-                  onClick={() => setModalitaAvanzata(true)}
-                  size="sm"
-                >
-                  🤖 Avanzata
-                </CButton>
-                <CButton 
-                  color={!modalitaAvanzata ? "primary" : "outline-primary"}
-                  onClick={() => setModalitaAvanzata(false)}
-                  size="sm"
-                >
-                  📝 Libera
-                </CButton>
-              </CButtonGroup>
-            </div>
-            
-            {modalitaAvanzata ? (
-              <RicettaAvanzata datiMedico={datiMedico} />
-            ) : (
-              <RicettaElettronica datiMedico={datiMedico} />
-            )}
+        {/* Tab Content */}
+        <CTabContent className="mt-4">
+          <CTabPane visible={activeTab === 'ricette'} role="tabpanel">
+            <RicettaAvanzata datiMedico={datiMedico} />
           </CTabPane>
 
-          <CTabPane visible={activeTab === 'protocolli'}>
+          <CTabPane visible={activeTab === 'protocolli'} role="tabpanel">
             <GestioneProtocolli />
           </CTabPane>
         </CTabContent>

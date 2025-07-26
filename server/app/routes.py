@@ -23,8 +23,5 @@ def register_routes(app: Flask):
     ]
 
     for bp in blueprints:
-        if bp.name in app.blueprints:
-            app.logger.warning(f"Blueprint già registrato: {bp.name}")
-        else:
+        if bp.name not in app.blueprints:
             app.register_blueprint(bp)
-            app.logger.info(f"Blueprint registrato: {bp.name}")

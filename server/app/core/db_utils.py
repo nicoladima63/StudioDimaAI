@@ -7,6 +7,9 @@ from server.app.core.mode_manager import get_mode  # ← se usi il sistema "get_
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Cache per evitare messaggi ripetuti
+_fallback_warned = False
+
 def get_dbf_path(table_name: str) -> str:
     """
     Costruisce il percorso completo per un file DBF in base alla modalità corrente e alla configurazione.
@@ -20,8 +23,19 @@ def get_dbf_path(table_name: str) -> str:
     if mode == 'prod':
         base_path = r'\\SERVERDIMA\Pixel\WINDENT'
         final_path = os.path.join(base_path, table_info['categoria'], table_info['file'])
+        
+        # Rilevamento automatico ambiente: se rete studio non disponibile, usa dev
         if not os.path.exists(final_path):
-            raise FileNotFoundError(f"File non trovato: '{final_path}'. Verifica la connessione alla rete dello studio.")
+            global _fallback_warned
+            if not _fallback_warned:
+                print(f"⚠️  Rete studio non disponibile, fallback automatico a modalità DEV")
+                _fallback_warned = True
+            # Fallback automatico a dev
+            base_path = os.path.join(BACKEND_DIR, 'windent')
+            final_path = os.path.join(base_path, table_info['categoria'], table_info['file'])
+            if not os.path.exists(final_path):
+                raise FileNotFoundError(f"File non trovato anche in ambiente DEV: '{final_path}'")
+        
         return final_path
 
     else:

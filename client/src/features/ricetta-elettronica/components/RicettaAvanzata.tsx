@@ -236,29 +236,6 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
 
   return (
     <CRow>
-      {/* Controlli modalità */}
-      <CCol md={12}>
-        <CAlert color="info" className="mb-3">
-          <div className="d-flex justify-content-between align-items-center">
-            <span>
-              <strong>🏥 Ricetta Elettronica Avanzata</strong> - 
-              Modalità {autoMode ? 'Automatica' : 'Manuale'}
-            </span>
-            <CButton 
-              color={autoMode ? "success" : "secondary"}
-              size="sm"
-              onClick={() => setAutoMode(!autoMode)}
-            >
-              {autoMode ? "🤖 Auto" : "✋ Manuale"}
-            </CButton>
-          </div>
-          {autoMode && (
-            <small className="d-block mt-1">
-              Seleziona diagnosi → farmaci e posologie si popoleranno automaticamente
-            </small>
-          )}
-        </CAlert>
-      </CCol>
 
       {/* Selezione paziente */}
       <CCol md={4}>

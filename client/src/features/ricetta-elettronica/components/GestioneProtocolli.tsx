@@ -77,9 +77,30 @@ const GestioneProtocolli: React.FC = () => {
     setLoading(true);
     try {
       const data = await getProtocolliCompleti();
+      console.log('Protocolli caricati:', data); // Debug
+      
+      // Validazione dati
+      if (!data || typeof data !== 'object') {
+        throw new Error('Dati protocolli non validi');
+      }
+      
+      if (!data.diagnosi) {
+        console.warn('Nessuna diagnosi trovata, inizializzo oggetto vuoto');
+        data.diagnosi = {};
+      }
+      
+      if (!data.durate_standard) {
+        data.durate_standard = [];
+      }
+      
+      if (!data.note_frequenti) {
+        data.note_frequenti = [];
+      }
+      
       setProtocolli(data);
     } catch (error) {
       console.error('Errore caricamento protocolli:', error);
+      setProtocolli(null);
     } finally {
       setLoading(false);
     }
@@ -286,33 +307,41 @@ const GestioneProtocolli: React.FC = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {Object.values(protocolli.diagnosi).map((diagnosi) => (
-                    <CTableRow key={diagnosi.id}>
-                      <CTableDataCell><code>{diagnosi.id}</code></CTableDataCell>
-                      <CTableDataCell><strong>{diagnosi.codice}</strong></CTableDataCell>
-                      <CTableDataCell>{diagnosi.descrizione}</CTableDataCell>
-                      <CTableDataCell>
-                        <CBadge color="info">{diagnosi.farmaci.length} farmaci</CBadge>
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <CButton 
-                          color="warning" 
-                          size="sm" 
-                          className="me-2"
-                          onClick={() => handleEditDiagnosi(diagnosi)}
-                        >
-                          ✏️ Modifica
-                        </CButton>
-                        <CButton 
-                          color="danger" 
-                          size="sm"
-                          onClick={() => handleDeleteDiagnosi(diagnosi.id)}
-                        >
-                          🗑️ Elimina
-                        </CButton>
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
+                  {protocolli?.diagnosi && Object.values(protocolli.diagnosi).length > 0 ? 
+                    Object.values(protocolli.diagnosi).map((diagnosi) => (
+                      <CTableRow key={diagnosi.id}>
+                        <CTableDataCell><code>{diagnosi.id}</code></CTableDataCell>
+                        <CTableDataCell><strong>{diagnosi.codice}</strong></CTableDataCell>
+                        <CTableDataCell>{diagnosi.descrizione}</CTableDataCell>
+                        <CTableDataCell>
+                          <CBadge color="info">{diagnosi.farmaci?.length || 0} farmaci</CBadge>
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <CButton 
+                            color="warning" 
+                            size="sm" 
+                            className="me-2"
+                            onClick={() => handleEditDiagnosi(diagnosi)}
+                          >
+                            ✏️ Modifica
+                          </CButton>
+                          <CButton 
+                            color="danger" 
+                            size="sm"
+                            onClick={() => handleDeleteDiagnosi(diagnosi.id)}
+                          >
+                            🗑️ Elimina
+                          </CButton>
+                        </CTableDataCell>
+                      </CTableRow>
+                    )) : (
+                      <CTableRow>
+                        <CTableDataCell colSpan={5} className="text-center text-muted">
+                          Nessuna diagnosi disponibile
+                        </CTableDataCell>
+                      </CTableRow>
+                    )
+                  }
                 </CTableBody>
               </CTable>
             </CCardBody>
@@ -329,22 +358,28 @@ const GestioneProtocolli: React.FC = () => {
                 </CCardHeader>
                 <CCardBody>
                   <CListGroup>
-                    {Object.values(protocolli.diagnosi).map((diagnosi) => (
-                      <CListGroupItem
-                        key={diagnosi.id}
-                        active={selectedDiagnosi === diagnosi.id}
-                        onClick={() => setSelectedDiagnosi(diagnosi.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <strong>{diagnosi.codice}</strong>
-                        <br />
-                        <small>{diagnosi.descrizione}</small>
-                        <br />
-                        <CBadge color="secondary" className="mt-1">
-                          {diagnosi.farmaci.length} farmaci
-                        </CBadge>
-                      </CListGroupItem>
-                    ))}
+                    {protocolli?.diagnosi && Object.values(protocolli.diagnosi).length > 0 ? 
+                      Object.values(protocolli.diagnosi).map((diagnosi) => (
+                        <CListGroupItem
+                          key={diagnosi.id}
+                          active={selectedDiagnosi === diagnosi.id}
+                          onClick={() => setSelectedDiagnosi(diagnosi.id)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <strong>{diagnosi.codice}</strong>
+                          <br />
+                          <small>{diagnosi.descrizione}</small>
+                          <br />
+                          <CBadge color="secondary" className="mt-1">
+                            {diagnosi.farmaci?.length || 0} farmaci
+                          </CBadge>
+                        </CListGroupItem>
+                      )) : (
+                        <CListGroupItem>
+                          <em className="text-muted">Nessuna diagnosi disponibile</em>
+                        </CListGroupItem>
+                      )
+                    }
                   </CListGroup>
                 </CCardBody>
               </CCard>
@@ -432,9 +467,15 @@ const GestioneProtocolli: React.FC = () => {
                 </CCardHeader>
                 <CCardBody>
                   <CListGroup>
-                    {protocolli.durate_standard.map((durata, index) => (
-                      <CListGroupItem key={index}>{durata}</CListGroupItem>
-                    ))}
+                    {protocolli?.durate_standard?.length > 0 ? 
+                      protocolli.durate_standard.map((durata, index) => (
+                        <CListGroupItem key={index}>{durata}</CListGroupItem>
+                      )) : (
+                        <CListGroupItem>
+                          <em className="text-muted">Nessuna durata configurata</em>
+                        </CListGroupItem>
+                      )
+                    }
                   </CListGroup>
                 </CCardBody>
               </CCard>
@@ -447,9 +488,15 @@ const GestioneProtocolli: React.FC = () => {
                 </CCardHeader>
                 <CCardBody>
                   <CListGroup>
-                    {protocolli.note_frequenti.map((nota, index) => (
-                      <CListGroupItem key={index}>{nota}</CListGroupItem>
-                    ))}
+                    {protocolli?.note_frequenti?.length > 0 ? 
+                      protocolli.note_frequenti.map((nota, index) => (
+                        <CListGroupItem key={index}>{nota}</CListGroupItem>
+                      )) : (
+                        <CListGroupItem>
+                          <em className="text-muted">Nessuna nota configurata</em>
+                        </CListGroupItem>
+                      )
+                    }
                   </CListGroup>
                 </CCardBody>
               </CCard>
