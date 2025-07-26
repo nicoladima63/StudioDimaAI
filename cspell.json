@@ -1,0 +1,87 @@
+{
+    "version": "0.2",
+    "language": "en,it",
+    "words": [
+        "Agliana",
+        "anni",
+        "asl",
+        "Autenticazione",
+        "brevo",
+        "Calendario",
+        "CAP",
+        "cf",
+        "diagnosi",
+        "DMRNCL",
+        "farmaci",
+        "Fatture",
+        "Firenze",
+        "formattati",
+        "Incassi",
+        "iscrizione",
+        "jsonify",
+        "mesi",
+        "odontoiatria",
+        "Pazienti",
+        "periodo",
+        "Prescrizione",
+        "PT",
+        "Ricetta",
+        "Richiami",
+        "richiamo",
+        "telefono",
+        "tipo",
+        "totale",
+        "Trovati",
+        "visita",
+        "visite"
+    ],
+    "ignorePaths": [
+        "node_modules",
+        "dist",
+        "build",
+        "coverage",
+        "**/*.min.*",
+        "**/*.map"
+    ],
+    "dictionaries": [
+        "it-it"
+    ],
+    "dictionaryDefinitions": [
+        {
+            "name": "it-it",
+            "path": "./node_modules/@cspell/dict-it-it/dict/it-it.trie"
+        }
+    ],
+    "languageSettings": [
+        {
+            "languageId": "typescript",
+            "dictionaries": [
+                "it-it"
+            ]
+        },
+        {
+            "languageId": "typescriptreact",
+            "dictionaries": [
+                "it-it"
+            ]
+        },
+        {
+            "languageId": "javascript",
+            "dictionaries": [
+                "it-it"
+            ]
+        },
+        {
+            "languageId": "markdown",
+            "dictionaries": [
+                "it-it"
+            ]
+        },
+        {
+            "languageId": "plaintext",
+            "dictionaries": [
+                "it-it"
+            ]
+        }
+    ]
+}

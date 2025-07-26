@@ -1,0 +1,116 @@
+{
+  "farmaci_sicuri": {
+    "paracetamolo": [
+      {
+        "codice_aic": "027864015",
+        "nome_commerciale": "TACHIPIRINA*20CPR 500MG",
+        "principio_attivo": "PARACETAMOLO",
+        "dosaggio": "500 mg",
+        "forma": "compresse",
+        "classe": "C",
+        "ricetta": "non richiesta",
+        "codice_atc": "N02BE01"
+      },
+      {
+        "codice_aic": "027864027",
+        "nome_commerciale": "TACHIPIRINA*10SUPP 500MG",
+        "principio_attivo": "PARACETAMOLO", 
+        "dosaggio": "500 mg",
+        "forma": "supposte",
+        "classe": "C",
+        "ricetta": "non richiesta",
+        "codice_atc": "N02BE01"
+      }
+    ],
+    "ibuprofene": [
+      {
+        "codice_aic": "034742188",
+        "nome_commerciale": "BRUFEN*20CPR RIV 600MG",
+        "principio_attivo": "IBUPROFENE",
+        "dosaggio": "600 mg", 
+        "forma": "compresse",
+        "classe": "C",
+        "ricetta": "non richiesta",
+        "codice_atc": "M01AE01"
+      },
+      {
+        "codice_aic": "019822024",
+        "nome_commerciale": "OKI*20BUST 80MG GRAT",
+        "principio_attivo": "KETOPROFENE",
+        "dosaggio": "80 mg",
+        "forma": "bustine",
+        "classe": "C", 
+        "ricetta": "non richiesta",
+        "codice_atc": "M01AE03"
+      }
+    ],
+    "amoxicillina": [
+      {
+        "codice_aic": "024570169",
+        "nome_commerciale": "ZIMOX*12CPS 500MG",
+        "principio_attivo": "AMOXICILLINA",
+        "dosaggio": "500 mg",
+        "forma": "capsule",
+        "classe": "A", 
+        "ricetta": "ripetibile",
+        "codice_atc": "J01CA04"
+      },
+      {
+        "codice_aic": "024570256",
+        "nome_commerciale": "ZIMOX*SOSP 250MG/5ML FL",
+        "principio_attivo": "AMOXICILLINA",
+        "dosaggio": "250 mg/5ml",
+        "forma": "sospensione",
+        "classe": "A",
+        "ricetta": "ripetibile", 
+        "codice_atc": "J01CA04"
+      }
+    ],
+    "amoxicillina_clavulanico": [
+      {
+        "codice_aic": "027028017",
+        "nome_commerciale": "AUGMENTIN*12CPR RIV 875MG+125MG",
+        "principio_attivo": "AMOXICILLINA + ACIDO CLAVULANICO",
+        "dosaggio": "875+125 mg",
+        "forma": "compresse",
+        "classe": "A",
+        "ricetta": "ripetibile",
+        "codice_atc": "J01CR02"
+      }
+    ],
+    "claritromicina": [
+      {
+        "codice_aic": "027756067", 
+        "nome_commerciale": "KLACID*14CPR RIV 250MG",
+        "principio_attivo": "CLARITROMICINA",
+        "dosaggio": "250 mg",
+        "forma": "compresse",
+        "classe": "A",
+        "ricetta": "ripetibile",
+        "codice_atc": "J01FA09"
+      }
+    ]
+  },
+  "diagnosi_odontoiatriche_icd10": {
+    "K02.9": {
+      "descrizione": "Carie dentaria, non specificata",
+      "farmaci_appropriati": ["paracetamolo", "ibuprofene"]
+    },
+    "K04.7": {
+      "descrizione": "Ascesso periapicale senza fistola",
+      "farmaci_appropriati": ["amoxicillina", "amoxicillina_clavulanico", "claritromicina", "paracetamolo"]
+    },
+    "K05.0": {
+      "descrizione": "Gengivite acuta",
+      "farmaci_appropriati": ["amoxicillina", "paracetamolo", "ibuprofene"]
+    },
+    "K08.3": {
+      "descrizione": "Radice dentaria trattenuta",
+      "farmaci_appropriati": ["amoxicillina_clavulanico", "paracetamolo", "ibuprofene"]
+    },
+    "Z01.2": {
+      "descrizione": "Esame dentario",
+      "farmaci_appropriati": ["paracetamolo"]
+    }
+  }
+}

@@ -32,6 +32,8 @@ interface DatiMedico {
   cap: string;
   citta: string;
   provincia: string;
+  asl: string;
+  cfMedico: string;
 }
 
 // Utility per localStorage suggerimenti
@@ -127,7 +129,18 @@ export default function RicettaElettronica({ datiMedico }: { datiMedico: DatiMed
       return;
     }
     const payload = {
-      medico: datiMedico,
+      medico: {
+        cfMedico: datiMedico.cfMedico,
+        regione: datiMedico.regione,
+        asl: datiMedico.asl,
+        specializzazione: datiMedico.specializzazione,
+        iscrizione: datiMedico.iscrizione,
+        indirizzo: datiMedico.indirizzo,
+        telefono: datiMedico.telefono,
+        cap: datiMedico.cap,
+        citta: datiMedico.citta,
+        provincia: datiMedico.provincia
+      },
       paziente: {
         id: pazienteSelezionato.DB_CODE,
         nome: pazienteSelezionato.DB_PANOME,
@@ -175,11 +188,11 @@ export default function RicettaElettronica({ datiMedico }: { datiMedico: DatiMed
             
             {/* Autocomplete paziente */}
             <AutoComplete<PazienteCompleto>
-              value={pazienteSelezionato ? pazienteSelezionato.nome_completo : search}
+              value={pazienteSelezionato ? pazienteSelezionato.DB_PANOME : search}
               onChange={setSearch}
               onSelect={(p: PazienteCompleto) => {
                 setPazienteSelezionato(p);
-                setSearch(p.nome_completo);
+                setSearch(p.DB_PANOME);
               }}
               fetchSuggestions={fetchPazienti}
               getOptionLabel={(p: PazienteCompleto) => `${p.DB_PANOME} (${p.DB_PACODFI})`}
@@ -431,7 +444,7 @@ export default function RicettaElettronica({ datiMedico }: { datiMedico: DatiMed
         </CModalHeader>
         <CModalBody>
           <div><b>Medico:</b> {datiMedico.specializzazione} ({datiMedico.regioneOrdine})</div>
-          <div><b>Paziente:</b> {pazienteSelezionato?.nome_completo || pazienteSelezionato?.nome} - {pazienteSelezionato?.codiceFiscale || pazienteSelezionato?.DB_PACODFI}</div>
+          <div><b>Paziente:</b> {pazienteSelezionato?.DB_PANOME} - {pazienteSelezionato?.DB_PACODFI}</div>
           <div><b>Diagnosi:</b> {diagnosiSelezionata ? `${diagnosiSelezionata.codice} - ${diagnosiSelezionata.descrizione}` : '-'}</div>
           <div><b>Farmaco:</b> {farmacoSelezionato ? `${farmacoSelezionato.principio_attivo} - ${farmacoSelezionato.descrizione}` : '-'}</div>
           <div><b>Posologia:</b> {posologia}</div>

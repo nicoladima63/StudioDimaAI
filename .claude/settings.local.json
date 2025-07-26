@@ -10,7 +10,11 @@
       "Bash(git checkout:*)",
       "Bash(ls:*)",
       "Bash(mv:*)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(find:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run dev:*)",
+      "Bash(venvScripts:*)"
     ],
     "deny": []
   }
