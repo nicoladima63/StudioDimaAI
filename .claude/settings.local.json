@@ -14,7 +14,8 @@
       "Bash(find:*)",
       "mcp__ide__getDiagnostics",
       "Bash(npm run dev:*)",
-      "Bash(venvScripts:*)"
+      "Bash(venvScripts:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

@@ -27,7 +27,7 @@ const RicettaElettronicaPage: React.FC = () => {
   return (
     <div>
       <Card 
-        title="Ricette Elettroniche"
+        title="Ricette"
         headerAction={<RicettaAuthStatus />}
       >
         {/* Navigation Tabs */}
@@ -38,7 +38,7 @@ const RicettaElettronicaPage: React.FC = () => {
               onClick={() => setActiveTab('ricette')}
               role="tab"
             >
-              📋 Compilazione Ricette
+              📋 Compilazione Ricetta
             </CNavLink>
           </CNavItem>
           <CNavItem>

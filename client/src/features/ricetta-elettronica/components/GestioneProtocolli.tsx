@@ -1,109 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CRow, CCol, CCard, CCardBody, CCardHeader, CButton, CForm, CFormInput,
+  CRow, CCol, CCard, CCardBody, CButton, CForm, CFormInput,
   CFormLabel, CFormTextarea, CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell, CBadge, CModal, CModalHeader, CModalBody,
-  CModalFooter, CAlert, CSpinner, CFormSelect, CListGroup, CListGroupItem,
-  CNav, CNavItem, CNavLink, CTabContent, CTabPane
+  CModalFooter, CAlert, CSpinner, CFormSelect
 } from '@coreui/react';
 import { 
-  getProtocolliCompleti, createDiagnosi, updateDiagnosi, deleteDiagnosi,
-  createFarmaco, updateFarmaco, deleteFarmaco
-} from '@/api/services/ricette.service';
-
-interface PosologiaAlternativa {
-  posologia: string;
-  durata: string;
-  note: string;
-}
-
-interface FarmacoProtocollo {
-  codice: string;
-  nome: string;
-  principio_attivo: string;
-  classe: string;
-  posologia_default: string;
-  durata_default: string;
-  note_default: string;
-  posologie_alternative: PosologiaAlternativa[];
-}
-
-interface Diagnosi {
-  id: string;
-  codice: string;
-  descrizione: string;
-  farmaci: FarmacoProtocollo[];
-}
-
-interface ProtocolliData {
-  diagnosi: { [key: string]: Diagnosi };
-  durate_standard: string[];
-  note_frequenti: string[];
-}
+  protocolliService,
+  type Diagnosi,
+  type Farmaco,
+  type ProtocolloTerapeutico
+} from '@/api/services/protocolli.service';
 
 const GestioneProtocolli: React.FC = () => {
-  const [protocolli, setProtocolli] = useState<ProtocolliData | null>(null);
+  // State per dati
+  const [diagnosi, setDiagnosi] = useState<Diagnosi[]>([]);
+  const [farmaci, setFarmaci] = useState<Farmaco[]>([]);
+  const [categorieFarmaci, setCategorieFarmaci] = useState<string[]>([]);
+  const [protocolli, setProtocolli] = useState<ProtocolloTerapeutico[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('diagnosi');
+  const [selectedDiagnosi, setSelectedDiagnosi] = useState<Diagnosi | null>(null);
+
+  // State per modali
   const [showModalDiagnosi, setShowModalDiagnosi] = useState(false);
-  const [showModalFarmaco, setShowModalFarmaco] = useState(false);
-  const [showModalAssociazione, setShowModalAssociazione] = useState(false);
-  const [selectedDiagnosi, setSelectedDiagnosi] = useState<string>('');
+  const [showModalDuplica, setShowModalDuplica] = useState(false);
+  const [showModalProtocollo, setShowModalProtocollo] = useState(false);
+  
+  // State per editing
   const [editingDiagnosi, setEditingDiagnosi] = useState<Diagnosi | null>(null);
-  const [editingFarmaco, setEditingFarmaco] = useState<FarmacoProtocollo | null>(null);
+  const [editingProtocollo, setEditingProtocollo] = useState<ProtocolloTerapeutico | null>(null);
 
   // Form states
   const [formDiagnosi, setFormDiagnosi] = useState({
-    id: '',
     codice: '',
-    descrizione: ''
+    descrizione: '',
+    categoria: ''
   });
 
-  const [formFarmaco, setFormFarmaco] = useState({
-    codice: '',
-    nome: '',
-    principio_attivo: '',
-    classe: '',
-    posologia_default: '',
-    durata_default: '',
-    note_default: ''
+  const [formDuplica, setFormDuplica] = useState({
+    new_codice: '',
+    new_descrizione: '',
+    new_categoria: ''
   });
+
+  const [formProtocollo, setFormProtocollo] = useState({
+    farmacoId: 0,
+    posologia_custom: '',
+    durata_custom: '',
+    note_custom: ''
+  });
+
+  const [filtroCategoria, setFiltroCategoria] = useState<string>('');
 
   useEffect(() => {
-    loadProtocolli();
+    loadData();
   }, []);
 
-  const loadProtocolli = async () => {
+  useEffect(() => {
+    if (selectedDiagnosi) {
+      loadProtocolli();
+    }
+  }, [selectedDiagnosi]);
+
+  useEffect(() => {
+    if (filtroCategoria) {
+      loadFarmaci();
+    }
+  }, [filtroCategoria]);
+
+  const loadData = async () => {
     setLoading(true);
     try {
-      const data = await getProtocolliCompleti();
-      console.log('Protocolli caricati:', data); // Debug
-      
-      // Validazione dati
-      if (!data || typeof data !== 'object') {
-        throw new Error('Dati protocolli non validi');
-      }
-      
-      if (!data.diagnosi) {
-        console.warn('Nessuna diagnosi trovata, inizializzo oggetto vuoto');
-        data.diagnosi = {};
-      }
-      
-      if (!data.durate_standard) {
-        data.durate_standard = [];
-      }
-      
-      if (!data.note_frequenti) {
-        data.note_frequenti = [];
-      }
-      
-      setProtocolli(data);
+      const [diagnosiData, farmaciData, categorieData] = await Promise.all([
+        protocolliService.getDiagnosi(),
+        protocolliService.getFarmaci(),
+        protocolliService.getCategorieFarmaci()
+      ]);
+      setDiagnosi(diagnosiData);
+      setFarmaci(farmaciData);
+      setCategorieFarmaci(categorieData);
     } catch (error) {
-      console.error('Errore caricamento protocolli:', error);
-      setProtocolli(null);
+      console.error('Errore caricamento dati:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadProtocolli = async () => {
+    if (!selectedDiagnosi) return;
+    
+    try {
+      const protocolliData = await protocolliService.getProtocolliPerDiagnosi(selectedDiagnosi.id);
+      setProtocolli(protocolliData);
+    } catch (error) {
+      console.error('Errore caricamento protocolli:', error);
+    }
+  };
+
+  const loadFarmaci = async () => {
+    try {
+      const farmaciData = await protocolliService.getFarmaci(filtroCategoria || undefined);
+      setFarmaci(farmaciData);
+    } catch (error) {
+      console.error('Errore caricamento farmaci:', error);
+    }
+  };
+
+  // Handlers per Diagnosi
+  const handleCreateDiagnosi = () => {
+    setEditingDiagnosi(null);
+    setFormDiagnosi({ id: '', codice: '', descrizione: '' });
+    setShowModalDiagnosi(true);
   };
 
   const handleEditDiagnosi = (diagnosi: Diagnosi) => {
@@ -116,107 +123,116 @@ const GestioneProtocolli: React.FC = () => {
     setShowModalDiagnosi(true);
   };
 
-  const handleEditFarmaco = (farmaco: FarmacoProtocollo, diagnosiId: string) => {
-    setEditingFarmaco(farmaco);
-    setSelectedDiagnosi(diagnosiId);
-    setFormFarmaco({
-      codice: farmaco.codice,
-      nome: farmaco.nome,
-      principio_attivo: farmaco.principio_attivo,
-      classe: farmaco.classe,
-      posologia_default: farmaco.posologia_default,
-      durata_default: farmaco.durata_default,
-      note_default: farmaco.note_default
-    });
-    setShowModalFarmaco(true);
-  };
-
   const handleSaveDiagnosi = async () => {
-    if (!protocolli) return;
-    
     try {
       if (editingDiagnosi) {
-        // Modifica esistente
-        await updateDiagnosi(formDiagnosi.id, {
+        await protocolliService.updateDiagnosi(editingDiagnosi.id, {
           codice: formDiagnosi.codice,
           descrizione: formDiagnosi.descrizione
         });
       } else {
-        // Nuova diagnosi
-        await createDiagnosi({
-          id: formDiagnosi.id,
-          codice: formDiagnosi.codice,
-          descrizione: formDiagnosi.descrizione
-        });
+        await protocolliService.createDiagnosi(formDiagnosi);
       }
       
-      // Ricarica i dati
-      await loadProtocolli();
+      await loadData();
       setShowModalDiagnosi(false);
-      resetFormDiagnosi();
     } catch (error) {
       console.error('Errore salvataggio diagnosi:', error);
-      alert('Errore durante il salvataggio della diagnosi');
+      alert('Errore durante il salvataggio');
     }
   };
 
-  const handleSaveFarmaco = async () => {
-    if (!protocolli || !selectedDiagnosi) return;
+  const handleDuplicaDiagnosi = (diagnosi: Diagnosi) => {
+    setEditingDiagnosi(diagnosi);
+    setFormDuplica({
+      new_id: `${diagnosi.id}_copy`,
+      new_codice: `${diagnosi.codice}_copy`,
+      new_descrizione: `${diagnosi.descrizione} (Copia)`
+    });
+    setShowModalDuplica(true);
+  };
+
+  const handleSaveDuplica = async () => {
+    if (!editingDiagnosi) return;
     
     try {
-      if (editingFarmaco) {
-        // Modifica esistente
-        await updateFarmaco(selectedDiagnosi, editingFarmaco.codice, formFarmaco);
-      } else {
-        // Nuovo farmaco
-        await createFarmaco(selectedDiagnosi, formFarmaco);
-      }
-      
-      // Ricarica i dati
-      await loadProtocolli();
-      setShowModalFarmaco(false);
-      resetFormFarmaco();
+      await protocolliService.duplicateDiagnosi(editingDiagnosi.id, formDuplica);
+      await loadData();
+      setShowModalDuplica(false);
     } catch (error) {
-      console.error('Errore salvataggio farmaco:', error);
-      alert('Errore durante il salvataggio del farmaco');
+      console.error('Errore duplicazione diagnosi:', error);
+      alert('Errore durante la duplicazione');
     }
   };
 
-  const handleDeleteDiagnosi = async (diagnosiId: string) => {
-    if (!protocolli || !confirm('Sei sicuro di voler eliminare questa diagnosi?')) return;
+  const handleDeleteDiagnosi = async (diagnosi: Diagnosi) => {
+    if (!confirm(`Eliminare la diagnosi "${diagnosi.codice}"? Verranno eliminate anche tutte le associazioni farmaci.`)) {
+      return;
+    }
     
     try {
-      await deleteDiagnosi(diagnosiId);
-      await loadProtocolli();
+      await protocolliService.deleteDiagnosi(diagnosi.id);
+      await loadData();
+      if (selectedDiagnosi?.id === diagnosi.id) {
+        setSelectedDiagnosi(null);
+        setFarmaciAssociati([]);
+      }
     } catch (error) {
       console.error('Errore eliminazione diagnosi:', error);
-      alert('Errore durante l\'eliminazione della diagnosi');
+      alert('Errore durante l\'eliminazione');
     }
   };
 
-  const handleDeleteFarmaco = async (diagnosiId: string, farmacoId: string) => {
-    if (!protocolli || !confirm('Sei sicuro di voler eliminare questo farmaco?')) return;
+  // Handlers per Associazioni Farmaci
+  const handleAddAssociazione = () => {
+    setEditingAssociazione(null);
+    setFormAssociazione({ farmaco_codice: '', posologia: '', durata: '', note: '' });
+    setShowModalAssociazione(true);
+  };
+
+  const handleEditAssociazione = (associazione: FarmacoAssociato) => {
+    setEditingAssociazione(associazione);
+    setFormAssociazione({
+      farmaco_codice: associazione.farmaco_codice,
+      posologia: associazione.posologia,
+      durata: associazione.durata,
+      note: associazione.note
+    });
+    setShowModalAssociazione(true);
+  };
+
+  const handleSaveAssociazione = async () => {
+    if (!selectedDiagnosi) return;
     
     try {
-      await deleteFarmaco(diagnosiId, farmacoId);
-      await loadProtocolli();
+      if (editingAssociazione) {
+        await protocolliService.updateFarmacoAssociazione(editingAssociazione.id, {
+          posologia: formAssociazione.posologia,
+          durata: formAssociazione.durata,
+          note: formAssociazione.note
+        });
+      } else {
+        await protocolliService.addFarmacoToDiagnosi(selectedDiagnosi.id, formAssociazione);
+      }
+      
+      await loadFarmaciAssociati();
+      setShowModalAssociazione(false);
     } catch (error) {
-      console.error('Errore eliminazione farmaco:', error);
-      alert('Errore durante l\'eliminazione del farmaco');
+      console.error('Errore salvataggio associazione:', error);
+      alert('Errore durante il salvataggio');
     }
   };
 
-  const resetFormDiagnosi = () => {
-    setFormDiagnosi({ id: '', codice: '', descrizione: '' });
-    setEditingDiagnosi(null);
-  };
-
-  const resetFormFarmaco = () => {
-    setFormFarmaco({
-      codice: '', nome: '', principio_attivo: '', classe: '',
-      posologia_default: '', durata_default: '', note_default: ''
-    });
-    setEditingFarmaco(null);
+  const handleDeleteAssociazione = async (associazione: FarmacoAssociato) => {
+    if (!confirm('Eliminare questa associazione farmaco?')) return;
+    
+    try {
+      await protocolliService.deleteFarmacoAssociazione(associazione.id);
+      await loadFarmaciAssociati();
+    } catch (error) {
+      console.error('Errore eliminazione associazione:', error);
+      alert('Errore durante l\'eliminazione');
+    }
   };
 
   if (loading) {
@@ -228,78 +244,27 @@ const GestioneProtocolli: React.FC = () => {
     );
   }
 
-  if (!protocolli) {
-    return (
-      <CAlert color="danger">
-        Errore nel caricamento dei protocolli terapeutici.
-      </CAlert>
-    );
-  }
-
   return (
     <div>
-      <CRow className="mb-3">
-        <CCol>
-          <h4>⚙️ Gestione Protocolli Terapeutici</h4>
-          <p className="text-muted">
-            Gestisci diagnosi, farmaci e le loro associazioni per l'auto-completamento delle ricette.
-          </p>
-        </CCol>
-      </CRow>
-
-      {/* Tabs secondarie */}
-      <CNav variant="pills" className="mb-3">
-        <CNavItem>
-          <CNavLink 
-            active={activeTab === 'diagnosi'}
-            onClick={() => setActiveTab('diagnosi')}
-            style={{ cursor: 'pointer' }}
-          >
-            🩺 Diagnosi
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink 
-            active={activeTab === 'farmaci'}
-            onClick={() => setActiveTab('farmaci')}
-            style={{ cursor: 'pointer' }}
-          >
-            💊 Farmaci per Diagnosi
-          </CNavLink>
-        </CNavItem>
-        <CNavItem>
-          <CNavLink 
-            active={activeTab === 'durate'}
-            onClick={() => setActiveTab('durate')}
-            style={{ cursor: 'pointer' }}
-          >
-            📅 Durate & Note
-          </CNavLink>
-        </CNavItem>
-      </CNav>
-
-      <CTabContent>
-        {/* Tab Diagnosi */}
-        <CTabPane visible={activeTab === 'diagnosi'}>
-          <CCard>
-            <CCardHeader className="d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">🩺 Gestione Diagnosi</h5>
-              <CButton 
-                color="primary" 
-                size="sm"
-                onClick={() => {
-                  resetFormDiagnosi();
-                  setShowModalDiagnosi(true);
-                }}
-              >
-                ➕ Nuova Diagnosi
-              </CButton>
-            </CCardHeader>
+      <CRow className="mb-4">
+        {/* Lista Diagnosi */}
+        <CCol md={6}>
+          <CCard className="h-100">
             <CCardBody>
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h6 className="mb-0 fw-semibold">🩺 Diagnosi Disponibili</h6>
+                <CButton 
+                  color="primary" 
+                  size="sm"
+                  onClick={handleCreateDiagnosi}
+                >
+                  ➕ Nuova
+                </CButton>
+              </div>
+              
               <CTable hover responsive>
                 <CTableHead>
                   <CTableRow>
-                    <CTableHeaderCell>ID</CTableHeaderCell>
                     <CTableHeaderCell>Codice</CTableHeaderCell>
                     <CTableHeaderCell>Descrizione</CTableHeaderCell>
                     <CTableHeaderCell>Farmaci</CTableHeaderCell>
@@ -307,203 +272,161 @@ const GestioneProtocolli: React.FC = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {protocolli?.diagnosi && Object.values(protocolli.diagnosi).length > 0 ? 
-                    Object.values(protocolli.diagnosi).map((diagnosi) => (
-                      <CTableRow key={diagnosi.id}>
-                        <CTableDataCell><code>{diagnosi.id}</code></CTableDataCell>
-                        <CTableDataCell><strong>{diagnosi.codice}</strong></CTableDataCell>
-                        <CTableDataCell>{diagnosi.descrizione}</CTableDataCell>
-                        <CTableDataCell>
-                          <CBadge color="info">{diagnosi.farmaci?.length || 0} farmaci</CBadge>
-                        </CTableDataCell>
-                        <CTableDataCell>
-                          <CButton 
-                            color="warning" 
-                            size="sm" 
-                            className="me-2"
-                            onClick={() => handleEditDiagnosi(diagnosi)}
-                          >
-                            ✏️ Modifica
-                          </CButton>
-                          <CButton 
-                            color="danger" 
-                            size="sm"
-                            onClick={() => handleDeleteDiagnosi(diagnosi.id)}
-                          >
-                            🗑️ Elimina
-                          </CButton>
-                        </CTableDataCell>
-                      </CTableRow>
-                    )) : (
-                      <CTableRow>
-                        <CTableDataCell colSpan={5} className="text-center text-muted">
-                          Nessuna diagnosi disponibile
-                        </CTableDataCell>
-                      </CTableRow>
-                    )
-                  }
+                  {diagnosi && diagnosi.length > 0 ? diagnosi.map((d) => (
+                    <CTableRow 
+                      key={d.id}
+                      className={selectedDiagnosi?.id === d.id ? 'table-active' : ''}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setSelectedDiagnosi(d)}
+                    >
+                      <CTableDataCell><strong>{d.codice}</strong></CTableDataCell>
+                      <CTableDataCell>{d.descrizione}</CTableDataCell>
+                      <CTableDataCell>
+                        <CBadge color="info">{d.num_associazioni}</CBadge>
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        <CButton 
+                          color="link" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDiagnosi(d);
+                          }}
+                          title="Gestisci associazioni"
+                        >
+                          🔗
+                        </CButton>
+                        <CButton 
+                          color="warning" 
+                          size="sm" 
+                          className="me-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditDiagnosi(d);
+                          }}
+                          title="Modifica"
+                        >
+                          ✏️
+                        </CButton>
+                        <CButton 
+                          color="info" 
+                          size="sm" 
+                          className="me-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicaDiagnosi(d);
+                          }}
+                          title="Duplica"
+                        >
+                          📋
+                        </CButton>
+                        <CButton 
+                          color="danger" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDiagnosi(d);
+                          }}
+                          title="Elimina"
+                        >
+                          🗑️
+                        </CButton>
+                      </CTableDataCell>
+                    </CTableRow>
+                  )) : (
+                    <CTableRow>
+                      <CTableDataCell colSpan={4} className="text-center text-muted">
+                        {loading ? 'Caricamento...' : 'Nessuna diagnosi disponibile'}
+                      </CTableDataCell>
+                    </CTableRow>
+                  )}
                 </CTableBody>
               </CTable>
             </CCardBody>
           </CCard>
-        </CTabPane>
+        </CCol>
 
-        {/* Tab Farmaci */}
-        <CTabPane visible={activeTab === 'farmaci'}>
-          <CRow>
-            <CCol md={4}>
-              <CCard>
-                <CCardHeader>
-                  <h6>🩺 Seleziona Diagnosi</h6>
-                </CCardHeader>
-                <CCardBody>
-                  <CListGroup>
-                    {protocolli?.diagnosi && Object.values(protocolli.diagnosi).length > 0 ? 
-                      Object.values(protocolli.diagnosi).map((diagnosi) => (
-                        <CListGroupItem
-                          key={diagnosi.id}
-                          active={selectedDiagnosi === diagnosi.id}
-                          onClick={() => setSelectedDiagnosi(diagnosi.id)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <strong>{diagnosi.codice}</strong>
-                          <br />
-                          <small>{diagnosi.descrizione}</small>
-                          <br />
-                          <CBadge color="secondary" className="mt-1">
-                            {diagnosi.farmaci?.length || 0} farmaci
-                          </CBadge>
-                        </CListGroupItem>
-                      )) : (
-                        <CListGroupItem>
-                          <em className="text-muted">Nessuna diagnosi disponibile</em>
-                        </CListGroupItem>
-                      )
-                    }
-                  </CListGroup>
-                </CCardBody>
-              </CCard>
-            </CCol>
-
-            <CCol md={8}>
-              {selectedDiagnosi ? (
-                <CCard>
-                  <CCardHeader className="d-flex justify-content-between align-items-center">
-                    <h6>💊 Farmaci per {protocolli.diagnosi[selectedDiagnosi]?.codice}</h6>
-                    <CButton 
-                      color="primary" 
-                      size="sm"
-                      onClick={() => {
-                        resetFormFarmaco();
-                        setShowModalFarmaco(true);
-                      }}
-                    >
-                      ➕ Nuovo Farmaco
-                    </CButton>
-                  </CCardHeader>
-                  <CCardBody>
-                    {protocolli.diagnosi[selectedDiagnosi]?.farmaci.map((farmaco) => (
-                      <CCard key={farmaco.codice} className="mb-3">
-                        <CCardBody>
-                          <div className="d-flex justify-content-between align-items-start">
-                            <div>
-                              <h6>{farmaco.nome}</h6>
-                              <p className="mb-1">
-                                <strong>Codice:</strong> {farmaco.codice} | 
-                                <strong> Principio:</strong> {farmaco.principio_attivo} |
-                                <strong> Classe:</strong> {farmaco.classe}
-                              </p>
-                              <p className="mb-1">
-                                <strong>Posologia:</strong> {farmaco.posologia_default}
-                              </p>
-                              <p className="mb-1">
-                                <strong>Durata:</strong> {farmaco.durata_default}
-                              </p>
-                              {farmaco.note_default && (
-                                <p className="mb-0">
-                                  <strong>Note:</strong> {farmaco.note_default}
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              <CButton 
-                                color="warning" 
-                                size="sm" 
-                                className="me-2"
-                                onClick={() => handleEditFarmaco(farmaco, selectedDiagnosi)}
-                              >
-                                ✏️
-                              </CButton>
-                              <CButton 
-                                color="danger" 
-                                size="sm"
-                                onClick={() => handleDeleteFarmaco(selectedDiagnosi, farmaco.codice)}
-                              >
-                                🗑️
-                              </CButton>
-                            </div>
-                          </div>
-                        </CCardBody>
-                      </CCard>
-                    ))}
-                  </CCardBody>
-                </CCard>
-              ) : (
+        {/* Associazioni Farmaci */}
+        <CCol md={6}>
+          <CCard className="h-100">
+            <CCardBody>
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <h6 className="mb-0 fw-semibold">💊 Farmaci Associati</h6>
+                {selectedDiagnosi && (
+                  <CButton 
+                    color="primary" 
+                    size="sm"
+                    onClick={handleAddAssociazione}
+                  >
+                    ➕ Aggiungi
+                  </CButton>
+                )}
+              </div>
+              
+              {!selectedDiagnosi ? (
                 <CAlert color="info">
-                  Seleziona una diagnosi per gestire i farmaci associati.
+                  Seleziona una diagnosi per gestire le associazioni farmaci
                 </CAlert>
+              ) : (
+                <div>
+                  <div className="mb-3 p-2 bg-light rounded">
+                    <strong>{selectedDiagnosi.codice}</strong>
+                    <br />
+                    <small>{selectedDiagnosi.descrizione}</small>
+                  </div>
+                  
+                  {!farmaciAssociati || farmaciAssociati.length === 0 ? (
+                    <p className="text-muted">Nessun farmaco associato</p>
+                  ) : (
+                    <div>
+                      {farmaciAssociati.map((farmaco) => (
+                        <CCard key={farmaco.id} className="mb-2">
+                          <CCardBody className="py-2">
+                            <div className="d-flex justify-content-between align-items-start">
+                              <div>
+                                <strong>{farmaco.nome}</strong>
+                                <br />
+                                <small>Principio: {farmaco.principio_attivo}</small>
+                                <br />
+                                <small>Posologia: {farmaco.posologia}</small>
+                                <br />
+                                <small>Durata: {farmaco.durata}</small>
+                                {farmaco.note && (
+                                  <>
+                                    <br />
+                                    <small>Note: {farmaco.note}</small>
+                                  </>
+                                )}
+                              </div>
+                              <div>
+                                <CButton 
+                                  color="warning" 
+                                  size="sm" 
+                                  className="me-1"
+                                  onClick={() => handleEditAssociazione(farmaco)}
+                                >
+                                  ✏️
+                                </CButton>
+                                <CButton 
+                                  color="danger" 
+                                  size="sm"
+                                  onClick={() => handleDeleteAssociazione(farmaco)}
+                                >
+                                  🗑️
+                                </CButton>
+                              </div>
+                            </div>
+                          </CCardBody>
+                        </CCard>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
-            </CCol>
-          </CRow>
-        </CTabPane>
-
-        {/* Tab Durate & Note */}
-        <CTabPane visible={activeTab === 'durate'}>
-          <CRow>
-            <CCol md={6}>
-              <CCard>
-                <CCardHeader>
-                  <h6>📅 Durate Standard</h6>
-                </CCardHeader>
-                <CCardBody>
-                  <CListGroup>
-                    {protocolli?.durate_standard?.length > 0 ? 
-                      protocolli.durate_standard.map((durata, index) => (
-                        <CListGroupItem key={index}>{durata}</CListGroupItem>
-                      )) : (
-                        <CListGroupItem>
-                          <em className="text-muted">Nessuna durata configurata</em>
-                        </CListGroupItem>
-                      )
-                    }
-                  </CListGroup>
-                </CCardBody>
-              </CCard>
-            </CCol>
-
-            <CCol md={6}>
-              <CCard>
-                <CCardHeader>
-                  <h6>📝 Note Frequenti</h6>
-                </CCardHeader>
-                <CCardBody>
-                  <CListGroup>
-                    {protocolli?.note_frequenti?.length > 0 ? 
-                      protocolli.note_frequenti.map((nota, index) => (
-                        <CListGroupItem key={index}>{nota}</CListGroupItem>
-                      )) : (
-                        <CListGroupItem>
-                          <em className="text-muted">Nessuna nota configurata</em>
-                        </CListGroupItem>
-                      )
-                    }
-                  </CListGroup>
-                </CCardBody>
-              </CCard>
-            </CCol>
-          </CRow>
-        </CTabPane>
-      </CTabContent>
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
 
       {/* Modal Diagnosi */}
       <CModal visible={showModalDiagnosi} onClose={() => setShowModalDiagnosi(false)} size="lg">
@@ -518,6 +441,7 @@ const GestioneProtocolli: React.FC = () => {
                 value={formDiagnosi.id}
                 onChange={(e) => setFormDiagnosi({...formDiagnosi, id: e.target.value})}
                 placeholder="es. ascesso_periapicale"
+                disabled={!!editingDiagnosi}
               />
             </div>
             <div className="mb-3">
@@ -548,88 +472,104 @@ const GestioneProtocolli: React.FC = () => {
         </CModalFooter>
       </CModal>
 
-      {/* Modal Farmaco */}
-      <CModal visible={showModalFarmaco} onClose={() => setShowModalFarmaco(false)} size="lg">
+      {/* Modal Duplica */}
+      <CModal visible={showModalDuplica} onClose={() => setShowModalDuplica(false)} size="lg">
         <CModalHeader>
-          <h4>{editingFarmaco ? 'Modifica Farmaco' : 'Nuovo Farmaco'}</h4>
+          <h4>📋 Duplica Diagnosi</h4>
         </CModalHeader>
         <CModalBody>
           <CForm>
-            <CRow>
-              <CCol md={6}>
-                <div className="mb-3">
-                  <CFormLabel>Codice AIC</CFormLabel>
-                  <CFormInput
-                    value={formFarmaco.codice}
-                    onChange={(e) => setFormFarmaco({...formFarmaco, codice: e.target.value})}
-                    placeholder="es. 025181018"
-                  />
-                </div>
-              </CCol>
-              <CCol md={6}>
-                <div className="mb-3">
-                  <CFormLabel>Classe</CFormLabel>
-                  <CFormInput
-                    value={formFarmaco.classe}
-                    onChange={(e) => setFormFarmaco({...formFarmaco, classe: e.target.value})}
-                    placeholder="es. A"
-                  />
-                </div>
-              </CCol>
-            </CRow>
-            
             <div className="mb-3">
-              <CFormLabel>Nome Commerciale</CFormLabel>
+              <CFormLabel>Nuovo ID</CFormLabel>
               <CFormInput
-                value={formFarmaco.nome}
-                onChange={(e) => setFormFarmaco({...formFarmaco, nome: e.target.value})}
-                placeholder="es. Augmentin 875mg + 125mg compresse"
+                value={formDuplica.new_id}
+                onChange={(e) => setFormDuplica({...formDuplica, new_id: e.target.value})}
               />
             </div>
-            
             <div className="mb-3">
-              <CFormLabel>Principio Attivo</CFormLabel>
+              <CFormLabel>Nuovo Codice</CFormLabel>
               <CFormInput
-                value={formFarmaco.principio_attivo}
-                onChange={(e) => setFormFarmaco({...formFarmaco, principio_attivo: e.target.value})}
-                placeholder="es. Amoxicillina + Acido clavulanico"
+                value={formDuplica.new_codice}
+                onChange={(e) => setFormDuplica({...formDuplica, new_codice: e.target.value})}
               />
             </div>
+            <div className="mb-3">
+              <CFormLabel>Nuova Descrizione</CFormLabel>
+              <CFormInput
+                value={formDuplica.new_descrizione}
+                onChange={(e) => setFormDuplica({...formDuplica, new_descrizione: e.target.value})}
+              />
+            </div>
+          </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowModalDuplica(false)}>
+            Annulla
+          </CButton>
+          <CButton color="primary" onClick={handleSaveDuplica}>
+            📋 Duplica
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal Associazione Farmaco */}
+      <CModal visible={showModalAssociazione} onClose={() => setShowModalAssociazione(false)} size="lg">
+        <CModalHeader>
+          <h4>{editingAssociazione ? 'Modifica Associazione' : 'Nuova Associazione Farmaco'}</h4>
+        </CModalHeader>
+        <CModalBody>
+          <CForm>
+            {!editingAssociazione && (
+              <div className="mb-3">
+                <CFormLabel>Farmaco</CFormLabel>
+                <CFormSelect
+                  value={formAssociazione.farmaco_codice}
+                  onChange={(e) => setFormAssociazione({...formAssociazione, farmaco_codice: e.target.value})}
+                >
+                  <option value="">Seleziona farmaco...</option>
+                  {farmaciBase && farmaciBase.map(farmaco => (
+                    <option key={farmaco.codice} value={farmaco.codice}>
+                      {farmaco.nome} - {farmaco.principio_attivo}
+                    </option>
+                  ))}
+                </CFormSelect>
+              </div>
+            )}
             
             <div className="mb-3">
-              <CFormLabel>Posologia Default</CFormLabel>
+              <CFormLabel>Posologia</CFormLabel>
               <CFormInput
-                value={formFarmaco.posologia_default}
-                onChange={(e) => setFormFarmaco({...formFarmaco, posologia_default: e.target.value})}
+                value={formAssociazione.posologia}
+                onChange={(e) => setFormAssociazione({...formAssociazione, posologia: e.target.value})}
                 placeholder="es. 1 compressa ogni 12 ore"
               />
             </div>
             
             <div className="mb-3">
-              <CFormLabel>Durata Default</CFormLabel>
+              <CFormLabel>Durata</CFormLabel>
               <CFormInput
-                value={formFarmaco.durata_default}
-                onChange={(e) => setFormFarmaco({...formFarmaco, durata_default: e.target.value})}
+                value={formAssociazione.durata}
+                onChange={(e) => setFormAssociazione({...formAssociazione, durata: e.target.value})}
                 placeholder="es. 6 giorni"
               />
             </div>
             
             <div className="mb-3">
-              <CFormLabel>Note Default</CFormLabel>
+              <CFormLabel>Note</CFormLabel>
               <CFormTextarea
-                value={formFarmaco.note_default}
-                onChange={(e) => setFormFarmaco({...formFarmaco, note_default: e.target.value})}
-                placeholder="es. Assumere a stomaco pieno"
+                value={formAssociazione.note}
+                onChange={(e) => setFormAssociazione({...formAssociazione, note: e.target.value})}
+                placeholder="Note aggiuntive..."
                 rows={2}
               />
             </div>
           </CForm>
         </CModalBody>
         <CModalFooter>
-          <CButton color="secondary" onClick={() => setShowModalFarmaco(false)}>
+          <CButton color="secondary" onClick={() => setShowModalAssociazione(false)}>
             Annulla
           </CButton>
-          <CButton color="primary" onClick={handleSaveFarmaco}>
+          <CButton color="primary" onClick={handleSaveAssociazione}>
             💾 Salva
           </CButton>
         </CModalFooter>
