@@ -16,6 +16,7 @@ const GestioneProtocolli: React.FC = () => {
   // State per dati
   const [diagnosi, setDiagnosi] = useState<Diagnosi[]>([]);
   const [farmaci, setFarmaci] = useState<Farmaco[]>([]);
+  const [farmaciBase, setFarmaciBase] = useState<Farmaco[]>([]);
   const [categorieFarmaci, setCategorieFarmaci] = useState<string[]>([]);
   const [protocolli, setProtocolli] = useState<ProtocolloTerapeutico[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,10 +26,12 @@ const GestioneProtocolli: React.FC = () => {
   const [showModalDiagnosi, setShowModalDiagnosi] = useState(false);
   const [showModalDuplica, setShowModalDuplica] = useState(false);
   const [showModalProtocollo, setShowModalProtocollo] = useState(false);
+  const [showModalAssociazione, setShowModalAssociazione] = useState(false);
   
   // State per editing
   const [editingDiagnosi, setEditingDiagnosi] = useState<Diagnosi | null>(null);
   const [editingProtocollo, setEditingProtocollo] = useState<ProtocolloTerapeutico | null>(null);
+  const [editingAssociazione, setEditingAssociazione] = useState<any>(null);
 
   // Form states
   const [formDiagnosi, setFormDiagnosi] = useState({
@@ -50,7 +53,16 @@ const GestioneProtocolli: React.FC = () => {
     note_custom: ''
   });
 
+  const [formAssociazione, setFormAssociazione] = useState({
+    farmaco_codice: '',
+    posologia: '',
+    durata: '',
+    note: ''
+  });
+
   const [filtroCategoria, setFiltroCategoria] = useState<string>('');
+  const [alert, setAlert] = useState<{type: string, message: string} | null>(null);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -528,8 +540,8 @@ const GestioneProtocolli: React.FC = () => {
                 >
                   <option value="">Seleziona farmaco...</option>
                   {farmaciBase && farmaciBase.map(farmaco => (
-                    <option key={farmaco.codice} value={farmaco.codice}>
-                      {farmaco.nome} - {farmaco.principio_attivo}
+                    <option key={farmaco.id} value={farmaco.id}>
+                      {farmaco.principio_attivo} - {farmaco.nomi_commerciali}
                     </option>
                   ))}
                 </CFormSelect>
