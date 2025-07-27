@@ -38,7 +38,9 @@ class RicettaElettronicaService:
     
     def _load_configuration(self):
         """Carica configurazione per ambiente corrente"""
-        project_root = r"C:\Users\gengi\Desktop\StudioDimaAI"
+        # Path dinamico invece di hardcodato
+        import os
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
         
         if self.env == 'test':
             # === AMBIENTE TEST - Dati dal kit ufficiale ===

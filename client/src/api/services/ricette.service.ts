@@ -180,3 +180,73 @@ export async function deleteFarmaco(diagnosiId: string, farmacoCodice: string) {
   const response = await apiClient.delete(`/api/protocolli/diagnosi/${diagnosiId}/farmaci/${farmacoCodice}`);
   return response.data;
 }
+
+// === API EMAIL RICETTE ===
+
+export interface EmailRicettaPayload {
+  email_paziente: string;
+  nome_paziente: string;
+  ricetta_data: any;
+  pdf_base64: string;
+}
+
+export async function inviaRicettaEmail(payload: EmailRicettaPayload) {
+  const response = await apiClient.post('/api/ricetta/email/send', payload);
+  return response.data;
+}
+
+export async function testEmailConnection() {
+  const response = await apiClient.get('/api/ricetta/email/test');
+  return response.data;
+}
+
+// === API GESTIONE RICETTE PAZIENTE ===
+
+export interface RicettaPaziente {
+  id: number;
+  nre: string;
+  codice_pin: string;
+  protocollo_transazione?: string;
+  stato: 'inviata' | 'annullata' | 'erogata';
+  paziente_nome: string;
+  paziente_cognome: string;
+  cf_assistito: string;
+  data_compilazione: string;
+  denominazione_farmaco: string;
+  posologia: string;
+  durata_trattamento: string;
+  note?: string;
+  pdf_base64?: string;
+  created_at: string;
+}
+
+export interface StatistichePaziente {
+  totale_ricette: number;
+  ricette_inviate: number;
+  ricette_annullate: number;
+  ultima_ricetta?: string;
+}
+
+export interface RicettePazienteResponse {
+  success: boolean;
+  cf_paziente: string;
+  statistiche: StatistichePaziente;
+  ricette: RicettaPaziente[];
+}
+
+export async function getRicettePaziente(cfPaziente: string): Promise<RicettePazienteResponse> {
+  const response = await apiClient.get(`/api/ricetta/paziente/${cfPaziente}`);
+  return response.data;
+}
+
+export async function downloadRicettaPDF(nre: string): Promise<Blob> {
+  const response = await apiClient.get(`/api/ricetta/download/${nre}`, {
+    responseType: 'blob'
+  });
+  return response.data;
+}
+
+export async function getAllRicette() {
+  const response = await apiClient.get('/api/ricetta/database/list');
+  return response.data;
+}

@@ -12,6 +12,7 @@ from server.app.ricetta_elettronica.utils import (
 )
 from server.app.ricetta_elettronica.auth_service import ricetta_auth_service
 from server.app.ricetta_elettronica.ricetta_service import ricetta_service
+from server.app.core.email_service import ricetta_email_service
 import logging
 import os
 
@@ -267,7 +268,7 @@ def invia_ricetta_completa():
                         # Metadati
                         'ambiente': 'test' if 'test' in ricetta_service.endpoint_invio else 'prod',
                         'response_xml': result['response_xml'],
-                        'request_payload': str(data)
+                        'pdf_base64': result.get('pdf_promemoria_b64')
                     }
                     
                     ricetta_id = RicetteDB.save_ricetta(ricetta_db_data)
@@ -700,4 +701,249 @@ def convert_pdf_base64():
         return jsonify({
             'success': False,
             'error': f'Errore conversione PDF: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/email/send", methods=['POST'])
+def invia_ricetta_email():
+    """
+    Invia ricetta elettronica via email al paziente
+    """
+    try:
+        data = request.get_json()
+        logger.info(f"Richiesta email ricevuta con campi: {list(data.keys()) if data else 'NESSUN DATA'}")
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Nessun dato ricevuto'
+            }), 400
+        
+        # Valida dati obbligatori
+        required_fields = ['email_paziente', 'nome_paziente', 'ricetta_data', 'pdf_base64']
+        for field in required_fields:
+            if field not in data:
+                logger.error(f"Campo mancante: {field}, campi presenti: {list(data.keys())}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Campo obbligatorio mancante: {field}'
+                }), 400
+        
+        # Invia email
+        result = ricetta_email_service.invia_ricetta_email(
+            destinatario_email=data['email_paziente'],
+            destinatario_nome=data['nome_paziente'],
+            ricetta_data=data['ricetta_data'],
+            pdf_base64=data['pdf_base64']
+        )
+        
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': 'Email inviata con successo',
+                'data': result
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': result['error']
+            }), 400
+            
+    except Exception as e:
+        logger.error(f"Errore endpoint invio email: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore invio email: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/email/test", methods=['GET'])
+def test_email_connection():
+    """
+    Testa la connessione email SMTP
+    """
+    try:
+        result = ricetta_email_service.test_connessione()
+        
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': 'Connessione email OK',
+                'data': result
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': result['error']
+            }), 400
+            
+    except Exception as e:
+        logger.error(f"Errore test email: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore test email: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/email/test-send", methods=['GET'])
+def test_send_email_direct():
+    """
+    Test diretto invio email con dati hardcodati
+    """
+    try:
+        # Dati di test simulati
+        ricetta_data_test = {
+            'nre': 'TEST123456',
+            'pin_ricetta': 'PIN789',
+            'data_inserimento': '2025-07-27 12:00:00',
+            'nome_medico': 'NICOLA',
+            'cognome_medico': 'DI MARTINO',
+            'denominazione_farmaco': 'AMOXICILLINA AC CLA ALM*12BUST (TEST)',
+            'posologia': '1 bustina ogni 8 ore (TEST)',
+            'protocollo_transazione': 'test-protocol-123'
+        }
+        
+        # PDF base64 fittizio (header PDF valido)
+        pdf_fake_b64 = "JVBERi0xLjQKJeLjz9MKNSAwIG9iago8PC9Db2xvclNwYWNlL0RldmljZUdyYXkvU3VidHlwZS9JbWFnZS9IZWlnaHQgMTAwL0ZpbHRlci9GbGF0ZURlY29kZS9UeXBlL1hPYmplY3QvV2lkdGggMTAwL0xlbmd0aCAzMy9CaXRzUGVyQ29tcG9uZW50IDg+PnN0cmVhbQp4nO3BAQ0AAADCoP6pbw43oAAAAAAAAAAAAODfALYj6ysKZW5kc3RyZWFtCmVuZG9iag=="
+        
+        logger.info("Test invio email diretto a nicoladimartino@gmail.com")
+        
+        # Invia email con servizio diretto
+        result = ricetta_email_service.invia_ricetta_email(
+            destinatario_email="nicoladimartino@gmail.com",
+            destinatario_nome="Nicola Di Martino",
+            ricetta_data=ricetta_data_test,
+            pdf_base64=pdf_fake_b64
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Test email completato',
+            'result': result
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore test email diretto: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore test email: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/database/list", methods=['GET'])
+def list_ricette_database():
+    """
+    Mostra tutte le ricette salvate nel database
+    """
+    try:
+        from ..core.ricette_db import RicetteDB
+        
+        ricette = RicetteDB.get_all_ricette()
+        
+        return jsonify({
+            'success': True,
+            'count': len(ricette),
+            'ricette': ricette
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore lista ricette DB: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore lista ricette: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/paziente/<cf_paziente>", methods=['GET'])
+def get_ricette_paziente(cf_paziente):
+    """
+    Recupera tutte le ricette di un paziente specifico
+    """
+    try:
+        from ..core.ricette_db import RicetteDB
+        
+        # Valida CF paziente
+        if not cf_paziente or len(cf_paziente) != 16:
+            return jsonify({
+                'success': False,
+                'error': 'Codice fiscale paziente non valido'
+            }), 400
+        
+        # Recupera ricette del paziente
+        ricette = RicetteDB.get_ricette_by_paziente(cf_paziente.upper())
+        
+        # Calcola statistiche
+        stats = {
+            'totale_ricette': len(ricette),
+            'ricette_inviate': len([r for r in ricette if r.get('stato') == 'inviata']),
+            'ricette_annullate': len([r for r in ricette if r.get('stato') == 'annullata']),
+            'ultima_ricetta': ricette[0].get('data_compilazione') if ricette else None
+        }
+        
+        return jsonify({
+            'success': True,
+            'cf_paziente': cf_paziente.upper(),
+            'statistiche': stats,
+            'ricette': ricette
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore recupero ricette paziente {cf_paziente}: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore recupero ricette paziente: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/download/<nre>", methods=['GET'])
+def download_ricetta_by_nre(nre):
+    """
+    Scarica il PDF di una ricetta tramite NRE
+    """
+    try:
+        from ..core.ricette_db import RicetteDB
+        import base64
+        from flask import Response
+        
+        # Recupera ricetta per NRE
+        ricetta = RicetteDB.get_ricetta_by_nre(nre)
+        
+        if not ricetta:
+            return jsonify({
+                'success': False,
+                'error': f'Ricetta con NRE {nre} non trovata'
+            }), 404
+        
+        # Controlla se ha il PDF
+        if not ricetta.get('pdf_base64'):
+            return jsonify({
+                'success': False,
+                'error': 'PDF non disponibile per questa ricetta'
+            }), 404
+        
+        # Decodifica PDF
+        try:
+            pdf_bytes = base64.b64decode(ricetta['pdf_base64'])
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': f'Errore decodifica PDF: {str(e)}'
+            }), 400
+        
+        # Genera nome file
+        filename = f"ricetta_{nre}_{ricetta.get('paziente_cognome', 'paziente').replace(' ', '_')}.pdf"
+        
+        # Restituisci PDF
+        response = Response(
+            pdf_bytes,
+            mimetype='application/pdf',
+            headers={
+                'Content-Disposition': f'attachment; filename="{filename}"',
+                'Content-Type': 'application/pdf',
+                'Content-Length': str(len(pdf_bytes))
+            }
+        )
+        
+        logger.info(f"PDF ricetta {nre} scaricato per paziente {ricetta.get('cf_assistito')}")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Errore download ricetta {nre}: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore download ricetta: {str(e)}'
         }), 500

@@ -72,7 +72,7 @@ def init_ricette_db():
             -- === METADATI TECNICI ===
             ambiente TEXT NOT NULL DEFAULT 'test',      -- 'test' o 'prod'
             response_xml TEXT NOT NULL,                 -- XML completo risposta
-            request_payload TEXT,                       -- Payload originale inviato
+            pdf_base64 TEXT,                            -- PDF ricetta per ristampa immediata
             
             -- Timestamps
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -112,7 +112,7 @@ class RicetteDB:
                     codice_diagnosi, descrizione_diagnosi,
                     gruppo_equivalenza_farmaco, prodotto_aic, codice_farmaco,
                     quantita, posologia, durata_trattamento, note,
-                    ambiente, response_xml, request_payload
+                    ambiente, response_xml, pdf_base64
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 ricetta_data['nre'],
@@ -146,7 +146,7 @@ class RicetteDB:
                 ricetta_data.get('note'),
                 ricetta_data.get('ambiente', 'test'),
                 ricetta_data['response_xml'],
-                ricetta_data.get('request_payload')
+                ricetta_data.get('pdf_base64')
             ))
             
             ricetta_id = cursor.lastrowid
@@ -190,6 +190,24 @@ class RicetteDB:
         conn.close()
         
         columns = [description[0] for description in cursor.description]
+        return [dict(zip(columns, row)) for row in results]
+    
+    @staticmethod
+    def get_all_ricette(limit: int = 50) -> List[Dict[str, Any]]:
+        """Recupera tutte le ricette (ultime prima)"""
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT * FROM ricette_elettroniche 
+            ORDER BY data_compilazione DESC
+            LIMIT ?
+        ''', (limit,))
+        
+        results = cursor.fetchall()
+        columns = [description[0] for description in cursor.description]
+        conn.close()
+        
         return [dict(zip(columns, row)) for row in results]
     
     @staticmethod

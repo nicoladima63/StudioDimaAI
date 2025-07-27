@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import {
   CCard, CCardBody, CButton, CForm, CFormInput, CFormLabel, 
-  CFormTextarea, CRow, CCol, CAlert, CSpinner, CBadge
+  CFormTextarea, CRow, CCol, CAlert, CSpinner, CBadge,
+  CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle
 } from '@coreui/react';
-import { inviaRicetta, type RicettaPayload } from '@/api/services/ricette.service';
+import { inviaRicetta, inviaRicettaEmail, type RicettaPayload, type EmailRicettaPayload } from '@/api/services/ricette.service';
 
 const TestInvioRicetta: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string>('');
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailData, setEmailData] = useState({
+    email: '',
+    nome: 'Maria Prandi' // Nome test di default
+  });
 
   // Dati hardcodati per ambiente TEST del Ministero - CODICI VALIDI UFFICIALI
   const [datiTest, setDatiTest] = useState({
@@ -132,6 +139,39 @@ const TestInvioRicetta: React.FC = () => {
     } catch (error) {
       console.error('Errore download PDF:', error);
       alert('Errore durante il download del PDF');
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailData.email || !emailData.nome) {
+      alert('Inserire email e nome paziente');
+      return;
+    }
+
+    setEmailLoading(true);
+    
+    try {
+      const emailPayload: EmailRicettaPayload = {
+        email_paziente: emailData.email,
+        nome_paziente: emailData.nome,
+        ricetta_data: response.data,
+        pdf_base64: response.data.pdf_promemoria_b64
+      };
+
+      const result = await inviaRicettaEmail(emailPayload);
+
+      if (result.success) {
+        alert('Email inviata con successo!');
+        setShowEmailModal(false);
+      } else {
+        alert(`Errore invio email: ${result.error}`);
+      }
+
+    } catch (error: any) {
+      console.error('Errore invio email:', error);
+      alert(`Errore durante l'invio dell'email: ${error.message || 'Errore sconosciuto'}`);
+    } finally {
+      setEmailLoading(false);
     }
   };
 
@@ -287,14 +327,24 @@ const TestInvioRicetta: React.FC = () => {
                       <p><strong>Medico:</strong> {response.data.nome_medico} {response.data.cognome_medico}</p>
                       <p><strong>PDF Ricetta:</strong> 
                         {response.data.pdf_disponibile ? (
-                          <CButton 
-                            size="sm" 
-                            color="success" 
-                            className="ms-2"
-                            onClick={() => downloadPDF(response.data.pdf_promemoria_b64)}
-                          >
-                            📄 Scarica PDF
-                          </CButton>
+                          <div className="d-inline-block">
+                            <CButton 
+                              size="sm" 
+                              color="success" 
+                              className="ms-2 me-2"
+                              onClick={() => downloadPDF(response.data.pdf_promemoria_b64)}
+                            >
+                              📄 Scarica PDF
+                            </CButton>
+                            <CButton 
+                              size="sm" 
+                              color="primary" 
+                              className="me-2"
+                              onClick={() => setShowEmailModal(true)}
+                            >
+                              📧 Invia Email
+                            </CButton>
+                          </div>
                         ) : '❌ Non disponibile'}
                       </p>
                     </div>
@@ -322,6 +372,57 @@ const TestInvioRicetta: React.FC = () => {
           </CCard>
         </CCol>
       </CRow>
+
+      {/* Modal per invio email */}
+      <CModal visible={showEmailModal} onClose={() => setShowEmailModal(false)}>
+        <CModalHeader>
+          <CModalTitle>📧 Invia Ricetta via Email</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <CForm>
+            <div className="mb-3">
+              <CFormLabel>Nome Paziente</CFormLabel>
+              <CFormInput
+                value={emailData.nome}
+                onChange={(e) => setEmailData({...emailData, nome: e.target.value})}
+                placeholder="Nome del paziente"
+              />
+            </div>
+            <div className="mb-3">
+              <CFormLabel>Email Paziente</CFormLabel>
+              <CFormInput
+                type="email"
+                value={emailData.email}
+                onChange={(e) => setEmailData({...emailData, email: e.target.value})}
+                placeholder="email@esempio.com"
+              />
+            </div>
+            {response?.data && (
+              <div className="mb-3">
+                <CAlert color="info">
+                  <strong>Ricetta da inviare:</strong><br/>
+                  NRE: {response.data.nre}<br/>
+                  PIN: {response.data.pin_ricetta}<br/>
+                  Farmaco: {response.data.denominazione_farmaco || 'AMOXICILLINA AC CLA ALM*12BUST'}
+                </CAlert>
+              </div>
+            )}
+          </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowEmailModal(false)}>
+            Annulla
+          </CButton>
+          <CButton 
+            color="primary" 
+            onClick={handleSendEmail}
+            disabled={emailLoading || !emailData.email || !emailData.nome}
+          >
+            {emailLoading ? <CSpinner size="sm" className="me-2" /> : '📧'}
+            Invia Email
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </div>
   );
 };
