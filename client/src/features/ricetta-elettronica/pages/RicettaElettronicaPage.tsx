@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '@/components/ui/Card';
 import RicettaAvanzata from '../components/RicettaAvanzata';
 import RicettaAuthStatus from '../components/RicettaAuthStatus';
-import GestioneProtocolli from '../components/GestioneProtocolli';
-import TestInvioRicetta from '../components/TestInvioRicetta';
 import RicettePaziente from '../components/RicettePaziente';
-import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react';
+import AutoComplete from '@/components/common/AutoComplete';
+import { CNav, CNavItem, CNavLink, CTabContent, CTabPane, CRow, CCol, CCard, CCardBody } from '@coreui/react';
+import { getPazientiAll } from '@/api/services/pazienti.service';
+import { usePazientiStore } from '@/store/pazienti.store';
+import type { PazienteCompleto } from '@/lib/types';
 
 // Dati reali del medico
 const datiMedico = {
@@ -25,13 +27,77 @@ const datiMedico = {
 
 const RicettaElettronicaPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('ricette');
+  
+  // Stato paziente globale
+  const allPazienti = usePazientiStore(state => state.pazienti);
+  const setPazienti = usePazientiStore(state => state.setPazienti);
+  const [pazienteSelezionato, setPazienteSelezionato] = useState<PazienteCompleto | null>(null);
+  const [search, setSearch] = useState('');
+
+  // Carica pazienti all'avvio
+  useEffect(() => {
+    const loadPazienti = async () => {
+      if (allPazienti.length === 0) {
+        try {
+          const res = await getPazientiAll();
+          if (res.success) setPazienti(res.data);
+        } catch (error) {
+          console.error('Errore caricamento pazienti:', error);
+        }
+      }
+    };
+    loadPazienti();
+  }, [allPazienti.length, setPazienti]);
+
+  // Funzione di ricerca pazienti (come in RicettaElettronica funzionante)
+  const fetchPazienti = async (q: string): Promise<PazienteCompleto[]> => {
+    const ql = q.toLowerCase();
+    const pazienti = usePazientiStore.getState().pazienti;
+    const result = pazienti.filter(p =>
+      (p.DB_PANOME && p.DB_PANOME.toLowerCase().includes(ql)) ||
+      (p.DB_PACODFI && p.DB_PACODFI.toLowerCase().includes(ql))
+    );
+    return result;
+  };
 
   return (
     <div>
       <Card 
-        title="Ricette"
+        title="Ricette Elettroniche"
         headerAction={<RicettaAuthStatus />}
       >
+        {/* Selezione Paziente Globale */}
+        <CCard className="mb-4">
+          <CCardBody>
+            <CRow className="align-items-center">
+              <CCol md={8}>
+                <AutoComplete<PazienteCompleto>
+                  value={pazienteSelezionato ? pazienteSelezionato.DB_PANOME : search}
+                  onChange={setSearch}
+                  onSelect={(paziente: PazienteCompleto) => {
+                    setPazienteSelezionato(paziente);
+                    setSearch(paziente.DB_PANOME);
+                  }}
+                  fetchSuggestions={fetchPazienti}
+                  getOptionLabel={(p: PazienteCompleto) => `${p.DB_PANOME} (${p.DB_PACODFI})`}
+                  placeholder="Digita nome paziente..."
+                />
+              </CCol>
+              <CCol md={4}>
+                {pazienteSelezionato && (
+                  <div className="text-center">
+                    <strong className="text-success">
+                      📋 {pazienteSelezionato.DB_PANOME}
+                    </strong>
+                    <br />
+                    <small className="text-muted">CF: {pazienteSelezionato.DB_PACODFI}</small>
+                  </div>
+                )}
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
+
         {/* Navigation Tabs */}
         <CNav variant="tabs" role="tablist">
           <CNavItem>
@@ -40,16 +106,7 @@ const RicettaElettronicaPage: React.FC = () => {
               onClick={() => setActiveTab('ricette')}
               role="tab"
             >
-              📋 Compilazione Ricetta
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink
-              active={activeTab === 'protocolli'}
-              onClick={() => setActiveTab('protocolli')}
-              role="tab"
-            >
-              ⚙️ Gestione Protocolli
+              📋 Compila Ricetta
             </CNavLink>
           </CNavItem>
           <CNavItem>
@@ -58,16 +115,7 @@ const RicettaElettronicaPage: React.FC = () => {
               onClick={() => setActiveTab('pazienti')}
               role="tab"
             >
-              👤 Ricette Pazienti
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink
-              active={activeTab === 'test'}
-              onClick={() => setActiveTab('test')}
-              role="tab"
-            >
-              🧪 Test Invio
+              👤 Ricette Paziente
             </CNavLink>
           </CNavItem>
         </CNav>
@@ -75,19 +123,16 @@ const RicettaElettronicaPage: React.FC = () => {
         {/* Tab Content */}
         <CTabContent className="mt-4">
           <CTabPane visible={activeTab === 'ricette'} role="tabpanel">
-            <RicettaAvanzata datiMedico={datiMedico} />
-          </CTabPane>
-
-          <CTabPane visible={activeTab === 'protocolli'} role="tabpanel">
-            <GestioneProtocolli />
+            <RicettaAvanzata 
+              datiMedico={datiMedico} 
+              pazienteSelezionato={pazienteSelezionato}
+            />
           </CTabPane>
 
           <CTabPane visible={activeTab === 'pazienti'} role="tabpanel">
-            <RicettePaziente />
-          </CTabPane>
-
-          <CTabPane visible={activeTab === 'test'} role="tabpanel">
-            <TestInvioRicetta />
+            <RicettePaziente 
+              cfPazienteIniziale={pazienteSelezionato?.DB_PACODFI?.trim() || ''}
+            />
           </CTabPane>
         </CTabContent>
       </Card>

@@ -46,8 +46,9 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
   const [downloadingNre, setDownloadingNre] = useState<string | null>(null);
 
   const cercaRicette = async () => {
-    if (!cfPaziente || cfPaziente.length !== 16) {
-      setError('Inserire un codice fiscale valido (16 caratteri)');
+    if (!cfPaziente || cfPaziente.length < 10) {
+      console.log('CF paziente ricevuto:', cfPaziente, 'lunghezza:', cfPaziente?.length);
+      setError('Codice fiscale paziente non valido');
       return;
     }
 
@@ -117,53 +118,29 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
   };
 
   useEffect(() => {
-    if (cfPazienteIniziale) {
+    setCfPaziente(cfPazienteIniziale);
+  }, [cfPazienteIniziale]);
+
+  useEffect(() => {
+    if (cfPaziente && cfPaziente.length >= 10) {
       cercaRicette();
     }
-  }, [cfPazienteIniziale]);
+  }, [cfPaziente]);
 
   return (
     <div className="mb-4">
-      {/* Header con ricerca */}
-      <CCard className="mb-4">
-        <CCardHeader>
-          <CCardTitle className="d-flex align-items-center gap-2">
-            <CIcon icon={cilUser} />
-            Ricette Paziente
-          </CCardTitle>
-        </CCardHeader>
-        <CCardBody>
-          <CInputGroup>
-            <CInputGroupText>
-              <CIcon icon={cilUser} />
-            </CInputGroupText>
-            <CFormInput
-              placeholder="Codice Fiscale Paziente (16 caratteri)"
-              value={cfPaziente}
-              onChange={(e) => setCfPaziente(e.target.value.toUpperCase())}
-              maxLength={16}
-              style={{ fontFamily: 'monospace' }}
-            />
-            <CButton 
-              color="primary"
-              onClick={cercaRicette}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <CSpinner size="sm" className="me-2" />
-                  Caricamento...
-                </>
-              ) : (
-                <>
-                  <CIcon icon={cilMagnifyingGlass} className="me-2" />
-                  Cerca
-                </>
-              )}
-            </CButton>
-          </CInputGroup>
-        </CCardBody>
-      </CCard>
+      {/* Messaggio se nessun paziente selezionato */}
+      {!cfPaziente && (
+        <CCard>
+          <CCardBody className="text-center py-5">
+            <CIcon icon={cilUser} size="3xl" className="text-muted mb-3" />
+            <h5 className="text-muted">Seleziona un paziente</h5>
+            <p className="text-muted">
+              Utilizza la ricerca in alto per selezionare un paziente e visualizzare le sue ricette.
+            </p>
+          </CCardBody>
+        </CCard>
+      )}
 
       {/* Errori */}
       {error && (
@@ -174,7 +151,7 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
       )}
 
       {/* Statistiche */}
-      {statistiche && (
+      {cfPaziente && statistiche && (
         <CCard className="mb-4">
           <CCardHeader>
             <CCardTitle>
@@ -216,7 +193,7 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
       )}
 
       {/* Lista ricette */}
-      {ricette.length > 0 && (
+      {cfPaziente && ricette.length > 0 && (
         <>
           <h5 className="mb-3">
             Ricette Trovate ({ricette.length})
@@ -312,7 +289,7 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
       )}
 
       {/* Messaggio quando non ci sono ricette */}
-      {!loading && ricette.length === 0 && cfPaziente && (
+      {!loading && cfPaziente && ricette.length === 0 && (
         <CCard>
           <CCardBody className="text-center py-5">
             <CIcon icon={cilDescription} size="3xl" className="text-muted mb-3" />

@@ -14,10 +14,7 @@ import {
   type FarmacoProtocollo,
   type RicettaPayload
 } from '@/api/services/ricette.service';
-import { getPazientiAll } from '@/api/services/pazienti.service';
-import { usePazientiStore } from '@/store/pazienti.store';
 import type { PazienteCompleto } from '@/lib/types';
-import AutoComplete from '@/components/common/AutoComplete';
 
 interface DatiMedico {
   regione: string;
@@ -34,12 +31,12 @@ interface DatiMedico {
   cfMedico: string;
 }
 
-export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico }) {
-  // Pazienti
-  const allPazienti = usePazientiStore(state => state.pazienti);
-  const setPazienti = usePazientiStore(state => state.setPazienti);
-  const [search, setSearch] = useState('');
-  const [pazienteSelezionato, setPazienteSelezionato] = useState<PazienteCompleto | null>(null);
+interface RicettaAvanzataProps {
+  datiMedico: DatiMedico;
+  pazienteSelezionato: PazienteCompleto | null;
+}
+
+export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: RicettaAvanzataProps) {
 
   // Diagnosi e farmaci
   const [diagnosiDisponibili, setDiagnosiDisponibili] = useState<Diagnosi[]>([]);
@@ -64,12 +61,6 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
     const loadData = async () => {
       setLoading(true);
       try {
-        // Carica pazienti se vuoti
-        if (allPazienti.length === 0) {
-          const res = await getPazientiAll();
-          if (res.success) setPazienti(res.data);
-        }
-
         // Carica diagnosi, durate e note
         const [diagnosi, durate, noteFreq] = await Promise.all([
           getDiagnosiDisponibili(),
@@ -115,14 +106,6 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
   }, [diagnosiSelezionata, autoMode]);
 
 
-  const fetchPazienti = async (q: string): Promise<PazienteCompleto[]> => {
-    const ql = q.toLowerCase();
-    const pazienti = usePazientiStore.getState().pazienti;
-    return pazienti.filter(p =>
-      (p.DB_PANOME && p.DB_PANOME.toLowerCase().includes(ql)) ||
-      (p.DB_PACODFI && p.DB_PACODFI.toLowerCase().includes(ql))
-    );
-  };
 
   const handleDiagnosiChange = (diagnosiId: string) => {
     const diagnosi = diagnosiDisponibili.find(d => d.id === parseInt(diagnosiId));
@@ -239,54 +222,40 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
   }
 
   return (
-    <CRow>
-
-      {/* Selezione paziente */}
-      <CCol md={4}>
+    <div>
+      {/* Messaggio se nessun paziente */}
+      {!pazienteSelezionato ? (
         <CCard>
-          <CCardBody>
-            <h5 className="mb-3">👤 Paziente</h5>
-            
-            <AutoComplete<PazienteCompleto>
-              value={pazienteSelezionato ? pazienteSelezionato.DB_PANOME : search}
-              onChange={setSearch}
-              onSelect={(p: PazienteCompleto) => {
-                setPazienteSelezionato(p);
-                setSearch(p.DB_PANOME);
-              }}
-              fetchSuggestions={fetchPazienti}
-              getOptionLabel={(p: PazienteCompleto) => `${p.DB_PANOME} (${p.DB_PACODFI})`}
-              placeholder="Cerca paziente..."
-            />
-
-            {pazienteSelezionato && (
-              <CCard className="mt-3" style={{ backgroundColor: '#f8f9fa' }}>
-                <CCardBody>
-                  <h6 className="mb-2">Dati Paziente</h6>
-                  <div className="small">
-                    <div><strong>Nome:</strong> {pazienteSelezionato.DB_PANOME}</div>
-                    <div><strong>CF:</strong> {pazienteSelezionato.DB_PACODFI || '-'}</div>
-                    <div><strong>Indirizzo:</strong> {pazienteSelezionato.DB_PAINDIR || '-'}</div>
-                  </div>
-                </CCardBody>
-              </CCard>
-            )}
+          <CCardBody className="text-center py-5">
+            <h5 className="text-muted">👤 Nessun paziente selezionato</h5>
+            <p className="text-muted">
+              Seleziona un paziente utilizzando la ricerca in alto per compilare una ricetta.
+            </p>
           </CCardBody>
         </CCard>
-      </CCol>
+      ) : (
+        <CRow>
+          {/* Dati paziente selezionato */}
+          <CCol md={4}>
+            <CCard>
+              <CCardBody>
+                <h5 className="mb-3">👤 Paziente Selezionato</h5>
+                <div className="small">
+                  <div><strong>Nome:</strong> {pazienteSelezionato.DB_PANOME}</div>
+                  <div><strong>CF:</strong> {pazienteSelezionato.DB_PACODFI || '-'}</div>
+                  <div><strong>Indirizzo:</strong> {pazienteSelezionato.DB_PAINDIR || '-'}</div>
+                </div>
+              </CCardBody>
+            </CCard>
+          </CCol>
 
-      {/* Form ricetta */}
-      <CCol md={8}>
+          {/* Form ricetta */}
+          <CCol md={8}>
         <CCard>
           <CCardBody>
             <h5 className="mb-3">📋 Protocollo Terapeutico</h5>
             
-            {!pazienteSelezionato ? (
-              <div className="text-center text-muted py-4">
-                <p>Seleziona prima un paziente per compilare la ricetta</p>
-              </div>
-            ) : (
-              <CForm>
+            <CForm>
                 {/* Diagnosi */}
                 <div className="mb-3">
                   <CFormLabel>🩺 Diagnosi</CFormLabel>
@@ -413,10 +382,11 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
                   📤 Invia Ricetta
                 </CButton>
               </CForm>
-            )}
           </CCardBody>
         </CCard>
       </CCol>
+    </CRow>
+    )}
 
       {/* Modal conferma */}
       <CModal visible={showConferma} onClose={() => setShowConferma(false)} size="lg">
@@ -462,6 +432,6 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
           </CButton>
         </CModalFooter>
       </CModal>
-    </CRow>
+    </div>
   );
 }
