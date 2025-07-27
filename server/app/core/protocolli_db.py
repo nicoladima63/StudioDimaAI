@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Path del database nella cartella instance
 INSTANCE_DIR = os.path.join(os.path.dirname(__file__), '../../instance')
-DB_PATH = os.path.join(INSTANCE_DIR, 'protocolli_new.db')
+DB_PATH = os.path.join(INSTANCE_DIR, 'protocolli.db')
 
 def init_protocolli_db():
     """Inizializza il database dei protocolli terapeutici"""
@@ -238,39 +238,44 @@ class ProtocolliDB:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         
-        cursor.execute('''
-            SELECT pt.id, pt.farmacoId, f.principio_attivo, f.nomi_commerciali, 
-                   f.categoria, f.indicazioni, f.posologia_standard,
-                   p.nome as posologia_custom, d.nome as durata_custom, 
-                   nt.testo as note_custom, pt.ordine
-            FROM protocolli_terapeutici pt
-            JOIN farmaci f ON pt.farmacoId = f.id
-            LEFT JOIN posologie p ON pt.posologiaId = p.id
-            LEFT JOIN durate d ON pt.durataId = d.id
-            LEFT JOIN note_terapeutiche nt ON pt.noteId = nt.id
-            WHERE pt.diagnosiId = ? AND pt.attivo = 1
-            ORDER BY pt.ordine, f.principio_attivo
-        ''', (diagnosi_id,))
-        
-        results = cursor.fetchall()
-        conn.close()
-        
-        return [
-            {
-                'protocollo_id': row[0],
-                'farmaco_id': row[1],
-                'principio_attivo': row[2],
-                'nomi_commerciali': row[3],
-                'categoria': row[4],
-                'indicazioni': row[5],
-                'posologia_standard': row[6],
-                'posologia_custom': row[7],
-                'durata_custom': row[8],
-                'note_custom': row[9],
-                'ordine': row[10]
-            }
-            for row in results
-        ]
+        try:
+            cursor.execute('''
+                SELECT pt.id, pt.farmacoId, f.principio_attivo, f.nomi_commerciali, 
+                       f.categoria, f.indicazioni, f.posologia_standard,
+                       p.nome as posologia_custom, d.nome as durata_custom, 
+                       nt.testo as note_custom, pt.ordine
+                FROM protocolli_terapeutici pt
+                JOIN farmaci f ON pt.farmacoId = f.id
+                LEFT JOIN posologie p ON pt.posologiaId = p.id
+                LEFT JOIN durate d ON pt.durataId = d.id
+                LEFT JOIN note_terapeutiche nt ON pt.noteId = nt.id
+                WHERE pt.diagnosiId = ? AND pt.attivo = 1
+                ORDER BY pt.ordine, f.principio_attivo
+            ''', (diagnosi_id,))
+            
+            results = cursor.fetchall()
+            
+            return [
+                {
+                    'protocollo_id': row[0],
+                    'farmaco_id': row[1],
+                    'principio_attivo': row[2],
+                    'nomi_commerciali': row[3],
+                    'categoria': row[4],
+                    'indicazioni': row[5],
+                    'posologia_standard': row[6],
+                    'posologia_custom': row[7],
+                    'durata_custom': row[8],
+                    'note_custom': row[9],
+                    'ordine': row[10]
+                }
+                for row in results
+            ]
+        except Exception as e:
+            print(f"Errore nel recupero protocolli per diagnosi {diagnosi_id}: {e}")
+            return []
+        finally:
+            conn.close()
     
     @staticmethod
     def get_all_farmaci(categoria: str = None) -> List[Dict[str, Any]]:

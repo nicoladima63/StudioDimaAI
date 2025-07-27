@@ -72,7 +72,7 @@ export async function getRicettaAuthStatus() {
 // === NUOVE API PER PROTOCOLLI TERAPEUTICI ===
 
 export interface Diagnosi {
-  id: string;
+  id: number;
   codice: string;
   descrizione: string;
   num_farmaci: number;
@@ -97,20 +97,26 @@ export interface FarmacoProtocollo {
 
 export async function getDiagnosiDisponibili(): Promise<Diagnosi[]> {
   const response = await apiClient.get('/api/protocolli/diagnosi');
-  return response.data.data;
+  return response.data.diagnosi;
 }
 
-export async function getFarmaciPerDiagnosi(diagnosiId: string): Promise<FarmacoProtocollo[]> {
-  const response = await apiClient.get(`/api/protocolli/farmaci/${diagnosiId}`);
-  return response.data.data;
+export async function getFarmaciPerDiagnosi(diagnosiId: number): Promise<FarmacoProtocollo[]> {
+  const response = await apiClient.get(`/api/protocolli/diagnosi/${diagnosiId}/protocolli`);
+  const protocolli = response.data.protocolli;
+  
+  // Mappa ProtocolloTerapeutico[] a FarmacoProtocollo[] 
+  return (protocolli || []).map((p: any) => ({
+    codice: `${p.farmaco_id}`,
+    nome: p.nomi_commerciali,
+    principio_attivo: p.principio_attivo,
+    classe: p.categoria,
+    posologia_default: p.posologia_custom || p.posologia_standard,
+    durata_default: p.durata_custom || 'Non specificata',
+    note_default: p.note_custom || '',
+    posologie_alternative: []
+  }));
 }
 
-export async function getPosologiePerFarmaco(principioAttivo: string): Promise<string[]> {
-  const response = await apiClient.get('/api/protocolli/posologie', {
-    params: { principio_attivo: principioAttivo }
-  });
-  return response.data.data;
-}
 
 export async function getDurateStandard(): Promise<string[]> {
   const response = await apiClient.get('/api/protocolli/durate');

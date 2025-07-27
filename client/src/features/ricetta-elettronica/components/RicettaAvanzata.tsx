@@ -7,7 +7,6 @@ import {
 import {
   getDiagnosiDisponibili,
   getFarmaciPerDiagnosi, 
-  getPosologiePerFarmaco,
   getDurateStandard,
   getNoteFrequenti,
   inviaRicetta,
@@ -49,7 +48,6 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
   const [farmacoSelezionato, setFarmacoSelezionato] = useState<FarmacoProtocollo | null>(null);
 
   // Posologie e durate
-  const [posologieDisponibili, setPosologieDisponibili] = useState<string[]>([]);
   const [posologia, setPosologia] = useState("");
   const [durateStandard, setDurateStandard] = useState<string[]>([]);
   const [durata, setDurata] = useState("");
@@ -116,21 +114,6 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
     }
   }, [diagnosiSelezionata, autoMode]);
 
-  // Quando cambia il farmaco, carica posologie
-  useEffect(() => {
-    if (farmacoSelezionato && autoMode) {
-      const loadPosologie = async () => {
-        try {
-          const posologie = await getPosologiePerFarmaco(farmacoSelezionato.principio_attivo);
-          setPosologieDisponibili(posologie);
-        } catch (error) {
-          console.error('Errore caricamento posologie:', error);
-        }
-      };
-
-      loadPosologie();
-    }
-  }, [farmacoSelezionato, autoMode]);
 
   const fetchPazienti = async (q: string): Promise<PazienteCompleto[]> => {
     const ql = q.toLowerCase();
@@ -142,7 +125,7 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
   };
 
   const handleDiagnosiChange = (diagnosiId: string) => {
-    const diagnosi = diagnosiDisponibili.find(d => d.id === diagnosiId);
+    const diagnosi = diagnosiDisponibili.find(d => d.id === parseInt(diagnosiId));
     setDiagnosiSelezionata(diagnosi || null);
     
     // Reset farmaco
@@ -216,12 +199,33 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
     };
 
     try {
-      await inviaRicetta(payload);
-      alert("Ricetta inviata con successo.");
+      const response = await inviaRicetta(payload);
+      
+      if (response.success && response.data) {
+        const { nre, pin_ricetta, protocollo_transazione } = response.data;
+        
+        if (nre && pin_ricetta) {
+          alert(`✅ Ricetta inviata con successo!\n\n📋 NRE: ${nre}\n🔑 PIN: ${pin_ricetta}${protocollo_transazione ? `\n🔗 Protocollo: ${protocollo_transazione}` : ''}\n\nConserva questi dati per eventuali annullamenti.`);
+        } else {
+          alert("✅ Ricetta inviata con successo al Sistema TS.");
+        }
+      } else {
+        alert("✅ Ricetta inviata con successo.");
+      }
+      
       setShowConferma(false);
+      
+      // Reset form dopo invio riuscito
+      setPazienteSelezionato(null);
+      setDiagnosiSelezionata(null);
+      setFarmacoSelezionato(null);
+      setPosologia("");
+      setDurata("");
+      setNote("");
+      
     } catch (err) {
       console.error("Errore invio ricetta:", err);
-      alert("Errore durante l'invio della ricetta.");
+      alert("❌ Errore durante l'invio della ricetta.");
     }
   };
 
@@ -291,7 +295,7 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
                     onChange={(e) => handleDiagnosiChange(e.target.value)}
                   >
                     <option value="">Seleziona diagnosi...</option>
-                    {diagnosiDisponibili.map(d => (
+                    {diagnosiDisponibili && diagnosiDisponibili.map(d => (
                       <option key={d.id} value={d.id}>
                         {d.codice} - {d.descrizione} ({d.num_farmaci} farmaci)
                       </option>
@@ -300,52 +304,42 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
                 </div>
 
                 {/* Farmaco */}
-                {farmaciDisponibili.length > 0 && (
-                  <div className="mb-3">
-                    <CFormLabel>💊 Farmaco</CFormLabel>
-                    <CFormSelect
-                      value={farmacoSelezionato?.codice || ''}
-                      onChange={(e) => handleFarmacoChange(e.target.value)}
-                    >
-                      <option value="">Seleziona farmaco...</option>
-                      {farmaciDisponibili.map(f => (
-                        <option key={f.codice} value={f.codice}>
-                          {f.nome} - {f.principio_attivo} 
-                          <CBadge color="secondary" className="ms-1">{f.classe}</CBadge>
-                        </option>
-                      ))}
-                    </CFormSelect>
-                    
-                    {farmacoSelezionato && (
-                      <small className="text-muted d-block mt-1">
-                        Codice: {farmacoSelezionato.codice} | Classe: {farmacoSelezionato.classe}
-                      </small>
-                    )}
-                  </div>
-                )}
+                <div className="mb-3">
+                  <CFormLabel>💊 Farmaco</CFormLabel>
+                  <CFormSelect
+                    value={farmacoSelezionato?.codice || ''}
+                    onChange={(e) => handleFarmacoChange(e.target.value)}
+                    disabled={!diagnosiSelezionata || farmaciDisponibili.length === 0}
+                  >
+                    <option value="">
+                      {!diagnosiSelezionata ? "Prima seleziona una diagnosi" : 
+                       farmaciDisponibili.length === 0 ? "Nessun farmaco disponibile" : 
+                       "Seleziona farmaco..."}
+                    </option>
+                    {farmaciDisponibili.map(f => (
+                      <option key={f.codice} value={f.codice}>
+                        {f.nome} - {f.principio_attivo} ({f.classe})
+                      </option>
+                    ))}
+                  </CFormSelect>
+                  
+                  {farmacoSelezionato && (
+                    <small className="text-muted d-block mt-1">
+                      Codice: {farmacoSelezionato.codice} | Classe: {farmacoSelezionato.classe}
+                    </small>
+                  )}
+                </div>
 
                 {/* Posologia */}
-                {(posologieDisponibili.length > 0 || !autoMode) && (
-                  <div className="mb-3">
-                    <CFormLabel>⏰ Posologia</CFormLabel>
-                    {autoMode && posologieDisponibili.length > 0 ? (
-                      <CFormSelect
-                        value={posologia}
-                        onChange={(e) => setPosologia(e.target.value)}
-                      >
-                        {posologieDisponibili.map(p => (
-                          <option key={p} value={p}>{p}</option>
-                        ))}
-                      </CFormSelect>
-                    ) : (
-                      <CFormInput
-                        value={posologia}
-                        onChange={(e) => setPosologia(e.target.value)}
-                        placeholder="es. 1 compressa ogni 8 ore"
-                      />
-                    )}
-                  </div>
-                )}
+                <div className="mb-3">
+                  <CFormLabel>⏰ Posologia</CFormLabel>
+                  <CFormInput
+                    value={posologia}
+                    onChange={(e) => setPosologia(e.target.value)}
+                    placeholder={!farmacoSelezionato ? "Prima seleziona un farmaco" : "es. 1 compressa ogni 8 ore"}
+                    disabled={!farmacoSelezionato}
+                  />
+                </div>
 
                 {/* Durata */}
                 <div className="mb-3">
@@ -354,8 +348,11 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
                     <CFormSelect
                       value={durata}
                       onChange={(e) => setDurata(e.target.value)}
+                      disabled={!farmacoSelezionato}
                     >
-                      <option value="">Seleziona durata...</option>
+                      <option value="">
+                        {!farmacoSelezionato ? "Prima seleziona un farmaco" : "Seleziona durata..."}
+                      </option>
                       {durateStandard.map(d => (
                         <option key={d} value={d}>{d}</option>
                       ))}
@@ -364,7 +361,8 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
                     <CFormInput
                       value={durata}
                       onChange={(e) => setDurata(e.target.value)}
-                      placeholder="es. 5 giorni"
+                      placeholder={!farmacoSelezionato ? "Prima seleziona un farmaco" : "es. 5 giorni"}
+                      disabled={!farmacoSelezionato}
                     />
                   )}
                 </div>
@@ -378,7 +376,8 @@ export default function RicettaAvanzata({ datiMedico }: { datiMedico: DatiMedico
                         value={note} 
                         onChange={(e) => setNote(e.target.value)}
                         rows={2}
-                        placeholder="Note aggiuntive..."
+                        placeholder={!farmacoSelezionato ? "Prima seleziona un farmaco" : "Note aggiuntive..."}
+                        disabled={!farmacoSelezionato}
                       />
                       <div className="mt-2">
                         <small className="text-muted">Note frequenti:</small>

@@ -16,7 +16,6 @@ const GestioneProtocolli: React.FC = () => {
   // State per dati
   const [diagnosi, setDiagnosi] = useState<Diagnosi[]>([]);
   const [farmaci, setFarmaci] = useState<Farmaco[]>([]);
-  const [farmaciBase, setFarmaciBase] = useState<Farmaco[]>([]);
   const [categorieFarmaci, setCategorieFarmaci] = useState<string[]>([]);
   const [protocolli, setProtocolli] = useState<ProtocolloTerapeutico[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +34,7 @@ const GestioneProtocolli: React.FC = () => {
 
   // Form states
   const [formDiagnosi, setFormDiagnosi] = useState({
+    id: '',
     codice: '',
     descrizione: '',
     categoria: ''
@@ -103,9 +103,12 @@ const GestioneProtocolli: React.FC = () => {
     
     try {
       const protocolliData = await protocolliService.getProtocolliPerDiagnosi(selectedDiagnosi.id);
-      setProtocolli(protocolliData);
+      setProtocolli(protocolliData || []);
+      setError('');
     } catch (error) {
       console.error('Errore caricamento protocolli:', error);
+      setProtocolli([]);
+      setError('Errore nel caricamento dei protocolli');
     }
   };
 
@@ -121,7 +124,7 @@ const GestioneProtocolli: React.FC = () => {
   // Handlers per Diagnosi
   const handleCreateDiagnosi = () => {
     setEditingDiagnosi(null);
-    setFormDiagnosi({ id: '', codice: '', descrizione: '' });
+    setFormDiagnosi({ id: '', codice: '', descrizione: '', categoria: '' });
     setShowModalDiagnosi(true);
   };
 
@@ -187,7 +190,7 @@ const GestioneProtocolli: React.FC = () => {
       await loadData();
       if (selectedDiagnosi?.id === diagnosi.id) {
         setSelectedDiagnosi(null);
-        setFarmaciAssociati([]);
+        setProtocolli([]);
       }
     } catch (error) {
       console.error('Errore eliminazione diagnosi:', error);
@@ -202,15 +205,27 @@ const GestioneProtocolli: React.FC = () => {
     setShowModalAssociazione(true);
   };
 
-  const handleEditAssociazione = (associazione: FarmacoAssociato) => {
-    setEditingAssociazione(associazione);
+  const handleEditAssociazione = (protocollo: ProtocolloTerapeutico) => {
+    setEditingAssociazione(protocollo);
     setFormAssociazione({
-      farmaco_codice: associazione.farmaco_codice,
-      posologia: associazione.posologia,
-      durata: associazione.durata,
-      note: associazione.note
+      farmaco_codice: protocollo.farmaco_id.toString(),
+      posologia: protocollo.posologia_custom || protocollo.posologia_standard,
+      durata: protocollo.durata_custom || '',
+      note: protocollo.note_custom || ''
     });
     setShowModalAssociazione(true);
+  };
+
+  const handleFarmacoChange = (farmacoId: string) => {
+    const farmaco = farmaci.find(f => f.id === parseInt(farmacoId));
+    
+    setFormAssociazione({
+      ...formAssociazione, 
+      farmaco_codice: farmacoId,
+      posologia: farmaco?.posologia_standard || '',
+      durata: '', // Il farmaco non ha durata standard, lasciamo vuoto
+      note: farmaco?.note || ''
+    });
   };
 
   const handleSaveAssociazione = async () => {
@@ -218,31 +233,38 @@ const GestioneProtocolli: React.FC = () => {
     
     try {
       if (editingAssociazione) {
-        await protocolliService.updateFarmacoAssociazione(editingAssociazione.id, {
-          posologia: formAssociazione.posologia,
-          durata: formAssociazione.durata,
-          note: formAssociazione.note
+        await protocolliService.updateProtocollo(editingAssociazione.protocollo_id, {
+          posologia_custom: formAssociazione.posologia,
+          durata_custom: formAssociazione.durata,
+          note_custom: formAssociazione.note
         });
       } else {
-        await protocolliService.addFarmacoToDiagnosi(selectedDiagnosi.id, formAssociazione);
+        await protocolliService.createProtocollo({
+          diagnosiId: selectedDiagnosi.id,
+          farmacoId: parseInt(formAssociazione.farmaco_codice),
+          posologia_custom: formAssociazione.posologia,
+          durata_custom: formAssociazione.durata,
+          note_custom: formAssociazione.note,
+          ordine: 0
+        });
       }
       
-      await loadFarmaciAssociati();
+      await loadProtocolli();
       setShowModalAssociazione(false);
     } catch (error) {
-      console.error('Errore salvataggio associazione:', error);
+      console.error('Errore salvataggio protocollo:', error);
       alert('Errore durante il salvataggio');
     }
   };
 
-  const handleDeleteAssociazione = async (associazione: FarmacoAssociato) => {
-    if (!confirm('Eliminare questa associazione farmaco?')) return;
+  const handleDeleteAssociazione = async (protocollo: ProtocolloTerapeutico) => {
+    if (!confirm('Eliminare questo protocollo terapeutico?')) return;
     
     try {
-      await protocolliService.deleteFarmacoAssociazione(associazione.id);
-      await loadFarmaciAssociati();
+      await protocolliService.deleteProtocollo(protocollo.protocollo_id);
+      await loadProtocolli();
     } catch (error) {
-      console.error('Errore eliminazione associazione:', error);
+      console.error('Errore eliminazione protocollo:', error);
       alert('Errore durante l\'eliminazione');
     }
   };
@@ -294,7 +316,7 @@ const GestioneProtocolli: React.FC = () => {
                       <CTableDataCell><strong>{d.codice}</strong></CTableDataCell>
                       <CTableDataCell>{d.descrizione}</CTableDataCell>
                       <CTableDataCell>
-                        <CBadge color="info">{d.num_associazioni}</CBadge>
+                        <CBadge color="info">{d.num_farmaci || 0}</CBadge>
                       </CTableDataCell>
                       <CTableDataCell>
                         <CButton 
@@ -387,26 +409,26 @@ const GestioneProtocolli: React.FC = () => {
                     <small>{selectedDiagnosi.descrizione}</small>
                   </div>
                   
-                  {!farmaciAssociati || farmaciAssociati.length === 0 ? (
+                  {!protocolli || protocolli.length === 0 ? (
                     <p className="text-muted">Nessun farmaco associato</p>
                   ) : (
                     <div>
-                      {farmaciAssociati.map((farmaco) => (
-                        <CCard key={farmaco.id} className="mb-2">
+                      {protocolli.map((protocollo) => (
+                        <CCard key={protocollo.protocollo_id} className="mb-2">
                           <CCardBody className="py-2">
                             <div className="d-flex justify-content-between align-items-start">
                               <div>
-                                <strong>{farmaco.nome}</strong>
+                                <strong>{protocollo.principio_attivo}</strong>
                                 <br />
-                                <small>Principio: {farmaco.principio_attivo}</small>
+                                <small>Nomi commerciali: {protocollo.nomi_commerciali}</small>
                                 <br />
-                                <small>Posologia: {farmaco.posologia}</small>
+                                <small>Posologia: {protocollo.posologia_custom || protocollo.posologia_standard}</small>
                                 <br />
-                                <small>Durata: {farmaco.durata}</small>
-                                {farmaco.note && (
+                                <small>Durata: {protocollo.durata_custom || 'Non specificata'}</small>
+                                {protocollo.note_custom && (
                                   <>
                                     <br />
-                                    <small>Note: {farmaco.note}</small>
+                                    <small>Note: {protocollo.note_custom}</small>
                                   </>
                                 )}
                               </div>
@@ -415,14 +437,14 @@ const GestioneProtocolli: React.FC = () => {
                                   color="warning" 
                                   size="sm" 
                                   className="me-1"
-                                  onClick={() => handleEditAssociazione(farmaco)}
+                                  onClick={() => handleEditAssociazione(protocollo)}
                                 >
                                   ✏️
                                 </CButton>
                                 <CButton 
                                   color="danger" 
                                   size="sm"
-                                  onClick={() => handleDeleteAssociazione(farmaco)}
+                                  onClick={() => handleDeleteAssociazione(protocollo)}
                                 >
                                   🗑️
                                 </CButton>
@@ -536,10 +558,10 @@ const GestioneProtocolli: React.FC = () => {
                 <CFormLabel>Farmaco</CFormLabel>
                 <CFormSelect
                   value={formAssociazione.farmaco_codice}
-                  onChange={(e) => setFormAssociazione({...formAssociazione, farmaco_codice: e.target.value})}
+                  onChange={(e) => handleFarmacoChange(e.target.value)}
                 >
                   <option value="">Seleziona farmaco...</option>
-                  {farmaciBase && farmaciBase.map(farmaco => (
+                  {farmaci && farmaci.map(farmaco => (
                     <option key={farmaco.id} value={farmaco.id}>
                       {farmaco.principio_attivo} - {farmaco.nomi_commerciali}
                     </option>

@@ -3,6 +3,7 @@ import Card from '@/components/ui/Card';
 import RicettaAvanzata from '../components/RicettaAvanzata';
 import RicettaAuthStatus from '../components/RicettaAuthStatus';
 import GestioneProtocolli from '../components/GestioneProtocolli';
+import TestInvioRicetta from '../components/TestInvioRicetta';
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react';
 
 // Dati reali del medico
@@ -50,6 +51,15 @@ const RicettaElettronicaPage: React.FC = () => {
               ⚙️ Gestione Protocolli
             </CNavLink>
           </CNavItem>
+          <CNavItem>
+            <CNavLink
+              active={activeTab === 'test'}
+              onClick={() => setActiveTab('test')}
+              role="tab"
+            >
+              🧪 Test Invio
+            </CNavLink>
+          </CNavItem>
         </CNav>
 
         {/* Tab Content */}
@@ -60,6 +70,10 @@ const RicettaElettronicaPage: React.FC = () => {
 
           <CTabPane visible={activeTab === 'protocolli'} role="tabpanel">
             <GestioneProtocolli />
+          </CTabPane>
+
+          <CTabPane visible={activeTab === 'test'} role="tabpanel">
+            <TestInvioRicetta />
           </CTabPane>
         </CTabContent>
       </Card>

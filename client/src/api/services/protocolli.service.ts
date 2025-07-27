@@ -4,8 +4,8 @@ export interface Diagnosi {
   id: number;
   codice: string;
   descrizione: string;
-  categoria: string;
-  num_protocolli: number;
+  categoria?: string;
+  num_farmaci?: number;
 }
 
 export interface Farmaco {

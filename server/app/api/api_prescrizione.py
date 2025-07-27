@@ -1,5 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file, Response
 from flask_jwt_extended import jwt_required
+import base64
+import io
+from datetime import datetime
 from server.app.ricetta_elettronica.utils import (
     cerca_diagnosi, cerca_farmaci, get_diagnosi_disponibili, 
     get_farmaci_per_diagnosi, get_posologie_per_farmaco, 
@@ -216,6 +219,64 @@ def invia_ricetta_completa():
         result = ricetta_service.invia_ricetta(ricetta_data)
         
         if result['success']:
+            # Salva ricetta nel database se ha i dati necessari
+            if result.get('nre') and result.get('pin_ricetta'):
+                try:
+                    from ..core.ricette_db import RicetteDB
+                    
+                    # Prepara dati completi per il database
+                    ricetta_db_data = {
+                        'nre': result['nre'],
+                        'codice_pin': result['pin_ricetta'],
+                        'protocollo_transazione': result.get('protocollo_transazione'),
+                        'stato': 'inviata',
+                        
+                        # Dati medico
+                        'cf_medico': data.get('medico', {}).get('cfMedico', ricetta_data.get('cf_medico', '')),
+                        'medico_cognome': data.get('medico', {}).get('cognome', ''),
+                        'medico_nome': data.get('medico', {}).get('nome', ''),
+                        'specializzazione': data.get('medico', {}).get('specializzazione', 'F'),
+                        'nr_iscrizione_albo': ricetta_data['num_iscrizione'],
+                        'medico_indirizzo': data.get('medico', {}).get('indirizzo', ''),
+                        'medico_telefono': data.get('medico', {}).get('telefono', ''),
+                        
+                        # Dati paziente
+                        'cf_assistito': ricetta_data['cf_assistito'],
+                        'paziente_cognome': paziente.get('cognome', ''),
+                        'paziente_nome': paziente.get('nome', ''),
+                        'paziente_indirizzo': paziente.get('indirizzo', ''),
+                        'paziente_cap': paziente.get('cap', ''),
+                        'paziente_citta': paziente.get('citta', ''),
+                        'paziente_provincia': paziente.get('provincia', ''),
+                        
+                        # Dati prescrizione
+                        'data_compilazione': datetime.now(),
+                        'tipo_prescrizione': 'farmaceutica',
+                        'codice_diagnosi': ricetta_data['codice_diagnosi'],
+                        'descrizione_diagnosi': ricetta_data['descrizione_diagnosi'],
+                        
+                        # Dati farmaco
+                        'gruppo_equivalenza_farmaco': ricetta_data['principio_attivo'],
+                        'prodotto_aic': ricetta_data['denominazione_farmaco'],
+                        'codice_farmaco': ricetta_data['codice_farmaco'],
+                        'quantita': 1,
+                        'posologia': ricetta_data['posologia'],
+                        'durata_trattamento': ricetta_data['durata'],
+                        'note': ricetta_data['note'],
+                        
+                        # Metadati
+                        'ambiente': 'test' if 'test' in ricetta_service.endpoint_invio else 'prod',
+                        'response_xml': result['response_xml'],
+                        'request_payload': str(data)
+                    }
+                    
+                    ricetta_id = RicetteDB.save_ricetta(ricetta_db_data)
+                    logger.info(f"Ricetta salvata nel database con ID: {ricetta_id}, NRE: {result['nre']}")
+                    
+                except Exception as e:
+                    logger.error(f"Errore salvataggio ricetta nel database: {e}")
+                    # Non fallisce l'invio se il salvataggio DB fallisce
+            
             return jsonify({
                 'success': True,
                 'message': 'Ricetta inviata con successo al Sistema TS',
@@ -569,4 +630,74 @@ def delete_farmaco_diagnosi(diagnosi_id, farmaco_codice):
         return jsonify({
             'success': False,
             'error': f'Errore eliminazione farmaco: {str(e)}'
-        }), 500 
+        }), 500
+
+@prescrizione_bp.route("/ricetta/pdf/<protocollo_transazione>", methods=['GET'])
+def download_ricetta_pdf(protocollo_transazione):
+    """
+    Scarica il PDF della ricetta dato il protocollo di transazione
+    """
+    try:
+        # In un'implementazione reale, dovresti recuperare il PDF dal database
+        # usando il protocollo_transazione per identificare la ricetta
+        
+        # Per ora, simuliamo che il PDF sia disponibile nella risposta più recente
+        # In produzione dovresti implementare un sistema di storage dei PDF
+        
+        return jsonify({
+            'success': False,
+            'error': 'PDF non trovato - implementare storage PDF nel database'
+        }), 404
+        
+    except Exception as e:
+        logger.error(f"Errore download PDF ricetta: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore download PDF: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/pdf/base64", methods=['POST'])
+def convert_pdf_base64():
+    """
+    Converte PDF base64 in file scaricabile
+    """
+    try:
+        data = request.get_json()
+        
+        if not data or 'pdf_base64' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'PDF base64 mancante'
+            }), 400
+        
+        pdf_b64 = data['pdf_base64']
+        filename = data.get('filename', 'ricetta_elettronica.pdf')
+        
+        # Decodifica base64
+        try:
+            pdf_bytes = base64.b64decode(pdf_b64)
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': f'Errore decodifica base64: {str(e)}'
+            }), 400
+        
+        # Crea response con PDF
+        response = Response(
+            pdf_bytes,
+            mimetype='application/pdf',
+            headers={
+                'Content-Disposition': f'attachment; filename="{filename}"',
+                'Content-Type': 'application/pdf',
+                'Content-Length': str(len(pdf_bytes))
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Errore conversione PDF: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore conversione PDF: {str(e)}'
+        }), 500
