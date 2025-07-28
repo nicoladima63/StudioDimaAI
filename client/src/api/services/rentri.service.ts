@@ -173,9 +173,6 @@ export async function testRentriAuthorization() {
     const response = await apiClient.post('/api/rentri/auth-test');
     return response.data;
   } catch (error) {
-    console.error('🔴 Frontend: Errore nella chiamata:', error);
-    console.error('🔴 Frontend: Dettagli errore:', error.response?.status, error.response?.data);
-    console.error('🔴 Frontend: URL effettivo:', error.config?.url);
     throw error;
   }
 }

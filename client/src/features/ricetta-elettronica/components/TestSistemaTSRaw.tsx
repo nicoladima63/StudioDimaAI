@@ -16,12 +16,10 @@ const TestSistemaTSRaw: React.FC = () => {
     setResponse(null);
 
     try {
-      console.log('Chiamata diretta al Sistema TS per lista ricette...');
       
       // Chiamata diretta all'endpoint modificato senza force_local
       const result = await apiClient.get('/api/ricetta/database/list');
       
-      console.log('Risposta ricevuta:', result.data);
       setResponse(result.data);
       
     } catch (err: any) {

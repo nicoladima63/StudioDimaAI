@@ -16,6 +16,9 @@ import os
 import sys
 from pathlib import Path
 from cryptography.hazmat.primitives import serialization
+import logging
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 P12_PATH = os.getenv('RENTRI_P12_PATH', 'DMRNCL63S21D612I.P12')
@@ -116,14 +119,14 @@ def get_auth_headers(body_json: str, demo=False) -> Dict[str, str]:
 if __name__ == "__main__":
     demo = '--demo' in sys.argv
     ambiente = 'DEMO' if demo else 'PRODUZIONE'
-    print(f"Ambiente selezionato: {ambiente}")
+    logger.info(f"Ambiente selezionato: {ambiente}")
     try:
         body = '{}'
         token = genera_jwt(demo=demo)
-        print(f"Token JWT: {token}\n")
+        logger.info(f"Token JWT: {token}")
         headers = get_auth_headers(body, demo=demo)
-        print("Headers per autenticazione:")
+        logger.info("Headers per autenticazione:")
         for k, v in headers.items():
-            print(f"{k}: {v}")
+            logger.info(f"{k}: {v}")
     except Exception as e:
-        print(f"[ERRORE] {e}")
+        logger.error(f"Errore: {e}")

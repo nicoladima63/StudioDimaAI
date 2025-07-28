@@ -2,6 +2,9 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from datetime import datetime
 from server.app.services.incassi_service import IncassiService
+import logging
+
+logger = logging.getLogger(__name__)
 
 fatture_bp = Blueprint('fatture', __name__, url_prefix='/api/fatture')
 service = IncassiService()
@@ -28,6 +31,5 @@ def get_anni_fatture():
         anni = service.get_anni_disponibili()
         return jsonify(anni)
     except Exception as e:
-        # Considera un logging più robusto in produzione
-        print(f"Errore nel recuperare gli anni delle fatture: {e}")
+        logger.error(f"Errore nel recuperare gli anni delle fatture: {e}", exc_info=True)
         return jsonify({"errore": "Impossibile recuperare gli anni"}), 500

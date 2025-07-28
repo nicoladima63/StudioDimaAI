@@ -199,27 +199,22 @@ const handleSync = async () => {
   setSyncTotal(0);
 
   try {
-    console.log(`🚀 Avvio sincronizzazione Studio ${studioId} su calendario:`, selectedCalendar);
     
     // Avvia la sincronizzazione asincrona con il parametro studio_id
     const response = await CalendarService.startSync(selectedCalendar, selectedMonth + 1, currentYear, studioId);
     
-    console.log('📋 Risposta sync:', response);
     const { job_id } = response;  // Nota: non response.data ma response direttamente
     
     if (!job_id) {
       throw new Error('Job ID non ricevuto dal server');
     }
     
-    console.log('🔑 Job ID ricevuto:', job_id);
     setSyncJobId(job_id);
     
     // Inizia il polling per monitorare il progresso
     const pollSyncStatus = async () => {
       try {
-        console.log('🔄 Polling status per job:', job_id);
         const statusResponse = await CalendarService.getSyncStatus(job_id);
-        console.log('📊 Status ricevuto:', statusResponse);
         
         // Controlla se statusResponse ha la struttura corretta
         if (!statusResponse || typeof statusResponse !== 'object') {
@@ -237,7 +232,6 @@ const handleSync = async () => {
         }
         
         if (status === 'completed') {
-          console.log('✅ Sincronizzazione completata');
           setSyncStatus('completed');
           setSyncModalMessage('Sincronizzazione completata con successo!');
           // Chiudi automaticamente la modal dopo 2 secondi
@@ -252,7 +246,6 @@ const handleSync = async () => {
           setSyncModalMessage(`Errore: ${error || 'Errore sconosciuto'}`);
           return;
         } else if (status === 'cancelled') {
-          console.log('❌ Sincronizzazione cancellata');
           setSyncStatus('cancelled');
           setSyncModalMessage('Sincronizzazione interrotta dall\'utente');
           setSyncCancelling(false);
@@ -288,7 +281,6 @@ const handleSync = async () => {
     setSyncCancelling(true);
     try {
       await CalendarService.cancelSyncJob(syncJobId);
-      console.log('🛑 Richiesta di cancellazione inviata');
     } catch (error) {
       console.error('❌ Errore durante la cancellazione:', error);
       setSyncCancelling(false);
@@ -316,7 +308,6 @@ const handleSync = async () => {
     setClearError(null);
 
     try {
-      console.log('🚀 Avvio cancellazione tutti i calendari');
       
       // Avvia la cancellazione asincrona
       const response = await CalendarService.startClearAll();
@@ -326,14 +317,11 @@ const handleSync = async () => {
         throw new Error('Job ID non ricevuto dal server');
       }
       
-      console.log('🔑 Clear Job ID ricevuto:', job_id);
       
       // Inizia il polling per monitorare il progresso
       const pollClearStatus = async () => {
         try {
-          console.log('🔄 Polling clear status per job:', job_id);
           const statusResponse = await CalendarService.getClearAllStatus(job_id);
-          console.log('📊 Clear Status ricevuto:', statusResponse);
           
           const { status, progress, deleted, message, error } = statusResponse;
           
@@ -341,7 +329,6 @@ const handleSync = async () => {
           setClearDeleted(deleted || 0);
           
           if (status === 'completed') {
-            console.log('✅ Cancellazione completata');
             setClearStatus('completed');
             toast.success(`Cancellazione completata! ${deleted} eventi rimossi.`);
             setTimeout(() => {
@@ -355,7 +342,6 @@ const handleSync = async () => {
             toast.error(error || 'Errore durante la cancellazione');
             return;
           } else if (status === 'cancelled') {
-            console.log('⏹️ Cancellazione annullata');
             setClearStatus('idle');
             toast.info('Cancellazione annullata');
             return;

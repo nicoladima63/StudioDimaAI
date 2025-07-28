@@ -83,10 +83,8 @@ const TestInvioRicetta: React.FC = () => {
     };
 
     try {
-      console.log('Invio payload test:', payload);
       const result = await inviaRicetta(payload);
       setResponse(result);
-      console.log('Risposta ricevuta:', result);
     } catch (err: any) {
       console.error('Errore test invio:', err);
       setError(err.message || 'Errore durante il test di invio');

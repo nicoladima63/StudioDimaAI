@@ -84,10 +84,10 @@ def get_auth_headers():
 if __name__ == "__main__":
     try:
         token = get_token()
-        print(f"Token valido: {token}\n")
+        logger.info(f"Token valido: {token}")
         headers = get_auth_headers()
-        print("Headers per autenticazione:")
+        logger.info("Headers per autenticazione:")
         for k, v in headers.items():
-            print(f"{k}: {v}")
+            logger.info(f"{k}: {v}")
     except Exception as e:
-        print(f"[ERRORE] {e}")
+        logger.error(f"Errore: {e}")

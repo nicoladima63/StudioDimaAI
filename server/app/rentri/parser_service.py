@@ -8,14 +8,17 @@ import json
 from datetime import datetime
 from pyzbar.pyzbar import decode as decode_qr
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Path assoluto di Poppler rispetto alla root del progetto
 POPLER_PATH = str(Path(__file__).resolve().parents[3] / 'poppler' / 'Library' / 'bin')
 TESSERACT_PATH = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def estrai_testo_con_ocr(pdf_path):
-    print(f"DEBUG: poppler_path = {POPLER_PATH}")
-    print(f"DEBUG: tesseract_path = {TESSERACT_PATH}")
+    logger.debug(f"poppler_path = {POPLER_PATH}")
+    logger.debug(f"tesseract_path = {TESSERACT_PATH}")
     pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
     immagini = convert_from_path(pdf_path, poppler_path=POPLER_PATH)
     testo = ""
@@ -83,7 +86,7 @@ def estrai_tutti_i_fir(data_dir):
                         return {}
                     return json.loads(contenuto)
             except Exception as e:
-                print(f"[ATTENZIONE] Errore nel registro JSON: {e}. Verrà ricreato da zero.")
+                logger.warning(f"Errore nel registro JSON: {e}. Verrà ricreato da zero.")
                 return {}
         return {}
     def salva_registro(registro):

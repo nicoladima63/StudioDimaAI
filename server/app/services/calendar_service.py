@@ -633,7 +633,7 @@ class CalendarService:
             access_type='offline',
             prompt='select_account consent'
         )
-        print(f"Generated auth URL: {auth_url}")  # Debug
+        logger.debug(f"Generated auth URL: {auth_url}")
         return auth_url
     
     @staticmethod

@@ -2,6 +2,9 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from server.app.services.calendar_service import CalendarService
 from datetime import date, datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 kpi_bp = Blueprint('kpi', __name__, url_prefix='/api/kpi')
 
@@ -37,9 +40,7 @@ def get_stats():
             'percentuale_prossimo': 0
         }})
     except Exception as e:
-        import traceback
-        print("ERRORE IN get_stats:")
-        print(traceback.format_exc())
+        logger.error("Errore in get_stats", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @kpi_bp.route('/prime-visite', methods=['GET'])

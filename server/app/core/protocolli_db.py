@@ -3,6 +3,9 @@ import os
 import json
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Path del database nella cartella instance
 INSTANCE_DIR = os.path.join(os.path.dirname(__file__), '../../instance')
@@ -145,9 +148,9 @@ def load_initial_data():
                     ''', (codice, descrizione, categoria))
                     diagnosi_count += 1
             
-            print(f"Caricate {diagnosi_count} diagnosi")
+            logger.info(f"Caricate {diagnosi_count} diagnosi")
         else:
-            print(f"File diagnosi non trovato: {diagnosi_path}")
+            logger.warning(f"File diagnosi non trovato: {diagnosi_path}")
         
         # Carica farmaci da farmaci.txt
         farmaci_path = os.path.join(os.path.dirname(__file__), '../../../farmaci.txt')
@@ -185,15 +188,15 @@ def load_initial_data():
                     ''', (principio_attivo, posologia_standard, nomi_commerciali, indicazioni, categoria))
                     farmaci_count += 1
             
-            print(f"Caricati {farmaci_count} farmaci")
+            logger.info(f"Caricati {farmaci_count} farmaci")
         else:
-            print(f"File farmaci non trovato: {farmaci_path}")
+            logger.warning(f"File farmaci non trovato: {farmaci_path}")
         
         conn.commit()
-        print("Dati caricati dai file txt nella nuova struttura database")
+        logger.info("Dati caricati dai file txt nella nuova struttura database")
         
     except Exception as e:
-        print(f"Errore caricamento dati: {e}")
+        logger.error(f"Errore caricamento dati: {e}", exc_info=True)
         import traceback
         traceback.print_exc()
         conn.rollback()
@@ -272,7 +275,7 @@ class ProtocolliDB:
                 for row in results
             ]
         except Exception as e:
-            print(f"Errore nel recupero protocolli per diagnosi {diagnosi_id}: {e}")
+            logger.error(f"Errore nel recupero protocolli per diagnosi {diagnosi_id}: {e}", exc_info=True)
             return []
         finally:
             conn.close()
@@ -630,5 +633,5 @@ else:
     conn.close()
     
     if count == 0:
-        print("Database vuoto, caricamento dati iniziali...")
+        logger.info("Database vuoto, caricamento dati iniziali...")
         load_initial_data()

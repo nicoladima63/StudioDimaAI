@@ -1,5 +1,8 @@
 import json
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 BASE_PATH = Path(__file__).resolve().parent / "data"
 
@@ -32,7 +35,7 @@ def cerca_diagnosi(query: str):
             return risultati
             
     except Exception as e:
-        print(f"Errore nel caricamento diagnosi ICD10: {e}")
+        logger.error(f"Errore nel caricamento diagnosi ICD10: {e}")
     
     # Fallback ai dati ICD9 originali
     data = load_json_file("icd9_odontoiatria.json")
@@ -85,7 +88,7 @@ def cerca_farmaci(query: str):
             return risultati
             
     except Exception as e:
-        print(f"Errore nel caricamento farmaci AIC: {e}")
+        logger.error(f"Errore nel caricamento farmaci AIC: {e}")
     
     # Fallback ai dati ATC originali
     data = load_json_file("atc_farmaci.json")
@@ -123,7 +126,7 @@ def get_protocolli_terapeutici():
     try:
         return load_json_file("protocolli_terapeutici.json")
     except Exception as e:
-        print(f"Errore nel caricamento protocolli: {e}")
+        logger.error(f"Errore nel caricamento protocolli: {e}")
         return {}
 
 def get_diagnosi_disponibili():
@@ -144,7 +147,7 @@ def get_diagnosi_disponibili():
         
         return diagnosi
     except Exception as e:
-        print(f"Errore nel caricamento diagnosi: {e}")
+        logger.error(f"Errore nel caricamento diagnosi: {e}")
         return []
 
 def get_farmaci_per_diagnosi(diagnosi_id: str):
@@ -188,7 +191,7 @@ def get_farmaci_per_diagnosi(diagnosi_id: str):
         
         return farmaci
     except Exception as e:
-        print(f"Errore nel caricamento farmaci per diagnosi: {e}")
+        logger.error(f"Errore nel caricamento farmaci per diagnosi: {e}")
         return []
 
 def get_posologie_per_farmaco(principio_attivo: str):
@@ -206,7 +209,7 @@ def get_posologie_per_farmaco(principio_attivo: str):
         
         return []
     except Exception as e:
-        print(f"Errore nel caricamento posologie: {e}")
+        logger.error(f"Errore nel caricamento posologie: {e}")
         return []
 
 def get_durate_standard():
@@ -217,7 +220,7 @@ def get_durate_standard():
         data = load_json_file("protocolli_terapeutici.json")
         return data.get("durate_standard", [])
     except Exception as e:
-        print(f"Errore nel caricamento durate: {e}")
+        logger.error(f"Errore nel caricamento durate: {e}")
         return []
 
 def get_note_frequenti():
@@ -228,7 +231,7 @@ def get_note_frequenti():
         data = load_json_file("protocolli_terapeutici.json")
         return data.get("note_frequenti", [])
     except Exception as e:
-        print(f"Errore nel caricamento note: {e}")
+        logger.error(f"Errore nel caricamento note: {e}")
         return []
 
 def save_protocolli_terapeutici(data):
@@ -241,7 +244,7 @@ def save_protocolli_terapeutici(data):
             json.dump(data, f, ensure_ascii=False, indent=2)
         return {"success": True, "message": "Protocolli salvati con successo"}
     except Exception as e:
-        print(f"Errore nel salvataggio protocolli: {e}")
+        logger.error(f"Errore nel salvataggio protocolli: {e}")
         return {"success": False, "error": str(e)}
 
 def add_diagnosi(diagnosi_data):

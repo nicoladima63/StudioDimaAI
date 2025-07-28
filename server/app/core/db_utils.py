@@ -4,6 +4,9 @@ from typing import List, Dict, Any
 from dbfread import DBF
 from server.app.config.constants import DBF_TABLES, COLONNE
 from server.app.core.mode_manager import get_mode  # ← se usi il sistema "get_mode" da settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -28,7 +31,7 @@ def get_dbf_path(table_name: str) -> str:
         if not os.path.exists(final_path):
             global _fallback_warned
             if not _fallback_warned:
-                print(f"⚠️  Rete studio non disponibile, fallback automatico a modalità DEV")
+                logger.warning("Rete studio non disponibile, fallback automatico a modalità DEV")
                 _fallback_warned = True
             # Fallback automatico a dev
             base_path = os.path.join(BACKEND_DIR, 'windent')

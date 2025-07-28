@@ -116,10 +116,10 @@ class IncassiService:
                     try:
                         record_date = datetime.strptime(record_date, "%d/%m/%Y").date()
                     except ValueError:
-                        print(f"Data non valida: {record_date}")
+                        logger.warning(f"Data non valida: {record_date}")
                         continue
                 else:
-                    print(f"Tipo di dato non valido per la data: {record_date} ({type(record_date)})")
+                    logger.warning(f"Tipo di dato non valido per la data: {record_date} ({type(record_date)})")
                     continue
                 if data_inizio <= record_date < data_fine:
                     incassi.append({

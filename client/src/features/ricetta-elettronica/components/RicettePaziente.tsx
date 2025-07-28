@@ -47,7 +47,6 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
 
   const cercaRicette = async () => {
     if (!cfPaziente || cfPaziente.length < 10) {
-      console.log('CF paziente ricevuto:', cfPaziente, 'lunghezza:', cfPaziente?.length);
       setError('Codice fiscale paziente non valido');
       return;
     }

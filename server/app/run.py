@@ -55,10 +55,7 @@ def create_app(config_class: Optional[object] = Config) -> Flask:
     
     @app.errorhandler(500)
     def internal_error(error):
-        logger.error(f"Internal server error: {error}")
-        print(f"Internal server error: {error}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Internal server error: {error}", exc_info=True)
         return jsonify({'error': 'Internal server error', 'details': str(error)}), 500
     
     # Test routes AFTER blueprint registration

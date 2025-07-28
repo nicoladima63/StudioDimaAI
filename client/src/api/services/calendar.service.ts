@@ -32,11 +32,9 @@ export const CalendarService = {
   },
 
   async getSyncStatus(jobId: string) {
-    console.log('📞 Chiamata getSyncStatus per job:', jobId);
     const response = await apiClient.get('/api/calendar/sync-status', {
       params: { jobId }
     });
-    console.log('📨 Risposta getSyncStatus:', response.data);
     return response.data;
   },
 
