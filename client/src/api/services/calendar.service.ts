@@ -147,6 +147,21 @@ export const CalendarService = {
       triggerModeWarning(response.data.warning);
     }
     return response.data;
+  },
+
+  async startClearAll() {
+    const response = await apiClient.post('/api/calendar/clear-all/start');
+    return response.data;
+  },
+
+  async getClearAllStatus(jobId: string) {
+    const response = await apiClient.get(`/api/calendar/clear-all/status/${jobId}`);
+    return response.data;
+  },
+
+  async cancelClearAll(jobId: string) {
+    const response = await apiClient.post('/api/calendar/clear-all/cancel', { job_id: jobId });
+    return response.data;
   }
 };
 
@@ -165,5 +180,8 @@ export const {
   getAppuntamentiPerAnno,
   getAppuntamentiTotali,
   getAppointmentsByRange,
-  getAppointmentsWithModeWarning
+  getAppointmentsWithModeWarning,
+  startClearAll,
+  getClearAllStatus,
+  cancelClearAll
 } = CalendarService;

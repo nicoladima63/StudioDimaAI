@@ -312,40 +312,78 @@ const handleSync = async () => {
     setClearStatus('in_progress');
     setClearProgress(0);
     setClearDeleted(0);
-    setClearTotal(0);
+    setClearTotal(2); // 2 calendari totali
     setClearError(null);
 
     try {
-      const response = await CalendarService.clearCalendar(selectedCalendar);
+      console.log('🚀 Avvio cancellazione tutti i calendari');
       
-      // Gestione risposta di successo
-      setClearStatus('completed');
-      setClearDeleted(response.deleted_count);
+      // Avvia la cancellazione asincrona
+      const response = await CalendarService.startClearAll();
+      const { job_id } = response;
       
-      // Mostra messaggio appropriato in base al risultato
-      if (response.deleted_count === 0 && !response.error) {
-        // Calendario già vuoto
-        toast.info(response.message);
-      } else {
-        // Cancellazione completata con successo
-        toast.success(response.message);
+      if (!job_id) {
+        throw new Error('Job ID non ricevuto dal server');
       }
+      
+      console.log('🔑 Clear Job ID ricevuto:', job_id);
+      
+      // Inizia il polling per monitorare il progresso
+      const pollClearStatus = async () => {
+        try {
+          console.log('🔄 Polling clear status per job:', job_id);
+          const statusResponse = await CalendarService.getClearAllStatus(job_id);
+          console.log('📊 Clear Status ricevuto:', statusResponse);
+          
+          const { status, progress, deleted, message, error } = statusResponse;
+          
+          setClearProgress(progress || 0);
+          setClearDeleted(deleted || 0);
+          
+          if (status === 'completed') {
+            console.log('✅ Cancellazione completata');
+            setClearStatus('completed');
+            toast.success(`Cancellazione completata! ${deleted} eventi rimossi.`);
+            setTimeout(() => {
+              setClearStatus('idle');
+            }, 2000);
+            return;
+          } else if (status === 'error') {
+            console.error('❌ Errore nella cancellazione:', error);
+            setClearStatus('error');
+            setClearError(error || 'Errore durante la cancellazione');
+            toast.error(error || 'Errore durante la cancellazione');
+            return;
+          } else if (status === 'cancelled') {
+            console.log('⏹️ Cancellazione annullata');
+            setClearStatus('idle');
+            toast.info('Cancellazione annullata');
+            return;
+          }
+          
+          // Continua il polling se ancora in corso
+          if (status === 'in_progress') {
+            clearPollingRef.current = setTimeout(pollClearStatus, 1000);
+          }
+          
+        } catch (pollError) {
+          console.error('Errore polling clear status:', pollError);
+          setClearStatus('error');
+          setClearError('Errore nel monitoraggio del progresso');
+          toast.error('Errore nel monitoraggio del progresso');
+        }
+      };
+      
+      // Avvia il polling
+      pollClearStatus();
+      
     } catch (error) {
       setClearStatus('error');
+      console.error('Errore durante avvio cancellazione:', error);
       
-      // Gestisci i vari tipi di errore
-      if (error.message) {
-        // Usa il messaggio di errore dal server
-        setClearError(error.message);
-        toast.error(error.message);
-      } else {
-        // Fallback per errori imprevisti
-        const genericError = "Si è verificato un errore durante la cancellazione. Riprova più tardi.";
-        setClearError(genericError);
-        toast.error(genericError);
-      }
-      
-      console.error('Errore durante la cancellazione:', error);
+      const errorMessage = error.message || "Si è verificato un errore durante la cancellazione.";
+      setClearError(errorMessage);
+      toast.error(errorMessage);
     }
   };
   // Cleanup dei polling quando il componente viene smontato

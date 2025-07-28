@@ -190,33 +190,19 @@ class CalendarService:
         page_token = None
         
         try:
-            # Prima verifica se ci sono eventi nel calendario
-            try:
-                initial_check = service.events().list(
-                    calendarId=calendar_id,
-                    maxResults=1  # Chiediamo solo un evento per verificare se il calendario ha contenuti
-                ).execute()
-                
-                if not initial_check.get('items', []):
-                    logger.info(f"Calendario {calendar_id} è già vuoto. Nessun evento da cancellare.")
-                    return {
-                        "message": "Il calendario è già vuoto. Nessun evento da cancellare.",
-                        "deleted_count": 0
-                    }
-            except HttpError as e:
-                if e.resp.status == 404:
-                    raise ValueError("Il calendario selezionato non esiste o non è accessibile.")
-                elif e.resp.status == 403:
-                    raise ValueError("Non hai i permessi necessari per modificare questo calendario.")
-                else:
-                    raise  # Rilancia altre eccezioni HTTP
+            # BYPASS del check iniziale - procediamo direttamente con la cancellazione
+            # Il check potrebbe non vedere eventi per limitazioni API
+            logger.info(f"Procedendo direttamente con la cancellazione eventi per {calendar_id}")
             
-            # Continua con la cancellazione se ci sono eventi
+            # Continua con la cancellazione
             while True:
                 events_result = service.events().list(
                     calendarId=calendar_id,
                     pageToken=page_token,
-                    maxResults=100
+                    maxResults=100,
+                    singleEvents=True,  # Espande eventi ricorrenti
+                    showDeleted=False,  # Non mostrare eventi già cancellati
+                    showHiddenInvitations=False  # Non mostrare inviti nascosti
                 ).execute()
                 events = events_result.get('items', [])
                 
@@ -400,11 +386,28 @@ class CalendarService:
         t_fine = _safe_to_time(app.get('ORA_FINE'))
         dt_inizio = datetime.combine(data_evento, t_inizio)
         dt_fine = datetime.combine(data_evento, t_fine) if t_fine > t_inizio else dt_inizio + timedelta(minutes=10)
-        if t_inizio.hour == 8 and t_inizio.minute == 0 and (not app.get('PAZIENTE') and not app.get('DESCRIZIONE')):
+        # Determina il titolo dell'evento
+        paziente = app.get('PAZIENTE', '').strip()
+        descrizione = app.get('DESCRIZIONE', '').strip()
+        note = app.get('NOTE', '').strip()
+        
+        # Debug log
+        logger.info(f"DEBUG - PAZIENTE: '{paziente}', DESCRIZIONE: '{descrizione}', NOTE: '{note}'")
+        
+        if t_inizio.hour == 8 and t_inizio.minute == 0 and (not paziente and not descrizione and not note):
             summary = "Nota giornaliera"
+            logger.info("DEBUG - Caso: Nota giornaliera")
+        elif paziente and not paziente.startswith("Appuntamento"):
+            # Se c'è un paziente vero (non generato), usa il nome del paziente
+            summary = paziente
+            logger.info(f"DEBUG - Caso: Paziente vero -> '{summary}'")
         else:
-            summary = app.get('PAZIENTE') or app.get('DESCRIZIONE') or "Appuntamento"
-            event = {
+            # Se non c'è paziente o è un "Appuntamento" generato, usa prima DB_NOTE poi DB_APDESCR
+            summary = note or descrizione or "Nota"
+            logger.info(f"DEBUG - Caso: Note/Descrizione/Fallback -> '{summary}'")
+        
+        # Crea evento semplice (non riunione)
+        event = {
             'summary': summary.strip(),
             'description': app.get('NOTE', ''),
             'start': {
@@ -417,8 +420,10 @@ class CalendarService:
             },
             'colorId': _get_google_color_id(app.get('TIPO')),
             'reminders': {
-                'useDefault': False
-            }
+                'useDefault': False,
+                'overrides': []  # Nessun reminder
+            },
+            # Non aggiungiamo organizer, attendees per evitare che diventi riunione
         }
         max_retries = 5
         for attempt in range(max_retries):
@@ -544,6 +549,10 @@ class CalendarService:
                         'DESCRIZIONE': r[col_app['descrizione']].strip() if r[col_app['descrizione']] else '',
                         'PAZIENTE': patients_dict.get(idpaz, '')
                     }
+                    
+                    # Debug per questo specifico caso
+                    if not patients_dict.get(idpaz, ''):
+                        logger.info(f"DEBUG RECORD - PAZIENTE VUOTO: DESCRIZIONE='{r[col_app['descrizione']]}', NOTE='{r[col_app['note']]}'")
                     
                     # Applica il mapping con gestione errori
                     try:

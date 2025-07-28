@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 calendar_bp = Blueprint('calendar', __name__, url_prefix='/api/calendar')
 sync_jobs = {}
+clear_jobs = {}
 
 # Sezione 1: Route per statistiche e report appuntamenti
 @calendar_bp.route('/stats/year', methods=['GET'])
@@ -450,3 +451,113 @@ def test_deleted_filter():
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@calendar_bp.route('/clear-all/start', methods=['POST'])
+@jwt_required()
+def start_clear_all():
+    """Avvia job di cancellazione di tutti i calendari con tracking real-time"""
+    import uuid
+    import threading
+    
+    if 'clear_jobs' not in globals():
+        global clear_jobs
+        clear_jobs = {}
+    
+    job_id = str(uuid.uuid4())
+    
+    clear_jobs[job_id] = {
+        "status": "in_progress",
+        "progress": 0,
+        "deleted": 0,
+        "total_calendars": 2,
+        "current_calendar": "",
+        "message": "Avvio cancellazione...",
+        "results": []
+    }
+    
+    def clear_job():
+        from server.app.core.automation_config import get_automation_settings
+        try:
+            settings = get_automation_settings()
+            studio_blu_calendar = settings.get('calendar_studio_blu_id')
+            studio_giallo_calendar = settings.get('calendar_studio_giallo_id')
+            
+            calendars = [
+                {"id": studio_blu_calendar, "name": "Studio Blu"},
+                {"id": studio_giallo_calendar, "name": "Studio Giallo"}
+            ]
+            
+            total_deleted = 0
+            
+            for i, calendar in enumerate(calendars):
+                if clear_jobs[job_id].get("cancelled"):
+                    raise Exception("Cancellazione interrotta dall'utente")
+                
+                clear_jobs[job_id]["current_calendar"] = calendar["name"]
+                clear_jobs[job_id]["message"] = f"Cancellazione {calendar['name']}..."
+                clear_jobs[job_id]["progress"] = int(50 * i / len(calendars))
+                
+                try:
+                    result = CalendarService.google_clear_calendar(calendar["id"])
+                    deleted_count = result.get("deleted_count", 0)
+                    total_deleted += deleted_count
+                    
+                    clear_jobs[job_id]["results"].append({
+                        "studio": calendar["name"],
+                        "success": True,
+                        "deleted_count": deleted_count,
+                        "message": result.get("message", "")
+                    })
+                    
+                except Exception as e:
+                    clear_jobs[job_id]["results"].append({
+                        "studio": calendar["name"],
+                        "success": False,
+                        "error": str(e)
+                    })
+            
+            clear_jobs[job_id]["status"] = "completed"
+            clear_jobs[job_id]["deleted"] = total_deleted
+            clear_jobs[job_id]["progress"] = 100
+            clear_jobs[job_id]["message"] = f"Cancellazione completata. {total_deleted} eventi rimossi totali."
+            
+        except Exception as e:
+            if "interrotta dall'utente" in str(e):
+                clear_jobs[job_id]["status"] = "cancelled"
+                clear_jobs[job_id]["message"] = "Cancellazione interrotta dall'utente"
+            else:
+                clear_jobs[job_id]["status"] = "error"
+                clear_jobs[job_id]["error"] = str(e)
+                clear_jobs[job_id]["message"] = f"Errore: {str(e)}"
+    
+    # Avvia il thread asincrono
+    thread = threading.Thread(target=clear_job)
+    thread.start()
+    
+    return jsonify({"job_id": job_id, "status": "started"}), 200
+
+@calendar_bp.route('/clear-all/status/<job_id>', methods=['GET'])
+@jwt_required()
+def get_clear_status(job_id):
+    """Ottiene lo stato del job di cancellazione"""
+    if job_id not in clear_jobs:
+        return jsonify({"error": "Job non trovato"}), 404
+    
+    status = clear_jobs[job_id]
+    return jsonify(status), 200
+
+@calendar_bp.route('/clear-all/cancel', methods=['POST'])
+@jwt_required()
+def cancel_clear():
+    """Cancella il job di cancellazione in corso"""
+    data = request.get_json() or {}
+    job_id = data.get('job_id')
+    
+    if not job_id or job_id not in clear_jobs:
+        return jsonify({"error": "Job non trovato"}), 404
+    
+    if clear_jobs[job_id]["status"] == "in_progress":
+        clear_jobs[job_id]["cancelled"] = True
+        return jsonify({"message": "Job cancellato con successo"}), 200
+    else:
+        return jsonify({"error": "Il job non è in corso"}), 400
