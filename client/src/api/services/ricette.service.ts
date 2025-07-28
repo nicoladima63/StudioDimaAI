@@ -246,7 +246,41 @@ export async function downloadRicettaPDF(nre: string): Promise<Blob> {
   return response.data;
 }
 
-export async function getAllRicette() {
-  const response = await apiClient.get('/api/ricetta/database/list');
+export async function getAllRicette(params?: {
+  data_da?: string;  // YYYY-MM-DD
+  data_a?: string;   // YYYY-MM-DD
+  cf_assistito?: string;
+  force_local?: boolean;
+}) {
+  const queryParams = new URLSearchParams();
+  
+  if (params?.data_da) queryParams.append('data_da', params.data_da);
+  if (params?.data_a) queryParams.append('data_a', params.data_a);
+  if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
+  if (params?.force_local) queryParams.append('force_local', 'true');
+  
+  const url = `/api/ricetta/database/list${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  const response = await apiClient.get(url);
+  return response.data;
+}
+
+export async function annullaRicetta(nre: string, pin: string, motivazione?: string) {
+  const response = await apiClient.post('/api/ricetta/annulla', {
+    nre,
+    pin,
+    motivazione: motivazione || 'Annullamento ricetta'
+  });
+  return response.data;
+}
+
+export async function verificaStatoRicetta(nre: string) {
+  const response = await apiClient.get(`/api/ricetta/stato/${nre}`);
+  return response.data;
+}
+
+export async function downloadRicettaPDFByNre(nre: string): Promise<Blob> {
+  const response = await apiClient.get(`/api/ricetta/download/${nre}`, {
+    responseType: 'blob'
+  });
   return response.data;
 }

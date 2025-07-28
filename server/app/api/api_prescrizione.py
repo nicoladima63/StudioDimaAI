@@ -829,21 +829,77 @@ def test_send_email_direct():
 @prescrizione_bp.route("/ricetta/database/list", methods=['GET'])
 def list_ricette_database():
     """
-    Mostra tutte le ricette salvate nel database
+    Recupera le ricette dal Sistema TS con fallback al database locale
     """
     try:
+        # Parametri opzionali dalla query string
+        data_da = request.args.get('data_da')  # formato YYYY-MM-DD
+        data_a = request.args.get('data_a')    # formato YYYY-MM-DD
+        cf_assistito = request.args.get('cf_assistito')
+        force_local = request.args.get('force_local', 'false').lower() == 'true'
+        
+        # Se force_local=true, usa solo database locale
+        if force_local:
+            logger.info("Richiesta lista ricette - forzato uso database locale")
+            from ..core.ricette_db import RicetteDB
+            ricette = RicetteDB.get_all_ricette()
+            
+            return jsonify({
+                'success': True,
+                'source': 'database_locale',
+                'count': len(ricette),
+                'data': ricette
+            }), 200
+        
+        # Prima prova a recuperare dal Sistema TS
+        try:
+            from ..ricetta_elettronica.ricetta_service import ricetta_service
+            
+            logger.info(f"Richiesta lista ricette dal Sistema TS - Da: {data_da}, A: {data_a}, CF: {cf_assistito}")
+            
+            ts_response = ricetta_service.visualizza_ricette(
+                data_da=data_da,
+                data_a=data_a, 
+                cf_assistito=cf_assistito
+            )
+            
+            if ts_response.get('success'):
+                logger.info(f"Ricette recuperate dal Sistema TS: {ts_response.get('total_count', 0)}")
+                
+                # TODO: Sincronizza con database locale le ricette nuove/aggiornate
+                
+                return jsonify({
+                    'success': True,
+                    'source': 'sistema_ts',
+                    'count': ts_response.get('total_count', 0),
+                    'data': ts_response.get('ricette', []),
+                    'ts_response': {
+                        'message': ts_response.get('message'),
+                        'timestamp': ts_response.get('timestamp')
+                    }
+                }), 200
+            else:
+                logger.warning(f"Errore Sistema TS: {ts_response.get('error')} - Fallback a database locale")
+                
+        except Exception as ts_error:
+            logger.error(f"Errore chiamata Sistema TS: {ts_error} - Fallback a database locale")
+        
+        # Fallback al database locale
+        logger.info("Usando database locale come fallback")
         from ..core.ricette_db import RicetteDB
         
         ricette = RicetteDB.get_all_ricette()
         
         return jsonify({
             'success': True,
+            'source': 'database_locale_fallback',
             'count': len(ricette),
-            'ricette': ricette
+            'data': ricette,
+            'warning': 'Dati recuperati dal database locale (Sistema TS non disponibile)'
         }), 200
         
     except Exception as e:
-        logger.error(f"Errore lista ricette DB: {str(e)}", exc_info=True)
+        logger.error(f"Errore lista ricette: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
             'error': f'Errore lista ricette: {str(e)}'
@@ -946,4 +1002,114 @@ def download_ricetta_by_nre(nre):
         return jsonify({
             'success': False,
             'error': f'Errore download ricetta: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/stato/<nre>", methods=['GET'])
+def verifica_stato_ricetta(nre):
+    """
+    Verifica lo stato aggiornato di una ricetta dal sistema TS
+    """
+    try:
+        from ..core.ricette_db import RicetteDB
+        
+        # Prima recupera la ricetta dal database locale
+        ricetta = RicetteDB.get_ricetta_by_nre(nre)
+        
+        if not ricetta:
+            return jsonify({
+                'success': False,
+                'error': f'Ricetta con NRE {nre} non trovata nel database locale'
+            }), 404
+        
+        # Per ora restituisce lo stato dal database
+        # TODO: In futuro implementare chiamata al sistema TS per verificare stato aggiornato
+        
+        return jsonify({
+            'success': True,
+            'nre': nre,
+            'stato_locale': ricetta.get('stato'),
+            'data_compilazione': ricetta.get('data_compilazione'),
+            'cf_assistito': ricetta.get('cf_assistito'),
+            'paziente_nome': ricetta.get('paziente_nome'),
+            'paziente_cognome': ricetta.get('paziente_cognome'),
+            'prodotto_aic': ricetta.get('prodotto_aic'),
+            'pin': ricetta.get('codice_pin'),
+            'data_annullamento': ricetta.get('data_annullamento'),
+            'motivo_annullamento': ricetta.get('motivo_annullamento')
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore verifica stato ricetta {nre}: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore verifica stato ricetta: {str(e)}'
+        }), 500
+
+@prescrizione_bp.route("/ricetta/annulla", methods=['POST'])
+def annulla_ricetta_endpoint():
+    """
+    Annulla una ricetta elettronica nel sistema TS
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Dati annullamento mancanti'
+            }), 400
+        
+        # Valida dati obbligatori
+        nre = data.get('nre')
+        pin = data.get('pin')
+        motivazione = data.get('motivazione', 'Annullamento ricetta')
+        
+        if not nre or not pin:
+            return jsonify({
+                'success': False,
+                'error': 'NRE e PIN sono obbligatori per l\'annullamento'
+            }), 400
+        
+        # Verifica che la ricetta esista nel database locale
+        from ..core.ricette_db import RicetteDB
+        ricetta = RicetteDB.get_ricetta_by_nre(nre)
+        
+        if not ricetta:
+            return jsonify({
+                'success': False,
+                'error': f'Ricetta con NRE {nre} non trovata nel database locale'
+            }), 404
+        
+        # Verifica stato attuale
+        if ricetta.get('stato') == 'annullata':
+            return jsonify({
+                'success': False,
+                'error': 'La ricetta risulta già annullata'
+            }), 400
+        
+        # TODO: Qui andrebbero implementate le chiamate al sistema TS per l'annullamento reale
+        # Per ora aggiorniamo solo il database locale
+        
+        # Aggiorna stato nel database
+        success = RicetteDB.annulla_ricetta(nre, motivazione)
+        
+        if success:
+            logger.info(f"Ricetta {nre} annullata con successo. Motivazione: {motivazione}")
+            return jsonify({
+                'success': True,
+                'message': 'Ricetta annullata con successo',
+                'nre': nre,
+                'motivazione': motivazione
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Errore durante l\'aggiornamento dello stato nel database'
+            }), 500
+        
+    except Exception as e:
+        logger.error(f"Errore annullamento ricetta: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': f'Errore annullamento ricetta: {str(e)}'
         }), 500

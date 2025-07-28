@@ -2,7 +2,7 @@
 import React from 'react'
 import { CSidebar, CSidebarNav, CNavItem, CNavTitle } from '@coreui/react'
 import { NavLink, Link } from 'react-router-dom'
-import { cilSpeedometer, cilCalendar, cilBell, cilUser,  cilSettings, cilCreditCard, cilList, cilEuro } from '@coreui/icons'
+import { cilSpeedometer, cilCalendar, cilBell, cilUser,  cilSettings, cilCreditCard, cilList, cilEuro, cilMedicalCross, cilDescription } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import "@/components/common/css/custom-css.css";
 
@@ -33,13 +33,24 @@ const Sidebar: React.FC = () => {
           </NavLink>
         </CNavItem>
         <CNavItem>
+          <NavLink to="/rentri" className="nav-link">
+            <CIcon icon={cilList} className="me-2" />RENTRI
+          </NavLink>
+        </CNavItem>
+        <CNavTitle>Ricetta elettronica</CNavTitle>
+        <CNavItem>
           <NavLink to="/ricetta" className="nav-link">
             <CIcon icon={cilList} className="me-2" />NRE
           </NavLink>
         </CNavItem>
         <CNavItem>
-          <NavLink to="/rentri" className="nav-link">
-            <CIcon icon={cilList} className="me-2" />RENTRI
+          <NavLink to="/ricetta/test" className="nav-link">
+            <CIcon icon={cilDescription} className="me-2" />Test Ricette
+          </NavLink>
+        </CNavItem>
+        <CNavItem>
+          <NavLink to="/ricetta/setting" className="nav-link">
+            <CIcon icon={cilDescription} className="me-2" />Protocolli
           </NavLink>
         </CNavItem>
         <CNavTitle>Studio</CNavTitle>

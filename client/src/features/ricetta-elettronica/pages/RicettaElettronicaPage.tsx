@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Card from '@/components/ui/Card';
-import RicettaAvanzata from '../components/RicettaAvanzata';
 import RicettaAuthStatus from '../components/RicettaAuthStatus';
 import RicettePaziente from '../components/RicettePaziente';
+import RicettaAvanzata from '../components/RicettaAvanzata';
+import RicetteTSPaziente from '../components/RicetteTSPaziente';
 import AutoComplete from '@/components/common/AutoComplete';
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane, CRow, CCol, CCard, CCardBody } from '@coreui/react';
 import { getPazientiAll } from '@/api/services/pazienti.service';
@@ -26,7 +27,7 @@ const datiMedico = {
 };
 
 const RicettaElettronicaPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('ricette');
+  const [activeTab, setActiveTab] = useState('compila');
   
   // Stato paziente globale
   const allPazienti = usePazientiStore(state => state.pazienti);
@@ -49,7 +50,7 @@ const RicettaElettronicaPage: React.FC = () => {
     loadPazienti();
   }, [allPazienti.length, setPazienti]);
 
-  // Funzione di ricerca pazienti (come in RicettaElettronica funzionante)
+  // Funzione di ricerca pazienti
   const fetchPazienti = async (q: string): Promise<PazienteCompleto[]> => {
     const ql = q.toLowerCase();
     const pazienti = usePazientiStore.getState().pazienti;
@@ -102,34 +103,49 @@ const RicettaElettronicaPage: React.FC = () => {
         <CNav variant="tabs" role="tablist">
           <CNavItem>
             <CNavLink
-              active={activeTab === 'ricette'}
-              onClick={() => setActiveTab('ricette')}
+              active={activeTab === 'compila'}
+              onClick={() => setActiveTab('compila')}
               role="tab"
             >
-              📋 Compila Ricetta
+              📝 Compila Ricetta
             </CNavLink>
           </CNavItem>
           <CNavItem>
             <CNavLink
-              active={activeTab === 'pazienti'}
-              onClick={() => setActiveTab('pazienti')}
+              active={activeTab === 'sistema-ts'}
+              onClick={() => setActiveTab('sistema-ts')}
               role="tab"
             >
-              👤 Ricette Paziente
+              🌐 Ricette Sistema TS
+            </CNavLink>
+          </CNavItem>
+          <CNavItem>
+            <CNavLink
+              active={activeTab === 'database'}
+              onClick={() => setActiveTab('database')}
+              role="tab"
+            >
+              💾 Ricette Database
             </CNavLink>
           </CNavItem>
         </CNav>
 
         {/* Tab Content */}
         <CTabContent className="mt-4">
-          <CTabPane visible={activeTab === 'ricette'} role="tabpanel">
+          <CTabPane visible={activeTab === 'compila'} role="tabpanel">
             <RicettaAvanzata 
               datiMedico={datiMedico} 
               pazienteSelezionato={pazienteSelezionato}
             />
           </CTabPane>
 
-          <CTabPane visible={activeTab === 'pazienti'} role="tabpanel">
+          <CTabPane visible={activeTab === 'sistema-ts'} role="tabpanel">
+            <RicetteTSPaziente 
+              pazienteSelezionato={pazienteSelezionato}
+            />
+          </CTabPane>
+
+          <CTabPane visible={activeTab === 'database'} role="tabpanel">
             <RicettePaziente 
               cfPazienteIniziale={pazienteSelezionato?.DB_PACODFI?.trim() || ''}
             />

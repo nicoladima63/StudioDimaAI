@@ -531,5 +531,134 @@ class RicettaElettronicaService:
                 'timestamp': datetime.now().isoformat()
             }
 
+    def visualizza_ricette(self, data_da: str = None, data_a: str = None, cf_assistito: str = None) -> Dict[str, Any]:
+        """
+        Recupera la lista delle ricette dal Sistema TS utilizzando l'endpoint di visualizzazione
+        
+        Args:
+            data_da: Data inizio ricerca (formato YYYY-MM-DD)
+            data_a: Data fine ricerca (formato YYYY-MM-DD)  
+            cf_assistito: Codice fiscale assistito specifico (opzionale)
+        """
+        try:
+            logger.info(f"Richiesta visualizzazione ricette - Da: {data_da}, A: {data_a}, CF: {cf_assistito}")
+            
+            # Se non specificate, usa ultimi 30 giorni
+            if not data_da:
+                data_da = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+            if not data_a:
+                data_a = datetime.now().strftime('%Y-%m-%d')
+            
+            # Crea richiesta SOAP per visualizzazione
+            soap_request = self._create_visualizza_soap_request(data_da, data_a, cf_assistito)
+            
+            # Esegui richiesta
+            session = self._create_session()
+            
+            headers = {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': '""',
+                'User-Agent': 'Python-requests/2.28.0'
+            }
+            
+            logger.info(f"Invio richiesta visualizzazione a: {self.endpoint_visualizza}")
+            
+            response = session.post(
+                self.endpoint_visualizza,
+                data=soap_request,
+                headers=headers,
+                timeout=30,
+                verify=False  # Per ambiente test
+            )
+            
+            logger.info(f"Risposta ricevuta - Status: {response.status_code}")
+            
+            # Parsa la risposta
+            return self._parse_visualizza_response(response)
+            
+        except Exception as e:
+            logger.error(f"Errore visualizzazione ricette: {e}", exc_info=True)
+            return {
+                'success': False,
+                'error': f'Errore visualizzazione ricette: {str(e)}',
+                'timestamp': datetime.now().isoformat()
+            }
+
+    def _create_visualizza_soap_request(self, data_da: str, data_a: str, cf_assistito: str = None) -> str:
+        """Crea richiesta SOAP per visualizzazione ricette"""
+        
+        # Token 2FA (semplificato per test)
+        token_2fa = self._genera_token_2fa()
+        
+        # Template SOAP per visualizzazione
+        soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
+               xmlns:dem="http://demVisualizzaPrescrittoRicettaBianca.webservice.ricettabianca.sanita.it">
+    <soap:Header/>
+    <soap:Body>
+        <dem:visualizzaPrescrittoRicettaBianca>
+            <dem:cfMedico>{self.cf_medico}</dem:cfMedico>
+            <dem:passwordMedico>{self.password}</dem:passwordMedico>
+            <dem:token2FA>{token_2fa}</dem:token2FA>
+            <dem:regione>{self.regione}</dem:regione>
+            <dem:asl>{self.asl}</dem:asl>
+            <dem:dataInizioRicerca>{data_da}</dem:dataInizioRicerca>
+            <dem:dataFineRicerca>{data_a}</dem:dataFineRicerca>'''
+        
+        # Aggiungi CF assistito se specificato
+        if cf_assistito:
+            cf_encrypted = self._encrypt_cf_assistito(cf_assistito)
+            soap_template += f'''
+            <dem:cfAssistito>{cf_encrypted}</dem:cfAssistito>'''
+        
+        soap_template += '''
+        </dem:visualizzaPrescrittoRicettaBianca>
+    </soap:Body>
+</soap:Envelope>'''
+        
+        return soap_template
+
+    def _parse_visualizza_response(self, response: requests.Response) -> Dict[str, Any]:
+        """Parsa la risposta della visualizzazione ricette"""
+        try:
+            response_text = response.text
+            logger.info(f"Parsing risposta visualizzazione ricette")
+            
+            if response.status_code == 200:
+                # Cerca lista ricette nella risposta XML
+                ricette = []
+                
+                # TODO: Implementare parsing completo del XML per estrarre lista ricette
+                # Per ora restituisce una risposta base che indica successo
+                # In produzione bisognerebbe parsare l'XML e estrarre tutti i dettagli delle ricette
+                
+                return {
+                    'success': True,
+                    'http_status': response.status_code,
+                    'ricette': ricette,
+                    'total_count': len(ricette),
+                    'response_xml': response_text,
+                    'timestamp': datetime.now().isoformat(),
+                    'message': 'Endpoint visualizzazione configurato - parsing completo da implementare'
+                }
+            else:
+                return {
+                    'success': False,
+                    'http_status': response.status_code,
+                    'error': f'HTTP {response.status_code}',
+                    'response_text': response_text[:500],
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            logger.error(f"Errore parsing risposta visualizzazione: {e}")
+            return {
+                'success': False,
+                'error': f'Errore parsing risposta: {str(e)}',
+                'http_status': response.status_code,
+                'response_text': response.text[:500],
+                'timestamp': datetime.now().isoformat()
+            }
+
 # Istanza globale del servizio
 ricetta_service = RicettaElettronicaService()

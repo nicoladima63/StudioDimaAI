@@ -16,6 +16,8 @@ import SettingsPage from '@/features/settings/pages/SettingsPage';
 import RentriPage from '@/features/rentri/pages/RentriPage';
 import FatturePage from '@/features/fatture/pages/FatturePage';
 import RicettaElettronicaPage from '@/features/ricetta-elettronica/pages/RicettaElettronicaPage';
+import RicettaSettingPage from '@/features/ricetta-elettronica/pages/RicettaSettingPage';
+import RicetteTestPage from '@/features/ricetta-elettronica/pages/RicetteTestPage';
 import HomePage from '@/pages/HomePage';
 import IncassiPage from '@/features/pki/incassi/IncassiPage';
 
@@ -52,6 +54,8 @@ const AppRouter: React.FC = () => {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/fatture" element={<FatturePage />} />
           <Route path="/ricetta" element={<RicettaElettronicaPage />} />
+          <Route path="/ricetta/setting" element={<RicettaSettingPage />} />
+          <Route path="/ricetta/test" element={<RicetteTestPage />} />
           <Route path="/incassi" element={<IncassiPage />} />
           <Route path="/rentri" element={<RentriPage />} />
         </Route>

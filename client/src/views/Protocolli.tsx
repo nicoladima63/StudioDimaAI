@@ -8,7 +8,8 @@ import {
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilPlus, cilPencil, cilTrash, cilCopy } from '@coreui/icons';
-import { protocolliService, Diagnosi, ProtocolloTerapeutico } from '../api/services/protocolli.service';
+import { protocolliService } from '../api/services/protocolli.service';
+import type { Diagnosi, ProtocolloTerapeutico } from '../api/services/protocolli.service';
 
 const Protocolli: React.FC = () => {
   const [diagnosi, setDiagnosi] = useState<Diagnosi[]>([]);
@@ -40,7 +41,7 @@ const Protocolli: React.FC = () => {
   const loadProtocolli = async (diagnosiId: number) => {
     try {
       setLoading(true);
-      const data = await protocolliService.getProtocolliByDiagnosi(diagnosiId);
+      const data = await protocolliService.getProtocolliPerDiagnosi(diagnosiId);
       setProtocolli(data);
       setSelectedDiagnosi(diagnosiId);
     } catch (err) {
@@ -52,8 +53,15 @@ const Protocolli: React.FC = () => {
 
   const duplicateDiagnosi = async (diagnosiId: number) => {
     try {
-      await protocolliService.duplicateDiagnosi(diagnosiId);
-      loadDiagnosi();
+      const originalDiagnosi = diagnosi.find(d => d.id === diagnosiId);
+      if (originalDiagnosi) {
+        await protocolliService.duplicateDiagnosi(diagnosiId, {
+          new_codice: `${originalDiagnosi.codice}_copy`,
+          new_descrizione: `${originalDiagnosi.descrizione} (Copia)`,
+          new_categoria: originalDiagnosi.categoria
+        });
+        loadDiagnosi();
+      }
     } catch (err) {
       setError('Errore nella duplicazione');
     }
@@ -87,7 +95,7 @@ const Protocolli: React.FC = () => {
                       <CTableDataCell>{d.codice}</CTableDataCell>
                       <CTableDataCell>{d.descrizione}</CTableDataCell>
                       <CTableDataCell>
-                        <CBadge color="info">{d.num_protocolli}</CBadge>
+                        <CBadge color="info">{d.num_farmaci || 0}</CBadge>
                       </CTableDataCell>
                       <CTableDataCell>
                         <CButton size="sm" color="secondary" onClick={(e) => {e.stopPropagation(); duplicateDiagnosi(d.id)}}>
