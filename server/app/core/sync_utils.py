@@ -144,8 +144,14 @@ def map_appointment(app):
             'SPECIAL': 'APP_SERVIZIO',
         }
 
-    summary = f"Appuntamento {tipo} - {paziente}"
-    description = descrizione or note or f"Appuntamento di tipo {tipo}"
+    # Se il paziente è vuoto o solo spazi, usa tipo e note/descrizione
+    if not paziente:
+        summary = tipo or "Appuntamento"
+        description = descrizione or note or f"Appuntamento di tipo {tipo}" if tipo else "Appuntamento generico"
+    else:
+        summary = f"{tipo} - {paziente}" if tipo else paziente
+        description = descrizione or note or f"Appuntamento di tipo {tipo}" if tipo else ""
+    
     return {
         COL_PAZIENTE: paziente,
         COL_DATA: data,
