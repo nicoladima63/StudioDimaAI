@@ -438,3 +438,15 @@ def test_time_conversion():
         return jsonify({"message": "Test completato, controlla i log del server"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@calendar_bp.route('/test-deleted-filter', methods=['GET'])
+def test_deleted_filter():
+    """Test per verificare il filtro dei record cancellati."""
+    month = request.args.get('month', type=int, default=7)  # Default luglio
+    year = request.args.get('year', type=int, default=2025)  # Default 2025
+    
+    try:
+        result = CalendarService.test_deleted_filter(month, year)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -475,7 +475,32 @@ class CalendarService:
             logger.error(f"Errore durante la lettura del DBF pazienti {path_pazienti}: {e}")
             raise IOError(f"Impossibile leggere il file dei pazienti.")
 
-        # 2. Legge gli appuntamenti record per record e filtra
+        # 2. Prima legge i flag deleted direttamente dal file binario
+        deleted_records = set()
+        try:
+            import struct
+            with open(path_appuntamenti, 'rb') as f:
+                # Leggi header DBF
+                f.seek(8)  # Va a header length
+                header_len = struct.unpack('<H', f.read(2))[0]
+                record_len = struct.unpack('<H', f.read(2))[0]
+                
+                # Leggi ogni record per controllare il flag deleted
+                record_index = 0
+                f.seek(header_len)  # Va all'inizio dei dati
+                while True:
+                    current_pos = header_len + (record_index * record_len)
+                    f.seek(current_pos)
+                    delete_flag = f.read(1)
+                    if not delete_flag:  # Fine file
+                        break
+                    if delete_flag == b'*':  # Record cancellato
+                        deleted_records.add(record_index)
+                    record_index += 1
+        except Exception as e:
+            logger.warning(f"Errore lettura flag deleted: {e}, procedo senza filtro")
+
+        # 3. Legge gli appuntamenti record per record e filtra
         appointments = []
         col_app = COLONNE['appuntamenti']
         try:
@@ -483,18 +508,26 @@ class CalendarService:
                 apps_count = 0
                 filtered_count = 0
                 processed_count = 0
+                record_index = 0
                 
                 for r in apps_table:
                     apps_count += 1
                     
+                    # Salta i record cancellati usando l'indice
+                    if record_index in deleted_records:
+                        record_index += 1
+                        continue
+                    
                     # Controlla se la data è valida
                     if not r[col_app['data']]:
+                        record_index += 1
                         continue
                         
                     app_date = r[col_app['data']]
                     
                     # Filtra per mese/anno
                     if app_date.month != month or app_date.year != year:
+                        record_index += 1
                         continue
                         
                     filtered_count += 1
@@ -549,8 +582,9 @@ class CalendarService:
                             mapped_app['DATA'] = mapped_app['DATA'].strftime('%Y-%m-%d')
 
                     appointments.append(mapped_app)
+                    record_index += 1
 
-                logger.info(f"Letti {apps_count} appuntamenti totali, {filtered_count} filtrati, {processed_count} processati")
+                logger.info(f"Letti {apps_count} appuntamenti totali, {len(deleted_records)} cancellati, {filtered_count} filtrati, {processed_count} processati")
 
         except Exception as e:
             logger.error(f"Errore durante la lettura del DBF appuntamenti {path_appuntamenti}: {e}")
@@ -619,3 +653,75 @@ class CalendarService:
         for time_val in test_times:
             converted = _decimal_to_time(time_val)
             logger.info(f"Conversione: {time_val} -> {converted}")
+
+    @staticmethod
+    def test_deleted_filter(month: int, year: int):
+        """Test per confrontare record con e senza filtro deleted usando dbfread"""
+        try:
+            path_appuntamenti = get_dbf_path('agenda')
+        except (ValueError, FileNotFoundError) as e:
+            logger.error(f"Errore nel recuperare il percorso del DBF: {e}")
+            return {"error": str(e)}
+
+        col_app = COLONNE['appuntamenti']
+        count_all = 0
+        count_not_deleted = 0
+        count_deleted = 0
+        
+        try:
+            # Torno alla libreria dbf originale ma con metodo diverso
+            import struct
+            
+            # Conta tutti i record fisici nel file
+            with open(path_appuntamenti, 'rb') as f:
+                # Leggi header DBF
+                f.seek(4)  # Salta signature
+                num_records = struct.unpack('<I', f.read(4))[0]
+                f.seek(8)  # Va a header length
+                header_len = struct.unpack('<H', f.read(2))[0]
+                record_len = struct.unpack('<H', f.read(2))[0]
+                
+                # Leggi ogni record per controllare il flag deleted
+                f.seek(header_len)  # Va all'inizio dei dati
+                
+                with dbf.Table(path_appuntamenti, codepage='cp1252') as apps_table:
+                    record_index = 0
+                    for r in apps_table:
+                        # Leggi il byte deleted direttamente dal file
+                        current_pos = header_len + (record_index * record_len)
+                        f.seek(current_pos)
+                        delete_flag = f.read(1)
+                        is_deleted = delete_flag == b'*'  # '*' significa cancellato
+                        
+                        # Controlla se la data è valida e nel mese/anno
+                        if not r[col_app['data']]:
+                            record_index += 1
+                            continue
+                        app_date = r[col_app['data']]
+                        if app_date.month != month or app_date.year != year:
+                            record_index += 1
+                            continue
+                        
+                        count_all += 1
+                        
+                        if is_deleted:
+                            count_deleted += 1
+                        else:
+                            count_not_deleted += 1
+                            
+                        record_index += 1
+
+            result = {
+                "month": month,
+                "year": year,
+                "total_records": count_all,
+                "active_records": count_not_deleted,
+                "deleted_records": count_deleted,
+                "library_used": "dbf+binary"
+            }
+            logger.info(f"Test deleted filter with dbfread: {result}")
+            return result
+                
+        except Exception as e:
+            logger.error(f"Errore durante il test con dbfread: {e}")
+            return {"error": str(e)}

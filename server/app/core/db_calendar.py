@@ -50,14 +50,47 @@ def _get_dbf_path(table_name: str):
 
 def _leggi_tabella_dbf(percorso_file: str) -> pd.DataFrame:
     try:
+        # Prima legge i flag deleted direttamente dal file binario
+        deleted_records = set()
+        try:
+            import struct
+            with open(percorso_file, 'rb') as f:
+                # Leggi header DBF
+                f.seek(8)  # Va a header length
+                header_len = struct.unpack('<H', f.read(2))[0]
+                record_len = struct.unpack('<H', f.read(2))[0]
+                
+                # Leggi ogni record per controllare il flag deleted
+                record_index = 0
+                f.seek(header_len)
+                while True:
+                    current_pos = header_len + (record_index * record_len)
+                    f.seek(current_pos)
+                    delete_flag = f.read(1)
+                    if not delete_flag:
+                        break
+                    if delete_flag == b'*':
+                        deleted_records.add(record_index)
+                    record_index += 1
+        except Exception as e:
+            logger.warning(f"Errore lettura flag deleted per {percorso_file}: {e}")
+
+        # Poi legge i record escludendo quelli cancellati
         with dbf.Table(percorso_file, codepage='cp1252') as table:
             records = []
+            record_index = 0
             for record in table:
                 try:
+                    # Salta i record cancellati
+                    if record_index in deleted_records:
+                        record_index += 1
+                        continue
                     records.append({field: record[field] for field in table.field_names})
+                    record_index += 1
                 except Exception as e:
                     logger.warning(f"Errore nel record: {e}")
-            logger.info(f"Letti {len(records)} record da {percorso_file}")
+                    record_index += 1
+            logger.info(f"Letti {len(records)} record da {percorso_file}, {len(deleted_records)} cancellati esclusi")
             return pd.DataFrame(records)
     except Exception as e:
         logger.error(f"Errore lettura tabella DBF '{percorso_file}': {e}")
@@ -89,14 +122,46 @@ def _get_appointments_for_month(month: int, year: int):
         logger.error(f"Errore durante la lettura del DBF pazienti {path_pazienti}: {e}")
         raise IOError(f"Impossibile leggere il file dei pazienti.")
 
-    # 2. Legge gli appuntamenti record per record e filtra
+    # 2. Prima legge i flag deleted direttamente dal file binario
+    deleted_records = set()
+    try:
+        import struct
+        with open(path_appuntamenti, 'rb') as f:
+            # Leggi header DBF
+            f.seek(8)  # Va a header length
+            header_len = struct.unpack('<H', f.read(2))[0]
+            record_len = struct.unpack('<H', f.read(2))[0]
+            
+            # Leggi ogni record per controllare il flag deleted
+            record_index = 0
+            f.seek(header_len)  # Va all'inizio dei dati
+            while True:
+                current_pos = header_len + (record_index * record_len)
+                f.seek(current_pos)
+                delete_flag = f.read(1)
+                if not delete_flag:  # Fine file
+                    break
+                if delete_flag == b'*':  # Record cancellato
+                    deleted_records.add(record_index)
+                record_index += 1
+    except Exception as e:
+        logger.warning(f"Errore lettura flag deleted: {e}, procedo senza filtro")
+
+    # 3. Legge gli appuntamenti record per record e filtra
     appointments = []
     col_app = COLONNE['appuntamenti']
     try:
         with dbf.Table(path_appuntamenti, codepage='cp1252') as apps_table:
+            record_index = 0
             for r in apps_table:
+                # Salta i record cancellati usando l'indice
+                if record_index in deleted_records:
+                    record_index += 1
+                    continue
+                    
                 app_date = r[col_app['data']]
                 if not app_date or app_date.month != month or app_date.year != year:
+                    record_index += 1
                     continue
 
                 idpaz = str(r[col_app['id_paziente']]).strip()
@@ -114,12 +179,13 @@ def _get_appointments_for_month(month: int, year: int):
                 }
                 
                 appointments.append(raw_appointment)
+                record_index += 1
 
     except Exception as e:
         logger.error(f"Errore durante la lettura del DBF appuntamenti {path_appuntamenti}: {e}")
         raise IOError(f"Impossibile leggere il file degli appuntamenti.")
         
-    logger.info(f"Trovati e processati {len(appointments)} appuntamenti per {month}/{year}")
+    logger.info(f"Trovati e processati {len(appointments)} appuntamenti per {month}/{year}, {len(deleted_records)} record cancellati esclusi")
     return appointments
 
 def get_appointments_stats_for_year():
