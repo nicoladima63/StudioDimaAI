@@ -5,7 +5,6 @@ import {
   CCol,
   CCard,
   CCardBody,
-  CCardHeader,
   CSpinner,
 } from "@coreui/react";
 import { CIcon } from "@coreui/icons-react";

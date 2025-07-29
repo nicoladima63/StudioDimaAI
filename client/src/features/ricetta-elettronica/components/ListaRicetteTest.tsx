@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CCard, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell,CFormCheck ,
+  CCard, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell, CButton, CBadge, CSpinner, CAlert,
   CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter,
   CFormInput, CFormLabel, CFormTextarea, CInputGroup, CInputGroupText,
-  CRow, CCol, CFormSelect, CPagination, CPaginationItem
+  CRow, CCol, CPagination, CPaginationItem
 } from '@coreui/react';
 import { getAllRicette, annullaRicetta, verificaStatoRicetta, downloadRicettaPDFByNre } from '@/api/services/ricette.service';
 
@@ -37,7 +37,8 @@ const ListaRicetteTest: React.FC = () => {
   const [ricettaSelezionata, setRicettaSelezionata] = useState<RicettaDB | null>(null);
   const [motivazione, setMotivazione] = useState('');
   const [annullaLoading, setAnnullaLoading] = useState(false);
-  const [statoVerificaLoading, setStatoVerificaLoading] = useState(false);
+  // const [statoVerificaLoading, setStatoVerificaLoading] = useState(false); // Loading state for status verification - not displayed in UI
+  const [, setStatoVerificaLoading] = useState(false);
   
   // Paginazione semplice
   const [currentPage, setCurrentPage] = useState(1);

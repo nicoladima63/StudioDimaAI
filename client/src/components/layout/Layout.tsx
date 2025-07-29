@@ -28,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({
         <CCol 
           xs={contentWidth} 
           className={contentClassName}
-          as="main"
         >
           <CContainer fluid className="h-100">
             <Outlet />

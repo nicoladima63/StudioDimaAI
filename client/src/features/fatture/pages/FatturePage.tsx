@@ -103,7 +103,7 @@ const FatturePage: React.FC = () => {
     }
     setLoading(true);
     setErrore(null);
-    getAllFatture(anno, mese)
+    getAllFatture()
       .then(({ fatture, last_update }) => {
         setFatture(fatture);
         setLastUpdate(last_update);

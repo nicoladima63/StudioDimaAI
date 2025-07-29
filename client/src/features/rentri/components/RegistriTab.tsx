@@ -27,8 +27,8 @@ import {
   CFormTextarea
 } from '@coreui/react';
 import { 
-  getRegistri,
-  getRegistro,
+  // getRegistri, // TODO: Uncomment when registri fetching is implemented
+  // getRegistro, // TODO: Uncomment when single registro fetching is implemented
   createRegistro,
   getCurrentOperatore,
   type Registro
@@ -98,7 +98,7 @@ const RegistriTab: React.FC<RegistriTabProps> = ({
     setError(null);
 
     try {
-      const newRegistro = await createRegistro({
+      /* const newRegistro = */ await createRegistro({
         denominazione: createForm.denominazione,
         tipo: createForm.tipo,
         descrizione: createForm.descrizione,

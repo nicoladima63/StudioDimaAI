@@ -8,9 +8,12 @@ import IncassiPeriodoForm from './IncassiPeriodoForm';
 
 const IncassiDashboard: React.FC = () => {
   const { anniDisponibili, setAnniDisponibili } = useFattureStore();
-  const [anniSelezionati, setAnniSelezionati] = useState<number[]>([]);
-  const [tipo, setTipo] = useState('mese');
-  const [numero, setNumero] = useState('');
+  // const [anniSelezionati, setAnniSelezionati] = useState<number[]>([]); // State used only in form submission
+  const [, setAnniSelezionati] = useState<number[]>([]);
+  // const [tipo, setTipo] = useState('mese'); // State used only in form submission
+  const [, setTipo] = useState('mese');
+  // const [numero, setNumero] = useState(''); // State used only in form submission
+  const [, setNumero] = useState('');
   const [dati, setDati] = useState<{ anno: number; numero_fatture?: number; importo_totale?: number }[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [errore, setErrore] = useState<string | null>(null);

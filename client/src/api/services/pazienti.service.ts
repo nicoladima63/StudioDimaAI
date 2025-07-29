@@ -1,9 +1,6 @@
 // src/api/services/pazienti.service.ts
 import apiClient from '@/api/client';
 import type { 
-  PazienteCompleto, 
-  StatistichePazienti, 
-  CittaData, 
   ViewType, 
   PriorityFilter, 
   StatusFilter,
@@ -124,7 +121,7 @@ export async function exportPazienti(params: {
 }
 
 // Funzioni di compatibilità per codice esistente
-export async function getPazientiList(forceRefresh = false) {
+export async function getPazientiList() {
   const response = await getPazientiAll();
   return response;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { CButton, CForm, CFormInput, CFormLabel, CFormTextarea, CModal, CModalHeader, CModalBody, CModalFooter, CRow, CCol, CCard, CCardBody } from '@coreui/react';
 import {
   searchDiagnosi,

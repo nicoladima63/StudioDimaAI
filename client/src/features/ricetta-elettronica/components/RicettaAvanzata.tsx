@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { 
   CButton, CForm, CFormInput, CFormLabel, CFormTextarea, CFormSelect,
   CModal, CModalHeader, CModalBody, CModalFooter, CRow, CCol, CCard, 
-  CCardBody, CAlert, CSpinner, CBadge
+  CCardBody, CSpinner, CBadge
 } from '@coreui/react';
 import {
   getDiagnosiDisponibili,
@@ -54,7 +54,7 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
   // UI states
   const [loading, setLoading] = useState(false);
   const [showConferma, setShowConferma] = useState(false);
-  const [autoMode, setAutoMode] = useState(true);
+  const [autoMode] = useState(true);
 
   // Carica dati iniziali
   useEffect(() => {
@@ -199,7 +199,6 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
       setShowConferma(false);
       
       // Reset form dopo invio riuscito
-      setPazienteSelezionato(null);
       setDiagnosiSelezionata(null);
       setFarmacoSelezionato(null);
       setPosologia("");

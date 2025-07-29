@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
 
         setStats({
           pazienti: {
-            totale: pazientiData.data.totale,
+            totale: pazientiData.data.totale_pazienti,
             inCura: pazientiData.data.in_cura
           },
           appuntamenti: {

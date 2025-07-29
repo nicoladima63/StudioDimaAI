@@ -15,7 +15,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       token: null,
       refreshToken: null,
       username: null,
@@ -43,7 +43,7 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         username: state.username,
       }),
-      onRehydrate: (state) => {
+      onRehydrateStorage: () => (state) => {
         // Ricostruisce isAuthenticated dopo il caricamento dal localStorage
         if (state?.token) {
           state.isAuthenticated = true;
@@ -74,7 +74,7 @@ export const useEnvStore = create<EnvState>()(
       setRentriMode: (mode) => set({ rentriMode: mode }),
       ricettaMode: 'dev',
       setRicettaMode: (mode) => set({ ricettaMode: mode }),
-      smsMode: 'dev',  // AGGIUNTO
+      smsMode: 'test',  // AGGIUNTO
       setSmsMode: (mode) => set({ smsMode: mode }),  // AGGIUNTO
     }),
     {

@@ -1,9 +1,7 @@
-import React from "react";
 import {
   CCard,
   CCardBody,
   CFormCheck,
-  CBadge,
   CButton,
   CSpinner,
 } from "@coreui/react";
@@ -17,7 +15,6 @@ const RecallsSMSActionsCard = ({
   selectedPatients,
   handleSelectAll,
   bulkLoading,
-  smsMode,
   handleBulkSMS,
 }: any) =>
   isSMSEnabled &&

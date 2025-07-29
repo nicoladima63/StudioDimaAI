@@ -8,7 +8,7 @@ import type {
   RichiamiExportResponse,
   RichiamiTestResponse,
   RichiamoFilters
-} from '../apiTypes';
+} from '@/lib/types';
 
 /**
  * Ottiene tutti i richiami con filtri opzionali (giorni, stato, tipo)

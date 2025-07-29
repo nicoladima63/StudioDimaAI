@@ -128,7 +128,7 @@ const CalendarPage: React.FC = () => {
       setIsLoadingPreview(true);
       setPreviewStats(null);
       try {
-        const data = await CalendarService.getAppointments(selectedMonth + 1, currentYear, controller.signal);
+        const data = await CalendarService.getAppointments(selectedMonth + 1, currentYear);
         const appointments: Appointment[] = data.appointments || [];
 
         const stats = {
@@ -323,7 +323,7 @@ const handleSync = async () => {
         try {
           const statusResponse = await CalendarService.getClearAllStatus(job_id);
           
-          const { status, progress, deleted, message, error } = statusResponse;
+          const { status, progress, deleted, error } = statusResponse;
           
           setClearProgress(progress || 0);
           setClearDeleted(deleted || 0);
@@ -349,7 +349,7 @@ const handleSync = async () => {
           
           // Continua il polling se ancora in corso
           if (status === 'in_progress') {
-            clearPollingRef.current = setTimeout(pollClearStatus, 1000);
+            clearPollingRef.current = window.setTimeout(pollClearStatus, 1000);
           }
           
         } catch (pollError) {
@@ -367,7 +367,7 @@ const handleSync = async () => {
       setClearStatus('error');
       console.error('Errore durante avvio cancellazione:', error);
       
-      const errorMessage = error.message || "Si è verificato un errore durante la cancellazione.";
+      const errorMessage = (error as Error).message || "Si è verificato un errore durante la cancellazione.";
       setClearError(errorMessage);
       toast.error(errorMessage);
     }

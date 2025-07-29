@@ -15,7 +15,9 @@
       "mcp__ide__getDiagnostics",
       "Bash(npm run dev:*)",
       "Bash(venvScripts:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

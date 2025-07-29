@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell, CButton, CFormInput, CFormSelect, CRow, CCol, CTooltip, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CInputGroup, CInputGroupText } from '@coreui/react';
-import { cilCheck, cilX, cilCheckCircle, cilXCircle, cilSearch, cilLocationPin, cilFilter, cilReload, cilCloudDownload } from '@coreui/icons';
+import { cilCheckCircle, cilXCircle, cilSearch, cilLocationPin, cilFilter, cilReload, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import type { PazienteCompleto } from '@/lib/types';
 
@@ -246,7 +246,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
               </CTableDataCell>
             </CTableRow>
           ) : (
-            paginated.map((p, idx) => (
+            paginated.map((p) => (
               <CTableRow key={p.DB_CODE}>
                 <CTableDataCell className="text-center">{p.DB_CODE}</CTableDataCell>
                 <CTableDataCell>

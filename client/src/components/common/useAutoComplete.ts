@@ -40,7 +40,7 @@ export function useAutoComplete<T>(fetchSuggestions: (q: string) => Promise<T[]>
     // eslint-disable-next-line
   }, [value, showList]);
 
-  const onSelect = (item: T) => {
+  const onSelect = (_item: T) => {
     setValue('');
     setSuggestions([]);
     setShowList(false);

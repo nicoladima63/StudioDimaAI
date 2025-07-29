@@ -2,8 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { 
   CButton, 
-  CRow, 
-  CCol, 
   CSpinner, 
   CAlert, 
   CCard, 
@@ -13,25 +11,13 @@ import {
   CNavLink,
   CTabContent,
   CTabPane,
-  CInputGroup,
-  CInputGroupText,
-  CFormInput,
-  CDropdown,
-  CDropdownToggle,
-  CDropdownMenu,
-  CDropdownItem,
   CBadge
 } from '@coreui/react';
 import { CIcon } from '@coreui/icons-react';
 import { 
   cilPeople, 
   cilPhone, 
-  cilLocationPin, 
-  cilChart, 
-  cilSearch,
-  cilFilter,
-  cilReload,
-  cilCloudDownload
+  cilLocationPin
 } from '@coreui/icons';
 
 import Card from '@/components/ui/Card';
@@ -40,26 +26,22 @@ import PazientiStats from '../components/PazientiStats';
 import RecallsTable from '../components/RecallsTable';
 import RecallsStatistics from '../components/RecallsStatistics';
 import CittaTable from '../components/CittaTable';
-import RecallsSMSActionsCard from '../components/RecallsSMSActionsCard';
 import { 
-  usePazientiStore, 
-  type ViewType, 
-  type PriorityFilter, 
-  type StatusFilter 
+  usePazientiStore
 } from '@/store/pazienti.store';
 import { 
   getPazientiAll,
   getPazientiStatistics,
-  getCittaData,
-  exportPazienti,
-  getRichiami
+  getCittaData
+  // exportPazienti // TODO: Uncomment when export functionality is needed
 } from '@/api/services/pazienti.service';
 import { useSMSStore } from '@/store/smsStore';
+import { smsService } from '@/api/services/sms.service';
+import type { ViewType } from '@/lib/types';
 
 const PazientiPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ViewType>('all');
   const [error, setError] = useState<string | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
   
   const {
     pazienti,
@@ -77,11 +59,8 @@ const PazientiPage: React.FC = () => {
     setStatistiche,
     setCittaData,
     setCurrentView,
-    setSearchTerm,
-    setPriorityFilter,
-    setStatusFilter,
     setSelectedCitta,
-    clearFilters,
+    // clearFilters, // TODO: Uncomment when clear filters functionality is needed
     
     // Getters
     getFilteredPazienti,
@@ -89,7 +68,9 @@ const PazientiPage: React.FC = () => {
     getFilteredCitta
   } = usePazientiStore();
 
-  const { mode: smsMode, isEnabled: isSMSEnabled, canSendSMS } = useSMSStore();
+  const { mode: smsMode } = useSMSStore();
+  const isSMSEnabled = useSMSStore(state => state.isEnabled());
+  const canSendSMS = useSMSStore(state => state.canSendSMS());
   const [selectedPatients, setSelectedPatients] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -118,9 +99,19 @@ const PazientiPage: React.FC = () => {
 
     setBulkLoading(true);
     try {
-      await sendBulkSMS(Array.from(selectedPatients));
+      // Prepare the SMS bulk request with patient data
+      const selectedRichiami = getFilteredRichiami().filter(r => selectedPatients.has(r.DB_CODE));
+      const smsRequest = {
+        richiami: selectedRichiami.map(r => ({
+          telefono: r.numero_contatto,
+          nome_completo: r.nome_completo,
+          tipo_richiamo: r.tipo_richiamo_desc || 'controllo',
+          data_richiamo: r.tipo_richiamo || ''
+        }))
+      };
+      
+      await smsService.sendBulkSMS(smsRequest);
       setSelectedPatients(new Set());
-      setAllWithPhoneSelected(false);
       setError('SMS inviati con successo!');
     } catch (err) {
       setError('Errore nell\'invio dei SMS.');
@@ -185,37 +176,36 @@ const PazientiPage: React.FC = () => {
     }
   };
   
-  const handleExport = async () => {
-    try {
-      setIsExporting(true);
-      await exportPazienti({ 
-        view: currentView, 
-        priority: priorityFilter, 
-        status: statusFilter 
-      });
-      // In produzione: gestire download file
-    } catch (err) {
-      setError('Errore nell\'export');
-    } finally {
-      setIsExporting(false);
-    }
-  };
+// TODO: Uncomment when export functionality is needed
+  // const handleExport = async () => {
+  //   try {
+  //     await exportPazienti({ 
+  //       view: currentView, 
+  //       priority: priorityFilter, 
+  //       status: statusFilter 
+  //     });
+  //     // In produzione: gestire download file
+  //   } catch (err) {
+  //     setError('Errore nell\'export');
+  //   }
+  // };
   
-  const handleClearFilters = () => {
-    clearFilters();
-  };
+// TODO: Uncomment when clear filters functionality is needed
+  // const handleClearFilters = () => {
+  //   clearFilters();
+  // };
   
-  // Dati filtrati per vista corrente
-  const currentData = React.useMemo(() => {
-    switch (currentView) {
-      case 'recalls':
-        return getFilteredRichiami();
-      case 'cities':
-        return getFilteredCitta();
-      default:
-        return getFilteredPazienti();
-    }
-  }, [currentView, getFilteredPazienti, getFilteredRichiami, getFilteredCitta]);
+// TODO: Uncomment when currentData is needed
+  // const currentData = React.useMemo(() => {
+  //   switch (currentView) {
+  //     case 'recalls':
+  //       return getFilteredRichiami();
+  //     case 'cities':
+  //       return getFilteredCitta();
+  //     default:
+  //       return getFilteredPazienti();
+  //   }
+  // }, [currentView, getFilteredPazienti, getFilteredRichiami, getFilteredCitta]);
   
   const hasActiveFilters = searchTerm || priorityFilter || statusFilter || selectedCitta;
   
@@ -330,12 +320,12 @@ const PazientiPage: React.FC = () => {
                         statistics={statistiche.richiami}
                         loading={isLoading}
                         isSMSEnabled={isSMSEnabled}
-                        patientsWithPhone={patientsWithPhone}
+                        patientsWithPhone={patientsWithPhone.length}
                         allWithPhoneSelected={allWithPhoneSelected}
-                        selectedPatients={selectedPatients}
-                        handleSelectAll={handleSelectAll}
+                        selectedPatients={Array.from(selectedPatients)}
+                        handleSelectAll={() => handleSelectAll(!allWithPhoneSelected)}
                         bulkLoading={bulkLoading}
-                        smsMode={smsMode}
+                        smsMode={smsMode === 'prod'}
                         handleBulkSMS={handleBulkSMS}
                       />
                     </div>

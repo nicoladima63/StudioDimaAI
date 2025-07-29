@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CFormInput, CSpinner } from '@coreui/react';
 import debounce from 'lodash/debounce';
 

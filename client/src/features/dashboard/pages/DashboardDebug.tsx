@@ -8,9 +8,16 @@ import {
   getAppuntamentiPerAnno,
   getAppuntamentiTotali
 } from '@/api/services/calendar.service';
+import type { PazientiStatisticsResponse } from '@/lib/types';
 
 const DashboardDebug: React.FC = () => {
-  const [data, setData] = useState({
+  const [data, setData] = useState<{
+    pazientiStats: PazientiStatisticsResponse | null;
+    appuntamentiStats: { meseCorrente: any; mesePrecedente: any; meseProssimo: any; crescita: number; } | null;
+    primeVisite: any | null;
+    appuntamentiAnno: { anno: string; totale: any; progressivo: any; colore: string; }[] | null;
+    appuntamentiTotali: any | null;
+  }>({
     pazientiStats: null,
     appuntamentiStats: null,
     primeVisite: null,

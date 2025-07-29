@@ -31,8 +31,8 @@ const StatWidget: React.FC<StatWidgetProps> = ({ color, value, title, icon, chil
       color={color}
       value={displayValue}
       title={title}
-      icon={icon ? <CIcon icon={icon} height={36} /> : undefined}
     >
+      {icon && <CIcon icon={icon} height={36} />}
       {children}
     </CWidgetStatsA>
   )

@@ -313,15 +313,13 @@ const RentriPage: React.FC = () => {
 
         <CTabPane visible={activeTab === 'movimenti'} role="tabpanel">
           <MovimentiTab 
-            isDemo={isDemo} 
-            selectedRegistro={selectedRegistro}
+            isDemo={isDemo}
           />
         </CTabPane>
 
         <CTabPane visible={activeTab === 'fir'} role="tabpanel">
           <FIRTab 
             isDemo={isDemo}
-            selectedRegistro={selectedRegistro} 
           />
         </CTabPane>
       </CTabContent>

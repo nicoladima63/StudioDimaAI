@@ -3,14 +3,15 @@
 import React, { useState, useMemo } from 'react';
 import {
   CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell,
-  CButton, CFormInput, CFormSelect, CRow, CCol, CBadge, CButtonGroup, CFormCheck, CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CToaster, CToast, CToastBody, CTooltip, CSpinner, CInputGroup, CInputGroupText
+  CButton, CFormInput, CFormSelect, CRow, CCol, CBadge, CButtonGroup, CFormCheck, CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CToaster, CToast, CToastBody, CSpinner, CInputGroup, CInputGroupText
 } from '@coreui/react';
-import { cilCheck, cilEnvelopeClosed, cilInfo, cilSearch, cilLocationPin, cilFilter, cilReload, cilCloudDownload } from '@coreui/icons';
+import { cilSearch, cilLocationPin, cilFilter, cilReload, cilCloudDownload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
 import { useSMSStore } from '@/store/smsStore';
 import SMSPreviewModal from '@/components/ui/SMSPreviewModal';
 import type { PazienteCompleto } from '@/lib/types';
 import type { SMSResponse } from '@/api/services/sms.service';
+// import { apiClient } from '@/api/client'; // TODO: Uncomment when API client functionality is needed
 
 interface RecallsTableProps {
   richiami: PazienteCompleto[];
@@ -89,14 +90,14 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading, selected
   };
 
   // SMS Store
-  const { mode: smsMode, isEnabled: isSMSEnabled, canSendSMS } = useSMSStore();
+  const { /* mode: smsMode, */ isEnabled: isSMSEnabled, canSendSMS } = useSMSStore();
 
   // Modal state
   const [smsModalVisible, setSmsModalVisible] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<PazienteCompleto | null>(null);
 
   // Bulk selection state
-  const [bulkLoading, setBulkLoading] = useState(false);
+  // const [bulkLoading, setBulkLoading] = useState(false); // TODO: Uncomment when bulk loading UI is implemented
 
   // Toast state
   const [toasts, setToasts] = useState<Array<{
@@ -132,60 +133,61 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading, selected
     }
   };
 
-  const handleSelectPatient = (dbCode: string, checked: boolean) => {
-    const newSelection = new Set(selectedPatients);
-    if (checked) {
-      newSelection.add(dbCode);
-    } else {
-      newSelection.delete(dbCode);
-    }
-    setSelectedPatients(newSelection);
-  };
+  // TODO: Uncomment when individual patient selection is implemented
+  // const handleSelectPatient = (dbCode: string, checked: boolean) => {
+  //   const newSelection = new Set(selectedPatients);
+  //   if (checked) {
+  //     newSelection.add(dbCode);
+  //   } else {
+  //     newSelection.delete(dbCode);
+  //   }
+  //   setSelectedPatients(newSelection);
+  // };
 
-  // Bulk SMS handler
-  const handleBulkSMS = async () => {
-    if (selectedPatients.size === 0) return;
+  // TODO: Uncomment when bulk SMS functionality is implemented
+  // const handleBulkSMS = async () => {
+  //   if (selectedPatients.size === 0) return;
+  //
+  //   const confirmed = confirm(
+  //     `Inviare SMS di richiamo a ${selectedPatients.size} pazienti selezionati?`
+  //   );
+  //
+  //   if (!confirmed) return;
 
-    const confirmed = confirm(
-      `Inviare SMS di richiamo a ${selectedPatients.size} pazienti selezionati?`
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setBulkLoading(true);
-      
-      const selectedData = richiami.filter(r => selectedPatients.has(r.DB_CODE));
-      
-      // Prepare bulk SMS data
-      const bulkData = selectedData.map(paziente => ({
-        telefono: paziente.numero_contatto!,
-        nome_completo: paziente.nome_completo,
-        tipo_richiamo: paziente.tipo_richiamo_desc || 'Controllo',
-        data_richiamo: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('it-IT')
-      }));
-
-      // Send bulk SMS
-      const response = await apiClient.post('/api/sms/send-bulk', { richiami: bulkData });
-      const result = response.data;
-
-      if (result.success) {
-        addToast(
-          `📤 SMS inviati: ${result.summary.success} successi, ${result.summary.errors} errori`,
-          result.summary.errors > 0 ? 'warning' : 'success'
-        );
-        setSelectedPatients(new Set()); // Clear selection
-      } else {
-        throw new Error(result.error || 'Errore invio bulk SMS');
-      }
-
-    } catch (error) {
-      console.error('Errore bulk SMS:', error);
-      addToast('❌ Errore invio SMS multipli', 'danger');
-    } finally {
-      setBulkLoading(false);
-    }
-  };
+  //   try {
+  //     setBulkLoading(true);
+  //     
+  //     const selectedData = richiami.filter(r => selectedPatients.has(r.DB_CODE));
+  //     
+  //     // Prepare bulk SMS data
+  //     const bulkData = selectedData.map(paziente => ({
+  //       telefono: paziente.numero_contatto!,
+  //       nome_completo: paziente.nome_completo,
+  //       tipo_richiamo: paziente.tipo_richiamo_desc || 'Controllo',
+  //       data_richiamo: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('it-IT')
+  //     }));
+  //
+  //     // Send bulk SMS
+  //     const response = await apiClient.post('/api/sms/send-bulk', { richiami: bulkData });
+  //     const result = response.data;
+  //
+  //     if (result.success) {
+  //       addToast(
+  //         `📤 SMS inviati: ${result.summary.success} successi, ${result.summary.errors} errori`,
+  //         result.summary.errors > 0 ? 'warning' : 'success'
+  //       );
+  //       setSelectedPatients(new Set()); // Clear selection
+  //     } else {
+  //       throw new Error(result.error || 'Errore invio bulk SMS');
+  //     }
+  //
+  //   } catch (error) {
+  //     console.error('Errore bulk SMS:', error);
+  //     addToast('❌ Errore invio SMS multipli', 'danger');
+  //   } finally {
+  //     setBulkLoading(false);
+  //   }
+  // };
 
   // Toast helper
   const addToast = (message: string, color: 'success' | 'danger' | 'warning') => {
@@ -321,7 +323,7 @@ const RecallsTable: React.FC<RecallsTableProps> = ({ richiami, loading, selected
       <CTable hover responsive bordered small>
         <CTableHead>
           <CTableRow>
-            <CTableHeaderCell className="text-center" width={40}>
+            <CTableHeaderCell className="text-center" style={{width: '40px'}}>
               <CFormCheck
                 checked={allWithPhoneSelected}
                 indeterminate={selectedPatients.size > 0 && !allWithPhoneSelected}

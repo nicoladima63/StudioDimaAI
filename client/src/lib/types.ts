@@ -305,23 +305,3 @@ export interface Calendar {
   name: string;
 }
 
-export interface SMSStatusResponse {
-  mode: 'dev' | 'test' | 'prod';
-  enabled: boolean;
-  sender: string;
-  api_configured?: boolean;
-}
-
-export interface SMSTestResponse {
-  success: boolean;
-  message: string;
-  mode: string;
-  error?: string;
-}
-
-export interface ModeResponse {
-  mode: 'dev' | 'test' | 'prod';
-  success?: boolean;
-  error?: string;
-  message?: string;
-}

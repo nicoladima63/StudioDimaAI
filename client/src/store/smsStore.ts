@@ -79,7 +79,7 @@ export const useSMSStore = create<SMSState>()(
 
       canSendSMS: () => {
         const { status, mode } = get();
-        return status?.enabled && mode !== 'dev';
+        return Boolean(status?.enabled && mode !== 'dev');
       },
 
       reset: () => set({

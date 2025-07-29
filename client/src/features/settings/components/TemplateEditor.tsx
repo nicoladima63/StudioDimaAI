@@ -277,7 +277,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({ tipo, title, defaultVar
                 {defaultVariables.map((variable) => (
                   <CListGroupItem
                     key={variable}
-                    action
+                    as="button"
                     onClick={() => insertVariable(variable)}
                     className="d-flex justify-content-between align-items-center py-2"
                   >

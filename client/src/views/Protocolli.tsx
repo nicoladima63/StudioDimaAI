@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   CContainer, CRow, CCol, CCard, CCardHeader, CCardBody,
   CButton, CTable, CTableHead, CTableRow, CTableHeaderCell,
-  CTableBody, CTableDataCell, CBadge, CModal, CModalHeader,
-  CModalTitle, CModalBody, CModalFooter, CForm, CFormInput,
-  CFormSelect, CFormTextarea, CAlert
+  CTableBody, CTableDataCell, CBadge, CAlert
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPlus, cilPencil, cilTrash, cilCopy } from '@coreui/icons';
+import { cilPlus, cilCopy } from '@coreui/icons';
 import { protocolliService } from '../api/services/protocolli.service';
 import type { Diagnosi, ProtocolloTerapeutico } from '../api/services/protocolli.service';
 
@@ -15,12 +13,12 @@ const Protocolli: React.FC = () => {
   const [diagnosi, setDiagnosi] = useState<Diagnosi[]>([]);
   const [protocolli, setProtocolli] = useState<ProtocolloTerapeutico[]>([]);
   const [selectedDiagnosi, setSelectedDiagnosi] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  // const [modalType, setModalType] = useState<'diagnosi' | 'protocollo' | null>(null); // Modal type state - used in event handlers but not in render
+  // const [showModal, setShowModal] = useState<boolean>(false); // Modal visibility state - used in event handlers but not in render
+  const [, setModalType] = useState<'diagnosi' | 'protocollo' | null>(null);
+  const [, setShowModal] = useState<boolean>(false);
   
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'diagnosi' | 'protocollo'>('diagnosi');
-  const [editingItem, setEditingItem] = useState<any>(null);
 
   useEffect(() => {
     loadDiagnosi();
@@ -28,26 +26,20 @@ const Protocolli: React.FC = () => {
 
   const loadDiagnosi = async () => {
     try {
-      setLoading(true);
       const data = await protocolliService.getDiagnosi();
       setDiagnosi(data);
     } catch (err) {
       setError('Errore nel caricamento delle diagnosi');
-    } finally {
-      setLoading(false);
     }
   };
 
   const loadProtocolli = async (diagnosiId: number) => {
     try {
-      setLoading(true);
       const data = await protocolliService.getProtocolliPerDiagnosi(diagnosiId);
       setProtocolli(data);
       setSelectedDiagnosi(diagnosiId);
     } catch (err) {
       setError('Errore nel caricamento dei protocolli');
-    } finally {
-      setLoading(false);
     }
   };
 

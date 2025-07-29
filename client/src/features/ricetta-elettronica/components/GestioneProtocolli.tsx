@@ -16,7 +16,8 @@ const GestioneProtocolli: React.FC = () => {
   // State per dati
   const [diagnosi, setDiagnosi] = useState<Diagnosi[]>([]);
   const [farmaci, setFarmaci] = useState<Farmaco[]>([]);
-  const [categorieFarmaci, setCategorieFarmaci] = useState<string[]>([]);
+  // const [categorieFarmaci, setCategorieFarmaci] = useState<string[]>([]); // Categories loaded but never displayed in current UI
+  const setCategorieFarmaci = (_categories?: any) => {}; // Placeholder for unused setter
   const [protocolli, setProtocolli] = useState<ProtocolloTerapeutico[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDiagnosi, setSelectedDiagnosi] = useState<Diagnosi | null>(null);
@@ -24,12 +25,12 @@ const GestioneProtocolli: React.FC = () => {
   // State per modali
   const [showModalDiagnosi, setShowModalDiagnosi] = useState(false);
   const [showModalDuplica, setShowModalDuplica] = useState(false);
-  const [showModalProtocollo, setShowModalProtocollo] = useState(false);
+  // const [showModalProtocollo, setShowModalProtocollo] = useState(false); // TODO: Uncomment when protocollo modal is implemented
   const [showModalAssociazione, setShowModalAssociazione] = useState(false);
   
   // State per editing
   const [editingDiagnosi, setEditingDiagnosi] = useState<Diagnosi | null>(null);
-  const [editingProtocollo, setEditingProtocollo] = useState<ProtocolloTerapeutico | null>(null);
+  // const [editingProtocollo, setEditingProtocollo] = useState<ProtocolloTerapeutico | null>(null); // TODO: Uncomment when protocollo editing is implemented
   const [editingAssociazione, setEditingAssociazione] = useState<any>(null);
 
   // Form states
@@ -41,17 +42,18 @@ const GestioneProtocolli: React.FC = () => {
   });
 
   const [formDuplica, setFormDuplica] = useState({
+    new_id: '',
     new_codice: '',
     new_descrizione: '',
     new_categoria: ''
   });
 
-  const [formProtocollo, setFormProtocollo] = useState({
-    farmacoId: 0,
-    posologia_custom: '',
-    durata_custom: '',
-    note_custom: ''
-  });
+  // const [formProtocollo, setFormProtocollo] = useState({
+  //   farmacoId: 0,
+  //   posologia_custom: '',
+  //   durata_custom: '',
+  //   note_custom: ''
+  // }); // TODO: Uncomment when protocollo form is implemented
 
   const [formAssociazione, setFormAssociazione] = useState({
     farmaco_codice: '',
@@ -60,9 +62,11 @@ const GestioneProtocolli: React.FC = () => {
     note: ''
   });
 
-  const [filtroCategoria, setFiltroCategoria] = useState<string>('');
-  const [alert, setAlert] = useState<{type: string, message: string} | null>(null);
-  const [error, setError] = useState<string>('');
+  const [filtroCategoria /* setFiltroCategoria */] = useState<string>(''); // Filter set up but setter not used in current UI
+  // const [alert, setAlert] = useState<{type: string, message: string} | null>(null); // Alert system set up but not displayed in current UI
+  const setAlert = (_alert?: any) => {}; // Placeholder for unused alert setter
+  // const [error, setError] = useState<string>(''); // Error handling set up but not displayed in current UI
+  const setError = (_error?: any) => {}; // Placeholder for unused error setter
 
   useEffect(() => {
     loadData();
@@ -131,9 +135,10 @@ const GestioneProtocolli: React.FC = () => {
   const handleEditDiagnosi = (diagnosi: Diagnosi) => {
     setEditingDiagnosi(diagnosi);
     setFormDiagnosi({
-      id: diagnosi.id,
+      id: diagnosi.id.toString(),
       codice: diagnosi.codice,
-      descrizione: diagnosi.descrizione
+      descrizione: diagnosi.descrizione,
+      categoria: diagnosi.categoria || ''
     });
     setShowModalDiagnosi(true);
   };
@@ -153,7 +158,7 @@ const GestioneProtocolli: React.FC = () => {
       setShowModalDiagnosi(false);
     } catch (error) {
       console.error('Errore salvataggio diagnosi:', error);
-      alert('Errore durante il salvataggio');
+      setAlert({type: 'danger', message: 'Errore durante il salvataggio'});
     }
   };
 
@@ -162,7 +167,8 @@ const GestioneProtocolli: React.FC = () => {
     setFormDuplica({
       new_id: `${diagnosi.id}_copy`,
       new_codice: `${diagnosi.codice}_copy`,
-      new_descrizione: `${diagnosi.descrizione} (Copia)`
+      new_descrizione: `${diagnosi.descrizione} (Copia)`,
+      new_categoria: diagnosi.categoria || ''
     });
     setShowModalDuplica(true);
   };
@@ -176,7 +182,7 @@ const GestioneProtocolli: React.FC = () => {
       setShowModalDuplica(false);
     } catch (error) {
       console.error('Errore duplicazione diagnosi:', error);
-      alert('Errore durante la duplicazione');
+      setAlert({type: 'danger', message: 'Errore durante la duplicazione'});
     }
   };
 
@@ -194,7 +200,7 @@ const GestioneProtocolli: React.FC = () => {
       }
     } catch (error) {
       console.error('Errore eliminazione diagnosi:', error);
-      alert('Errore durante l\'eliminazione');
+      setAlert({type: 'danger', message: 'Errore durante l\'eliminazione'});
     }
   };
 
@@ -253,7 +259,7 @@ const GestioneProtocolli: React.FC = () => {
       setShowModalAssociazione(false);
     } catch (error) {
       console.error('Errore salvataggio protocollo:', error);
-      alert('Errore durante il salvataggio');
+      setAlert({type: 'danger', message: 'Errore durante il salvataggio del protocollo'});
     }
   };
 
@@ -265,7 +271,7 @@ const GestioneProtocolli: React.FC = () => {
       await loadProtocolli();
     } catch (error) {
       console.error('Errore eliminazione protocollo:', error);
-      alert('Errore durante l\'eliminazione');
+      setAlert({type: 'danger', message: 'Errore durante l\'eliminazione del protocollo'});
     }
   };
 

@@ -1,22 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   CCard,
   CCardBody,
   CCardHeader,
   CCardTitle,
   CButton,
-  CFormInput,
   CBadge,
   CAlert,
   CSpinner,
   CRow,
   CCol,
-  CInputGroup,
-  CInputGroupText
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import {
-  cilMagnifyingGlass,
   cilCloudDownload,
   cilCalendar,
   cilDescription,

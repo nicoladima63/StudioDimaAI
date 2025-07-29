@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CButton, CCard, CCardBody, CAlert, CSpinner, CBadge } from '@coreui/react';
+import { CButton, CSpinner, CBadge } from '@coreui/react';
 import { testRicettaConnection, ricettaAuthLogin, getRicettaAuthStatus } from '@/api/services/ricette.service';
 
 interface AuthStatusData {

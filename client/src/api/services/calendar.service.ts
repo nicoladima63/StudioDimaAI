@@ -43,16 +43,19 @@ export const CalendarService = {
       const encodedCalendarId = encodeURIComponent(calendarId);
       const response = await apiClient.delete(`/api/calendar/clear/${encodedCalendarId}`);
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       // Gestione migliorata degli errori
-      if (error.response?.data?.message) {
-        // Propaga l'errore con il messaggio dal server
-        const errorObj = {
-          message: error.response.data.message,
-          error: true,
-          deleted_count: 0
-        };
-        throw errorObj;
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        if (axiosError.response?.data?.message) {
+          // Propaga l'errore con il messaggio dal server
+          const errorObj = {
+            message: axiosError.response.data.message,
+            error: true,
+            deleted_count: 0
+          };
+          throw errorObj;
+        }
       }
       // Per errori di rete o altri errori non previsti
       throw {
