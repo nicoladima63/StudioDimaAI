@@ -57,7 +57,7 @@ class PazientiService:
                 
                 pazienti.append(paziente)
             
-            self.logger.info(f"Caricati {len(pazienti)} pazienti con dati completi")
+            # self.logger.info(f"Caricati {len(pazienti)} pazienti con dati completi")
             return pazienti
             
         except Exception as e:

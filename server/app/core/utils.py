@@ -74,20 +74,20 @@ def normalizza_numero_telefono(numero_telefono, origine='cellulare'):
     # Logica differenziata per origine
     if origine == 'telefono' or numero_str.startswith("0"):
         if len(numero_pulito) < 11 or len(numero_pulito) > 13:
-            logger.warning(f"[FISSO ANOMALO] Orig: '{numero_telefono}' -> '{numero_pulito}'")
+            #logger.warning(f"[FISSO ANOMALO] Orig: '{numero_telefono}' -> '{numero_pulito}'")
             return None
         if is_falso(numero_pulito):
-            logger.warning(f"[FISSO FASULLO] '{numero_telefono}' ->'{numero_pulito}'")
+            #logger.warning(f"[FISSO FASULLO] '{numero_telefono}' ->'{numero_pulito}'")
             return None
         return "+" + numero_pulito
 
     # Caso default: cellulare
     if len(numero_pulito) < 11 or len(numero_pulito) > 13:
-        logger.warning(f"[CELL ANOMALO] Orig: '{numero_telefono}' -> '{numero_pulito}'")
+        #logger.warning(f"[CELL ANOMALO] Orig: '{numero_telefono}' -> '{numero_pulito}'")
         return None
 
     if is_falso(numero_pulito):
-        logger.warning(f"[CELL FASULLO] '{numero_telefono}' -> '{numero_pulito}'")
+        #logger.warning(f"[CELL FASULLO] '{numero_telefono}' -> '{numero_pulito}'")
         return None
 
     return "+" + numero_pulito

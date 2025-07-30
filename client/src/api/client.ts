@@ -2,13 +2,13 @@
 import axios from 'axios';
 import { useAuthStore, useEnvStore } from '@/features/auth/store/useAuthStore';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 function getBaseUrl() {
   return API_BASE_URL;
 }
 
-const DEFAULT_TIMEOUT = 10000;
+const DEFAULT_TIMEOUT = 60000; // 60 secondi per operazioni che richiedono autenticazione
 
 export const apiClient = axios.create({
   baseURL: getBaseUrl(),

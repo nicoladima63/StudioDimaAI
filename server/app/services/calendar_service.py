@@ -145,16 +145,73 @@ class CalendarService:
 
     @staticmethod
     def _run_authentication_script():
-        """Lancia lo script di autenticazione Google."""
+        """Lancia lo script di autenticazione Google e cattura l'URL OAuth per il client."""
         logger.info("Lancio script di autenticazione Google...")
+        
+        # Trova il path corretto dello script
+        script_paths = [
+            'server/scripts/authenticate_google.py',  # Dalla root
+            'scripts/authenticate_google.py',         # Dalla cartella server
+            os.path.join(os.path.dirname(__file__), '..', '..', 'scripts', 'authenticate_google.py'),  # Path assoluto
+        ]
+        
+        script_path = None
+        for path in script_paths:
+            if os.path.exists(path):
+                script_path = path
+                break
+        
+        if not script_path:
+            logger.error("Script di autenticazione non trovato")
+            raise GoogleCredentialsNotFoundError("Script di autenticazione non trovato")
+        
+        logger.info(f"Eseguendo script: {script_path}")
         try:
-            result = subprocess.run(['python', 'server/scripts/authenticate_google.py'], 
-                                  capture_output=True, text=True, timeout=60)
-            if result.returncode == 0:
+            # Timeout aumentato per dare tempo all'utente di completare OAuth
+            result = subprocess.run(['python', script_path], 
+                                  capture_output=True, text=True, timeout=300)
+            # Controlla se l'autenticazione è realmente riuscita verificando che il token sia stato creato
+            # anche se returncode è 0, potrebbe esserci stato un errore durante l'autenticazione
+            output_text = result.stdout + result.stderr
+            
+            if result.returncode == 0 and "Autenticazione completata!" in output_text and os.path.exists(TOKEN_FILE):
                 logger.info("Script di autenticazione completato con successo")
+                logger.info(f"Output script: {result.stdout}")
+                if result.stderr:
+                    logger.warning(f"Script stderr: {result.stderr}")
             else:
                 logger.error(f"Script di autenticazione fallito: {result.stderr}")
-                raise GoogleCredentialsNotFoundError("Autenticazione Google fallita")
+                logger.error(f"Script stdout: {result.stdout}")
+                
+                # Cerca l'URL OAuth nell'output per mostrarlo al client
+                oauth_url = None
+                output_lines = (result.stdout + result.stderr).split('\n')
+                for line in output_lines:
+                    if 'https://accounts.google.com/o/oauth2/auth' in line:
+                        # Estrai l'URL OAuth dalla riga
+                        import re
+                        url_match = re.search(r'https://accounts\.google\.com/o/oauth2/auth[^\s]*', line)
+                        if url_match:
+                            oauth_url = url_match.group(0)
+                            break
+                    # Pattern per il nuovo formato "*** URL OAUTH PER IL CLIENT: ... ***"
+                    elif 'URL OAUTH PER IL CLIENT:' in line:
+                        import re
+                        url_match = re.search(r'https://accounts\.google\.com/o/oauth2/auth[^\s]*', line)
+                        if url_match:
+                            oauth_url = url_match.group(0)
+                            break
+                    # Anche se l'URL viene stampato su una riga separata
+                    elif 'Please visit this URL to authorize this application:' in line:
+                        # La prossima riga potrebbe contenere l'URL
+                        continue
+                
+                if oauth_url:
+                    error_msg = f"Autenticazione Google richiesta. URL OAuth: {oauth_url}"
+                    logger.info(f"URL OAuth estratto: {oauth_url}")
+                    raise GoogleCredentialsNotFoundError(error_msg, oauth_url=oauth_url)
+                else:
+                    raise GoogleCredentialsNotFoundError("Autenticazione Google fallita")
         except subprocess.TimeoutExpired:
             logger.error("Script di autenticazione timeout")
             raise GoogleCredentialsNotFoundError("Timeout durante l'autenticazione Google")
@@ -391,20 +448,20 @@ class CalendarService:
         descrizione = app.get('DESCRIZIONE', '').strip()
         note = app.get('NOTE', '').strip()
         
-        # Debug log
-        logger.info(f"DEBUG - PAZIENTE: '{paziente}', DESCRIZIONE: '{descrizione}', NOTE: '{note}'")
+        # Debug log disabilitato per evitare log verbose
+        # logger.info(f"DEBUG - PAZIENTE: '{paziente}', DESCRIZIONE: '{descrizione}', NOTE: '{note}'")
         
         if t_inizio.hour == 8 and t_inizio.minute == 0 and (not paziente and not descrizione and not note):
             summary = "Nota giornaliera"
-            logger.info("DEBUG - Caso: Nota giornaliera")
+            # logger.info("DEBUG - Caso: Nota giornaliera")
         elif paziente and not paziente.startswith("Appuntamento"):
             # Se c'è un paziente vero (non generato), usa il nome del paziente
             summary = paziente
-            logger.info(f"DEBUG - Caso: Paziente vero -> '{summary}'")
+            # logger.info(f"DEBUG - Caso: Paziente vero -> '{summary}'")
         else:
             # Se non c'è paziente o è un "Appuntamento" generato, usa prima DB_NOTE poi DB_APDESCR
             summary = note or descrizione or "Nota"
-            logger.info(f"DEBUG - Caso: Note/Descrizione/Fallback -> '{summary}'")
+            # logger.info(f"DEBUG - Caso: Note/Descrizione/Fallback -> '{summary}'")
         
         # Crea evento semplice (non riunione)
         event = {
@@ -475,7 +532,7 @@ class CalendarService:
                     name = str(record[col_paz['nome']]).strip() if record[col_paz['nome']] else ''
                     if pid:
                         patients_dict[pid] = name
-                logger.info(f"Letti {pazienti_count} pazienti, {len(patients_dict)} validi")
+                # logger.info(f"Letti {pazienti_count} pazienti, {len(patients_dict)} validi")
         except Exception as e:
             logger.error(f"Errore durante la lettura del DBF pazienti {path_pazienti}: {e}")
             raise IOError(f"Impossibile leggere il file dei pazienti.")
@@ -550,9 +607,9 @@ class CalendarService:
                         'PAZIENTE': patients_dict.get(idpaz, '')
                     }
                     
-                    # Debug per questo specifico caso
-                    if not patients_dict.get(idpaz, ''):
-                        logger.info(f"DEBUG RECORD - PAZIENTE VUOTO: DESCRIZIONE='{r[col_app['descrizione']]}', NOTE='{r[col_app['note']]}'")
+                    # Debug disabilitato per evitare log verbose
+                    # if not patients_dict.get(idpaz, ''):
+                    #     logger.info(f"DEBUG RECORD - PAZIENTE VUOTO: DESCRIZIONE='{r[col_app['descrizione']]}', NOTE='{r[col_app['note']]}'")
                     
                     # Applica il mapping con gestione errori
                     try:
@@ -593,13 +650,13 @@ class CalendarService:
                     appointments.append(mapped_app)
                     record_index += 1
 
-                logger.info(f"Letti {apps_count} appuntamenti totali, {len(deleted_records)} cancellati, {filtered_count} filtrati, {processed_count} processati")
+                # logger.info(f"Letti {apps_count} appuntamenti totali, {len(deleted_records)} cancellati, {filtered_count} filtrati, {processed_count} processati")
 
         except Exception as e:
             logger.error(f"Errore durante la lettura del DBF appuntamenti {path_appuntamenti}: {e}")
             raise IOError(f"Impossibile leggere il file degli appuntamenti.")
             
-        logger.info(f"Trovati e processati {len(appointments)} appuntamenti per {month}/{year}")
+        # logger.info(f"Trovati e processati {len(appointments)} appuntamenti per {month}/{year}")
         return appointments
 
     @staticmethod

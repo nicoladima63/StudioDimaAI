@@ -117,12 +117,28 @@ def list_calendars():
         logger.error(f"Errore in list_calendars: {str(e)}", exc_info=True)
         
         if isinstance(e, GoogleCredentialsNotFoundError):
-            return jsonify({
+            response_data = {
                 "success": False,
                 "error": "google_auth_required",
-                "message": "Autenticazione Google richiesta. Script automatico eseguito.",
-                "action_required": "Riprova la richiesta tra qualche secondo"
-            }), 401
+                "message": "Autenticazione Google richiesta",
+                "action_required": "Completa l'autenticazione Google usando le istruzioni fornite"
+            }
+            
+            # Se abbiamo l'URL OAuth, includilo nella risposta
+            if hasattr(e, 'oauth_url') and e.oauth_url:
+                response_data["oauth_url"] = e.oauth_url
+                response_data["message"] = "Autenticazione Google richiesta. Segui le istruzioni sotto."
+                response_data["instructions"] = [
+                    "1. Copia l'URL fornito",
+                    "2. Aprilo nel browser del TUO PC (non del server)",
+                    "3. Autorizza l'applicazione con l'account Google",
+                    "4. Torna qui e riprova l'operazione"
+                ]
+            else:
+                response_data["message"] = "Autenticazione Google richiesta. In corso sul server..."
+                response_data["action_required"] = "Attendi che l'amministratore completi l'autenticazione, poi riprova tra qualche minuto"
+            
+            return jsonify(response_data), 401
         else:
             return jsonify({
                 "success": False,
@@ -327,10 +343,63 @@ def clear_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@calendar_bp.route('/oauth/start', methods=['POST'])
+@jwt_required()
+def start_google_oauth():
+    """Genera l'URL OAuth per avviare l'autenticazione Google."""
+    try:
+        from google_auth_oauthlib.flow import Flow
+        from flask import request, url_for
+        
+        # Rimuovi token esistente per forzare re-auth
+        import os
+        TOKEN_FILE = 'server/token.json'
+        if os.path.exists(TOKEN_FILE):
+            os.remove(TOKEN_FILE)
+            logger.info("Token esistente rimosso per re-autenticazione")
+        
+        # Crea il flow OAuth
+        flow = Flow.from_client_secrets_file(
+            'server/credentials.json',
+            scopes=['https://www.googleapis.com/auth/calendar']
+        )
+        
+        # Configura redirect URI per callback
+        # Usa l'host della richiesta per costruire l'URL corretto
+        host = request.headers.get('Host', 'localhost:5000')
+        flow.redirect_uri = f"http://{host}/api/calendar/oauth/callback"
+        
+        # Genera URL OAuth
+        auth_url, state = flow.authorization_url(
+            access_type='offline',
+            prompt='consent',
+            login_hint='studiodrnicoladimartino@gmail.com'
+        )
+        
+        # Salva lo state per la verifica nel callback
+        import json
+        state_data = {'state': state, 'flow_data': flow.client_config}
+        with open('server/oauth_state.json', 'w') as f:
+            json.dump(state_data, f)
+        
+        logger.info(f"URL OAuth generato: {auth_url}")
+        return jsonify({
+            "success": True,
+            "auth_url": auth_url,
+            "message": "Apri l'URL in una nuova finestra per autorizzare l'applicazione"
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore nella generazione dell'URL OAuth: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 @calendar_bp.route('/reauth-url', methods=['GET'])
 @jwt_required()
 def get_google_oauth_url():
-    """Genera l'URL di riautorizzazione Google."""
+    """Genera l'URL di riautorizzazione Google (legacy)."""
     try:
         auth_url = CalendarService.get_google_oauth_url()
         return jsonify({"auth_url": auth_url})
@@ -338,6 +407,97 @@ def get_google_oauth_url():
         logger.error(f"Errore nella generazione dell'URL OAuth: {e}")
         return jsonify({"error": str(e)}), 500
 
+@calendar_bp.route('/oauth/callback', methods=['GET'])
+def oauth_callback():
+    """Gestisce il callback OAuth da Google."""
+    try:
+        from google_auth_oauthlib.flow import Flow
+        from flask import request, redirect
+        import json
+        import os
+        
+        # Recupera il codice di autorizzazione
+        code = request.args.get('code')
+        state = request.args.get('state')
+        error = request.args.get('error')
+        
+        if error:
+            logger.error(f"Errore OAuth da Google: {error}")
+            return redirect(f"/oauth-result?success=false&error={error}")
+        
+        if not code:
+            logger.error("Codice di autorizzazione mancante")
+            return redirect("/oauth-result?success=false&error=missing_code")
+        
+        # Carica lo state salvato
+        try:
+            with open('server/oauth_state.json', 'r') as f:
+                state_data = json.load(f)
+            saved_state = state_data['state']
+            flow_data = state_data['flow_data']
+        except Exception as e:
+            logger.error(f"Errore caricamento state: {e}")
+            return redirect("/oauth-result?success=false&error=invalid_state")
+        
+        # Verifica state per sicurezza
+        if state != saved_state:
+            logger.error("State OAuth non corrisponde")
+            return redirect("/oauth-result?success=false&error=state_mismatch")
+        
+        # Ricrea il flow con gli stessi parametri
+        flow = Flow.from_client_config(
+            flow_data,
+            scopes=['https://www.googleapis.com/auth/calendar']
+        )
+        flow.redirect_uri = request.url_root.rstrip('/') + '/api/calendar/oauth/callback'
+        
+        # Scambia il codice con il token
+        flow.fetch_token(code=code)
+        credentials = flow.credentials
+        
+        # Salva il token
+        TOKEN_FILE = 'server/token.json'
+        with open(TOKEN_FILE, 'w') as token_file:
+            token_file.write(credentials.to_json())
+        
+        # Pulisci file temporaneo
+        if os.path.exists('server/oauth_state.json'):
+            os.remove('server/oauth_state.json')
+        
+        logger.info("Autenticazione Google completata con successo")
+        return redirect("/oauth-result?success=true")
+        
+    except Exception as e:
+        logger.error(f"Errore nel callback OAuth: {e}")
+        return redirect(f"/oauth-result?success=false&error=callback_error")
+
+@calendar_bp.route('/oauth/status', methods=['GET'])
+@jwt_required()
+def oauth_status():
+    """Verifica lo stato dell'autenticazione OAuth."""
+    try:
+        import os
+        TOKEN_FILE = 'server/token.json'
+        
+        if os.path.exists(TOKEN_FILE):
+            return jsonify({
+                "success": True,
+                "authenticated": True,
+                "message": "Autenticazione Google attiva"
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "authenticated": False,
+                "message": "Autenticazione Google richiesta"
+            })
+            
+    except Exception as e:
+        logger.error(f"Errore verifica stato OAuth: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 
 @calendar_bp.route('/appointments', methods=['GET'])

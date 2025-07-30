@@ -15,12 +15,12 @@ set "BACKUP_PATH=%SERVER%\StudioDimaAI_backup_%date:~-4,4%%date:~-10,2%%date:~-7
 echo [1/8] Verifica connessione server SERVERDIMA...
 ping -n 1 192.168.1.200 >nul 2>&1
 if errorlevel 1 (
-    echo ❌ ERRORE: Server SERVERDIMA non raggiungibile
-    echo    Verifica che il server sia acceso e connesso alla rete
+    echo ERRORE: Server SERVERDIMA non raggiungibile
+    echo Verifica che il server sia acceso e connesso alla rete
     pause
     exit /b 1
 )
-echo ✅ Server raggiungibile
+echo Server raggiungibile
 
 :: Backup esistente
 echo.
@@ -29,14 +29,14 @@ if exist "%DEPLOY_PATH%" (
     echo Creazione backup in %BACKUP_PATH%...
     xcopy "%DEPLOY_PATH%" "%BACKUP_PATH%" /E /I /Q >nul 2>&1
     if errorlevel 1 (
-        echo ⚠️  WARNING: Backup fallito, continuare? (y/n)
+        echo WARNING: Backup fallito, continuare? (y/n)
         set /p continue=
         if /i not "!continue!"=="y" exit /b 1
     ) else (
-        echo ✅ Backup creato
+        echo Backup creato
     )
 ) else (
-    echo ✅ Prima installazione, nessun backup necessario
+    echo Prima installazione, nessun backup necessario
 )
 
 :: Build client
@@ -47,7 +47,7 @@ if not exist "node_modules" (
     echo Installazione dipendenze npm...
     call npm install
     if errorlevel 1 (
-        echo ❌ ERRORE: npm install fallito
+        echo ERRORE: npm install fallito
         echo    Verifica Node.js installato e connessione internet
         pause
         exit /b 1
@@ -57,12 +57,12 @@ if not exist "node_modules" (
 echo Build produzione...
 call npm run build
 if errorlevel 1 (
-    echo ❌ ERRORE: Build React fallito
+    echo ERRORE: Build React fallito
     echo    Controlla errori TypeScript/ESLint nel codice
     pause
     exit /b 1
 )
-echo ✅ Frontend buildato
+echo Frontend buildato
 cd ..
 
 :: Crea cartelle sul server
@@ -72,62 +72,98 @@ mkdir "%DEPLOY_PATH%" 2>nul
 mkdir "%DEPLOY_PATH%\server" 2>nul
 mkdir "%DEPLOY_PATH%\server\static" 2>nul
 mkdir "%DEPLOY_PATH%\server\instance" 2>nul
-echo ✅ Cartelle create
+echo Cartelle create
 
 :: Copia file server
 echo.
 echo [5/8] Copia file server...
 xcopy "server" "%DEPLOY_PATH%\server" /E /I /Q /Y >nul 2>&1
 if errorlevel 1 (
-    echo ❌ ERRORE: Copia file server fallita
+    echo ERRORE: Copia file server fallita
     echo    Verifica permessi scrittura su SERVERDIMA
     pause
     exit /b 1
 )
-echo ✅ File server copiati
+
+:: Crea requirements unificato per produzione
+echo Creazione requirements.txt unificato per produzione...
+echo # Requirements unificato per produzione > "%DEPLOY_PATH%\requirements.txt"
+type "requirements.txt" >> "%DEPLOY_PATH%\requirements.txt"
+echo. >> "%DEPLOY_PATH%\requirements.txt"
+echo # Dipendenze produzione >> "%DEPLOY_PATH%\requirements.txt"
+type "server\requirements-prod.txt" >> "%DEPLOY_PATH%\requirements.txt"
+echo Requirements unificato creato
+
+echo File server copiati
 
 :: Copia build frontend
 echo.
 echo [6/8] Copia build frontend...
 xcopy "client\dist" "%DEPLOY_PATH%\server\static" /E /I /Q /Y >nul 2>&1
 if errorlevel 1 (
-    echo ❌ ERRORE: Copia frontend fallita
+    echo ERRORE: Copia frontend fallita
     pause
     exit /b 1
 )
-echo ✅ Frontend copiato
+echo Frontend copiato
+
+:: Copia certificati digitali per ricette elettroniche
+echo.
+echo [6.5/8] Copia certificati digitali...
+if exist "certs" (
+    xcopy "certs" "%DEPLOY_PATH%\certs" /E /I /Q /Y >nul 2>&1
+    if errorlevel 1 (
+        echo WARNING: Copia certificati fallita
+    ) else (
+        echo Certificati digitali copiati
+    )
+) else (
+    echo WARNING: Cartella certs non trovata
+)
+
+:: Copia file autenticazione Google Calendar
+echo Copia credenziali Google Calendar...
+if exist "server\credentials.json" (
+    copy "server\credentials.json" "%DEPLOY_PATH%\server\credentials.json" >nul 2>&1
+    echo credentials.json copiato
+) else (
+    echo WARNING: credentials.json non trovato
+)
+if exist "server\token.json" (
+    copy "server\token.json" "%DEPLOY_PATH%\server\token.json" >nul 2>&1
+    echo token.json copiato
+) else (
+    echo WARNING: token.json non trovato
+)
 
 :: Setup ambiente Python sul server
 echo.
 echo [7/8] Setup ambiente Python remoto...
-echo Creazione virtual environment...
-pushd "%DEPLOY_PATH%\server"
+echo Creazione virtual environment nella root...
+pushd "%DEPLOY_PATH%"
 
 python -m venv venv
 if errorlevel 1 (
-    echo ❌ ERRORE: Creazione venv fallita
+    echo ERRORE: Creazione venv fallita
     echo    Verifica Python installato sul server
     pause
     exit /b 1
 )
 
-echo Installazione dipendenze Python...
+echo Installazione dipendenze Python unificate...
 call venv\Scripts\activate.bat
 pip install -r requirements.txt
 if errorlevel 1 (
-    echo ❌ ERRORE: pip install fallito
-    echo    Verifica requirements.txt e connessione internet server
+    echo ERRORE: pip install fallito
+    echo    Verifica requirements.txt unificato e connessione internet server
     pause
     exit /b 1
 )
 
-pip install waitress
-if errorlevel 1 (
-    echo ⚠️  WARNING: Installazione waitress fallita, usa server dev
-)
+echo Waitress già incluso in requirements-prod.txt
 
 popd
-echo ✅ Ambiente Python configurato
+echo Ambiente Python configurato
 
 :: Configurazione produzione
 echo.
@@ -136,27 +172,40 @@ echo [8/8] Configurazione produzione...
 :: Imposta modalità database
 echo prod > "%DEPLOY_PATH%\server\instance\database_mode.txt"
 
-:: Copia .env se non esiste
+:: Copia .env per produzione
 if not exist "%DEPLOY_PATH%\server\.env" (
-    if exist "server\.env" (
+    if exist "server\.env.production" (
+        copy "server\.env.production" "%DEPLOY_PATH%\server\.env" >nul
+        echo File .env produzione copiato
+        echo IMPORTANTE: Configura SECRET_KEY e JWT_SECRET_KEY in .env
+    ) else if exist "server\.env" (
         copy "server\.env" "%DEPLOY_PATH%\server\.env" >nul
-        echo ✅ File .env copiato
+        echo File .env development copiato
+        echo WARNING: Usa configurazioni development in produzione
     ) else (
-        echo ⚠️  WARNING: File .env non trovato
-        echo    Crea manualmente %DEPLOY_PATH%\server\.env con le configurazioni
+        echo ERRORE: Nessun file .env trovato
+        echo    Crea manualmente %DEPLOY_PATH%\server\.env
+        pause
+        exit /b 1
     )
 ) else (
-    echo ✅ File .env già presente
+    echo File .env già presente
 )
 
-:: Crea script avvio
+:: Crea script avvio produzione
 echo @echo off > "%DEPLOY_PATH%\start_server.bat"
-echo cd /d "%DEPLOY_PATH%\server" >> "%DEPLOY_PATH%\start_server.bat"
+echo echo Attivazione virtual environment... >> "%DEPLOY_PATH%\start_server.bat"
 echo call venv\Scripts\activate.bat >> "%DEPLOY_PATH%\start_server.bat"
+echo if errorlevel 1 ( >> "%DEPLOY_PATH%\start_server.bat"
+echo     echo ERRORE: Virtual environment non attivato >> "%DEPLOY_PATH%\start_server.bat"
+echo     pause >> "%DEPLOY_PATH%\start_server.bat"
+echo     exit /b 1 >> "%DEPLOY_PATH%\start_server.bat"
+echo ^) >> "%DEPLOY_PATH%\start_server.bat"
+echo echo Avvio server produzione con Waitress... >> "%DEPLOY_PATH%\start_server.bat"
 echo python -m server.app.run >> "%DEPLOY_PATH%\start_server.bat"
 echo pause >> "%DEPLOY_PATH%\start_server.bat"
 
-echo ✅ Script avvio creato
+echo Script avvio creato
 
 echo.
 echo ========================================

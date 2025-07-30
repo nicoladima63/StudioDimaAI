@@ -90,7 +90,7 @@ def _leggi_tabella_dbf(percorso_file: str) -> pd.DataFrame:
                 except Exception as e:
                     logger.warning(f"Errore nel record: {e}")
                     record_index += 1
-            logger.info(f"Letti {len(records)} record da {percorso_file}, {len(deleted_records)} cancellati esclusi")
+            # logger.info(f"Letti {len(records)} record da {percorso_file}, {len(deleted_records)} cancellati esclusi")
             return pd.DataFrame(records)
     except Exception as e:
         logger.error(f"Errore lettura tabella DBF '{percorso_file}': {e}")
