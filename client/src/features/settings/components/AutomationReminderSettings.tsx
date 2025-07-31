@@ -8,13 +8,13 @@ import {
   CCol,
   CButton,
   CFormSelect,
+  CFormInput,
   CAlert,
   CSpinner,
 } from "@coreui/react";
 import apiClient from "@/api/client";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
 const AutomationReminderSettings: React.FC = () => {
   const [enabled, setEnabled] = useState(true);
@@ -174,18 +174,15 @@ const AutomationReminderSettings: React.FC = () => {
                       ))}
                     </CFormSelect>
                     <span>:</span>
-                    <CFormSelect
+                    <CFormInput
+                      type="number"
                       value={minute}
-                      onChange={(e) => setMinute(Number(e.target.value))}
+                      onChange={(e) => setMinute(Math.max(0, Math.min(59, Number(e.target.value))))}
                       style={{ width: 80 }}
                       disabled={!enabled}
-                    >
-                      {MINUTES.map((m) => (
-                        <option key={m} value={m}>
-                          {m.toString().padStart(2, "0")}
-                        </option>
-                      ))}
-                    </CFormSelect>
+                      min={0}
+                      max={59}
+                    />
                   </div>
                 </CCol>
                 <CCol

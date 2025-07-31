@@ -1,0 +1,26 @@
+ISTRUZIONI SETUP SERVER STUDIO DIMA AI
+
+Dopo aver fatto il deploy, vai sul server ed esegui questi comandi:
+
+1. Apri CMD come amministratore
+
+2. Vai nella cartella del progetto:
+   cd \\SERVERDIMA\StudioDimaAI
+
+3. Crea virtual environment:
+   python -m venv venv
+
+4. Attiva virtual environment:
+   call venv\Scripts\activate.bat
+
+5. Installa dipendenze:
+   pip install -r requirements.txt
+
+6. Avvia il server:
+   python -m server.app.run
+
+7. Apri browser e vai su:
+   http://SERVERDIMA:5000
+
+NOTA: I comandi 3, 4, 5 vanno eseguiti solo la prima volta o se ricrei il venv.
+Per i successivi avvii basta fare i comandi 2, 4, 6.

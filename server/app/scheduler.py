@@ -37,7 +37,7 @@ def schedule_reminder_job():
         return
 
     def job():
-        logger.info(f"[AUTOMAZIONE] Invio promemoria appuntamenti: ora={hour}")
+        logger.info(f"[AUTOMAZIONE] Invio promemoria appuntamenti: ora={hour:02d}:{minute:02d}")
         log = get_tomorrow_appointments_for_reminder()
         for line in log:
             logger.info(f"[PROMEMORIA] {line}")
@@ -45,7 +45,7 @@ def schedule_reminder_job():
     minute = int(settings.get("reminder_minute", 0))
     trigger = CronTrigger(hour=hour, minute=minute)
     _current_job = scheduler.add_job(job, trigger, id="reminder_job", replace_existing=True)
-    logger.info(f"Automazione promemoria appuntamenti schedulata alle {hour}:00.")
+    logger.info(f"Automazione promemoria appuntamenti schedulata alle {hour:02d}:{minute:02d}.")
 
 
 def schedule_recall_job():

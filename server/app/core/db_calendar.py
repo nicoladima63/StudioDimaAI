@@ -282,38 +282,119 @@ def get_tomorrow_appointments_for_reminder():
     # Estrai appuntamenti di domani
     try:
         path_appuntamenti = _get_dbf_path('agenda')
+        path_pazienti = _get_dbf_path('pazienti')
     except Exception as e:
-        log.append(f"Errore nel recuperare il percorso DBF: {e}")
+        log.append(f"Errore nel recuperare i percorsi DBF: {e}")
         return log
 
-    df = _leggi_tabella_dbf(path_appuntamenti)
+    # Carica appuntamenti
+    df_apps = _leggi_tabella_dbf(path_appuntamenti)
     col_data = COLONNE['appuntamenti']['data']
-    if df.empty or col_data not in df.columns:
+    col_id_paziente = COLONNE['appuntamenti']['id_paziente']
+    
+    if df_apps.empty or col_data not in df_apps.columns:
         log.append("Nessun appuntamento trovato per domani.")
         return log
 
-    df[col_data] = pd.to_datetime(df[col_data], errors='coerce')
-    mask = (df[col_data].dt.date == tomorrow)
-    apps = df[mask].to_dict(orient='records')
+    # Filtra appuntamenti di domani
+    df_apps[col_data] = pd.to_datetime(df_apps[col_data], errors='coerce')
+    mask = (df_apps[col_data].dt.date == tomorrow)
+    df_apps_tomorrow = df_apps[mask]
 
-    if not apps:
+    if df_apps_tomorrow.empty:
         log.append("Nessun appuntamento trovato per domani.")
         return log
+
+    # Carica anagrafica pazienti
+    df_pazienti = _leggi_tabella_dbf(path_pazienti)
+    col_paz_id = COLONNE['pazienti']['id']
+    col_telefono = COLONNE['pazienti']['telefono']
+    col_cellulare = COLONNE['pazienti']['cellulare']
+    col_nome = COLONNE['pazienti']['nome']
+    
+    if df_pazienti.empty:
+        log.append("Anagrafica pazienti non disponibile.")
+        return log
+
+    # JOIN tra appuntamenti e pazienti
+    df_merged = df_apps_tomorrow.merge(
+        df_pazienti, 
+        left_on=col_id_paziente, 
+        right_on=col_paz_id, 
+        how='left'
+    )
+    
+    apps = df_merged.to_dict(orient='records')
 
     settings = get_automation_settings()
     mode = settings.get('sms_promemoria_mode', 'prod')
     count = 0
     success = 0
     errors = []
+    skipped_appointments = []  # Appuntamenti saltati (note giornaliere, ecc.)
+    
     for app in apps:
-        # Prepara i dati per l'SMS (adatta se serve)
+        # Recupera telefono: prima cellulare, poi fisso
+        telefono_raw = app.get(col_cellulare) or app.get(col_telefono)
+        nome_raw = app.get(col_nome, 'Gentile paziente')
+        if nome_raw and str(nome_raw).lower() != 'nan':
+            nome_completo = str(nome_raw).strip()
+        else:
+            nome_completo = 'Gentile paziente'
+        
+        # Applica la stessa logica del calendar sync per escludere appuntamenti di sistema
+        descrizione = app.get(COLONNE['appuntamenti']['descrizione'], '').strip()
+        note = app.get(COLONNE['appuntamenti']['note'], '').strip()
+        ora_inizio = app.get(COLONNE['appuntamenti']['ora_inizio'], '')
+        
+        # Escludi "Note giornaliere" (8:00 senza paziente, descrizione o note)
+        is_nota_giornaliera = (
+            str(ora_inizio).startswith('8:00') and 
+            not nome_completo.strip() and 
+            not descrizione and 
+            not note
+        )
+        
+        # Escludi appuntamenti senza paziente vero (solo note/descrizioni di sistema)
+        is_system_appointment = (
+            not nome_completo or 
+            nome_completo in ['Gentile paziente', 'nan'] or
+            (nome_raw and str(nome_raw).lower() == 'nan')
+        )
+        
+        if is_nota_giornaliera or is_system_appointment:
+            skipped_appointments.append({
+                'ora': ora_inizio,
+                'descrizione': descrizione or note or 'Appuntamento di sistema',
+                'motivo': 'Nota giornaliera' if is_nota_giornaliera else 'Appuntamento senza paziente'
+            })
+            continue
+        
+        # Converti telefono in stringa e pulisci
+        if telefono_raw and str(telefono_raw).lower() != 'nan':
+            telefono = str(telefono_raw).strip()
+            # Rimuovi .0 se è un float convertito
+            if telefono.endswith('.0'):
+                telefono = telefono[:-2]
+            # Aggiungi prefisso +39 se manca
+            if telefono and not telefono.startswith('+'):
+                if telefono.startswith('39'):
+                    telefono = '+' + telefono
+                elif telefono.startswith('3'):
+                    telefono = '+39' + telefono
+                else:
+                    telefono = '+39' + telefono
+        else:
+            telefono = ''
+        
+        # Prepara i dati per l'SMS
         sms_data = {
-            'nome_completo': app.get('PAZIENTE', 'Gentile paziente'),
-            'telefono': app.get('TELEFONO', ''),
+            'nome_completo': nome_completo,
+            'telefono': telefono,
             'data_appuntamento': tomorrow.strftime('%d/%m/%Y'),
-            'ora_appuntamento': str(app.get('ORA_INIZIO', '')),
-            'tipo_appuntamento': app.get('TIPO', ''),
-            'medico': app.get('DOTTORE', '')
+            'ora_appuntamento': str(app.get(COLONNE['appuntamenti']['ora_inizio'], '')),
+            'tipo_appuntamento': app.get(COLONNE['appuntamenti']['tipo'], ''),
+            'medico': app.get(COLONNE['appuntamenti']['medico'], '')
         }
         if not sms_data['telefono']:
             log.append(f"Appuntamento per {sms_data['nome_completo']} senza telefono: nessun SMS.")
@@ -340,7 +421,23 @@ def get_tomorrow_appointments_for_reminder():
                     'errore': result.get('error')
                 })
         count += 1
+    
+    # Resoconto finale
     log.append(f"Totale appuntamenti processati: {count}")
+    if skipped_appointments:
+        log.append(f"Appuntamenti saltati (sistema/note): {len(skipped_appointments)}")
+        for skip in skipped_appointments:
+            log.append(f"  - {skip['ora']}: {skip['descrizione']} ({skip['motivo']})")
+    
+    # TODO: Inviare resoconto al frontend quando sarà implementato
+    # summary_for_frontend = {
+    #     'date': tomorrow.strftime('%Y-%m-%d'),
+    #     'processed': count,
+    #     'success': success,
+    #     'errors': len(errors),
+    #     'skipped': len(skipped_appointments),
+    #     'skipped_details': skipped_appointments
+    # }
 
     # Scrivi log dettagliato su file
     log_entry = {

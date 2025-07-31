@@ -9,9 +9,8 @@ echo.
 :: Configurazione
 set "SERVER=\\SERVERDIMA"
 set "DEPLOY_PATH=%SERVER%\StudioDimaAI"
-set "BACKUP_PATH=%SERVER%\StudioDimaAI_backup_%date:~-4,4%%date:~-10,2%%date:~-7,2%"
 
-:: Verifica connessione server
+:: [1/8] Verifica connessione server
 echo [1/8] Verifica connessione server SERVERDIMA...
 ping -n 1 192.168.1.200 >nul 2>&1
 if errorlevel 1 (
@@ -22,24 +21,19 @@ if errorlevel 1 (
 )
 echo Server raggiungibile
 
-:: Backup esistente
+:: [2/8] Pulizia contenuto cartella destinazione
 echo.
-echo [2/8] Backup installazione esistente...
+echo [2/8] Pulizia contenuto cartella destinazione...
 if exist "%DEPLOY_PATH%" (
-    echo Creazione backup in %BACKUP_PATH%...
-    xcopy "%DEPLOY_PATH%" "%BACKUP_PATH%" /E /I /Q >nul 2>&1
-    if errorlevel 1 (
-        echo WARNING: Backup fallito, continuare? (y/n)
-        set /p continue=
-        if /i not "!continue!"=="y" exit /b 1
-    ) else (
-        echo Backup creato
-    )
+    echo Cancellazione contenuto cartella esistente...
+    del /s /q "%DEPLOY_PATH%\*.*" >nul 2>&1
+    for /d %%i in ("%DEPLOY_PATH%\*") do rmdir /s /q "%%i" >nul 2>&1
+    echo Contenuto cartella pulito
 ) else (
-    echo Prima installazione, nessun backup necessario
+    echo Prima installazione, nessuna pulizia necessaria
 )
 
-:: Build client
+:: [3/8] Build client React
 echo.
 echo [3/8] Build frontend React...
 cd client
@@ -48,7 +42,6 @@ if not exist "node_modules" (
     call npm install
     if errorlevel 1 (
         echo ERRORE: npm install fallito
-        echo    Verifica Node.js installato e connessione internet
         pause
         exit /b 1
     )
@@ -58,14 +51,13 @@ echo Build produzione...
 call npm run build
 if errorlevel 1 (
     echo ERRORE: Build React fallito
-    echo    Controlla errori TypeScript/ESLint nel codice
     pause
     exit /b 1
 )
 echo Frontend buildato
 cd ..
 
-:: Crea cartelle sul server
+:: [4/8] Crea struttura cartelle
 echo.
 echo [4/8] Creazione struttura cartelle sul server...
 mkdir "%DEPLOY_PATH%" 2>nul
@@ -74,18 +66,48 @@ mkdir "%DEPLOY_PATH%\server\static" 2>nul
 mkdir "%DEPLOY_PATH%\server\instance" 2>nul
 echo Cartelle create
 
-:: Copia file server
+:: [5/8] Copia file server (solo necessari)
 echo.
-echo [5/8] Copia file server...
-xcopy "server" "%DEPLOY_PATH%\server" /E /I /Q /Y >nul 2>&1
+echo [5/8] Copia file server (solo necessari)...
+
+:: Crea file esclusioni per evitare cache e temp
+echo __pycache__ > exclude.txt
+echo *.pyc >> exclude.txt
+echo *.pyo >> exclude.txt
+echo *.log >> exclude.txt
+echo venv >> exclude.txt
+echo node_modules >> exclude.txt
+echo .pytest_cache >> exclude.txt
+echo *.tmp >> exclude.txt
+echo windent >> exclude.txt
+echo test >> exclude.txt
+echo tests >> exclude.txt
+
+:: Copia solo file necessari (no venv, no cache, no temp)
+echo Copia file Python applicazione...
+xcopy "server" "%DEPLOY_PATH%\server" /E /I /Q /Y /EXCLUDE:exclude.txt >nul 2>&1
 if errorlevel 1 (
     echo ERRORE: Copia file server fallita
-    echo    Verifica permessi scrittura su SERVERDIMA
+    del exclude.txt 2>nul
     pause
     exit /b 1
 )
 
-:: Crea requirements unificato per produzione
+:: Pulizia file temporaneo
+del exclude.txt 2>nul
+
+:: Copia cartella instance (database e configurazioni)
+echo Copia cartella instance (database)...
+if exist "instance" (
+    xcopy "instance" "%DEPLOY_PATH%\instance" /E /I /Q /Y >nul 2>&1
+    echo Instance copiata
+) else (
+    echo WARNING: cartella instance non trovata
+)
+
+echo File server copiati (no cache/venv/temp)
+
+:: Crea requirements unificato
 echo Creazione requirements.txt unificato per produzione...
 echo # Requirements unificato per produzione > "%DEPLOY_PATH%\requirements.txt"
 type "requirements.txt" >> "%DEPLOY_PATH%\requirements.txt"
@@ -94,9 +116,7 @@ echo # Dipendenze produzione >> "%DEPLOY_PATH%\requirements.txt"
 type "server\requirements-prod.txt" >> "%DEPLOY_PATH%\requirements.txt"
 echo Requirements unificato creato
 
-echo File server copiati
-
-:: Copia build frontend
+:: Copia build React
 echo.
 echo [6/8] Copia build frontend...
 xcopy "client\dist" "%DEPLOY_PATH%\server\static" /E /I /Q /Y >nul 2>&1
@@ -107,7 +127,7 @@ if errorlevel 1 (
 )
 echo Frontend copiato
 
-:: Copia certificati digitali per ricette elettroniche
+:: [6.5/8] Copia certificati digitali
 echo.
 echo [6.5/8] Copia certificati digitali...
 if exist "certs" (
@@ -121,103 +141,52 @@ if exist "certs" (
     echo WARNING: Cartella certs non trovata
 )
 
-:: Copia file autenticazione Google Calendar
+:: Copia credenziali Google Calendar
 echo Copia credenziali Google Calendar...
 if exist "server\credentials.json" (
-    copy "server\credentials.json" "%DEPLOY_PATH%\server\credentials.json" >nul 2>&1
+    copy "server\credentials.json" "%DEPLOY_PATH%\server\credentials.json" >nul
     echo credentials.json copiato
 ) else (
     echo WARNING: credentials.json non trovato
 )
 if exist "server\token.json" (
-    copy "server\token.json" "%DEPLOY_PATH%\server\token.json" >nul 2>&1
+    copy "server\token.json" "%DEPLOY_PATH%\server\token.json" >nul
     echo token.json copiato
 ) else (
     echo WARNING: token.json non trovato
 )
 
-:: Setup ambiente Python sul server
+:: [7/8] Configurazione finale
 echo.
-echo [7/8] Setup ambiente Python remoto...
-echo Creazione virtual environment nella root...
-pushd "%DEPLOY_PATH%"
+echo [7/8] Configurazione produzione...
 
-python -m venv venv
-if errorlevel 1 (
-    echo ERRORE: Creazione venv fallita
-    echo    Verifica Python installato sul server
-    pause
-    exit /b 1
-)
-
-echo Installazione dipendenze Python unificate...
-call venv\Scripts\activate.bat
-pip install -r requirements.txt
-if errorlevel 1 (
-    echo ERRORE: pip install fallito
-    echo    Verifica requirements.txt unificato e connessione internet server
-    pause
-    exit /b 1
-)
-
-echo Waitress già incluso in requirements-prod.txt
-
-popd
-echo Ambiente Python configurato
-
-:: Configurazione produzione
-echo.
-echo [8/8] Configurazione produzione...
-
-:: Imposta modalità database
+:: Imposta modalità DB
 echo prod > "%DEPLOY_PATH%\server\instance\database_mode.txt"
 
-:: Copia .env per produzione
-if not exist "%DEPLOY_PATH%\server\.env" (
-    if exist "server\.env.production" (
-        copy "server\.env.production" "%DEPLOY_PATH%\server\.env" >nul
-        echo File .env produzione copiato
-        echo IMPORTANTE: Configura SECRET_KEY e JWT_SECRET_KEY in .env
-    ) else if exist "server\.env" (
-        copy "server\.env" "%DEPLOY_PATH%\server\.env" >nul
-        echo File .env development copiato
-        echo WARNING: Usa configurazioni development in produzione
-    ) else (
-        echo ERRORE: Nessun file .env trovato
-        echo    Crea manualmente %DEPLOY_PATH%\server\.env
-        pause
-        exit /b 1
-    )
+:: Copia .env produzione
+echo Copia file .env...
+if exist ".env" (
+    copy ".env" "%DEPLOY_PATH%\.env" >nul
+    echo File .env copiato nella destinazione
 ) else (
-    echo File .env già presente
+    echo ERRORE: File .env non trovato nella root del progetto
+    pause
+    exit /b 1
 )
-
-:: Crea script avvio produzione
-echo @echo off > "%DEPLOY_PATH%\start_server.bat"
-echo echo Attivazione virtual environment... >> "%DEPLOY_PATH%\start_server.bat"
-echo call venv\Scripts\activate.bat >> "%DEPLOY_PATH%\start_server.bat"
-echo if errorlevel 1 ( >> "%DEPLOY_PATH%\start_server.bat"
-echo     echo ERRORE: Virtual environment non attivato >> "%DEPLOY_PATH%\start_server.bat"
-echo     pause >> "%DEPLOY_PATH%\start_server.bat"
-echo     exit /b 1 >> "%DEPLOY_PATH%\start_server.bat"
-echo ^) >> "%DEPLOY_PATH%\start_server.bat"
-echo echo Avvio server produzione con Waitress... >> "%DEPLOY_PATH%\start_server.bat"
-echo python -m server.app.run >> "%DEPLOY_PATH%\start_server.bat"
-echo pause >> "%DEPLOY_PATH%\start_server.bat"
-
-echo Script avvio creato
 
 echo.
 echo ========================================
 echo    DEPLOYMENT COMPLETATO! 🎉
 echo ========================================
 echo.
-echo Per avviare l'applicazione:
-echo 1. Vai su SERVERDIMA
-echo 2. Esegui: %DEPLOY_PATH%\start_server.bat
-echo 3. Apri browser: http://192.168.1.200:5000
+echo Files copiati in: %DEPLOY_PATH%
 echo.
-echo File configurazione: %DEPLOY_PATH%\server\.env
-echo Log errori: Controlla console server
+echo PROSSIMI STEP MANUALI SUL SERVER:
+echo 1. Vai su SERVERDIMA nella cartella: %DEPLOY_PATH%
+echo 2. Crea venv: python -m venv venv
+echo 3. Attiva venv: call venv\Scripts\activate.bat
+echo 4. Installa dipendenze: pip install -r requirements.txt
+echo 5. Avvia server: python -m server.app.run
+echo 6. Apri browser: http://SERVERDIMA:5000
 echo.
 pause

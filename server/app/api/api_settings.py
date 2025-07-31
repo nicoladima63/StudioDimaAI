@@ -157,7 +157,12 @@ def get_appointment_reminder_settings():
 @jwt_required()
 def set_appointment_reminder_settings():
     data = request.get_json() or {}
-    set_automation_settings(data)
+    
+    # Ottieni impostazioni esistenti e fai merge
+    current_settings = get_automation_settings()
+    current_settings.update(data)
+    
+    set_automation_settings(current_settings)
     reschedule_reminder_job()
     return jsonify({'success': True, 'settings': get_automation_settings()})
 
@@ -198,8 +203,20 @@ def get_recall_automation_settings():
 def set_recall_automation_settings():
     from server.app.core.automation_config import set_automation_settings
     data = request.get_json() or {}
-    set_automation_settings(data)
-    # (Opzionale: reschedula job richiami qui se serve)
+    
+    # Ottieni impostazioni esistenti e fai merge
+    current_settings = get_automation_settings()
+    current_settings.update(data)
+    
+    set_automation_settings(current_settings)
+    
+    # Reschedula job richiami
+    try:
+        from server.app.scheduler import reschedule_recall_job
+        reschedule_recall_job()
+    except ImportError as e:
+        logger.error(f"Errore import reschedule_recall_job: {e}")
+        
     return jsonify({'success': True})
 
 @settings_bp.route('/api/settings/recall-automation/log', methods=['GET'])
@@ -251,7 +268,11 @@ def set_calendar_sync_settings():
         if not isinstance(minute, int) or minute < 0 or minute > 59:
             return jsonify({'error': 'Minuto non valido (0-59)'}), 400
     
-    set_automation_settings(data)
+    # Ottieni impostazioni esistenti e fai merge
+    current_settings = get_automation_settings()
+    current_settings.update(data)
+    
+    set_automation_settings(current_settings)
     
     # Import locale per evitare import circolari
     try:

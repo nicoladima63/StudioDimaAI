@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 _api_key_warned = False
 
 # Carica le variabili d'ambiente dal file .env
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../.env'))
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../../.env'))
 
 class SMSService:
     """Servizio per l'invio di SMS tramite Brevo con gestione modalità"""

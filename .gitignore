@@ -76,3 +76,4 @@ app.log
 
 # Log di sistema (ignorata come richiesto)
 /logs/
+/zzzztest/
