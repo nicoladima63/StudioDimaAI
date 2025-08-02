@@ -1,0 +1,215 @@
+import React, { useState, useEffect } from "react";
+import { 
+  CContainer, 
+  CAlert, 
+  CNav, 
+  CNavItem, 
+  CNavLink, 
+  CTabContent, 
+  CTabPane,
+  CButton,
+} from "@coreui/react";
+import FiltriSpeseComponent from "../components/FiltriSpese";
+import TabellaSpese from "../components/TabellaSpese";
+import RicercaArticoli from "../components/RicercaArticoli";
+import { speseFornitioriService } from "../services/spese.service";
+import type { FiltriSpese, SpesaFornitore, DettaglioSpesaFornitore } from "../types";
+
+const SpesePage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>("fatture");
+  const [filtri, setFiltri] = useState<FiltriSpese>({
+    anno: new Date().getFullYear(),
+    limit: 50,
+    page: 1,
+  });
+
+  const [spese, setSpese] = useState<SpesaFornitore[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [totalBeforeLimit, setTotalBeforeLimit] = useState(0);
+
+  const caricaSpese = async (filtriSpecifici?: FiltriSpese) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const filtriDaUsare = filtriSpecifici || filtri;
+      const response = await speseFornitioriService.getSpeseFornitori(filtriDaUsare);
+      
+      if (response.success) {
+        setSpese(response.data);
+        setTotal(response.total);
+        setTotalBeforeLimit(response.total_before_limit);
+      } else {
+        setError("Errore nel caricamento delle spese");
+      }
+    } catch (err: any) {
+      console.error("Errore caricamento spese:", err);
+      setError(err.message || "Errore di connessione");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carica spese al primo render e quando cambiano i filtri
+  useEffect(() => {
+    caricaSpese();
+  }, []);
+
+  const handleFiltriChange = (nuoviFiltri: FiltriSpese) => {
+    setFiltri(nuoviFiltri);
+  };
+
+  const handleApplicaFiltri = () => {
+    caricaSpese();
+  };
+
+  const handleTabellaFiltriChange = (nuoviFiltri: FiltriSpese) => {
+    setFiltri(nuoviFiltri);
+    // Auto-carica quando cambiano i filtri della tabella (paginazione)
+    setTimeout(() => {
+      caricaSpese();
+    }, 50);
+  };
+
+  const calcolaTotale = () => {
+    return spese.reduce((acc, spesa) => acc + spesa.costo_iva, 0);
+  };
+
+  const handleSelezionaFattura = (fatturaId: string) => {
+    // Passa alla tab fatture
+    setActiveTab("fatture");
+    
+    // Applica filtro ESCLUSIVO per quella fattura (rimuove altri filtri)
+    const nuoviFiltri: FiltriSpese = {
+      anno: new Date().getFullYear(),
+      fattura_id: fatturaId,
+      page: 1,
+      limit: 50
+    };
+    setFiltri(nuoviFiltri);
+    
+    // Ricarica i dati con i nuovi filtri direttamente
+    caricaSpese(nuoviFiltri);
+  };
+
+  const handleCaricaMagazzino = (dettaglio: DettaglioSpesaFornitore) => {
+    // TODO: Implementare logica caricamento magazzino
+    console.log("Caricamento magazzino:", dettaglio);
+    alert(`Caricamento magazzino non ancora implementato.\nArticolo: ${dettaglio.descrizione}`);
+  };
+
+  return (
+    <CContainer fluid>
+      <div className="mb-4">
+        <h2>Spese Fornitori</h2>
+        <p className="text-muted">
+          Gestione e analisi delle spese sostenute con i fornitori
+        </p>
+      </div>
+
+      {error && (
+        <CAlert color="danger" dismissible onClose={() => setError(null)}>
+          {error}
+        </CAlert>
+      )}
+
+      <CNav variant="tabs" className="mb-4">
+        <CNavItem>
+          <CNavLink
+            active={activeTab === "fatture"}
+            onClick={() => setActiveTab("fatture")}
+            style={{ cursor: "pointer" }}
+          >
+            📋 Fatture Fornitori
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === "ricerca"}
+            onClick={() => setActiveTab("ricerca")}
+            style={{ cursor: "pointer" }}
+          >
+            🔍 Ricerca Articoli
+          </CNavLink>
+        </CNavItem>
+      </CNav>
+
+      <CTabContent>
+        <CTabPane visible={activeTab === "fatture"}>
+          <FiltriSpeseComponent
+            filtri={filtri}
+            onFiltriChange={handleFiltriChange}
+            onApplicaFiltri={handleApplicaFiltri}
+            loading={loading}
+          />
+
+          {/* Indicatore filtro specifico */}
+          {filtri.fattura_id && (
+            <CAlert color="warning" className="mb-3">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  🔍 <strong>Filtro attivo:</strong> Visualizzazione fattura specifica ID: {filtri.fattura_id}
+                </div>
+                <CButton
+                  color="warning"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFiltri({
+                      anno: new Date().getFullYear(),
+                      limit: 50,
+                      page: 1,
+                    });
+                    setTimeout(() => caricaSpese(), 50);
+                  }}
+                >
+                  ✕ Rimuovi Filtro
+                </CButton>
+              </div>
+            </CAlert>
+          )}
+
+          {/* Riepilogo rapido */}
+          {spese.length > 0 && (
+            <CAlert color="info" className="mb-4">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>Riepilogo:</strong> {spese.length} spese trovate
+                </div>
+                <div>
+                  <strong>Totale con IVA:</strong>{" "}
+                  {new Intl.NumberFormat("it-IT", {
+                    style: "currency",
+                    currency: "EUR",
+                  }).format(calcolaTotale())}
+                </div>
+              </div>
+            </CAlert>
+          )}
+
+          <TabellaSpese
+            spese={spese}
+            loading={loading}
+            total={total}
+            totalBeforeLimit={totalBeforeLimit}
+            filtri={filtri}
+            onCaricaMagazzino={handleCaricaMagazzino}
+            onFiltriChange={handleTabellaFiltriChange}
+          />
+        </CTabPane>
+
+        <CTabPane visible={activeTab === "ricerca"}>
+          <RicercaArticoli 
+            onSelezionaFattura={handleSelezionaFattura}
+            onCaricaMagazzino={handleCaricaMagazzino}
+            autoFocus={activeTab === "ricerca"}
+          />
+        </CTabPane>
+      </CTabContent>
+    </CContainer>
+  );
+};
+
+export default SpesePage;
