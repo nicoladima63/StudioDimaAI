@@ -16,10 +16,8 @@ import {
   CTableDataCell,
   CBadge,
   CInputGroup,
-  CCollapse,
 } from "@coreui/react";
 import { speseFornitioriService } from "../services/spese.service";
-import TestataFattura from "./TestataFattura";
 import type { RisultatoRicercaArticolo, DettaglioSpesaFornitore } from "../types";
 
 interface RicercaArticoliProps {
@@ -30,7 +28,7 @@ interface RicercaArticoliProps {
 
 const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
   onSelezionaFattura,
-  onCaricaMagazzino,
+  //onCaricaMagazzino,
   autoFocus = false,
 }) => {
   const [query, setQuery] = useState("");
@@ -38,7 +36,6 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cercatoQuery, setCercatoQuery] = useState("");
-  const [fatturaEspansa, setFatturaEspansa] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus automatico quando il componente viene montato o autoFocus cambia
@@ -64,7 +61,13 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
       const response = await speseFornitioriService.ricercaArticoli(searchQuery.trim(), 100);
       
       if (response.success) {
-        setRisultati(response.data);
+        // Ordina i risultati per data fattura decrescente
+        const risultatiOrdinati = [...response.data].sort((a, b) => {
+          const dataA = a.fattura?.data_spesa ? new Date(a.fattura.data_spesa).getTime() : 0;
+          const dataB = b.fattura?.data_spesa ? new Date(b.fattura.data_spesa).getTime() : 0;
+          return dataB - dataA; // Decrescente
+        });
+        setRisultati(risultatiOrdinati);
       } else {
         setError("Errore nella ricerca articoli");
       }
@@ -81,19 +84,7 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
     cercaArticoli();
   };
 
-  const handleMostraDettagliFattura = (fatturaId: string) => {
-    if (fatturaEspansa === fatturaId) {
-      setFatturaEspansa(null); // Chiudi se già aperta
-    } else {
-      setFatturaEspansa(fatturaId); // Apri dettagli
-    }
-  };
 
-  const handleVaiAllaTabFatture = (fatturaId: string) => {
-    if (onSelezionaFattura) {
-      onSelezionaFattura(fatturaId);
-    }
-  };
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat("it-IT", {
@@ -171,21 +162,16 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
                 <CTableRow>
                   <CTableHeaderCell>Descrizione Articolo</CTableHeaderCell>
                   <CTableHeaderCell>Cod. Art.</CTableHeaderCell>
-                  <CTableHeaderCell className="text-end">Qtà</CTableHeaderCell>
-                  <CTableHeaderCell className="text-end">Prezzo</CTableHeaderCell>
-                  <CTableHeaderCell>Fattura di Origine</CTableHeaderCell>
                   <CTableHeaderCell>Fornitore</CTableHeaderCell>
+                  <CTableHeaderCell>Numero</CTableHeaderCell>
                   <CTableHeaderCell>Data</CTableHeaderCell>
-                  <CTableHeaderCell>Stato</CTableHeaderCell>
+                  <CTableHeaderCell className="text-end">Prezzo</CTableHeaderCell>
+                  <CTableHeaderCell className="text-end">Qtà</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
                 {risultati.map((risultato, index) => (
-                  <CTableRow 
-                  key={index}
-                  style={{ cursor: risultato.fattura ? "pointer" : "default" }}
-                  onClick={() => risultato.fattura && handleMostraDettagliFattura(risultato.fattura.id)}
-                >
+                  <CTableRow key={index}>
                     <CTableDataCell>
                       <div className="fw-semibold">
                         {risultato.articolo.descrizione}
@@ -196,39 +182,20 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
                         {risultato.articolo.codice_articolo}
                       </small>
                     </CTableDataCell>
-                    <CTableDataCell className="text-end">
-                      {formatNumber(risultato.articolo.quantita)}
-                    </CTableDataCell>
-                    <CTableDataCell className="text-end">
-                      {formatCurrency(risultato.articolo.prezzo_unitario)}
-                    </CTableDataCell>
                     <CTableDataCell>
                       {risultato.fattura ? (
-                        <div>
-                          <div className="fw-semibold">
-                            {risultato.fattura.numero_documento}
-                          </div>
-                          <small className="text-muted">
-                            {risultato.fattura.descrizione}
-                          </small>
+                        <div className="fw-semibold">
+                          {risultato.fattura.nome_fornitore || 'Nome non trovato'}
                         </div>
                       ) : (
-                        <span className="text-muted">Non trovata</span>
+                        "-"
                       )}
                     </CTableDataCell>
                     <CTableDataCell>
                       {risultato.fattura ? (
-                        <div>
-                          <CBadge color="primary">
-                            {risultato.fattura.codice_fornitore}
-                          </CBadge>
-                          <br />
-                          <small className="text-muted">
-                            {risultato.fattura.nome_fornitore || 'Nome non trovato'}
-                          </small>
-                        </div>
+                        risultato.fattura.numero_documento
                       ) : (
-                        "-"
+                        <span className="text-muted">Non trovata</span>
                       )}
                     </CTableDataCell>
                     <CTableDataCell>
@@ -238,10 +205,11 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
                         "-"
                       )}
                     </CTableDataCell>
-                    <CTableDataCell>
-                      {risultato.fattura && fatturaEspansa === risultato.fattura.id && (
-                        <small className="text-success">📋 Espansa</small>
-                      )}
+                    <CTableDataCell className="text-end">
+                      {formatCurrency(risultato.articolo.prezzo_unitario)}
+                    </CTableDataCell>
+                    <CTableDataCell className="text-end">
+                      {formatNumber(risultato.articolo.quantita)}
                     </CTableDataCell>
                   </CTableRow>
                 ))}
@@ -250,17 +218,6 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
           </div>
         )}
 
-        {/* Testata fattura espansa */}
-        {fatturaEspansa && (
-          <CCollapse visible={true}>
-            <div className="mt-3">
-              <TestataFattura
-                fatturaId={fatturaEspansa}
-                onVaiAllaFattura={handleVaiAllaTabFatture}
-              />
-            </div>
-          </CCollapse>
-        )}
 
         {cercatoQuery && risultati.length === 0 && !loading && !error && (
           <div className="text-center text-muted p-4">

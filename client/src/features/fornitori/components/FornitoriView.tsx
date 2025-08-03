@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   CCard,
   CCardBody,
@@ -18,14 +18,14 @@ import {
   CPagination,
   CPaginationItem,
   CFormInput,
-  CFormSelect
-} from '@coreui/react';
-import CIcon from '@coreui/icons-react';
-import { cilZoom, cilDescription } from '@coreui/icons';
-import { fornitoriService } from '../services/fornitori.service';
-import type { Fornitore } from '../types';
-import FornitoreDetailModal from './FornitoreDetailModal';
-import FattureFornitoreModal from './FattureFornitoreModal';
+  CFormSelect,
+} from "@coreui/react";
+import CIcon from "@coreui/icons-react";
+import { cilZoom } from "@coreui/icons";
+import { fornitoriService } from "../services/fornitori.service";
+import type { Fornitore } from "../types";
+import FornitoreDetailModal from "./FornitoreDetailModal";
+import FattureFornitoreModal from "./FattureFornitoreModal";
 
 const FornitoriView: React.FC = () => {
   const [fornitori, setFornitori] = useState<Fornitore[]>([]);
@@ -33,15 +33,17 @@ const FornitoriView: React.FC = () => {
   const [filteredFornitori, setFilteredFornitori] = useState<Fornitore[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFornitore, setSelectedFornitore] = useState<Fornitore | null>(null);
+  const [selectedFornitore, setSelectedFornitore] = useState<Fornitore | null>(
+    null
+  );
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showFattureModal, setShowFattureModal] = useState(false);
-  
+
   // Ricerca e filtri
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<'id' | 'nome'>('id');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortField, setSortField] = useState<"id" | "nome">("id");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
   // Paginazione
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -76,8 +78,8 @@ const FornitoriView: React.FC = () => {
       setAllFornitori(allData);
       setError(null);
     } catch (err) {
-      setError('Errore nel caricamento dei fornitori');
-      console.error('Errore:', err);
+      setError("Errore nel caricamento dei fornitori");
+      console.error("Errore:", err);
     } finally {
       setLoading(false);
     }
@@ -88,23 +90,28 @@ const FornitoriView: React.FC = () => {
 
     // Applicare ricerca
     if (searchTerm) {
-      filtered = filtered.filter(fornitore => 
-        fornitore.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fornitore.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fornitore.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        fornitore.telefono?.includes(searchTerm)
+      filtered = filtered.filter(
+        (fornitore) =>
+          fornitore.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          fornitore.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          fornitore.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          fornitore.telefono?.includes(searchTerm)
       );
     }
 
     // Applicare ordinamento
     filtered.sort((a, b) => {
-      const aValue = a[sortField] || '';
-      const bValue = b[sortField] || '';
-      
-      if (sortDirection === 'asc') {
-        return aValue.toString().localeCompare(bValue.toString(), 'it', { numeric: true });
+      const aValue = a[sortField] || "";
+      const bValue = b[sortField] || "";
+
+      if (sortDirection === "asc") {
+        return aValue
+          .toString()
+          .localeCompare(bValue.toString(), "it", { numeric: true });
       } else {
-        return bValue.toString().localeCompare(aValue.toString(), 'it', { numeric: true });
+        return bValue
+          .toString()
+          .localeCompare(aValue.toString(), "it", { numeric: true });
       }
     });
 
@@ -122,12 +129,12 @@ const FornitoriView: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const handleSort = (field: 'id' | 'nome') => {
+  const handleSort = (field: "id" | "nome") => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
@@ -138,21 +145,22 @@ const FornitoriView: React.FC = () => {
 
   const renderPagination = () => (
     <CPagination size="sm">
-      <CPaginationItem 
+      <CPaginationItem
         onClick={() => handlePageChange(1)}
         disabled={currentPage === 1}
       >
         &laquo;
       </CPaginationItem>
-      <CPaginationItem 
+      <CPaginationItem
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
         &lsaquo;
       </CPaginationItem>
-      
+
       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-        const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+        const pageNum =
+          Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
         return (
           <CPaginationItem
             key={pageNum}
@@ -163,14 +171,14 @@ const FornitoriView: React.FC = () => {
           </CPaginationItem>
         );
       })}
-      
-      <CPaginationItem 
+
+      <CPaginationItem
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
         &rsaquo;
       </CPaginationItem>
-      <CPaginationItem 
+      <CPaginationItem
         onClick={() => handlePageChange(totalPages)}
         disabled={currentPage === totalPages}
       >
@@ -185,8 +193,8 @@ const FornitoriView: React.FC = () => {
       setSelectedFornitore(fornitore);
       setShowDetailModal(true);
     } catch (err) {
-      setError('Errore nel caricamento dei dettagli del fornitore');
-      console.error('Errore handleShowDetail:', err);
+      setError("Errore nel caricamento dei dettagli del fornitore");
+      console.error("Errore handleShowDetail:", err);
     }
   };
 
@@ -196,8 +204,8 @@ const FornitoriView: React.FC = () => {
       setSelectedFornitore(fornitore);
       setShowFattureModal(true);
     } catch (err) {
-      setError('Errore nel caricamento delle fatture del fornitore');
-      console.error('Errore handleShowFatture:', err);
+      setError("Errore nel caricamento delle fatture del fornitore");
+      console.error("Errore handleShowFatture:", err);
     }
   };
 
@@ -216,11 +224,11 @@ const FornitoriView: React.FC = () => {
     return (
       <CAlert color="danger" dismissible>
         {error}
-        <CButton 
-          color="danger" 
-          variant="outline" 
-          size="sm" 
-          className="ms-2" 
+        <CButton
+          color="danger"
+          variant="outline"
+          size="sm"
+          className="ms-2"
           onClick={fetchFornitori}
         >
           Riprova
@@ -236,8 +244,10 @@ const FornitoriView: React.FC = () => {
           <CRow className="align-items-center mb-3">
             <CCol>
               <h5 className="mb-0">
-                Elenco Fornitori 
-                <CBadge color="info" className="ms-2">{allFornitori.length}</CBadge>
+                Elenco Fornitori
+                <CBadge color="info" className="ms-2">
+                  {allFornitori.length}
+                </CBadge>
                 {filteredFornitori.length !== allFornitori.length && (
                   <CBadge color="warning" className="ms-1">
                     {filteredFornitori.length} filtrati
@@ -245,16 +255,11 @@ const FornitoriView: React.FC = () => {
                 )}
               </h5>
             </CCol>
-            <CCol xs="auto">
-              <CButton color="primary" size="sm" onClick={fetchFornitori}>
-                Aggiorna
-              </CButton>
-            </CCol>
           </CRow>
-          
+
           {/* Controlli ricerca e filtri */}
           <CRow className="g-3">
-            <CCol md={4}>
+            <CCol md={3}>
               <CFormInput
                 type="text"
                 placeholder="Cerca per nome, ID, email o telefono..."
@@ -265,7 +270,9 @@ const FornitoriView: React.FC = () => {
             <CCol md={2}>
               <CFormSelect
                 value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                onChange={(e) =>
+                  handleItemsPerPageChange(Number(e.target.value))
+                }
               >
                 <option value={10}>10 per pagina</option>
                 <option value={20}>20 per pagina</option>
@@ -273,12 +280,18 @@ const FornitoriView: React.FC = () => {
                 <option value={100}>100 per pagina</option>
               </CFormSelect>
             </CCol>
-            <CCol md={6}>
+            <CCol md={3}>
+              <CButton color="primary" size="sm" onClick={fetchFornitori}>
+                Cerca
+              </CButton>
+            </CCol>
+            <CCol md={4} className="d-flex justify-content-end ">
               {/* Navigazione pagine superiore */}
               {totalPages > 1 && (
                 <div className="d-flex justify-content-end align-items-center">
                   <small className="text-muted me-3">
-                    Pagina {currentPage} di {totalPages} - {filteredFornitori.length} fornitori
+                    Pagina {currentPage} di {totalPages} -{" "}
+                    {filteredFornitori.length} fornitori
                   </small>
                   {renderPagination()}
                 </div>
@@ -290,33 +303,36 @@ const FornitoriView: React.FC = () => {
           <CTable striped hover responsive>
             <CTableHead>
               <CTableRow>
-                <CTableHeaderCell 
-                  style={{ cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('id')}
+                <CTableHeaderCell
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("id")}
                 >
-                  ID {sortField === 'id' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  ID{" "}
+                  {sortField === "id" && (sortDirection === "asc" ? "↑" : "↓")}
                 </CTableHeaderCell>
-                <CTableHeaderCell 
-                  style={{ cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('nome')}
+                <CTableHeaderCell
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("nome")}
                 >
-                  Nome {sortField === 'nome' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  Nome{" "}
+                  {sortField === "nome" &&
+                    (sortDirection === "asc" ? "↑" : "↓")}
                 </CTableHeaderCell>
                 <CTableHeaderCell>Telefono</CTableHeaderCell>
                 <CTableHeaderCell>Email</CTableHeaderCell>
-                <CTableHeaderCell>IBAN</CTableHeaderCell>
-                <CTableHeaderCell>Azioni</CTableHeaderCell>
+                <CTableHeaderCell className="text-center">
+                  Azioni
+                </CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
               {fornitori.map((fornitore) => (
-                <CTableRow key={fornitore.id}>
+                <CTableRow key={fornitore.id} onClick={() => handleShowFatture(fornitore.id)}>
                   <CTableDataCell>{fornitore.id}</CTableDataCell>
-                  <CTableDataCell>{fornitore.nome || '-'}</CTableDataCell>
-                  <CTableDataCell>{fornitore.telefono || '-'}</CTableDataCell>
-                  <CTableDataCell>{fornitore.email || '-'}</CTableDataCell>
-                  <CTableDataCell>{fornitore.iban || '-'}</CTableDataCell>
-                  <CTableDataCell>
+                  <CTableDataCell>{fornitore.nome || "-"}</CTableDataCell>
+                  <CTableDataCell>{fornitore.telefono || "-"}</CTableDataCell>
+                  <CTableDataCell>{fornitore.email || "-"}</CTableDataCell>
+                  <CTableDataCell className="text-center">
                     <CButton
                       color="primary"
                       variant="outline"
@@ -326,15 +342,6 @@ const FornitoriView: React.FC = () => {
                     >
                       <CIcon icon={cilZoom} size="sm" className="me-1" />
                       Dettagli
-                    </CButton>
-                    <CButton
-                      color="info"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleShowFatture(fornitore.id)}
-                    >
-                      <CIcon icon={cilDescription} size="sm" className="me-1" />
-                      Fatture
                     </CButton>
                   </CTableDataCell>
                 </CTableRow>
@@ -349,13 +356,14 @@ const FornitoriView: React.FC = () => {
             </CTableBody>
           </CTable>
         </CCardBody>
-        
+
         {totalPages > 1 && (
           <CCardBody className="pt-0">
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <small className="text-muted">
-                  Pagina {currentPage} di {totalPages} - {filteredFornitori.length} fornitori
+                  Pagina {currentPage} di {totalPages} -{" "}
+                  {filteredFornitori.length} fornitori
                 </small>
               </div>
               {renderPagination()}

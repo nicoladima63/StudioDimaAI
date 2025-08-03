@@ -236,6 +236,377 @@ def get_spese_fornitori():
             'error': str(e)
         }), 500
 
+@spese_fornitori_bp.route('/api/spese-fornitori/all', methods=['GET'])
+#@jwt_required()
+def get_all_spese_fornitori():
+    """
+    Ottieni TUTTE le spese fornitori senza filtri temporali di default
+    Query params:
+    - data_inizio: data inizio periodo (formato YYYY-MM-DD, opzionale)
+    - data_fine: data fine periodo (formato YYYY-MM-DD, opzionale)
+    - codice_fornitore: filtra per codice fornitore specifico (opzionale)
+    - numero_documento: filtra per numero documento specifico (opzionale)
+    - fattura_id: filtra per ID fattura specifico (opzionale)
+    - page: numero pagina per paginazione (default: 1)
+    - limit: numero massimo record per pagina (default: 1000)
+    """
+    try:
+        # Parametri query (senza filtro anno di default)
+        data_inizio = request.args.get('data_inizio')
+        data_fine = request.args.get('data_fine')
+        codice_fornitore = request.args.get('codice_fornitore')
+        numero_documento = request.args.get('numero_documento')
+        fattura_id = request.args.get('fattura_id')
+        page = request.args.get('page', type=int, default=1)
+        limit = request.args.get('limit', type=int, default=1000)
+        
+        # Ottieni percorsi DBF
+        path_spese = _get_dbf_path('spese_fornitori')
+        path_fornitori = _get_dbf_path('fornitori')
+        
+        # Leggi tabelle
+        df = _leggi_tabella_dbf(path_spese)
+        df_fornitori = _leggi_tabella_dbf(path_fornitori)
+        
+        if df.empty:
+            return jsonify({
+                'success': True,
+                'data': [],
+                'total': 0,
+                'page': page,
+                'limit': limit,
+                'total_pages': 0,
+                'filters_applied': {
+                    'data_inizio': data_inizio,
+                    'data_fine': data_fine,
+                    'codice_fornitore': codice_fornitore,
+                    'page': page,
+                    'limit': limit
+                }
+            })
+        
+        # Mapping colonne
+        col_map = COLONNE['spese_fornitori']
+        col_data = col_map['data_spesa']
+        
+        # Converte date
+        df[col_data] = pd.to_datetime(df[col_data], errors='coerce')
+        
+        # Applica filtri temporali SOLO se specificati
+        df_filtered = df.copy()
+        if data_inizio and data_fine:
+            start_date = pd.to_datetime(data_inizio)
+            end_date = pd.to_datetime(data_fine)
+            mask = (df[col_data] >= start_date) & (df[col_data] <= end_date)
+            df_filtered = df[mask]
+        
+        # Filtra per codice fornitore se specificato
+        if codice_fornitore:
+            col_fornitore = col_map['codice_fornitore']
+            def match_fornitore(val):
+                if pd.isna(val):
+                    return False
+                if isinstance(val, bytes):
+                    val_str = val.decode('latin-1', errors='ignore').strip()
+                else:
+                    val_str = str(val).strip()
+                return val_str == str(codice_fornitore).strip()
+            
+            df_filtered = df_filtered[df_filtered[col_fornitore].apply(match_fornitore)]
+
+        # Filtra per numero documento se specificato
+        if numero_documento:
+            col_numero = col_map['numero_documento']
+            def match_numero(val):
+                if pd.isna(val):
+                    return False
+                if isinstance(val, bytes):
+                    val_str = val.decode('latin-1', errors='ignore').strip()
+                else:
+                    val_str = str(val).strip()
+                return numero_documento.lower() in val_str.lower()
+            
+            df_filtered = df_filtered[df_filtered[col_numero].apply(match_numero)]
+
+        # Filtra per ID fattura se specificato
+        if fattura_id:
+            col_id = col_map['id']
+            def match_id(val):
+                if pd.isna(val):
+                    return False
+                if isinstance(val, bytes):
+                    val_str = val.decode('latin-1', errors='ignore').strip()
+                else:
+                    val_str = str(val).strip()
+                return val_str == str(fattura_id).strip()
+            
+            df_filtered = df_filtered[df_filtered[col_id].apply(match_id)]
+        
+        # Conta totale prima della paginazione
+        total_records = len(df_filtered)
+        
+        # Applica paginazione
+        start_idx = (page - 1) * limit
+        end_idx = start_idx + limit
+        df_filtered = df_filtered.iloc[start_idx:end_idx]
+        
+        # Crea mappa fornitori per lookup veloce
+        fornitori_map = {}
+        if not df_fornitori.empty:
+            col_map_fornitori = COLONNE['fornitori']
+            for _, fornitore_row in df_fornitori.iterrows():
+                codice_fornitore = fornitore_row.get(col_map_fornitori['id'])
+                nome_fornitore = fornitore_row.get(col_map_fornitori['nome'])
+                
+                if pd.notna(codice_fornitore) and pd.notna(nome_fornitore):
+                    if isinstance(codice_fornitore, bytes):
+                        codice_fornitore = codice_fornitore.decode('latin-1', errors='ignore').strip()
+                    else:
+                        codice_fornitore = str(codice_fornitore).strip()
+                    
+                    if isinstance(nome_fornitore, bytes):
+                        nome_fornitore = nome_fornitore.decode('latin-1', errors='ignore').strip()
+                    else:
+                        nome_fornitore = str(nome_fornitore).strip()
+                    
+                    fornitori_map[codice_fornitore] = nome_fornitore
+
+        # Prepara dati di output
+        spese = []
+        for _, row in df_filtered.iterrows():
+            def safe_float(val, default=0.0):
+                if pd.isna(val) or val is None:
+                    return default
+                try:
+                    return float(val)
+                except (ValueError, TypeError):
+                    return default
+            
+            def safe_int(val, default=0):
+                if pd.isna(val) or val is None:
+                    return default  
+                try:
+                    return int(val)
+                except (ValueError, TypeError):
+                    return default
+            
+            def safe_str(val, default=''):
+                if pd.isna(val) or val is None:
+                    return default
+                return str(val).strip()
+            
+            codice_fornitore = safe_str(row.get(col_map['codice_fornitore']))
+            nome_fornitore = fornitori_map.get(codice_fornitore, None)
+            
+            spesa = {
+                'id': safe_str(row.get(col_map['id'])),
+                'codice_fornitore': codice_fornitore,
+                'nome_fornitore': nome_fornitore,
+                'descrizione': safe_str(row.get(col_map['descrizione'])),
+                'costo_netto': safe_float(row.get(col_map['costo_netto'])),
+                'costo_iva': safe_float(row.get(col_map['costo_iva'])),
+                'data_spesa': row[col_data].strftime('%Y-%m-%d') if pd.notnull(row[col_data]) else None,
+                'data_registrazione': row.get(col_map['data_registrazione'], ''),
+                'numero_documento': safe_str(row.get(col_map['numero_documento'])),
+                'note': safe_str(row.get(col_map['note'])),
+                'categoria': safe_int(row.get(col_map['categoria'])),
+                'importo_1': safe_float(row.get(col_map['importo_1'])),
+                'importo_2': safe_float(row.get(col_map['importo_2'])),
+                'aliquota_iva_1': safe_int(row.get(col_map['aliquota_iva_1'])),
+                'aliquota_iva_2': safe_int(row.get(col_map['aliquota_iva_2'])),
+                'rate': safe_str(row.get(col_map['rate']))
+            }
+            spese.append(spesa)
+        
+        return jsonify({
+            'success': True,
+            'data': spese,
+            'total': total_records,
+            'page': page,
+            'limit': limit,
+            'total_pages': (total_records + limit - 1) // limit,
+            'filters_applied': {
+                'data_inizio': data_inizio,
+                'data_fine': data_fine,
+                'codice_fornitore': codice_fornitore,
+                'numero_documento': numero_documento,
+                'fattura_id': fattura_id,
+                'page': page,
+                'limit': limit
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore recupero tutte le spese fornitori: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/api/spese-fornitori/fornitore/<string:fornitore_id>/all', methods=['GET'])
+#@jwt_required()
+def get_all_fatture_fornitore(fornitore_id):
+    """
+    Ottieni TUTTE le fatture di un fornitore specifico senza filtri temporali di default
+    Query params:
+    - data_inizio: data inizio periodo (formato YYYY-MM-DD, opzionale)
+    - data_fine: data fine periodo (formato YYYY-MM-DD, opzionale)
+    - numero_documento: filtra per numero documento specifico (opzionale)
+    - page: numero pagina per paginazione (default: 1)
+    - limit: numero massimo record per pagina (default: 10)
+    """
+    try:
+        # Parametri query
+        data_inizio = request.args.get('data_inizio')
+        data_fine = request.args.get('data_fine')
+        numero_documento = request.args.get('numero_documento')
+        page = request.args.get('page', type=int, default=1)
+        limit = request.args.get('limit', type=int, default=10)
+        
+        # Ottieni percorsi DBF
+        path_spese = _get_dbf_path('spese_fornitori')
+        path_fornitori = _get_dbf_path('fornitori')
+        
+        # Leggi tabelle
+        df = _leggi_tabella_dbf(path_spese)
+        df_fornitori = _leggi_tabella_dbf(path_fornitori)
+        
+        if df.empty:
+            return jsonify({
+                'success': True,
+                'data': [],
+                'total': 0,
+                'page': page,
+                'limit': limit,
+                'total_pages': 0,
+                'fornitore_id': fornitore_id
+            })
+        
+        # Mapping colonne
+        col_map = COLONNE['spese_fornitori']
+        col_data = col_map['data_spesa']
+        col_fornitore = col_map['codice_fornitore']
+        
+        # Converte date
+        df[col_data] = pd.to_datetime(df[col_data], errors='coerce')
+        
+        # Filtra per fornitore (obbligatorio)
+        def match_fornitore(val):
+            if pd.isna(val):
+                return False
+            if isinstance(val, bytes):
+                val_str = val.decode('latin-1', errors='ignore').strip()
+            else:
+                val_str = str(val).strip()
+            return val_str == str(fornitore_id).strip()
+        
+        df_filtered = df[df[col_fornitore].apply(match_fornitore)]
+        
+        # Applica filtri temporali SOLO se specificati
+        if data_inizio and data_fine:
+            start_date = pd.to_datetime(data_inizio)
+            end_date = pd.to_datetime(data_fine)
+            mask = (df_filtered[col_data] >= start_date) & (df_filtered[col_data] <= end_date)
+            df_filtered = df_filtered[mask]
+
+        # Filtra per numero documento se specificato
+        if numero_documento:
+            col_numero = col_map['numero_documento']
+            def match_numero(val):
+                if pd.isna(val):
+                    return False
+                if isinstance(val, bytes):
+                    val_str = val.decode('latin-1', errors='ignore').strip()
+                else:
+                    val_str = str(val).strip()
+                return numero_documento.lower() in val_str.lower()
+            
+            df_filtered = df_filtered[df_filtered[col_numero].apply(match_numero)]
+        
+        # Conta totale prima della paginazione
+        total_records = len(df_filtered)
+        
+        # Applica paginazione
+        start_idx = (page - 1) * limit
+        end_idx = start_idx + limit
+        df_filtered = df_filtered.iloc[start_idx:end_idx]
+        
+        # Ottieni nome fornitore
+        nome_fornitore = None
+        if not df_fornitori.empty:
+            col_map_fornitori = COLONNE['fornitori']
+            for _, fornitore_row in df_fornitori.iterrows():
+                codice = fornitore_row.get(col_map_fornitori['id'])
+                nome = fornitore_row.get(col_map_fornitori['nome'])
+                
+                if pd.notna(codice):
+                    if isinstance(codice, bytes):
+                        codice = codice.decode('latin-1', errors='ignore').strip()
+                    else:
+                        codice = str(codice).strip()
+                    
+                    if codice == str(fornitore_id).strip():
+                        if isinstance(nome, bytes):
+                            nome_fornitore = nome.decode('latin-1', errors='ignore').strip()
+                        else:
+                            nome_fornitore = str(nome).strip()
+                        break
+
+        # Prepara dati di output
+        fatture = []
+        for _, row in df_filtered.iterrows():
+            def safe_float(val, default=0.0):
+                if pd.isna(val) or val is None:
+                    return default
+                try:
+                    return float(val)
+                except (ValueError, TypeError):
+                    return default
+            
+            def safe_str(val, default=''):
+                if pd.isna(val) or val is None:
+                    return default
+                return str(val).strip()
+            
+            fattura = {
+                'id': safe_str(row.get(col_map['id'])),
+                'codice_fornitore': fornitore_id,
+                'nome_fornitore': nome_fornitore,
+                'descrizione': safe_str(row.get(col_map['descrizione'])),
+                'costo_netto': safe_float(row.get(col_map['costo_netto'])),
+                'costo_iva': safe_float(row.get(col_map['costo_iva'])),
+                'data_spesa': row[col_data].strftime('%Y-%m-%d') if pd.notnull(row[col_data]) else None,
+                'numero_documento': safe_str(row.get(col_map['numero_documento'])),
+                'note': safe_str(row.get(col_map['note']))
+            }
+            fatture.append(fattura)
+        
+        return jsonify({
+            'success': True,
+            'data': fatture,
+            'total': total_records,
+            'page': page,
+            'limit': limit,
+            'total_pages': (total_records + limit - 1) // limit,
+            'fornitore_id': fornitore_id,
+            'nome_fornitore': nome_fornitore,
+            'filters_applied': {
+                'data_inizio': data_inizio,
+                'data_fine': data_fine,
+                'numero_documento': numero_documento,
+                'page': page,
+                'limit': limit
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore recupero fatture fornitore {fornitore_id}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'fornitore_id': fornitore_id
+        }), 500
+
 @spese_fornitori_bp.route('/api/spese-fornitori/riepilogo', methods=['GET'])
 #@jwt_required()
 def get_riepilogo_spese():

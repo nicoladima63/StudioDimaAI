@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { 
-  CContainer, 
-  CAlert, 
-  CNav, 
-  CNavItem, 
-  CNavLink, 
-  CTabContent, 
+import {
+  CCol,
+  CAlert,
+  CNav,
+  CNavItem,
+  CNavLink,
+  CTabContent,
   CTabPane,
   CButton,
+  CRow,
 } from "@coreui/react";
+import { Card } from "@/components/ui";
 import FiltriSpeseComponent from "../components/FiltriSpese";
 import TabellaSpese from "../components/TabellaSpese";
 import RicercaArticoli from "../components/RicercaArticoli";
+import StatisticheCategorizzazione from "../components/StatisticheCategorizzazione";
 import { speseFornitioriService } from "../services/spese.service";
-import type { FiltriSpese, SpesaFornitore, DettaglioSpesaFornitore } from "../types";
+import type {
+  FiltriSpese,
+  SpesaFornitore,
+  DettaglioSpesaFornitore,
+} from "../types";
 
 const SpesePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("fatture");
@@ -35,8 +42,10 @@ const SpesePage: React.FC = () => {
 
     try {
       const filtriDaUsare = filtriSpecifici || filtri;
-      const response = await speseFornitioriService.getSpeseFornitori(filtriDaUsare);
-      
+      const response = await speseFornitioriService.getSpeseFornitori(
+        filtriDaUsare
+      );
+
       if (response.success) {
         setSpese(response.data);
         setTotal(response.total);
@@ -80,16 +89,16 @@ const SpesePage: React.FC = () => {
   const handleSelezionaFattura = (fatturaId: string) => {
     // Passa alla tab fatture
     setActiveTab("fatture");
-    
+
     // Applica filtro ESCLUSIVO per quella fattura (rimuove altri filtri)
     const nuoviFiltri: FiltriSpese = {
       anno: new Date().getFullYear(),
       fattura_id: fatturaId,
       page: 1,
-      limit: 50
+      limit: 50,
     };
     setFiltri(nuoviFiltri);
-    
+
     // Ricarica i dati con i nuovi filtri direttamente
     caricaSpese(nuoviFiltri);
   };
@@ -97,24 +106,14 @@ const SpesePage: React.FC = () => {
   const handleCaricaMagazzino = (dettaglio: DettaglioSpesaFornitore) => {
     // TODO: Implementare logica caricamento magazzino
     console.log("Caricamento magazzino:", dettaglio);
-    alert(`Caricamento magazzino non ancora implementato.\nArticolo: ${dettaglio.descrizione}`);
+    alert(
+      `Caricamento magazzino non ancora implementato.\nArticolo: ${dettaglio.descrizione}`
+    );
   };
 
   return (
-    <CContainer fluid>
-      <div className="mb-4">
-        <h2>Spese Fornitori</h2>
-        <p className="text-muted">
-          Gestione e analisi delle spese sostenute con i fornitori
-        </p>
-      </div>
-
-      {error && (
-        <CAlert color="danger" dismissible onClose={() => setError(null)}>
-          {error}
-        </CAlert>
-      )}
-
+    <Card title="Spese Fornitori">
+      {/* Navigation Tabs */}
       <CNav variant="tabs" className="mb-4">
         <CNavItem>
           <CNavLink
@@ -134,23 +133,57 @@ const SpesePage: React.FC = () => {
             🔍 Ricerca Articoli
           </CNavLink>
         </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === "statistiche"}
+            onClick={() => setActiveTab("statistiche")}
+            style={{ cursor: "pointer" }}
+          >
+            📊 Statistiche Categorizzazione
+          </CNavLink>
+        </CNavItem>
       </CNav>
 
+      {error && (
+        <CAlert color="danger" dismissible onClose={() => setError(null)}>
+          {error}
+        </CAlert>
+      )}
+      {/* Tab Content */}
       <CTabContent>
-        <CTabPane visible={activeTab === "fatture"}>
-          <FiltriSpeseComponent
-            filtri={filtri}
-            onFiltriChange={handleFiltriChange}
-            onApplicaFiltri={handleApplicaFiltri}
+        {/* Fatture Tab */}
+        <CTabPane visible={activeTab === "fatture"} role="tabpanel">
+          <CRow className="mt-4">
+            <CCol md={2}>
+              <FiltriSpeseComponent
+                filtri={filtri}
+                onFiltriChange={handleFiltriChange}
+                onApplicaFiltri={handleApplicaFiltri}
+                loading={loading}
+              />
+            </CCol>
+            <CCol md={10}>
+            <TabellaSpese
+            spese={spese}
             loading={loading}
+            total={total}
+            totalBeforeLimit={totalBeforeLimit}
+            filtri={filtri}
+            onCaricaMagazzino={handleCaricaMagazzino}
+            onFiltriChange={handleTabellaFiltriChange}
           />
+
+
+            </CCol>
+          </CRow>
 
           {/* Indicatore filtro specifico */}
           {filtri.fattura_id && (
             <CAlert color="warning" className="mb-3">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  🔍 <strong>Filtro attivo:</strong> Visualizzazione fattura specifica ID: {filtri.fattura_id}
+                  🔍 <strong>Filtro attivo:</strong> Visualizzazione fattura
+                  specifica ID: {filtri.fattura_id}
                 </div>
                 <CButton
                   color="warning"
@@ -189,26 +222,23 @@ const SpesePage: React.FC = () => {
             </CAlert>
           )}
 
-          <TabellaSpese
-            spese={spese}
-            loading={loading}
-            total={total}
-            totalBeforeLimit={totalBeforeLimit}
-            filtri={filtri}
-            onCaricaMagazzino={handleCaricaMagazzino}
-            onFiltriChange={handleTabellaFiltriChange}
-          />
         </CTabPane>
 
-        <CTabPane visible={activeTab === "ricerca"}>
-          <RicercaArticoli 
+        {/* Ricerca Articoli Tab */}
+        <CTabPane visible={activeTab === "ricerca"} role="tabpanel">
+          <RicercaArticoli
             onSelezionaFattura={handleSelezionaFattura}
             onCaricaMagazzino={handleCaricaMagazzino}
             autoFocus={activeTab === "ricerca"}
           />
         </CTabPane>
+
+        {/* Statistiche Categorizzazione Tab */}
+        <CTabPane visible={activeTab === "statistiche"} role="tabpanel">
+          <StatisticheCategorizzazione spese={spese} className="mt-4" />
+        </CTabPane>
       </CTabContent>
-    </CContainer>
+    </Card>
   );
 };
 

@@ -15,11 +15,13 @@ import {
   CPagination,
   CPaginationItem,
   CFormSelect,
-  CRow,
-  CCol,
+  CTooltip,
 } from "@coreui/react";
+import { CIcon } from '@coreui/icons-react';
+import { cilInfo } from '@coreui/icons';
 import type { SpesaFornitore, DettaglioSpesaFornitore, FiltriSpese } from "../types";
 import DettagliFattura from "./DettagliFattura";
+import { useAutoCategorization } from "../hooks/useAutoCategorization";
 
 interface TabellaSpeseProps {
   spese: SpesaFornitore[];
@@ -41,6 +43,7 @@ const TabellaSpese: React.FC<TabellaSpeseProps> = ({
   onFiltriChange,
 }) => {
   const [espansioni, setEspansioni] = useState<Set<string>>(new Set());
+  const { categorizzaSpesa, getCategoriaLabel: getCategoriaLabelAuto, getCategoriaColor: getCategoriaColorAuto, getConfidenceLevel } = useAutoCategorization();
 
   const handlePageChange = (page: number) => {
     if (onFiltriChange && filtri) {
@@ -79,24 +82,18 @@ const TabellaSpese: React.FC<TabellaSpeseProps> = ({
     return new Date(dateString).toLocaleDateString("it-IT");
   };
 
-  const getCategoriaLabel = (categoria: number): string => {
-    // Mappa delle categorie - da personalizzare in base alle esigenze
-    const categorie: { [key: number]: string } = {
-      0: "Non classificato",
-      1: "Materiali",
-      2: "Servizi",
-      3: "Consulenze",
-      4: "Attrezzature",
-      5: "Manutenzione",
-      // Aggiungi altre categorie in base ai dati reali
-    };
-    return categorie[categoria] || `Categoria ${categoria}`;
+  // Lista collaboratori medici dal gestionale
+  const COLLABORATORI_MEDICI = [
+    'Lara', 'Giacomo', 'Roberto', 'Anet', 'Rossella'
+  ];
+
+  const isCollaboratoreEsterno = (nomeFornitore: string): boolean => {
+    const nome = nomeFornitore.toLowerCase();
+    return COLLABORATORI_MEDICI.some(medico => 
+      nome.includes(medico.toLowerCase())
+    );
   };
 
-  const getCategoriaColor = (categoria: number): string => {
-    const colors = ["secondary", "primary", "success", "info", "warning", "danger"];
-    return colors[categoria % colors.length];
-  };
 
   if (loading) {
     return (
@@ -134,21 +131,66 @@ const TabellaSpese: React.FC<TabellaSpeseProps> = ({
             <CTable hover responsive>
               <CTableHead>
                 <CTableRow>
-                  <CTableHeaderCell style={{ width: "60px" }}>Dettagli</CTableHeaderCell>
-                  <CTableHeaderCell>Data</CTableHeaderCell>
                   <CTableHeaderCell>ID</CTableHeaderCell>
                   <CTableHeaderCell>Fornitore</CTableHeaderCell>
+                  <CTableHeaderCell>Data</CTableHeaderCell>
                   <CTableHeaderCell>N. Documento</CTableHeaderCell>
                   <CTableHeaderCell>Categoria</CTableHeaderCell>
-                  <CTableHeaderCell className="text-end">Netto</CTableHeaderCell>
-                  <CTableHeaderCell className="text-end">Con IVA</CTableHeaderCell>
-                  <CTableHeaderCell>Note</CTableHeaderCell>
+                  <CTableHeaderCell className="text-end">Totale</CTableHeaderCell>
+                  <CTableHeaderCell style={{ width: "60px" }}>Dettagli</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {spese.map((spesa) => (
+                {[...spese].sort((a, b) => {
+                  const nomeA = (a.nome_fornitore || '').toLowerCase();
+                  const nomeB = (b.nome_fornitore || '').toLowerCase();
+                  return nomeA.localeCompare(nomeB);
+                }).map((spesa) => (
                   <React.Fragment key={spesa.id}>
-                    <CTableRow id={`fattura-${spesa.id}`} style={{ cursor: "pointer" }}>
+                    <CTableRow id={`fattura-${spesa.id}`} style={{ cursor: "pointer" }} onClick={() => toggleEspansione(spesa.id)}>
+                      <CTableDataCell>
+                        <small className="text-muted">{spesa.id}</small>
+                      </CTableDataCell>
+                      <CTableDataCell >
+                        <div className="fw-semibold">{spesa.nome_fornitore || 'Nome non trovato'}</div>
+                      </CTableDataCell>
+                      <CTableDataCell >
+                        {formatDate(spesa.data_spesa)}
+                      </CTableDataCell>
+
+                      <CTableDataCell>
+                        {spesa.numero_documento}
+                      </CTableDataCell>
+                      <CTableDataCell>
+                        {(() => {
+                          const categorizzazione = categorizzaSpesa(spesa);
+                          const confidenceLevel = getConfidenceLevel(categorizzazione.confidence);
+                          const categoriaLabelAuto = getCategoriaLabelAuto(categorizzazione.categoria);
+                          const categoriaColorAuto = getCategoriaColorAuto(categorizzazione.categoria);
+                          
+                          return (
+                            <div className="d-flex align-items-center gap-1">
+                              <CBadge color={categoriaColorAuto}>
+                                {categoriaLabelAuto}
+                              </CBadge>
+                              {categorizzazione.confidence > 0 && (
+                                <CTooltip
+                                  content={`Auto-categorizzato con confidence ${Math.round(categorizzazione.confidence * 100)}%: ${categorizzazione.motivo}`}
+                                >
+                                  <CIcon 
+                                    icon={cilInfo} 
+                                    size="sm"
+                                    className={`text-${confidenceLevel === 'high' ? 'success' : confidenceLevel === 'medium' ? 'warning' : 'danger'}`}
+                                  />
+                                </CTooltip>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </CTableDataCell>
+                      <CTableDataCell className="text-end" >
+                        {formatCurrency(spesa.costo_netto+spesa.costo_iva)}
+                      </CTableDataCell>
                       <CTableDataCell>
                         <CButton
                           color="light"
@@ -164,37 +206,7 @@ const TabellaSpese: React.FC<TabellaSpeseProps> = ({
                           {espansioni.has(spesa.id) ? "▼" : "▶"}
                         </CButton>
                       </CTableDataCell>
-                      <CTableDataCell onClick={() => toggleEspansione(spesa.id)}>
-                        {formatDate(spesa.data_spesa)}
-                      </CTableDataCell>
-                      <CTableDataCell onClick={() => toggleEspansione(spesa.id)}>
-                        <small className="text-muted">{spesa.id}</small>
-                      </CTableDataCell>
-                      <CTableDataCell onClick={() => toggleEspansione(spesa.id)}>
-                        <div className="fw-semibold">{spesa.codice_fornitore}</div>
-                        <small className="text-muted">{spesa.nome_fornitore || 'Nome non trovato'}</small>
-                      </CTableDataCell>
-                      <CTableDataCell onClick={() => toggleEspansione(spesa.id)}>
-                        {spesa.numero_documento}
-                      </CTableDataCell>
-                      <CTableDataCell onClick={() => toggleEspansione(spesa.id)}>
-                        <CBadge color={getCategoriaColor(spesa.categoria)}>
-                          {getCategoriaLabel(spesa.categoria)}
-                        </CBadge>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-end" onClick={() => toggleEspansione(spesa.id)}>
-                        {formatCurrency(spesa.costo_netto)}
-                      </CTableDataCell>
-                      <CTableDataCell className="text-end fw-bold" onClick={() => toggleEspansione(spesa.id)}>
-                        {formatCurrency(spesa.costo_iva)}
-                      </CTableDataCell>
-                      <CTableDataCell onClick={() => toggleEspansione(spesa.id)}>
-                        {spesa.note && (
-                          <div className="text-truncate" style={{ maxWidth: "150px" }}>
-                            {spesa.note}
-                          </div>
-                        )}
-                      </CTableDataCell>
+
                     </CTableRow>
                     {espansioni.has(spesa.id) && (
                       <CTableRow>

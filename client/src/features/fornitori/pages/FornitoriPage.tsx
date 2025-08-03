@@ -1,19 +1,50 @@
-import React from 'react';
-import { CContainer } from '@coreui/react';
+import React, { useState } from 'react';
+import {
+  CNav,
+  CNavItem,
+  CNavLink,
+  CTabContent,
+  CTabPane,
+} from '@coreui/react';
+import Card from '@/components/ui/Card';
 import FornitoriView from '../components/FornitoriView';
+import TutteLeFatture from '../components/TutteLeFatture';
 
 const FornitoriPage: React.FC = () => {
-  return (
-    <CContainer fluid>
-      <div className="mb-4">
-        <h2>Gestione Fornitori</h2>
-        <p className="text-muted">
-          Visualizza e gestisci l'elenco dei fornitori con dettagli completi e fatture associate
-        </p>
-      </div>
+  const [activeTab, setActiveTab] = useState<string>("elenco");
 
-      <FornitoriView />
-    </CContainer>
+  return (
+    <Card title="Gestione Fornitori">
+      <CNav variant="tabs" className="mb-3">
+        <CNavItem>
+          <CNavLink
+            active={activeTab === "elenco"}
+            onClick={() => setActiveTab("elenco")}
+            style={{ cursor: "pointer" }}
+          >
+            Elenco Fornitori
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === "fatture"}
+            onClick={() => setActiveTab("fatture")}
+            style={{ cursor: "pointer" }}
+          >
+            Tutte le Fatture
+          </CNavLink>
+        </CNavItem>
+      </CNav>
+
+      <CTabContent>
+        <CTabPane visible={activeTab === "elenco"}>
+          <FornitoriView />
+        </CTabPane>
+        <CTabPane visible={activeTab === "fatture"}>
+          <TutteLeFatture />
+        </CTabPane>
+      </CTabContent>
+    </Card>
   );
 };
 

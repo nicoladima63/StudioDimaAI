@@ -11,7 +11,8 @@ import {
   CFormLabel,
 } from "@coreui/react";
 import type { FiltriSpese } from "../types";
-
+import CIcon from "@coreui/icons-react";
+import { cilSearch } from "@coreui/icons";
 interface FiltriSpeseProps {
   filtri: FiltriSpese;
   onFiltriChange: (filtri: FiltriSpese) => void;
@@ -64,7 +65,10 @@ const FiltriSpeseComponent: React.FC<FiltriSpeseProps> = ({
     });
   };
 
-  const handleRangeDateChange = (field: 'data_inizio' | 'data_fine', value: string) => {
+  const handleRangeDateChange = (
+    field: "data_inizio" | "data_fine",
+    value: string
+  ) => {
     onFiltriChange({
       ...filtri,
       [field]: value || undefined,
@@ -83,12 +87,15 @@ const FiltriSpeseComponent: React.FC<FiltriSpeseProps> = ({
   return (
     <CCard className="mb-4">
       <CCardHeader>
-        <h5 className="mb-0">Filtri Ricerca</h5>
+        <h5 className="mb-0">
+          <CIcon icon={cilSearch} className="me-2" />
+          Filtri Ricerca
+        </h5>
       </CCardHeader>
       <CCardBody>
-        <CRow className="g-3">
+        <CRow>
           {/* Anno */}
-          <CCol md={3}>
+          <CCol md={12}className="mb-3">
             <CFormLabel>Anno</CFormLabel>
             <CFormSelect
               value={filtri.anno}
@@ -101,9 +108,8 @@ const FiltriSpeseComponent: React.FC<FiltriSpeseProps> = ({
               ))}
             </CFormSelect>
           </CCol>
-
           {/* Mese */}
-          <CCol md={3}>
+          <CCol md={12}className="mb-3">
             <CFormLabel>Mese</CFormLabel>
             <CFormSelect
               value={filtri.mese || ""}
@@ -119,29 +125,33 @@ const FiltriSpeseComponent: React.FC<FiltriSpeseProps> = ({
           </CCol>
 
           {/* Data Inizio */}
-          <CCol md={2}>
+          <CCol md={12}>
             <CFormLabel>Data Inizio</CFormLabel>
             <CFormInput
               type="date"
               value={filtri.data_inizio || ""}
-              onChange={(e) => handleRangeDateChange('data_inizio', e.target.value)}
+              onChange={(e) =>
+                handleRangeDateChange("data_inizio", e.target.value)
+              }
               disabled={!!filtri.mese}
             />
           </CCol>
 
           {/* Data Fine */}
-          <CCol md={2}>
+          <CCol md={12}>
             <CFormLabel>Data Fine</CFormLabel>
             <CFormInput
               type="date"
               value={filtri.data_fine || ""}
-              onChange={(e) => handleRangeDateChange('data_fine', e.target.value)}
+              onChange={(e) =>
+                handleRangeDateChange("data_fine", e.target.value)
+              }
               disabled={!!filtri.mese}
             />
           </CCol>
 
           {/* Limit */}
-          <CCol md={2}>
+          <CCol md={12}>
             <CFormLabel>Limit Records</CFormLabel>
             <CFormSelect
               value={filtri.limit || 1000}
