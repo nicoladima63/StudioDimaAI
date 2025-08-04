@@ -35,3 +35,9 @@
 - Test: `npm test` (se configurato)
 - Lint: `npm run lint` (se configurato)
 - Build: `npm run build`
+- Server: `python -m server.app.run` (dalla directory root del progetto)
+
+## Messaggi e Output
+- NON usare mai emoji nei messaggi del server o nei log
+- NON usare caratteri Unicode speciali che possono causare errori di encoding
+- Usare solo testo ASCII per messaggi di sistema e log

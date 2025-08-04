@@ -22,6 +22,7 @@ import HomePage from '@/pages/HomePage';
 import IncassiPage from '@/features/pki/incassi/IncassiPage';
 import SpesePage from '@/features/spese';
 import FornitoriPage from '@/features/fornitori/pages/FornitoriPage';
+import KpiPage from '@/features/kpi/pages/KpiPage';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -60,6 +61,7 @@ const AppRouter: React.FC = () => {
           <Route path="/incassi" element={<IncassiPage />} />
           <Route path="/spese" element={<SpesePage />} />
           <Route path="/fornitori" element={<FornitoriPage />} />
+          <Route path="/kpi" element={<KpiPage />} />
           <Route path="/rentri" element={<RentriPage />} />
         </Route>
 

@@ -1,39 +1,50 @@
-// src/components/Layout.tsx
 import React from 'react';
-import { CContainer, CRow, CCol } from '@coreui/react';
-import { Outlet } from 'react-router-dom';
-import Navbar from './Navbar';
-import { Sidebar } from '@/components/layout';
+import { useResponsive } from '@/hooks/useResponsive';
+import { useSidebarStore } from '@/store/useSidebarStore';
+import Sidebar from './Sidebar';
+import AppHeader from './AppHeader';
+import AppContent from './AppContent';
+import AppFooter from './AppFooter';
+import '@/styles/sidebar-responsive.css';
 
-interface LayoutProps {
-  sidebarWidth?: number;
-  contentClassName?: string;
-}
+// Layout CoreUI originale identico al template
+const Layout: React.FC = () => {
+  // Inizializza il responsive behavior
+  useResponsive();
+  
+  const { visible, isMobile, unfoldable, setSidebarVisible } = useSidebarStore();
 
-const DEFAULT_SIDEBAR_WIDTH = 1;
-
-const Layout: React.FC<LayoutProps> = ({ 
-  sidebarWidth = DEFAULT_SIDEBAR_WIDTH, 
-  contentClassName = 'p-4' 
-}) => {
-  const contentWidth = 12 - sidebarWidth;
+  // Handler per chiudere sidebar quando si clicca sul backdrop (mobile)
+  const handleBackdropClick = () => {
+    if (isMobile) {
+      setSidebarVisible(false);
+    }
+  };
 
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <Navbar />
-      <CRow className="g-0 flex-grow-1">
-        <CCol xs={sidebarWidth} className="bg-light">
-          <Sidebar />
-        </CCol>
-        <CCol 
-          xs={contentWidth} 
-          className={contentClassName}
-        >
-          <CContainer fluid className="h-100">
-            <Outlet />
-          </CContainer>
-        </CCol>
-      </CRow>
+    <div>
+      {/* Mobile backdrop */}
+      {isMobile && visible && (
+        <div 
+          className={`sidebar-backdrop ${visible ? 'show' : ''}`}
+          onClick={handleBackdropClick}
+        />
+      )}
+      
+      <Sidebar />
+      <div 
+        className={`
+          wrapper d-flex flex-column min-vh-100
+          ${!isMobile && visible && !unfoldable ? 'sidebar-visible' : ''}
+          ${!isMobile && visible && unfoldable ? 'sidebar-minimized' : ''}
+        `}
+      >
+        <AppHeader />
+        <div className="body flex-grow-1">
+          <AppContent />
+        </div>
+        <AppFooter />
+      </div>
     </div>
   );
 };

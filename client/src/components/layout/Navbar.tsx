@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom'
 import { setMode as apiSetMode } from '@/api/services/settings.service';
 import { useState } from 'react';
 import { CToast, CToastBody, CToaster } from '@coreui/react';
+import { useSidebarStore } from '@/store/useSidebarStore';
+import { cilMenu, cilArrowLeft, cilArrowRight } from '@coreui/icons';
+import CIcon from '@coreui/icons-react';
 
 const Navbar: React.FC = () => {
   const { token, clearToken, username } = useAuthStore()
@@ -14,6 +17,9 @@ const Navbar: React.FC = () => {
   const rentriMode = useEnvStore((state) => state.rentriMode)
   const ricettaMode = useEnvStore((state) => state.ricettaMode)
   const { setMode, setRentriMode, setRicettaMode } = useEnvStore.getState();
+
+  // Sidebar state
+  const { unfoldable, isMobile, toggleSidebar, toggleMinimize } = useSidebarStore();
 
   const [errorToast, setErrorToast] = useState(false);
   const [successToast, setSuccessToast] = useState(false);
@@ -76,6 +82,21 @@ const Navbar: React.FC = () => {
       <CContainer fluid>
         <div className="d-flex justify-content-between align-items-center w-100">
           <div className="d-flex align-items-center">
+            {/* Toggle Sidebar Button */}
+            <CButton
+              variant="ghost"
+              color="secondary"
+              className="me-2 d-flex align-items-center justify-content-center"
+              style={{ width: '40px', height: '40px' }}
+              onClick={isMobile ? toggleSidebar : toggleMinimize}
+              title={isMobile ? 'Toggle menu' : unfoldable ? 'Espandi sidebar' : 'Minimizza sidebar'}
+            >
+              <CIcon 
+                icon={isMobile ? cilMenu : (unfoldable ? cilArrowRight : cilArrowLeft)} 
+                size="lg"
+              />
+            </CButton>
+            
             <CNavbarBrand href="/" className="mb-0">
               Studio Di Martino
             </CNavbarBrand>

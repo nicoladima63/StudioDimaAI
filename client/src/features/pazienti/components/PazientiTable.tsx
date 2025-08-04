@@ -57,7 +57,10 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
       p.DB_CODE.toLowerCase().includes(search.toLowerCase()) ||
       p.nome_completo.toLowerCase().includes(search.toLowerCase()) ||
       p.citta_clean.toLowerCase().includes(search.toLowerCase()) ||
-      (p.DB_PAEMAIL && p.DB_PAEMAIL.toLowerCase().includes(search.toLowerCase()))
+      (p.DB_PAEMAIL && p.DB_PAEMAIL.toLowerCase().includes(search.toLowerCase())) ||
+      (p.DB_PACELLU && p.DB_PACELLU.toLowerCase().includes(search.toLowerCase())) ||
+      (p.DB_PATELEF && p.DB_PATELEF.toLowerCase().includes(search.toLowerCase())) ||
+      (p.numero_contatto && p.numero_contatto.toLowerCase().includes(search.toLowerCase()))
     );
   }, [pazienti, search]);
 
@@ -140,7 +143,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
               <CIcon icon={cilSearch} />
             </CInputGroupText>
             <CFormInput
-              placeholder="Cerca per nome, codice, email, città..."
+              placeholder="Cerca per nome, codice, email, città, telefono..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
