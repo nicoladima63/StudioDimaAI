@@ -35,9 +35,9 @@ const AppRouter: React.FC = () => {
     <BrowserRouter>
       <Routes>
         {/* Route pubbliche */}
-        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/home" element={<HomePage />} />
 
         {/* Route protette con Layout */}
         <Route 
@@ -47,6 +47,7 @@ const AppRouter: React.FC = () => {
             </PrivateRoute>
           }
         >
+          <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/debug" element={<DashboardDebug />} />
           <Route path="/calendar" element={<Calendar />} />

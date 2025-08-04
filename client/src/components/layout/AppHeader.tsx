@@ -100,7 +100,7 @@ const AppHeader: React.FC = () => {
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
-      <CContainer className="border-bottom px-4" fluid>
+      <CContainer className="border-bottom px-4 py-3" fluid style={{ minHeight: '77px' }}>
         {/* Sidebar Toggle */}
         <CHeaderToggler
           onClick={toggleSidebar}

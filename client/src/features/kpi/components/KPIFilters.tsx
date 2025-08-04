@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CForm, CRow, CCol, CButton, CFormInput } from '@coreui/react';
 import Select from 'react-select';
 import CIcon from '@coreui/icons-react';
-import { cilReload, cilCalendar } from '@coreui/icons';
+import { cilReload, cilCalendar, cilXCircle } from '@coreui/icons';
 
 export interface KPIFiltersState {
   anni: number[];
@@ -60,7 +60,7 @@ const KPIFilters: React.FC<KPIFiltersProps> = ({
     <CForm onSubmit={handleSubmit} className="mb-4 p-3 border rounded bg-light">
       <CRow className="g-3 align-items-end">
         {/* Multi-select anni */}
-        <CCol xs={12} md={7}>
+        <CCol xs={12} md={6}>
           <label className="form-label fw-semibold">
             <CIcon icon={cilCalendar} className="me-1" />
             Anni da analizzare
@@ -72,7 +72,18 @@ const KPIFilters: React.FC<KPIFiltersProps> = ({
               .sort((a, b) => b - a)
               .map(a => ({ value: a, label: a }))}
             value={anni.map(a => ({ value: a, label: a }))}
-            onChange={opts => setAnni(opts ? opts.map(o => o.value) : [])}
+            onChange={opts => {
+              const newAnni = opts ? opts.map(o => o.value) : [];
+              setAnni(newAnni);
+              // Auto-aggiorna quando cambiano gli anni
+              if (newAnni.length > 0) {
+                onFiltersChange({
+                  anni: newAnni,
+                  dataInizio: dataInizio || undefined,
+                  dataFine: dataFine || undefined
+                });
+              }
+            }}
             placeholder="Seleziona anni"
             closeMenuOnSelect={false}
             styles={{
@@ -135,8 +146,8 @@ const KPIFilters: React.FC<KPIFiltersProps> = ({
         </CCol>
 
         {/* Pulsanti azione */}
-        <CCol xs={12} md={1}>
-          <div className="d-flex flex-column gap-2">
+        <CCol xs={12} md={2} >
+          <div className="d-flex align-items-center h-100 gap-2">
             <CButton 
               color="primary" 
               type="submit"
@@ -146,12 +157,14 @@ const KPIFilters: React.FC<KPIFiltersProps> = ({
               <CIcon icon={cilReload} className="me-1" />
               {loading ? 'Caricamento...' : 'Aggiorna'}
             </CButton>
+
             <CButton 
               color="secondary" 
               variant="outline"
               onClick={resetFilters}
-              size="sm"
-            >
+              size="md"
+              >
+              <CIcon icon={cilXCircle} className="me-1" />
               Reset
             </CButton>
           </div>

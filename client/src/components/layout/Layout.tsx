@@ -1,7 +1,7 @@
 import React from 'react';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useSidebarStore } from '@/store/useSidebarStore';
-import Sidebar from './Sidebar';
+import AppSidebar from './AppSidebar';
 import AppHeader from './AppHeader';
 import AppContent from './AppContent';
 import AppFooter from './AppFooter';
@@ -31,13 +31,17 @@ const Layout: React.FC = () => {
         />
       )}
       
-      <Sidebar />
+      <AppSidebar />
       <div 
         className={`
           wrapper d-flex flex-column min-vh-100
           ${!isMobile && visible && !unfoldable ? 'sidebar-visible' : ''}
           ${!isMobile && visible && unfoldable ? 'sidebar-minimized' : ''}
         `}
+        style={{
+          marginLeft: !isMobile && visible ? (unfoldable ? '56px' : '256px') : '0',
+          transition: 'margin-left 0.3s ease-in-out'
+        }}
       >
         <AppHeader />
         <div className="body flex-grow-1">

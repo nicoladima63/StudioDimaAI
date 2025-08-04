@@ -9,7 +9,7 @@ const AppContent: React.FC = () => {
   const isDashboard = location.pathname === '/';
 
   return (
-    <CContainer className="h-auto px-4" fluid>
+    <CContainer className="h-auto" fluid>
       <Suspense fallback={<CSpinner color="primary" />}>
         <Outlet />
       </Suspense>

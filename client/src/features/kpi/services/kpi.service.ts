@@ -114,7 +114,7 @@ export const kpiService = {
     return response.data;
   },
 
-  // Marginalità prestazioni
+  // Marginalità prestazioni v1 (legacy)
   async getMarginalita(params?: { 
     anno?: number; 
     data_inizio?: string; 
@@ -127,6 +127,27 @@ export const kpiService = {
     total_prestazioni: number; 
   }> {
     const response = await apiClient.get('/api/kpi/marginalita', { params });
+    return response.data;
+  },
+
+  // Marginalità prestazioni v2 (ottimizzata con istruzioni raw data)
+  async getMarginalitaV2(params?: { 
+    anni?: string; // "2022,2023,2024"
+  }): Promise<{
+    success: boolean;
+    message: string;
+    instructions: {
+      step1: string;
+      step2: string;
+      step3: string;
+      step4: string;
+    };
+    benefits: string[];
+    sample_client_logic: {
+      javascript: string;
+    };
+  }> {
+    const response = await apiClient.get('/api/kpi/marginalita-v2', { params });
     return response.data;
   },
 
@@ -162,6 +183,24 @@ export const kpiService = {
     mesi_perdita?: number; 
   }): Promise<{ success: boolean; data: KPIRicorrenza }> {
     const response = await apiClient.get('/api/kpi/ricorrenza-pazienti', { params });
+    return response.data;
+  },
+
+  // === RAW DATA ENDPOINTS PER PKI V2 ===
+  
+  // Dati fatture raw per calcoli client-side
+  async getFattureRaw(params?: { 
+    anni?: string; // "2022,2023,2024"
+  }) {
+    const response = await apiClient.get('/api/fatture/raw', { params });
+    return response.data;
+  },
+
+  // Dati appuntamenti raw per calcoli client-side  
+  async getCalendarRaw(params?: { 
+    anni?: string; // "2022,2023,2024"
+  }) {
+    const response = await apiClient.get('/api/calendar/raw', { params });
     return response.data;
   }
 };

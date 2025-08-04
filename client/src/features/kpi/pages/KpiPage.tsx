@@ -13,6 +13,7 @@ import {
 import { Card } from '@/components/ui';
 import { KPICard, MarginalitaChart, TrendChart, KPIFilters } from '../components';
 import { kpiService } from '../services/kpi.service';
+import { eseguiMarginalitaV2 } from '../utils/marginalitaV2';
 import type { 
   KPIMarginalita, 
   KPITrend, 
@@ -32,6 +33,9 @@ const KpiPage: React.FC = () => {
   const [filters, setFilters] = useState<KPIFiltersState>({
     anni: [new Date().getFullYear()]
   });
+  
+  // Versione PKI da usare (v1 o v2)
+  const [usePKIv2, setUsePKIv2] = useState<boolean>(true);
   
   // Stati di caricamento granulari per ogni tab
   const [loadingStates, setLoadingStates] = useState<Record<TabType, boolean>>({
@@ -83,30 +87,52 @@ const KpiPage: React.FC = () => {
         data_fine: dataFine
       };
 
-      // Carica solo i dati necessari per overview
+      // Carica dati overview - usa PKI v2 se abilitata
+      let marginalitaResults: Record<number, KPIMarginalita[]> = {};
+      
+      if (usePKIv2) {
+        // PKI v2: carica tutti gli anni in una volta
+        const v2Result = await eseguiMarginalitaV2(kpiService, anni.map(String));
+        if (v2Result.success) {
+          // Distribuisci i dati per anno (logica semplificata)
+          anni.forEach(anno => {
+            marginalitaResults[anno] = v2Result.data;
+          });
+        }
+      } else {
+        // PKI v1: carica anno per anno
+        const promises = anni.map(async (anno) => {
+          const marginalita = await kpiService.getMarginalita({ anno, ...baseParams });
+          return { anno, marginalita };
+        });
+        const marginalitaData = await Promise.all(promises);
+        marginalitaData.forEach(({ anno, marginalita }) => {
+          marginalitaResults[anno] = marginalita.data;
+        });
+      }
+
+      // Carica altri dati (ricorrenza, produttività)  
       const promises = anni.map(async (anno) => {
-        const [marginalita, ricorrenza, produttivita] = await Promise.all([
-          kpiService.getMarginalita({ anno, ...baseParams }),
+        const [ricorrenza, produttivita] = await Promise.all([
           kpiService.getRicorrenza({ anno, ...baseParams }),
           kpiService.getProduttivita({ anno, ...baseParams })
         ]);
-        return { anno, marginalita, ricorrenza, produttivita };
+        return { anno, ricorrenza, produttivita };
       });
 
       const annoData = await Promise.all(promises);
 
       // Organizza dati per anno
-      const newMarginalitaData: Record<number, KPIMarginalita[]> = {};
       const newRicorrenzaData: Record<number, KPIRicorrenza> = {};
       const newProduttivitaData: Record<number, KPIProduttivita> = {};
 
-      annoData.forEach(({ anno, marginalita, ricorrenza, produttivita }) => {
-        newMarginalitaData[anno] = marginalita.data;
+      annoData.forEach(({ anno, ricorrenza, produttivita }) => {
         newRicorrenzaData[anno] = ricorrenza.data;
         newProduttivitaData[anno] = produttivita.data;
       });
 
-      setMarginalitaData(newMarginalitaData);
+      // Usa i dati marginalità già caricati (v1 o v2)
+      setMarginalitaData(marginalitaResults);
       setRicorrenzaData(newRicorrenzaData);
       setProduttivitaData(newProduttivitaData);
 
@@ -115,7 +141,16 @@ const KpiPage: React.FC = () => {
     } finally {
       setTabLoading('overview', false);
     }
-  }, [filters, setTabLoading, setTabError]);
+  }, [filters, setTabLoading, setTabError, usePKIv2]);
+
+  // Handler per cambio versione PKI
+  const handlePKIVersionChange = useCallback((useV2: boolean) => {
+    setUsePKIv2(useV2);
+    // Ricarica i dati se marginalità è attualmente visualizzata
+    if (activeTab === 'marginalita' || activeTab === 'overview') {
+      loadOverviewData(filters);
+    }
+  }, [activeTab, filters, loadOverviewData]);
 
   // Carica dati trend (solo quando necessario)
   const loadTrendData = useCallback(async (filterState: KPIFiltersState = filters) => {
@@ -358,6 +393,29 @@ const KpiPage: React.FC = () => {
         onFiltersChange={handleFiltersChange}
         loading={loadingStates.overview}
       />
+
+      {/* Toggle PKI Version */}
+      <CRow className="mb-3">
+        <CCol xs={12}>
+          <div className="d-flex justify-content-end align-items-center">
+            <span className="me-2 text-muted">PKI Version:</span>
+            <CButtonGroup size="sm">
+              <CButton 
+                color={!usePKIv2 ? 'primary' : 'outline-primary'}
+                onClick={() => handlePKIVersionChange(false)}
+              >
+                v1 (Legacy)
+              </CButton>
+              <CButton 
+                color={usePKIv2 ? 'success' : 'outline-success'}
+                onClick={() => handlePKIVersionChange(true)}
+              >
+                v2 (Ottimizzata)
+              </CButton>
+            </CButtonGroup>
+          </div>
+        </CCol>
+      </CRow>
 
       <CRow className="mb-4">
         <CCol xs={12}>

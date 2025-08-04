@@ -50,19 +50,34 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [selected, setSelected] = useState<PazienteCompleto | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [cittaFilter, setCittaFilter] = useState<string>('');
+  const [prioritaFilter, setPrioritaFilter] = useState<string>('');
+  const [statoFilter, setStatoFilter] = useState<string>('');
 
   const filtered = useMemo(() => {
-    return pazienti.filter(p =>
-      p.DB_PANOME.toLowerCase().includes(search.toLowerCase()) ||
-      p.DB_CODE.toLowerCase().includes(search.toLowerCase()) ||
-      p.nome_completo.toLowerCase().includes(search.toLowerCase()) ||
-      p.citta_clean.toLowerCase().includes(search.toLowerCase()) ||
-      (p.DB_PAEMAIL && p.DB_PAEMAIL.toLowerCase().includes(search.toLowerCase())) ||
-      (p.DB_PACELLU && p.DB_PACELLU.toLowerCase().includes(search.toLowerCase())) ||
-      (p.DB_PATELEF && p.DB_PATELEF.toLowerCase().includes(search.toLowerCase())) ||
-      (p.numero_contatto && p.numero_contatto.toLowerCase().includes(search.toLowerCase()))
-    );
-  }, [pazienti, search]);
+    return pazienti.filter(p => {
+      // Filtro testo
+      const matchText = p.DB_PANOME.toLowerCase().includes(search.toLowerCase()) ||
+        p.DB_CODE.toLowerCase().includes(search.toLowerCase()) ||
+        p.nome_completo.toLowerCase().includes(search.toLowerCase()) ||
+        p.citta_clean.toLowerCase().includes(search.toLowerCase()) ||
+        (p.DB_PAEMAIL && p.DB_PAEMAIL.toLowerCase().includes(search.toLowerCase())) ||
+        (p.DB_PACELLU && String(p.DB_PACELLU).toLowerCase().includes(search.toLowerCase())) ||
+        (p.DB_PATELEF && String(p.DB_PATELEF).toLowerCase().includes(search.toLowerCase())) ||
+        (p.numero_contatto && String(p.numero_contatto).toLowerCase().includes(search.toLowerCase()));
+      
+      // Filtro città
+      const matchCitta = !cittaFilter || p.citta_clean === cittaFilter;
+      
+      // Filtro priorità
+      const matchPriorita = !prioritaFilter || p.recall_priority === prioritaFilter;
+      
+      // Filtro stato
+      const matchStato = !statoFilter || p.recall_status === statoFilter;
+      
+      return matchText && matchCitta && matchPriorita && matchStato;
+    });
+  }, [pazienti, search, cittaFilter, prioritaFilter, statoFilter]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -113,6 +128,27 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
 
   const totalPages = Math.ceil(filtered.length / pageSize) || 1;
 
+  // Lista città uniche per il dropdown
+  const cittaOptions = useMemo(() => {
+    const citta = [...new Set(pazienti.map(p => p.citta_clean))].filter(Boolean).sort();
+    return citta;
+  }, [pazienti]);
+
+  // Opzioni priorità
+  const prioritaOptions = ['high', 'medium', 'low'];
+  
+  // Opzioni stato
+  const statoOptions = ['scaduto', 'in_scadenza', 'futuro'];
+
+  // Funzioni
+  const handleRefresh = () => {
+    alert('Funzione aggiorna: qui andrà la chiamata API per ricaricare i pazienti');
+  };
+
+  const handleExport = () => {
+    alert('Funzione esporta: qui andrà l\'esportazione dei dati filtrati');
+  };
+
   const handleSort = (col: typeof sortBy) => {
     if (sortBy === col) {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -161,26 +197,62 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
         <CCol md="auto" className="d-flex gap-2 align-items-center">
           <CDropdown>
             <CDropdownToggle color="outline-secondary" size="sm">
-              <CIcon icon={cilLocationPin} className="me-1" /> Città
+              <CIcon icon={cilLocationPin} className="me-1" /> 
+              {cittaFilter || 'Città'}
             </CDropdownToggle>
-            <CDropdownMenu><CDropdownItem disabled>Tutte le città</CDropdownItem></CDropdownMenu>
+            <CDropdownMenu>
+              <CDropdownItem onClick={() => setCittaFilter('')}>Tutte le città</CDropdownItem>
+              {cittaOptions.map(citta => (
+                <CDropdownItem 
+                  key={citta} 
+                  onClick={() => setCittaFilter(citta)}
+                  active={cittaFilter === citta}
+                >
+                  {citta}
+                </CDropdownItem>
+              ))}
+            </CDropdownMenu>
           </CDropdown>
           <CDropdown>
             <CDropdownToggle color="outline-secondary" size="sm">
-              <CIcon icon={cilFilter} className="me-1" /> Priorità
+              <CIcon icon={cilFilter} className="me-1" /> 
+              {prioritaFilter || 'Priorità'}
             </CDropdownToggle>
-            <CDropdownMenu><CDropdownItem disabled>Tutte</CDropdownItem></CDropdownMenu>
+            <CDropdownMenu>
+              <CDropdownItem onClick={() => setPrioritaFilter('')}>Tutte</CDropdownItem>
+              {prioritaOptions.map(priorita => (
+                <CDropdownItem 
+                  key={priorita} 
+                  onClick={() => setPrioritaFilter(priorita)}
+                  active={prioritaFilter === priorita}
+                >
+                  {priorita.charAt(0).toUpperCase() + priorita.slice(1)}
+                </CDropdownItem>
+              ))}
+            </CDropdownMenu>
           </CDropdown>
           <CDropdown>
             <CDropdownToggle color="outline-secondary" size="sm">
-              <CIcon icon={cilFilter} className="me-1" /> Stato
+              <CIcon icon={cilFilter} className="me-1" /> 
+              {statoFilter || 'Stato'}
             </CDropdownToggle>
-            <CDropdownMenu><CDropdownItem disabled>Tutti</CDropdownItem></CDropdownMenu>
+            <CDropdownMenu>
+              <CDropdownItem onClick={() => setStatoFilter('')}>Tutti</CDropdownItem>
+              {statoOptions.map(stato => (
+                <CDropdownItem 
+                  key={stato} 
+                  onClick={() => setStatoFilter(stato)}
+                  active={statoFilter === stato}
+                >
+                  {stato.charAt(0).toUpperCase() + stato.slice(1)}
+                </CDropdownItem>
+              ))}
+            </CDropdownMenu>
           </CDropdown>
-          <CButton color="outline-primary" size="sm" disabled>
+          <CButton color="outline-primary" size="sm" onClick={handleRefresh}>
             <CIcon icon={cilReload} className="me-1" /> Aggiorna
           </CButton>
-          <CButton color="outline-primary" size="sm" disabled>
+          <CButton color="outline-primary" size="sm" onClick={handleExport}>
             <CIcon icon={cilCloudDownload} className="me-1" /> Esporta
           </CButton>
         </CCol>
@@ -253,11 +325,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
               <CTableRow key={p.DB_CODE}>
                 <CTableDataCell className="text-center">{p.DB_CODE}</CTableDataCell>
                 <CTableDataCell>
-                  <div>
-                    <strong>{p.nome_completo}</strong>
-                    <br />
-                    <small className="text-muted">{p.DB_PANOME}</small>
-                  </div>
+                  <strong>{p.nome_completo}</strong>
                 </CTableDataCell>
                 <CTableDataCell className="text-center">{p.citta_clean}</CTableDataCell>
                 <CTableDataCell className="text-center">
@@ -271,7 +339,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({ pazienti, loading = false
                 <CTableDataCell className="text-center">
                   {formatDate(p.DB_PAULTVI)}
                   {p.giorni_ultima_visita && (
-                    <small className="text-muted">(<br />{p.giorni_ultima_visita} giorni fa)</small>
+                    <small className="text-muted"><br />{p.giorni_ultima_visita} giorni fa</small>
                   )}
                 </CTableDataCell>
                 <CTableDataCell className="text-center">

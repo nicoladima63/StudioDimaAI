@@ -62,6 +62,12 @@ def get_marginalita_prestazioni():
     Analisi marginalità per tipo di prestazione
     Calcola ricavi e margini per ogni tipo di trattamento
     
+    DEPRECATO: Questa funzione è inefficiente per più anni.
+    Usare invece i nuovi endpoint:
+    - GET /api/fatture/raw?anni=2022,2023,2024
+    - GET /api/calendar/raw?anni=2022,2023,2024
+    E fare i calcoli lato client.
+    
     Query params:
     - anno: anno di riferimento (default: anno corrente)
     - data_inizio: data inizio periodo (formato YYYY-MM-DD, opzionale)
@@ -754,6 +760,76 @@ def get_ricorrenza_pazienti():
         
     except Exception as e:
         logger.error(f"Errore analisi ricorrenza pazienti: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@kpi_bp.route('/marginalita-v2', methods=['GET'])
+@jwt_required()
+def get_marginalita_prestazioni_v2():
+    """
+    Analisi marginalità ottimizzata per tipo di prestazione.
+    Restituisce istruzioni per il client su come ottenere dati raw
+    e fare i calcoli localmente per migliori performance.
+    
+    Query params:
+    - anni: lista anni separati da virgola (es: 2022,2023,2024)
+    """
+    try:
+        anni_param = request.args.get('anni', str(datetime.now().year))
+        
+        # Validation
+        try:
+            anni = [int(anno.strip()) for anno in anni_param.split(',')]
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'Formato anni non valido. Usare: 2022,2023,2024'
+            }), 400
+        
+        return jsonify({
+            'success': True,
+            'message': 'Usa i nuovi endpoint raw per performance migliori',
+            'instructions': {
+                'step1': f'Chiama GET /api/fatture/raw?anni={anni_param}',
+                'step2': f'Chiama GET /api/calendar/raw?anni={anni_param}',
+                'step3': 'Associa fatture-appuntamenti lato client per paziente_id e data (±7 giorni)',
+                'step4': 'Calcola marginalità per tipo_prestazione'
+            },
+            'benefits': [
+                'Una sola lettura DBF per endpoint invece di N chiamate',
+                'Transfer dati raw senza processing server',
+                'Possibilità di cache client-side',
+                'Scalabilità migliore per più anni'
+            ],
+            'sample_client_logic': {
+                'javascript': '''
+// Esempio logica client-side
+const fatture = await fetch('/api/fatture/raw?anni=2022,2023,2024');
+const appuntamenti = await fetch('/api/calendar/raw?anni=2022,2023,2024');
+
+// Associa fatture ad appuntamenti
+const marginalita = {};
+fatture.data.forEach(fattura => {
+    const appCorrispondente = appuntamenti.data.find(app => 
+        app.paziente_id === fattura.paziente_id && 
+        Math.abs(daysDiff(app.data, fattura.data)) <= 7
+    );
+    
+    if (appCorrispondente) {
+        const tipo = appCorrispondente.tipo;
+        if (!marginalita[tipo]) marginalita[tipo] = {ricavo: 0, count: 0};
+        marginalita[tipo].ricavo += fattura.importo;
+        marginalita[tipo].count += 1;
+    }
+});
+                '''
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore marginalità v2: {e}")
         return jsonify({
             'success': False,
             'error': str(e)

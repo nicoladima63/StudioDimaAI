@@ -338,8 +338,11 @@ const FornitoriView: React.FC = () => {
                       variant="outline"
                       size="sm"
                       className="me-2"
-                      onClick={() => handleShowDetail(fornitore.id)}
-                    >
+                      onClick={(e) => {
+                        e.stopPropagation(); // <-- parentesi per invocarla
+                        handleShowDetail(fornitore.id);
+                        }}
+                      >
                       <CIcon icon={cilZoom} size="sm" className="me-1" />
                       Dettagli
                     </CButton>

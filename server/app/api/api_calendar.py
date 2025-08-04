@@ -9,7 +9,10 @@ Include:
 from flask import Blueprint, request, jsonify, url_for
 from flask_jwt_extended import jwt_required
 from server.app.services.calendar_service import CalendarService
-from datetime import date
+from datetime import date, datetime
+from dbfread import DBF
+from server.app.core.db_utils import get_dbf_path
+from server.app.config.constants import COLONNE
 import logging
 
 logger = logging.getLogger(__name__)
@@ -721,3 +724,96 @@ def cancel_clear():
         return jsonify({"message": "Job cancellato con successo"}), 200
     else:
         return jsonify({"error": "Il job non è in corso"}), 400
+
+@calendar_bp.route('/raw', methods=['GET'])
+@jwt_required()
+def get_appuntamenti_raw():
+    """
+    Endpoint per dati raw degli appuntamenti filtrati per anni.
+    Query params:
+    - anni: lista anni separati da virgola (es: 2022,2023,2024)
+    """
+    try:
+        # Parse anni parameter
+        anni_param = request.args.get('anni', '')
+        if not anni_param:
+            return jsonify({
+                'success': False,
+                'error': 'Parametro anni richiesto (es: 2022,2023,2024)'
+            }), 400
+        
+        try:
+            anni = [int(anno.strip()) for anno in anni_param.split(',')]
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'error': 'Formato anni non valido. Usare: 2022,2023,2024'
+            }), 400
+        
+        # Helper functions
+        def safe_str(val, default=''):
+            if val is None:
+                return default
+            return str(val).strip()
+        
+        def parse_date(date_str):
+            if not date_str:
+                return None
+            try:
+                return datetime.strptime(str(date_str)[:10], '%Y-%m-%d').date()
+            except:
+                return None
+        
+        def parse_time(time_str):
+            if not time_str:
+                return None
+            try:
+                # Assumiamo formato HH:MM
+                time_clean = str(time_str).strip()
+                if ':' in time_clean:
+                    return datetime.strptime(time_clean, '%H:%M').time()
+                elif len(time_clean) == 4:  # HHMM
+                    return datetime.strptime(time_clean, '%H%M').time()
+            except:
+                pass
+            return None
+        
+        # Read DBF
+        path_appuntamenti = get_dbf_path('agenda')
+        col_map = COLONNE['appuntamenti']
+        
+        appuntamenti_data = []
+        for record in DBF(path_appuntamenti, encoding='latin-1'):
+            data_app = parse_date(record.get(col_map['data']))
+            if not data_app or data_app.year not in anni:
+                continue
+            
+            ora_inizio = parse_time(record.get(col_map['ora_inizio']))
+            
+            appuntamenti_data.append({
+                'paziente_id': safe_str(record.get(col_map['id_paziente'])),
+                'data': data_app.isoformat(),
+                'ora_inizio': ora_inizio.strftime('%H:%M') if ora_inizio else None,
+                'tipo': safe_str(record.get(col_map['tipo'])),
+                'medico': safe_str(record.get(col_map['medico'])),
+                'studio': safe_str(record.get(col_map.get('studio', ''))),
+                'anno': data_app.year,
+                'mese': data_app.month
+            })
+        
+        return jsonify({
+            'success': True,
+            'data': appuntamenti_data,
+            'metadata': {
+                'count': len(appuntamenti_data),
+                'anni_richiesti': anni,
+                'anni_trovati': list(set(a['anno'] for a in appuntamenti_data))
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore endpoint appuntamenti raw: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
