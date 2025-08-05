@@ -5,13 +5,15 @@ from datetime import datetime, date
 import pandas as pd
 from server.app.core.db_calendar import _get_dbf_path, _leggi_tabella_dbf
 from server.app.config.constants import COLONNE
+from server.app.services.gestionale_intelligence_service import gestionale_service
+from server.app.services.xml_parser_service import xml_parser_service
 
 logger = logging.getLogger(__name__)
 
-spese_fornitori_bp = Blueprint('spese_fornitori', __name__)
+spese_fornitori_bp = Blueprint('spese_fornitori', __name__, url_prefix='/api/spese-fornitori')
 
-@spese_fornitori_bp.route('/api/spese-fornitori', methods=['GET'])
-#@jwt_required()
+@spese_fornitori_bp.route('/', methods=['GET'])
+@jwt_required()
 def get_spese_fornitori():
     """
     Ottieni spese fornitori con filtri opzionali
@@ -236,8 +238,8 @@ def get_spese_fornitori():
             'error': str(e)
         }), 500
 
-@spese_fornitori_bp.route('/api/spese-fornitori/all', methods=['GET'])
-#@jwt_required()
+@spese_fornitori_bp.route('/all', methods=['GET'])
+@jwt_required()
 def get_all_spese_fornitori():
     """
     Ottieni TUTTE le spese fornitori senza filtri temporali di default
@@ -443,8 +445,8 @@ def get_all_spese_fornitori():
             'error': str(e)
         }), 500
 
-@spese_fornitori_bp.route('/api/spese-fornitori/fornitore/<string:fornitore_id>/all', methods=['GET'])
-#@jwt_required()
+@spese_fornitori_bp.route('/fornitore/<string:fornitore_id>/all', methods=['GET'])
+@jwt_required()
 def get_all_fatture_fornitore(fornitore_id):
     """
     Ottieni TUTTE le fatture di un fornitore specifico senza filtri temporali di default
@@ -607,8 +609,8 @@ def get_all_fatture_fornitore(fornitore_id):
             'fornitore_id': fornitore_id
         }), 500
 
-@spese_fornitori_bp.route('/api/spese-fornitori/riepilogo', methods=['GET'])
-#@jwt_required()
+@spese_fornitori_bp.route('/riepilogo', methods=['GET'])
+@jwt_required()
 def get_riepilogo_spese():
     """
     Ottieni riepilogo spese per analisi (totali per mese, categoria, ecc.)
@@ -718,7 +720,7 @@ def get_riepilogo_spese():
             'error': str(e)
         }), 500
 
-@spese_fornitori_bp.route('/api/spese-fornitori/<string:fattura_id>/dettagli', methods=['GET'])
+@spese_fornitori_bp.route('/<string:fattura_id>/dettagli', methods=['GET'])
 @jwt_required()
 def get_dettagli_fattura(fattura_id):
     """
@@ -802,7 +804,7 @@ def get_dettagli_fattura(fattura_id):
             'fattura_id': fattura_id
         }), 500
 
-@spese_fornitori_bp.route('/api/spese-fornitori/ricerca-articoli', methods=['GET'])
+@spese_fornitori_bp.route('/ricerca-articoli', methods=['GET'])
 @jwt_required()
 def ricerca_articoli():
     """
@@ -948,6 +950,249 @@ def ricerca_articoli():
         
     except Exception as e:
         logger.error(f"Errore ricerca articoli: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# === NUOVI ENDPOINT PER CATEGORIZZAZIONE INTELLIGENTE ===
+
+@spese_fornitori_bp.route('/categorie-gestionale', methods=['GET'])
+@jwt_required()
+def get_categorie_gestionale():
+    """
+    Restituisce le categorie di spesa dal piano dei conti del gestionale
+    """
+    try:
+        conti = gestionale_service.get_piano_conti()
+        
+        # Converti in formato adatto al frontend
+        categorie = []
+        for codice, info in conti.items():
+            categorie.append({
+                'codice': codice,
+                'nome': info['descrizione'],
+                'importo_totale': info['importo_totale'],
+                'iva_totale': info['iva_totale'],
+                'peso': info['peso']
+            })
+        
+        # Ordina per importo decrescente
+        categorie.sort(key=lambda x: x['importo_totale'], reverse=True)
+        
+        return jsonify({
+            'success': True,
+            'data': categorie,
+            'total': len(categorie)
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore recupero categorie gestionale: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/categorizza-spesa', methods=['POST'])
+@jwt_required()
+def categorizza_spesa():
+    """
+    Categorizza automaticamente una spesa basandosi sui pattern del gestionale
+    
+    Body: {
+        "descrizione": "Descrizione della spesa",
+        "fornitore": "Nome fornitore" (opzionale)
+    }
+    """
+    try:
+        data = request.get_json()
+        descrizione = data.get('descrizione', '')
+        fornitore = data.get('fornitore', '')
+        
+        if not descrizione:
+            return jsonify({
+                'success': False,
+                'error': 'Descrizione richiesta'
+            }), 400
+        
+        # Categorizza usando il service
+        categoria, confidence = gestionale_service.categorize_spesa(descrizione, fornitore)
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'categoria': categoria,
+                'confidence': confidence,
+                'descrizione_input': descrizione,
+                'fornitore_input': fornitore
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore categorizzazione spesa: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/statistiche-gestionale', methods=['GET'])
+@jwt_required()
+def get_statistiche_gestionale():
+    """
+    Restituisce statistiche sui dati del gestionale per categorizzazione
+    """
+    try:
+        stats = gestionale_service.get_statistics()
+        
+        return jsonify({
+            'success': True,
+            'data': stats
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore statistiche gestionale: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/clear-cache', methods=['POST'])
+@jwt_required()
+def clear_categorization_cache():
+    """
+    Pulisce la cache dei pattern di categorizzazione per ricaricare i miglioramenti
+    """
+    try:
+        gestionale_service.clear_cache()
+        return jsonify({
+            "success": True,
+            "message": "Cache pulita con successo. I pattern sono stati ricaricati."
+        })
+    except Exception as e:
+        logger.error(f"Errore nella pulizia cache: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/analyze-xml-fatture', methods=['POST'])
+@jwt_required()
+def analyze_xml_fattures():
+    """
+    Analizza le fatture XML SDI per estrarre pattern di categorizzazione
+    """
+    try:
+        # Path esatto alla cartella XML
+        xml_path = r'C:\Users\gengi\Desktop\StudioDimaAI\sample_fatture_xml'
+        
+        # Crea un'istanza con il path corretto
+        from server.app.services.xml_parser_service import XMLParserService
+        xml_service = XMLParserService(xml_path)
+        
+        # Analizza tutte le fatture XML nella cartella
+        analysis_results = xml_service.analyze_xml_files()
+        
+        if not analysis_results:
+            return jsonify({
+                "success": False,
+                "error": "Nessuna fattura XML trovata o analizzabile"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "message": f"Analizzate {analysis_results['statistiche'].get('totale_fornitori', 0)} fatture XML",
+            "data": analysis_results
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore nell'analisi fatture XML: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/integrate-xml-patterns', methods=['POST'])
+@jwt_required()
+def integrate_xml_patterns():
+    """
+    Analizza le fatture XML e integra i pattern nel sistema di categorizzazione
+    """
+    try:
+        # Path esatto alla cartella XML
+        xml_path = r'C:\Users\gengi\Desktop\StudioDimaAI\sample_fatture_xml'
+        
+        # Crea un'istanza con il path corretto
+        from server.app.services.xml_parser_service import XMLParserService
+        xml_service = XMLParserService(xml_path)
+        
+        # Analizza fatture XML
+        xml_analysis = xml_service.analyze_xml_files()
+        
+        if not xml_analysis:
+            return jsonify({
+                "success": False,
+                "error": "Nessuna fattura XML trovata"
+            }), 404
+        
+        # Integra pattern nel sistema di categorizzazione
+        integrated_patterns = gestionale_service.integrate_xml_patterns(xml_analysis)
+        
+        return jsonify({
+            "success": True,
+            "message": f"Pattern XML integrati con successo. {xml_analysis['statistiche'].get('totale_fornitori', 0)} fornitori analizzati.",
+            "data": {
+                "fornitori_xml": xml_analysis['fornitori_identificati'],
+                "pattern_integrati": list(integrated_patterns.keys()),
+                "statistiche": xml_analysis['statistiche']
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore nell'integrazione pattern XML: {e}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/test-categorizzazione', methods=['GET'])
+@jwt_required()
+def test_categorizzazione():
+    """
+    Endpoint di test per validare la categorizzazione con esempi
+    """
+    try:
+        # Esempi di test
+        test_cases = [
+            {"descrizione": "PUNTE VERDI 671/204/060 5PZ", "fornitore": "Dental Supply"},
+            {"descrizione": "ENERGIA ELETTRICA MARZO 2024", "fornitore": "ENEL"},
+            {"descrizione": "17D0NNLC-Aggiunta Gancio a protesi", "fornitore": "Laboratorio Odonto"},
+            {"descrizione": "GL001AS Confezione da 100 guanti ALOE", "fornitore": "Medical Store"},
+            {"descrizione": "Canone telefono fisso", "fornitore": "TIM"},
+            {"descrizione": "Ricalcolo acqua precedenti", "fornitore": "Acquedotto"},
+        ]
+        
+        risultati = []
+        for test in test_cases:
+            categoria, confidence = gestionale_service.categorize_spesa(
+                test['descrizione'], 
+                test['fornitore']
+            )
+            risultati.append({
+                'input': test,
+                'categoria_predetta': categoria,
+                'confidence': confidence
+            })
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'test_results': risultati,
+                'total_tests': len(test_cases)
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore test categorizzazione: {e}")
         return jsonify({
             'success': False,
             'error': str(e)

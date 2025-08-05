@@ -15,6 +15,7 @@ import FiltriSpeseComponent from "../components/FiltriSpese";
 import TabellaSpese from "../components/TabellaSpese";
 import RicercaArticoli from "../components/RicercaArticoli";
 import StatisticheCategorizzazione from "../components/StatisticheCategorizzazione";
+import TestCategorizzazioneGestionale from "../components/TestCategorizzazioneGestionale";
 import { speseFornitioriService } from "../services/spese.service";
 import type {
   FiltriSpese,
@@ -142,6 +143,15 @@ const SpesePage: React.FC = () => {
             📊 Statistiche Categorizzazione
           </CNavLink>
         </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === "gestionale"}
+            onClick={() => setActiveTab("gestionale")}
+            style={{ cursor: "pointer" }}
+          >
+            🎯 Test Gestionale v2
+          </CNavLink>
+        </CNavItem>
       </CNav>
 
       {error && (
@@ -236,6 +246,11 @@ const SpesePage: React.FC = () => {
         {/* Statistiche Categorizzazione Tab */}
         <CTabPane visible={activeTab === "statistiche"} role="tabpanel">
           <StatisticheCategorizzazione spese={spese} className="mt-4" />
+        </CTabPane>
+
+        {/* Test Categorizzazione Gestionale Tab */}
+        <CTabPane visible={activeTab === "gestionale"} role="tabpanel">
+          <TestCategorizzazioneGestionale />
         </CTabPane>
       </CTabContent>
     </Card>

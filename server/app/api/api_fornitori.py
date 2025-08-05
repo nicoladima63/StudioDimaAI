@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from server.app.core.db_calendar import _get_dbf_path, _leggi_tabella_dbf
 from server.app.config.constants import COLONNE, DBF_TABLES
 import pandas as pd
@@ -6,6 +7,7 @@ import pandas as pd
 api_fornitori = Blueprint('api_fornitori', __name__, url_prefix='/api')
 
 @api_fornitori.route('/fornitori', methods=['GET'])
+@jwt_required()
 def get_fornitori():
     try:
         file_path = _get_dbf_path('fornitori')
@@ -40,6 +42,7 @@ def get_fornitori():
         }), 500
 
 @api_fornitori.route('/fornitori/<fornitore_id>', methods=['GET'])
+@jwt_required()
 def get_fornitore_by_id(fornitore_id):
     try:
         file_path = _get_dbf_path('fornitori')

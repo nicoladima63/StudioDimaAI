@@ -7,6 +7,23 @@ import type {
   FiltriSpese 
 } from "../types";
 
+// === NUOVE API PER CATEGORIZZAZIONE GESTIONALE ===
+
+export interface CategoriaGestionale {
+  codice: string;
+  nome: string;
+  importo_totale: number;
+  iva_totale: number;
+  peso: number;
+}
+
+export interface RisultatoCategorizzazione {
+  categoria: string;
+  confidence: number;
+  descrizione_input: string;
+  fornitore_input: string;
+}
+
 export const speseFornitioriService = {
   /**
    * Ottieni lista spese fornitori con filtri
@@ -48,7 +65,8 @@ export const speseFornitioriService = {
       params.append('limit', filtri.limit.toString());
     }
     
-    const response = await apiClient.get(`/api/spese-fornitori?${params.toString()}`);
+    const response = await apiClient.get(`/api/spese-fornitori/?${params.toString()}`);
+    console.log(params)
     return response.data;
   },
 
@@ -89,5 +107,66 @@ export const speseFornitioriService = {
   async exportSpese(filtri: FiltriSpese): Promise<Blob> {
     // TODO: Implementare export CSV
     throw new Error("Export non ancora implementato");
+  },
+
+  // === NUOVI METODI PER CATEGORIZZAZIONE GESTIONALE ===
+
+  /**
+   * Ottieni categorie di spesa dal piano dei conti del gestionale
+   */
+  async getCategorieGestionale(): Promise<{ success: boolean; data: CategoriaGestionale[]; total: number }> {
+    const response = await apiClient.get('/api/spese-fornitori/categorie-gestionale');
+    return response.data;
+  },
+
+  /**
+   * Categorizza automaticamente una spesa
+   */
+  async categorizzaSpesa(descrizione: string, fornitore?: string): Promise<{ success: boolean; data: RisultatoCategorizzazione }> {
+    const response = await apiClient.post('/api/spese-fornitori/categorizza-spesa', {
+      descrizione,
+      fornitore: fornitore || ''
+    });
+    return response.data;
+  },
+
+  /**
+   * Ottieni statistiche del gestionale per categorizzazione
+   */
+  async getStatisticheGestionale() {
+    const response = await apiClient.get('/api/spese-fornitori/statistiche-gestionale');
+    return response.data;
+  },
+
+  /**
+   * Test della categorizzazione con esempi predefiniti
+   */
+  async testCategorizzazione() {
+    const response = await apiClient.get('/api/spese-fornitori/test-categorizzazione');
+    return response.data;
+  },
+
+  /**
+   * Pulisce la cache dei pattern per ricaricare i miglioramenti
+   */
+  async clearCategorizzazioneCache() {
+    const response = await apiClient.post('/api/spese-fornitori/clear-cache');
+    return response.data;
+  },
+
+  /**
+   * Analizza le fatture XML SDI per estrarre pattern
+   */
+  async analyzeXmlFatture() {
+    const response = await apiClient.post('/api/spese-fornitori/analyze-xml-fatture');
+    return response.data;
+  },
+
+  /**
+   * Integra i pattern delle fatture XML nel sistema di categorizzazione
+   */
+  async integrateXmlPatterns() {
+    const response = await apiClient.post('/api/spese-fornitori/integrate-xml-patterns');
+    return response.data;
   }
 };

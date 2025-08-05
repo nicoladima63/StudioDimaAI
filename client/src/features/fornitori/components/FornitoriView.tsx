@@ -23,9 +23,12 @@ import {
 import CIcon from "@coreui/icons-react";
 import { cilZoom } from "@coreui/icons";
 import { fornitoriService } from "../services/fornitori.service";
-import type { Fornitore } from "../types";
+import type { Fornitore, ClassificazioneCosto } from "../types";
 import FornitoreDetailModal from "./FornitoreDetailModal";
 import FattureFornitoreModal from "./FattureFornitoreModal";
+import ClassificazioneToggle from "./ClassificazioneToggle";
+import CategoriaSpesaSelect from "./CategoriaSpesaSelect";
+import classificazioniService from "../services/classificazioni.service";
 
 const FornitoriView: React.FC = () => {
   const [fornitori, setFornitori] = useState<Fornitore[]>([]);
@@ -38,6 +41,12 @@ const FornitoriView: React.FC = () => {
   );
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showFattureModal, setShowFattureModal] = useState(false);
+  
+  // Stato per classificazioni
+  const [classificazioni, setClassificazioni] = useState<Map<string, ClassificazioneCosto>>(new Map());
+  
+  // Stato per categorie di spesa (caricate una sola volta)
+  const [categorieSpesa, setCategorieSpesa] = useState<Array<{codice_conto: string, descrizione: string}>>([]);
 
   // Ricerca e filtri
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,7 +60,35 @@ const FornitoriView: React.FC = () => {
 
   useEffect(() => {
     fetchFornitori();
+    fetchClassificazioni();
+    fetchCategorieSpesa();
   }, []);
+
+  const fetchClassificazioni = async () => {
+    try {
+      const response = await classificazioniService.getFornitoriClassificati();
+      if (response.success) {
+        const classMap = new Map<string, ClassificazioneCosto>();
+        response.data.forEach(c => {
+          classMap.set(c.codice_riferimento, c);
+        });
+        setClassificazioni(classMap);
+      }
+    } catch (error) {
+      console.error("Errore nel caricamento classificazioni:", error);
+    }
+  };
+
+  const fetchCategorieSpesa = async () => {
+    try {
+      const response = await classificazioniService.getCategorieSpesa();
+      if (response.success) {
+        setCategorieSpesa(response.data);
+      }
+    } catch (error) {
+      console.error("Errore nel caricamento categorie spesa:", error);
+    }
+  };
 
   // Effetto per ricerca e ordinamento
   useEffect(() => {
@@ -321,6 +358,12 @@ const FornitoriView: React.FC = () => {
                 <CTableHeaderCell>Telefono</CTableHeaderCell>
                 <CTableHeaderCell>Email</CTableHeaderCell>
                 <CTableHeaderCell className="text-center">
+                  Classificazione
+                </CTableHeaderCell>
+                <CTableHeaderCell className="text-center">
+                  Categoria Spesa
+                </CTableHeaderCell>
+                <CTableHeaderCell className="text-center">
                   Azioni
                 </CTableHeaderCell>
               </CTableRow>
@@ -332,6 +375,46 @@ const FornitoriView: React.FC = () => {
                   <CTableDataCell>{fornitore.nome || "-"}</CTableDataCell>
                   <CTableDataCell>{fornitore.telefono || "-"}</CTableDataCell>
                   <CTableDataCell>{fornitore.email || "-"}</CTableDataCell>
+                  <CTableDataCell className="text-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ClassificazioneToggle 
+                      fornitoreId={fornitore.id}
+                      classificazioneIniziale={classificazioni.get(fornitore.id)}
+                      onClassificazioneChange={(nuovaClassificazione) => {
+                        const newMap = new Map(classificazioni);
+                        if (nuovaClassificazione) {
+                          newMap.set(fornitore.id, nuovaClassificazione);
+                        } else {
+                          newMap.delete(fornitore.id);
+                        }
+                        setClassificazioni(newMap);
+                      }}
+                    />
+                  </CTableDataCell>
+                  <CTableDataCell 
+                    className="text-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <CategoriaSpesaSelect
+                      fornitoreId={fornitore.id}
+                      classificazione={classificazioni.get(fornitore.id) || null}
+                      categorie={categorieSpesa}
+                      onCategoriaChange={(codiceCategoria) => {
+                        // Aggiorna la classificazione locale con la nuova categoria
+                        const classificazione = classificazioni.get(fornitore.id);
+                        if (classificazione) {
+                          const updatedClassificazione = {
+                            ...classificazione,
+                            categoria_conto: codiceCategoria || undefined
+                          };
+                          const newMap = new Map(classificazioni);
+                          newMap.set(fornitore.id, updatedClassificazione);
+                          setClassificazioni(newMap);
+                        }
+                      }}
+                    />
+                  </CTableDataCell>
                   <CTableDataCell className="text-center">
                     <CButton
                       color="primary"
@@ -351,7 +434,7 @@ const FornitoriView: React.FC = () => {
               ))}
               {fornitori.length === 0 && (
                 <CTableRow>
-                  <CTableDataCell colSpan={6} className="text-center p-4">
+                  <CTableDataCell colSpan={7} className="text-center p-4">
                     Nessun fornitore trovato
                   </CTableDataCell>
                 </CTableRow>

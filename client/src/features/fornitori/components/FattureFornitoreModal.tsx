@@ -16,10 +16,15 @@ import {
   CPaginationItem,
   CAlert,
   CSpinner,
-  CBadge
+  CBadge,
+  CCollapse,
+  CCard,
+  CCardBody
 } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilChevronCircleDownAlt, cilChevronRight } from '@coreui/icons';
 import { fornitoriService } from '../services/fornitori.service';
-import type { Fornitore, FatturaFornitore } from '../types';
+import type { Fornitore, FatturaFornitore, DettaglioFattura } from '../types';
 
 interface FattureFornitoreModalProps {
   visible: boolean;
@@ -39,6 +44,11 @@ const FattureFornitoreModal: React.FC<FattureFornitoreModalProps> = ({
   const [totalPages, setTotalPages] = useState(1);
   const [totalFatture, setTotalFatture] = useState(0);
   const itemsPerPage = 10;
+  
+  // Stati per dettagli fatture
+  const [dettagliFatture, setDettagliFatture] = useState<Map<string, DettaglioFattura[]>>(new Map());
+  const [fatturaExpanded, setFatturaExpanded] = useState<string | null>(null);
+  const [loadingDettagli, setLoadingDettagli] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible && fornitore) {
@@ -88,12 +98,40 @@ const FattureFornitoreModal: React.FC<FattureFornitoreModalProps> = ({
     }
   };
 
+  const handleToggleDettagli = async (fatturaId: string) => {
+    if (fatturaExpanded === fatturaId) {
+      // Chiudi se già aperto
+      setFatturaExpanded(null);
+      return;
+    }
+    
+    // Se non abbiamo già i dettagli, caricali
+    if (!dettagliFatture.has(fatturaId)) {
+      try {
+        setLoadingDettagli(fatturaId);
+        const dettagli = await fornitoriService.getDettagliFattura(fatturaId);
+        setDettagliFatture(prev => new Map(prev.set(fatturaId, dettagli)));
+      } catch (err) {
+        console.error('Errore caricamento dettagli:', err);
+        setError('Errore nel caricamento dei dettagli della fattura');
+        return;
+      } finally {
+        setLoadingDettagli(null);
+      }
+    }
+    
+    setFatturaExpanded(fatturaId);
+  };
+
   const handleClose = () => {
     setFatture([]);
     setCurrentPage(1);
     setTotalPages(1);
     setTotalFatture(0);
     setError(null);
+    setDettagliFatture(new Map());
+    setFatturaExpanded(null);
+    setLoadingDettagli(null);
     onClose();
   };
 
@@ -189,6 +227,7 @@ const FattureFornitoreModal: React.FC<FattureFornitoreModalProps> = ({
             <CTable striped hover responsive className="mb-3">
               <CTableHead color="dark">
                 <CTableRow>
+                  <CTableHeaderCell style={{ width: '40px' }}></CTableHeaderCell>
                   <CTableHeaderCell>ID</CTableHeaderCell>
                   <CTableHeaderCell>Data Spesa</CTableHeaderCell>
                   <CTableHeaderCell>Numero Doc.</CTableHeaderCell>
@@ -199,18 +238,78 @@ const FattureFornitoreModal: React.FC<FattureFornitoreModalProps> = ({
               </CTableHead>
               <CTableBody>
                 {fatture.map((fattura) => (
-                  <CTableRow key={fattura.id}>
-                    <CTableDataCell>{fattura.id}</CTableDataCell>
-                    <CTableDataCell>{formatDate(fattura.data_spesa)}</CTableDataCell>
-                    <CTableDataCell>{fattura.numero_documento || '-'}</CTableDataCell>
-                    <CTableDataCell>{formatCurrency(fattura.costo_netto)}</CTableDataCell>
-                    <CTableDataCell>{formatCurrency(fattura.costo_iva)}</CTableDataCell>
-                    <CTableDataCell>{formatCurrency((fattura.costo_netto || 0) + (fattura.costo_iva || 0))}</CTableDataCell>
-                  </CTableRow>
+                  <React.Fragment key={fattura.id}>
+                    <CTableRow 
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleToggleDettagli(fattura.id)}
+                    >
+                      <CTableDataCell>
+                        {loadingDettagli === fattura.id ? (
+                          <CSpinner size="sm" />
+                        ) : (
+                          <CIcon 
+                            icon={fatturaExpanded === fattura.id ? cilChevronCircleDownAlt : cilChevronRight} 
+                            size="sm" 
+                          />
+                        )}
+                      </CTableDataCell>
+                      <CTableDataCell>{fattura.id}</CTableDataCell>
+                      <CTableDataCell>{formatDate(fattura.data_spesa)}</CTableDataCell>
+                      <CTableDataCell>{fattura.numero_documento || '-'}</CTableDataCell>
+                      <CTableDataCell>{formatCurrency(fattura.costo_netto)}</CTableDataCell>
+                      <CTableDataCell>{formatCurrency(fattura.costo_iva)}</CTableDataCell>
+                      <CTableDataCell>{formatCurrency((fattura.costo_netto || 0) + (fattura.costo_iva || 0))}</CTableDataCell>
+                    </CTableRow>
+                    
+                    {/* Riga espandibile con dettagli */}
+                    {fatturaExpanded === fattura.id && (
+                      <CTableRow>
+                        <CTableDataCell colSpan={7} className="p-0">
+                          <CCollapse visible={true}>
+                            <CCard className="border-0">
+                              <CCardBody className="bg-light">
+                                <h6 className="mb-3">Dettagli Fattura {fattura.id}</h6>
+                                {dettagliFatture.get(fattura.id)?.length ? (
+                                  <CTable size="sm" className="mb-0">
+                                    <CTableHead>
+                                      <CTableRow>
+                                        <CTableHeaderCell>Codice Articolo</CTableHeaderCell>
+                                        <CTableHeaderCell>Descrizione</CTableHeaderCell>
+                                        <CTableHeaderCell>Quantità</CTableHeaderCell>
+                                        <CTableHeaderCell>Prezzo Unit.</CTableHeaderCell>
+                                        <CTableHeaderCell>Sconto %</CTableHeaderCell>
+                                        <CTableHeaderCell>IVA %</CTableHeaderCell>
+                                        <CTableHeaderCell>Totale Riga</CTableHeaderCell>
+                                      </CTableRow>
+                                    </CTableHead>
+                                    <CTableBody>
+                                      {dettagliFatture.get(fattura.id)!.map((dettaglio, index) => (
+                                        <CTableRow key={index}>
+                                          <CTableDataCell>{dettaglio.codice_articolo || '-'}</CTableDataCell>
+                                          <CTableDataCell>{dettaglio.descrizione || '-'}</CTableDataCell>
+                                          <CTableDataCell>{dettaglio.quantita || 0}</CTableDataCell>
+                                          <CTableDataCell>{formatCurrency(dettaglio.prezzo_unitario)}</CTableDataCell>
+                                          <CTableDataCell>{dettaglio.sconto || 0}%</CTableDataCell>
+                                          <CTableDataCell>{dettaglio.aliquota_iva || 0}%</CTableDataCell>
+                                          <CTableDataCell><strong>{formatCurrency(dettaglio.totale_riga)}</strong></CTableDataCell>
+                                        </CTableRow>
+                                      ))}
+                                    </CTableBody>
+                                  </CTable>
+                                ) : (
+                                  <p className="text-muted mb-0">Nessun dettaglio disponibile per questa fattura</p>
+                                )}
+                              </CCardBody>
+                            </CCard>
+                          </CCollapse>
+                        </CTableDataCell>
+                      </CTableRow>
+                    )}
+                  </React.Fragment>
                 ))}
                 {fatture.length === 0 && !loading && (
                   <CTableRow>
-                    <CTableDataCell colSpan={6} className="text-center p-4">
+                    <CTableDataCell colSpan={7} className="text-center p-4">
                       Nessuna fattura trovata per questo fornitore
                     </CTableDataCell>
                   </CTableRow>

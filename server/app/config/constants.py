@@ -150,6 +150,26 @@ COLONNE = {
         'pagamento_alternativo': 'DB_FOPAGAM',
         'iva_deducibile': 'DB_FOIVADE',
         'commissione': 'DB_FOCOMMI',
+    },
+    'conti': {
+        'codice': 'DB_CODE',
+        'tipo': 'DB_COTIPO',
+        'descrizione': 'DB_CODESCR',
+        'totale_dare': 'DB_COTOTVE',
+        'totale_avere': 'DB_COTOTAC',
+        'iva_vendite': 'DB_COIVAVE',
+        'iva_acquisti': 'DB_COIVAAC'
+    },
+    'vocispes': {
+        'codice_fattura': 'DB_VOSPCOD',
+        'codice_articolo': 'DB_VOSOCOD',
+        'descrizione': 'DB_VODESCR',
+        'quantita': 'DB_VOQUANT',
+        'prezzo': 'DB_VOPREZZ',
+        'iva': 'DB_VOIVA',
+        'sconto': 'DB_VOSCONT'
+    },
+    'temp_continue': {
         'codice_destinazione': 'DB_FOCODES',
         'note_destinazione': 'DB_FONOTD',
         'regime': 'DB_FOREGIM',
@@ -180,5 +200,7 @@ DBF_TABLES = {
     "spese_fornitori": {"file": "SPESAFOR.DBF", "categoria": "DATI"},
     "dettagli_spese_fornitori": {"file": "VOCISPES.DBF", "categoria": "DATI"},
     "fornitori":  {"file": "FORNITOR.DBF",   "categoria": "DATI"},
+    "conti":      {"file": "CONTI.DBF",      "categoria": "DATI"},
+    "vocispes":   {"file": "VOCISPES.DBF",   "categoria": "DATI"},
     # AGGIUNGERE QUI EVENTUALI TABELLE MANCANTI
 }

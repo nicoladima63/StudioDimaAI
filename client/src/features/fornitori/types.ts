@@ -60,6 +60,19 @@ export interface FatturaFornitore {
   categoria: number;
 }
 
+export interface DettaglioFattura {
+  codice_fattura: string;
+  codice_articolo: string;
+  descrizione: string;
+  quantita: number;
+  prezzo_unitario: number;
+  sconto: number;
+  ritenuta: string;
+  aliquota_iva: number;
+  codice_iva: string;
+  totale_riga: number;
+}
+
 export interface FornitoriResponse {
   success?: boolean; // Opzionale perché a volte non arriva
   data: Fornitore[];
@@ -69,4 +82,68 @@ export interface FornitoriResponse {
 export interface FornitoreResponse {
   success: boolean;
   data: Fornitore;
+}
+
+// Enum per i tipi di costo
+export enum TipoDiCosto {
+  DIRETTO = 1,
+  INDIRETTO = 2,
+  NON_DEDUCIBILE = 3
+}
+
+// Labels per i tipi di costo
+export const TipoDiCostoLabels = {
+  [TipoDiCosto.DIRETTO]: 'Diretto',
+  [TipoDiCosto.INDIRETTO]: 'Indiretto', 
+  [TipoDiCosto.NON_DEDUCIBILE]: 'Non Deducibile'
+} as const;
+
+// Interface per la classificazione
+export interface ClassificazioneCosto {
+  id: number;
+  codice_riferimento: string;
+  tipo_entita: 'fornitore' | 'spesa';
+  tipo_di_costo: TipoDiCosto;
+  categoria?: number;
+  categoria_conto?: string;  // Codice conto contabile
+  note?: string;
+  data_classificazione: string;
+  data_modifica: string;
+}
+
+// Interface per la risposta API classificazione
+export interface ClassificazioneResponse {
+  success: boolean;
+  data?: ClassificazioneCosto;
+  message?: string;
+  error?: string;
+}
+
+// Interface per la richiesta di classificazione
+export interface ClassificazioneRequest {
+  tipo_di_costo: TipoDiCosto;
+  categoria?: number;
+  categoria_conto?: string;  // Codice conto contabile
+  note?: string;
+}
+
+// Interface per le categorie di spesa da CONTI.DBF
+export interface CategoriaSpesa {
+  codice_conto: string;
+  descrizione: string;
+  tipo: string;
+}
+
+// Interface per le statistiche classificazioni
+export interface StatisticheClassificazioni {
+  fornitori: {
+    diretti?: number;
+    indiretti?: number;
+    non_deducibili?: number;
+  };
+  spese: {
+    diretti?: number;
+    indiretti?: number;
+    non_deducibili?: number;
+  };
 }

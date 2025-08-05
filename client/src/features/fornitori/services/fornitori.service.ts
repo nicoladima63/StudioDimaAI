@@ -1,5 +1,5 @@
 import { apiClient } from '@/api/client';
-import type { FornitoriResponse,  FatturaFornitore } from '../types';
+import type { FornitoriResponse, FatturaFornitore, DettaglioFattura } from '../types';
 
 export const fornitoriService = {
   /**
@@ -33,10 +33,9 @@ export const fornitoriService = {
    */
   async getFattureFornitore(fornitoreId: string, page: number = 1, limit: number = 10): Promise<{fatture: FatturaFornitore[], total: number}> {
     try {
-      // Chiamata all'API delle spese filtrando per codice fornitore
-      const response = await apiClient.get(`/api/spese-fornitori`, {
+      // Usa endpoint specifico per fornitore senza filtri temporali
+      const response = await apiClient.get(`/api/spese-fornitori/fornitore/${fornitoreId}/all`, {
         params: {
-          codice_fornitore: fornitoreId,
           page,
           limit
         }
@@ -52,6 +51,24 @@ export const fornitoriService = {
       }
     } catch (error) {
       console.error('Errore getFattureFornitore:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Ottieni dettagli/righe di una fattura specifica
+   */
+  async getDettagliFattura(fatturaId: string): Promise<DettaglioFattura[]> {
+    try {
+      const response = await apiClient.get(`/api/spese-fornitori/${fatturaId}/dettagli`);
+      
+      if (response.data.success) {
+        return response.data.data || [];
+      } else {
+        throw new Error('Errore nel recupero dei dettagli della fattura');
+      }
+    } catch (error) {
+      console.error('Errore getDettagliFattura:', error);
       throw error;
     }
   }
