@@ -10,6 +10,7 @@
 - Gestire sempre i valori NaN convertendoli in null per il JSON
 - Seguire i pattern esistenti per i service (object literal pattern, non classi)
 - usare @jwt_required() nelle route a meno che non siano delle route di test
+- Nei service del FE mettere il prefisso "api" nelle chiamate
 
 ## Frontend e GUI
 - Usare sempre CoreUI per tutti i componenti dell'interfaccia
@@ -31,13 +32,21 @@
 - Non inventare nuovi pattern se esiste già una convenzione
 - Controllare come sono implementate le funzionalità simili prima di iniziare
 
+## Service e API
+- Crea sempre il service per le chiamate API nella cartella service della features creata
+
 ## Comandi Utili
 - Test: `npm test` (se configurato)
 - Lint: `npm run lint` (se configurato)
 - Build: `npm run build`
 - Server: `python -m server.app.run` (dalla directory root del progetto)
+- Controllo processi server: `wmic process where "name='python.exe'" get ProcessId,CommandLine`
+- Kill processi Python: `taskkill /F /IM python.exe` (se necessario)
 
 ## Messaggi e Output
 - NON usare mai emoji nei messaggi del server o nei log
 - NON usare caratteri Unicode speciali che possono causare errori di encoding
 - Usare solo testo ASCII per messaggi di sistema e log
+
+## Avvio del Server
+- Non avviare tu il server, se è già avviato ci sono due task attivi
