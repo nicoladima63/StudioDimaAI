@@ -50,3 +50,6 @@
 
 ## Avvio del Server
 - Non avviare tu il server, se è già avviato ci sono due task attivi
+
+## Gestione Stato
+- Usare zustand per cache gestione stato di dati da db che non cambiano nel tempo esempio i conti

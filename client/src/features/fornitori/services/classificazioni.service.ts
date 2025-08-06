@@ -73,6 +73,21 @@ const classificazioniService = {
   getCategorieSpesa: async (): Promise<{ success: boolean; data: Array<{codice_conto: string, descrizione: string}>; count: number; error?: string }> => {
     const response = await apiClient.get('/api/classificazioni/categorie-spesa');
     return response.data;
+  },
+
+  // Suggestion automatica categoria per fornitore
+  suggestCategoriaFornitore: async (fornitoreId: string): Promise<{
+    success: boolean;
+    data?: {
+      categoria_suggerita: string | null;
+      confidence: number;
+      motivo: string;
+      algoritmo: string;
+    };
+    error?: string;
+  }> => {
+    const response = await apiClient.get(`/api/classificazioni/fornitore/${fornitoreId}/suggest-categoria`);
+    return response.data;
   }
 };
 

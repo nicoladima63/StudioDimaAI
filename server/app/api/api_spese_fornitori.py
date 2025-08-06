@@ -399,12 +399,23 @@ def get_all_spese_fornitori():
             
             codice_fornitore = safe_str(row.get(col_map['codice_fornitore']))
             nome_fornitore = fornitori_map.get(codice_fornitore, None)
+            descrizione = safe_str(row.get(col_map['descrizione']))
+            
+            # Categorizzazione automatica (inclusi collaboratori)
+            categoria_automatica = "Non classificato"
+            categoria_confidence = 0.0
+            try:
+                categoria_automatica, categoria_confidence = gestionale_service.categorize_spesa(
+                    descrizione, nome_fornitore or "", codice_fornitore
+                )
+            except Exception as e:
+                logger.warning(f"Errore categorizzazione spesa {descrizione}: {e}")
             
             spesa = {
                 'id': safe_str(row.get(col_map['id'])),
                 'codice_fornitore': codice_fornitore,
                 'nome_fornitore': nome_fornitore,
-                'descrizione': safe_str(row.get(col_map['descrizione'])),
+                'descrizione': descrizione,
                 'costo_netto': safe_float(row.get(col_map['costo_netto'])),
                 'costo_iva': safe_float(row.get(col_map['costo_iva'])),
                 'data_spesa': row[col_data].strftime('%Y-%m-%d') if pd.notnull(row[col_data]) else None,
@@ -412,6 +423,8 @@ def get_all_spese_fornitori():
                 'numero_documento': safe_str(row.get(col_map['numero_documento'])),
                 'note': safe_str(row.get(col_map['note'])),
                 'categoria': safe_int(row.get(col_map['categoria'])),
+                'categoria_automatica': categoria_automatica,
+                'categoria_confidence': categoria_confidence,
                 'importo_1': safe_float(row.get(col_map['importo_1'])),
                 'importo_2': safe_float(row.get(col_map['importo_2'])),
                 'aliquota_iva_1': safe_int(row.get(col_map['aliquota_iva_1'])),
@@ -1001,13 +1014,15 @@ def categorizza_spesa():
     
     Body: {
         "descrizione": "Descrizione della spesa",
-        "fornitore": "Nome fornitore" (opzionale)
+        "fornitore": "Nome fornitore" (opzionale),
+        "codice_fornitore": "Codice fornitore per controllo collaboratori" (opzionale)
     }
     """
     try:
         data = request.get_json()
         descrizione = data.get('descrizione', '')
         fornitore = data.get('fornitore', '')
+        codice_fornitore = data.get('codice_fornitore', '')
         
         if not descrizione:
             return jsonify({
@@ -1015,8 +1030,8 @@ def categorizza_spesa():
                 'error': 'Descrizione richiesta'
             }), 400
         
-        # Categorizza usando il service
-        categoria, confidence = gestionale_service.categorize_spesa(descrizione, fornitore)
+        # Categorizza usando il service (con controllo collaboratori integrato)
+        categoria, confidence = gestionale_service.categorize_spesa(descrizione, fornitore, codice_fornitore)
         
         return jsonify({
             'success': True,

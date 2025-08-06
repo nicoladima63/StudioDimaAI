@@ -14,15 +14,15 @@ SOTTOCONTI_COLLABORATORI = {
 # Codici fornitori collaboratori (da tabella FORNITOR.DBF)
 FORNITORI_COLLABORATORI = {
     # Chirurghi (2)
-    "ZZZZWB": {"nome": "Roberto Dott. Calvisi", "tipo": "Chirurgia"},
-    "ZZZZYM": {"nome": "Dr. Fabio Marchi", "tipo": "Chirurgia"},
+    #"ZZZZWB": {"nome": "Roberto Dott. Calvisi", "tipo": "Chirurgia"},
+    #"ZZZZYM": {"nome": "Dr. Fabio Marchi", "tipo": "Chirurgia"},
     
     # Ortodontista (1) 
-    "ZZZZXP": {"nome": "Dr. Giacomo D'Orlandi Odontoiatra", "tipo": "Ortodonzia"},
+   # "ZZZZXP": {"nome": "Dr. Giacomo D'Orlandi Odontoiatra", "tipo": "Ortodonzia"},
     
     # Igienisti (3)
-    "ZZZZXJ": {"nome": "Armandi Lara", "tipo": "Igienista"},
-    "ZZZZUC": {"nome": "Jablonsky Anet", "tipo": "Igienista"},
+    #"ZZZZXJ": {"nome": "Armandi Lara", "tipo": "Igienista"},
+    #"ZZZZUC": {"nome": "Jablonsky Anet", "tipo": "Igienista"},
 }
 
 # Pattern per identificazione
@@ -123,6 +123,31 @@ def classify_fattura_collaboratore(record):
             result["caratteristiche"].append("FORNITORE_REGISTRATO")
     
     return result
+
+
+def categorizza_spesa_collaboratori(record):
+    """
+    Categorizza una spesa come "Collaboratori" se è di un collaboratore
+    Per integrazione nel sistema di categorizzazione spese
+    
+    Returns:
+    - {"categoria": "Collaboratori", "confidence": 1.0} se è collaboratore
+    - None se non è collaboratore
+    """
+    classificazione = classify_fattura_collaboratore(record)
+    
+    if classificazione["is_collaboratore"]:
+        return {
+            "categoria": "Collaboratori",
+            "confidence": 1.0,  # Alta confidenza per match diretti
+            "dettagli": {
+                "tipo": classificazione["tipo_collaboratore"],
+                "nome": classificazione["nome_collaboratore"], 
+                "codice": classificazione["codice_fornitore"]
+            }
+        }
+    
+    return None
 
 
 def create_fattura_filters():

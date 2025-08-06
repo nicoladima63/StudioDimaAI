@@ -10,6 +10,8 @@ export interface SpesaFornitore {
   numero_documento: string;
   note: string;
   categoria: number;
+  categoria_automatica?: string;
+  categoria_confidence?: number;
   importo_1: number;
   importo_2: number;
   aliquota_iva_1: number;

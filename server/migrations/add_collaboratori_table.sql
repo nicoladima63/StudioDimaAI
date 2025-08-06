@@ -20,11 +20,11 @@ CREATE TABLE IF NOT EXISTS collaboratori (
 );
 
 -- Inserisci i 5 collaboratori già noti come baseline
-INSERT OR IGNORE INTO collaboratori (codice_fornitore, nome, tipo, confermato_da_utente, note) VALUES 
-('ZZZZWB', 'Roberto Dott. Calvisi', 'Chirurgia', TRUE, 'Collaboratore storico - 21 fatture'),
-('ZZZZXP', 'Dr. Giacomo D''Orlandi Odontoiatra', 'Ortodonzia', TRUE, 'Collaboratore storico'),
-('ZZZZXJ', 'Armandi Lara', 'Igienista', TRUE, 'Collaboratore storico - Dott.ssa'),
-('ZZZZUC', 'Jablonsky Anet', 'Igienista', TRUE, 'Collaboratore storico - Dott.ssa'),
-('ZZZZRL', 'PISANTE ROSSELLA', 'Igienista', TRUE, 'Collaboratore storico - Pesaro');
+--INSERT OR IGNORE INTO collaboratori (codice_fornitore, nome, tipo, confermato_da_utente, note) VALUES 
+--('ZZZZWB', 'Roberto Dott. Calvisi', 'Chirurgia', TRUE, 'Collaboratore storico - 21 fatture'),
+--('ZZZZXP', 'Dr. Giacomo D''Orlandi Odontoiatra', 'Ortodonzia', TRUE, 'Collaboratore storico'),
+--('ZZZZXJ', 'Armandi Lara', 'Igienista', TRUE, 'Collaboratore storico - Dott.ssa'),
+--('ZZZZUC', 'Jablonsky Anet', 'Igienista', TRUE, 'Collaboratore storico - Dott.ssa'),
+--('ZZZZRL', 'PISANTE ROSSELLA', 'Igienista', TRUE, 'Collaboratore storico - Pesaro');
 
 -- ZZZZYM non inserito perché non ha fatture IVA esente nel DB attuale

@@ -13,7 +13,8 @@ import {
   cilMoney, 
   cilPeople, 
   cilChart,
-  cilUserPlus
+  cilUserPlus,
+  cilCode
 } from '@coreui/icons';
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react';
 
@@ -117,6 +118,16 @@ const _nav = [
     name: 'KPI',
     to: '/kpi',
     icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Test & Debug',
+  },
+  {
+    component: CNavItem,
+    name: 'Test Conti/Sottoconti',
+    to: '/test/conti',
+    icon: <CIcon icon={cilCode} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

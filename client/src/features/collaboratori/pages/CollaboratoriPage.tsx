@@ -68,8 +68,10 @@ const CollaboratoriPage: React.FC = () => {
         const tipi: Record<string, string> = {};
         
         tuttiCollaboratori.forEach(c => {
-          selezione[c.codice_fornitore] = c.pre_selezionato || false;
-          tipi[c.codice_fornitore] = c.tipo || 'Igienista';
+          // Solo i collaboratori già confermati sono pre-selezionati
+          selezione[c.codice_fornitore] = c.is_confermato || false;
+          // Per i nuovi candidati, usa "Da classificare" invece di un tipo specifico
+          tipi[c.codice_fornitore] = c.tipo && c.tipo !== 'Da classificare' ? c.tipo : 'Da classificare';
         });
         
         setSelezioneCollaboratori(selezione);
@@ -101,6 +103,17 @@ const CollaboratoriPage: React.FC = () => {
       // Prepara dati per salvataggio
       const codiciSelezionati = Object.keys(selezioneCollaboratori)
         .filter(codice => selezioneCollaboratori[codice]);
+      
+      // Valida che tutti i collaboratori selezionati abbiano un tipo assegnato
+      const collaboratoriSenzaTipo = codiciSelezionati.filter(
+        codice => !tipiAssegnati[codice] || tipiAssegnati[codice] === 'Da classificare'
+      );
+      
+      if (collaboratoriSenzaTipo.length > 0) {
+        setError('Seleziona un sottoconto per tutti i collaboratori prima di salvare');
+        setSaving(false);
+        return;
+      }
       
       const tipiPerSalvataggio: Record<string, string> = {};
       codiciSelezionati.forEach(codice => {
@@ -137,6 +150,14 @@ const CollaboratoriPage: React.FC = () => {
       ...prev,
       [codice]: nuovoTipo
     }));
+    
+    // Se viene selezionato un tipo valido (non "Da classificare"), seleziona automaticamente il collaboratore
+    if (nuovoTipo !== 'Da classificare') {
+      setSelezioneCollaboratori(prev => ({
+        ...prev,
+        [codice]: true
+      }));
+    }
   };
 
   const ricaricaCandidati = async () => {
@@ -275,10 +296,11 @@ const CollaboratoriPage: React.FC = () => {
                         <div className="d-flex align-items-center">
                           <CFormSelect
                             size="sm"
-                            value={tipiAssegnati[candidato.codice_fornitore] || 'Igienista'}
+                            value={tipiAssegnati[candidato.codice_fornitore] || 'Da classificare'}
                             onChange={(e) => aggiornaTipo(candidato.codice_fornitore, e.target.value)}
-                            style={{width: '120px', marginRight: '10px'}}
+                            style={{width: '140px', marginRight: '10px'}}
                           >
+                            <option value="Da classificare">Seleziona sottoconto</option>
                             {tipiCollaboratore.map(tipo => (
                               <option key={tipo} value={tipo}>{tipo}</option>
                             ))}
@@ -297,6 +319,7 @@ const CollaboratoriPage: React.FC = () => {
                   )}
                 </CCol>
               </CRow>
+
             </CCardBody>
           </CCard>
         </CCol>

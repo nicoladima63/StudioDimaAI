@@ -106,6 +106,7 @@ export interface ClassificazioneCosto {
   tipo_di_costo: TipoDiCosto;
   categoria?: number;
   categoria_conto?: string;  // Codice conto contabile
+  sottoconto?: string;       // Codice sottoconto
   note?: string;
   data_classificazione: string;
   data_modifica: string;
@@ -124,6 +125,7 @@ export interface ClassificazioneRequest {
   tipo_di_costo: TipoDiCosto;
   categoria?: number;
   categoria_conto?: string;  // Codice conto contabile
+  sottoconto?: string;       // Codice sottoconto
   note?: string;
 }
 

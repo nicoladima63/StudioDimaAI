@@ -297,3 +297,135 @@ def get_categorie_spesa():
             "success": False,
             "error": str(e)
         }), 500
+
+
+@api_classificazioni.route('/fornitore/<fornitore_id>/suggest-categoria', methods=['GET'])
+@jwt_required()
+def suggest_categoria_fornitore(fornitore_id):
+    """
+    Suggerisce automaticamente una categoria per un fornitore basandosi su:
+    - Nome del fornitore
+    - Storico delle fatture
+    - Algoritmi di pattern matching (incluso sistema collaboratori)
+    """
+    try:
+        from server.services.collaboratori_service import init_collaboratori_service
+        
+        # Prima verifica se è un collaboratore (massima priorità)
+        try:
+            collaboratori_service = init_collaboratori_service()
+            collaboratori_attivi = collaboratori_service.get_collaboratori_confermati()
+            
+            for collab in collaboratori_attivi:
+                if collab['codice_fornitore'] == fornitore_id:
+                    # È un collaboratore - suggeriamo la categoria collaboratori appropriata
+                    tipo_collaboratore = collab.get('tipo', 'Collaboratori')
+                    
+                    # Mapping dei tipi collaboratore alle categorie conto
+                    categoria_mapping = {
+                        'Chirurgia': 'ZZZZXO',  # Sottoconto chirurgia  
+                        'Ortodonzia': 'ZZZZXP',  # Sottoconto ortodonzia
+                        'Igienista': 'ZZZZYB',   # Sottoconto igienista
+                    }
+                    
+                    categoria_suggerita = categoria_mapping.get(tipo_collaboratore, 'ZZZZZI')  # Default collaboratori
+                    
+                    return jsonify({
+                        "success": True,
+                        "data": {
+                            "categoria_suggerita": categoria_suggerita,
+                            "confidence": 1.0,
+                            "motivo": f"Collaboratore identificato - {tipo_collaboratore}",
+                            "algoritmo": "collaboratori_diretti"
+                        }
+                    }), 200
+                    
+        except Exception as e:
+            print(f"Errore controllo collaboratori per {fornitore_id}: {e}")
+        
+        # Se non è collaboratore, usiamo altri algoritmi di categorizzazione
+        # TODO: Implementare algoritmi per:
+        # - Fornitori materiali dentali (keywords: dental, materiali, implant, etc.)  
+        # - Fornitori servizi (keywords: energia, telefono, assicurazione, etc.)
+        # - Fornitori farmaceutici (keywords: farmacia, medicinali, etc.)
+        # - Laboratori (keywords: laboratorio, protesi, etc.)
+        
+        # Per ora returnamo "da classificare"
+        return jsonify({
+            "success": True,
+            "data": {
+                "categoria_suggerita": None,
+                "confidence": 0.0,
+                "motivo": "Nessun pattern riconosciuto - classificazione manuale richiesta",
+                "algoritmo": "nessuno"
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@api_classificazioni.route('/conti', methods=['GET'])
+# @jwt_required()  # Temporaneamente rimosso per testing
+def get_conti_contabili():
+    """
+    Ottiene tutti i conti contabili disponibili
+    """
+    try:
+        conti = classificazione_service.get_conti_contabili()
+        return jsonify({
+            "success": True,
+            "data": conti,
+            "count": len(conti)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@api_classificazioni.route('/conti/<codice_conto>/sottoconti', methods=['GET'])
+@jwt_required()
+def get_sottoconti_per_conto(codice_conto):
+    """
+    Ottiene tutti i sottoconti per un conto specifico
+    """
+    try:
+        sottoconti = classificazione_service.get_sottoconti_per_conto(codice_conto)
+        return jsonify({
+            "success": True,
+            "data": sottoconti,
+            "count": len(sottoconti),
+            "conto_padre": codice_conto
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@api_classificazioni.route('/conti-sottoconti/count', methods=['GET'])
+@jwt_required()
+def get_count_conti_sottoconti():
+    """
+    Ottiene il conteggio di conti e sottoconti per il caching intelligente
+    """
+    try:
+        counts = classificazione_service.get_count_conti_sottoconti()
+        return jsonify({
+            "success": True,
+            "data": counts
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500

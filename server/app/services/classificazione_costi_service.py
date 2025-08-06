@@ -5,10 +5,10 @@ from typing import Optional, List, Dict, Any
 from server.app.config.config import Config
 
 class ClassificazioneCostiService:
-    """Service per gestire le classificazioni dei costi in database SQLite separato"""
+    """Service per gestire le classificazioni dei costi nel database unificato studio_dima.db"""
     
     def __init__(self):
-        self.db_path = os.path.join(Config.INSTANCE_FOLDER, 'classificazioni_costi.db')
+        self.db_path = os.path.join(Config.INSTANCE_FOLDER, 'studio_dima.db')
         self._init_database()
     
     def _init_database(self):
@@ -37,6 +37,14 @@ class ClassificazioneCostiService:
             except sqlite3.OperationalError:
                 # La colonna esiste già, continua
                 pass
+                
+            # Migrazione: aggiungi sottoconto se non esiste
+            try:
+                conn.execute('ALTER TABLE classificazioni_costi ADD COLUMN sottoconto TEXT')
+                conn.commit()
+            except sqlite3.OperationalError:
+                # La colonna esiste già, continua
+                pass
             
             # Indici per performance
             conn.execute('''
@@ -53,7 +61,7 @@ class ClassificazioneCostiService:
     
     def classifica_fornitore(self, codice_fornitore: str, tipo_di_costo: int, 
                            categoria: Optional[int] = None, categoria_conto: Optional[str] = None, 
-                           note: Optional[str] = None) -> bool:
+                           sottoconto: Optional[str] = None, note: Optional[str] = None) -> bool:
         """
         Classifica un fornitore
         
@@ -61,7 +69,8 @@ class ClassificazioneCostiService:
             codice_fornitore: Codice del fornitore (DB_CODE)
             tipo_di_costo: 1=diretto, 2=indiretto, 3=non_deducibile
             categoria: Categoria gestionale (opzionale)
-            categoria_conto: Codice conto contabile (es: ZZZZZZ per Materiali Dentali)
+            categoria_conto: Codice conto contabile (es: ZZZZZI per Collaboratori)
+            sottoconto: Codice sottoconto (es: ZZZZUC per Jablonsky)
             note: Note aggiuntive (opzionale)
             
         Returns:
@@ -74,9 +83,9 @@ class ClassificazioneCostiService:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute('''
                     INSERT OR REPLACE INTO classificazioni_costi 
-                    (codice_riferimento, tipo_entita, tipo_di_costo, categoria, categoria_conto, note, data_modifica)
-                    VALUES (?, 'fornitore', ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                ''', (codice_fornitore, tipo_di_costo, categoria, categoria_conto, note))
+                    (codice_riferimento, tipo_entita, tipo_di_costo, categoria, categoria_conto, sottoconto, note, data_modifica)
+                    VALUES (?, 'fornitore', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ''', (codice_fornitore, tipo_di_costo, categoria, categoria_conto, sottoconto, note))
                 conn.commit()
                 return True
         except Exception as e:
@@ -282,6 +291,109 @@ class ClassificazioneCostiService:
         except Exception as e:
             print(f"Errore nel calcolo statistiche: {e}")
             return {'fornitori': {}, 'spese': {}}
+    
+    def get_conti_contabili(self) -> List[Dict[str, Any]]:
+        """
+        Ottiene tutti i conti contabili dalla tabella CONTI.DBF
+        
+        Returns:
+            Lista di conti con codice e descrizione
+        """
+        try:
+            from dbfread import DBF
+            import os
+            
+            dbf_path = os.path.join('server', 'windent', 'DATI', 'CONTI.DBF')
+            if not os.path.exists(dbf_path):
+                return []
+                
+            table = DBF(dbf_path, encoding='latin1')
+            conti = []
+            
+            for record in table:
+                if record.get('DB_CODE') and record.get('DB_CODESCR'):
+                    conti.append({
+                        'codice_conto': record.get('DB_CODE'),
+                        'descrizione': record.get('DB_CODESCR'),
+                        'tipo': record.get('DB_COTIPO', '')
+                    })
+            
+            # Ordina per codice
+            conti.sort(key=lambda x: x['codice_conto'])
+            return conti
+            
+        except Exception as e:
+            print(f"Errore nel recupero conti: {e}")
+            return []
+    
+    def get_sottoconti_per_conto(self, codice_conto: str) -> List[Dict[str, Any]]:
+        """
+        Ottiene tutti i sottoconti per un conto specifico dalla tabella SOTTOCON.DBF
+        
+        Args:
+            codice_conto: Codice del conto padre
+            
+        Returns:
+            Lista di sottoconti per il conto specificato
+        """
+        try:
+            from dbfread import DBF
+            import os
+            
+            dbf_path = os.path.join('server', 'windent', 'DATI', 'SOTTOCON.DBF')
+            if not os.path.exists(dbf_path):
+                return []
+                
+            table = DBF(dbf_path, encoding='latin1')
+            sottoconti = []
+            
+            for record in table:
+                if (record.get('DB_SOCOCOD') == codice_conto and 
+                    record.get('DB_CODE') and record.get('DB_SODESCR')):
+                    sottoconti.append({
+                        'codice_sottoconto': record.get('DB_CODE'),
+                        'descrizione': record.get('DB_SODESCR'),
+                        'conto_padre': record.get('DB_SOCOCOD')
+                    })
+            
+            # Ordina per codice
+            sottoconti.sort(key=lambda x: x['codice_sottoconto'])
+            return sottoconti
+            
+        except Exception as e:
+            print(f"Errore nel recupero sottoconti per {codice_conto}: {e}")
+            return []
+    
+    def get_count_conti_sottoconti(self) -> Dict[str, int]:
+        """
+        Ottiene il conteggio di conti e sottoconti per il caching intelligente
+        
+        Returns:
+            Dizionario con count di conti e sottoconti
+        """
+        try:
+            from dbfread import DBF
+            import os
+            
+            counts = {'conti': 0, 'sottoconti': 0}
+            
+            # Count conti
+            conti_path = os.path.join('server', 'windent', 'DATI', 'CONTI.DBF')
+            if os.path.exists(conti_path):
+                table = DBF(conti_path, encoding='latin1')
+                counts['conti'] = len([r for r in table if r.get('DB_CODE') and r.get('DB_CODESCR')])
+            
+            # Count sottoconti
+            sottoconti_path = os.path.join('server', 'windent', 'DATI', 'SOTTOCON.DBF')
+            if os.path.exists(sottoconti_path):
+                table = DBF(sottoconti_path, encoding='latin1')
+                counts['sottoconti'] = len([r for r in table if r.get('DB_CODE') and r.get('DB_SODESCR')])
+            
+            return counts
+            
+        except Exception as e:
+            print(f"Errore nel conteggio conti/sottoconti: {e}")
+            return {'conti': 0, 'sottoconti': 0}
 
 # Istanza globale del service
 classificazione_service = ClassificazioneCostiService()

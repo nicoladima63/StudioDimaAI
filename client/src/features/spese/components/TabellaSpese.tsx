@@ -163,19 +163,28 @@ const TabellaSpese: React.FC<TabellaSpeseProps> = ({
                       </CTableDataCell>
                       <CTableDataCell>
                         {(() => {
-                          const categorizzazione = categorizzaSpesa(spesa);
-                          const confidenceLevel = getConfidenceLevel(categorizzazione.confidence);
-                          const categoriaLabelAuto = getCategoriaLabelAuto(categorizzazione.categoria);
-                          const categoriaColorAuto = getCategoriaColorAuto(categorizzazione.categoria);
+                          // Usa la categorizzazione automatica dall'API se disponibile
+                          const categoria = spesa.categoria_automatica || "Non classificato";
+                          const confidence = spesa.categoria_confidence || 0;
+                          
+                          // Colori per categoria
+                          const getCategoriaBadgeColor = (cat: string) => {
+                            if (cat === "Collaboratori") return "success";
+                            if (cat === "Non classificato") return "secondary"; 
+                            return "info";
+                          };
+                          
+                          const badgeColor = getCategoriaBadgeColor(categoria);
+                          const confidenceLevel = confidence >= 0.8 ? 'high' : confidence >= 0.5 ? 'medium' : 'low';
                           
                           return (
                             <div className="d-flex align-items-center gap-1">
-                              <CBadge color={categoriaColorAuto}>
-                                {categoriaLabelAuto}
+                              <CBadge color={badgeColor}>
+                                {categoria}
                               </CBadge>
-                              {categorizzazione.confidence > 0 && (
+                              {confidence > 0 && confidence < 1.0 && (
                                 <CTooltip
-                                  content={`Auto-categorizzato con confidence ${Math.round(categorizzazione.confidence * 100)}%: ${categorizzazione.motivo}`}
+                                  content={`Auto-categorizzato con confidence ${Math.round(confidence * 100)}%`}
                                 >
                                   <CIcon 
                                     icon={cilInfo} 

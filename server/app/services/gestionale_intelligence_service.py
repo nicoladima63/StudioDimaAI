@@ -9,6 +9,7 @@ from dbfread import DBF
 from server.app.core.db_utils import get_dbf_path
 import re
 from collections import Counter, defaultdict
+from server.services.collaboratori_service import init_collaboratori_service
 
 logger = logging.getLogger(__name__)
 
@@ -225,19 +226,34 @@ class GestionaleIntelligenceService:
             logger.error(f"Errore lettura VOCISPES.DBF: {e}")
             return {}
     
-    def categorize_spesa(self, descrizione: str, fornitore: str = "") -> Tuple[str, float]:
+    def categorize_spesa(self, descrizione: str, fornitore: str = "", codice_fornitore: str = "") -> Tuple[str, float]:
         """
         Categorizza una spesa basandosi sui pattern del gestionale
         
         Args:
             descrizione: Descrizione della spesa
             fornitore: Nome fornitore (opzionale)
+            codice_fornitore: Codice fornitore per controllo collaboratori (opzionale)
             
         Returns:
             Tuple (categoria, confidence_score)
         """
         if not descrizione:
             return "Varie", 0.1
+            
+        # PRIORITA' 1: Controllo collaboratori (massima priorità)
+        if codice_fornitore:
+            try:
+                collaboratori_service = init_collaboratori_service()
+                collaboratori_attivi = collaboratori_service.get_collaboratori_confermati()
+                
+                # Verifica se il codice fornitore è di un collaboratore attivo
+                for collab in collaboratori_attivi:
+                    if collab['codice_fornitore'] == codice_fornitore:
+                        return "Collaboratori", 1.0  # Confidenza massima
+                        
+            except Exception as e:
+                logger.warning(f"Errore controllo collaboratori: {e}")
             
         # Carica pattern se non ancora fatto
         patterns = self.extract_vocispes_patterns()

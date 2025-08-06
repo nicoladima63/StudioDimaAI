@@ -18,15 +18,39 @@ const CategoriaSpesaSelect: React.FC<CategoriaSpesaSelectProps> = ({
 }) => {
   const [updating, setUpdating] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState<string>("");
+  const [suggestedCategoria, setSuggestedCategoria] = useState<string | null>(null);
+  const [suggestionConfidence, setSuggestionConfidence] = useState<number>(0);
+  const [suggestionMotivo, setSuggestionMotivo] = useState<string>("");
 
   useEffect(() => {
     // Aggiorna la selezione quando cambia la classificazione
     if (classificazione?.categoria_conto) {
       setSelectedCategoria(classificazione.categoria_conto);
     } else {
+      // Se non c'è categoria assegnata, prova a suggerire automaticamente
       setSelectedCategoria("");
+      suggeriscategoriaAutomatica();
     }
-  }, [classificazione]);
+  }, [classificazione, fornitoreId]);
+
+  const suggeriscategoriaAutomatica = async () => {
+    try {
+      const suggestion = await classificazioniService.suggestCategoriaFornitore(fornitoreId);
+      
+      if (suggestion.success && suggestion.data?.categoria_suggerita) {
+        setSuggestedCategoria(suggestion.data.categoria_suggerita);
+        setSuggestionConfidence(suggestion.data.confidence);
+        setSuggestionMotivo(suggestion.data.motivo);
+        
+        // Se la confidenza è alta (>= 0.8), pre-seleziona automaticamente
+        if (suggestion.data.confidence >= 0.8) {
+          setSelectedCategoria(suggestion.data.categoria_suggerita);
+        }
+      }
+    } catch (error) {
+      console.error("Errore nella suggestion automatica:", error);
+    }
+  };
 
 
   const handleCategoriaChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
