@@ -17,7 +17,8 @@
       "Bash(venvScripts:*)",
       "Bash(rm:*)",
       "Bash(npm install:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(sqlite3:*)"
     ],
     "deny": []
   }

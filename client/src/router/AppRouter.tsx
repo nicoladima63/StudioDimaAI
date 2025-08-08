@@ -25,6 +25,7 @@ import FornitoriPage from '@/features/fornitori/pages/FornitoriPage';
 import KpiPage from '@/features/kpi/pages/KpiPage';
 import CollaboratoriPage from '@/features/collaboratori/pages/CollaboratoriPage';
 import ContiTestPage from '@/features/test/ContiTestPage';
+import ContiPage from '@/features/studio/pages/ContiPage';
 
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -68,6 +69,7 @@ const AppRouter: React.FC = () => {
           <Route path="/collaboratori" element={<CollaboratoriPage />} />
           <Route path="/kpi" element={<KpiPage />} />
           <Route path="/rentri" element={<RentriPage />} />
+          <Route path="/studio/conti" element={<ContiPage />} />
         </Route>
 
         {/* Route fallback */}

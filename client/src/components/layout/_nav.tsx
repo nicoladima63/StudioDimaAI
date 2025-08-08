@@ -14,7 +14,8 @@ import {
   cilPeople, 
   cilChart,
   cilUserPlus,
-  cilCode
+  cilCode,
+  cilAccountLogout
 } from '@coreui/icons';
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react';
 
@@ -118,6 +119,12 @@ const _nav = [
     name: 'KPI',
     to: '/kpi',
     icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Conti',
+    to: '/studio/conti',
+    icon: <CIcon icon={cilAccountLogout} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

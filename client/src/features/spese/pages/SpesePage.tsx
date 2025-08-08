@@ -16,6 +16,7 @@ import TabellaSpese from "../components/TabellaSpese";
 import RicercaArticoli from "../components/RicercaArticoli";
 import StatisticheCategorizzazione from "../components/StatisticheCategorizzazione";
 import TestCategorizzazioneGestionale from "../components/TestCategorizzazioneGestionale";
+import ContiSottocontiTab from "../components/ContiSottocontiTab";
 import { speseFornitioriService } from "../services/spese.service";
 import type {
   FiltriSpese,
@@ -152,6 +153,15 @@ const SpesePage: React.FC = () => {
             🎯 Test Gestionale v2
           </CNavLink>
         </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === "conti-sottoconti"}
+            onClick={() => setActiveTab("conti-sottoconti")}
+            style={{ cursor: "pointer" }}
+          >
+            🧾 Conti-Sottoconti
+          </CNavLink>
+        </CNavItem>
       </CNav>
 
       {error && (
@@ -252,6 +262,12 @@ const SpesePage: React.FC = () => {
         <CTabPane visible={activeTab === "gestionale"} role="tabpanel">
           <TestCategorizzazioneGestionale />
         </CTabPane>
+
+        {/* Conti-Sottoconti Tab */}
+        <CTabPane visible={activeTab === "conti-sottoconti"} role="tabpanel">
+          <ContiSottocontiTab />
+        </CTabPane>
+
       </CTabContent>
     </Card>
   );

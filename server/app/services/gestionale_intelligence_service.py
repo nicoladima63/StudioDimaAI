@@ -226,7 +226,7 @@ class GestionaleIntelligenceService:
             logger.error(f"Errore lettura VOCISPES.DBF: {e}")
             return {}
     
-    def categorize_spesa(self, descrizione: str, fornitore: str = "", codice_fornitore: str = "") -> Tuple[str, float]:
+    def categorize_spesa(self, descrizione: str, fornitore: str = "", codice_fornitore: str = "") -> dict:
         """
         Categorizza una spesa basandosi sui pattern del gestionale
         
@@ -236,10 +236,17 @@ class GestionaleIntelligenceService:
             codice_fornitore: Codice fornitore per controllo collaboratori (opzionale)
             
         Returns:
-            Tuple (categoria, confidence_score)
+            Dict con categoria_nome, confidence, conto_suggerito, branca_suggerita, sottoconto_suggerito
         """
         if not descrizione:
-            return "Varie", 0.1
+            return {
+                "categoria_nome": "Varie", 
+                "confidence": 0.1,
+                "conto_suggerito": None,
+                "branca_suggerita": None, 
+                "sottoconto_suggerito": None,
+                "motivo": "Descrizione vuota"
+            }
             
         # PRIORITA' 1: Controllo collaboratori (massima priorità)
         if codice_fornitore:
@@ -250,7 +257,16 @@ class GestionaleIntelligenceService:
                 # Verifica se il codice fornitore è di un collaboratore attivo
                 for collab in collaboratori_attivi:
                     if collab['codice_fornitore'] == codice_fornitore:
-                        return "Collaboratori", 1.0  # Confidenza massima
+                        # Mappa il collaboratore alla struttura conto->branca->sottoconto
+                        conto_id, branca_id, sottoconto_id = self._map_collaboratore_to_struttura(collab)
+                        return {
+                            "categoria_nome": "Collaboratori",
+                            "confidence": 1.0,
+                            "conto_suggerito": conto_id,
+                            "branca_suggerita": branca_id,
+                            "sottoconto_suggerito": sottoconto_id,
+                            "motivo": f"Collaboratore identificato - {collab.get('tipo', 'Generico')}"
+                        }
                         
             except Exception as e:
                 logger.warning(f"Errore controllo collaboratori: {e}")
@@ -332,11 +348,316 @@ class GestionaleIntelligenceService:
                 category_scores[categoria] = confidence
         
         if not category_scores:
-            return "Varie", 0.1
+            conto_id, branca_id, sottoconto_id = self._map_categoria_to_struttura("Varie", descrizione, fornitore)
+            return {
+                "categoria_nome": "Varie",
+                "confidence": 0.1,
+                "conto_suggerito": conto_id,
+                "branca_suggerita": branca_id,
+                "sottoconto_suggerito": sottoconto_id,
+                "motivo": "Nessun pattern riconosciuto"
+            }
         
         # Trova categoria con score più alto
         best_category = max(category_scores.items(), key=lambda x: x[1])
-        return best_category[0], best_category[1]
+        categoria_nome, confidence = best_category[0], best_category[1]
+        
+        # Mappa la categoria alla struttura conto->branca->sottoconto
+        conto_id, branca_id, sottoconto_id = self._map_categoria_to_struttura(categoria_nome, descrizione, fornitore)
+        
+        return {
+            "categoria_nome": categoria_nome,
+            "confidence": confidence,
+            "conto_suggerito": conto_id,
+            "branca_suggerita": branca_id,
+            "sottoconto_suggerito": sottoconto_id,
+            "motivo": f"Pattern matching - {confidence*100:.1f}% confidenza"
+        }
+    
+    def _map_categoria_to_struttura(self, categoria_nome: str, descrizione: str = "", fornitore: str = "") -> tuple:
+        """
+        Mappa una categoria ai dati della struttura conto->branca->sottoconto
+        
+        Returns:
+            Tuple (conto_id, branca_id, sottoconto_id)
+        """
+        try:
+            import sqlite3
+            conn = sqlite3.connect('server/instance/studio_dima.db')
+            cursor = conn.cursor()
+            
+            # Mapping delle categorie ai nomi conti nel database
+            categoria_to_conto_mapping = {
+                "Materiali Dentali": "Materiali",
+                "Farmaci": "Farmaci", 
+                "Laboratorio": "Laboratori",
+                "Utenze": "Utenze",
+                "Telecomunicazioni": "Telecomunicazioni",
+                "Collaboratori": "Collaboratori",
+                "Varie": "Varie"
+            }
+            
+            conto_nome = categoria_to_conto_mapping.get(categoria_nome, "Varie")
+            
+            # Trova il conto nel database SQLite
+            cursor.execute("SELECT id FROM conti WHERE nome LIKE ? LIMIT 1", (f"%{conto_nome}%",))
+            conto_row = cursor.fetchone()
+            if not conto_row:
+                conn.close()
+                return None, None, None
+                
+            conto_id = conto_row[0]
+            
+            # Logica più intelligente per mappare branca e sottoconto
+            branca_id, sottoconto_id = self._map_categoria_specifica_to_branca_sottoconto(
+                cursor, conto_id, categoria_nome, descrizione, fornitore
+            )
+            
+            conn.close()
+            return conto_id, branca_id, sottoconto_id
+            
+        except Exception as e:
+            logger.error(f"Errore mapping categoria to struttura: {e}")
+            return None, None, None
+    
+    def _map_collaboratore_to_struttura(self, collab: dict) -> tuple:
+        """
+        Gestisce il mapping specifico per i collaboratori
+        """
+        try:
+            import sqlite3
+            conn = sqlite3.connect('server/instance/studio_dima.db')
+            cursor = conn.cursor()
+            
+            # Trova il conto "Collaboratori"
+            cursor.execute("SELECT id FROM conti WHERE nome LIKE '%collaborator%' LIMIT 1")
+            conto_row = cursor.fetchone()
+            if not conto_row:
+                conn.close()
+                return None, None, None
+                
+            conto_id = conto_row[0]
+            tipo_collaboratore = collab.get('tipo', 'Generici')
+            
+            # Trova la branca appropriata per il tipo di collaboratore
+            cursor.execute("""
+                SELECT id FROM branche 
+                WHERE contoid = ? AND (nome LIKE ? OR nome LIKE '%generic%' OR nome LIKE '%general%')
+                ORDER BY 
+                    CASE 
+                        WHEN nome LIKE ? THEN 1 
+                        ELSE 2 
+                    END
+                LIMIT 1
+            """, (conto_id, f"%{tipo_collaboratore}%", f"%{tipo_collaboratore}%"))
+            branca_row = cursor.fetchone()
+            branca_id = branca_row[0] if branca_row else None
+            
+            # Trova il sottoconto più appropriato
+            cursor.execute("SELECT id FROM sottoconti ORDER BY nome LIMIT 1")
+            sottoconto_row = cursor.fetchone()
+            sottoconto_id = sottoconto_row[0] if sottoconto_row else None
+            
+            conn.close()
+            return conto_id, branca_id, sottoconto_id
+            
+        except Exception as e:
+            logger.error(f"Errore mapping collaboratori: {e}")
+            return None, None, None
+    
+    def _map_categoria_specifica_to_branca_sottoconto(self, cursor, conto_id: int, categoria_nome: str, descrizione: str = "", fornitore: str = "") -> tuple:
+        """
+        Mappa in modo specifico una categoria a branca e sottoconto basandosi sulla descrizione
+        """
+        try:
+            desc_lower = (descrizione + " " + fornitore).lower()
+            
+            # Mapping specifico per Materiali Dentali
+            if categoria_nome == "Materiali Dentali":
+                # Pattern per identificare la branca specifica
+                branca_patterns = {
+                    "endodonzia": ["endodonzia", "endo", "canale", "root", "lima", "ipoclorito", "edt"],
+                    "ortodonzia": ["ortodonzia", "ortho", "bracket", "filo", "arco", "allineatore", "apparecchio", "attacco"],
+                    "conservativa": ["conservativa", "composito", "resina", "adesivo", "flow", "bulk", "bonding"],
+                    "implantologia": ["implanto", "impianto", "implant", "fixture", "abutment", "protesi"],
+                    "anestesia": ["anestesia", "anestetico", "mepivacaina", "articaina", "lidocaina"],
+                    "igiene e profilassi": ["profilassi", "ablatore", "pasta", "igiene", "polish", "fluoro"],
+                    "protesi": ["protesi", "corona", "ponte", "maryland", "capsula", "zirconia", "ceramica"],
+                    "impronte": ["impronta", "alginato", "silicone", "polyvinyl", "massa", "cucchiai"],
+                    "apparecchiature": ["manipolo", "testina", "turbina", "micromotore", "ablatore", "siringhe"],
+                    "strumentario": ["strumento", "pinza", "specillo", "sonda", "elevator", "leva", "forbice"],
+                    "disinfezione e sterilizzazione": ["sterilizzazione", "disinfezione", "autoclave", "cidex", "sporox"]
+                }
+                
+                best_match = None
+                best_score = 0
+                
+                for branca_key, keywords in branca_patterns.items():
+                    score = sum(1 for kw in keywords if kw in desc_lower)
+                    if score > best_score:
+                        best_score = score
+                        best_match = branca_key
+                
+                if best_match:
+                    # Trova la branca nel database
+                    cursor.execute("""
+                        SELECT id FROM branche 
+                        WHERE contoid = ? AND nome LIKE ?
+                        LIMIT 1
+                    """, (conto_id, f"%{best_match.upper()}%"))
+                    branca_row = cursor.fetchone()
+                    if branca_row:
+                        branca_id = branca_row[0]
+                        
+                        # Trova il sottoconto più appropriato per questa branca
+                        sottoconto_id = self._find_best_sottoconto_for_branca(cursor, branca_id, desc_lower)
+                        return branca_id, sottoconto_id
+            
+            # Mapping per Collaboratori
+            elif categoria_nome == "Collaboratori":
+                # Trova branca collaboratori generica
+                cursor.execute("""
+                    SELECT id FROM branche 
+                    WHERE contoid = ? AND (nome LIKE '%IGIENE%' OR nome LIKE '%CHIRURGIA%' OR nome LIKE '%ORTODONZIA%')
+                    LIMIT 1
+                """, (conto_id,))
+                branca_row = cursor.fetchone()
+                if branca_row:
+                    return branca_row[0], None
+            
+            # Mapping per Utenze
+            elif categoria_nome == "Utenze":
+                utenze_patterns = {
+                    "energia": ["energia", "elettr", "enel", "kwh", "oneri", "sistema", "attiva"],
+                    "acqua": ["acqua", "idric", "acea", "mc", "metri cubi", "quota", "fissa", "acquedott", "publiacqua"],
+                    "telefonia": ["telefon", "tim", "vodafone", "wind", "canone", "adsl", "fibra"]
+                }
+                
+                best_match = None
+                best_score = 0
+                
+                for utenza_key, keywords in utenze_patterns.items():
+                    score = sum(1 for kw in keywords if kw in desc_lower)
+                    if score > best_score:
+                        best_score = score
+                        best_match = utenza_key
+                
+                if best_match:
+                    cursor.execute("""
+                        SELECT id FROM branche 
+                        WHERE contoid = ? AND nome LIKE ?
+                        LIMIT 1
+                    """, (conto_id, f"%{best_match.upper()}%"))
+                    branca_row = cursor.fetchone()
+                    if branca_row:
+                        branca_id = branca_row[0]
+                        
+                        # Trova il sottoconto più appropriato per questa branca utenze
+                        sottoconto_id = self._find_best_sottoconto_for_branca(cursor, branca_id, desc_lower)
+                        
+                        return branca_id, sottoconto_id
+            
+            # Fallback: prima branca disponibile
+            cursor.execute("SELECT id FROM branche WHERE contoid = ? ORDER BY nome LIMIT 1", (conto_id,))
+            branca_row = cursor.fetchone()
+            branca_id = branca_row[0] if branca_row else None
+            
+            return branca_id, None
+            
+        except Exception as e:
+            logger.error(f"Errore mapping specifico branca/sottoconto: {e}")
+            return None, None
+    
+    def _find_best_sottoconto_for_branca(self, cursor, branca_id: int, desc_lower: str) -> int:
+        """
+        Trova il sottoconto più appropriato per una branca basandosi sulla descrizione
+        """
+        try:
+            # Ottieni il nome della branca per capire il contesto
+            cursor.execute("SELECT nome FROM branche WHERE id = ?", (branca_id,))
+            branca_row = cursor.fetchone()
+            if not branca_row:
+                return None
+                
+            branca_nome = branca_row[0].lower()
+            
+            # Pattern per mapping sottoconto basato su branca e descrizione
+            sottoconto_patterns = {
+                # ENDODONZIA
+                "endodonzia": {
+                    "lima": ["LIME"],
+                    "ipoclorito": ["IPOCLORITO", "NAOCL"],
+                    "otturazione": ["GUTTAPERCA", "CEMENTO"],
+                    "strumenti": ["STRUMENTI"]
+                },
+                # ORTODONZIA  
+                "ortodonzia": {
+                    "allineatori": ["ALLINEATORI", "INVISALIGN"],
+                    "attacchi": ["ATTACCHI", "BRACKET"], 
+                    "fili": ["FILO", "ARCO"],
+                    "apparecchi": ["APPARECCHIO"]
+                },
+                # CONSERVATIVA
+                "conservativa": {
+                    "compositi": ["COMPOSITI", "COMPOSITO", "RESINA"],
+                    "adesivi": ["ADESIVO", "BONDING"],
+                    "flow": ["FLOW"]
+                },
+                # IMPLANTOLOGIA
+                "implantologia": {
+                    "impianti": ["IMPIANTO", "FIXTURE"],
+                    "abutment": ["ABUTMENT", "MONCONE"]
+                },
+                # UTENZE - ENERGIA
+                "energia": {
+                    "bolletta": ["BOLLETTA", "FATTURA", "CONSUMO", "UTENZA"]
+                },
+                # UTENZE - ACQUA  
+                "acqua": {
+                    "bolletta": ["BOLLETTA", "FATTURA", "CONSUMO", "UTENZA"]
+                },
+                # UTENZE - TELEFONIA
+                "telefonia": {
+                    "fisso": ["FISSO", "CANONE", "ABBONAMENTO"],
+                    "mobile": ["MOBILE", "CELLULARE", "GSM"],
+                    "internet": ["INTERNET", "ADSL", "FIBRA", "WEB"]
+                }
+            }
+            
+            # Trova il pattern migliore per questa branca
+            if any(key in branca_nome for key in sottoconto_patterns.keys()):
+                branca_key = next((key for key in sottoconto_patterns.keys() if key in branca_nome), None)
+                
+                if branca_key and branca_key in sottoconto_patterns:
+                    patterns = sottoconto_patterns[branca_key]
+                    
+                    # Cerca il sottoconto più appropriato
+                    for sottoconto_key, keywords in patterns.items():
+                        for keyword in keywords:
+                            if any(kw.lower() in desc_lower for kw in keyword.split()):
+                                # Cerca il sottoconto nel database
+                                cursor.execute("SELECT id FROM sottoconti WHERE nome LIKE ? LIMIT 1", (f"%{keyword}%",))
+                                sottoconto_row = cursor.fetchone()
+                                if sottoconto_row:
+                                    return sottoconto_row[0]
+            
+            # Fallback intelligente: cerca sottoconti per questa branca specifica
+            try:
+                cursor.execute("SELECT id, nome FROM sottoconti WHERE brancaid = ? ORDER BY nome LIMIT 1", (branca_id,))
+                sottoconto_row = cursor.fetchone()
+                if sottoconto_row:
+                    return sottoconto_row[0]
+            except Exception:
+                pass
+            
+            # Fallback finale: primo sottoconto disponibile in assoluto
+            cursor.execute("SELECT id FROM sottoconti ORDER BY nome LIMIT 1")
+            sottoconto_row = cursor.fetchone()
+            return sottoconto_row[0] if sottoconto_row else None
+            
+        except Exception as e:
+            logger.error(f"Errore ricerca sottoconto: {e}")
+            return None
     
     def get_statistics(self) -> Dict:
         """

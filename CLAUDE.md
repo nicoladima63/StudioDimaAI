@@ -53,3 +53,6 @@
 
 ## Gestione Stato
 - Usare zustand per cache gestione stato di dati da db che non cambiano nel tempo esempio i conti
+
+## Database
+- Usare studio_dima.db come database per eventuali nuove tabelle

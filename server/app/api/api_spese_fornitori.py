@@ -404,10 +404,18 @@ def get_all_spese_fornitori():
             # Categorizzazione automatica (inclusi collaboratori)
             categoria_automatica = "Non classificato"
             categoria_confidence = 0.0
+            conto_suggerito = None
+            branca_suggerita = None
+            sottoconto_suggerito = None
             try:
-                categoria_automatica, categoria_confidence = gestionale_service.categorize_spesa(
+                result = gestionale_service.categorize_spesa(
                     descrizione, nome_fornitore or "", codice_fornitore
                 )
+                categoria_automatica = result.get("categoria_nome", "Non classificato")
+                categoria_confidence = result.get("confidence", 0.0)
+                conto_suggerito = result.get("conto_suggerito")
+                branca_suggerita = result.get("branca_suggerita")
+                sottoconto_suggerito = result.get("sottoconto_suggerito")
             except Exception as e:
                 logger.warning(f"Errore categorizzazione spesa {descrizione}: {e}")
             
@@ -425,6 +433,9 @@ def get_all_spese_fornitori():
                 'categoria': safe_int(row.get(col_map['categoria'])),
                 'categoria_automatica': categoria_automatica,
                 'categoria_confidence': categoria_confidence,
+                'conto_suggerito': conto_suggerito,
+                'branca_suggerita': branca_suggerita,
+                'sottoconto_suggerito': sottoconto_suggerito,
                 'importo_1': safe_float(row.get(col_map['importo_1'])),
                 'importo_2': safe_float(row.get(col_map['importo_2'])),
                 'aliquota_iva_1': safe_int(row.get(col_map['aliquota_iva_1'])),
@@ -1031,13 +1042,17 @@ def categorizza_spesa():
             }), 400
         
         # Categorizza usando il service (con controllo collaboratori integrato)
-        categoria, confidence = gestionale_service.categorize_spesa(descrizione, fornitore, codice_fornitore)
+        result = gestionale_service.categorize_spesa(descrizione, fornitore, codice_fornitore)
         
         return jsonify({
             'success': True,
             'data': {
-                'categoria': categoria,
-                'confidence': confidence,
+                'categoria': result.get("categoria_nome"),
+                'confidence': result.get("confidence"),
+                'conto_suggerito': result.get("conto_suggerito"),
+                'branca_suggerita': result.get("branca_suggerita"),
+                'sottoconto_suggerito': result.get("sottoconto_suggerito"),
+                'motivo': result.get("motivo"),
                 'descrizione_input': descrizione,
                 'fornitore_input': fornitore
             }
@@ -1188,14 +1203,18 @@ def test_categorizzazione():
         
         risultati = []
         for test in test_cases:
-            categoria, confidence = gestionale_service.categorize_spesa(
+            result = gestionale_service.categorize_spesa(
                 test['descrizione'], 
                 test['fornitore']
             )
             risultati.append({
                 'input': test,
-                'categoria_predetta': categoria,
-                'confidence': confidence
+                'categoria_predetta': result.get("categoria_nome"),
+                'confidence': result.get("confidence"),
+                'conto_suggerito': result.get("conto_suggerito"),
+                'branca_suggerita': result.get("branca_suggerita"),
+                'sottoconto_suggerito': result.get("sottoconto_suggerito"),
+                'motivo': result.get("motivo")
             })
         
         return jsonify({
@@ -1208,6 +1227,904 @@ def test_categorizzazione():
         
     except Exception as e:
         logger.error(f"Errore test categorizzazione: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/materiali-da-classificare', methods=['GET'])
+@jwt_required()
+def get_materiali_da_classificare():
+    """
+    Restituisce tutti i materiali unici dal database con il loro stato di classificazione
+    
+    Query params:
+    - stato: 'tutti', 'classificati', 'non_classificati', 'da_verificare' (default: 'tutti')
+    - fornitore: filtra per codice fornitore specifico
+    - limit: numero massimo risultati (default: 1000)
+    - page: numero pagina (default: 1)
+    """
+    try:
+        # Parametri query
+        stato = request.args.get('stato', 'tutti')
+        codice_fornitore_filtro = request.args.get('fornitore')
+        limit = request.args.get('limit', type=int, default=1000)
+        page = request.args.get('page', type=int, default=1)
+        
+        # Ottieni percorsi DBF
+        path_dettagli = _get_dbf_path('dettagli_spese_fornitori')
+        path_fornitori = _get_dbf_path('fornitori')
+        path_spese = _get_dbf_path('spese_fornitori')
+        
+        # Leggi tabelle
+        df_dettagli = _leggi_tabella_dbf(path_dettagli)
+        df_fornitori = _leggi_tabella_dbf(path_fornitori)
+        df_spese = _leggi_tabella_dbf(path_spese)
+        
+        if df_dettagli.empty:
+            return jsonify({
+                'success': True,
+                'data': [],
+                'total': 0,
+                'stats': {'classificati': 0, 'non_classificati': 0, 'da_verificare': 0}
+            })
+        
+        # Mapping colonne
+        col_map_dettagli = COLONNE['dettagli_spese_fornitori']
+        col_map_fornitori = COLONNE['fornitori']
+        col_map_spese = COLONNE['spese_fornitori']
+        
+        # Crea mappa fornitori
+        fornitori_map = {}
+        if not df_fornitori.empty:
+            for _, fornitore_row in df_fornitori.iterrows():
+                codice = fornitore_row.get(col_map_fornitori['id'])
+                nome = fornitore_row.get(col_map_fornitori['nome'])
+                
+                if pd.notna(codice) and pd.notna(nome):
+                    if isinstance(codice, bytes):
+                        codice_str = codice.decode('latin-1', errors='ignore').strip()
+                    else:
+                        codice_str = str(codice).strip()
+                    
+                    if isinstance(nome, bytes):
+                        nome_str = nome.decode('latin-1', errors='ignore').strip()
+                    else:
+                        nome_str = str(nome).strip()
+                    
+                    fornitori_map[codice_str] = nome_str
+        
+        # Crea mappa fatture -> fornitori
+        fatture_fornitori_map = {}
+        if not df_spese.empty:
+            for _, spesa_row in df_spese.iterrows():
+                fattura_id = spesa_row.get(col_map_spese['id'])
+                cod_forn = spesa_row.get(col_map_spese['codice_fornitore'])
+                
+                if pd.notna(fattura_id) and pd.notna(cod_forn):
+                    if isinstance(fattura_id, bytes):
+                        fat_id_str = fattura_id.decode('latin-1', errors='ignore').strip()
+                    else:
+                        fat_id_str = str(fattura_id).strip()
+                        
+                    if isinstance(cod_forn, bytes):
+                        cod_forn_str = cod_forn.decode('latin-1', errors='ignore').strip()
+                    else:
+                        cod_forn_str = str(cod_forn).strip()
+                    
+                    fatture_fornitori_map[fat_id_str] = cod_forn_str
+        
+        # Estrai materiali unici dai dettagli
+        materiali_unici = {}
+        
+        for _, det_row in df_dettagli.iterrows():
+            descrizione = det_row.get(col_map_dettagli['descrizione'])
+            codice_articolo = det_row.get(col_map_dettagli['codice_articolo'])
+            codice_fattura = det_row.get(col_map_dettagli['codice_fattura'])
+            
+            # Safe string conversion
+            def safe_str(val, default=''):
+                if pd.isna(val):
+                    return default
+                if isinstance(val, bytes):
+                    return val.decode('latin-1', errors='ignore').strip()
+                return str(val).strip()
+            
+            desc_str = safe_str(descrizione)
+            cod_art_str = safe_str(codice_articolo)
+            cod_fat_str = safe_str(codice_fattura)
+            
+            # Filtra descrizioni valide
+            if (desc_str and len(desc_str) > 5 and
+                'DDT' not in desc_str.upper() and
+                'COD_FORNITORE' not in desc_str.upper() and
+                'TRASPORTO' not in desc_str.upper() and
+                'SPESE' not in desc_str.upper()):
+                
+                # Ottieni fornitore dalla fattura
+                cod_fornitore = fatture_fornitori_map.get(cod_fat_str, '')
+                nome_fornitore = fornitori_map.get(cod_fornitore, '')
+                
+                # Applica filtro fornitore se specificato
+                if codice_fornitore_filtro and cod_fornitore != codice_fornitore_filtro:
+                    continue
+                
+                # Chiave unica per materiale
+                chiave_materiale = f"{cod_art_str}|{desc_str}|{cod_fornitore}"
+                
+                if chiave_materiale not in materiali_unici:
+                    materiali_unici[chiave_materiale] = {
+                        'codice_articolo': cod_art_str,
+                        'descrizione': desc_str,
+                        'codice_fornitore': cod_fornitore,
+                        'nome_fornitore': nome_fornitore,
+                        'occorrenze': 1
+                    }
+                else:
+                    materiali_unici[chiave_materiale]['occorrenze'] += 1
+        
+        # Connetti al database SQLite per ottenere classificazioni esistenti
+        import sqlite3
+        conn = sqlite3.connect('server/instance/studio_dima.db')
+        cursor = conn.cursor()
+        
+        # Ottieni classificazioni esistenti dalla tabella materiali (SQLite)
+        cursor.execute('''
+            SELECT codicearticolo as codice_articolo,
+                   m.nome as descrizione,
+                   m.fornitoreid as codice_fornitore,
+                   m.fornitorenome as nome_fornitore,
+                   c.nome as conto_codice,
+                   s.nome as sottoconto_codice,
+                   m.categoria_contabile,
+                   m.brancaid,
+                   m.metodo_classificazione,
+                   m.confidence,
+                   m.confermato as confermato_da_utente
+            FROM materiali m
+            LEFT JOIN conti c ON m.contoid = c.id
+            LEFT JOIN sottoconti s ON m.sottocontoid = s.id
+        ''')
+        
+        classificazioni_esistenti = {}
+        for row in cursor.fetchall():
+            chiave = f"{row[0]}|{row[1]}|{row[2]}"
+            _, _, _, _, conto_codice, sottoconto_codice, categoria_contabile, brancaid, metodo_classificazione, confidence, confermato = row
+            classificazioni_esistenti[chiave] = {
+                'conto_codice': conto_codice,
+                'sottoconto_codice': sottoconto_codice,
+                'categoria_contabile': categoria_contabile,
+                'branca_codice': str(brancaid) if brancaid else None,
+                'metodo_classificazione': metodo_classificazione,
+                'confidence': confidence,
+                'confermato_da_utente': bool(confermato)
+            }
+        
+        conn.close()
+        
+        # Risolvi la branca a partire da conto_nome/sottoconto_nome
+        def resolve_branca_id(conto_nome: str, sottoconto_nome: str):
+            try:
+                conn_r = sqlite3.connect('server/instance/studio_dima.db')
+                c = conn_r.cursor()
+                c.execute('''
+                    SELECT b.id
+                    FROM sottoconti s
+                    JOIN branche b ON s.brancaid = b.id
+                    JOIN conti c2 ON s.contoid = c2.id
+                    WHERE c2.nome = ? AND s.nome = ?
+                    LIMIT 1
+                ''', (conto_nome, sottoconto_nome))
+                r = c.fetchone()
+                conn_r.close()
+                return r[0] if r else None
+            except Exception:
+                return None
+
+        # Funzione per classificazione automatica usando il nuovo sistema intelligente
+        def classifica_automaticamente(descrizione, codice_articolo, codice_fornitore=None, nome_fornitore=""):
+            try:
+                # Usa il nostro nuovo servizio di classificazione intelligente
+                result = gestionale_service.categorize_spesa(descrizione, nome_fornitore, codice_fornitore or "")
+                
+                if result and result.get("confidence", 0) > 0.3:  # Soglia minima 30%
+                    # Converti gli ID in nomi per compatibilità con l'interfaccia
+                    conn = sqlite3.connect('server/instance/studio_dima.db')
+                    cursor = conn.cursor()
+                    
+                    conto_nome = None
+                    branca_nome = None
+                    sottoconto_nome = None
+                    
+                    # Recupera nomi da ID
+                    if result.get("conto_suggerito"):
+                        cursor.execute("SELECT nome FROM conti WHERE id = ?", (result["conto_suggerito"],))
+                        row = cursor.fetchone()
+                        conto_nome = row[0] if row else None
+                        
+                    if result.get("branca_suggerita"):
+                        cursor.execute("SELECT nome FROM branche WHERE id = ?", (result["branca_suggerita"],))
+                        row = cursor.fetchone()
+                        branca_nome = row[0] if row else None
+                        
+                    if result.get("sottoconto_suggerito"):
+                        cursor.execute("SELECT nome FROM sottoconti WHERE id = ?", (result["sottoconto_suggerito"],))
+                        row = cursor.fetchone()
+                        sottoconto_nome = row[0] if row else None
+                    
+                    conn.close()
+                    
+                    return {
+                        'conto_codice': conto_nome,
+                        'sottoconto_codice': sottoconto_nome,
+                        'branca_codice': str(result["branca_suggerita"]) if result.get("branca_suggerita") else None,
+                        'categoria_contabile': result.get("categoria_nome"),
+                        'metodo_classificazione': 'intelligente',
+                        'confidence': int(result.get("confidence", 0) * 100),
+                        'confermato_da_utente': False,
+                        'motivo': result.get("motivo", "")
+                    }
+                    
+            except Exception as e:
+                logger.warning(f"Errore classificazione intelligente per {descrizione}: {e}")
+            
+            # Fallback al sistema vecchio
+            descrizione_upper = descrizione.upper()
+            
+            conn = sqlite3.connect('server/instance/studio_dima.db')
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                SELECT pattern_descrizione, conto_codice, sottoconto_codice, 
+                       categoria_contabile, priorita
+                FROM categorizzazione_dettaglio_fattura 
+                WHERE attivo = 1
+                ORDER BY priorita DESC
+            ''')
+            
+            patterns = cursor.fetchall()
+            conn.close()
+            
+            for pattern, conto, sottoconto, categoria, priorita in patterns:
+                if pattern in descrizione_upper:
+                    branca_id = resolve_branca_id(conto, sottoconto)
+                    return {
+                        'conto_codice': conto,
+                        'sottoconto_codice': sottoconto,
+                        'branca_codice': str(branca_id) if branca_id else None,
+                        'categoria_contabile': categoria,
+                        'metodo_classificazione': 'pattern',
+                        'confidence': min(95, priorita),
+                        'confermato_da_utente': False
+                    }
+            
+            return None
+        
+        # Prepara risultati finali
+        materiali_risultato = []
+        stats = {'classificati': 0, 'non_classificati': 0, 'da_verificare': 0}
+        
+        for chiave, materiale in materiali_unici.items():
+            risultato = materiale.copy()
+            
+            # Verifica se già classificato manualmente
+            if chiave in classificazioni_esistenti:
+                classificazione = classificazioni_esistenti[chiave]
+                risultato.update(classificazione)
+                risultato['stato_classificazione'] = 'classificato'
+                stats['classificati'] += 1
+            else:
+                # Prova classificazione automatica
+                auto_class = classifica_automaticamente(
+                    materiale['descrizione'], 
+                    materiale['codice_articolo'],
+                    materiale['codice_fornitore'],
+                    materiale['nome_fornitore']
+                )
+                
+                if auto_class and auto_class['confidence'] >= 30:  # Soglia ridotta per includere più suggerimenti
+                    risultato.update(auto_class)
+                    risultato['stato_classificazione'] = 'da_verificare'
+                    stats['da_verificare'] += 1
+                else:
+                    risultato.update({
+                        'conto_codice': None,
+                        'sottoconto_codice': None,
+                        'categoria_contabile': None,
+                        'metodo_classificazione': None,
+                        'confidence': 0,
+                        'confermato_da_utente': False
+                    })
+                    risultato['stato_classificazione'] = 'non_classificato'
+                    stats['non_classificati'] += 1
+            
+            materiali_risultato.append(risultato)
+        
+        # Filtra per stato se richiesto
+        if stato != 'tutti':
+            materiali_risultato = [m for m in materiali_risultato 
+                                 if m['stato_classificazione'] == stato.replace('_', '_')]
+        
+        # Ordina per occorrenze decrescenti
+        materiali_risultato.sort(key=lambda x: x['occorrenze'], reverse=True)
+        
+        # Paginazione
+        total = len(materiali_risultato)
+        start_idx = (page - 1) * limit
+        end_idx = start_idx + limit
+        materiali_paginati = materiali_risultato[start_idx:end_idx]
+        
+        return jsonify({
+            'success': True,
+            'data': materiali_paginati,
+            'total': total,
+            'page': page,
+            'limit': limit,
+            'total_pages': (total + limit - 1) // limit,
+            'stats': stats,
+            'filters_applied': {
+                'stato': stato,
+                'fornitore': codice_fornitore_filtro
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore recupero materiali da classificare: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/salva-classificazione-materiale', methods=['POST'])
+@jwt_required()
+def salva_classificazione_materiale():
+    """
+    Salva o aggiorna la classificazione di un materiale
+    
+    Body: {
+        "codice_articolo": "DM1 1012148",
+        "descrizione": "CELTRA DUO S LT A3",
+        "codice_fornitore": "ZZZZZO",
+        "nome_fornitore": "DENTSPLY SIRONA",
+        "conto_codice": "ZZZZZZ",
+        "sottoconto_codice": "Blocchetti cerec",
+        "categoria_contabile": "Materiali Dentali - Blocchetti CEREC"
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        # Validazione campi obbligatori
+        required_fields = ['descrizione', 'codice_fornitore', 'conto_codice', 'sottoconto_codice']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Campo obbligatorio mancante: {field}'
+                }), 400
+        
+        # Estrai dati
+        codice_articolo = data.get('codice_articolo', '').strip()
+        descrizione = data.get('descrizione', '').strip()
+        codice_fornitore = data.get('codice_fornitore', '').strip()
+        nome_fornitore = data.get('nome_fornitore', '').strip()
+        conto_codice = data.get('conto_codice', '').strip()
+        sottoconto_codice = data.get('sottoconto_codice', '').strip()
+        categoria_contabile = data.get('categoria_contabile', '').strip()
+        note = data.get('note', '').strip()
+        
+        # Connetti al database
+        import sqlite3
+        conn = sqlite3.connect('server/instance/studio_dima.db')
+        cursor = conn.cursor()
+        
+        try:
+            # Verifica se esiste già una classificazione
+            cursor.execute('''
+                SELECT id FROM materiali_classificazioni 
+                WHERE codice_articolo = ? AND descrizione = ? AND codice_fornitore = ?
+            ''', (codice_articolo, descrizione, codice_fornitore))
+            
+            existing_id = cursor.fetchone()
+            
+            if existing_id:
+                # Aggiorna classificazione esistente
+                cursor.execute('''
+                    UPDATE materiali_classificazioni 
+                    SET nome_fornitore = ?, conto_codice = ?, sottoconto_codice = ?,
+                        categoria_contabile = ?, metodo_classificazione = 'manuale',
+                        confidence = 100, confermato_da_utente = TRUE,
+                        data_ultima_modifica = CURRENT_TIMESTAMP, note = ?
+                    WHERE id = ?
+                ''', (nome_fornitore, conto_codice, sottoconto_codice, 
+                      categoria_contabile, note, existing_id[0]))
+                
+                operazione = 'aggiornata'
+                record_id = existing_id[0]
+                
+            else:
+                # Inserisci nuova classificazione
+                cursor.execute('''
+                    INSERT INTO materiali_classificazioni 
+                    (codice_articolo, descrizione, codice_fornitore, nome_fornitore,
+                     conto_codice, sottoconto_codice, categoria_contabile,
+                     metodo_classificazione, confidence, confermato_da_utente, note)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'manuale', 100, TRUE, ?)
+                ''', (codice_articolo, descrizione, codice_fornitore, nome_fornitore,
+                      conto_codice, sottoconto_codice, categoria_contabile, note))
+                
+                operazione = 'salvata'
+                record_id = cursor.lastrowid
+            
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Classificazione {operazione} con successo',
+                'data': {
+                    'id': record_id,
+                    'operazione': operazione,
+                    'classificazione': {
+                        'codice_articolo': codice_articolo,
+                        'descrizione': descrizione,
+                        'codice_fornitore': codice_fornitore,
+                        'nome_fornitore': nome_fornitore,
+                        'conto_codice': conto_codice,
+                        'sottoconto_codice': sottoconto_codice,
+                        'categoria_contabile': categoria_contabile,
+                        'confidence': 100,
+                        'metodo_classificazione': 'manuale'
+                    }
+                }
+            })
+            
+        except sqlite3.IntegrityError as e:
+            conn.rollback()
+            return jsonify({
+                'success': False,
+                'error': f'Errore integrità database: {str(e)}'
+            }), 400
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Errore salvataggio classificazione materiale: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/conti-disponibili', methods=['GET'])
+@jwt_required()
+def get_conti_disponibili():
+    """
+    Restituisce tutti i conti disponibili dal database SQLite
+    """
+    try:
+        import sqlite3
+        conn = sqlite3.connect('server/instance/studio_dima.db')
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT id, nome FROM conti ORDER BY nome')
+        conti_rows = cursor.fetchall()
+        
+        conti = []
+        for row in conti_rows:
+            conti.append({
+                'id': row[0],
+                'codice': str(row[0]),  # Per compatibilità con il frontend
+                'descrizione': row[1],
+                'tipo': '',  # Non abbiamo tipo nel nuovo schema
+                'label': f"{row[0]} - {row[1]}"
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'data': conti,
+            'total': len(conti)
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore recupero conti disponibili: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/sottoconti-disponibili/<string:conto_codice>', methods=['GET'])
+@jwt_required()
+def get_sottoconti_disponibili(conto_codice):
+    """
+    Restituisce i sottoconti disponibili per un conto specifico
+    """
+    try:
+        import sqlite3
+        
+        # Estrai sottoconti unici dalle classificazioni esistenti per questo conto
+        conn = sqlite3.connect('server/instance/studio_dima.db')
+        cursor = conn.cursor()
+        
+        # Sottoconti dai pattern automatici
+        cursor.execute('''
+            SELECT DISTINCT sottoconto_codice, categoria_contabile
+            FROM categorizzazione_dettaglio_fattura 
+            WHERE conto_codice = ? AND attivo = 1
+            ORDER BY sottoconto_codice
+        ''', (conto_codice,))
+        
+        sottoconti_automatici = cursor.fetchall()
+        
+        # Sottoconti dalle classificazioni manuali
+        cursor.execute('''
+            SELECT DISTINCT sottoconto_codice, categoria_contabile
+            FROM materiali_classificazioni 
+            WHERE conto_codice = ?
+            ORDER BY sottoconto_codice
+        ''', (conto_codice,))
+        
+        sottoconti_manuali = cursor.fetchall()
+        conn.close()
+        
+        # Unisci e deduplica
+        sottoconti_set = set()
+        sottoconti = []
+        
+        for sottoconto, categoria in sottoconti_automatici + sottoconti_manuali:
+            if sottoconto and sottoconto not in sottoconti_set:
+                sottoconti_set.add(sottoconto)
+                sottoconti.append({
+                    'codice': sottoconto,
+                    'descrizione': categoria or sottoconto,
+                    'label': f'{sottoconto} - {categoria}' if categoria else sottoconto,
+                    'fonte': 'sistema'
+                })
+        
+        # Ordina per codice
+        sottoconti.sort(key=lambda x: x['codice'])
+        
+        return jsonify({
+            'success': True,
+            'data': sottoconti,
+            'total': len(sottoconti),
+            'conto_codice': conto_codice
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore recupero sottoconti per conto {conto_codice}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/conferma-classificazione-materiale', methods=['POST'])
+@jwt_required()
+def conferma_classificazione_materiale():
+    """
+    Conferma una classificazione automatica da "da_verificare" a "classificato"
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'Nessun dato ricevuto'}), 400
+        
+        codice_articolo = data.get('codice_articolo', '').strip()
+        descrizione = data.get('descrizione', '').strip()
+        codice_fornitore = data.get('codice_fornitore', '').strip()
+        nome_fornitore = data.get('nome_fornitore', '').strip()
+        conto_codice = data.get('conto_codice', '').strip()
+        sottoconto_codice = data.get('sottoconto_codice', '').strip()
+        categoria_contabile = data.get('categoria_contabile', '').strip()
+        
+        if not all([descrizione, codice_fornitore, conto_codice, sottoconto_codice]):
+            return jsonify({
+                'success': False,
+                'error': 'Dati obbligatori mancanti'
+            }), 400
+        
+        # Connessione database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Controlla se esiste già una classificazione
+            cursor.execute('''
+                SELECT id FROM materiali_classificazioni 
+                WHERE codice_articolo = ? AND descrizione = ? AND codice_fornitore = ?
+            ''', (codice_articolo, descrizione, codice_fornitore))
+            
+            existing = cursor.fetchone()
+            
+            if existing:
+                # Aggiorna esistente confermandola
+                cursor.execute('''
+                    UPDATE materiali_classificazioni 
+                    SET confermato_da_utente = TRUE,
+                        metodo_classificazione = 'confermato',
+                        confidence = 100,
+                        data_aggiornamento = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                ''', (existing[0],))
+                operazione = 'confermata'
+                record_id = existing[0]
+            else:
+                # Inserisce nuova classificazione confermata
+                cursor.execute('''
+                    INSERT INTO materiali_classificazioni 
+                    (codice_articolo, descrizione, codice_fornitore, nome_fornitore,
+                     conto_codice, sottoconto_codice, categoria_contabile,
+                     metodo_classificazione, confidence, confermato_da_utente)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'confermato', 100, TRUE)
+                ''', (codice_articolo, descrizione, codice_fornitore, nome_fornitore,
+                      conto_codice, sottoconto_codice, categoria_contabile))
+                
+                operazione = 'confermata'
+                record_id = cursor.lastrowid
+            
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Classificazione {operazione} con successo',
+                'data': {
+                    'id': record_id,
+                    'operazione': operazione,
+                    'classificazione': {
+                        'codice_articolo': codice_articolo,
+                        'descrizione': descrizione,
+                        'codice_fornitore': codice_fornitore,
+                        'nome_fornitore': nome_fornitore,
+                        'conto_codice': conto_codice,
+                        'sottoconto_codice': sottoconto_codice,
+                        'categoria_contabile': categoria_contabile,
+                        'confidence': 100,
+                        'metodo_classificazione': 'confermato',
+                        'confermato_da_utente': True,
+                        'stato_classificazione': 'classificato'
+                    }
+                }
+            })
+            
+        except sqlite3.IntegrityError as e:
+            conn.rollback()
+            return jsonify({
+                'success': False,
+                'error': f'Errore integrità database: {str(e)}'
+            }), 400
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Errore conferma classificazione materiale: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@spese_fornitori_bp.route('/conferma-tutti-da-verificare', methods=['POST'])
+@jwt_required()
+def conferma_tutti_da_verificare():
+    """
+    Conferma tutte le classificazioni automatiche da "da_verificare" a "classificato"
+    """
+    try:
+        # Connessione database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        materiali_confermati = 0
+        
+        try:
+            # Prima ottieni tutti i materiali da verificare usando la stessa logica
+            # dell'endpoint materiali-da-classificare
+            
+            path_vocispes = _get_dbf_path('vocispes')
+            path_spesafor = _get_dbf_path('spese_fornitori')
+            path_fornitor = _get_dbf_path('fornitori')
+            
+            df_vocispes = _leggi_tabella_dbf(path_vocispes)
+            df_spesafor = _leggi_tabella_dbf(path_spesafor)  
+            df_fornitor = _leggi_tabella_dbf(path_fornitor)
+            
+            if df_vocispes.empty or df_spesafor.empty:
+                return jsonify({
+                    'success': True,
+                    'message': 'Nessun materiale da elaborare',
+                    'materiali_confermati': 0
+                })
+            
+            # Ottieni classificazioni esistenti
+            cursor.execute('''
+                SELECT codice_articolo, descrizione, codice_fornitore,
+                       conto_codice, sottoconto_codice, categoria_contabile,
+                       metodo_classificazione, confidence, confermato_da_utente
+                FROM materiali_classificazioni
+            ''')
+            
+            classificazioni_esistenti = {}
+            for row in cursor.fetchall():
+                def safe_str_db(val, default=''):
+                    if val is None:
+                        return default
+                    if isinstance(val, bytes):
+                        return val.decode('latin-1', errors='ignore').strip()
+                    return str(val).strip()
+                
+                cod_art = safe_str_db(row[0])
+                desc = safe_str_db(row[1])  
+                cod_forn = safe_str_db(row[2])
+                chiave = f"{cod_art}|{desc}|{cod_forn}"
+                
+                classificazioni_esistenti[chiave] = {
+                    'conto_codice': safe_str_db(row[3]),
+                    'sottoconto_codice': safe_str_db(row[4]),
+                    'categoria_contabile': safe_str_db(row[5]),
+                    'metodo_classificazione': safe_str_db(row[6]),
+                    'confidence': row[7] or 0,
+                    'confermato_da_utente': bool(row[8])
+                }
+            
+            # Ottieni patterns classificazione
+            cursor.execute('''
+                SELECT pattern_codice, pattern_descrizione, conto_codice, sottoconto_codice
+                FROM categorizzazione_dettaglio_fattura
+                ORDER BY priority ASC
+            ''')
+            
+            patterns = cursor.fetchall()
+            
+            def classifica_automaticamente(descrizione, codice_articolo):
+                desc_lower = descrizione.lower()
+                cod_lower = (codice_articolo or '').lower()
+                
+                for pattern in patterns:
+                    pattern_cod = pattern[0] or ''
+                    pattern_desc = pattern[1] or ''
+                    
+                    if pattern_cod and pattern_cod.lower() in cod_lower:
+                        return {
+                            'conto_codice': pattern[2],
+                            'sottoconto_codice': pattern[3], 
+                            'categoria_contabile': f"{pattern[2]} - {pattern[3]}",
+                            'metodo_classificazione': 'pattern_codice',
+                            'confidence': 95,
+                            'confermato_da_utente': False
+                        }
+                    
+                    if pattern_desc and pattern_desc.lower() in desc_lower:
+                        return {
+                            'conto_codice': pattern[2],
+                            'sottoconto_codice': pattern[3],
+                            'categoria_contabile': f"{pattern[2]} - {pattern[3]}",
+                            'metodo_classificazione': 'pattern_descrizione',
+                            'confidence': 85,
+                            'confermato_da_utente': False
+                        }
+                
+                return None
+            
+            # Processa materiali per trovare quelli "da_verificare"
+            materiali_da_confermare = []
+            
+            # Safe string conversion function
+            def safe_str(val, default=''):
+                if pd.isna(val):
+                    return default
+                if isinstance(val, bytes):
+                    return val.decode('latin-1', errors='ignore').strip()
+                return str(val).strip()
+            
+            # Join tables e crea lista materiali unici usando nomi colonne corretti
+            col_map_vocispes = COLONNE['dettagli_spese_fornitori']  # VOCISPES.DBF mapping
+            col_map_spese = COLONNE['spese_fornitori']              # SPESAFOR.DBF mapping  
+            col_map_fornitori = COLONNE['fornitori']                # FORNITOR.DBF mapping
+            
+            df_merged = df_vocispes.merge(df_spesafor, left_on=col_map_vocispes['codice_fattura'], right_on=col_map_spese['id'], how='inner')
+            df_merged = df_merged.merge(df_fornitor, left_on=col_map_spese['codice_fornitore'], right_on=col_map_fornitori['id'], how='left')
+            
+            materiali_unici = {}
+            
+            for _, row in df_merged.iterrows():
+                cod_art = safe_str(row.get(col_map_vocispes['codice_articolo']))
+                desc = safe_str(row.get(col_map_vocispes['descrizione']))
+                cod_forn = safe_str(row.get(col_map_spese['codice_fornitore']))
+                nome_forn = safe_str(row.get(col_map_fornitori['nome']))
+                
+                if not desc or not cod_forn:
+                    continue
+                    
+                chiave = f"{cod_art}|{desc}|{cod_forn}"
+                
+                if chiave not in materiali_unici:
+                    materiali_unici[chiave] = {
+                        'codice_articolo': cod_art,
+                        'descrizione': desc,
+                        'codice_fornitore': cod_forn,
+                        'nome_fornitore': nome_forn,
+                        'occorrenze': 1
+                    }
+                else:
+                    materiali_unici[chiave]['occorrenze'] += 1
+            
+            # Trova materiali "da_verificare"
+            for chiave, materiale in materiali_unici.items():
+                # Salta se già classificato manualmente
+                if chiave in classificazioni_esistenti and classificazioni_esistenti[chiave]['confermato_da_utente']:
+                    continue
+                
+                # Prova classificazione automatica
+                auto_class = classifica_automaticamente(
+                    materiale['descrizione'], 
+                    materiale['codice_articolo']
+                )
+                
+                if auto_class and auto_class['confidence'] >= 85:
+                    # Questo è un materiale "da_verificare"
+                    materiali_da_confermare.append({
+                        'codice_articolo': materiale['codice_articolo'],
+                        'descrizione': materiale['descrizione'], 
+                        'codice_fornitore': materiale['codice_fornitore'],
+                        'nome_fornitore': materiale['nome_fornitore'],
+                        'conto_codice': auto_class['conto_codice'],
+                        'sottoconto_codice': auto_class['sottoconto_codice'],
+                        'categoria_contabile': auto_class['categoria_contabile']
+                    })
+            
+            # Conferma tutti i materiali da verificare
+            for materiale in materiali_da_confermare:
+                # Controlla se esiste già
+                cursor.execute('''
+                    SELECT id FROM materiali_classificazioni 
+                    WHERE codice_articolo = ? AND descrizione = ? AND codice_fornitore = ?
+                ''', (materiale['codice_articolo'], materiale['descrizione'], materiale['codice_fornitore']))
+                
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # Aggiorna esistente
+                    cursor.execute('''
+                        UPDATE materiali_classificazioni 
+                        SET confermato_da_utente = TRUE,
+                            metodo_classificazione = 'confermato_bulk',
+                            confidence = 100,
+                            data_aggiornamento = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    ''', (existing[0],))
+                else:
+                    # Inserisce nuova
+                    cursor.execute('''
+                        INSERT INTO materiali_classificazioni 
+                        (codice_articolo, descrizione, codice_fornitore, nome_fornitore,
+                         conto_codice, sottoconto_codice, categoria_contabile,
+                         metodo_classificazione, confidence, confermato_da_utente)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 'confermato_bulk', 100, TRUE)
+                    ''', (materiale['codice_articolo'], materiale['descrizione'], 
+                          materiale['codice_fornitore'], materiale['nome_fornitore'],
+                          materiale['conto_codice'], materiale['sottoconto_codice'], 
+                          materiale['categoria_contabile']))
+                
+                materiali_confermati += 1
+            
+            conn.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Confermate {materiali_confermati} classificazioni automatiche',
+                'materiali_confermati': materiali_confermati
+            })
+            
+        except Exception as e:
+            conn.rollback()
+            raise e
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        logger.error(f"Errore conferma tutti da verificare: {e}")
         return jsonify({
             'success': False,
             'error': str(e)

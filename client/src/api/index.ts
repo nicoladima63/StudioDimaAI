@@ -14,6 +14,7 @@ export * from './services/calendar.service';
 export * from './services/ricette.service';
 export * from './services/settings.service';
 export * from './services/rentri.service';
+export * from './services/materiali.service';
 
 // Types
 export * from '@/lib/types';
