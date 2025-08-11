@@ -260,16 +260,196 @@ export interface SpesaFornitore {
 }
 
 export interface CategorizzazioneResult {
-  categoria: CategoriaSpesa;
+  categoria_spesa: CategoriaSpesa; // Rinominato per evitare conflitti
   confidence: number;
   motivo: string;
   suggerimenti?: string[];
+  algoritmo?: string;
+}
+
+interface FornitoreClassificazioneAPI {
+  categoria_suggerita: string | null;
+  confidence: number;
+  motivo: string;
+  algoritmo: string;
 }
 
 /**
- * Funzione principale per auto-categorizzare una spesa fornitore
+ * Chiama l'API per ottenere la classificazione suggerita per un fornitore
  */
-export function categorizzaSpesaFornitore(spesa: SpesaFornitore): CategorizzazioneResult {
+async function getClassificazioneFornitore(codiceFornitore: string): Promise<FornitoreClassificazioneAPI | null> {
+  try {
+    const response = await fetch(`/api/classificazioni/fornitore/${codiceFornitore}/suggest-categoria`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      return data.data;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Errore chiamata API classificazione fornitore:', error);
+    return null;
+  }
+}
+
+/**
+ * Mappa un codice conto alle categorie di spesa
+ */
+function mapCodiceContoToCategoria(codiceConto: string): CategoriaSpesa {
+  const mapping: Record<string, CategoriaSpesa> = {
+    'ZZZZZI': CategoriaSpesa.MATERIALI_DENTALI,
+    'ZZZZZU': CategoriaSpesa.ENERGIA_ELETTRICA,
+    'ZZZZZN': CategoriaSpesa.TELECOMUNICAZIONI,
+    'ZZZZXR': CategoriaSpesa.CONSULENZE_PROFESSIONALI,
+    'ZZZZZK': CategoriaSpesa.FARMACEUTICI,
+    'ZZZZXO': CategoriaSpesa.CONSULENZE_PROFESSIONALI, // Collaboratori chirurgia -> consulenze
+    'ZZZZXP': CategoriaSpesa.CONSULENZE_PROFESSIONALI, // Collaboratori ortodonzia -> consulenze
+    'ZZZZYB': CategoriaSpesa.CONSULENZE_PROFESSIONALI, // Collaboratori igienista -> consulenze
+    'ZZZZYL': CategoriaSpesa.LEASING_FINANZIARIO,
+    // Aggiungi altri mapping secondo necessità
+  };
+  
+  return mapping[codiceConto] || CategoriaSpesa.ALTRO;
+}
+
+/**
+ * Funzione principale per auto-categorizzare una spesa fornitore con priorità intelligente
+ * Priorità di categorizzazione:
+ * 1. Classificazione fornitore esistente (API suggest-categoria) - Confidence 80%+
+ * 2. Pattern nome fornitore - Confidence 60-80%
+ * 3. Pattern descrizione - Confidence 40-70%
+ * 4. Pattern documento - Confidence 30-50%
+ */
+export async function categorizzaSpesaFornitore(spesa: SpesaFornitore): Promise<CategorizzazioneResult> {
+  const risultati: Array<{categoria: CategoriaSpesa, confidence: number, motivo: string}> = [];
+  
+  // 1. PRIORITÀ MASSIMA: Verifica classificazione fornitore esistente
+  if (spesa.codice_fornitore) {
+    try {
+      // Chiama API suggest-categoria per il fornitore
+      const fornitoreClassificazione = await getClassificazioneFornitore(spesa.codice_fornitore);
+      
+      if (fornitoreClassificazione?.categoria_suggerita && fornitoreClassificazione.confidence >= 0.3) {
+        const categoriaFornitore = mapCodiceContoToCategoria(fornitoreClassificazione.categoria_suggerita);
+        
+        if (categoriaFornitore !== CategoriaSpesa.ALTRO) {
+          return {
+            categoria_spesa: categoriaFornitore,
+            confidence: Math.min(0.95, fornitoreClassificazione.confidence + 0.1), // Boost confidence
+            motivo: `Fornitore classificato: ${fornitoreClassificazione.motivo}`,
+            algoritmo: fornitoreClassificazione.algoritmo,
+            suggerimenti: ['Classificazione basata su fornitore e storico spese']
+          };
+        }
+      }
+    } catch (error) {
+      console.warn('Errore nel recupero classificazione fornitore:', error);
+    }
+  }
+  
+  // 2. Analizza il nome del fornitore (pattern tradizionali)
+  if (spesa.nome_fornitore) {
+    const nomeFornitore = spesa.nome_fornitore.toLowerCase().trim();
+    
+    for (const [key, pattern] of Object.entries(FORNITORI_PATTERNS)) {
+      for (const keyword of pattern.keywords) {
+        if (nomeFornitore.includes(keyword.toLowerCase())) {
+          risultati.push({
+            categoria: pattern.categoria,
+            confidence: pattern.confidence * 0.8, // Ridotto perché ora è seconda priorità
+            motivo: `Nome fornitore contiene "${keyword}"`
+          });
+          break;
+        }
+      }
+    }
+  }
+  
+  // 3. Analizza la descrizione
+  if (spesa.descrizione) {
+    const descrizione = spesa.descrizione.toLowerCase().trim();
+    
+    for (const [key, pattern] of Object.entries(DESCRIZIONE_PATTERNS)) {
+      for (const keyword of pattern.keywords) {
+        if (descrizione.includes(keyword.toLowerCase())) {
+          risultati.push({
+            categoria: pattern.categoria,
+            confidence: pattern.confidence * 0.7, // Ridotto per dare precedenza a fornitori
+            motivo: `Descrizione contiene "${keyword}"`
+          });
+          break;
+        }
+      }
+    }
+  }
+  
+  // 4. Analizza il numero documento
+  if (spesa.numero_documento) {
+    const numeroDoc = spesa.numero_documento.trim();
+    
+    for (const [key, pattern] of Object.entries(DOCUMENTO_PATTERNS)) {
+      if (pattern.pattern && pattern.pattern.test(numeroDoc)) {
+        risultati.push({
+          categoria: pattern.categoria,
+          confidence: pattern.confidence * 0.6, // Priorità più bassa
+          motivo: `Numero documento segue pattern ${key}`
+        });
+      }
+    }
+  }
+  
+  // 5. Determina la categoria finale
+  if (risultati.length === 0) {
+    return {
+      categoria_spesa: CategoriaSpesa.ALTRO,
+      confidence: 0,
+      motivo: 'Nessun pattern riconosciuto',
+      suggerimenti: [
+        'Verifica manualmente il fornitore',
+        'Considera di classificare il fornitore per migliorare future predizioni',
+        'Aggiungi pattern personalizzati se necessario'
+      ]
+    };
+  }
+  
+  // Raggruppa per categoria e calcola confidence totale
+  const categorieGrouped = risultati.reduce((acc, r) => {
+    if (!acc[r.categoria]) {
+      acc[r.categoria] = { confidence: 0, motivi: [] };
+    }
+    acc[r.categoria].confidence = Math.max(acc[r.categoria].confidence, r.confidence);
+    acc[r.categoria].motivi.push(r.motivo);
+    return acc;
+  }, {} as Record<CategoriaSpesa, {confidence: number, motivi: string[]}>);
+  
+  // Trova la categoria con confidence maggiore
+  const categoriaFinale = Object.entries(categorieGrouped)
+    .sort(([,a], [,b]) => b.confidence - a.confidence)[0];
+  
+  return {
+    categoria_spesa: categoriaFinale[0] as CategoriaSpesa,
+    confidence: categoriaFinale[1].confidence,
+    motivo: categoriaFinale[1].motivi.join(', ')
+  };
+}
+
+/**
+ * Versione sincrona della categorizzazione (backward compatibility)
+ * Usa solo pattern tradizionali senza chiamate API
+ */
+export function categorizzaSpesaFornitoreSync(spesa: SpesaFornitore): CategorizzazioneResult {
   const risultati: Array<{categoria: CategoriaSpesa, confidence: number, motivo: string}> = [];
   
   // 1. Analizza il nome del fornitore
@@ -326,7 +506,7 @@ export function categorizzaSpesaFornitore(spesa: SpesaFornitore): Categorizzazio
   // 4. Determina la categoria finale
   if (risultati.length === 0) {
     return {
-      categoria: CategoriaSpesa.ALTRO,
+      categoria_spesa: CategoriaSpesa.ALTRO,
       confidence: 0,
       motivo: 'Nessun pattern riconosciuto',
       suggerimenti: [
@@ -351,7 +531,7 @@ export function categorizzaSpesaFornitore(spesa: SpesaFornitore): Categorizzazio
     .sort(([,a], [,b]) => b.confidence - a.confidence)[0];
   
   return {
-    categoria: categoriaFinale[0] as CategoriaSpesa,
+    categoria_spesa: categoriaFinale[0] as CategoriaSpesa,
     confidence: categoriaFinale[1].confidence,
     motivo: categoriaFinale[1].motivi.join(', ')
   };
@@ -364,7 +544,7 @@ export function getSuggerimentiMiglioramento(spese: SpesaFornitore[]): string[] 
   const suggerimenti: Set<string> = new Set();
   
   const categorieNonRiconosciute = spese.filter(s => 
-    categorizzaSpesaFornitore(s).categoria === CategoriaSpesa.ALTRO
+    categorizzaSpesaFornitoreSync(s).categoria_spesa === CategoriaSpesa.ALTRO
   );
   
   if (categorieNonRiconosciute.length > 0) {
@@ -411,12 +591,29 @@ export function getSuggerimentiMiglioramento(spese: SpesaFornitore[]): string[] 
 }
 
 /**
- * Funzione per esportare le categorizzazioni per review
+ * Funzione per esportare le categorizzazioni per review (versione asincrona)
  */
-export function esportaCategorizzazioni(spese: SpesaFornitore[]): Array<SpesaFornitore & CategorizzazioneResult> {
+export async function esportaCategorizzazioni(spese: SpesaFornitore[]): Promise<Array<SpesaFornitore & CategorizzazioneResult>> {
+  const risultati: Array<SpesaFornitore & CategorizzazioneResult> = [];
+  
+  for (const spesa of spese) {
+    const categorizzazione = await categorizzaSpesaFornitore(spesa);
+    risultati.push({
+      ...spesa,
+      ...categorizzazione
+    });
+  }
+  
+  return risultati;
+}
+
+/**
+ * Funzione per esportare le categorizzazioni per review (versione sincrona)
+ */
+export function esportaCategorizzazioniSync(spese: SpesaFornitore[]): Array<SpesaFornitore & CategorizzazioneResult> {
   return spese.map(spesa => ({
     ...spesa,
-    ...categorizzaSpesaFornitore(spesa)
+    ...categorizzaSpesaFornitoreSync(spesa)
   }));
 }
 
@@ -424,20 +621,21 @@ export function esportaCategorizzazioni(spese: SpesaFornitore[]): Array<SpesaFor
  * Statistiche di categorizzazione
  */
 export function getStatisticheCategorizzazione(spese: SpesaFornitore[]) {
-  const categorizzazioni = spese.map(s => categorizzaSpesaFornitore(s));
+  // Usa la versione sincrona per le statistiche
+  const categorizzazioni = spese.map(s => categorizzaSpesaFornitoreSync(s));
   
   const stats = categorizzazioni.reduce((acc, cat) => {
-    if (!acc[cat.categoria]) {
-      acc[cat.categoria] = { count: 0, avgConfidence: 0, totalConfidence: 0 };
+    if (!acc[cat.categoria_spesa]) {
+      acc[cat.categoria_spesa] = { count: 0, avgConfidence: 0, totalConfidence: 0 };
     }
-    acc[cat.categoria].count++;
-    acc[cat.categoria].totalConfidence += cat.confidence;
-    acc[cat.categoria].avgConfidence = acc[cat.categoria].totalConfidence / acc[cat.categoria].count;
+    acc[cat.categoria_spesa].count++;
+    acc[cat.categoria_spesa].totalConfidence += cat.confidence;
+    acc[cat.categoria_spesa].avgConfidence = acc[cat.categoria_spesa].totalConfidence / acc[cat.categoria_spesa].count;
     return acc;
   }, {} as Record<CategoriaSpesa, {count: number, avgConfidence: number, totalConfidence: number}>);
   
   const totaleSpese = spese.length;
-  const speseRiconosciute = categorizzazioni.filter(c => c.categoria !== CategoriaSpesa.ALTRO).length;
+  const speseRiconosciute = categorizzazioni.filter(c => c.categoria_spesa !== CategoriaSpesa.ALTRO).length;
   const percentualeRiconoscimento = totaleSpese > 0 ? (speseRiconosciute / totaleSpese) * 100 : 0;
   
   return {

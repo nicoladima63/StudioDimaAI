@@ -1,5 +1,5 @@
 import { apiClient } from '@/api/client';
-import type { FornitoriResponse, FatturaFornitore, DettaglioFattura } from '../types';
+import type { FornitoriResponse, FatturaFornitore, DettaglioFattura, Fornitore } from '../types';
 
 export const fornitoriService = {
   /**

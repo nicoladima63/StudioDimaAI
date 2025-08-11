@@ -27,7 +27,7 @@ import type { Fornitore, ClassificazioneCosto } from "../types";
 import FornitoreDetailModal from "./FornitoreDetailModal";
 import FattureFornitoreModal from "./FattureFornitoreModal";
 import ClassificazioneToggle from "./ClassificazioneToggle";
-import CategoriaSpesaSelect from "./CategoriaSpesaSelect";
+import ClassificazioneStatus from "./ClassificazioneStatus";
 import classificazioniService from "../services/classificazioni.service";
 
 const FornitoriView: React.FC = () => {
@@ -45,12 +45,11 @@ const FornitoriView: React.FC = () => {
   // Stato per classificazioni
   const [classificazioni, setClassificazioni] = useState<Map<string, ClassificazioneCosto>>(new Map());
   
-  // Stato per categorie di spesa (caricate una sola volta)
-  const [categorieSpesa, setCategorieSpesa] = useState<Array<{codice_conto: string, descrizione: string}>>([]);
+  // Stato per categorie di spesa (legacy - non più utilizzato)
 
   // Ricerca e filtri
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<"id" | "nome">("id");
+  const [sortField, setSortField] = useState<"id" | "nome" | "classificazione" | "status">("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Paginazione
@@ -61,7 +60,6 @@ const FornitoriView: React.FC = () => {
   useEffect(() => {
     fetchFornitori();
     fetchClassificazioni();
-    fetchCategorieSpesa();
   }, []);
 
   const fetchClassificazioni = async () => {
@@ -79,16 +77,7 @@ const FornitoriView: React.FC = () => {
     }
   };
 
-  const fetchCategorieSpesa = async () => {
-    try {
-      const response = await classificazioniService.getCategorieSpesa();
-      if (response.success) {
-        setCategorieSpesa(response.data);
-      }
-    } catch (error) {
-      console.error("Errore nel caricamento categorie spesa:", error);
-    }
-  };
+  // fetchCategorieSpesa rimossa - non più necessaria con il nuovo sistema
 
   // Effetto per ricerca e ordinamento
   useEffect(() => {
@@ -122,6 +111,27 @@ const FornitoriView: React.FC = () => {
     }
   };
 
+  // Funzione helper per ottenere il tipo di classificazione
+  const getClassificationType = (fornitoreId: string): 'completo' | 'parziale' | 'non_classificato' => {
+    const classificazione = classificazioni.get(fornitoreId);
+    if (!classificazione) return 'non_classificato';
+    
+    const hasContoid = classificazione.contoid && classificazione.contoid > 0;
+    const hasBrancaid = classificazione.brancaid && classificazione.brancaid > 0;
+    const hasSottocontoid = classificazione.sottocontoid && classificazione.sottocontoid > 0;
+    
+    if (hasContoid && hasBrancaid && hasSottocontoid) {
+      return 'completo';
+    } else if (hasContoid && (
+      (!classificazione.brancaid || classificazione.brancaid === 0) ||
+      (hasBrancaid && (!classificazione.sottocontoid || classificazione.sottocontoid === 0))
+    )) {
+      return 'parziale';
+    } else {
+      return 'non_classificato';
+    }
+  };
+
   const applyFiltersAndSort = () => {
     let filtered = [...allFornitori];
 
@@ -138,14 +148,36 @@ const FornitoriView: React.FC = () => {
 
     // Applicare ordinamento
     filtered.sort((a, b) => {
-      const aValue = a[sortField] || "";
-      const bValue = b[sortField] || "";
+      let aValue: string | number;
+      let bValue: string | number;
+
+      if (sortField === 'classificazione') {
+        // Ordinamento per tipo di classificazione (completo > parziale > non_classificato)
+        const statusOrder = { 'completo': 3, 'parziale': 2, 'non_classificato': 1 };
+        aValue = statusOrder[getClassificationType(a.id)];
+        bValue = statusOrder[getClassificationType(b.id)];
+      } else if (sortField === 'status') {
+        // Ordinamento identico a classificazione (stesso significato)
+        const statusOrder = { 'completo': 3, 'parziale': 2, 'non_classificato': 1 };
+        aValue = statusOrder[getClassificationType(a.id)];
+        bValue = statusOrder[getClassificationType(b.id)];
+      } else {
+        // Ordinamento normale per id e nome
+        aValue = a[sortField as keyof Fornitore] || "";
+        bValue = b[sortField as keyof Fornitore] || "";
+      }
 
       if (sortDirection === "asc") {
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return aValue - bValue;
+        }
         return aValue
           .toString()
           .localeCompare(bValue.toString(), "it", { numeric: true });
       } else {
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return bValue - aValue;
+        }
         return bValue
           .toString()
           .localeCompare(aValue.toString(), "it", { numeric: true });
@@ -166,7 +198,7 @@ const FornitoriView: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const handleSort = (field: "id" | "nome") => {
+  const handleSort = (field: "id" | "nome" | "classificazione" | "status") => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -357,11 +389,23 @@ const FornitoriView: React.FC = () => {
                 </CTableHeaderCell>
                 <CTableHeaderCell>Telefono</CTableHeaderCell>
                 <CTableHeaderCell>Email</CTableHeaderCell>
-                <CTableHeaderCell className="text-center">
-                  Classificazione
+                <CTableHeaderCell 
+                  className="text-center"
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("classificazione")}
+                >
+                  Classificazione{" "}
+                  {sortField === "classificazione" &&
+                    (sortDirection === "asc" ? "↑" : "↓")}
                 </CTableHeaderCell>
-                <CTableHeaderCell className="text-center">
-                  Categoria Spesa
+                <CTableHeaderCell 
+                  className="text-center" 
+                  style={{ width: '80px', cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("status")}
+                >
+                  Status{" "}
+                  {sortField === "status" &&
+                    (sortDirection === "asc" ? "↑" : "↓")}
                 </CTableHeaderCell>
                 <CTableHeaderCell className="text-center">
                   Azioni
@@ -396,22 +440,23 @@ const FornitoriView: React.FC = () => {
                     className="text-center"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <CategoriaSpesaSelect
+                    <ClassificazioneStatus
                       fornitoreId={fornitore.id}
                       classificazione={classificazioni.get(fornitore.id) || null}
-                      categorie={categorieSpesa}
-                      onCategoriaChange={(codiceCategoria) => {
-                        // Aggiorna la classificazione locale con la nuova categoria
+                      onClassificazioneChange={(contoid, brancaid, sottocontoid) => {
+                        // Aggiorna la classificazione locale senza ricaricare tutto
                         const classificazione = classificazioni.get(fornitore.id);
-                        if (classificazione) {
-                          const updatedClassificazione = {
-                            ...classificazione,
-                            categoria_conto: codiceCategoria || undefined
-                          };
-                          const newMap = new Map(classificazioni);
-                          newMap.set(fornitore.id, updatedClassificazione);
-                          setClassificazioni(newMap);
-                        }
+                        const updatedClassificazione = {
+                          ...classificazione,
+                          contoid,
+                          brancaid,
+                          sottocontoid,
+                          data_modifica: new Date().toISOString()
+                        } as ClassificazioneCosto;
+                        
+                        const newMap = new Map(classificazioni);
+                        newMap.set(fornitore.id, updatedClassificazione);
+                        setClassificazioni(newMap);
                       }}
                     />
                   </CTableDataCell>

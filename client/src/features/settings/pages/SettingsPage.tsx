@@ -15,7 +15,8 @@ import {
   CNavItem,
   CNavLink,
   CTabContent,
-  CTabPane, CBadge
+  CTabPane, CBadge,
+  CCardHeader
 } from '@coreui/react';
 import { useEnvStore } from '@/features/auth/store/useAuthStore';
 import { 
@@ -28,6 +29,10 @@ import AutomationReminderSettings from '../components/AutomationReminderSettings
 import AutomationRecallSettings from '../components/AutomationRecallSettings';
 import AutomationCalendarSyncSettings from '../components/AutomationCalendarSyncSettings';
 import NetworkModal from '@/components/ui/MessageModal';
+import SelectConto  from "@/components/selects/SelectConto";
+import { SelectBranca } from "@/components/selects/SelectBranca";
+import { SelectSottoconto } from "@/components/selects/SelectSottoconto";
+import { useConti, useBranche,useSottoconti } from "@/store/contiStore";
 
 const SettingsPage: React.FC = () => {
   // Store esistente per database, rentri, ricetta
@@ -46,7 +51,10 @@ const SettingsPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<'dev' | 'prod'>(mode);
   const [selectedRentriMode, setSelectedRentriMode] = useState<'dev' | 'prod'>(rentriMode);
   const [selectedRicettaMode, setSelectedRicettaMode] = useState<'dev' | 'prod'>(ricettaMode);
-
+  const [contoId, setContoId] = useState<number | null>(null);
+  const [brancaId, setBrancaId] = useState<number | null>(null);
+  const [sottocontoId, setSottocontoId] = useState<number | null>(null);
+  
   // Toast state esistente
   const [showToast, setShowToast] = useState(false);
   const [errorToast, setErrorToast] = useState(false);
@@ -162,6 +170,29 @@ const SettingsPage: React.FC = () => {
       <CToastBody>Modalità aggiornata con successo!</CToastBody>
     </CToast>
   );
+
+  const HierarchicalSelector = () => {
+    const [selectedConto, setConto] = useState<number | null>(null);
+    const [selectedBranca, setBranca] = useState<number | null>(null);
+    
+    const { conti } = useConti();
+    const { branche } = useBranche(selectedConto!);
+    const { sottoconti } = useSottoconti(selectedBranca!);
+  
+    return (
+      <div className="grid gap-4">
+        <SelectConto value={selectedConto} onChange={setConto} />
+        {selectedConto && (
+          <SelectBranca 
+            value={selectedBranca} 
+            onChange={setBranca} 
+            branche={branche} 
+          />
+        )}
+        {selectedBranca && <SelectSottoconto sottoconti={sottoconti} />}
+      </div>
+    );
+  };
   
   return (
     <Card title="Impostazioni">
@@ -201,6 +232,15 @@ const SettingsPage: React.FC = () => {
             role="tab"
           >
             Automazione Calendario
+          </CNavLink>
+        </CNavItem>
+        <CNavItem>
+          <CNavLink
+            active={activeTab === 'select'}
+            onClick={() => setActiveTab('select')}
+            role="tab"
+          >
+            Test Select
           </CNavLink>
         </CNavItem>
       </CNav>
@@ -398,6 +438,39 @@ const SettingsPage: React.FC = () => {
               </CCard>
             </CCol>
           </CRow>
+        </CTabPane>
+
+        <CTabPane role="tabpanel" aria-labelledby="select-tab" visible={activeTab==='select'}>
+            <CRow>
+              <CCol xs={4}>
+              <CCard>
+                <CCardHeader>select conti</CCardHeader>
+                <CCardBody>
+                  
+                  
+                  <SelectConto value={contoId} onChange={setContoId} autoSelectIfSingle />
+                </CCardBody>
+              </CCard>
+              </CCol>
+              <CCol xs={4}>
+                <CCard>
+                  <CCardHeader>select branche</CCardHeader>
+                  <CCardBody>
+                  <SelectBranca contoId={contoId} value={brancaId} onChange={setBrancaId} autoSelectIfSingle />
+
+                  </CCardBody>
+                </CCard>
+              </CCol>
+              <CCol xs={4}>
+                <CCard>
+                  <CCardHeader>select sottoconti</CCardHeader>
+                  <CCardBody>
+                  <SelectSottoconto brancaId={brancaId} value={sottocontoId} onChange={setSottocontoId} autoSelectIfSingle />
+<HierarchicalSelector/>
+                  </CCardBody>
+                </CCard>
+              </CCol>
+            </CRow>
         </CTabPane>
       </CTabContent>
 

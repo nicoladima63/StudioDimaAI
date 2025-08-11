@@ -270,7 +270,7 @@ const FattureFornitoreModal: React.FC<FattureFornitoreModalProps> = ({
                               <CCardBody className="bg-light">
                                 <h6 className="mb-3">Dettagli Fattura {fattura.id}</h6>
                                 {dettagliFatture.get(fattura.id)?.length ? (
-                                  <CTable size="sm" className="mb-0">
+                                  <CTable className="mb-0">
                                     <CTableHead>
                                       <CTableRow>
                                         <CTableHeaderCell>Codice Articolo</CTableHeaderCell>

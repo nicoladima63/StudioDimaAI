@@ -119,7 +119,7 @@ const DettagliFattura: React.FC<DettagliFatturaProps> = ({
         </div>
         
         <div style={{ overflowX: "auto" }}>
-          <CTable size="sm" hover>
+          <CTable hover>
             <CTableHead>
               <CTableRow>
                 <CTableHeaderCell>Cod. Art.</CTableHeaderCell>

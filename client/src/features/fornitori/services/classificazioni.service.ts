@@ -2,6 +2,7 @@ import apiClient from '@/api/client';
 import type { 
   ClassificazioneResponse, 
   ClassificazioneRequest, 
+  ClassificazioneCompletaRequest,
   ClassificazioneCosto,
   StatisticheClassificazioni
 } from '../types';
@@ -33,6 +34,12 @@ const classificazioniService = {
 
   rimuoviClassificazioneFornitore: async (fornitoreId: string): Promise<{ success: boolean; message?: string; error?: string }> => {
     const response = await apiClient.delete(`/api/classificazioni/fornitore/${fornitoreId}`);
+    return response.data;
+  },
+
+  // Nuovo metodo per classificazione completa
+  salvaClassificazioneFornitoreCompleta: async (fornitoreId: string, request: ClassificazioneCompletaRequest): Promise<ClassificazioneResponse> => {
+    const response = await apiClient.put(`/api/classificazioni/fornitore/${fornitoreId}/completa`, request);
     return response.data;
   },
 

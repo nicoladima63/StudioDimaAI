@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   CCard,
   CCardBody,
@@ -25,6 +25,11 @@ import {
   CToastClose,
   CToaster,
   CTooltip,
+  CNav,
+  CNavItem,
+  CNavLink,
+  CTabContent,
+  CTabPane,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
 import {
@@ -36,23 +41,37 @@ import {
 } from "@coreui/icons";
 import SelectSmart from "./SelectSmart";
 import materialiClassificazioniService from "../services/materialiClassificazioni.service";
-import { confirmTuttiDaVerificare } from "@/api/services/materiali.service";
+import { confirmListaMateriali } from "@/api/services/materiali.service";
 import type { MaterialeClassificazione, FiltriMateriali, MaterialiDaClassificareResponse } from "../services/materialiClassificazioni.service";
-import { useContiStore } from "../../../store/contiStore";
-import { useBrancheStore } from "../../../store/brancheStore";
+// import { useConti, useBranche, useSottoconti } from "../../../store/contiStore"; // Not used in this component
 // lettura/salvataggio: si usa il servizio materialiClassificazioniService (DBF + classificazioni)
+import SelectConto from "@/components/selects/SelectConto";
+import { SelectBranca } from "@/components/selects/SelectBranca";
+import { SelectSottoconto } from "@/components/selects/SelectSottoconto";
+import AnalyticsFornitori from "./AnalyticsFornitori";
 
 const ContiSottocontiTab: React.FC = () => {
+  // Stato per le tabs
+  const [activeTab, setActiveTab] = useState("materiali");
+  
   const [materiali, setMateriali] = useState<MaterialeClassificazione[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   // rimosso success non utilizzato
 
-  // Store per conti e sottoconti
-  const { conti, checkAndUpdateCache } = useContiStore();
-  
-  // Store per branche
-  const { brancheByParent, checkAndUpdateCache: checkBrancheCache } = useBrancheStore();
+  // Cache locale per evitare chiamate server ripetute
+  const [materialiCache, setMaterialiCache] = useState<Map<string, {
+    data: MaterialeClassificazione[];
+    total: number;
+    total_pages: number;
+    stats: { classificati: number; non_classificati: number; da_verificare: number };
+    timestamp: number;
+  }>>(new Map());
+
+  // Store per conti, branche e sottoconti
+  const [contoId, setContoId] = useState<number | null>(null);
+  const [brancaId, setBrancaId] = useState<number | null>(null);
+  const [sottocontoId, setSottocontoId] = useState<number | null>(null);
 
   // Paginazione e filtri
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,6 +81,10 @@ const ContiSottocontiTab: React.FC = () => {
     stato: "tutti",
     limit: 50,
   });
+  
+  
+  // Stato per tenere traccia dei materiali esclusi dall'utente
+  const [materialiEsclusi, setMaterialiEsclusi] = useState<Set<string>>(new Set());
 
   // Stats
   const [stats, setStats] = useState({
@@ -71,56 +94,75 @@ const ContiSottocontiTab: React.FC = () => {
   });
 
   // Toast notifications
-  type ToastItem = { id: number; color: "success" | "danger"; title: string; message: string };
+  type ToastItem = { id: number; color: "success" | "danger" | "warning"; title: string; message: string };
   const [toast, setToast] = useState<ToastItem[]>([]);
   const addToast = (item: ToastItem) => setToast((prev) => [...prev, item]);
 
-  // Funzioni helper per lookup nomi
-  const getContoNome = (codice: string | null | undefined): string => {
-    if (!codice) return "-";
-    const conto = conti.find((c) => c.codice_conto === codice);
-    return conto ? `${codice} - ${conto.descrizione}` : codice;
+
+  // Genera chiave cache per stato filtro
+  const getCacheKey = (filtroStato: string) => {
+    return `materiali_${filtroStato}`;
   };
 
-  // (rimosso helper sottoconto non usato)
-
-  const getBrancaNome = (codice: string | null | undefined, contoId?: number): string => {
-    if (!codice) return "-";
-    
-    // Se abbiamo il contoId, cerca nelle branche di quel conto
-    if (contoId) {
-      const branche = brancheByParent[contoId] || [];
-      const branca = branche.find((b) => b.id.toString() === codice);
-      return branca ? `${codice} - ${branca.nome}` : codice;
-    }
-    
-    // Altrimenti cerca in tutte le branche
-    for (const [, branche] of Object.entries(brancheByParent)) {
-      const branca = branche.find((b) => b.id.toString() === codice);
-      if (branca) {
-        return `${codice} - ${branca.nome}`;
-      }
-    }
-    
-    return codice;
-  };
-
-  // Carica materiali (DBF derivati) con suggerimenti
-  const caricaMateriali = useCallback(async (page = 1, nuoviFiltri = filtri) => {
+  // Carica materiali con cache intelligente
+  const caricaMateriali = useCallback(async (page = 1, nuoviFiltri = filtri, forceReload = false) => {
     try {
       setLoading(true);
       setError("");
+
+      // Chiave cache basata solo sullo stato (non su page/limit)
+      const cacheKey = getCacheKey(nuoviFiltri.stato || "tutti");
+      const cachedData = materialiCache.get(cacheKey);
+      const cacheAge = cachedData ? Date.now() - cachedData.timestamp : Infinity;
+      const CACHE_DURATION = 5 * 60 * 1000; // 5 minuti
+
+      // Usa cache se disponibile, recente e non è un reload forzato
+      if (!forceReload && cachedData && cacheAge < CACHE_DURATION) {
+        // Applica paginazione locale sui dati cached
+        const startIdx = (page - 1) * (nuoviFiltri.limit || 50);
+        const endIdx = startIdx + (nuoviFiltri.limit || 50);
+        const paginatedData = cachedData.data.slice(startIdx, endIdx);
+        
+        setMateriali(paginatedData);
+        setCurrentPage(page);
+        setTotalPages(Math.ceil(cachedData.data.length / (nuoviFiltri.limit || 50)));
+        setTotal(cachedData.data.length);
+        setStats(cachedData.stats);
+        setLoading(false);
+        return;
+      }
+
+      // Carica TUTTI i dati dal server (senza paginazione server-side)
       const response: MaterialiDaClassificareResponse =
         await materialiClassificazioniService.apiGetMaterialiDaClassificare({
-          ...nuoviFiltri,
-          page,
+          stato: nuoviFiltri.stato,
+          limit: 10000, // Carica tutto
+          page: 1
         });
 
       if (response.success) {
-        setMateriali(response.data);
-        setCurrentPage(response.page);
-        setTotalPages(response.total_pages);
-        setTotal(response.total);
+        // Salva in cache
+        setMaterialiCache(prev => {
+          const newCache = new Map(prev);
+          newCache.set(cacheKey, {
+            data: response.data,
+            total: response.total,
+            total_pages: response.total_pages,
+            stats: response.stats,
+            timestamp: Date.now()
+          });
+          return newCache;
+        });
+
+        // Applica paginazione locale
+        const startIdx = (page - 1) * (nuoviFiltri.limit || 50);
+        const endIdx = startIdx + (nuoviFiltri.limit || 50);
+        const paginatedData = response.data.slice(startIdx, endIdx);
+        
+        setMateriali(paginatedData);
+        setCurrentPage(page);
+        setTotalPages(Math.ceil(response.data.length / (nuoviFiltri.limit || 50)));
+        setTotal(response.data.length);
         setStats(response.stats);
       } else {
         setError("Errore nel caricamento dei materiali");
@@ -131,26 +173,75 @@ const ContiSottocontiTab: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [filtri]);
+  }, [filtri, materialiCache]);
 
-  // Carica materiali al mount
-  useEffect(() => {
-    caricaMateriali();
-  }, [caricaMateriali]);
 
-  // Carica conti, sottoconti e branche al mount
-  useEffect(() => {
-    checkAndUpdateCache();
-    checkBrancheCache();
-  }, [checkAndUpdateCache, checkBrancheCache]);
 
   // Handler per filtri
   const handleFiltroChange = (key: keyof FiltriMateriali, value: string | number) => {
     const nuoviFiltri = { ...filtri, [key]: value };
     setFiltri(nuoviFiltri);
     setCurrentPage(1);
-    caricaMateriali(1, nuoviFiltri);
+    
+    // Solo per cambio di stato ricarica dal server/cache
+    if (key === 'stato') {
+      caricaMateriali(1, nuoviFiltri, false);
+    } else {
+      // Per limit, usa la cache esistente con nuova paginazione
+      caricaMateriali(1, nuoviFiltri, false);
+    }
   };
+
+  // Handler per reset a cascata
+  const handleContoChange = (newContoId: number | null) => {
+    setContoId(newContoId);
+    setBrancaId(null);
+    setSottocontoId(null);
+  };
+
+  const handleBrancaChange = (newBrancaId: number | null) => {
+    setBrancaId(newBrancaId);
+    setSottocontoId(null);
+  };
+
+  // Handler per escludere un materiale dalla vista
+  const handleEscludiMateriale = (materiale: MaterialeClassificazione) => {
+    const chiaveMateriale = `${materiale.codicearticolo || ''}-${materiale.nome}-${materiale.fornitoreid}`;
+    setMaterialiEsclusi(prev => new Set([...prev, chiaveMateriale]));
+  };
+
+  // Handler per ripulire i materiali esclusi quando cambiano i filtri
+  const handlePulisciEsclusi = () => {
+    setMaterialiEsclusi(new Set());
+  };
+
+  // Materiali filtrati con le select in cascata (usa i campi ID corretti del BE)
+  const materialiFiltrati = materiali.filter(materiale => {
+    // Escludi materiali rimossi dall'utente (aggiornato con campi corretti)
+    const chiaveMateriale = `${materiale.codicearticolo || ''}-${materiale.nome}-${materiale.fornitoreid}`;
+    if (materialiEsclusi.has(chiaveMateriale)) {
+      return false;
+    }
+    
+    // Filtro per conto - confronta ID numerico con ID numerico
+    if (contoId && materiale.contoid !== contoId) {
+      return false;
+    }
+    
+    // Filtro per branca - confronta ID numerico con ID numerico  
+    if (brancaId && materiale.brancaid !== brancaId) {
+      return false;
+    }
+    
+    // Filtro per sottoconto - confronta ID numerico con ID numerico
+    if (sottocontoId && materiale.sottocontoid !== sottocontoId) {
+      return false;
+    }
+    
+    return true;
+  });
+
+
 
   // Handler per paginazione
   const handlePageChange = (page: number) => {
@@ -166,9 +257,9 @@ const ContiSottocontiTab: React.FC = () => {
     // Aggiorna il materiale nella lista
     setMateriali((prev) =>
       prev.map((m) =>
-        m.codice_articolo === materialeAggiornato.codice_articolo &&
-        m.descrizione === materialeAggiornato.descrizione &&
-        m.codice_fornitore === materialeAggiornato.codice_fornitore
+        m.codicearticolo === materialeAggiornato.codicearticolo &&
+        m.nome === materialeAggiornato.nome &&
+        m.fornitoreid === materialeAggiornato.fornitoreid
           ? ({ ...m, ...materialeAggiornato } as MaterialeClassificazione)
           : m
       )
@@ -186,7 +277,7 @@ const ContiSottocontiTab: React.FC = () => {
       id: Date.now(),
       color: "success",
       title: "Classificazione Salvata",
-      message: `${materialeAggiornato.descrizione} classificato come ${materialeAggiornato.categoria_contabile}`,
+      message: `${materialeAggiornato.nome} classificato come ${materialeAggiornato.categoria_contabile}`,
     });
 
     // Il salvataggio effettivo è demandato al servizio chiamato da SelectSmart
@@ -202,13 +293,38 @@ const ContiSottocontiTab: React.FC = () => {
     });
   };
 
-  // Handler conferma tutti da verificare
+  // Handler conferma tutti da verificare (solo quelli filtrati e visibili)
   const handleConfermaTuttiDaVerificare = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await confirmTuttiDaVerificare();
+      // Ottieni solo i materiali "da_verificare" che sono attualmente filtrati
+      const materialiDaConfermare = materialiFiltrati.filter(m => m.stato_classificazione === 'da_verificare');
+      
+      if (materialiDaConfermare.length === 0) {
+        setError("Nessun materiale da verificare nei filtri correnti");
+        return;
+      }
+
+      // Mappa i materiali al formato richiesto dall'endpoint (i dati sono già nel formato corretto)
+      const materialiFormattati = materialiDaConfermare.map(materiale => {
+        return {
+          codicearticolo: materiale.codicearticolo || '',
+          nome: materiale.nome,
+          fornitoreid: materiale.fornitoreid,
+          fornitorenome: materiale.fornitorenome || '',
+          contoid: materiale.contoid || undefined, // Converti null in undefined
+          contonome: materiale.contonome || undefined,
+          brancaid: materiale.brancaid || undefined,
+          brancanome: materiale.brancanome || undefined,
+          sottocontoid: materiale.sottocontoid || undefined,
+          sottocontonome: materiale.sottocontonome || undefined,
+          confidence: materiale.confidence || 100
+        };
+      });
+
+      const response = await confirmListaMateriali(materialiFormattati);
 
       if (response.success) {
         // Ricarica la tabella per aggiornare i dati
@@ -219,8 +335,17 @@ const ContiSottocontiTab: React.FC = () => {
           id: Date.now(),
           color: "success",
           title: "Conferma Completata",
-          message: `Confermate ${response.materiali_confermati} classificazioni automatiche`,
+          message: `Confermate ${response.materiali_confermati}/${materialiDaConfermare.length} classificazioni${contoId || brancaId || sottocontoId ? ' filtrate' : ''}`,
         });
+        
+        if (response.materiali_falliti > 0) {
+          addToast({
+            id: Date.now() + 1,
+            color: "warning",
+            title: "Attenzione",
+            message: `${response.materiali_falliti} materiali non sono stati confermati`,
+          });
+        }
       } else {
         setError("Errore nella conferma delle classificazioni");
       }
@@ -268,6 +393,32 @@ const ContiSottocontiTab: React.FC = () => {
   return (
     <>
       <CCard>
+        <CCardHeader className="pb-0">
+          <CNav variant="tabs" className="card-header-tabs">
+            <CNavItem>
+              <CNavLink
+                active={activeTab === "materiali"}
+                onClick={() => setActiveTab("materiali")}
+                style={{ cursor: "pointer" }}
+              >
+                📦 Materiali
+              </CNavLink>
+            </CNavItem>
+            <CNavItem>
+              <CNavLink
+                active={activeTab === "fornitori"}
+                onClick={() => setActiveTab("fornitori")}
+                style={{ cursor: "pointer" }}
+              >
+                📊 Analytics Fornitori
+              </CNavLink>
+            </CNavItem>
+          </CNav>
+        </CCardHeader>
+
+        <CTabContent>
+          <CTabPane visible={activeTab === "materiali"}>
+            <CCard className="border-0">
         <CCardHeader>
           <CRow className="align-items-center">
             <CCol md={8}>
@@ -280,7 +431,11 @@ const ContiSottocontiTab: React.FC = () => {
               <CButton
                 color="primary"
                 variant="outline"
-                onClick={() => caricaMateriali(currentPage)}
+                onClick={() => {
+                  // Pulisce cache e ricarica dal server
+                  setMaterialiCache(new Map());
+                  caricaMateriali(currentPage, filtri, true);
+                }}
                 disabled={loading}
               >
                 <CIcon icon={cilReload} className={loading ? "fa-spin" : ""} />
@@ -321,7 +476,7 @@ const ContiSottocontiTab: React.FC = () => {
 
           {/* Filtri */}
           <CRow className="mb-3">
-            <CCol md={3}>
+            <CCol md={2}>
               <CInputGroup>
                 <CFormSelect
                   value={filtri.stato}
@@ -334,7 +489,7 @@ const ContiSottocontiTab: React.FC = () => {
                 </CFormSelect>
               </CInputGroup>
             </CCol>
-            <CCol md={3}>
+            <CCol md={2}>
               <CFormSelect
                 value={filtri.limit}
                 onChange={(e) =>
@@ -346,28 +501,79 @@ const ContiSottocontiTab: React.FC = () => {
                 <option value={100}>100 per pagina</option>
               </CFormSelect>
             </CCol>
-            <CCol md={6} className="d-flex gap-2 align-items-center">
+            <CCol md={2}>
+              <SelectConto 
+                value={contoId} 
+                onChange={handleContoChange} 
+                autoSelectIfSingle 
+              />
+            </CCol>
+            <CCol md={2}>
+              <SelectBranca 
+                contoId={contoId}
+                value={brancaId} 
+                onChange={handleBrancaChange}
+                autoSelectIfSingle 
+              />
+            </CCol>
+            <CCol md={2}>
+              <SelectSottoconto 
+                brancaId={brancaId}
+                value={sottocontoId} 
+                onChange={setSottocontoId}
+                autoSelectIfSingle 
+              />
+            </CCol>
+            <CCol md={2} className="d-flex gap-2 align-items-center">
               <CBadge color="info" className="p-2">
                 <CIcon icon={cilFilter} className="me-1" />
-                {total} materiali trovati
+                {materialiFiltrati.length} / {total} materiali
               </CBadge>
-
-              {stats.da_verificare > 0 && (
-                <CTooltip
-                  content={`Conferma tutte le ${stats.da_verificare} classificazioni automatiche`}
+              {(contoId || brancaId || sottocontoId) && (
+                <CButton
+                  color="secondary"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setContoId(null);
+                    setBrancaId(null);
+                    setSottocontoId(null);
+                  }}
                 >
-                  <CButton
-                    color="success"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleConfermaTuttiDaVerificare}
-                    disabled={loading}
-                  >
-                    <CIcon icon={cilCheckCircle} className="me-1" />
-                    Conferma Tutti ({stats.da_verificare})
-                  </CButton>
-                </CTooltip>
+                  Rimuovi Filtri
+                </CButton>
               )}
+              
+              {materialiEsclusi.size > 0 && (
+                <CButton
+                  color="info"
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePulisciEsclusi}
+                >
+                  Ripristina {materialiEsclusi.size} Esclusi
+                </CButton>
+              )}
+
+              {(() => {
+                const daVerificareFiltrati = materialiFiltrati.filter(m => m.stato_classificazione === 'da_verificare').length;
+                return daVerificareFiltrati > 0 && (
+                  <CTooltip
+                    content={`Conferma ${daVerificareFiltrati} classificazioni automatiche ${contoId || brancaId || sottocontoId ? 'filtrate' : ''}`}
+                  >
+                    <CButton
+                      color="success"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleConfermaTuttiDaVerificare}
+                      disabled={loading}
+                    >
+                      <CIcon icon={cilCheckCircle} className="me-1" />
+                      Conferma {contoId || brancaId || sottocontoId ? 'Filtrati' : 'Tutti'} ({daVerificareFiltrati})
+                    </CButton>
+                  </CTooltip>
+                );
+              })()}
             </CCol>
           </CRow>
 
@@ -420,9 +626,9 @@ const ContiSottocontiTab: React.FC = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {materiali.map((materiale) => (
+                  {materialiFiltrati.map((materiale) => (
                     <CTableRow
-                      key={`${materiale.codice_articolo}-${materiale.descrizione}-${materiale.codice_fornitore}`}
+                      key={`${materiale.codicearticolo}-${materiale.nome}-${materiale.fornitoreid}`}
                     >
                       <CTableDataCell>
                         {getBadgeStato(materiale.stato_classificazione)}
@@ -430,55 +636,42 @@ const ContiSottocontiTab: React.FC = () => {
 
                       <CTableDataCell>
                         <code className="text-muted small">
-                          {materiale.codice_articolo || "-"}
+                          {materiale.codicearticolo || "-"}
                         </code>
                       </CTableDataCell>
 
                       <CTableDataCell>
                         <div className="fw-medium">
-                          {materiale.descrizione.length > 50
-                            ? `${materiale.descrizione.substring(0, 50)}...`
-                            : materiale.descrizione}
+                          {materiale.nome}
                         </div>
                       </CTableDataCell>
 
                       <CTableDataCell>
                         <small>
-                          <strong>{materiale.nome_fornitore}</strong>
+                          <strong>{materiale.fornitorenome}</strong>
                         </small>
                       </CTableDataCell>
 
                       <CTableDataCell>
                         <small>
                           <strong>
-                            {materiale.conto_codice
-                              ? (() => {
-                                  const nomeCompleto = getContoNome(materiale.conto_codice);
-                                  const parti = nomeCompleto.split(" - ");
-                                  return parti.length > 1 ? parti[1] : nomeCompleto;
-                                })()
-                              : "-"}
+                            {materiale.contonome || "-"}
                           </strong>
                         </small>
                       </CTableDataCell>
 
                       <CTableDataCell>
-                        {materiale.branca_codice ? (
-                          <small>
-                            <strong>
-                              {getBrancaNome(materiale.branca_codice).split(" - ")[1] ||
-                                materiale.branca_codice}
-                            </strong>
-                          </small>
-                        ) : (
-                          <small><strong>ND</strong></small>
-                        )}
+                        <small>
+                          <strong>
+                            {materiale.brancanome || "-"}
+                          </strong>
+                        </small>
                       </CTableDataCell>
 
                       <CTableDataCell>
                         <small>
                           <strong>
-                            {materiale.sottoconto_codice || "-"}
+                            {materiale.sottocontonome || "-"}
                           </strong>
                         </small>
                       </CTableDataCell>
@@ -490,14 +683,28 @@ const ContiSottocontiTab: React.FC = () => {
                       </CTableDataCell>
 
                       <CTableDataCell>
-                        {/* passiamo l'id materiale nel callback per aggiornare la tabella materiali */}
-                        <SelectSmart
-                          materiale={materiale}
-                          onClassificazioneAggiornata={(m) =>
-                            handleClassificazioneAggiornataForRow(0, m)
-                          }
-                          onError={handleError}
-                        />
+                        <div className="d-flex gap-1 align-items-center">
+                          {/* passiamo l'id materiale nel callback per aggiornare la tabella materiali */}
+                          <SelectSmart
+                            materiale={materiale}
+                            onClassificazioneAggiornata={(m) =>
+                              handleClassificazioneAggiornataForRow(0, m)
+                            }
+                            onError={handleError}
+                          />
+                          
+                          {/* Tasto X per escludere il materiale */}
+                          <CTooltip content="Rimuovi dalla lista">
+                            <CButton
+                              color="danger"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEscludiMateriale(materiale)}
+                            >
+                              ✕
+                            </CButton>
+                          </CTooltip>
+                        </div>
                       </CTableDataCell>
                     </CTableRow>
                   ))}
@@ -540,6 +747,13 @@ const ContiSottocontiTab: React.FC = () => {
             </>
           )}
         </CCardBody>
+            </CCard>
+          </CTabPane>
+
+          <CTabPane visible={activeTab === "fornitori"}>
+            <AnalyticsFornitori />
+          </CTabPane>
+        </CTabContent>
       </CCard>
 
       {/* Toast Container */}

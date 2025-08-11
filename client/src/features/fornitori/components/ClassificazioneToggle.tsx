@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { CButton, CSpinner, CTooltip } from "@coreui/react";
 import classificazioniService from "../services/classificazioni.service";
 import type { TipoDiCosto, ClassificazioneCosto } from "../types";
-import type { TipoDiCostoLabels } from "../types";
 
 interface ClassificazioneToggleProps {
   fornitoreId: string;
@@ -80,7 +79,7 @@ const ClassificazioneToggle: React.FC<ClassificazioneToggleProps> = ({
       case 1: // DIRETTO
         return {
           color: "danger" as const,
-          variant: "solid" as const,
+          variant: "outline" as const,
           text: "DIRETTO",
           tooltip: "Clicca per cambiare in Indiretto",
           icon: "🔴"
@@ -88,7 +87,7 @@ const ClassificazioneToggle: React.FC<ClassificazioneToggleProps> = ({
       case 2: // INDIRETTO
         return {
           color: "primary" as const,
-          variant: "solid" as const,
+          variant: "outline" as const,
           text: "INDIRETTO", 
           tooltip: "Clicca per cambiare in Non Deducibile",
           icon: "🔵"
@@ -96,7 +95,7 @@ const ClassificazioneToggle: React.FC<ClassificazioneToggleProps> = ({
       case 3: // NON_DEDUCIBILE
         return {
           color: "dark" as const,
-          variant: "solid" as const,
+          variant: "outline" as const,
           text: "NON DEDUCIBILE",
           tooltip: "Clicca per rimuovere classificazione",
           icon: "⚫"

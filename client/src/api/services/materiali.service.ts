@@ -48,12 +48,16 @@ export async function deleteMateriale(materialeId: number) {
 }
 
 export async function saveClassificazioneMateriale(payload: {
-  codice_articolo?: string;
-  descrizione: string;
-  codice_fornitore: string;
-  nome_fornitore?: string;
-  conto_codice: string;
-  sottoconto_codice: string;
+  codicearticolo?: string;
+  nome: string;
+  fornitoreid: string;
+  fornitorenome?: string;
+  contoid: number;
+  contonome?: string;
+  brancaid: number;
+  brancanome?: string;
+  sottocontoid: number;
+  sottocontonome?: string;
   categoria_contabile?: string;
   metodo_classificazione?: 'manuale' | 'confermato' | 'automatico' | 'pattern';
   confidence?: number;
@@ -65,6 +69,23 @@ export async function saveClassificazioneMateriale(payload: {
 export async function confirmTuttiDaVerificare() {
   const res = await apiClient.post('/api/materiali/confirm-da-verificare');
   return res.data as { success: boolean; message: string; materiali_confermati: number };
+}
+
+export async function confirmListaMateriali(materiali: Array<{
+  codicearticolo?: string;
+  nome: string;
+  fornitoreid: string;
+  fornitorenome?: string;
+  contoid?: number;
+  contonome?: string;
+  brancaid?: number;
+  brancanome?: string;
+  sottocontoid?: number;
+  sottocontonome?: string;
+  confidence?: number;
+}>) {
+  const res = await apiClient.post('/api/materiali/confirm-lista', { materiali });
+  return res.data as { success: boolean; message: string; materiali_confermati: number; materiali_falliti: number };
 }
 
 

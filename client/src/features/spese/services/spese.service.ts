@@ -66,7 +66,6 @@ export const speseFornitioriService = {
     }
     
     const response = await apiClient.get(`/api/spese-fornitori/?${params.toString()}`);
-    console.log(params)
     return response.data;
   },
 

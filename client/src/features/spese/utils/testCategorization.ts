@@ -4,7 +4,7 @@
  */
 
 import type { SpesaFornitore } from '../types';
-import { categorizzaSpesaFornitore, getStatisticheCategorizzazione, CategoriaSpesa } from './autoCategorization';
+import { categorizzaSpesaFornitoreSync as categorizzaSpesaFornitore, getStatisticheCategorizzazione, CategoriaSpesa } from './autoCategorization';
 
 // Dati di test basati sui pattern reali identificati
 export const TEST_SPESE: SpesaFornitore[] = [
@@ -368,7 +368,7 @@ export function testCategorizzazione(): void {
   TEST_SPESE.forEach((spesa, index) => {
     const risultato = categorizzaSpesaFornitore(spesa);
     console.log(`${(index + 1).toString().padStart(2, ' ')}. ${spesa.nome_fornitore}`);
-    console.log(`    Categoria: ${risultato.categoria}`);
+    console.log(`    Categoria: ${risultato.categoria_spesa}`);
     console.log(`    Confidence: ${Math.round(risultato.confidence * 100)}%`);
     console.log(`    Motivo: ${risultato.motivo}`);
     console.log('');
@@ -401,7 +401,7 @@ export function testCategorizzazione(): void {
   console.log(`Pattern Energia (${speseEnergia.length} spese):`);
   speseEnergia.forEach(spesa => {
     const cat = categorizzaSpesaFornitore(spesa);
-    console.log(`  ${spesa.nome_fornitore} -> ${cat.categoria} (${Math.round(cat.confidence * 100)}%)`);
+    console.log(`  ${spesa.nome_fornitore} -> ${cat.categoria_spesa} (${Math.round(cat.confidence * 100)}%)`);
   });
   console.log('');
   
@@ -414,7 +414,7 @@ export function testCategorizzazione(): void {
   console.log(`Pattern Telecomunicazioni (${speseTelco.length} spese):`);
   speseTelco.forEach(spesa => {
     const cat = categorizzaSpesaFornitore(spesa);
-    console.log(`  ${spesa.nome_fornitore} -> ${cat.categoria} (${Math.round(cat.confidence * 100)}%)`);
+    console.log(`  ${spesa.nome_fornitore} -> ${cat.categoria_spesa} (${Math.round(cat.confidence * 100)}%)`);
   });
   console.log('');
   
@@ -428,7 +428,7 @@ export function testCategorizzazione(): void {
   console.log(`Pattern Materiali Dentali (${speseDentali.length} spese):`);
   speseDentali.forEach(spesa => {
     const cat = categorizzaSpesaFornitore(spesa);
-    console.log(`  ${spesa.nome_fornitore} -> ${cat.categoria} (${Math.round(cat.confidence * 100)}%)`);
+    console.log(`  ${spesa.nome_fornitore} -> ${cat.categoria_spesa} (${Math.round(cat.confidence * 100)}%)`);
   });
   console.log('');
 }
@@ -456,12 +456,12 @@ export function generaReportCategorizzazione(): string {
   
   report += '## Fornitori per Categoria\n\n';
   const categorieUniche = Array.from(new Set(
-    TEST_SPESE.map(s => categorizzaSpesaFornitore(s).categoria)
+    TEST_SPESE.map(s => categorizzaSpesaFornitore(s).categoria_spesa)
   ));
   
   categorieUniche.forEach(categoria => {
     const speseCat = TEST_SPESE.filter(s => 
-      categorizzaSpesaFornitore(s).categoria === categoria
+      categorizzaSpesaFornitore(s).categoria_spesa === categoria
     );
     
     if (speseCat.length > 0) {

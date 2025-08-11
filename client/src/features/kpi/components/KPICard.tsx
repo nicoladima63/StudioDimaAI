@@ -1,5 +1,5 @@
 import React from 'react';
-import { CCard, CCardBody, CCardHeader } from '@coreui/react';
+import { CCard, CCardBody } from '@coreui/react';
 
 interface KPICardProps {
   title: string;

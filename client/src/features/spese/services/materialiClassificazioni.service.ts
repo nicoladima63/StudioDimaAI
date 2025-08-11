@@ -1,15 +1,19 @@
 import type { AxiosResponse } from 'axios'
 import apiClient from '@/api/client'
 
-// Types per le classificazioni materiali
+// Types per le classificazioni materiali (formato BE corretto)
 export interface MaterialeClassificazione {
-  codice_articolo: string
-  descrizione: string
-  codice_fornitore: string
-  nome_fornitore: string
-  conto_codice?: string | null
-  branca_codice?: string | null
-  sottoconto_codice?: string | null
+  id: number
+  codicearticolo: string
+  nome: string
+  fornitoreid: string
+  fornitorenome: string
+  contoid?: number | null
+  contonome?: string | null
+  brancaid?: number | null
+  brancanome?: string | null
+  sottocontoid?: number | null
+  sottocontonome?: string | null
   categoria_contabile?: string | null
   metodo_classificazione?: 'manuale' | 'automatico' | 'pattern' | null
   confidence: number

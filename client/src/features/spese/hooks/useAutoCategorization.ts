@@ -2,17 +2,21 @@ import { useMemo } from 'react';
 import type { SpesaFornitore } from '@/features/spese/types';
 import {
   categorizzaSpesaFornitore,
+  categorizzaSpesaFornitoreSync,
   getSuggerimentiMiglioramento,
   getStatisticheCategorizzazione,
   esportaCategorizzazioni,
+  esportaCategorizzazioniSync,
   CategoriaSpesa,
   CATEGORIE_LABELS,
   type CategorizzazioneResult
 } from '../utils/autoCategorization';
 
 export interface UseAutoCategorization {
-  categorizzaSpesa: (spesa: SpesaFornitore) => CategorizzazioneResult;
-  categorizzaLotto: (spese: SpesaFornitore[]) => Array<SpesaFornitore & CategorizzazioneResult>;
+  categorizzaSpesa: (spesa: SpesaFornitore) => Promise<CategorizzazioneResult>;
+  categorizzaSpesaSync: (spesa: SpesaFornitore) => CategorizzazioneResult; // Versione sincrona per backward compatibility
+  categorizzaLotto: (spese: SpesaFornitore[]) => Promise<Array<SpesaFornitore & CategorizzazioneResult>>;
+  categorizzaLottoSync: (spese: SpesaFornitore[]) => Array<SpesaFornitore & CategorizzazioneResult>; // Versione sincrona
   getStatistiche: (spese: SpesaFornitore[]) => ReturnType<typeof getStatisticheCategorizzazione>;
   getSuggerimenti: (spese: SpesaFornitore[]) => string[];
   categorie: typeof CategoriaSpesa;
@@ -53,14 +57,26 @@ const CATEGORIA_COLORS: Record<CategoriaSpesa, string> = {
 export function useAutoCategorization(): UseAutoCategorization {
   
   const categorizzaSpesa = useMemo(() => {
+    return async (spesa: SpesaFornitore): Promise<CategorizzazioneResult> => {
+      return await categorizzaSpesaFornitore(spesa);
+    };
+  }, []);
+
+  const categorizzaSpesaSync = useMemo(() => {
     return (spesa: SpesaFornitore): CategorizzazioneResult => {
-      return categorizzaSpesaFornitore(spesa);
+      return categorizzaSpesaFornitoreSync(spesa);
     };
   }, []);
 
   const categorizzaLotto = useMemo(() => {
+    return async (spese: SpesaFornitore[]): Promise<Array<SpesaFornitore & CategorizzazioneResult>> => {
+      return await esportaCategorizzazioni(spese);
+    };
+  }, []);
+
+  const categorizzaLottoSync = useMemo(() => {
     return (spese: SpesaFornitore[]): Array<SpesaFornitore & CategorizzazioneResult> => {
-      return esportaCategorizzazioni(spese);
+      return esportaCategorizzazioniSync(spese);
     };
   }, []);
 
@@ -116,7 +132,9 @@ export function useAutoCategorization(): UseAutoCategorization {
 
   return {
     categorizzaSpesa,
+    categorizzaSpesaSync,
     categorizzaLotto,
+    categorizzaLottoSync,
     getStatistiche,
     getSuggerimenti,
     categorie: CategoriaSpesa,

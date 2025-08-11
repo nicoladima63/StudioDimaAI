@@ -16,7 +16,8 @@ def _ensure_materiali_table_exists() -> None:
             CREATE TABLE IF NOT EXISTS materiali (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 codicearticolo TEXT,
-                fornitoreid TEXT,
+                nome TEXT NOT NULL,
+                fornitoreid INTEGER,
                 fornitorenome TEXT,
                 contoid INTEGER,
                 contonome TEXT,
@@ -24,10 +25,6 @@ def _ensure_materiali_table_exists() -> None:
                 brancanome TEXT,
                 sottocontoid INTEGER,
                 sottocontonome TEXT,
-                conto_codice TEXT,
-                sottoconto_codice TEXT,
-                categoria_contabile TEXT,
-                nome TEXT NOT NULL,
                 metodo_classificazione TEXT,
                 confidence INTEGER DEFAULT 0,
                 confermato INTEGER DEFAULT 0,
@@ -80,6 +77,9 @@ def save_classificazione_materiale():
         codice_fornitore = (data.get('codice_fornitore') or '').strip()
         nome_fornitore = (data.get('nome_fornitore') or '').strip()
         conto_codice = (data.get('conto_codice') or '').strip() or None
+        conto_nome = (data.get('conto_nome') or '').strip() or None
+        branca_codice = (data.get('branca_codice') or '').strip() or None
+        branca_nome = (data.get('branca_nome') or '').strip() or None
         sottoconto_codice = (data.get('sottoconto_codice') or '').strip() or None
         categoria_contabile = (data.get('categoria_contabile') or '').strip() or None
         metodo_classificazione = data.get('metodo_classificazione') or 'manuale'
@@ -120,12 +120,22 @@ def save_classificazione_materiale():
             s_row = cursor.fetchone()
             if s_row:
                 sottocontoid_val, brancaid_val, contoid_val, sottocontonome_val, brancanome_val, contonome_val = s_row
+        
+        # Usa i nomi passati dal frontend se disponibili, altrimenti usa quelli del database
+        if conto_nome:
+            contonome_val = conto_nome
+        if branca_nome:
+            brancanome_val = branca_nome
+        
         # In fallback prova a risolvere solo il conto
         if contoid_val is None and conto_codice:
             cursor.execute('SELECT id, nome FROM conti WHERE nome = ? LIMIT 1', (conto_codice,))
             c_row = cursor.fetchone()
             if c_row:
                 contoid_val, contonome_val = c_row
+                # Usa il nome passato dal frontend se disponibile
+                if conto_nome:
+                    contonome_val = conto_nome
 
         if row:
             # Update con ID e nomi risolti
@@ -400,6 +410,106 @@ def confirm_da_verificare():
         return jsonify({'success': True, 'message': 'Classificazioni confermate', 'materiali_confermati': confermati})
     except Exception as e:
         logger.error(f"Errore confirm_da_verificare: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@materiali_bp.route('/confirm-lista', methods=['POST'])
+@jwt_required()
+def confirm_lista_materiali():
+    """Conferma una lista specifica di materiali passati dal frontend."""
+    try:
+        data = request.get_json()
+        if not data or 'materiali' not in data:
+            return jsonify({'success': False, 'error': 'Lista materiali obbligatoria'}), 400
+
+        materiali = data['materiali']
+        if not materiali:
+            return jsonify({'success': True, 'message': 'Nessun materiale da confermare', 'materiali_confermati': 0, 'materiali_falliti': 0})
+
+        conn = sqlite3.connect('server/instance/studio_dima.db')
+        cursor = conn.cursor()
+
+        confermati = 0
+        falliti = 0
+
+        for m in materiali:
+            try:
+                codicearticolo = (m.get('codicearticolo') or '').strip()
+                nome = (m.get('nome') or '').strip()
+                fornitoreid = (m.get('fornitoreid') or '').strip()
+                fornitorenome = (m.get('fornitorenome') or '').strip()
+                contoid = m.get('contoid')
+                contonome = m.get('contonome')
+                brancaid = m.get('brancaid')
+                brancanome = m.get('brancanome')
+                sottocontoid = m.get('sottocontoid')
+                sottocontonome = m.get('sottocontonome')
+                confidence = m.get('confidence', 100)
+
+                if not (nome and fornitoreid):
+                    falliti += 1
+                    continue
+
+                # Cerca materiale esistente
+                cursor.execute('''
+                    SELECT id FROM materiali
+                    WHERE (IFNULL(codicearticolo,'') = ?) AND nome = ? AND (IFNULL(fornitoreid,'') = ?)
+                ''', (codicearticolo, nome, fornitoreid))
+                row = cursor.fetchone()
+
+                if row:
+                    # Aggiorna materiale esistente
+                    updates = [
+                        'fornitoreid = ?', 'fornitorenome = ?',
+                        'metodo_classificazione = ?', 'confidence = ?', 'confermato = 1'
+                    ]
+                    params = [fornitoreid, fornitorenome, 'confermato', confidence]
+
+                    if contoid is not None:
+                        updates += ['contoid = ?', 'contonome = ?']
+                        params += [contoid, contonome]
+                    if brancaid is not None:
+                        updates += ['brancaid = ?', 'brancanome = ?']
+                        params += [brancaid, brancanome]
+                    if sottocontoid is not None:
+                        updates += ['sottocontoid = ?', 'sottocontonome = ?']
+                        params += [sottocontoid, sottocontonome]
+
+                    params.append(row[0])
+                    cursor.execute(f"UPDATE materiali SET {', '.join(updates)} WHERE id = ?", params)
+                else:
+                    # Inserisci nuovo materiale
+                    cursor.execute('''
+                        INSERT INTO materiali (
+                            codicearticolo, fornitoreid, fornitorenome, nome,
+                            contoid, contonome, brancaid, brancanome,
+                            sottocontoid, sottocontonome,
+                            metodo_classificazione, confidence, confermato, occorrenze
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'confermato', ?, 1, 1)
+                    ''', (
+                        codicearticolo, fornitoreid, fornitorenome, nome,
+                        contoid, contonome, brancaid, brancanome,
+                        sottocontoid, sottocontonome, confidence
+                    ))
+                
+                confermati += 1
+
+            except Exception as e:
+                logger.warning(f"Errore conferma singolo materiale {m.get('nome', 'N/A')}: {e}")
+                falliti += 1
+                continue
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            'success': True,
+            'message': f'Confermati {confermati} materiali',
+            'materiali_confermati': confermati,
+            'materiali_falliti': falliti
+        })
+
+    except Exception as e:
+        logger.error(f"Errore confirm_lista_materiali: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @materiali_bp.route('', methods=['GET'])

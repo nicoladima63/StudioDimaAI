@@ -68,6 +68,7 @@ const CrudStrutturaConti: React.FC = () => {
   // Stati UI
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [warning,setWarning]=useState("");
   const [success, setSuccess] = useState("");
 
   // Modal stati
@@ -126,9 +127,7 @@ const CrudStrutturaConti: React.FC = () => {
     entity: "conto" | "branca" | "sottoconto",
     id: number
   ) => {
-    if (!window.confirm("Sei sicuro di voler eliminare questo elemento?"))
-      return;
-
+    if (!window.confirm("Sei sicuro di voler eliminare questo elemento?")) return;
     try {
       setLoading(true);
       const response = await apiClient.delete(
@@ -198,8 +197,6 @@ const CrudStrutturaConti: React.FC = () => {
     }
   };
 
-
-
   // CRUD funzioni per conti
   const addConto = async (newItem: Partial<Conto>) => {
     try {
@@ -241,7 +238,7 @@ const CrudStrutturaConti: React.FC = () => {
         await caricaDati()
       } else setError(res.data.error || 'Errore eliminazione conto')
     } catch (err: any) {
-      setError(err.message || 'Errore eliminazione conto')
+      setError(err.response?.data?.error || err.message || 'Errore eliminazione conto')
     } finally {
       setLoading(false)
     }
@@ -634,9 +631,14 @@ const CrudStrutturaConti: React.FC = () => {
       </CCardHeader>
 
       <CCardBody>
-        {error && (
+      {error && (
           <CAlert color="danger" dismissible onClose={() => setError("")}>
             {error}
+          </CAlert>
+        )}
+        {warning && (
+          <CAlert color="warning" dismissible onClose={() => setWarning("")}>
+            {warning}
           </CAlert>
         )}
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import {
   CButton,
-  CFormSelect,
   CSpinner,
   CButtonGroup,
   CBadge,
@@ -9,9 +8,13 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilCenterFocus, cilPencil, cilX, cilCheck, cilWarning, cilCheckCircle } from '@coreui/icons'
-import materialiClassificazioniService from '../services/materialiClassificazioni.service'
-import type { Conto, Branca, Sottoconto, MaterialeClassificazione } from '../services/materialiClassificazioni.service'
+import type { MaterialeClassificazione } from '../services/materialiClassificazioni.service'
 import { saveClassificazioneMateriale } from '@/api/services/materiali.service'
+import SelectConto from '@/components/selects/SelectConto'
+import { SelectBranca } from '@/components/selects/SelectBranca'
+import { SelectSottoconto } from '@/components/selects/SelectSottoconto'
+import { useAutoLearning } from '../utils/autoLearning'
+import { CategoriaSpesa } from '../utils/autoCategorization'
 
 interface SelectSmartProps {
   materiale: MaterialeClassificazione
@@ -27,70 +30,42 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
   onError
 }) => {
   const [stato, setStato] = useState<StatoSelect>('neutro')
-  const [contiDisponibili, setContiDisponibili] = useState<Conto[]>([])
-  const [brancheDisponibili, setBrancheDisponibili] = useState<Branca[]>([])
-  const [sottocontiDisponibili, setSottocontiDisponibili] = useState<Sottoconto[]>([])
-  const [contoSelezionato, setContoSelezionato] = useState<string>('')
-  const [brancaSelezionata, setBrancaSelezionata] = useState<string>('')
-  const [sottocontoSelezionato, setSottocontoSelezionato] = useState<string>('')
+  const [contoSelezionato, setContoSelezionato] = useState<number | null>(null)
+  const [brancaSelezionata, setBrancaSelezionata] = useState<number | null>(null)
+  const [sottocontoSelezionato, setSottocontoSelezionato] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  
+  // Hook per auto-learning
+  const { onMaterialeConfermato } = useAutoLearning()
 
   // Inizializza stato in base al materiale
   useEffect(() => {
-    if (materiale.conto_codice && materiale.branca_codice && materiale.sottoconto_codice) {
+    if (materiale.contoid && materiale.brancaid && materiale.sottocontoid) {
       setStato('completato')
-      setContoSelezionato(materiale.conto_codice)
-      setBrancaSelezionata(materiale.branca_codice)
-      setSottocontoSelezionato(materiale.sottoconto_codice)
+      setContoSelezionato(materiale.contoid)
+      setBrancaSelezionata(materiale.brancaid)
+      setSottocontoSelezionato(materiale.sottocontoid)
     } else {
       setStato('neutro')
     }
   }, [materiale])
-
-  // Carica conti disponibili
-  const caricaContiDisponibili = async () => {
-    try {
-      setLoading(true)
-      const response = await materialiClassificazioniService.apiGetContiDisponibili()
-      if (response.success) {
-        setContiDisponibili(response.data)
-      }
-    } catch (error) {
-      onError?.('Errore caricamento conti disponibili')
-    } finally {
-      setLoading(false)
+  
+  // Helper per determinare la categoria dalla classificazione
+  const getCategoriaFromClassificazione = (contoid: number): CategoriaSpesa | null => {
+    // Mappatura ID conto -> codice conto -> categoria
+    // Questa è una semplificazione, in un caso reale dovresti fare una query
+    // Per ora usiamo una mappatura diretta base
+    const commonMappings: Record<number, CategoriaSpesa> = {
+      1: CategoriaSpesa.MATERIALI_DENTALI, // Esempio
+      2: CategoriaSpesa.ENERGIA_ELETTRICA,
+      3: CategoriaSpesa.TELECOMUNICAZIONI,
+      // Aggiungi altri mapping secondo la tua struttura
     }
+    
+    return commonMappings[contoid] || CategoriaSpesa.ALTRO
   }
 
-  // Carica branche per un conto
-  const caricaBrancheDisponibili = async (contoId: number) => {
-    try {
-      setLoading(true)
-      const response = await materialiClassificazioniService.apiGetBrancheDisponibili(contoId)
-      if (response.success) {
-        setBrancheDisponibili(response.data)
-      }
-    } catch (error) {
-      onError?.('Errore caricamento branche disponibili')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Carica sottoconti per una branca
-  const caricaSottocontiDisponibili = async (brancaId: number) => {
-    try {
-      setLoading(true)
-      const response = await materialiClassificazioniService.apiGetSottocontiDisponibili(brancaId)
-      if (response.success) {
-        setSottocontiDisponibili(response.data)
-      }
-    } catch (error) {
-      onError?.('Errore caricamento sottoconti disponibili')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Funzioni di caricamento rimosse - ora gestite dai componenti Select
 
   // Salva classificazione finale (persistenza su tabella materiali)
   const salvaClassificazione = async () => {
@@ -99,20 +74,17 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
     try {
       setLoading(true)
       
-      const contoObj = contiDisponibili.find(c => c.codice === contoSelezionato)
-      const brancaObj = brancheDisponibili.find(b => b.id.toString() === brancaSelezionata)
-      const sottocontoObj = sottocontiDisponibili.find(s => s.codice === sottocontoSelezionato)
-      
       const classificazione = {
-        codice_articolo: materiale.codice_articolo,
-        descrizione: materiale.descrizione,
-        codice_fornitore: materiale.codice_fornitore,
-        nome_fornitore: materiale.nome_fornitore,
-        conto_codice: contoSelezionato,
-        branca_codice: brancaSelezionata,
-        sottoconto_codice: sottocontoSelezionato,
-        categoria_contabile: `${contoObj?.descrizione} - ${brancaObj?.nome} - ${sottocontoObj?.descrizione}` || ''
+        codicearticolo: materiale.codicearticolo,
+        nome: materiale.nome,
+        fornitoreid: materiale.fornitoreid,
+        fornitorenome: materiale.fornitorenome,
+        contoid: contoSelezionato,
+        brancaid: brancaSelezionata,
+        sottocontoid: sottocontoSelezionato,
+        categoria_contabile: 'Classificazione manuale'
       }
+      
       // Persisti sul nuovo endpoint materiali
       const response = await saveClassificazioneMateriale({
         ...classificazione,
@@ -124,14 +96,26 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
         // Aggiorna materiale con nuova classificazione
         const materialeAggiornato = {
           ...materiale,
-          conto_codice: contoSelezionato,
-          branca_codice: brancaSelezionata,
-          sottoconto_codice: sottocontoSelezionato,
+          contoid: contoSelezionato,
+          brancaid: brancaSelezionata,
+          sottocontoid: sottocontoSelezionato,
           categoria_contabile: classificazione.categoria_contabile,
           metodo_classificazione: 'manuale' as const,
           confidence: 100,
           confermato_da_utente: true,
           stato_classificazione: 'classificato' as const
+        }
+        
+        // Auto-learning: aggiorna pattern fornitore
+        const categoria = getCategoriaFromClassificazione(contoSelezionato)
+        if (categoria && materiale.fornitoreid) {
+          onMaterialeConfermato(
+            { 
+              fornitoreid: materiale.fornitoreid,
+              categoria_contabile: classificazione.categoria_contabile 
+            },
+            categoria
+          ).catch(error => console.warn('Auto-learning fallito:', error))
         }
         
         onClassificazioneAggiornata(materialeAggiornato)
@@ -146,20 +130,23 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
 
   // Conferma classificazione automatica (persistenza su tabella materiali)
   const confermaClassificazioneAutomatica = async () => {
-    if (!materiale.conto_codice || !materiale.branca_codice || !materiale.sottoconto_codice) return
+    if (!materiale.contoid || !materiale.brancaid || !materiale.sottocontoid) return
 
     try {
       setLoading(true)
       
       const classificazione = {
-        codice_articolo: materiale.codice_articolo,
-        descrizione: materiale.descrizione,
-        codice_fornitore: materiale.codice_fornitore,
-        nome_fornitore: materiale.nome_fornitore,
-        conto_codice: materiale.conto_codice,
-        branca_codice: materiale.branca_codice,
-        sottoconto_codice: materiale.sottoconto_codice,
-        categoria_contabile: materiale.categoria_contabile || `${materiale.conto_codice} - ${materiale.branca_codice} - ${materiale.sottoconto_codice}`
+        codicearticolo: materiale.codicearticolo,
+        nome: materiale.nome,
+        fornitoreid: materiale.fornitoreid,
+        fornitorenome: materiale.fornitorenome,
+        contoid: materiale.contoid!,
+        contonome: materiale.contonome,
+        brancaid: materiale.brancaid!,
+        brancanome: materiale.brancanome || undefined,
+        sottocontoid: materiale.sottocontoid!,
+        sottocontonome: materiale.sottocontonome || undefined,
+        categoria_contabile: materiale.categoria_contabile || `${materiale.contonome} - ${materiale.brancanome} - ${materiale.sottocontonome}`
       }
       // Persisti sul nuovo endpoint materiali
       const response = await saveClassificazioneMateriale({
@@ -178,6 +165,18 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
           stato_classificazione: 'classificato' as const
         }
         
+        // Auto-learning: aggiorna pattern fornitore dalla classificazione confermata
+        const categoria = getCategoriaFromClassificazione(materiale.contoid!)
+        if (categoria && materiale.fornitoreid) {
+          onMaterialeConfermato(
+            { 
+              fornitoreid: materiale.fornitoreid,
+              categoria_contabile: classificazione.categoria_contabile 
+            },
+            categoria
+          ).catch(error => console.warn('Auto-learning fallito:', error))
+        }
+        
         onClassificazioneAggiornata(materialeAggiornato)
         setStato('completato')
       }
@@ -189,49 +188,43 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
   }
 
   // Handlers per cambio stato
-  const handleIniziaClassificazione = async () => {
+  const handleIniziaClassificazione = () => {
     setStato('select_conto')
-    if (contiDisponibili.length === 0) {
-      await caricaContiDisponibili()
+  }
+
+  const handleSelezionaConto = (contoId: number | null) => {
+    setContoSelezionato(contoId)
+    setBrancaSelezionata(null)
+    setSottocontoSelezionato(null)
+    if (contoId) {
+      setStato('select_branca')
     }
   }
 
-  const handleSelezionaConto = async (conto: string) => {
-    setContoSelezionato(conto)
-    setStato('select_branca')
-    
-    // Trova l'ID del conto per caricare le branche
-    const contoObj = contiDisponibili.find(c => c.codice === conto)
-    if (contoObj) {
-      await caricaBrancheDisponibili(contoObj.id)
-    }
-  }
-
-  const handleSelezionaBranca = async (brancaId: string) => {
+  const handleSelezionaBranca = (brancaId: number | null) => {
     setBrancaSelezionata(brancaId)
-    setStato('select_sottoconto')
-    await caricaSottocontiDisponibili(parseInt(brancaId))
+    setSottocontoSelezionato(null)
+    if (brancaId) {
+      setStato('select_sottoconto')
+    }
   }
 
-  const handleSelezionaSottoconto = (sottoconto: string) => {
-    setSottocontoSelezionato(sottoconto)
-    salvaClassificazione()
+  const handleSelezionaSottoconto = (sottocontoId: number | null) => {
+    setSottocontoSelezionato(sottocontoId)
+    if (sottocontoId) {
+      salvaClassificazione()
+    }
   }
 
   const handleReset = () => {
     setStato('neutro')
-    setContoSelezionato('')
-    setBrancaSelezionata('')
-    setSottocontoSelezionato('')
-    setBrancheDisponibili([])
-    setSottocontiDisponibili([])
+    setContoSelezionato(null)
+    setBrancaSelezionata(null)
+    setSottocontoSelezionato(null)
   }
 
   const handleModifica = () => {
     setStato('select_conto')
-    if (contiDisponibili.length === 0) {
-      caricaContiDisponibili()
-    }
   }
 
   // Badge confidence
@@ -259,7 +252,7 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
     switch (stato) {
       case 'neutro':
         // Se è un materiale "da_verificare" mostra tasto conferma
-        if (materiale.stato_classificazione === 'da_verificare' && materiale.conto_codice && materiale.branca_codice && materiale.sottoconto_codice) {
+        if (materiale.stato_classificazione === 'da_verificare' && materiale.contoid && materiale.brancaid && materiale.sottocontoid) {
           return (
             <CButtonGroup>
               <CTooltip content="Conferma classificazione automatica">
@@ -304,19 +297,11 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
       case 'select_conto':
         return (
           <CButtonGroup>
-            <CFormSelect
-              size="sm"
-              value={contoSelezionato}
-              onChange={(e) => handleSelezionaConto(e.target.value)}
+            <SelectConto 
+              value={contoSelezionato} 
+              onChange={handleSelezionaConto}
               style={{ minWidth: '200px' }}
-            >
-              <option value="">▼ Seleziona Conto</option>
-              {contiDisponibili.map(conto => (
-                <option key={conto.codice} value={conto.codice}>
-                  {conto.label}
-                </option>
-              ))}
-            </CFormSelect>
+            />
             <CTooltip content="Annulla">
               <CButton
                 color="danger"
@@ -331,25 +316,17 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
         )
 
       case 'select_branca':
-        const contoObj = contiDisponibili.find(c => c.codice === contoSelezionato)
         return (
           <CButtonGroup>
             <CBadge color="info" className="me-2">
-              {contoObj?.descrizione}
+              Conto selezionato
             </CBadge>
-            <CFormSelect
-              size="sm"
-              value={brancaSelezionata}
-              onChange={(e) => handleSelezionaBranca(e.target.value)}
+            <SelectBranca 
+              contoId={contoSelezionato}
+              value={brancaSelezionata} 
+              onChange={handleSelezionaBranca}
               style={{ minWidth: '200px' }}
-            >
-              <option value="">▼ Seleziona Branca</option>
-              {brancheDisponibili.map(branca => (
-                <option key={branca.id} value={branca.id.toString()}>
-                  {branca.nome}
-                </option>
-              ))}
-            </CFormSelect>
+            />
             <CTooltip content="Annulla">
               <CButton
                 color="danger"
@@ -364,29 +341,20 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
         )
 
       case 'select_sottoconto':
-        const contoObjSotto = contiDisponibili.find(c => c.codice === contoSelezionato)
-        const brancaObj = brancheDisponibili.find(b => b.id.toString() === brancaSelezionata)
         return (
           <CButtonGroup>
             <CBadge color="info" className="me-2">
-              {contoObjSotto?.descrizione}
+              Conto
             </CBadge>
             <CBadge color="secondary" className="me-2">
-              {brancaObj?.nome}
+              Branca
             </CBadge>
-            <CFormSelect
-              size="sm"
-              value={sottocontoSelezionato}
-              onChange={(e) => handleSelezionaSottoconto(e.target.value)}
+            <SelectSottoconto 
+              brancaId={brancaSelezionata}
+              value={sottocontoSelezionato} 
+              onChange={handleSelezionaSottoconto}
               style={{ minWidth: '200px' }}
-            >
-              <option value="">▼ Seleziona Sottoconto</option>
-              {sottocontiDisponibili.map(sottoconto => (
-                <option key={sottoconto.codice} value={sottoconto.codice}>
-                  {sottoconto.label}
-                </option>
-              ))}
-            </CFormSelect>
+            />
             <CTooltip content="Annulla">
               <CButton
                 color="danger"
@@ -401,13 +369,6 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
         )
 
       case 'completato':
-        const sottocontoObj = sottocontiDisponibili.find(s => s.codice === sottocontoSelezionato) || 
-                              { descrizione: materiale.sottoconto_codice }
-        const contoCompletato = contiDisponibili.find(c => c.codice === contoSelezionato) ||
-                                { descrizione: materiale.conto_codice }
-        const brancaCompletata = brancheDisponibili.find(b => b.id.toString() === brancaSelezionata) ||
-                                { nome: materiale.branca_codice }
-        
         return (
           <CButtonGroup>
             <CBadge 
@@ -415,7 +376,7 @@ const SelectSmart: React.FC<SelectSmartProps> = ({
               className="me-2"
             >
               {materiale.metodo_classificazione === 'manuale' ? '✅' : '🤖'} 
-              {contoCompletato.descrizione} → {brancaCompletata.nome} → {sottocontoObj.descrizione}
+              {materiale.contonome} → {materiale.brancanome} → {materiale.sottocontonome}
             </CBadge>
             
             <CTooltip content="Modifica classificazione">

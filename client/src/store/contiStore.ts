@@ -1,248 +1,214 @@
-import React from 'react';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import apiClient from '@/api/client';
-
-export interface Conto {
-  codice_conto: string;
-  descrizione: string;
-  tipo: string;
-}
-
-export interface Sottoconto {
-  codice_sottoconto: string;
-  descrizione: string;
-  conto_padre: string;
-}
-
-interface ContiState {
-  // State
-  conti: Conto[];
-  sottocontiByParent: Record<string, Sottoconto[]>;
-  lastUpdate: number;
-  counts: { conti: number; sottoconti: number };
-  isLoading: boolean;
-  error: string | null;
-
-  // Actions
-  loadConti: () => Promise<void>;
-  getSottoconti: (codiceContoPadre: string) => Promise<Sottoconto[]>;
-  invalidateCache: () => void;
-  checkAndUpdateCache: () => Promise<boolean>;
-  getCacheInfo: () => { loaded: boolean; lastUpdate?: string; counts?: any; contiCount?: number; sottocontiGroupsCount?: number };
-}
+// store/contiStore.ts
+import  {useEffect} from "react";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import apiClient from "@/api/client";
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minuti
+const MAX_RETRIES = 3;
 
-export const useContiStore = create<ContiState>()(
+interface Conto { id: number; nome: string; }
+interface Branca { id: number; nome: string; contoId: number; }
+interface Sottoconto { id: number; nome: string; brancaId: number; contoId: number; }
+
+interface State {
+  // Dati
+  conti: Conto[];
+  brancheByConto: Record<number, Branca[]>;
+  sottocontiByBranca: Record<number, Sottoconto[]>;
+  
+  // Stati
+  isLoading: boolean;
+  errors: Record<string, string | null>;
+  
+  // Cache
+  lastUpdated: {
+    conti: number;
+    branche: Record<number, number>;
+    sottoconti: Record<number, number>;
+  };
+  
+  // Azioni
+  loadConti: (options?: { force?: boolean }) => Promise<void>;
+  loadBranche: (contoId: number, options?: { force?: boolean }) => Promise<void>;
+  loadSottoconti: (brancaId: number, options?: { force?: boolean }) => Promise<void>;
+  
+  // Utilità
+  invalidateCache: () => void;
+  getContoById: (id: number) => Conto | undefined;
+}
+
+export const useContiStore = create<State>()(
   persist(
     (set, get) => ({
-      // Initial state
       conti: [],
-      sottocontiByParent: {},
-      lastUpdate: 0,
-      counts: { conti: 0, sottoconti: 0 },
+      brancheByConto: {},
+      sottocontiByBranca: {},
       isLoading: false,
-      error: null,
+      errors: { conti: null, branche: null, sottoconti: null },
+      lastUpdated: { conti: 0, branche: {}, sottoconti: {} },
 
-      // Controlla se il cache è valido e aggiorna se necessario
-      checkAndUpdateCache: async (): Promise<boolean> => {
+      // Caricamento conti con retry
+      loadConti: async ({ force = false } = {}) => {
         const state = get();
-        const now = Date.now();
-
-        // Controlla scadenza temporale
-        if (now - state.lastUpdate > CACHE_DURATION) {
-          console.log('Cache conti scaduto per tempo, ricaricamento...');
-          await get().loadConti();
-          return true;
+        if (!force && state.conti.length > 0 && Date.now() - state.lastUpdated.conti < CACHE_DURATION) {
+          return;
         }
 
-        try {
-          // Controlla count dal server
-          const response = await apiClient.get('/api/classificazioni/conti-sottoconti/count');
-          if (!response.data.success) return false;
-
-          const serverCounts = response.data.data;
-          const countsChanged = (
-            state.counts.conti !== serverCounts.conti ||
-            state.counts.sottoconti !== serverCounts.sottoconti
-          );
-
-          if (countsChanged) {
-            console.log('Count conti/sottoconti cambiati, ricaricamento...', {
-              old: state.counts,
-              new: serverCounts
+        set({ isLoading: true, errors: { ...state.errors, conti: null } });
+        
+        let retry = 0;
+        while (retry < MAX_RETRIES) {
+          try {
+            const res = await apiClient.get("/api/struttura-conti/conti");
+            if (!res.data.success) throw new Error(res.data.error || "Errore caricamento conti");
+            
+            set({
+              conti: res.data.data,
+              isLoading: false,
+              lastUpdated: { ...state.lastUpdated, conti: Date.now() },
+              errors: { ...state.errors, conti: null }
             });
-            await get().loadConti();
-            return true;
+            return;
+          } catch (err: any) {
+            retry++;
+            if (retry >= MAX_RETRIES) {
+              set({
+                isLoading: false,
+                errors: { ...state.errors, conti: err.message || "Errore sconosciuto" }
+              });
+            }
           }
-
-          return false; // Cache valido
-        } catch (error) {
-          console.warn('Errore controllo count conti:', error);
-          return false;
         }
       },
 
-      // Carica tutti i conti dal server
-      loadConti: async () => {
-        set({ isLoading: true, error: null });
+      // Caricamento branche con cache per conto
+      loadBranche: async (contoId, { force = false } = {}) => {
+        const state = get();
+        if (!force && 
+            state.brancheByConto[contoId] && 
+            Date.now() - (state.lastUpdated.branche[contoId] || 0) < CACHE_DURATION) {
+          return;
+        }
 
+        set({ isLoading: true, errors: { ...state.errors, branche: null } });
+        
         try {
-          // Carica conti
-          const contiResponse = await apiClient.get('/api/classificazioni/conti');
-          if (!contiResponse.data.success) {
-            throw new Error('Errore nel caricamento conti');
-          }
-
-          const conti: Conto[] = contiResponse.data.data;
-          const sottocontiByParent: Record<string, Sottoconto[]> = {};
-
-          // Carica sottoconti per ogni conto (in parallelo per performance)
-          const sottocontiPromises = conti.map(async (conto) => {
-            try {
-              const sottocontiResponse = await apiClient.get(
-                `/api/classificazioni/conti/${conto.codice_conto}/sottoconti`
-              );
-              
-              if (sottocontiResponse.data.success && sottocontiResponse.data.data.length > 0) {
-                return {
-                  contoPadre: conto.codice_conto,
-                  sottoconti: sottocontiResponse.data.data as Sottoconto[]
-                };
-              }
-              return null;
-            } catch (error) {
-              console.warn(`Errore nel caricamento sottoconti per ${conto.codice_conto}:`, error);
-              return null;
-            }
-          });
-
-          const sottocontiResults = await Promise.all(sottocontiPromises);
+          const res = await apiClient.get(`/api/struttura-conti/branche?conto_id=${contoId}`);
+          if (!res.data.success) throw new Error("Errore caricamento branche");
           
-          // Costruisci mappa sottoconti
-          sottocontiResults.forEach(result => {
-            if (result) {
-              sottocontiByParent[result.contoPadre] = result.sottoconti;
-            }
-          });
-
-          // Ottieni count aggiornati
-          const countResponse = await apiClient.get('/api/classificazioni/conti-sottoconti/count');
-          const counts = countResponse.data.success ? countResponse.data.data : { conti: 0, sottoconti: 0 };
-
           set({
-            conti,
-            sottocontiByParent,
-            lastUpdate: Date.now(),
-            counts,
+            brancheByConto: { ...state.brancheByConto, [contoId]: res.data.data },
             isLoading: false,
-            error: null
+            lastUpdated: { 
+              ...state.lastUpdated, 
+              branche: { ...state.lastUpdated.branche, [contoId]: Date.now() } 
+            },
+            errors: { ...state.errors, branche: null }
           });
-
-          console.log(`Conti caricati: ${conti.length} conti, ${Object.keys(sottocontiByParent).length} con sottoconti`);
-
-        } catch (error: any) {
+        } catch (err: any) {
           set({
             isLoading: false,
-            error: error.message || 'Errore nel caricamento conti'
+            errors: { ...state.errors, branche: err.message || "Errore sconosciuto" }
           });
-          throw error;
         }
       },
 
-      // Ottieni sottoconti per un conto (con lazy loading se necessario)
-      getSottoconti: async (codiceContoPadre: string): Promise<Sottoconto[]> => {
+      // Caricamento sottoconti con cache per branca
+      loadSottoconti: async (brancaId, { force = false } = {}) => {
         const state = get();
-
-        // Controlla e aggiorna cache se necessario
-        await get().checkAndUpdateCache();
-
-        // Restituisci sottoconti dal cache
-        const currentState = get();
-        return currentState.sottocontiByParent[codiceContoPadre] || [];
-      },
-
-      // Invalida cache
-      invalidateCache: () => {
-        set({
-          conti: [],
-          sottocontiByParent: {},
-          lastUpdate: 0,
-          counts: { conti: 0, sottoconti: 0 },
-          error: null
-        });
-      },
-
-      // Ottieni info sul cache per debug
-      getCacheInfo: () => {
-        const state = get();
-        if (!state.lastUpdate) {
-          return { loaded: false };
+        if (!force && 
+            state.sottocontiByBranca[brancaId] && 
+            Date.now() - (state.lastUpdated.sottoconti[brancaId] || 0) < CACHE_DURATION) {
+          return;
         }
 
-        return {
-          loaded: true,
-          lastUpdate: new Date(state.lastUpdate).toLocaleString(),
-          counts: state.counts,
-          contiCount: state.conti.length,
-          sottocontiGroupsCount: Object.keys(state.sottocontiByParent).length
-        };
-      }
+        set({ isLoading: true, errors: { ...state.errors, sottoconti: null } });
+        
+        try {
+          const res = await apiClient.get(`/api/struttura-conti/sottoconti?branca_id=${brancaId}`);
+          if (!res.data.success) throw new Error("Errore caricamento sottoconti");
+          
+          set({
+            sottocontiByBranca: { ...state.sottocontiByBranca, [brancaId]: res.data.data },
+            isLoading: false,
+            lastUpdated: { 
+              ...state.lastUpdated, 
+              sottoconti: { ...state.lastUpdated.sottoconti, [brancaId]: Date.now() } 
+            },
+            errors: { ...state.errors, sottoconti: null }
+          });
+        } catch (err: any) {
+          set({
+            isLoading: false,
+            errors: { ...state.errors, sottoconti: err.message || "Errore sconosciuto" }
+          });
+        }
+      },
+
+      invalidateCache: () => set({
+        conti: [],
+        brancheByConto: {},
+        sottocontiByBranca: {},
+        lastUpdated: { conti: 0, branche: {}, sottoconti: {} }
+      }),
+
+      getContoById: (id) => get().conti.find(c => c.id === id)
     }),
     {
-      name: 'conti-storage', // Nome per localStorage
+      name: "conti-store",
       partialize: (state) => ({
-        // Salva solo questi campi nel localStorage
         conti: state.conti,
-        sottocontiByParent: state.sottocontiByParent,
-        lastUpdate: state.lastUpdate,
-        counts: state.counts
+        lastUpdated: state.lastUpdated
       })
     }
   )
 );
 
-// Hook personalizzati per uso semplificato
+// Hook ottimizzati con caricamento automatico
 export const useConti = () => {
-  const { conti, isLoading, error, loadConti, checkAndUpdateCache } = useContiStore();
+  const store = useContiStore();
   
-  // Auto-carica al primo uso
-  React.useEffect(() => {
-    if (conti.length === 0 && !isLoading) {
-      checkAndUpdateCache();
-    }
-  }, []);
+  useEffect(() => {
+    store.loadConti();
+  }, [store.loadConti]);
 
-  return { conti, isLoading, error, refresh: loadConti };
+  return {
+    conti: store.conti,
+    isLoading: store.isLoading,
+    error: store.errors.conti,
+    load: () => store.loadConti({ force: true }),
+    loadConti: () => store.loadConti({ force: true }),
+    getById: store.getContoById
+  };
 };
 
-export const useSottoconti = (codiceContoPadre: string | null) => {
-  const { getSottoconti, sottocontiByParent, isLoading } = useContiStore();
-  const [sottoconti, setSottoconti] = React.useState<Sottoconto[]>([]);
-  const [loadingSottoconti, setLoadingSottoconti] = React.useState(false);
+export const useBranche = (contoId: number | null) => {
+  const store = useContiStore();
+  
+  useEffect(() => {
+    if (contoId) store.loadBranche(contoId);
+  }, [contoId, store.loadBranche]);
 
-  React.useEffect(() => {
-    if (!codiceContoPadre) {
-      setSottoconti([]);
-      return;
-    }
+  return {
+    branche: contoId ? (store.brancheByConto[contoId] || []) : [],
+    isLoading: store.isLoading,
+    error: store.errors.branche,
+    load: () => contoId && store.loadBranche(contoId, { force: true })
+  };
+};
 
-    const loadSottoconti = async () => {
-      setLoadingSottoconti(true);
-      try {
-        const result = await getSottoconti(codiceContoPadre);
-        setSottoconti(result);
-      } catch (error) {
-        console.error('Errore caricamento sottoconti:', error);
-        setSottoconti([]);
-      } finally {
-        setLoadingSottoconti(false);
-      }
-    };
+export const useSottoconti = (brancaId: number | null) => {
+  const store = useContiStore();
+  
+  useEffect(() => {
+    if (brancaId) store.loadSottoconti(brancaId);
+  }, [brancaId, store.loadSottoconti]);
 
-    loadSottoconti();
-  }, [codiceContoPadre, getSottoconti]);
-
-  return { sottoconti, isLoading: loadingSottoconti };
+  return {
+    sottoconti: brancaId ? (store.sottocontiByBranca[brancaId] || []) : [],
+    isLoading: store.isLoading,
+    error: store.errors.sottoconti,
+    load: () => brancaId && store.loadSottoconti(brancaId, { force: true })
+  };
 };

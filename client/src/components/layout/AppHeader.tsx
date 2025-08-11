@@ -2,10 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   CContainer,
-  CDropdown,
-  CDropdownItem,
-  CDropdownMenu,
-  CDropdownToggle,
   CHeader,
   CHeaderNav,
   CHeaderToggler,
@@ -15,7 +11,7 @@ import {
   CBadge,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilMenu, cilContrast, cilMoon, cilSun } from '@coreui/icons';
+import { cilMenu } from '@coreui/icons';
 import { useSidebarStore } from '@/store/useSidebarStore';
 import { useAuthStore, useEnvStore } from '@/features/auth/store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +23,7 @@ const AppHeader: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
   
   // Sidebar state
-  const { visible, toggleSidebar } = useSidebarStore();
+  const { toggleSidebar } = useSidebarStore();
   
   // Auth state
   const { token, clearToken, username } = useAuthStore();

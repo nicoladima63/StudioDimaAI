@@ -1,0 +1,3 @@
+<SelectConto value={contoId} onChange={setContoId} />
+<SelectBranca contoId={contoId} value={brancaId} onChange={setBrancaId} />
+<SelectSottoconto brancaId={brancaId} value={sottocontoId} onChange={setSottocontoId} />

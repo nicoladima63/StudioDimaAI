@@ -47,9 +47,7 @@ const DettagliFatturaModal: React.FC<DettagliFatturaModalProps> = ({
       <CModalHeader>
         <CModalTitle>
           Dettagli Fattura {fattura.id}
-          {fattura.nome_fornitore && (
-            <span className="text-muted ms-2">- {fattura.nome_fornitore}</span>
-          )}
+          <span className="text-muted ms-2">- {fattura.codice_fornitore}</span>
         </CModalTitle>
       </CModalHeader>
       <CModalBody>
@@ -96,7 +94,7 @@ const DettagliFatturaModal: React.FC<DettagliFatturaModalProps> = ({
           <div className="col-md-4">
             <strong>Fornitore:</strong><br />
             <span className="text-muted">
-              {fattura.nome_fornitore || 'Nome non disponibile'} ({fattura.codice_fornitore})
+              {fattura.codice_fornitore}
             </span>
           </div>
         </div>

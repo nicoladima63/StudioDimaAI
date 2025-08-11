@@ -10,7 +10,7 @@ struttura_conti_bp = Blueprint('struttura_conti', __name__, url_prefix='/api/str
 # ===================== CONTI =====================
 
 @struttura_conti_bp.route('/conti', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def get_conti():
     """Ottiene tutti i conti"""
     try:
@@ -138,7 +138,7 @@ def delete_conto(conto_id):
         cursor.execute('SELECT COUNT(*) FROM branche WHERE contoid = ?', (conto_id,))
         if cursor.fetchone()[0] > 0:
             conn.close()
-            return jsonify({'success': False, 'error': 'Impossibile eliminare: conto ha branche associate'}), 400
+            return jsonify({'success': False,'warning': True, 'error': 'Impossibile eliminare: conto ha branche associate'}), 400
         
         cursor.execute('DELETE FROM conti WHERE id = ?', (conto_id,))
         
@@ -402,6 +402,11 @@ def get_sottoconti():
         sottoconti = []
         for row in cursor.fetchall():
             sottoconti.append({
+                'codice': str(row[0]),  # Usa l'id come codice
+                'descrizione': row[3],   # Nome del sottoconto
+                'label': f"{row[0]} - {row[3]}",  # ID - Nome
+                'fonte': 'sqlite',
+                # Mantieni anche i campi originali per compatibilità
                 'id': row[0],
                 'contoid': row[1],
                 'brancaid': row[2],

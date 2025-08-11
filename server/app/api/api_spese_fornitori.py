@@ -1314,10 +1314,140 @@ def get_materiali_da_classificare():
                     
                     fatture_fornitori_map[fat_id_str] = cod_forn_str
         
-        # Estrai materiali unici dai dettagli
+        # Pre-processa per unire descrizioni spezzate (limite 75 caratteri DBF)
+        df_dettagli_processato = df_dettagli.copy()
+        rows_to_remove = []
+        
+        for i in range(len(df_dettagli_processato) - 1):
+            current_row = df_dettagli_processato.iloc[i]
+            next_row = df_dettagli_processato.iloc[i + 1]
+            
+            # Safe string conversion
+            def safe_str_pre(val, default=''):
+                if pd.isna(val):
+                    return default
+                if isinstance(val, bytes):
+                    return val.decode('latin-1', errors='ignore').strip()
+                return str(val).strip()
+            
+            current_desc = safe_str_pre(current_row.get(col_map_dettagli['descrizione']))
+            next_desc = safe_str_pre(next_row.get(col_map_dettagli['descrizione']))
+            current_fattura = safe_str_pre(current_row.get(col_map_dettagli['codice_fattura']))
+            next_fattura = safe_str_pre(next_row.get(col_map_dettagli['codice_fattura']))
+            
+            # Identifica righe spezzate: stessa fattura, descrizione ~75 caratteri che finisce con parola incompleta
+            if (current_fattura == next_fattura and 
+                len(current_desc) >= 70 and  # Vicino al limite di 75
+                len(next_desc) > 0 and len(next_desc) < 50 and  # Continuazione probabile
+                not current_desc[-1].isspace() and  # Non finisce con spazio
+                not next_desc[0].isupper()):  # Non inizia con maiuscola
+                
+                # Unisci le descrizioni
+                combined_desc = current_desc + next_desc
+                df_dettagli_processato.iloc[i, df_dettagli_processato.columns.get_loc(col_map_dettagli['descrizione'])] = combined_desc
+                rows_to_remove.append(i + 1)
+        
+        # Rimuovi righe già unite
+        df_dettagli_processato = df_dettagli_processato.drop(df_dettagli_processato.index[rows_to_remove]).reset_index(drop=True)
+        
+        # AGGREGAZIONE INTELLIGENTE UTENZE - Logica semplificata
+        # Identifica e seleziona solo le voci principali delle fatture utenze
+        logger.info(f"AGGREGAZIONE: Inizio selezione voci principali utenze")
+        
+        try:
+            from server.app.services.classificazione_costi_service import classificazione_service
+            logger.info(f"AGGREGAZIONE: Servizio classificazione importato")
+        except Exception as e:
+            logger.error(f"AGGREGAZIONE: Errore import servizio: {str(e)}")
+            classificazione_service = None
+        
+        if classificazione_service:
+            voci_principali_utenze = 0
+            voci_secondarie_rimosse = 0
+            fatture_utenze_processate = {}
+            
+            # Raggruppa per codice fattura e identifica le utenze
+            for idx, det_row in df_dettagli_processato.iterrows():
+                def safe_str_agg(val, default=''):
+                    if pd.isna(val):
+                        return default
+                    if isinstance(val, bytes):
+                        return val.decode('latin-1', errors='ignore').strip()
+                    return str(val).strip()
+                
+                cod_fat_str = safe_str_agg(det_row.get(col_map_dettagli['codice_fattura']))
+                cod_fornitore = fatture_fornitori_map.get(cod_fat_str, '')
+                nome_fornitore = fornitori_map.get(cod_fornitore, '')
+                descrizione = safe_str_agg(det_row.get(col_map_dettagli['descrizione']))
+                prezzo = det_row.get(col_map_dettagli['prezzo_unitario'], 0) or 0
+                
+                # Verifica se è un fornitore utenze
+                if classificazione_service.is_fornitore_utenze(nome_fornitore)['is_utenza']:
+                    if cod_fat_str not in fatture_utenze_processate:
+                        fatture_utenze_processate[cod_fat_str] = {
+                            'voci': [],
+                            'codice_fornitore': cod_fornitore,
+                            'nome_fornitore': nome_fornitore
+                        }
+                    
+                    fatture_utenze_processate[cod_fat_str]['voci'].append({
+                        'index': idx,
+                        'descrizione': descrizione,
+                        'prezzo': float(prezzo),
+                        'row_data': det_row
+                    })
+            
+            # Per ogni fattura utenze, seleziona la voce principale
+            indici_da_rimuovere = set()
+            for cod_fattura, fattura_data in fatture_utenze_processate.items():
+                voci = fattura_data['voci']
+                if len(voci) <= 1:
+                    continue  # Una sola voce, niente da fare
+                
+                # Trova la voce principale (importo maggiore, escludendo voci secondarie)
+                voci_filtrate = []
+                for voce in voci:
+                    desc_lower = voce['descrizione'].lower()
+                    # Escludi voci chiaramente secondarie
+                    if (not any(keyword in desc_lower for keyword in ['iva', 'imposta', 'sconto', 'trasporto']) and
+                        voce['prezzo'] >= 5.0):  # Importo minimo significativo
+                        voci_filtrate.append(voce)
+                
+                if not voci_filtrate:
+                    voci_filtrate = voci  # Fallback: usa tutte le voci
+                
+                # Seleziona la voce con importo maggiore
+                voce_principale = max(voci_filtrate, key=lambda x: x['prezzo'])
+                
+                # Modifica la descrizione della voce principale
+                nome_fornitore = fattura_data['nome_fornitore']
+                nuova_descrizione = f"{nome_fornitore} - Fattura #{cod_fattura}"
+                
+                # Aggiorna la descrizione nel DataFrame
+                df_dettagli_processato.loc[voce_principale['index'], col_map_dettagli['descrizione']] = nuova_descrizione
+                
+                # Marca le altre voci per la rimozione
+                for voce in voci:
+                    if voce['index'] != voce_principale['index']:
+                        indici_da_rimuovere.add(voce['index'])
+                        voci_secondarie_rimosse += 1
+                
+                voci_principali_utenze += 1
+            
+            # Rimuovi le voci secondarie
+            if indici_da_rimuovere:
+                df_dettagli_processato = df_dettagli_processato.drop(indici_da_rimuovere).reset_index(drop=True)
+            
+            logger.info(f"AGGREGAZIONE: {voci_principali_utenze} fatture utenze processate, "
+                       f"{voci_secondarie_rimosse} voci secondarie rimosse, "
+                       f"DataFrame finale: {len(df_dettagli_processato)} righe")
+        else:
+            logger.warning(f"AGGREGAZIONE: Saltata - servizio non disponibile")
+        
+        # Estrai materiali unici dai dettagli (ora con voci principali utenze)
         materiali_unici = {}
         
-        for _, det_row in df_dettagli.iterrows():
+        for _, det_row in df_dettagli_processato.iterrows():
             descrizione = det_row.get(col_map_dettagli['descrizione'])
             codice_articolo = det_row.get(col_map_dettagli['codice_articolo'])
             codice_fattura = det_row.get(col_map_dettagli['codice_fattura'])
@@ -1333,6 +1463,10 @@ def get_materiali_da_classificare():
             desc_str = safe_str(descrizione)
             cod_art_str = safe_str(codice_articolo)
             cod_fat_str = safe_str(codice_fattura)
+            
+            # Pulisci codice articolo - rimuovi placeholder per utenze/servizi
+            if cod_art_str in ['ZZZZZL', 'ZZZZZ', 'NULL', '']:
+                cod_art_str = ''
             
             # Filtra descrizioni valide
             if (desc_str and len(desc_str) > 5 and
@@ -1354,10 +1488,10 @@ def get_materiali_da_classificare():
                 
                 if chiave_materiale not in materiali_unici:
                     materiali_unici[chiave_materiale] = {
-                        'codice_articolo': cod_art_str,
-                        'descrizione': desc_str,
-                        'codice_fornitore': cod_fornitore,
-                        'nome_fornitore': nome_fornitore,
+                        'codicearticolo': cod_art_str,
+                        'nome': desc_str,
+                        'fornitoreid': cod_fornitore,
+                        'fornitorenome': nome_fornitore,
                         'occorrenze': 1
                     }
                 else:
@@ -1370,31 +1504,38 @@ def get_materiali_da_classificare():
         
         # Ottieni classificazioni esistenti dalla tabella materiali (SQLite)
         cursor.execute('''
-            SELECT codicearticolo as codice_articolo,
-                   m.nome as descrizione,
-                   m.fornitoreid as codice_fornitore,
-                   m.fornitorenome as nome_fornitore,
-                   c.nome as conto_codice,
-                   s.nome as sottoconto_codice,
-                   m.categoria_contabile,
+            SELECT m.codicearticolo,
+                   m.nome,
+                   m.fornitoreid,
+                   m.fornitorenome,
+                   m.contoid,
+                   c.nome as contonome,
                    m.brancaid,
+                   b.nome as brancanome,
+                   m.sottocontoid,
+                   s.nome as sottocontonome,
+                   m.categoria_contabile,
                    m.metodo_classificazione,
                    m.confidence,
                    m.confermato as confermato_da_utente
             FROM materiali m
             LEFT JOIN conti c ON m.contoid = c.id
+            LEFT JOIN branche b ON m.brancaid = b.id
             LEFT JOIN sottoconti s ON m.sottocontoid = s.id
         ''')
         
         classificazioni_esistenti = {}
         for row in cursor.fetchall():
-            chiave = f"{row[0]}|{row[1]}|{row[2]}"
-            _, _, _, _, conto_codice, sottoconto_codice, categoria_contabile, brancaid, metodo_classificazione, confidence, confermato = row
+            codicearticolo, nome, fornitoreid, fornitorenome, contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome, categoria_contabile, metodo_classificazione, confidence, confermato = row
+            chiave = f"{codicearticolo}|{nome}|{fornitoreid}"
             classificazioni_esistenti[chiave] = {
-                'conto_codice': conto_codice,
-                'sottoconto_codice': sottoconto_codice,
+                'contoid': contoid,
+                'contonome': contonome,
+                'brancaid': brancaid,
+                'brancanome': brancanome,
+                'sottocontoid': sottocontoid,
+                'sottocontonome': sottocontonome,
                 'categoria_contabile': categoria_contabile,
-                'branca_codice': str(brancaid) if brancaid else None,
                 'metodo_classificazione': metodo_classificazione,
                 'confidence': confidence,
                 'confermato_da_utente': bool(confermato)
@@ -1455,9 +1596,12 @@ def get_materiali_da_classificare():
                     conn.close()
                     
                     return {
-                        'conto_codice': conto_nome,
-                        'sottoconto_codice': sottoconto_nome,
-                        'branca_codice': str(result["branca_suggerita"]) if result.get("branca_suggerita") else None,
+                        'contoid': result.get("conto_suggerito"),
+                        'contonome': conto_nome,
+                        'brancaid': result.get("branca_suggerita"),
+                        'brancanome': branca_nome,
+                        'sottocontoid': result.get("sottoconto_suggerito"),
+                        'sottocontonome': sottoconto_nome,
                         'categoria_contabile': result.get("categoria_nome"),
                         'metodo_classificazione': 'intelligente',
                         'confidence': int(result.get("confidence", 0) * 100),
@@ -1488,10 +1632,36 @@ def get_materiali_da_classificare():
             for pattern, conto, sottoconto, categoria, priorita in patterns:
                 if pattern in descrizione_upper:
                     branca_id = resolve_branca_id(conto, sottoconto)
+                    # Ottieni gli ID dai nomi per il nuovo formato
+                    conn_ids = sqlite3.connect('server/instance/studio_dima.db')
+                    cursor_ids = conn_ids.cursor()
+                    
+                    # Ottieni contoid
+                    cursor_ids.execute("SELECT id FROM conti WHERE nome = ?", (conto,))
+                    conto_row = cursor_ids.fetchone()
+                    contoid = conto_row[0] if conto_row else None
+                    
+                    # Ottieni sottocontoid
+                    cursor_ids.execute("SELECT id FROM sottoconti WHERE nome = ?", (sottoconto,))
+                    sottoconto_row = cursor_ids.fetchone()
+                    sottocontoid = sottoconto_row[0] if sottoconto_row else None
+                    
+                    # Ottieni brancanome
+                    brancanome = None
+                    if branca_id:
+                        cursor_ids.execute("SELECT nome FROM branche WHERE id = ?", (branca_id,))
+                        branca_row = cursor_ids.fetchone()
+                        brancanome = branca_row[0] if branca_row else None
+                    
+                    conn_ids.close()
+                    
                     return {
-                        'conto_codice': conto,
-                        'sottoconto_codice': sottoconto,
-                        'branca_codice': str(branca_id) if branca_id else None,
+                        'contoid': contoid,
+                        'contonome': conto,
+                        'brancaid': branca_id,
+                        'brancanome': brancanome,
+                        'sottocontoid': sottocontoid,
+                        'sottocontonome': sottoconto,
                         'categoria_contabile': categoria,
                         'metodo_classificazione': 'pattern',
                         'confidence': min(95, priorita),
@@ -1503,6 +1673,7 @@ def get_materiali_da_classificare():
         # Prepara risultati finali
         materiali_risultato = []
         stats = {'classificati': 0, 'non_classificati': 0, 'da_verificare': 0}
+        materiali_filtrati_2plus = 0  # Conta materiali filtrati per 2+ livelli
         
         for chiave, materiale in materiali_unici.items():
             risultato = materiale.copy()
@@ -1510,26 +1681,65 @@ def get_materiali_da_classificare():
             # Verifica se già classificato manualmente
             if chiave in classificazioni_esistenti:
                 classificazione = classificazioni_esistenti[chiave]
+                brancaid = classificazione.get('brancaid', 0)
+                
+                # FILTRO: Escludere materiali già classificati a 2+ livelli (con branca)
+                # Solo materiali con classificazione parziale (solo conto) o non classificati devono apparire
+                if brancaid and brancaid != 0:
+                    materiali_filtrati_2plus += 1
+                    continue  # Salta questo materiale - già classificato a 2+ livelli
+                
                 risultato.update(classificazione)
                 risultato['stato_classificazione'] = 'classificato'
                 stats['classificati'] += 1
             else:
-                # Prova classificazione automatica
+                # Prima prova classificazione automatica standard
                 auto_class = classifica_automaticamente(
-                    materiale['descrizione'], 
-                    materiale['codice_articolo'],
-                    materiale['codice_fornitore'],
-                    materiale['nome_fornitore']
+                    materiale['nome'], 
+                    materiale['codicearticolo'],
+                    materiale['fornitoreid'],
+                    materiale['fornitorenome']
                 )
                 
-                if auto_class and auto_class['confidence'] >= 30:  # Soglia ridotta per includere più suggerimenti
+                # Poi verifica se è un fornitore utenze per classificazione ereditata
+                utenza_class = None
+                if classificazione_service and materiale['fornitorenome']:
+                    utenza_info = classificazione_service.is_fornitore_utenze(materiale['fornitorenome'])
+                    if utenza_info['is_utenza']:
+                        # Classifica automaticamente come utenza con classificazione del fornitore
+                        classificazione_suggerita = utenza_info.get('classificazione_suggerita', {})
+                        if classificazione_suggerita:
+                            utenza_class = {
+                                'contoid': None,  # Sarà risolto dopo
+                                'contonome': 'UTENZE',
+                                'brancaid': None,  # Sarà risolto dopo
+                                'brancanome': classificazione_suggerita.get('branca', 'GENERICHE'),
+                                'sottocontoid': None,  # Sarà risolto dopo
+                                'sottocontonome': classificazione_suggerita.get('sottoconto', 'BOLLETTE'),
+                                'categoria_contabile': f"UTENZE - {classificazione_suggerita.get('branca', 'GENERICHE')}",
+                                'metodo_classificazione': 'utenza_ereditata',
+                                'confidence': 85,  # Alta confidenza per utenze
+                                'confermato_da_utente': False
+                            }
+                
+                # Usa classificazione utenze se disponibile, altrimenti quella standard
+                if utenza_class:
+                    # FILTRO: Le utenze hanno sempre 2+ livelli, quindi non le mostriamo in ContiSottocontiTab
+                    # Classificale automaticamente ma non includerle nella tabella
+                    materiali_filtrati_2plus += 1
+                    continue  # Salta materiale utenze - auto-classificato a 2+ livelli
+                elif auto_class and auto_class['confidence'] >= 30:
                     risultato.update(auto_class)
                     risultato['stato_classificazione'] = 'da_verificare'
                     stats['da_verificare'] += 1
                 else:
                     risultato.update({
-                        'conto_codice': None,
-                        'sottoconto_codice': None,
+                        'contoid': None,
+                        'contonome': None,
+                        'brancaid': None,
+                        'brancanome': None,
+                        'sottocontoid': None,
+                        'sottocontonome': None,
                         'categoria_contabile': None,
                         'metodo_classificazione': None,
                         'confidence': 0,
@@ -1542,11 +1752,21 @@ def get_materiali_da_classificare():
         
         # Filtra per stato se richiesto
         if stato != 'tutti':
+            # Mappa gli stati dalla UI (plurale) agli stati interni (singolare)
+            stato_map = {
+                'classificati': 'classificato',
+                'non_classificati': 'non_classificato', 
+                'da_verificare': 'da_verificare'
+            }
+            stato_filtro = stato_map.get(stato, stato)
             materiali_risultato = [m for m in materiali_risultato 
-                                 if m['stato_classificazione'] == stato.replace('_', '_')]
+                                 if m['stato_classificazione'] == stato_filtro]
         
         # Ordina per occorrenze decrescenti
         materiali_risultato.sort(key=lambda x: x['occorrenze'], reverse=True)
+        
+        # Log finale con info filtro
+        logger.info(f"MATERIALI: {len(materiali_risultato)} materiali finali (esclusi {materiali_filtrati_2plus} già classificati a 2+ livelli)")
         
         # Paginazione
         total = len(materiali_risultato)

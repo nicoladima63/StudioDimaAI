@@ -84,12 +84,13 @@ export interface FornitoreResponse {
   data: Fornitore;
 }
 
-// Enum per i tipi di costo
-export enum TipoDiCosto {
-  DIRETTO = 1,
-  INDIRETTO = 2,
-  NON_DEDUCIBILE = 3
-}
+// Tipi di costo
+export type TipoDiCosto = 1 | 2 | 3;
+export const TipoDiCosto = {
+  DIRETTO: 1 as const,
+  INDIRETTO: 2 as const,
+  NON_DEDUCIBILE: 3 as const
+} as const;
 
 // Labels per i tipi di costo
 export const TipoDiCostoLabels = {
@@ -105,8 +106,13 @@ export interface ClassificazioneCosto {
   tipo_entita: 'fornitore' | 'spesa';
   tipo_di_costo: TipoDiCosto;
   categoria?: number;
-  categoria_conto?: string;  // Codice conto contabile
-  sottoconto?: string;       // Codice sottoconto
+  categoria_conto?: string;  // Codice conto contabile (legacy)
+  sottoconto?: string;       // Codice sottoconto (legacy)
+  // Nuovi campi numerici
+  contoid?: number;
+  brancaid?: number;
+  sottocontoid?: number;
+  fornitoreid?: number;
   note?: string;
   data_classificazione: string;
   data_modifica: string;
@@ -124,8 +130,21 @@ export interface ClassificazioneResponse {
 export interface ClassificazioneRequest {
   tipo_di_costo: TipoDiCosto;
   categoria?: number;
-  categoria_conto?: string;  // Codice conto contabile
-  sottoconto?: string;       // Codice sottoconto
+  categoria_conto?: string;  // Codice conto contabile (legacy)
+  sottoconto?: string;       // Codice sottoconto (legacy)
+  // Nuovi campi numerici
+  contoid?: number;
+  brancaid?: number;
+  sottocontoid?: number;
+  note?: string;
+}
+
+// Interface per la richiesta di classificazione completa (nuovo sistema)
+export interface ClassificazioneCompletaRequest {
+  tipo_di_costo: TipoDiCosto;
+  contoid: number;
+  brancaid: number;
+  sottocontoid: number;
   note?: string;
 }
 

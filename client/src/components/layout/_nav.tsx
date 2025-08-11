@@ -1,4 +1,3 @@
-import React from 'react';
 import CIcon from '@coreui/icons-react';
 import { 
   cilSpeedometer, 
@@ -17,7 +16,7 @@ import {
   cilCode,
   cilAccountLogout
 } from '@coreui/icons';
-import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react';
+import { CNavItem, CNavTitle } from '@coreui/react';
 
 const _nav = [
   {

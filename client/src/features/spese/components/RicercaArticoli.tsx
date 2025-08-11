@@ -157,7 +157,7 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({
 
         {risultati.length > 0 && (
           <div style={{ overflowX: "auto" }}>
-            <CTable hover responsive size="sm">
+            <CTable hover responsive>
               <CTableHead>
                 <CTableRow>
                   <CTableHeaderCell>Descrizione Articolo</CTableHeaderCell>

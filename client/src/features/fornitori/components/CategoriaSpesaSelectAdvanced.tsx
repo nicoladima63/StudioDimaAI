@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { CCard, CCardBody, CSpinner, CBadge, CAlert } from "@coreui/react";
-import ContoSottocontoSelect from "@/components/ContoSottocontoSelect";
+import ContoBrancheSottocontoSelect from "@/components/selects/ContoBrancheSottocontoSelect";
 import classificazioniService from "../services/classificazioni.service";
 import type { ClassificazioneCosto } from "../types";
-import type { Conto, Sottoconto } from "@/store/contiStore";
 
 interface CategoriaSpesaSelectAdvancedProps {
   fornitoreId: string;
@@ -19,8 +18,9 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
   showSuggestions = true
 }) => {
   const [updating, setUpdating] = useState(false);
-  const [selectedConto, setSelectedConto] = useState<string>("");
-  const [selectedSottoconto, setSelectedSottoconto] = useState<string>("");
+  const [selectedContoId, setSelectedContoId] = useState<number | null>(null);
+  const [selectedBrancaId, setSelectedBrancaId] = useState<number | null>(null);
+  const [selectedSottocontoId, setSelectedSottocontoId] = useState<number | null>(null);
   
   // Suggestion state
   const [suggestedConto, setSuggestedConto] = useState<string | null>(null);
@@ -31,11 +31,11 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
   // Inizializza dalla classificazione esistente
   useEffect(() => {
     if (classificazione?.categoria_conto) {
-      setSelectedConto(classificazione.categoria_conto);
-      setSelectedSottoconto(classificazione.sottoconto || "");
+      // setSelectedContoId(classificazione.categoria_conto);
+      // setSelectedSottocontoId(classificazione.sottoconto || null);
     } else {
-      setSelectedConto("");
-      setSelectedSottoconto("");
+      setSelectedContoId(null);
+      setSelectedSottocontoId(null);
       
       if (showSuggestions) {
         suggerisciCategoriaAutomatica();
@@ -57,7 +57,7 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
         
         // Se la confidenza è molto alta (>= 0.9), pre-seleziona automaticamente
         if (suggestion.data.confidence >= 0.9) {
-          setSelectedConto(suggestion.data.categoria_suggerita);
+          // setSelectedContoId(suggestion.data.categoria_suggerita);
         }
       }
     } catch (error) {
@@ -67,23 +67,9 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
     }
   };
 
-  const handleContoChange = async (codice: string | null, conto: Conto | null) => {
-    setSelectedConto(codice || "");
-    
-    // Se cambia il conto, salva subito (il sottoconto verrà salvato dopo)
-    if (codice) {
-      await saveClassificazione(codice, null);
-    }
-  };
+  // Le funzioni handleContoChange e handleSottocontoChange non sono più necessarie
+  // Il componente ContoBrancheSottocontoSelect gestisce direttamente le selezioni
 
-  const handleSottocontoChange = async (codice: string | null, sottoconto: Sottoconto | null) => {
-    setSelectedSottoconto(codice || "");
-    
-    // Salva con il sottoconto
-    if (selectedConto) {
-      await saveClassificazione(selectedConto, codice);
-    }
-  };
 
   const saveClassificazione = async (conto: string, sottoconto: string | null) => {
     if (!fornitoreId) return;
@@ -104,14 +90,14 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
         onCategoriaChange?.(conto, sottoconto);
       } else {
         // Ripristina valori precedenti in caso di errore
-        setSelectedConto(classificazione?.categoria_conto || "");
-        setSelectedSottoconto(classificazione?.sottoconto || "");
+        // setSelectedContoId(null);
+        // setSelectedSottocontoId(null);
       }
     } catch (error) {
       console.error("Errore nell'aggiornamento categoria:", error);
       // Ripristina valori precedenti
-      setSelectedConto(classificazione?.categoria_conto || "");
-      setSelectedSottoconto(classificazione?.sottoconto || "");
+      // setSelectedContoId(null);
+      // setSelectedSottocontoId(null);
     } finally {
       setUpdating(false);
     }
@@ -119,7 +105,7 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
 
   const applySuggestion = () => {
     if (suggestedConto) {
-      setSelectedConto(suggestedConto);
+      // setSelectedContoId(suggestedConto);
       saveClassificazione(suggestedConto, null);
     }
   };
@@ -163,14 +149,13 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
       {/* Selezione Conto/Sottoconto */}
       <CCard className="border-0 bg-light">
         <CCardBody className="p-3">
-          <ContoSottocontoSelect
-            selectedConto={selectedConto}
-            selectedSottoconto={selectedSottoconto}
-            onContoChange={handleContoChange}
-            onSottocontoChange={handleSottocontoChange}
-            disabled={updating}
-            size="sm"
-            showLabels={true}
+          <ContoBrancheSottocontoSelect
+            contoId={selectedContoId}
+            setContoId={setSelectedContoId}
+            brancaId={selectedBrancaId}
+            setBrancaId={setSelectedBrancaId}
+            sottocontoId={selectedSottocontoId}
+            setSottocontoId={setSelectedSottocontoId}
             autoSelectIfSingle={true}
           />
           
@@ -183,12 +168,12 @@ const CategoriaSpesaSelectAdvanced: React.FC<CategoriaSpesaSelectAdvancedProps> 
       </CCard>
 
       {/* Info sulla classificazione corrente */}
-      {(selectedConto || selectedSottoconto) && (
+      {(selectedContoId || selectedSottocontoId) && (
         <div className="mt-2">
           <small className="text-muted">
             Classificazione attuale: 
-            {selectedConto && <span className="ms-1 fw-bold">{selectedConto}</span>}
-            {selectedSottoconto && <span className="ms-1">→ {selectedSottoconto}</span>}
+            {selectedContoId && <span className="ms-1 fw-bold">Conto: {selectedContoId}</span>}
+            {selectedSottocontoId && <span className="ms-1">→ Sottoconto: {selectedSottocontoId}</span>}
           </small>
         </div>
       )}

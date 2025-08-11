@@ -25,7 +25,7 @@ const AppSidebar: React.FC = () => {
       onVisibleChange={(visible) => setSidebarVisible(visible)}
     >
       <CSidebarHeader className="border-bottom" style={{ minHeight: '76px' }}>
-        <CSidebarBrand to="/">
+        <CSidebarBrand href="/">
           <h5>Studio Nicola Di Martino</h5>
         </CSidebarBrand>
       </CSidebarHeader>

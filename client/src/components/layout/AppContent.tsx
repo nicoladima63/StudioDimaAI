@@ -1,12 +1,10 @@
 import React, { Suspense } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { CContainer, CSpinner } from '@coreui/react';
 
 const AppContent: React.FC = () => {
-  const location = useLocation();
-  
   // Puoi personalizzare il comportamento del container basandoti sulla route
-  const isDashboard = location.pathname === '/';
+  // const isDashboard = location.pathname === '/';
 
   return (
     <CContainer className="h-auto" fluid>

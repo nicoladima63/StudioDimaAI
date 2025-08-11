@@ -14,14 +14,13 @@ import {
   CTableDataCell,
   CSpinner,
   CAlert,
-  CButton,
   CBadge,
   CPagination,
   CPaginationItem,
 } from '@coreui/react';
 import Select from 'react-select';
-import CIcon from '@coreui/icons-react';
-import { cilX } from '@coreui/icons';
+// import CIcon from '@coreui/icons-react';
+// import { cilX } from '@coreui/icons';
 import { fornitoriService } from '../services/fornitori.service';
 import DettagliFatturaModal from './DettagliFatturaModal';
 import type { Fornitore, FatturaFornitore } from '../types';
@@ -122,20 +121,20 @@ const TutteLeFatture: React.FC = () => {
     }
   };
 
-  const pulisciFiltri = () => {
-    setAnnoSelezionato('');
-    setFattureVisualizzate(tutteLeFatture);
-  };
+  // const pulisciFiltri = () => {
+  //   setAnnoSelezionato('');
+  //   setFattureVisualizzate(tutteLeFatture);
+  // };
 
-  const resetTutto = () => {
-    setFornitoreSelezionato(null);
-    setTutteLeFatture([]);
-    setFattureVisualizzate([]);
-    setAnniDisponibili([]);
-    setAnnoSelezionato('');
-    setCurrentPage(1);
-    setError(null);
-  };
+  // const resetTutto = () => {
+  //   setFornitoreSelezionato(null);
+  //   setTutteLeFatture([]);
+  //   setFattureVisualizzate([]);
+  //   setAnniDisponibili([]);
+  //   setAnnoSelezionato('');
+  //   setCurrentPage(1);
+  //   setError(null);
+  // };
 
   const handleFornitoreSelect = (selectedOption: {value: string, label: string, fornitore: Fornitore} | null) => {
     setFornitoreSelezionato(selectedOption);
