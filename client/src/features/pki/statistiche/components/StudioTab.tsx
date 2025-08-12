@@ -9,19 +9,19 @@ import {
   CAlert
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilChart, cilUser } from '@coreui/icons';
+import { cilBuilding, cilUser } from '@coreui/icons';
 import { useClassificazioni } from '@/store/classificazioniStore';
 import { useContiStore } from '@/store/contiStore';
 import StatisticheLavoroCard from './StatisticheLavoroCard';
 import { getColoreSerieByIndex } from '../utils/coloriSerie';
 
-const UtenzeTab: React.FC = () => {
-  const { classificazioni, isLoading, error } = useClassificazioni('UTENZE');
+const StudioTab: React.FC = () => {
+  const { classificazioni, isLoading, error } = useClassificazioni('STUDIO');
   const { getBrancaById, loadBranche } = useContiStore();
 
 
   // Raggruppa per codice_riferimento (fornitore)
-  const utenze = React.useMemo(() => {
+  const consulenti = React.useMemo(() => {
     const gruppi = new Map<
       string,
       {
@@ -49,44 +49,44 @@ const UtenzeTab: React.FC = () => {
     return Array.from(gruppi.values());
   }, [classificazioni]);
 
-  // Raggruppa utenze per branca
-  const utenzePerBranca = React.useMemo(() => {
-    const gruppiPerBranca = new Map<string, typeof utenze>();
+  // Raggruppa consulenti per branca
+  const consulentiPerBranca = React.useMemo(() => {
+    const gruppiPerBranca = new Map<string, typeof consulenti>();
     
-    utenze.forEach(utenza => {
-      const nomeBranca = getBrancaById(utenza.brancaid) || 'Non classificato';
+    consulenti.forEach(consulente => {
+      const nomeBranca = getBrancaById(consulente.brancaid) || 'Non classificato';
       if (!gruppiPerBranca.has(nomeBranca)) {
         gruppiPerBranca.set(nomeBranca, []);
       }
-      gruppiPerBranca.get(nomeBranca)!.push(utenza);
+      gruppiPerBranca.get(nomeBranca)!.push(consulente);
     });
 
     const brancheUniche = Array.from(gruppiPerBranca.keys()).sort();
     
-    return Array.from(gruppiPerBranca.entries()).map(([nomeBranca, utenze], groupIndex) => ({
+    return Array.from(gruppiPerBranca.entries()).map(([nomeBranca, consulenti]) => ({
       nomeBranca,
-      utenze,
+      consulenti,
       colore: getColoreSerieByIndex(brancheUniche.indexOf(nomeBranca))
     }));
-  }, [utenze, getBrancaById]);
+  }, [consulenti, getBrancaById]);
 
-  // Carica le branche per tutti i conti delle utenze
+  // Carica le branche per tutti i conti dei consulenti
   React.useEffect(() => {
     const contiUniques = new Set<number>();
-    utenze.forEach(u => {
-      if (u.contoid) contiUniques.add(u.contoid);
+    consulenti.forEach(c => {
+      if (c.contoid) contiUniques.add(c.contoid);
     });
     
     contiUniques.forEach(contoid => {
       loadBranche(contoid);
     });
-  }, [utenze, loadBranche]);
+  }, [consulenti, loadBranche]);
 
   if (isLoading) {
     return (
       <div className="text-center p-4">
         <CSpinner />
-        <div className="mt-2">Caricamento utenze...</div>
+        <div className="mt-2">Caricamento consulenti...</div>
       </div>
     );
   }
@@ -99,11 +99,11 @@ const UtenzeTab: React.FC = () => {
     );
   }
 
-  if (utenze.length === 0) {
+  if (consulenti.length === 0) {
     return (
       <CAlert color="info">
-        <CIcon icon={cilChart} className="me-2" />
-        Nessuna utenza classificata trovata.
+        <CIcon icon={cilBuilding} className="me-2" />
+        Nessun consulente classificato trovato.
       </CAlert>
     );
   }
@@ -112,12 +112,12 @@ const UtenzeTab: React.FC = () => {
     <div>
       <div className="mb-4">
         <h6 className="text-muted">
-          <CIcon icon={cilChart} className="me-2" />
-          {utenze.length} utenze trovate in {utenzePerBranca.length} categorie
+          <CIcon icon={cilBuilding} className="me-2" />
+          {consulenti.length} consulenti trovati in {consulentiPerBranca.length} categorie
         </h6>
       </div>
 
-      {utenzePerBranca.map((gruppo, groupIndex) => (
+      {consulentiPerBranca.map((gruppo, groupIndex) => (
         <div key={groupIndex} className="mb-5">
           {/* Header della categoria */}
           <div className="mb-3">
@@ -128,13 +128,13 @@ const UtenzeTab: React.FC = () => {
                 display: 'inline-block'
               }}
             >
-              {gruppo.nomeBranca} ({gruppo.utenze.length})
+              {gruppo.nomeBranca} ({gruppo.consulenti.length})
             </h5>
           </div>
           
-          {/* Card delle utenze di questa categoria */}
+          {/* Card dei consulenti di questa categoria */}
           <CRow>
-            {gruppo.utenze.map((utenza, index) => (
+            {gruppo.consulenti.map((consulente, index) => (
               <CCol key={index} md={3} className="mb-4">
                 <CCard className="h-100">
                   <CCardHeader
@@ -145,14 +145,14 @@ const UtenzeTab: React.FC = () => {
                       height: 80
                     }}
                   >
-                    <CIcon icon={cilChart} size="xl" className="text-white me-3" />
-                    {utenza.fornitore_nome}
+                    <CIcon icon={cilBuilding} size="xl" className="text-white me-3" />
+                    {consulente.fornitore_nome}
                   </CCardHeader>
                   <CCardBody>
                     <StatisticheLavoroCard 
                       collaboratore={{
-                        codice_riferimento: utenza.codice_riferimento,
-                        fornitore_nome: utenza.fornitore_nome
+                        codice_riferimento: consulente.codice_riferimento,
+                        fornitore_nome: consulente.fornitore_nome
                       }}
                     />
                   </CCardBody>
@@ -166,4 +166,4 @@ const UtenzeTab: React.FC = () => {
   );
 };
 
-export default UtenzeTab;
+export default StudioTab;

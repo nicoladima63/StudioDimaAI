@@ -37,9 +37,9 @@ const classificazioniService = {
     return response.data;
   },
 
-  // Nuovo metodo per classificazione completa
+  // Metodo per classificazione completa (usa stesso endpoint unificato)
   salvaClassificazioneFornitoreCompleta: async (fornitoreId: string, request: ClassificazioneCompletaRequest): Promise<ClassificazioneResponse> => {
-    const response = await apiClient.put(`/api/classificazioni/fornitore/${fornitoreId}/completa`, request);
+    const response = await apiClient.put(`/api/classificazioni/fornitore/${fornitoreId}`, request);
     return response.data;
   },
 

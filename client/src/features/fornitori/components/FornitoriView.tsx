@@ -440,6 +440,7 @@ const FornitoriView: React.FC = () => {
                   >
                     <ClassificazioneStatus
                       fornitoreId={fornitore.id}
+                      fornitoreNome={fornitore.nome}
                       classificazione={classificazioni.get(fornitore.id) || null}
                       onClassificazioneChange={(contoid, brancaid, sottocontoid) => {
                         // Aggiorna la classificazione locale senza ricaricare tutto

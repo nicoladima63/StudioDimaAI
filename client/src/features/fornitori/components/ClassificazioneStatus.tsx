@@ -8,6 +8,7 @@ import { useConti, useBranche, useSottoconti } from "@/store/contiStore";
 
 interface ClassificazioneStatusProps {
   fornitoreId: string;
+  fornitoreNome?: string;
   classificazione: ClassificazioneCosto | null;
   onClassificazioneChange?: (
     contoid: number | null,
@@ -18,6 +19,7 @@ interface ClassificazioneStatusProps {
 
 const ClassificazioneStatus: React.FC<ClassificazioneStatusProps> = ({
   fornitoreId,
+  fornitoreNome,
   classificazione,
   onClassificazioneChange,
 }) => {
@@ -128,6 +130,7 @@ const ClassificazioneStatus: React.FC<ClassificazioneStatusProps> = ({
       <div className="d-flex flex-column gap-2">
         <ClassificazioneGerarchica
           fornitoreId={fornitoreId}
+          fornitoreNome={fornitoreNome}
           classificazione={classificazione}
           onClassificazioneChange={(contoid, brancaid, sottocontoid) => {
             if (onClassificazioneChange) {

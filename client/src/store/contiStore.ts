@@ -17,6 +17,11 @@ interface State {
   brancheByConto: Record<number, Branca[]>;
   sottocontiByBranca: Record<number, Sottoconto[]>;
   
+  // Mappe id→nome per lookup rapidi
+  contiMap: Record<number, string>;
+  brancheMap: Record<number, string>;
+  sottocontiMap: Record<number, string>;
+  
   // Stati
   isLoading: boolean;
   errors: Record<string, string | null>;
@@ -36,6 +41,8 @@ interface State {
   // Utilità
   invalidateCache: () => void;
   getContoById: (id: number) => Conto | undefined;
+  getBrancaById: (id: number) => string | undefined;
+  getSottocontoById: (id: number) => string | undefined;
 }
 
 export const useContiStore = create<State>()(
@@ -44,6 +51,9 @@ export const useContiStore = create<State>()(
       conti: [],
       brancheByConto: {},
       sottocontiByBranca: {},
+      contiMap: {},
+      brancheMap: {},
+      sottocontiMap: {},
       isLoading: false,
       errors: { conti: null, branche: null, sottoconti: null },
       lastUpdated: { conti: 0, branche: {}, sottoconti: {} },
@@ -63,8 +73,15 @@ export const useContiStore = create<State>()(
             const res = await apiClient.get("/api/struttura-conti/conti");
             if (!res.data.success) throw new Error(res.data.error || "Errore caricamento conti");
             
+            // Crea mappa id→nome per i conti
+            const contiMap = res.data.data.reduce((map: Record<number, string>, conto: Conto) => {
+              map[conto.id] = conto.nome;
+              return map;
+            }, {});
+            
             set({
               conti: res.data.data,
+              contiMap,
               isLoading: false,
               lastUpdated: { ...state.lastUpdated, conti: Date.now() },
               errors: { ...state.errors, conti: null }
@@ -97,8 +114,15 @@ export const useContiStore = create<State>()(
           const res = await apiClient.get(`/api/struttura-conti/branche?conto_id=${contoId}`);
           if (!res.data.success) throw new Error("Errore caricamento branche");
           
+          // Aggiorna mappa branche
+          const newBrancheMap = { ...state.brancheMap };
+          res.data.data.forEach((branca: Branca) => {
+            newBrancheMap[branca.id] = branca.nome;
+          });
+          
           set({
             brancheByConto: { ...state.brancheByConto, [contoId]: res.data.data },
+            brancheMap: newBrancheMap,
             isLoading: false,
             lastUpdated: { 
               ...state.lastUpdated, 
@@ -153,7 +177,11 @@ export const useContiStore = create<State>()(
         lastUpdated: { conti: 0, branche: {}, sottoconti: {} }
       }),
 
-      getContoById: (id) => get().conti.find(c => c.id === id)
+      getContoById: (id) => get().conti.find(c => c.id === id),
+      
+      // Funzioni helper per lookup rapidi
+      getBrancaById: (id) => get().brancheMap[id],
+      getSottocontoById: (id) => get().sottocontiMap[id]
     }),
     {
       name: "conti-store",

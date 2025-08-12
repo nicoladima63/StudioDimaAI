@@ -146,6 +146,7 @@ export interface ClassificazioneCompletaRequest {
   brancaid: number;
   sottocontoid: number;
   note?: string;
+  fornitore_nome?: string;
 }
 
 // Interface per le categorie di spesa da CONTI.DBF

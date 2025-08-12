@@ -3,19 +3,23 @@ import {
   CCard,
   CCardBody,
   CCardHeader,
-  CTabs,
-  CTabList,
-  CTab,
+  CNav,
+  CNavItem,
+  CNavLink,
   CTabContent,
   CTabPane,
   CContainer,
   CRow,
   CCol
 } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilUser, cilChart, cilBuilding } from '@coreui/icons';
 import CollaboratoriTab from '../components/CollaboratoriTab';
+import UtenzeTab from '../components/UtenzeTab';
+import StudioTab from '../components/StudioTab';
 
 const StatistichePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState('collaboratori');
 
   return (
     <CContainer fluid>
@@ -29,7 +33,52 @@ const StatistichePage: React.FC = () => {
               </small>
             </CCardHeader>
             <CCardBody>
-            <CollaboratoriTab />
+              {/* Navigation Tabs */}
+              <CNav variant="tabs" className="mb-4">
+                <CNavItem>
+                  <CNavLink
+                    active={activeTab === 'collaboratori'}
+                    onClick={() => setActiveTab('collaboratori')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <CIcon icon={cilUser} className="me-2" />
+                    Collaboratori
+                  </CNavLink>
+                </CNavItem>
+                <CNavItem>
+                  <CNavLink
+                    active={activeTab === 'utenze'}
+                    onClick={() => setActiveTab('utenze')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <CIcon icon={cilChart} className="me-2" />
+                    Utenze
+                  </CNavLink>
+                </CNavItem>
+                <CNavItem>
+                  <CNavLink
+                    active={activeTab === 'studio'}
+                    onClick={() => setActiveTab('studio')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <CIcon icon={cilBuilding} className="me-2" />
+                    Studio
+                  </CNavLink>
+                </CNavItem>
+              </CNav>
+
+              {/* Tab Content */}
+              <CTabContent>
+                <CTabPane visible={activeTab === 'collaboratori'} role="tabpanel">
+                  <CollaboratoriTab />
+                </CTabPane>
+                <CTabPane visible={activeTab === 'utenze'} role="tabpanel">
+                  <UtenzeTab />
+                </CTabPane>
+                <CTabPane visible={activeTab === 'studio'} role="tabpanel">
+                  <StudioTab />
+                </CTabPane>
+              </CTabContent>
             </CCardBody>
           </CCard>
         </CCol>

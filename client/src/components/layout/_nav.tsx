@@ -96,12 +96,12 @@ const _nav = [
     to: '/fatture',
     icon: <CIcon icon={cilCreditCard} customClassName="nav-icon" />,
   },
-  {
-    component: CNavItem,
-    name: 'Collaboratori',
-    to: '/collaboratori',
-    icon: <CIcon icon={cilUserPlus} customClassName="nav-icon" />,
-  },
+  // {
+  //   component: CNavItem,
+  //   name: 'Collaboratori',
+  //   to: '/collaboratori',
+  //   icon: <CIcon icon={cilUserPlus} customClassName="nav-icon" />,
+  // },
   {
     component: CNavItem,
     name: 'Spese',

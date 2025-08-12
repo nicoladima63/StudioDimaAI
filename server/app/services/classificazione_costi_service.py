@@ -77,7 +77,9 @@ class ClassificazioneCostiService:
             from dbfread import DBF
             import os
             
-            fornitori_path = os.path.join('server', 'windent', 'DATI', 'FORNITORI.DBF')
+            base_path = "server/windent/DATI"
+            fornitori_path = os.path.join(base_path, "FORNITOR.DBF")
+            
             if not os.path.exists(fornitori_path):
                 return f"Fornitore {codice_fornitore}"
                 
@@ -101,7 +103,8 @@ class ClassificazioneCostiService:
         contoid: int = 0,
         brancaid: int = 0,
         sottocontoid: int = 0,
-        tipo_entita: str = "fornitore") -> bool:
+        tipo_entita: str = "fornitore",
+        fornitore_nome: str = None) -> bool:
         """
         Classifica una entità (fornitore o spesa) nella tabella 'classificazione_costi'.
 
@@ -120,12 +123,16 @@ class ClassificazioneCostiService:
             raise ValueError("tipo_di_costo deve essere 0, 1, 2 o 3")
 
         try:
+            # Se è un fornitore e non è stato passato il nome, ottienilo dal DBF
+            if tipo_entita == "fornitore" and not fornitore_nome:
+                fornitore_nome = self._get_fornitore_nome(codice_riferimento)
+            
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute('''
                     INSERT OR REPLACE INTO classificazioni_costi
-                    (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid, data_modifica)
-                    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                ''', (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid))
+                    (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid, fornitore_nome, data_modifica)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ''', (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid, fornitore_nome))
                 conn.commit()
                 return True
         except Exception as e:

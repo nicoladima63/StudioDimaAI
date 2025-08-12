@@ -20,24 +20,50 @@ def classifica_fornitore(fornitore_id):
                 "error": "Dati JSON richiesti"
             }), 400
         
-        tipo_di_costo = data.get('tipo_di_costo')
-        categoria = data.get('categoria')
-        categoria_conto = data.get('categoria_conto')  # Nuovo campo
-        note = data.get('note')
-        
-        if tipo_di_costo not in [1, 2, 3]:
-            return jsonify({
-                "success": False,
-                "error": "tipo_di_costo deve essere 1 (diretto), 2 (indiretto) o 3 (non_deducibile)"
-            }), 400
-        
-        success = classificazione_service.classifica_fornitore(
-            codice_fornitore=fornitore_id,
-            tipo_di_costo=tipo_di_costo,
-            categoria=categoria,
-            categoria_conto=categoria_conto,
-            note=note
-        )
+        # Supporta sia il vecchio formato che il nuovo formato gerarchico
+        if 'contoid' in data:
+            # Nuovo formato con gerarchia conto->branca->sottoconto
+            contoid = data.get('contoid')
+            brancaid = data.get('brancaid', 0)
+            sottocontoid = data.get('sottocontoid', 0)
+            note = data.get('note')
+            fornitore_nome = data.get('fornitore_nome')
+            
+            if not contoid:
+                return jsonify({
+                    "success": False,
+                    "error": "contoid è richiesto"
+                }), 400
+                
+            success = classificazione_service.classifica_entita(
+                codice_riferimento=fornitore_id,
+                tipo_di_costo=0,  # Non specificato per classificazione gerarchica
+                contoid=contoid,
+                brancaid=brancaid or 0,
+                sottocontoid=sottocontoid or 0,
+                tipo_entita="fornitore",
+                fornitore_nome=fornitore_nome
+            )
+        else:
+            # Vecchio formato con tipo_di_costo
+            tipo_di_costo = data.get('tipo_di_costo')
+            categoria = data.get('categoria')
+            categoria_conto = data.get('categoria_conto')
+            note = data.get('note')
+            
+            if tipo_di_costo not in [1, 2, 3]:
+                return jsonify({
+                    "success": False,
+                    "error": "tipo_di_costo deve essere 1 (diretto), 2 (indiretto) o 3 (non_deducibile)"
+                }), 400
+                
+            success = classificazione_service.classifica_fornitore(
+                codice_fornitore=fornitore_id,
+                tipo_di_costo=tipo_di_costo,
+                categoria=categoria,
+                categoria_conto=categoria_conto,
+                note=note
+            )
         
         if success:
             classificazione = classificazione_service.get_classificazione_fornitore(fornitore_id)

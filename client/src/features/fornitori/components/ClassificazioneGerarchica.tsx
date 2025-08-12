@@ -10,12 +10,14 @@ import type { ClassificazioneCosto } from '../types';
 
 interface ClassificazioneGerarchicaProps {
   fornitoreId: string;
+  fornitoreNome?: string;
   classificazione: ClassificazioneCosto | null;
   onClassificazioneChange?: (contoid: number | null, brancaid: number | null, sottocontoid: number | null) => void;
 }
 
 const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
   fornitoreId,
+  fornitoreNome,
   classificazione,
   onClassificazioneChange
 }) => {
@@ -64,7 +66,8 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
             tipo_di_costo: classificazione?.tipo_di_costo || 1,
             contoid: contoId,
             brancaid: brancaId,
-            sottocontoid: newSottocontoId
+            sottocontoid: newSottocontoId,
+            fornitore_nome: fornitoreNome
           }
         );
         
@@ -101,7 +104,8 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
               tipo_di_costo: classificazione?.tipo_di_costo || 1,
               contoid: contoId,
               brancaid: brancaId,
-              sottocontoid: 0  // 0 indica che sottoconto non è necessario
+              sottocontoid: 0,  // 0 indica che sottoconto non è necessario
+              fornitore_nome: fornitoreNome
             }
           );
           
@@ -119,7 +123,8 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
               tipo_di_costo: classificazione?.tipo_di_costo || 1,
               contoid: contoId,
               brancaid: 0,  // 0 indica "parziale ma salvato"
-              sottocontoid: 0  // 0 indica "parziale ma salvato"
+              sottocontoid: 0,  // 0 indica "parziale ma salvato"
+              fornitore_nome: fornitoreNome
             }
           );
           
