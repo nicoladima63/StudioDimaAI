@@ -136,75 +136,6 @@ def get_classificazione_fornitore(fornitore_id):
             "error": str(e)
         }), 500
 
-@api_classificazioni.route('/fornitore/<fornitore_id>/completa', methods=['PUT'])
-@jwt_required()
-def classifica_fornitore_completa(fornitore_id):
-    """
-    Classifica un fornitore con la gerarchia completa: conto -> branca -> sottoconto
-    """
-    try:
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({
-                "success": False,
-                "error": "Dati JSON richiesti"
-            }), 400
-        
-        tipo_di_costo = data.get('tipo_di_costo')
-        contoid = data.get('contoid')
-        brancaid = data.get('brancaid')
-        sottocontoid = data.get('sottocontoid')
-        note = data.get('note')
-        
-        # Validazione campi richiesti
-        if tipo_di_costo not in [1, 2, 3]:
-            return jsonify({
-                "success": False,
-                "error": "tipo_di_costo deve essere 1 (diretto), 2 (indiretto) o 3 (non_deducibile)"
-            }), 400
-            
-        # Validazione: contoid è sempre richiesto, brancaid e sottocontoid possono essere 0 per classificazioni parziali
-        if contoid is None:
-            return jsonify({
-                "success": False,
-                "error": "contoid è richiesto"
-            }), 400
-            
-        # brancaid e sottocontoid possono essere 0 (classificazione parziale) o None (convertito a 0 nel service)
-        if brancaid is None:
-            brancaid = 0
-        if sottocontoid is None:
-            sottocontoid = 0
-        
-        success = classificazione_service.classifica_fornitore_completo(
-            codice_fornitore=fornitore_id,
-            tipo_di_costo=tipo_di_costo,
-            contoid=contoid,
-            brancaid=brancaid,
-            sottocontoid=sottocontoid,
-            note=note
-        )
-        
-        if success:
-            classificazione = classificazione_service.get_classificazione_fornitore(fornitore_id)
-            return jsonify({
-                "success": True,
-                "message": "Fornitore classificato completamente con successo",
-                "data": classificazione
-            }), 200
-        else:
-            return jsonify({
-                "success": False,
-                "error": "Errore nella classificazione completa del fornitore"
-            }), 500
-            
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-
 @api_classificazioni.route('/spesa/<spesa_id>', methods=['GET'])
 @jwt_required()
 def get_classificazione_spesa(spesa_id):
@@ -373,14 +304,15 @@ def get_categorie_spesa():
 def suggest_categoria_fornitore(fornitore_id):
     """
     Suggerisce automaticamente una categoria per un fornitore basandosi su:
-    - Collaboratori identificati (priorità massima)
-    - Analisi pattern storici delle spese (analisi intelligente)
-    - Pattern matching su nomi fornitori (fallback)
+    - Nome del fornitore
+    - Storico delle fatture
+    - Algoritmi di pattern matching (incluso sistema collaboratori)
     """
     try:
-        # 1. Prima verifica se è un collaboratore (massima priorità)
+        from server.services.collaboratori_service import init_collaboratori_service
+        
+        # Prima verifica se è un collaboratore (massima priorità)
         try:
-            from server.services.collaboratori_service import init_collaboratori_service
             collaboratori_service = init_collaboratori_service()
             collaboratori_attivi = collaboratori_service.get_collaboratori_confermati()
             
@@ -411,68 +343,21 @@ def suggest_categoria_fornitore(fornitore_id):
         except Exception as e:
             print(f"Errore controllo collaboratori per {fornitore_id}: {e}")
         
-        # 2. Analisi pattern storici delle spese (priorità alta)
-        historical_result = classificazione_service.analyze_fornitore_historical_patterns(fornitore_id)
+        # Se non è collaboratore, usiamo altri algoritmi di categorizzazione
+        # TODO: Implementare algoritmi per:
+        # - Fornitori materiali dentali (keywords: dental, materiali, implant, etc.)  
+        # - Fornitori servizi (keywords: energia, telefono, assicurazione, etc.)
+        # - Fornitori farmaceutici (keywords: farmacia, medicinali, etc.)
+        # - Laboratori (keywords: laboratorio, protesi, etc.)
         
-        # Se l'analisi storica ha trovato qualcosa con confidence decente, usala
-        if historical_result.get('categoria_suggerita') and historical_result.get('confidence', 0) >= 0.3:
-            return jsonify({
-                "success": True,
-                "data": historical_result
-            }), 200
-        
-        # 3. Pattern matching su nome fornitore (fallback)
-        try:
-            # Carica il nome del fornitore dal DBF
-            from server.app.core.db_utils import get_dbf_path, estrai_dati
-            
-            fornitori_path = get_dbf_path('fornitori')
-            fornitori_data = estrai_dati(fornitori_path, 'fornitori')
-            
-            fornitore_info = None
-            for fornitore in fornitori_data:
-                if fornitore.get('codice') == fornitore_id:
-                    fornitore_info = fornitore
-                    break
-            
-            if fornitore_info:
-                nome_fornitore = fornitore_info.get('nome', '').lower()
-                
-                # Pattern matching su nome fornitore
-                nome_patterns = {
-                    'ZZZZZU': ['enel', 'edison', 'energia', 'gas', 'bolletta'],
-                    'ZZZZZN': ['vodafone', 'tim', 'wind', 'fastweb', 'telefon'],
-                    'ZZZZZI': ['dental', 'dentsply', 'zimmer', 'straumann'],
-                    'ZZZZZK': ['farmacia', 'biaggini medical'],
-                    'ZZZZYL': ['bnp paribas', 'leasing'],
-                    'ZZZZXR': ['commercialista', 'avvocato', 'consulente']
-                }
-                
-                for categoria, keywords in nome_patterns.items():
-                    for keyword in keywords:
-                        if keyword in nome_fornitore:
-                            return jsonify({
-                                "success": True,
-                                "data": {
-                                    "categoria_suggerita": categoria,
-                                    "confidence": 0.8,
-                                    "motivo": f"Pattern nome fornitore: '{keyword}' in '{fornitore_info.get('nome', '')}'",
-                                    "algoritmo": "nome_fornitore_pattern"
-                                }
-                            }), 200
-                            
-        except Exception as e:
-            print(f"Errore pattern matching nome per {fornitore_id}: {e}")
-        
-        # 4. Nessun pattern riconosciuto
+        # Per ora returnamo "da classificare"
         return jsonify({
             "success": True,
             "data": {
                 "categoria_suggerita": None,
                 "confidence": 0.0,
                 "motivo": "Nessun pattern riconosciuto - classificazione manuale richiesta",
-                "algoritmo": "nessuno",
-                "historical_analysis": historical_result  # Include comunque l'analisi per debug
+                "algoritmo": "nessuno"
             }
         }), 200
         
@@ -539,92 +424,6 @@ def get_count_conti_sottoconti():
             "data": counts
         }), 200
         
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-
-@api_classificazioni.route('/fornitori/analytics', methods=['GET'])
-@jwt_required()
-def get_fornitori_analytics():
-    """
-    Ottiene analytics completi sui fornitori per dashboard
-    """
-    try:
-        analytics = classificazione_service.get_fornitori_analytics()
-        return jsonify({
-            "success": True,
-            "data": analytics
-        }), 200
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-
-@api_classificazioni.route('/fornitori/non-categorizzati', methods=['GET'])
-@jwt_required()
-def get_fornitori_non_categorizzati():
-    """
-    Ottiene lista fornitori classificati ma senza categoria assegnata
-    """
-    try:
-        fornitori = classificazione_service.get_fornitori_non_categorizzati()
-        return jsonify({
-            "success": True,
-            "data": fornitori,
-            "count": len(fornitori)
-        }), 200
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
-
-@api_classificazioni.route('/fornitore/<fornitore_id>/learn-pattern', methods=['POST'])
-@jwt_required()
-def update_fornitore_learning_pattern(fornitore_id):
-    """
-    Aggiorna il pattern di learning per un fornitore quando l'utente conferma/corregge una categorizzazione
-    """
-    try:
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({
-                "success": False,
-                "error": "Dati JSON richiesti"
-            }), 400
-        
-        categoria_confermata = data.get('categoria_confermata')
-        fonte_learning = data.get('fonte', 'materiale_confermato')  # 'materiale_confermato', 'fornitore_manuale', etc.
-        
-        if not categoria_confermata:
-            return jsonify({
-                "success": False,
-                "error": "categoria_confermata richiesta"
-            }), 400
-        
-        success = classificazione_service.update_fornitore_pattern_learning(
-            fornitore_id=fornitore_id,
-            categoria_confermata=categoria_confermata
-        )
-        
-        if success:
-            return jsonify({
-                "success": True,
-                "message": f"Pattern learning aggiornato per fornitore {fornitore_id}",
-                "fonte": fonte_learning
-            }), 200
-        else:
-            return jsonify({
-                "success": False,
-                "error": "Errore nell'aggiornamento del pattern learning"
-            }), 500
-            
     except Exception as e:
         return jsonify({
             "success": False,
