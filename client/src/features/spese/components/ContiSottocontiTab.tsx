@@ -39,7 +39,7 @@ import {
   cilWarning,
   cilXCircle,
 } from "@coreui/icons";
-import SelectSmart from "./SelectSmart";
+//import SelectSmart from "./SelectSmart";
 import materialiClassificazioniService from "../services/materialiClassificazioni.service";
 import { confirmListaMateriali } from "@/api/services/materiali.service";
 import type { MaterialeClassificazione, FiltriMateriali, MaterialiDaClassificareResponse } from "../services/materialiClassificazioni.service";
@@ -685,13 +685,13 @@ const ContiSottocontiTab: React.FC = () => {
                       <CTableDataCell>
                         <div className="d-flex gap-1 align-items-center">
                           {/* passiamo l'id materiale nel callback per aggiornare la tabella materiali */}
-                          <SelectSmart
+                          {/* <SelectSmart
                             materiale={materiale}
                             onClassificazioneAggiornata={(m) =>
                               handleClassificazioneAggiornataForRow(0, m)
                             }
                             onError={handleError}
-                          />
+                          /> */}
                           
                           {/* Tasto X per escludere il materiale */}
                           <CTooltip content="Rimuovi dalla lista">

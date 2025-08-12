@@ -4,6 +4,7 @@ Analizza CONTI.DBF e VOCISPES.DBF per categorizzazione automatica spese
 """
 
 import logging
+import os
 from typing import Dict, List, Optional, Tuple
 from dbfread import DBF
 from server.app.core.db_utils import get_dbf_path
@@ -92,12 +93,8 @@ class GestionaleIntelligenceService:
                 tipo = str(record.get('DB_COTIPO', '')).strip()
                 descrizione = str(record.get('DB_CODESCR', '')).strip()
                 
-                # Pulisci descrizioni troncate
-                if descrizione.startswith('ntali'):
-                    descrizione = 'Materiali Dentali'
-                elif descrizione.startswith('Stipendi dipendenti'):
-                    descrizione = 'Stipendi dipendenti'
-                elif len(descrizione) < 3:  # Descrizioni troppo corte
+                # Pulisci descrizioni troncate - rimossa logica hardcoded
+                if len(descrizione) < 3:  # Descrizioni troppo corte
                     continue
                     
                 if codice and descrizione and tipo == 'A':  # Solo conti Attivi (spese)
@@ -228,20 +225,20 @@ class GestionaleIntelligenceService:
     
     def categorize_spesa(self, descrizione: str, fornitore: str = "", codice_fornitore: str = "") -> dict:
         """
-        Categorizza una spesa basandosi sui pattern del gestionale
+        Categorizza una spesa utilizzando solo classificazioni dal database
         
         Args:
             descrizione: Descrizione della spesa
             fornitore: Nome fornitore (opzionale)
-            codice_fornitore: Codice fornitore per controllo collaboratori (opzionale)
+            codice_fornitore: Codice fornitore per controllo classificazione esistente
             
         Returns:
             Dict con categoria_nome, confidence, conto_suggerito, branca_suggerita, sottoconto_suggerito
         """
         if not descrizione:
             return {
-                "categoria_nome": "Varie", 
-                "confidence": 0.1,
+                "categoria_nome": "Non classificato", 
+                "confidence": 0.0,
                 "conto_suggerito": None,
                 "branca_suggerita": None, 
                 "sottoconto_suggerito": None,
@@ -270,108 +267,55 @@ class GestionaleIntelligenceService:
                         
             except Exception as e:
                 logger.warning(f"Errore controllo collaboratori: {e}")
-            
-        # Carica pattern se non ancora fatto
-        patterns = self.extract_vocispes_patterns()
-        conti = self.get_piano_conti()
         
-        desc_lower = (descrizione + " " + fornitore).lower()
-        desc_clean = re.sub(r'[^\w\s]', ' ', desc_lower)
-        
-        # Pattern specifici per riconoscimento avanzato
-        def has_product_code_pattern(text: str) -> bool:
-            """Riconosce pattern di codici prodotto dentali"""
-            patterns = [
-                r'\b\d{3}/\d{3}/\d{3}\b',  # 671/204/060
-                r'\b[a-z]{2}\d{3}[a-z]{0,2}\b',  # gl001as
-                r'\b\d{2}[a-z]\d[a-z]{2}[a-z]{2}-\b',  # 17d0nnlc-
-            ]
-            return any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns)
-        
-        def has_utility_pattern(text: str) -> bool:
-            """Riconosce pattern di bollette utenze"""
-            patterns = [
-                r'energia elettrica.*\b(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\b',
-                r'ricalcolo.*acque?',
-                r'canone.*fisso'
-            ]
-            return any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns)
-        
-        # Score per categoria
-        category_scores = {}
-        
-        for categoria, keywords in patterns.items():
-            score = 0.0
-            matched_keywords = 0
-            total_weight = 0
-            
-            for keyword in keywords:
-                # Peso keyword: più lunghe = più specifiche = peso maggiore
-                weight = max(1.0, len(keyword.split()) * 0.8)
-                total_weight += weight
+        # PRIORITA' 2: Controlla se esiste classificazione nel database studio_dima.db
+        if codice_fornitore:
+            try:
+                import sqlite3
+                from server.app.config.config import Config
+                db_path = os.path.join(Config.INSTANCE_FOLDER, 'studio_dima.db')
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
                 
-                if keyword in desc_lower:
-                    # Match esatto: peso pieno
-                    score += weight * 2.0
-                    matched_keywords += weight
-                elif any(kw in desc_lower for kw in keyword.split()):
-                    # Match parziale: peso ridotto
-                    score += weight * 0.8
-                    matched_keywords += weight * 0.5
-                    
-                # Bonus per fornitori specifici
-                if categoria == 'Materiali Dentali' and any(f in fornitore.lower() for f in ['dental', 'mcal']):
-                    score += weight * 0.5
-                elif categoria == 'Telecomunicazioni' and any(f in fornitore.lower() for f in ['tim', 'vodafone', 'wind']):
-                    score += weight * 0.5
-                elif categoria == 'Utenze' and any(f in fornitore.lower() for f in ['enel', 'acquedotto']):
-                    score += weight * 0.5
-                elif categoria == 'Laboratorio' and 'lab' in fornitore.lower():
-                    score += weight * 0.5
-            
-            if matched_keywords > 0:
-                # Normalizza score con peso totale
-                confidence = min(score / (total_weight * 1.5), 1.0)
+                # Cerca classificazione esistente nella tabella classificazioni_costi
+                cursor.execute("""
+                    SELECT cc.contoid, cc.brancaid, cc.sottocontoid,
+                           c.nome as contonome, b.nome as brancanome, s.nome as sottocontonome
+                    FROM classificazioni_costi cc
+                    LEFT JOIN conti c ON cc.contoid = c.id
+                    LEFT JOIN branche b ON cc.brancaid = b.id  
+                    LEFT JOIN sottoconti s ON cc.sottocontoid = s.id
+                    WHERE cc.codice_riferimento = ? AND cc.tipo_entita = 'fornitore'
+                """, (codice_fornitore,))
                 
-                # Bonus per pattern specifici
-                if categoria == 'Materiali Dentali' and has_product_code_pattern(desc_lower):
-                    confidence = min(confidence * 1.5, 1.0)
-                elif categoria == 'Utenze' and has_utility_pattern(desc_lower):
-                    confidence = min(confidence * 1.4, 1.0)
-                elif categoria == 'Telecomunicazioni' and 'canone' in desc_lower:
-                    confidence = min(confidence * 1.3, 1.0)
+                row = cursor.fetchone()
+                conn.close()
                 
-                # Bonus finale per match multipli
-                if matched_keywords > total_weight * 0.3:
-                    confidence = min(confidence * 1.2, 1.0)
-                    
-                category_scores[categoria] = confidence
+                if row and row[0] and row[1] and row[2]:  # Controllo classificazione completa (3 livelli)
+                    logger.info(f"Classificazione trovata per {codice_fornitore}: {row}")
+                    return {
+                        "categoria_nome": row[3] or "Classificato",  # contonome
+                        "confidence": 0.95,
+                        "conto_suggerito": row[0],  # contoid
+                        "branca_suggerita": row[1],  # brancaid
+                        "sottoconto_suggerito": row[2],  # sottocontoid
+                        "conto_nome": row[3],  # contonome
+                        "branca_nome": row[4],  # brancanome  
+                        "sottoconto_nome": row[5],  # sottocontonome
+                        "motivo": "Fornitore classificato nel database"
+                    }
+                
+            except Exception as e:
+                logger.warning(f"Errore controllo classificazione database: {e}")
         
-        if not category_scores:
-            conto_id, branca_id, sottoconto_id = self._map_categoria_to_struttura("Varie", descrizione, fornitore)
-            return {
-                "categoria_nome": "Varie",
-                "confidence": 0.1,
-                "conto_suggerito": conto_id,
-                "branca_suggerita": branca_id,
-                "sottoconto_suggerito": sottoconto_id,
-                "motivo": "Nessun pattern riconosciuto"
-            }
-        
-        # Trova categoria con score più alto
-        best_category = max(category_scores.items(), key=lambda x: x[1])
-        categoria_nome, confidence = best_category[0], best_category[1]
-        
-        # Mappa la categoria alla struttura conto->branca->sottoconto
-        conto_id, branca_id, sottoconto_id = self._map_categoria_to_struttura(categoria_nome, descrizione, fornitore)
-        
+        # Nessuna classificazione trovata - pattern matching rimosso
         return {
-            "categoria_nome": categoria_nome,
-            "confidence": confidence,
-            "conto_suggerito": conto_id,
-            "branca_suggerita": branca_id,
-            "sottoconto_suggerito": sottoconto_id,
-            "motivo": f"Pattern matching - {confidence*100:.1f}% confidenza"
+            "categoria_nome": "Non classificato",
+            "confidence": 0.0,
+            "conto_suggerito": None,
+            "branca_suggerita": None,
+            "sottoconto_suggerito": None,
+            "motivo": "Fornitore non classificato - classificare manualmente"
         }
     
     def _map_categoria_to_struttura(self, categoria_nome: str, descrizione: str = "", fornitore: str = "") -> tuple:

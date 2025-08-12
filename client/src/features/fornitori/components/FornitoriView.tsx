@@ -77,8 +77,6 @@ const FornitoriView: React.FC = () => {
     }
   };
 
-  // fetchCategorieSpesa rimossa - non più necessaria con il nuovo sistema
-
   // Effetto per ricerca e ordinamento
   useEffect(() => {
     applyFiltersAndSort();
@@ -399,8 +397,7 @@ const FornitoriView: React.FC = () => {
                     (sortDirection === "asc" ? "↑" : "↓")}
                 </CTableHeaderCell>
                 <CTableHeaderCell 
-                  className="text-center" 
-                  style={{ width: '80px', cursor: "pointer", userSelect: "none" }}
+                  style={{ width: '550px', cursor: "pointer", userSelect: "none" }}
                   onClick={() => handleSort("status")}
                 >
                   Status{" "}
@@ -419,25 +416,26 @@ const FornitoriView: React.FC = () => {
                   <CTableDataCell>{fornitore.nome || "-"}</CTableDataCell>
                   <CTableDataCell>{fornitore.telefono || "-"}</CTableDataCell>
                   <CTableDataCell>{fornitore.email || "-"}</CTableDataCell>
-                  <CTableDataCell className="text-center"
+                  <CTableDataCell 
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <ClassificazioneToggle 
-                      fornitoreId={fornitore.id}
-                      classificazioneIniziale={classificazioni.get(fornitore.id)}
-                      onClassificazioneChange={(nuovaClassificazione) => {
-                        const newMap = new Map(classificazioni);
-                        if (nuovaClassificazione) {
-                          newMap.set(fornitore.id, nuovaClassificazione);
-                        } else {
-                          newMap.delete(fornitore.id);
-                        }
-                        setClassificazioni(newMap);
-                      }}
-                    />
+                    <div className="d-flex justify-content-end">
+                      <ClassificazioneToggle 
+                        fornitoreId={fornitore.id}
+                        classificazioneIniziale={classificazioni.get(fornitore.id)}
+                        onClassificazioneChange={(nuovaClassificazione) => {
+                          const newMap = new Map(classificazioni);
+                          if (nuovaClassificazione) {
+                            newMap.set(fornitore.id, nuovaClassificazione);
+                          } else {
+                            newMap.delete(fornitore.id);
+                          }
+                          setClassificazioni(newMap);
+                        }}
+                      />
+                    </div>
                   </CTableDataCell>
                   <CTableDataCell 
-                    className="text-center"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <ClassificazioneStatus

@@ -25,7 +25,7 @@ import FornitoriPage from '@/features/fornitori/pages/FornitoriPage';
 import KpiPage from '@/features/kpi/pages/KpiPage';
 import CollaboratoriPage from '@/features/collaboratori/pages/CollaboratoriPage';
 import ContiPage from '@/features/studio/pages/ContiPage';
-
+import StatistichePage from '@/features/pki/statistiche/pages/StatistichePage'
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = useAuthStore((state) => state.token);
@@ -65,6 +65,8 @@ const AppRouter: React.FC = () => {
           <Route path="/spese" element={<SpesePage />} />
           <Route path="/fornitori" element={<FornitoriPage />} />
           <Route path="/collaboratori" element={<CollaboratoriPage />} />
+          <Route path="/statistiche" element={<StatistichePage />} />
+          
           <Route path="/kpi" element={<KpiPage />} />
           <Route path="/rentri" element={<RentriPage />} />
           <Route path="/studio/conti" element={<ContiPage />} />

@@ -655,7 +655,7 @@ const CrudStrutturaConti: React.FC = () => {
         )}
 
         {/* Tabs Navigation */}
-        <CNav variant="tabs" className="mb-4">
+        {/* <CNav variant="tabs" className="mb-4">
           <CNavItem>
             <CNavLink
               active={activeTab === "conti"}
@@ -692,15 +692,33 @@ const CrudStrutturaConti: React.FC = () => {
               📁 SMART Tab
             </CNavLink>
           </CNavItem>
-        </CNav>
+        </CNav> */}
 
         {/* Tab Content */}
         <CTabContent>
-          {renderContiTab()}
+          {/* {renderContiTab()}
           {renderBrancheTab()}
-          {renderSottocontiTab()}
-          {renderSmartTab()}
+          {renderSottocontiTab()} 
+          {renderSmartTab()}*/}
         </CTabContent>
+
+
+        <ContiTable
+        conti={conti}
+        onAdd={addConto}
+        onEdit={editConto}
+        onDelete={deleteConto}
+        branche={branche}
+        onAddBranca={addBranca}
+        onEditBranca={editBranca}
+        onDeleteBranca={deleteBranca}
+        sottoconti={sottoconti}
+        onAddSottoconto={addSottoconto}
+        onEditSottoconto={editSottoconto}
+        onDeleteSottoconto={deleteSottoconto}
+      />
+
+
 
         {/* Modal */}
         {renderModal()}

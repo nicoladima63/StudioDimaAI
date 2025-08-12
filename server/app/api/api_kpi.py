@@ -1,12 +1,14 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from server.app.services.calendar_service import CalendarService
-from datetime import date, datetime
+from datetime import date, datetime,timedelta
+import sqlite3
 import logging
 import pandas as pd
 from dbfread import DBF
 from server.app.core.db_utils import get_dbf_path
 from server.app.config.constants import COLONNE
+import sqlite3
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +25,37 @@ def ping():
         'message': 'KPI service is running',
         'timestamp': datetime.now().isoformat()
     })
+
+def get_periodo(periodo):
+    """Helper per calcolare date inizio/fine in base al periodo"""
+    oggi = datetime.now()
+    
+    if periodo == 'mese_corrente':
+        inizio = oggi.replace(day=1)
+        if oggi.month == 12:
+            fine = oggi.replace(year=oggi.year + 1, month=1, day=1) - timedelta(days=1)
+        else:
+            fine = oggi.replace(month=oggi.month + 1, day=1) - timedelta(days=1)
+    elif periodo == 'ultimi_3_mesi':
+        inizio = (oggi.replace(day=1) - timedelta(days=90))
+        fine = oggi
+    elif periodo == 'ultimi_6_mesi':
+        inizio = (oggi.replace(day=1) - timedelta(days=180))
+        fine = oggi
+    elif periodo == 'anno_corrente':
+        inizio = oggi.replace(month=1, day=1)
+        fine = oggi.replace(month=12, day=31)
+    elif periodo == 'anno_precedente':
+        anno_prec = oggi.year - 1
+        inizio = datetime(anno_prec, 1, 1)
+        fine = datetime(anno_prec, 12, 31)
+    else:
+        # Default: anno corrente
+        inizio = oggi.replace(month=1, day=1)
+        fine = oggi.replace(month=12, day=31)
+    
+    return inizio.date(), fine.date()
+
 
 @kpi_bp.route('/dashboard', methods=['GET'])
 @jwt_required()

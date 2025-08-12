@@ -12,10 +12,8 @@ import {
 } from "@coreui/react";
 import { Card } from "@/components/ui";
 import FiltriSpeseComponent from "../components/FiltriSpese";
-import TabellaSpese from "../components/TabellaSpese";
 import RicercaArticoli from "../components/RicercaArticoli";
-import StatisticheCategorizzazione from "../components/StatisticheCategorizzazione";
-import TestCategorizzazioneGestionale from "../components/TestCategorizzazioneGestionale";
+//import StatisticheCategorizzazione from "../components/StatisticheCategorizzazione";
 import ContiSottocontiTab from "../components/ContiSottocontiTab";
 import { speseFornitioriService } from "../services/spese.service";
 import type {
@@ -183,15 +181,6 @@ const SpesePage: React.FC = () => {
               />
             </CCol>
             <CCol md={10}>
-            <TabellaSpese
-            spese={spese}
-            loading={loading}
-            total={total}
-            totalBeforeLimit={totalBeforeLimit}
-            filtri={filtri}
-            onCaricaMagazzino={handleCaricaMagazzino}
-            onFiltriChange={handleTabellaFiltriChange}
-          />
 
 
             </CCol>
@@ -255,12 +244,7 @@ const SpesePage: React.FC = () => {
 
         {/* Statistiche Categorizzazione Tab */}
         <CTabPane visible={activeTab === "statistiche"} role="tabpanel">
-          <StatisticheCategorizzazione spese={spese} className="mt-4" />
-        </CTabPane>
-
-        {/* Test Categorizzazione Gestionale Tab */}
-        <CTabPane visible={activeTab === "gestionale"} role="tabpanel">
-          <TestCategorizzazioneGestionale />
+          {/* <StatisticheCategorizzazione spese={spese} className="mt-4" /> */}
         </CTabPane>
 
         {/* Conti-Sottoconti Tab */}

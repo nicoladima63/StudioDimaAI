@@ -36,12 +36,15 @@ export const SelectSottoconto: React.FC<SelectSottocontoProps> = ({
     }
   }, [sottoconti, isLoading, autoSelectIfSingle, brancaId, onChange, value]);
 
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = e.target.value;
+    onChange(selectedValue ? Number(selectedValue) : null);
+  };
+
   return (
     <CFormSelect
       value={value ?? ""}
-      onChange={(e) =>
-        onChange(e.target.value ? Number(e.target.value) : null)
-      }
+      onChange={handleChange}
       disabled={disabled || !brancaId || isLoading}
       aria-invalid={!!error}
     >

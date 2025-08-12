@@ -1569,31 +1569,34 @@ def get_materiali_da_classificare():
                 result = gestionale_service.categorize_spesa(descrizione, nome_fornitore, codice_fornitore or "")
                 
                 if result and result.get("confidence", 0) > 0.3:  # Soglia minima 30%
-                    # Converti gli ID in nomi per compatibilità con l'interfaccia
-                    conn = sqlite3.connect('server/instance/studio_dima.db')
-                    cursor = conn.cursor()
+                    # Usa i nomi già recuperati dalla query con JOIN, se disponibili
+                    conto_nome = result.get("conto_nome")
+                    branca_nome = result.get("branca_nome")
+                    sottoconto_nome = result.get("sottoconto_nome")
                     
-                    conto_nome = None
-                    branca_nome = None
-                    sottoconto_nome = None
-                    
-                    # Recupera nomi da ID
-                    if result.get("conto_suggerito"):
-                        cursor.execute("SELECT nome FROM conti WHERE id = ?", (result["conto_suggerito"],))
-                        row = cursor.fetchone()
-                        conto_nome = row[0] if row else None
+                    # Fallback ai lookup se i nomi non sono presenti (per compatibilità)
+                    if not conto_nome or not branca_nome or not sottoconto_nome:
+                        conn = sqlite3.connect('server/instance/studio_dima.db')
+                        cursor = conn.cursor()
                         
-                    if result.get("branca_suggerita"):
-                        cursor.execute("SELECT nome FROM branche WHERE id = ?", (result["branca_suggerita"],))
-                        row = cursor.fetchone()
-                        branca_nome = row[0] if row else None
+                        if not conto_nome and result.get("conto_suggerito"):
+                            cursor.execute("SELECT nome FROM conti WHERE id = ?", (result["conto_suggerito"],))
+                            row = cursor.fetchone()
+                            conto_nome = row[0] if row else None
+                            
+                        if not branca_nome and result.get("branca_suggerita"):
+                            cursor.execute("SELECT nome FROM branche WHERE id = ?", (result["branca_suggerita"],))
+                            row = cursor.fetchone()
+                            branca_nome = row[0] if row else None
+                            
+                        if not sottoconto_nome and result.get("sottoconto_suggerito"):
+                            cursor.execute("SELECT nome FROM sottoconti WHERE id = ?", (result["sottoconto_suggerito"],))
+                            row = cursor.fetchone()
+                            sottoconto_nome = row[0] if row else None
                         
-                    if result.get("sottoconto_suggerito"):
-                        cursor.execute("SELECT nome FROM sottoconti WHERE id = ?", (result["sottoconto_suggerito"],))
-                        row = cursor.fetchone()
-                        sottoconto_nome = row[0] if row else None
+                        conn.close()
                     
-                    conn.close()
+                    logger.info(f"Classificazione per {nome_fornitore}: {conto_nome} -> {branca_nome} -> {sottoconto_nome}")
                     
                     return {
                         'contoid': result.get("conto_suggerito"),

@@ -31,7 +31,7 @@ def register_routes(app: Flask):
         api_struttura_conti.struttura_conti_bp,
         api_materiali.materiali_bp,
         api_studio_classification.api_studio_classification,
-        api_utenze_aggregation.api_utenze_aggregation
+        api_utenze_aggregation.api_utenze_aggregation,
     ]
 
     for bp in blueprints:

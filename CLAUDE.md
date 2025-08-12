@@ -94,3 +94,4 @@
 - Pattern response: `{success: boolean, data: object, error?: string}`
 - usa contistore per recuperare elenco conti, branche e sottoconti
 - risposte json del server a tre stati: success,warning,error da gestire nel BE opportunamente controllando chiave state con i tre valori per gestire toast verdi gialli o rossi
+- i blueprint sono registrati in routes.py

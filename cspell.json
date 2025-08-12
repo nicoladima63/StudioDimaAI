@@ -14,10 +14,13 @@
         "CAP",
         "cf",
         "clicka",
+        "CODESCR",
         "codicearticolo",
         "contoid",
         "contonome",
+        "COTIPO",
         "dall'endpoint",
+        "dbfread",
         "diagnosi",
         "DMRNCL",
         "farmaci",
@@ -33,6 +36,8 @@
         "iscrizione",
         "jsonify",
         "lastrowid",
+        "macrocategoria",
+        "macrocategorie",
         "mesi",
         "NNLC",
         "Odonto",
@@ -67,7 +72,8 @@
         "unfoldable",
         "venv",
         "visita",
-        "visite"
+        "visite",
+        "windent"
     ],
     "ignorePaths": [
         "node_modules",

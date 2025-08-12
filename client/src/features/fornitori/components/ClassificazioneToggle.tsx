@@ -67,9 +67,9 @@ const ClassificazioneToggle: React.FC<ClassificazioneToggleProps> = ({
   const getButtonProps = () => {
     if (!classificazione) {
       return {
-        color: "light" as const,
+        color: "warning" as const,
         variant: "outline" as const,
-        text: "NON CLASSIFICATO",
+        text: "DA CLASSIFICARE",
         tooltip: "Clicca per classificare come Diretto",
         icon: "⚪"
       };
@@ -96,13 +96,13 @@ const ClassificazioneToggle: React.FC<ClassificazioneToggleProps> = ({
         return {
           color: "dark" as const,
           variant: "outline" as const,
-          text: "NON DEDUCIBILE",
+          text: "INDEDUCIBILE",
           tooltip: "Clicca per rimuovere classificazione",
           icon: "⚫"
         };
       default:
         return {
-          color: "light" as const,
+          color: "warning" as const,
           variant: "outline" as const,
           text: "NON CLASSIFICATO",
           tooltip: "Clicca per classificare",
@@ -122,7 +122,8 @@ const ClassificazioneToggle: React.FC<ClassificazioneToggleProps> = ({
         size="sm"
         onClick={handleToggle}
         disabled={updating}
-        className="text-nowrap"
+        className="text-nowrap text-start"
+        style={{ minWidth: "160px" }}
       >
         {updating ? (
           <>

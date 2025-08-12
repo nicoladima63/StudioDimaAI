@@ -20,157 +20,121 @@ class ClassificazioneCostiService:
                     codice_riferimento TEXT NOT NULL,
                     tipo_entita TEXT NOT NULL CHECK (tipo_entita IN ('fornitore', 'spesa')),
                     tipo_di_costo INTEGER NOT NULL CHECK (tipo_di_costo IN (1, 2, 3)),
-                    categoria INTEGER,
-                    categoria_conto TEXT,  -- Codice conto contabile (es: ZZZZZZ per Materiali Dentali)
-                    note TEXT,
+                    contoid INTEGER,
+                    brancaid INTEGER,
+                    sottocontoid INTEGER,
                     data_classificazione DATETIME DEFAULT CURRENT_TIMESTAMP,
                     data_modifica DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    
                     UNIQUE(codice_riferimento, tipo_entita)
                 )
             ''')
-            
-            # Migrazione: aggiungi categoria_conto se non esiste
-            try:
-                conn.execute('ALTER TABLE classificazioni_costi ADD COLUMN categoria_conto TEXT')
-                conn.commit()
-            except sqlite3.OperationalError:
-                # La colonna esiste già, continua
-                pass
-                
-            # Migrazione: aggiungi sottoconto se non esiste
-            try:
-                conn.execute('ALTER TABLE classificazioni_costi ADD COLUMN sottoconto TEXT')
-                conn.commit()
-            except sqlite3.OperationalError:
-                # La colonna esiste già, continua
-                pass
-                
-            # Migrazione: aggiungi contoid, brancaid, sottocontoid per nuovo sistema gerarchico
-            for column in ['contoid', 'brancaid', 'sottocontoid']:
-                try:
-                    conn.execute(f'ALTER TABLE classificazioni_costi ADD COLUMN {column} INTEGER')
-                    conn.commit()
-                except sqlite3.OperationalError:
-                    # La colonna esiste già, continua
-                    pass
-            
-            # Indici per performance
-            conn.execute('''
-                CREATE INDEX IF NOT EXISTS idx_codice_tipo 
-                ON classificazioni_costi(codice_riferimento, tipo_entita)
-            ''')
-            
-            conn.execute('''
-                CREATE INDEX IF NOT EXISTS idx_tipo_costo 
-                ON classificazioni_costi(tipo_di_costo)
-            ''')
-            
-            conn.commit()
+
     
-    def classifica_fornitore(self, codice_fornitore: str, tipo_di_costo: int, 
-                           categoria: Optional[int] = None, categoria_conto: Optional[str] = None, 
-                           sottoconto: Optional[str] = None, note: Optional[str] = None) -> bool:
+    def classifica_fornitore(self, codice_fornitore: str, tipo_di_costo: int, categoria: str = None, categoria_conto: str = None, note: str = None) -> bool:
         """
-        Classifica un fornitore
+        Classifica un fornitore con supporto al campo fornitore_nome
         
         Args:
-            codice_fornitore: Codice del fornitore (DB_CODE)
+            codice_fornitore: Codice del fornitore
             tipo_di_costo: 1=diretto, 2=indiretto, 3=non_deducibile
-            categoria: Categoria gestionale (opzionale)
-            categoria_conto: Codice conto contabile (es: ZZZZZI per Collaboratori)
-            sottoconto: Codice sottoconto (es: ZZZZUC per Jablonsky)
-            note: Note aggiuntive (opzionale)
+            categoria: Categoria legacy (non utilizzata)
+            categoria_conto: Categoria conto (non utilizzata)
+            note: Note aggiuntive
             
         Returns:
-            True se l'operazione è riuscita
+            True se l'operazione è riuscita, False altrimenti
         """
         if tipo_di_costo not in [1, 2, 3]:
             raise ValueError("tipo_di_costo deve essere 1, 2 o 3")
-            
+
         try:
+            # Ottieni il nome del fornitore dalla tabella FORNITORI.DBF
+            fornitore_nome = self._get_fornitore_nome(codice_fornitore)
+            
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute('''
-                    INSERT OR REPLACE INTO classificazioni_costi 
-                    (codice_riferimento, tipo_entita, tipo_di_costo, categoria, categoria_conto, sottoconto, note, data_modifica)
-                    VALUES (?, 'fornitore', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                ''', (codice_fornitore, tipo_di_costo, categoria, categoria_conto, sottoconto, note))
+                    INSERT OR REPLACE INTO classificazioni_costi
+                    (codice_riferimento, tipo_entita, tipo_di_costo, note, fornitore_nome, data_modifica)
+                    VALUES (?, 'fornitore', ?, ?, ?, CURRENT_TIMESTAMP)
+                ''', (codice_fornitore, tipo_di_costo, note, fornitore_nome))
                 conn.commit()
                 return True
         except Exception as e:
             print(f"Errore nella classificazione fornitore {codice_fornitore}: {e}")
             return False
     
-    def classifica_fornitore_completo(self, codice_fornitore: str, tipo_di_costo: int,
-                                    contoid: int, brancaid: int, sottocontoid: int,
-                                    note: Optional[str] = None) -> bool:
+    def _get_fornitore_nome(self, codice_fornitore: str) -> str:
         """
-        Classifica un fornitore con la gerarchia completa: conto -> branca -> sottoconto
+        Ottiene il nome del fornitore dalla tabella FORNITORI.DBF
         
         Args:
-            codice_fornitore: Codice del fornitore (DB_CODE)
-            tipo_di_costo: 1=diretto, 2=indiretto, 3=non_deducibile
-            contoid: ID del conto dalla tabella conti
-            brancaid: ID della branca dalla tabella branche
-            sottocontoid: ID del sottoconto dalla tabella sottoconti
-            note: Note aggiuntive (opzionale)
+            codice_fornitore: Codice del fornitore
             
         Returns:
-            True se l'operazione è riuscita
+            Nome del fornitore o placeholder se non trovato
         """
-        if tipo_di_costo not in [1, 2, 3]:
-            raise ValueError("tipo_di_costo deve essere 1, 2 o 3")
-            
         try:
-            with sqlite3.connect(self.db_path) as conn:
-                # Per classificazioni parziali, salva brancaid=0 e sottocontoid=0 invece di None
-                brancaid_value = brancaid if brancaid is not None else 0
-                sottocontoid_value = sottocontoid if sottocontoid is not None else 0
+            from dbfread import DBF
+            import os
+            
+            fornitori_path = os.path.join('server', 'windent', 'DATI', 'FORNITORI.DBF')
+            if not os.path.exists(fornitori_path):
+                return f"Fornitore {codice_fornitore}"
                 
-                conn.execute('''
-                    INSERT OR REPLACE INTO classificazioni_costi 
-                    (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid, note, data_modifica)
-                    VALUES (?, 'fornitore', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                ''', (codice_fornitore, tipo_di_costo, contoid, brancaid_value, sottocontoid_value, note))
-                conn.commit()
-                return True
+            table = DBF(fornitori_path, encoding='latin1')
+            
+            for record in table:
+                if record.get('DB_CODE') == codice_fornitore:
+                    nome = record.get('DB_RAGIONE1', '') or record.get('DB_NOME', '')
+                    if nome:
+                        return nome.strip()
+                        
+            return f"Fornitore {codice_fornitore}"
+            
         except Exception as e:
-            print(f"Errore nella classificazione completa fornitore {codice_fornitore}: {e}")
-            return False
-    
-    def classifica_spesa(self, codice_spesa: str, tipo_di_costo: int,
-                        categoria: Optional[int] = None, note: Optional[str] = None) -> bool:
+            print(f"Errore nel recupero nome fornitore {codice_fornitore}: {e}")
+            return f"Fornitore {codice_fornitore}"
+
+    def classifica_entita(self,
+        codice_riferimento: str,
+        tipo_di_costo: int = 0,
+        contoid: int = 0,
+        brancaid: int = 0,
+        sottocontoid: int = 0,
+        tipo_entita: str = "fornitore") -> bool:
         """
-        Classifica una spesa (fallback se AI non funziona)
-        
+        Classifica una entità (fornitore o spesa) nella tabella 'classificazione_costi'.
+
         Args:
-            codice_spesa: ID della spesa
-            tipo_di_costo: 1=diretto, 2=indiretto, 3=non_deducibile
-            categoria: Categoria gestionale (opzionale)
-            note: Note aggiuntive (opzionale)
-            
+            codice_riferimento: Codice della voce da classificare (DB_CODE) - obbligatorio
+            tipo_di_costo: 1=diretto, 2=indiretto, 3=non_deducibile, 0=non specificato
+            contoid: ID conto (macrocategoria spesa)
+            brancaid: ID branca
+            sottocontoid: ID sottoconto
+            tipo_entita: Tipo di entità (default 'fornitore')
+
         Returns:
-            True se l'operazione è riuscita
+            True se l'operazione è riuscita, False altrimenti
         """
-        if tipo_di_costo not in [1, 2, 3]:
-            raise ValueError("tipo_di_costo deve essere 1, 2 o 3")
-            
+        if tipo_di_costo not in [0, 1, 2, 3]:
+            raise ValueError("tipo_di_costo deve essere 0, 1, 2 o 3")
+
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute('''
-                    INSERT OR REPLACE INTO classificazioni_costi 
-                    (codice_riferimento, tipo_entita, tipo_di_costo, categoria, note, data_modifica)
-                    VALUES (?, 'spesa', ?, ?, ?, CURRENT_TIMESTAMP)
-                ''', (codice_spesa, tipo_di_costo, categoria, note))
+                    INSERT OR REPLACE INTO classificazioni_costi
+                    (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid, data_modifica)
+                    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ''', (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid))
                 conn.commit()
                 return True
         except Exception as e:
-            print(f"Errore nella classificazione spesa {codice_spesa}: {e}")
+            print(f"Errore nella classificazione {tipo_entita} {codice_riferimento}: {e}")
             return False
     
     def get_classificazione_fornitore(self, codice_fornitore: str) -> Optional[Dict[str, Any]]:
         """
-        Ottiene la classificazione di un fornitore
+        Ottiene la classificazione di un fornitore con JOIN alle tabelle conti/branche/sottoconti
         
         Args:
             codice_fornitore: Codice del fornitore
@@ -182,25 +146,34 @@ class ClassificazioneCostiService:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute('''
-                    SELECT * FROM classificazioni_costi 
-                    WHERE codice_riferimento = ? AND tipo_entita = 'fornitore'
+                    SELECT 
+                        cc.*,
+                        c.nome as conto_nome,
+                        b.nome as branca_nome,
+                        s.nome as sottoconto_nome
+                    FROM classificazioni_costi cc
+                    LEFT JOIN conti c ON cc.contoid = c.id
+                    LEFT JOIN branche b ON cc.brancaid = b.id
+                    LEFT JOIN sottoconti s ON cc.sottocontoid = s.id
+                    WHERE cc.codice_riferimento = ? AND cc.tipo_entita = 'fornitore'
                 ''', (codice_fornitore,))
-                
+
                 row = cursor.fetchone()
-                if row:
-                    return dict(row)
-                return None
+                return dict(row) if row else None
         except Exception as e:
             print(f"Errore nel recupero classificazione fornitore {codice_fornitore}: {e}")
             return None
-    
-    def get_classificazione_spesa(self, codice_spesa: str) -> Optional[Dict[str, Any]]:
+
+    def get_classificazione(self,
+        codice_riferimento: str,
+        tipo_entita: str) -> Optional[Dict[str, Any]]:
         """
-        Ottiene la classificazione di una spesa
-        
+        Ottiene la classificazione di un'entità (fornitore, spesa, ecc.)
+
         Args:
-            codice_spesa: ID della spesa
-            
+            codice_riferimento: Codice della voce da cercare
+            tipo_entita: Tipo entità ('fornitore', 'spesa', ecc.)
+
         Returns:
             Dizionario con i dati della classificazione o None se non trovata
         """
@@ -208,17 +181,16 @@ class ClassificazioneCostiService:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute('''
-                    SELECT * FROM classificazioni_costi 
-                    WHERE codice_riferimento = ? AND tipo_entita = 'spesa'
-                ''', (codice_spesa,))
-                
+                    SELECT * FROM classificazioni_costi
+                    WHERE codice_riferimento = ? AND tipo_entita = ?
+                ''', (codice_riferimento, tipo_entita))
+
                 row = cursor.fetchone()
-                if row:
-                    return dict(row)
-                return None
+                return dict(row) if row else None
         except Exception as e:
-            print(f"Errore nel recupero classificazione spesa {codice_spesa}: {e}")
+            print(f"Errore nel recupero classificazione {tipo_entita} {codice_riferimento}: {e}")
             return None
+
     
     def get_fornitori_classificati(self) -> List[Dict[str, Any]]:
         """
@@ -460,9 +432,12 @@ class ClassificazioneCostiService:
             with sqlite3.connect(self.db_path) as conn:
                 # Prima controlla classificazione COMPLETA (confidence 95%)
                 cursor = conn.execute('''
-                    SELECT contoid, brancaid, sottocontoid, c.nome as conto_nome
+                    SELECT cc.contoid, cc.brancaid, cc.sottocontoid, 
+                           c.nome as conto_nome, b.nome as branca_nome, s.nome as sottoconto_nome
                     FROM classificazioni_costi cc
                     LEFT JOIN conti c ON cc.contoid = c.id
+                    LEFT JOIN branche b ON cc.brancaid = b.id
+                    LEFT JOIN sottoconti s ON cc.sottocontoid = s.id
                     WHERE cc.codice_riferimento = ? AND cc.tipo_entita = 'fornitore'
                       AND cc.contoid IS NOT NULL AND cc.brancaid IS NOT NULL AND cc.sottocontoid IS NOT NULL
                       AND cc.brancaid > 0 AND cc.sottocontoid > 0
@@ -471,11 +446,11 @@ class ClassificazioneCostiService:
                 classificazione_completa = cursor.fetchone()
                 
                 if classificazione_completa:
-                    contoid, brancaid, sottocontoid, conto_nome = classificazione_completa
+                    contoid, brancaid, sottocontoid, conto_nome, branca_nome, sottoconto_nome = classificazione_completa
                     return {
-                        "categoria_suggerita": str(contoid),
+                        "categoria_suggerita": sottoconto_nome or f"Sottoconto ID {sottocontoid}",
                         "confidence": 0.95,
-                        "motivo": f"Fornitore classificato completo: {conto_nome}",
+                        "motivo": f"Fornitore classificato completo: {conto_nome} > {branca_nome} > {sottoconto_nome}",
                         "algoritmo": "fornitore_classificato_completo",
                         "contoid": contoid,
                         "brancaid": brancaid,
@@ -484,7 +459,7 @@ class ClassificazioneCostiService:
                 
                 # Poi controlla classificazione PARZIALE (confidence 80%)
                 cursor = conn.execute('''
-                    SELECT contoid, brancaid, sottocontoid, c.nome as conto_nome
+                    SELECT cc.contoid, cc.brancaid, cc.sottocontoid, c.nome as conto_nome
                     FROM classificazioni_costi cc
                     LEFT JOIN conti c ON cc.contoid = c.id
                     WHERE cc.codice_riferimento = ? AND cc.tipo_entita = 'fornitore'
@@ -498,7 +473,7 @@ class ClassificazioneCostiService:
                 if classificazione_parziale:
                     contoid, _, _, conto_nome = classificazione_parziale
                     return {
-                        "categoria_suggerita": str(contoid),
+                        "categoria_suggerita": conto_nome or f"Conto ID {contoid}",
                         "confidence": 0.80,
                         "motivo": f"Fornitore classificato parziale: {conto_nome} (solo conto)",
                         "algoritmo": "fornitore_classificato_parziale",
@@ -537,94 +512,12 @@ class ClassificazioneCostiService:
             # Analizza pattern dalle descrizioni delle spese esistenti
             descrizioni = [spesa.get('descrizione', '') for spesa in fornitore_spese if spesa.get('descrizione')]
             
-            # Pattern matching basato su keywords
-            pattern_categories = {
-                'ZZZZZI': {  # Materiali Dentali
-                    'keywords': ['dental', 'implant', 'materiali', 'protesi', 'dentsply', 'zimmer', 'straumann', 'nobel', 'bludental'],
-                    'description': 'Materiali Dentali'
-                },
-                'ZZZZZU': {  # Energia/Utenze
-                    'keywords': ['energia', 'elettrica', 'gas', 'enel', 'edison', 'bolletta', 'utenze', 'kwh', 'mc gas'],
-                    'description': 'Energia e Utenze'
-                },
-                'ZZZZZN': {  # Telecomunicazioni
-                    'keywords': ['telefono', 'internet', 'adsl', 'fibra', 'vodafone', 'tim', 'wind', 'fastweb', 'canone'],
-                    'description': 'Telecomunicazioni'
-                },
-                'ZZZZXR': {  # Consulenze
-                    'keywords': ['consulenza', 'honorari', 'parcella', 'commercialista', 'avvocato', 'consulente', 'prestazione'],
-                    'description': 'Consulenze Professionali'
-                },
-                'ZZZZZK': {  # Farmaci
-                    'keywords': ['farmacia', 'medicinali', 'farmaco', 'farmaceutico', 'medical devices'],
-                    'description': 'Farmaci e Prodotti Farmaceutici'
-                },
-                'ZZZZXO': {  # Collaboratori Chirurgia
-                    'keywords': ['chirurgia', 'chirurgico', 'intervento', 'operatorio'],
-                    'description': 'Collaboratori Chirurgia'
-                },
-                'ZZZZXP': {  # Collaboratori Ortodonzia
-                    'keywords': ['ortodonzia', 'ortodontico', 'apparecchio', 'brackets'],
-                    'description': 'Collaboratori Ortodonzia'
-                },
-                'ZZZZYB': {  # Collaboratori Igienista
-                    'keywords': ['igienista', 'pulizia', 'igiene', 'detartrasi'],
-                    'description': 'Collaboratori Igienista'
-                },
-                'ZZZZYL': {  # Leasing
-                    'keywords': ['leasing', 'locazione finanziaria', 'canone leasing', 'bnp paribas'],
-                    'description': 'Leasing Finanziario'
-                }
-            }
-            
-            # Analizza tutte le descrizioni
-            all_text = ' '.join(descrizioni).lower()
-            
-            # Calcola score per ogni categoria
-            category_scores = {}
-            for categoria, data in pattern_categories.items():
-                score = 0
-                matched_keywords = []
-                
-                for keyword in data['keywords']:
-                    if keyword in all_text:
-                        score += all_text.count(keyword)
-                        matched_keywords.append(keyword)
-                
-                if score > 0:
-                    category_scores[categoria] = {
-                        'score': score,
-                        'keywords': matched_keywords,
-                        'description': data['description']
-                    }
-            
-            if not category_scores:
-                return {
-                    "categoria_suggerita": None,
-                    "confidence": 0.0,
-                    "motivo": "Nessun pattern riconosciuto nelle descrizioni storiche",
-                    "algoritmo": "historical_analysis"
-                }
-            
-            # Trova categoria con score maggiore
-            best_category = max(category_scores.items(), key=lambda x: x[1]['score'])
-            categoria_id = best_category[0]
-            categoria_data = best_category[1]
-            
-            # Calcola confidence basato su:
-            # - Numero di spese analizzate
-            # - Score delle keywords
-            # - Frequenza pattern
-            num_spese = len(fornitore_spese)
-            confidence = min(0.95, (categoria_data['score'] / max(1, num_spese)) * 0.8 + 0.1)
-            
+            # Nessun pattern matching - ritorna sempre nessuna classificazione
             return {
-                "categoria_suggerita": categoria_id,
-                "confidence": round(confidence, 2),
-                "motivo": f"Pattern identificato: {categoria_data['description']} (keywords: {', '.join(categoria_data['keywords'][:3])})",
-                "algoritmo": "historical_analysis",
-                "spese_analizzate": num_spese,
-                "keywords_trovate": categoria_data['keywords']
+                "categoria_suggerita": None,
+                "confidence": 0.0,
+                "motivo": "Pattern matching disabilitato - utilizzare solo classificazioni manuali",
+                "algoritmo": "none"
             }
             
         except Exception as e:
@@ -886,17 +779,6 @@ class ClassificazioneCostiService:
                 'branca': 'ENERGIA',
                 'sottoconto': 'BOLLETTA'
             },
-            'gas_metano': {
-                'keywords': [
-                    'italgas', 'snam rete gas', 'eni gas',
-                    'hera gas', 'iren gas', 'a2a gas',
-                    'acea gas', 'edison gas'
-                ],
-                'tipo_utenza': 'GAS',
-                'conto': 'UTENZE',
-                'branca': 'GAS',
-                'sottoconto': 'BOLLETTA'
-            },
             'acqua_fognatura': {
                 'keywords': [
                     'publiacqua', 'acea ato', 'hera acqua',
@@ -909,15 +791,15 @@ class ClassificazioneCostiService:
                 'branca': 'ACQUA',
                 'sottoconto': 'BOLLETTA'
             },
-            'telecomunicazioni': {
+            'telefonia': {
                 'keywords': [
                     'wind tre', 'vodafone', 'tim ', 'telecom italia',
                     'fastweb', 'infostrada', 'tiscali',
                     'linkem', 'eolo', 'open fiber'
                 ],
-                'tipo_utenza': 'TELECOMUNICAZIONI',
+                'tipo_utenza': 'TELEFONIA',
                 'conto': 'UTENZE',
-                'branca': 'TELECOMUNICAZIONI', 
+                'branca': 'TELEFONIA', 
                 'sottoconto': 'BOLLETTA'
             }
         }

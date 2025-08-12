@@ -429,3 +429,73 @@ def get_count_conti_sottoconti():
             "success": False,
             "error": str(e)
         }), 500
+
+@api_classificazioni.route('/all', methods=['GET'])
+@jwt_required()
+def get_all_classificazioni():
+    """
+    Ottiene tutte le classificazioni con dettagli di conto/branca/sottoconto
+    """
+    try:
+        import sqlite3
+        
+        conn = sqlite3.connect('server/instance/studio_dima.db')
+        cursor = conn.cursor()
+        
+        query = '''
+        SELECT 
+            cc.id,
+            cc.codice_riferimento,
+            cc.tipo_entita,
+            cc.tipo_di_costo,
+            cc.note,
+            cc.contoid,
+            cc.brancaid,
+            cc.sottocontoid,
+            cc.data_classificazione,
+            cc.data_modifica,
+            cc.fornitore_nome,
+            c.nome as conto_nome,
+            b.nome as branca_nome,
+            s.nome as sottoconto_nome
+        FROM classificazioni_costi cc
+        LEFT JOIN conti c ON cc.contoid = c.id
+        LEFT JOIN branche b ON cc.brancaid = b.id
+        LEFT JOIN sottoconti s ON cc.sottocontoid = s.id
+        ORDER BY c.nome, b.nome, s.nome
+        '''
+        
+        cursor.execute(query)
+        results = cursor.fetchall()
+        
+        classificazioni = []
+        for row in results:
+            classificazioni.append({
+                'id': row[0],
+                'codice_riferimento': row[1],
+                'tipo_entita': row[2],
+                'tipo_di_costo': row[3],
+                'note': row[4],
+                'contoid': row[5],
+                'brancaid': row[6],
+                'sottocontoid': row[7],
+                'data_classificazione': row[8],
+                'data_modifica': row[9],
+                'fornitore_nome': row[10],
+                'conto_nome': row[11],
+                'branca_nome': row[12],
+                'sottoconto_nome': row[13]
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            "success": True,
+            "data": classificazioni
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500

@@ -23,6 +23,7 @@ import CIcon from '@coreui/icons-react';
 import { cilUserPlus, cilCheck, cilReload, cilPeople } from '@coreui/icons';
 import type { Collaboratore, CollaboratoriResponse, Statistiche } from '../services/collaboratoriService';
 import collaboratoriService from '../services/collaboratoriService';
+import StatisticheLavoroCard from '../components/StatisticheLavoroCard';
 
 
 const CollaboratoriPage: React.FC = () => {
@@ -247,28 +248,36 @@ const CollaboratoriPage: React.FC = () => {
                     {collaboratori.map(collab => (
                       <CListGroupItem 
                         key={collab.codice_fornitore}
-                        className="d-flex justify-content-between align-items-center"
                       >
-                        <div>
-                          <CFormCheck
-                            checked={selezioneCollaboratori[collab.codice_fornitore] || false}
-                            onChange={() => toggleSelezione(collab.codice_fornitore)}
-                            label={`${collab.codice_fornitore}: ${collab.nome}`}
-                          />
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <CFormCheck
+                              checked={selezioneCollaboratori[collab.codice_fornitore] || false}
+                              onChange={() => toggleSelezione(collab.codice_fornitore)}
+                              label={`${collab.codice_fornitore}: ${collab.nome}`}
+                            />
+                          </div>
+                          <div className="d-flex align-items-center">
+                            <CFormSelect
+                              size="sm"
+                              value={tipiAssegnati[collab.codice_fornitore] || collab.tipo}
+                              onChange={(e) => aggiornaTipo(collab.codice_fornitore, e.target.value)}
+                              style={{width: '120px', marginRight: '10px'}}
+                            >
+                              {tipiCollaboratore.map(tipo => (
+                                <option key={tipo} value={tipo}>{tipo}</option>
+                              ))}
+                            </CFormSelect>
+                            <CBadge color="success">Confermato</CBadge>
+                          </div>
                         </div>
-                        <div className="d-flex align-items-center">
-                          <CFormSelect
-                            size="sm"
-                            value={tipiAssegnati[collab.codice_fornitore] || collab.tipo}
-                            onChange={(e) => aggiornaTipo(collab.codice_fornitore, e.target.value)}
-                            style={{width: '120px', marginRight: '10px'}}
-                          >
-                            {tipiCollaboratore.map(tipo => (
-                              <option key={tipo} value={tipo}>{tipo}</option>
-                            ))}
-                          </CFormSelect>
-                          <CBadge color="success">Confermato</CBadge>
-                        </div>
+                        <StatisticheLavoroCard 
+                          collaboratore={{
+                            codice_fornitore: collab.codice_fornitore,
+                            nome: collab.nome
+                          }}
+                          compact={true}
+                        />
                       </CListGroupItem>
                     ))}
                   </CListGroup>
@@ -281,32 +290,40 @@ const CollaboratoriPage: React.FC = () => {
                     {nuoviCandidati.map(candidato => (
                       <CListGroupItem 
                         key={candidato.codice_fornitore}
-                        className="d-flex justify-content-between align-items-center"
                       >
-                        <div>
-                          <CFormCheck
-                            checked={selezioneCollaboratori[candidato.codice_fornitore] || false}
-                            onChange={() => toggleSelezione(candidato.codice_fornitore)}
-                            label={`${candidato.codice_fornitore}: ${candidato.nome}`}
-                          />
-                          <small className="text-muted d-block">
-                            Score: {candidato.score} - {candidato.criteri?.slice(0, 2).join(', ')}
-                          </small>
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <CFormCheck
+                              checked={selezioneCollaboratori[candidato.codice_fornitore] || false}
+                              onChange={() => toggleSelezione(candidato.codice_fornitore)}
+                              label={`${candidato.codice_fornitore}: ${candidato.nome}`}
+                            />
+                            <small className="text-muted d-block">
+                              Score: {candidato.score} - {candidato.criteri?.slice(0, 2).join(', ')}
+                            </small>
+                          </div>
+                          <div className="d-flex align-items-center">
+                            <CFormSelect
+                              size="sm"
+                              value={tipiAssegnati[candidato.codice_fornitore] || 'Da classificare'}
+                              onChange={(e) => aggiornaTipo(candidato.codice_fornitore, e.target.value)}
+                              style={{width: '140px', marginRight: '10px'}}
+                            >
+                              <option value="Da classificare">Seleziona sottoconto</option>
+                              {tipiCollaboratore.map(tipo => (
+                                <option key={tipo} value={tipo}>{tipo}</option>
+                              ))}
+                            </CFormSelect>
+                            <CBadge color="warning">Da Confermare</CBadge>
+                          </div>
                         </div>
-                        <div className="d-flex align-items-center">
-                          <CFormSelect
-                            size="sm"
-                            value={tipiAssegnati[candidato.codice_fornitore] || 'Da classificare'}
-                            onChange={(e) => aggiornaTipo(candidato.codice_fornitore, e.target.value)}
-                            style={{width: '140px', marginRight: '10px'}}
-                          >
-                            <option value="Da classificare">Seleziona sottoconto</option>
-                            {tipiCollaboratore.map(tipo => (
-                              <option key={tipo} value={tipo}>{tipo}</option>
-                            ))}
-                          </CFormSelect>
-                          <CBadge color="warning">Da Confermare</CBadge>
-                        </div>
+                        <StatisticheLavoroCard 
+                          collaboratore={{
+                            codice_fornitore: candidato.codice_fornitore,
+                            nome: candidato.nome
+                          }}
+                          compact={true}
+                        />
                       </CListGroupItem>
                     ))}
                   </CListGroup>
