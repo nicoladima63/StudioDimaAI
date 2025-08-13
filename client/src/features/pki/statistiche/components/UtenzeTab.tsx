@@ -5,49 +5,37 @@ import {
   CCardHeader,
   CRow,
   CCol,
-  CSpinner,
   CAlert
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilChart, cilUser } from '@coreui/icons';
-import { useClassificazioni } from '@/store/classificazioniStore';
-import { useContiStore } from '@/store/contiStore';
-import StatisticheLavoroCard from './StatisticheLavoroCard';
+import { cilChart } from '@coreui/icons';
+import type { ClassificazioneCosto } from '@/store/classificazioniStore';
+import StatisticheSpeseCard from './StatisticheSpeseCard';
+import StatisticheSkeleton from './StatisticheSkeleton';
 import { getColoreSerieByIndex } from '../utils/coloriSerie';
 
-const UtenzeTab: React.FC = () => {
-  const { classificazioni, isLoading, error } = useClassificazioni('UTENZE');
-  const { getBrancaById, loadBranche } = useContiStore();
+interface RaggruppamentoFornitore {
+  codice_riferimento: string;
+  fornitore_nome: string;
+  count: number;
+  brancaid: number | null;
+  contoid: number | null;
+}
 
+interface TabData {
+  classificazioni: ClassificazioneCosto[];
+  raggruppamenti: RaggruppamentoFornitore[];
+}
 
-  // Raggruppa per codice_riferimento (fornitore)
-  const utenze = React.useMemo(() => {
-    const gruppi = new Map<
-      string,
-      {
-        codice_riferimento: string;
-        fornitore_nome: string;
-        count: number;
-        brancaid: number | null;
-        contoid: number | null;
-      }
-    >();
+interface Props {
+  data: TabData;
+  isLoading: boolean;
+  error: string | null;
+  getBrancaById: (id: number | null) => string | undefined;
+}
 
-    classificazioni.forEach((c) => {
-      if (!gruppi.has(c.codice_riferimento)) {
-        gruppi.set(c.codice_riferimento, {
-          codice_riferimento: c.codice_riferimento,
-          fornitore_nome: c.fornitore_nome || c.codice_riferimento,
-          count: 0,
-          brancaid: c.brancaid,
-          contoid: c.contoid,
-        });
-      }
-      gruppi.get(c.codice_riferimento)!.count += 1;
-    });
-
-    return Array.from(gruppi.values());
-  }, [classificazioni]);
+const UtenzeTab: React.FC<Props> = ({ data, isLoading, error, getBrancaById }) => {
+  const { raggruppamenti: utenze } = data;
 
   // Raggruppa utenze per branca
   const utenzePerBranca = React.useMemo(() => {
@@ -63,32 +51,16 @@ const UtenzeTab: React.FC = () => {
 
     const brancheUniche = Array.from(gruppiPerBranca.keys()).sort();
     
-    return Array.from(gruppiPerBranca.entries()).map(([nomeBranca, utenze], groupIndex) => ({
+    return Array.from(gruppiPerBranca.entries()).map(([nomeBranca, utenze]) => ({
       nomeBranca,
       utenze,
       colore: getColoreSerieByIndex(brancheUniche.indexOf(nomeBranca))
     }));
   }, [utenze, getBrancaById]);
 
-  // Carica le branche per tutti i conti delle utenze
-  React.useEffect(() => {
-    const contiUniques = new Set<number>();
-    utenze.forEach(u => {
-      if (u.contoid) contiUniques.add(u.contoid);
-    });
-    
-    contiUniques.forEach(contoid => {
-      loadBranche(contoid);
-    });
-  }, [utenze, loadBranche]);
 
   if (isLoading) {
-    return (
-      <div className="text-center p-4">
-        <CSpinner />
-        <div className="mt-2">Caricamento utenze...</div>
-      </div>
-    );
+    return <StatisticheSkeleton count={6} />;
   }
 
   if (error) {
@@ -149,8 +121,8 @@ const UtenzeTab: React.FC = () => {
                     {utenza.fornitore_nome}
                   </CCardHeader>
                   <CCardBody>
-                    <StatisticheLavoroCard 
-                      collaboratore={{
+                    <StatisticheSpeseCard 
+                      fornitore={{
                         codice_riferimento: utenza.codice_riferimento,
                         fornitore_nome: utenza.fornitore_nome
                       }}

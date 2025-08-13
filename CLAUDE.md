@@ -95,3 +95,36 @@
 - usa contistore per recuperare elenco conti, branche e sottoconti
 - risposte json del server a tre stati: success,warning,error da gestire nel BE opportunamente controllando chiave state con i tre valori per gestire toast verdi gialli o rossi
 - i blueprint sono registrati in routes.py
+
+## Performance e Ottimizzazioni API
+
+### Principi di Caricamento Dati
+- **MAI caricare tutto subito**: Implementare sempre lazy loading per dati non immediatamente visibili
+- **Evitare chiamate API duplicate**: Controllare sempre se esistono già dati in cache prima di fare nuove chiamate
+- **Lazy loading per tab**: Caricare dati solo per il tab attivo, non per tutti i tab contemporaneamente
+- **Cache intelligente**: Usare Zustand con cache di 5-10 minuti per dati che non cambiano frequentemente
+
+### Pattern Service Aggregati
+- **Endpoint aggregati**: Preferire `/api/entita/categoria` che restituisce dati pre-calcolati invece di N chiamate separate
+- **Service pattern**: `nomeEntitaService.apiNomeAzione()` con prefisso "api" per chiamate backend
+- **Batch loading**: Se necessario caricare più dati, farlo in parallelo con `Promise.all()` non in sequenza
+
+### Store Pattern con Zustand
+- **Un store per feature**: Ogni feature deve avere il proprio store per dati complessi/cacheable
+- **Cache duration**: CACHE_DURATION = 5 * 60 * 1000 (5 minuti standard)
+- **Retry logic**: MAX_RETRIES = 3 con exponential backoff
+- **Persist selettivo**: Salvare solo dati e timestamp, non stati di loading
+- **Hook per categoria**: Esporre hook specializzati `useNomeCategoria(categoria)` per lazy loading
+
+### UX e Loading States
+- **Skeleton loading**: Usare sempre componenti skeleton invece di spinner generici
+- **Progressive loading**: Mostrare struttura prima, dati poi
+- **Fallback compatibile**: Mantenere sempre backward compatibility con caricamento diretto
+- **Toast colorati**: Verde=success, Arancione=warning, Rosso=error
+
+### Naming Conventions
+- **Componenti specifici**: Mantenere nomi file .tsx specifici (CollaboratoriTab.tsx, UtenzeTab.tsx)
+- **Codice generico**: Usare nomi generici per variabili/interfacce (fornitore, statisticheSpese, calcolaStatistiche)
+- **Service files**: nomeEntitaService.ts per i service
+- **Store files**: nomeEntita.store.ts per gli store Zustand
+- **Utils files**: nomeEntita.ts per utilities (senza suffissi tipo "Utils")

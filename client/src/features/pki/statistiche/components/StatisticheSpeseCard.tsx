@@ -7,38 +7,44 @@ import {
   CCol
 } from '@coreui/react';
 import {fornitoriService} from '../../../fornitori/services/fornitori.service';
-import type { StatisticheLavoroCollaboratore } from '../utils/statisticheCollaboratori';
-import { calcolaStatisticheLavoro, formatCurrency, formatDate } from '../utils/statisticheCollaboratori';
+import type { StatisticheSpeseFornitore } from '../utils/statisticheFornitori';
+import { calcolaStatisticheSpese, formatCurrency, formatDate } from '../utils/statisticheFornitori';
 
 interface Props {
-  collaboratore: {
+  fornitore: {
     codice_riferimento: string;
     fornitore_nome: string;
   };
-  statistiche?: StatisticheLavoroCollaboratore | null;
+  statistiche?: StatisticheSpeseFornitore | null;
   compact?: boolean;
 }
 
-const StatisticheLavoroCard: React.FC<Props> = ({ collaboratore, statistiche: statisticheProp, compact = false }) => {
+const StatisticheSpeseCard: React.FC<Props> = ({ fornitore, statistiche: statisticheProp, compact = false }) => {
+  console.log('🔍 StatisticheSpeseCard render:', fornitore.codice_riferimento, { hasProp: !!statisticheProp });
   // Se abbiamo le statistiche come prop, usiamo quelle, altrimenti carichiamole
-  const [statisticheLocal, setStatisticheLocal] = useState<StatisticheLavoroCollaboratore | null>(null);
+  const [statisticheLocal, setStatisticheLocal] = useState<StatisticheSpeseFornitore | null>(null);
   const [loading, setLoading] = useState(!statisticheProp);
   const [error, setError] = useState<string | null>(null);
   
   const statistiche = statisticheProp || statisticheLocal;
 
   useEffect(() => {
-    // Se abbiamo già le statistiche come prop, non carichiamo nulla
+    // Se abbiamo già le statistiche come prop, usiamo quelle
     if (statisticheProp) {
       setLoading(false);
       return;
     }
     
-    // Altrimenti carichiamole (fallback per compatibilità)
-    caricaStatisticheLavoro();
-  }, [collaboratore.codice_riferimento, statisticheProp]);
+    // 🚨 EMERGENCY STOP: Disattivato caricamento automatico per evitare loop infinito
+    // TODO: Implementare caricamento centralizzato nella StatistichePage
+    setLoading(false);
+    
+    // // DISATTIVATO TEMPORANEAMENTE
+    // caricaStatisticheSpese();
+  }, [fornitore.codice_riferimento, statisticheProp]);
 
-  const caricaStatisticheLavoro = async () => {
+  // DISATTIVATO: Caricamento ora centralizzato in StatistichePage  
+  const caricaStatisticheSpese = async () => {
     if (statisticheProp) return; // Se abbiamo le prop, non carichiamo
     
     try {
@@ -47,17 +53,17 @@ const StatisticheLavoroCard: React.FC<Props> = ({ collaboratore, statistiche: st
       
       // Recupera tutte le fatture senza paginazione (limit alto)
       const response = await fornitoriService.getFattureFornitore(
-        collaboratore.codice_riferimento, 
+        fornitore.codice_riferimento, 
         1, 
         1000
       );
       
-      const stats = calcolaStatisticheLavoro(response.fatture);
+      const stats = calcolaStatisticheSpese(response.fatture);
       setStatisticheLocal(stats);
       
     } catch (err: any) {
       setError('Errore caricamento dati');
-      console.error('Errore statistiche collaboratore:', err);
+      console.error('Errore statistiche fornitore:', err);
     } finally {
       setLoading(false);
     }
@@ -66,7 +72,7 @@ const StatisticheLavoroCard: React.FC<Props> = ({ collaboratore, statistiche: st
   if (loading) {
     return (
       <div className="text-center py-2">
-        <CSpinner size="sm" /> Caricamento dati lavoro...
+        <CSpinner size="sm" /> Caricamento dati spese...
       </div>
     );
   }
@@ -79,7 +85,14 @@ const StatisticheLavoroCard: React.FC<Props> = ({ collaboratore, statistiche: st
     );
   }
 
-  if (!statistiche) return null;
+  if (!statistiche) {
+    // 🚨 EMERGENCY: Mostra skeleton anche quando non ci sono dati
+    return (
+      <div className="text-center py-2">
+        <div className="text-muted small">Statistiche non disponibili</div>
+      </div>
+    );
+  }
 
   if (compact) {
     return (
@@ -141,4 +154,4 @@ const StatisticheLavoroCard: React.FC<Props> = ({ collaboratore, statistiche: st
   );
 };
 
-export default StatisticheLavoroCard;
+export default StatisticheSpeseCard;

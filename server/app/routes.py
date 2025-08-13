@@ -5,7 +5,7 @@ from server.app.api import (
     api_fatture, api_calendar, api_sms, api_templates, api_rentri,
     api_protocolli, api_spese_fornitori, api_fornitori, api_classificazioni,
     api_collaboratori, api_struttura_conti, api_materiali, api_studio_classification,
-    api_utenze_aggregation
+    api_utenze_aggregation, api_statistiche
 )
 
 def register_routes(app: Flask):
@@ -32,6 +32,7 @@ def register_routes(app: Flask):
         api_materiali.materiali_bp,
         api_studio_classification.api_studio_classification,
         api_utenze_aggregation.api_utenze_aggregation,
+        api_statistiche.api_statistiche,
     ]
 
     for bp in blueprints:

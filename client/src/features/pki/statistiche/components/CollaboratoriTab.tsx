@@ -4,15 +4,14 @@ import {
   CCardBody,
   CRow,
   CCol,
-  CSpinner,
   CAlert,
   CCardHeader,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPeople, cilUser } from "@coreui/icons";
-import { useClassificazioni } from "@/store/classificazioniStore";
-import { useContiStore } from "@/store/contiStore";
-import StatisticheLavoroCard from "./StatisticheLavoroCard";
+import { cilPeople } from "@coreui/icons";
+import type { ClassificazioneCosto } from "@/store/classificazioniStore";
+import StatisticheSpeseCard from "./StatisticheSpeseCard";
+import StatisticheSkeleton from "./StatisticheSkeleton";
 
 // Mappatura tipi collaboratori con colori degli appuntamenti
 const COLORI_COLLABORATORI = {
@@ -28,39 +27,29 @@ const COLORI_COLLABORATORI = {
   default: "#ADD8E6", // S - Azzurro chiaro
 };
 
-const CollaboratoriTab: React.FC = () => {
-  const { classificazioni, isLoading, error } =
-    useClassificazioni("COLLABORATORI");
-  const { getBrancaById, loadBranche } = useContiStore();
+interface RaggruppamentoFornitore {
+  codice_riferimento: string;
+  fornitore_nome: string;
+  count: number;
+  brancaid: number | null;
+  contoid: number | null;
+}
 
-  // Raggruppa per codice_riferimento (fornitore)
-  const collaboratori = React.useMemo(() => {
-    const gruppi = new Map<
-      string,
-      {
-        codice_riferimento: string;
-        fornitore_nome: string;
-        count: number;
-        brancaid: number | null;
-        contoid: number | null;
-      }
-    >();
+interface TabData {
+  classificazioni: ClassificazioneCosto[];
+  raggruppamenti: RaggruppamentoFornitore[];
+}
 
-    classificazioni.forEach((c) => {
-      if (!gruppi.has(c.codice_riferimento)) {
-        gruppi.set(c.codice_riferimento, {
-          codice_riferimento: c.codice_riferimento,
-          fornitore_nome: c.fornitore_nome || c.codice_riferimento,
-          count: 0,
-          brancaid: c.brancaid,
-          contoid: c.contoid,
-        });
-      }
-      gruppi.get(c.codice_riferimento)!.count += 1;
-    });
+interface Props {
+  data: TabData;
+  isLoading: boolean;
+  error: string | null;
+  getBrancaById: (id: number | null) => string | undefined;
+}
 
-    return Array.from(gruppi.values());
-  }, [classificazioni]);
+const CollaboratoriTab: React.FC<Props> = ({ data, isLoading, error, getBrancaById }) => {
+  const { raggruppamenti: fornitori } = data;
+
 
   // Funzione per ottenere il colore in base al brancaid
   const getColoreCollaboratore = React.useCallback((brancaid: number | null): string => {
@@ -84,44 +73,28 @@ const CollaboratoriTab: React.FC = () => {
     return COLORI_COLLABORATORI.default;
   }, [getBrancaById]);
 
-  // Raggruppa collaboratori per branca
-  const collaboratoriPerBranca = React.useMemo(() => {
-    const gruppiPerBranca = new Map<string, typeof collaboratori>();
+  // Raggruppa fornitori per branca
+  const fornitoriPerBranca = React.useMemo(() => {
+    const gruppiPerBranca = new Map<string, typeof fornitori>();
     
-    collaboratori.forEach(collab => {
-      const nomeBranca = getBrancaById(collab.brancaid) || 'Non classificato';
+    fornitori.forEach(fornitore => {
+      const nomeBranca = getBrancaById(fornitore.brancaid) || 'Non classificato';
       if (!gruppiPerBranca.has(nomeBranca)) {
         gruppiPerBranca.set(nomeBranca, []);
       }
-      gruppiPerBranca.get(nomeBranca)!.push(collab);
+      gruppiPerBranca.get(nomeBranca)!.push(fornitore);
     });
 
-    return Array.from(gruppiPerBranca.entries()).map(([nomeBranca, collaboratori]) => ({
+    return Array.from(gruppiPerBranca.entries()).map(([nomeBranca, fornitori]) => ({
       nomeBranca,
-      collaboratori,
-      colore: getColoreCollaboratore(collaboratori[0]?.brancaid || null)
+      fornitori,
+      colore: getColoreCollaboratore(fornitori[0]?.brancaid || null)
     }));
-  }, [collaboratori, getBrancaById, getColoreCollaboratore]);
+  }, [fornitori, getBrancaById, getColoreCollaboratore]);
 
-  // Carica le branche per tutti i conti dei collaboratori
-  React.useEffect(() => {
-    const contiUniques = new Set<number>();
-    collaboratori.forEach(c => {
-      if (c.contoid) contiUniques.add(c.contoid);
-    });
-    
-    contiUniques.forEach(contoid => {
-      loadBranche(contoid);
-    });
-  }, [collaboratori, loadBranche]);
 
   if (isLoading) {
-    return (
-      <div className="text-center p-4">
-        <CSpinner />
-        <div className="mt-2">Caricamento collaboratori...</div>
-      </div>
-    );
+    return <StatisticheSkeleton count={8} />;
   }
 
   if (error) {
@@ -132,10 +105,10 @@ const CollaboratoriTab: React.FC = () => {
     );
   }
 
-  if (collaboratori.length === 0) {
+  if (fornitori.length === 0) {
     return (
       <CAlert color="info">
-        <CIcon icon={cilUser} className="me-2" />
+        <CIcon icon={cilPeople} className="me-2" />
         Nessun collaboratore classificato trovato.
       </CAlert>
     );
@@ -146,11 +119,11 @@ const CollaboratoriTab: React.FC = () => {
       <div className="mb-4">
         <h6 className="text-muted">
           <CIcon icon={cilPeople} className="me-2" />
-          {collaboratori.length} collaboratori trovati in {collaboratoriPerBranca.length} branche
+          {fornitori.length} collaboratori trovati in {fornitoriPerBranca.length} branche
         </h6>
       </div>
 
-      {collaboratoriPerBranca.map((gruppo, groupIndex) => (
+      {fornitoriPerBranca.map((gruppo, groupIndex) => (
         <div key={groupIndex} className="mb-5">
           {/* Header della branca */}
           <div className="mb-3">
@@ -161,13 +134,13 @@ const CollaboratoriTab: React.FC = () => {
                 display: 'inline-block'
               }}
             >
-              {gruppo.nomeBranca} ({gruppo.collaboratori.length})
+              {gruppo.nomeBranca} ({gruppo.fornitori.length})
             </h5>
           </div>
           
           {/* Card dei collaboratori di questa branca */}
           <CRow>
-            {gruppo.collaboratori.map((collaboratore, index) => (
+            {gruppo.fornitori.map((fornitore, index) => (
               <CCol key={index} md={3} className="mb-4">
                 <CCard className="h-100">
                   <CCardHeader
@@ -178,14 +151,14 @@ const CollaboratoriTab: React.FC = () => {
                       height: 80
                     }}
                   >
-                    <CIcon icon={cilUser} size="xl" className="text-white me-3" />
-                    {collaboratore.fornitore_nome}
+                    <CIcon icon={cilPeople} size="xl" className="text-white me-3" />
+                    {fornitore.fornitore_nome}
                   </CCardHeader>
                   <CCardBody>
-                    <StatisticheLavoroCard
-                      collaboratore={{
-                        codice_riferimento: collaboratore.codice_riferimento,
-                        fornitore_nome: collaboratore.fornitore_nome,
+                    <StatisticheSpeseCard
+                      fornitore={{
+                        codice_riferimento: fornitore.codice_riferimento,
+                        fornitore_nome: fornitore.fornitore_nome,
                       }}
                     />
                   </CCardBody>

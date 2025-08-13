@@ -5,48 +5,38 @@ import {
   CCardHeader,
   CRow,
   CCol,
-  CSpinner,
   CAlert
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilSpeedometer, cilUser } from '@coreui/icons';
-import { useClassificazioni } from '@/store/classificazioniStore';
-import { useContiStore } from '@/store/contiStore';
-import StatisticheLavoroCard from './StatisticheLavoroCard';
+import { cilSpeedometer } from '@coreui/icons';
+import type { ClassificazioneCosto } from '@/store/classificazioniStore';
+import StatisticheSpeseCard from './StatisticheSpeseCard';
+import StatisticheSkeleton from './StatisticheSkeleton';
 import { getColoreSerieByIndex } from '../utils/coloriSerie';
 
-const AutostradaTab: React.FC = () => {
-  const { classificazioni, isLoading, error } = useClassificazioni('AUTOSTRADA');
-  const { getBrancaById, loadBranche } = useContiStore();
+interface RaggruppamentoFornitore {
+  codice_riferimento: string;
+  fornitore_nome: string;
+  count: number;
+  brancaid: number | null;
+  contoid: number | null;
+}
 
-  // Raggruppa per codice_riferimento (fornitore)
-  const fornitori = React.useMemo(() => {
-    const gruppi = new Map<
-      string,
-      {
-        codice_riferimento: string;
-        fornitore_nome: string;
-        count: number;
-        brancaid: number | null;
-        contoid: number | null;
-      }
-    >();
+interface TabData {
+  classificazioni: ClassificazioneCosto[];
+  raggruppamenti: RaggruppamentoFornitore[];
+}
 
-    classificazioni.forEach((c) => {
-      if (!gruppi.has(c.codice_riferimento)) {
-        gruppi.set(c.codice_riferimento, {
-          codice_riferimento: c.codice_riferimento,
-          fornitore_nome: c.fornitore_nome || c.codice_riferimento,
-          count: 0,
-          brancaid: c.brancaid,
-          contoid: c.contoid,
-        });
-      }
-      gruppi.get(c.codice_riferimento)!.count += 1;
-    });
+interface Props {
+  data: TabData;
+  isLoading: boolean;
+  error: string | null;
+  getBrancaById: (id: number | null) => string | undefined;
+}
 
-    return Array.from(gruppi.values());
-  }, [classificazioni]);
+const AutostradaTab: React.FC<Props> = ({ data, isLoading, error, getBrancaById }) => {
+  const { raggruppamenti: fornitori } = data;
+
 
   // Raggruppa fornitori per branca
   const fornitoriPerBranca = React.useMemo(() => {
@@ -69,25 +59,9 @@ const AutostradaTab: React.FC = () => {
     }));
   }, [fornitori, getBrancaById]);
 
-  // Carica le branche per tutti i conti dei fornitori
-  React.useEffect(() => {
-    const contiUniques = new Set<number>();
-    fornitori.forEach(f => {
-      if (f.contoid) contiUniques.add(f.contoid);
-    });
-    
-    contiUniques.forEach(contoid => {
-      loadBranche(contoid);
-    });
-  }, [fornitori, loadBranche]);
 
   if (isLoading) {
-    return (
-      <div className="text-center p-4">
-        <CSpinner />
-        <div className="mt-2">Caricamento fornitori autostrada...</div>
-      </div>
-    );
+    return <StatisticheSkeleton count={4} />;
   }
 
   if (error) {
@@ -148,8 +122,8 @@ const AutostradaTab: React.FC = () => {
                     {fornitore.fornitore_nome}
                   </CCardHeader>
                   <CCardBody>
-                    <StatisticheLavoroCard 
-                      collaboratore={{
+                    <StatisticheSpeseCard 
+                      fornitore={{
                         codice_riferimento: fornitore.codice_riferimento,
                         fornitore_nome: fornitore.fornitore_nome
                       }}

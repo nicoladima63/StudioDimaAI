@@ -1,15 +1,50 @@
 import apiClient from '@/api/client';
 
-export interface MaterialiStats {
-  conto_nome: string;
-  branca_nome: string;
-  totale_spesa: number;
+export interface FornitoreStats {
+  codice_riferimento: string;
+  fornitore_nome: string;
+  spesa_totale: number;
   numero_fatture: number;
   spesa_media: number;
   percentuale_sul_totale: number;
-  ultimo_acquisto: string;
+  ultimo_acquisto: string | null;
+  classificazione: {
+    contoid: number | null;
+    brancaid: number | null;
+    sottocontoid: number | null;
+  };
 }
 
+export interface StatisticheFilters {
+  contoid?: number;
+  brancaid?: number;
+  sottocontoid?: number;
+  periodo?: string;
+  data_inizio?: string;
+  data_fine?: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T[];
+  error?: string;
+  total_fornitori?: number;
+  totale_generale?: number;
+  periodo?: {
+    periodo: string;
+    data_inizio: string;
+    data_fine: string;
+  };
+  filters_applied?: {
+    contoid: number | null;
+    brancaid: number | null;
+    sottocontoid: number | null;
+    fornitori_classificati_trovati: number;
+  };
+  warning?: string;
+}
+
+// Legacy interfaces per compatibilità (deprecate dopo migrazione)
 export interface CollaboratoreStats {
   nome: string;
   cognome: string;
@@ -35,31 +70,39 @@ export interface UtenzaStats {
   unita_misura: string;
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T[];
-  error?: string;
-  periodo?: {
-    periodo: string;
-    data_inizio: string;
-    data_fine: string;
-  };
-}
-
 const statisticheService = {
-  async apiGetMaterialiDentali(periodo: string = 'anno_corrente'): Promise<ApiResponse<MaterialiStats>> {
-    const response = await apiClient.get(`/api/statistiche/materiali-dentali?periodo=${periodo}`);
+  /**
+   * Nuovo endpoint flessibile per statistiche fornitori
+   * Sostituisce tutti gli altri endpoint hardcoded
+   */
+  async apiGetStatisticheFornitori(filters: StatisticheFilters = {}): Promise<ApiResponse<FornitoreStats>> {
+    const params = new URLSearchParams();
+    
+    if (filters.contoid) params.append('contoid', filters.contoid.toString());
+    if (filters.brancaid) params.append('brancaid', filters.brancaid.toString());
+    if (filters.sottocontoid) params.append('sottocontoid', filters.sottocontoid.toString());
+    if (filters.periodo) params.append('periodo', filters.periodo);
+    if (filters.data_inizio) params.append('data_inizio', filters.data_inizio);
+    if (filters.data_fine) params.append('data_fine', filters.data_fine);
+    
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const response = await apiClient.get(`/api/fornitori/statistiche${queryString}`);
     return response.data;
   },
 
-  async apiGetCollaboratori(periodo: string = 'anno_corrente'): Promise<ApiResponse<CollaboratoreStats>> {
-    const response = await apiClient.get(`/api/statistiche/collaboratori?periodo=${periodo}`);
-    return response.data;
+  // ==================== LEGACY METHODS (DEPRECATED) ====================
+  // Mantenuti per compatibilità temporanea, saranno rimossi dopo migrazione
+  
+  async apiGetCollaboratori(periodo: string = 'anno_corrente'): Promise<ApiResponse<FornitoreStats>> {
+    console.warn('⚠️ apiGetCollaboratori è deprecated. Usa apiGetStatisticheFornitori con filters');
+    // TODO: Recupera contoid per "COLLABORATORI" dal store
+    return this.apiGetStatisticheFornitori({ periodo });
   },
 
-  async apiGetUtenze(periodo: string = 'anno_corrente'): Promise<ApiResponse<UtenzaStats>> {
-    const response = await apiClient.get(`/api/statistiche/utenze?periodo=${periodo}`);
-    return response.data;
+  async apiGetUtenze(periodo: string = 'anno_corrente'): Promise<ApiResponse<FornitoreStats>> {
+    console.warn('⚠️ apiGetUtenze è deprecated. Usa apiGetStatisticheFornitori con filters');
+    // TODO: Recupera contoid per "UTENZE" dal store
+    return this.apiGetStatisticheFornitori({ periodo });
   }
 };
 
