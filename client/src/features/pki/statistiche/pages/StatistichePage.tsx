@@ -13,10 +13,11 @@ import {
   CCol
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilUser, cilChart, cilBuilding } from '@coreui/icons';
+import { cilUser, cilChart, cilBuilding, cilSpeedometer } from '@coreui/icons';
 import CollaboratoriTab from '../components/CollaboratoriTab';
 import UtenzeTab from '../components/UtenzeTab';
 import StudioTab from '../components/StudioTab';
+import AutostradaTab from '../components/AutostradaTab';
 
 const StatistichePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('collaboratori');
@@ -65,6 +66,16 @@ const StatistichePage: React.FC = () => {
                     Studio
                   </CNavLink>
                 </CNavItem>
+                <CNavItem>
+                  <CNavLink
+                    active={activeTab === 'autostrada'}
+                    onClick={() => setActiveTab('autostrada')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <CIcon icon={cilSpeedometer} className="me-2" />
+                    Autostrada
+                  </CNavLink>
+                </CNavItem>
               </CNav>
 
               {/* Tab Content */}
@@ -77,6 +88,9 @@ const StatistichePage: React.FC = () => {
                 </CTabPane>
                 <CTabPane visible={activeTab === 'studio'} role="tabpanel">
                   <StudioTab />
+                </CTabPane>
+                <CTabPane visible={activeTab === 'autostrada'} role="tabpanel">
+                  <AutostradaTab />
                 </CTabPane>
               </CTabContent>
             </CCardBody>
