@@ -35,12 +35,13 @@ def safe_int(val):
     except (ValueError, TypeError):
         return 0
 
-def get_periodo_filters(periodo='anno_corrente', data_inizio=None, data_fine=None):
+def get_periodo_filters(periodo='anno_corrente', anni=None, data_inizio=None, data_fine=None):
     """
-    Genera filtri temporali per pandas DataFrame
+    Genera filtri temporali per pandas DataFrame con supporto multi-anno
     
     Args:
         periodo: 'anno_corrente', 'ultimo_trimestre', 'ultimi_6_mesi', etc.
+        anni: Lista di anni da includere [2023, 2024, 2025] (opzionale)
         data_inizio: Data inizio custom (YYYY-MM-DD)
         data_fine: Data fine custom (YYYY-MM-DD)
     
@@ -49,10 +50,24 @@ def get_periodo_filters(periodo='anno_corrente', data_inizio=None, data_fine=Non
     """
     oggi = datetime.now()
     
+    # Priorità 1: Range custom esplicito
     if data_inizio and data_fine:
-        # Custom range
         start_date = pd.to_datetime(data_inizio)
         end_date = pd.to_datetime(data_fine)
+        
+    # Priorità 2: Multi-anno o singolo anno specificato
+    elif anni and len(anni) > 0:
+        # Multi-anno: dal gennaio del primo anno al dicembre dell'ultimo
+        if len(anni) > 1:
+            start_date = pd.to_datetime(f"{min(anni)}-01-01")
+            end_date = pd.to_datetime(f"{max(anni)}-12-31")
+        else:
+            # Singolo anno specificato
+            anno = anni[0]
+            start_date = pd.to_datetime(f"{anno}-01-01")
+            end_date = pd.to_datetime(f"{anno}-12-31")
+            
+    # Priorità 3: Periodi predefiniti
     elif periodo == 'ultimo_trimestre':
         # Ultimi 3 mesi
         start_date = pd.to_datetime(oggi.replace(month=max(1, oggi.month-2), day=1))
@@ -72,13 +87,14 @@ def get_periodo_filters(periodo='anno_corrente', data_inizio=None, data_fine=Non
 @jwt_required()
 def get_statistiche_fornitori():
     """
-    Endpoint flessibile per statistiche fornitori
+    Endpoint flessibile per statistiche fornitori con supporto multi-anno
     
     Query params:
     - contoid: Filtra per conto ID (opzionale)
     - brancaid: Filtra per branca ID (opzionale)  
     - sottocontoid: Filtra per sottoconto ID (opzionale)
     - periodo: 'anno_corrente' | 'ultimo_trimestre' | 'ultimi_6_mesi' (default: anno_corrente)
+    - anni: Lista di anni separati da virgola es. "2023,2024,2025" (opzionale)
     - data_inizio: Data inizio custom YYYY-MM-DD (opzionale)
     - data_fine: Data fine custom YYYY-MM-DD (opzionale)
     """
@@ -91,7 +107,18 @@ def get_statistiche_fornitori():
         data_inizio = request.args.get('data_inizio')
         data_fine = request.args.get('data_fine')
         
-        logger.info(f"Richiesta statistiche: contoid={contoid}, brancaid={brancaid}, sottocontoid={sottocontoid}, periodo={periodo}")
+        # Parsing array di anni dalla query string
+        anni_param = request.args.get('anni')
+        anni = None
+        if anni_param:
+            try:
+                anni = [int(anno.strip()) for anno in anni_param.split(',') if anno.strip().isdigit()]
+                logger.info(f"Anni richiesti: {anni}")
+            except (ValueError, AttributeError):
+                logger.warning(f"Formato anni non valido: {anni_param}")
+                anni = None
+        
+        logger.info(f"Richiesta statistiche: contoid={contoid}, brancaid={brancaid}, sottocontoid={sottocontoid}, periodo={periodo}, anni={anni}")
         
         # STEP 1: Ottieni fornitori classificati da studio_dima.db
         db_path = os.path.join(Config.INSTANCE_FOLDER, 'studio_dima.db')
@@ -99,29 +126,31 @@ def get_statistiche_fornitori():
         
         with sqlite3.connect(db_path) as conn:
             # Costruisci query dinamica per filtri classificazione
-            where_conditions = ["tipo_entita = 'fornitore'"]
+            where_conditions = ["cc.tipo_entita = 'fornitore'"]
             params = []
             
             if contoid:
-                where_conditions.append("contoid = ?")
+                where_conditions.append("cc.contoid = ?")
                 params.append(contoid)
             if brancaid:
-                where_conditions.append("brancaid = ?")
+                where_conditions.append("cc.brancaid = ?")
                 params.append(brancaid)
             if sottocontoid:
-                where_conditions.append("sottocontoid = ?")
+                where_conditions.append("cc.sottocontoid = ?")
                 params.append(sottocontoid)
             
             where_clause = " AND ".join(where_conditions)
             
             query = f"""
                 SELECT DISTINCT 
-                    codice_riferimento,
-                    fornitore_nome,
-                    contoid,
-                    brancaid,
-                    sottocontoid
-                FROM classificazioni_costi 
+                    cc.codice_riferimento,
+                    cc.fornitore_nome,
+                    cc.contoid,
+                    cc.brancaid,
+                    cc.sottocontoid,
+                    b.nome as branca_nome
+                FROM classificazioni_costi cc
+                LEFT JOIN branche b ON cc.brancaid = b.id
                 WHERE {where_clause}
             """
             
@@ -132,7 +161,8 @@ def get_statistiche_fornitori():
                     'fornitore_nome': row[1] or f'Fornitore {row[0]}',
                     'contoid': row[2],
                     'brancaid': row[3],
-                    'sottocontoid': row[4]
+                    'sottocontoid': row[4],
+                    'branca_nome': row[5] or 'Non classificato'
                 })
         
         logger.info(f"Trovati {len(fornitori_classificati)} fornitori classificati")
@@ -179,8 +209,8 @@ def get_statistiche_fornitori():
         # Converte date
         df_spese[col_data] = pd.to_datetime(df_spese[col_data], errors='coerce')
         
-        # Filtra per periodo
-        start_date, end_date = get_periodo_filters(periodo, data_inizio, data_fine)
+        # Filtra per periodo con supporto multi-anno
+        start_date, end_date = get_periodo_filters(periodo, anni, data_inizio, data_fine)
         mask_periodo = (df_spese[col_data] >= start_date) & (df_spese[col_data] <= end_date)
         df_filtered = df_spese[mask_periodo]
         
@@ -269,7 +299,8 @@ def get_statistiche_fornitori():
                     'classificazione': {
                         'contoid': classificazione.get('contoid'),
                         'brancaid': classificazione.get('brancaid'),
-                        'sottocontoid': classificazione.get('sottocontoid')
+                        'sottocontoid': classificazione.get('sottocontoid'),
+                        'branca_nome': classificazione.get('branca_nome')
                     }
                 })
         

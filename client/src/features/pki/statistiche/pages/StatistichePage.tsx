@@ -18,9 +18,11 @@ import CollaboratoriTab from '../components/CollaboratoriTab';
 import UtenzeTab from '../components/UtenzeTab';
 import StudioTab from '../components/StudioTab';
 import AutostradaTab from '../components/AutostradaTab';
+import StatisticheFiltri from '../components/StatisticheFiltri';
 import { useContiStore } from '@/store/contiStore';
 import statisticheService from '../services/statistiche.service';
 import type { FornitoreStats, StatisticheFilters } from '../services/statistiche.service';
+import type { StatisticheFiltriState } from '../components/StatisticheFiltri';
 
 // Configurazione tab con filtri di classificazione
 const TAB_FILTERS: Record<string, StatisticheFilters> = {
@@ -48,7 +50,12 @@ const StatistichePage: React.FC = () => {
   // Store per accesso ai conti
   const { conti, loadConti, getBrancaById } = useContiStore();
   
-  // Cache ottimizzato per nuovo endpoint
+  // 🆕 State per filtri multi-anno
+  const [filtriAnni, setFiltriAnni] = useState<StatisticheFiltriState>({
+    anni: [new Date().getFullYear()]
+  });
+  
+  // Cache ottimizzato per nuovo endpoint (ora include filtri nella chiave)
   const [cache, setCache] = useState<Record<string, FornitoreStats[]>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string | null>>({});
@@ -66,74 +73,77 @@ const StatistichePage: React.FC = () => {
     loadConti();
   }, [loadConti]);
   
-  // 🎯 CARICAMENTO OTTIMIZZATO: Una singola chiamata per tab attivo
+  // Genera chiave cache che include tab + filtri anni
+  const getCacheKey = (tab: string, anni: number[]) => {
+    return `${tab}_${anni.sort().join('-')}`;
+  };
+  
+  // Handler per cambio filtri
+  const handleFiltriChange = (nuoviFiltri: StatisticheFiltriState) => {
+    setFiltriAnni(nuoviFiltri);
+    
+    // Invalida cache quando cambiano i filtri (triggera ricaricamento)
+    setCache({});
+  };
+  
+  // 🎯 CARICAMENTO OTTIMIZZATO: Reagisce a tab attivo + filtri anni
   useEffect(() => {
-    console.log('🔍 StatistichePage useEffect:', { 
-      activeTab, 
-      hasCache: !!cache[activeTab], 
-      isLoading: loading[activeTab],
-      contiLoaded: conti.length
-    });
+    const cacheKey = getCacheKey(activeTab, filtriAnni.anni);
+    
     
     // Attende che i conti siano caricati
     if (conti.length === 0) {
-      console.log('⏸️ Skip: conti non ancora caricati');
       return;
     }
     
     // Controlli anti-loop
-    if (loading[activeTab]) {
-      console.log('⏸️ Skip: già in caricamento');
+    if (loading[cacheKey]) {
       return;
     }
     
-    if (cache[activeTab]) {
-      console.log('💾 Skip: dati già in cache');
+    if (cache[cacheKey]) {
       return;
     }
     
-    // Carica dati per il tab attivo
-    loadTabData(activeTab);
-  }, [activeTab, conti]); // Dipende da conti per i filtri dinamici
+    // Carica dati per il tab attivo + filtri
+    loadTabData(activeTab, filtriAnni.anni);
+  }, [activeTab, filtriAnni.anni, conti]); // Dipende da tab + anni + conti
   
-  const loadTabData = async (tab: string) => {
-    console.log('🚀 Caricamento dati per tab:', tab);
+  const loadTabData = async (tab: string, anni: number[]) => {
+    const cacheKey = getCacheKey(tab, anni);
     
-    setLoading(prev => ({ ...prev, [tab]: true }));
-    setErrors(prev => ({ ...prev, [tab]: null }));
+    setLoading(prev => ({ ...prev, [cacheKey]: true }));
+    setErrors(prev => ({ ...prev, [cacheKey]: null }));
     
     try {
       // Costruisci filtri dinamici per il tab
-      const baseFilters = TAB_FILTERS[tab] || { periodo: 'anno_corrente' };
+      const baseFilters = TAB_FILTERS[tab] || {};
       
       // Aggiungi contoid se trovato
       const contoid = getContoIdByName(tab); // es. "collaboratori" → contoid per "COLLABORATORI"
+      
+      // 🆕 Includi filtri anni invece di periodo fisso
       const filters: StatisticheFilters = {
         ...baseFilters,
-        ...(contoid && { contoid })
+        ...(contoid && { contoid }),
+        anni: anni  // 🎯 Multi-anno filter
       };
       
-      console.log(`📊 Chiamata API per ${tab}:`, filters);
       
-      // Singola chiamata API flessibile
+      // Singola chiamata API flessibile con multi-anno
       const response = await statisticheService.apiGetStatisticheFornitori(filters);
       
       if (response.success) {
-        setCache(prev => ({ ...prev, [tab]: response.data }));
-        console.log(`✅ ${tab} caricati:`, {
-          fornitori: response.data.length,
-          totale: response.totale_generale,
-          filtri_applicati: response.filters_applied
-        });
+        setCache(prev => ({ ...prev, [cacheKey]: response.data }));
       } else {
         throw new Error(response.error || `Errore caricamento ${tab}`);
       }
       
     } catch (error: any) {
       console.error('❌ Errore caricamento:', tab, error);
-      setErrors(prev => ({ ...prev, [tab]: error.message || 'Errore sconosciuto' }));
+      setErrors(prev => ({ ...prev, [cacheKey]: error.message || 'Errore sconosciuto' }));
     } finally {
-      setLoading(prev => ({ ...prev, [tab]: false }));
+      setLoading(prev => ({ ...prev, [cacheKey]: false }));
     }
   };
   
@@ -143,7 +153,17 @@ const StatistichePage: React.FC = () => {
     return getBrancaById(id);
   };
   
-  // Adatta dati FornitoreStats al formato legacy per i tab
+  // Helper per ottenere dati del tab con cache key corretto
+  const getTabData = (tab: string) => {
+    const cacheKey = getCacheKey(tab, filtriAnni.anni);
+    return {
+      data: cache[cacheKey],
+      isLoading: loading[cacheKey] || false,
+      error: errors[cacheKey] || null
+    };
+  };
+  
+  // Adatta dati FornitoreStats al formato legacy per i tab + include statistiche complete
   const adaptDataForTab = (fornitoreStats: FornitoreStats[]) => {
     // Crea raggruppamenti compatibili con la vecchia interfaccia
     const raggruppamenti = fornitoreStats.map(stat => ({
@@ -151,7 +171,17 @@ const StatistichePage: React.FC = () => {
       fornitore_nome: stat.fornitore_nome,
       count: stat.numero_fatture, // Usa numero fatture come count
       brancaid: stat.classificazione.brancaid,
-      contoid: stat.classificazione.contoid
+      contoid: stat.classificazione.contoid,
+      branca_nome: stat.classificazione.branca_nome, // 🆕 Nome branca diretto da API
+      // 🆕 Aggiungi statistiche complete per StatisticheSpeseCard
+      statistiche: {
+        totale_fatturato: stat.spesa_totale,
+        numero_fatture: stat.numero_fatture,
+        media_fattura: stat.spesa_media,
+        ultimo_lavoro: stat.ultimo_acquisto,
+        percentuale_sul_totale: stat.percentuale_sul_totale,
+        totali_mensili: [] // TODO: se necessario, calcolare da backend
+      }
     }));
     
     return {
@@ -172,6 +202,12 @@ const StatistichePage: React.FC = () => {
               </small>
             </CCardHeader>
             <CCardBody>
+              {/* 🆕 Filtri Multi-Anno */}
+              <StatisticheFiltri 
+                onFiltersChange={handleFiltriChange}
+                loading={Object.values(loading).some(Boolean)}
+              />
+              
               {/* Navigation Tabs */}
               <CNav variant="tabs" className="mb-4">
                 <CNavItem>
@@ -182,7 +218,7 @@ const StatistichePage: React.FC = () => {
                   >
                     <CIcon icon={cilUser} className="me-2" />
                     Collaboratori
-                    {cache.collaboratori && ` (${cache.collaboratori.length})`}
+                    {getTabData('collaboratori').data && ` (${getTabData('collaboratori').data.length})`}
                   </CNavLink>
                 </CNavItem>
                 <CNavItem>
@@ -193,7 +229,7 @@ const StatistichePage: React.FC = () => {
                   >
                     <CIcon icon={cilChart} className="me-2" />
                     Utenze
-                    {cache.utenze && ` (${cache.utenze.length})`}
+                    {getTabData('utenze').data && ` (${getTabData('utenze').data.length})`}
                   </CNavLink>
                 </CNavItem>
                 <CNavItem>
@@ -204,7 +240,7 @@ const StatistichePage: React.FC = () => {
                   >
                     <CIcon icon={cilBuilding} className="me-2" />
                     Studio
-                    {cache.studio && ` (${cache.studio.length})`}
+                    {getTabData('studio').data && ` (${getTabData('studio').data.length})`}
                   </CNavLink>
                 </CNavItem>
                 <CNavItem>
@@ -215,7 +251,7 @@ const StatistichePage: React.FC = () => {
                   >
                     <CIcon icon={cilSpeedometer} className="me-2" />
                     Autostrada
-                    {cache.autostrada && ` (${cache.autostrada.length})`}
+                    {getTabData('autostrada').data && ` (${getTabData('autostrada').data.length})`}
                   </CNavLink>
                 </CNavItem>
               </CNav>
@@ -223,36 +259,56 @@ const StatistichePage: React.FC = () => {
               {/* Tab Content con dati ottimizzati */}
               <CTabContent>
                 <CTabPane visible={activeTab === 'collaboratori'} role="tabpanel">
-                  <CollaboratoriTab 
-                    data={cache.collaboratori ? adaptDataForTab(cache.collaboratori) : { classificazioni: [], raggruppamenti: [] }}
-                    isLoading={loading.collaboratori || false}
-                    error={errors.collaboratori || null}
-                    getBrancaById={getBrancaByIdSafe}
-                  />
+                  {(() => {
+                    const tabData = getTabData('collaboratori');
+                    return (
+                      <CollaboratoriTab 
+                        data={tabData.data ? adaptDataForTab(tabData.data) : { classificazioni: [], raggruppamenti: [] }}
+                        isLoading={tabData.isLoading}
+                        error={tabData.error}
+                        getBrancaById={getBrancaByIdSafe}
+                      />
+                    );
+                  })()}
                 </CTabPane>
                 <CTabPane visible={activeTab === 'utenze'} role="tabpanel">
-                  <UtenzeTab 
-                    data={cache.utenze ? adaptDataForTab(cache.utenze) : { classificazioni: [], raggruppamenti: [] }}
-                    isLoading={loading.utenze || false}
-                    error={errors.utenze || null}
-                    getBrancaById={getBrancaByIdSafe}
-                  />
+                  {(() => {
+                    const tabData = getTabData('utenze');
+                    return (
+                      <UtenzeTab 
+                        data={tabData.data ? adaptDataForTab(tabData.data) : { classificazioni: [], raggruppamenti: [] }}
+                        isLoading={tabData.isLoading}
+                        error={tabData.error}
+                        getBrancaById={getBrancaByIdSafe}
+                      />
+                    );
+                  })()}
                 </CTabPane>
                 <CTabPane visible={activeTab === 'studio'} role="tabpanel">
-                  <StudioTab 
-                    data={cache.studio ? adaptDataForTab(cache.studio) : { classificazioni: [], raggruppamenti: [] }}
-                    isLoading={loading.studio || false}
-                    error={errors.studio || null}
-                    getBrancaById={getBrancaByIdSafe}
-                  />
+                  {(() => {
+                    const tabData = getTabData('studio');
+                    return (
+                      <StudioTab 
+                        data={tabData.data ? adaptDataForTab(tabData.data) : { classificazioni: [], raggruppamenti: [] }}
+                        isLoading={tabData.isLoading}
+                        error={tabData.error}
+                        getBrancaById={getBrancaByIdSafe}
+                      />
+                    );
+                  })()}
                 </CTabPane>
                 <CTabPane visible={activeTab === 'autostrada'} role="tabpanel">
-                  <AutostradaTab 
-                    data={cache.autostrada ? adaptDataForTab(cache.autostrada) : { classificazioni: [], raggruppamenti: [] }}
-                    isLoading={loading.autostrada || false}
-                    error={errors.autostrada || null}
-                    getBrancaById={getBrancaByIdSafe}
-                  />
+                  {(() => {
+                    const tabData = getTabData('autostrada');
+                    return (
+                      <AutostradaTab 
+                        data={tabData.data ? adaptDataForTab(tabData.data) : { classificazioni: [], raggruppamenti: [] }}
+                        isLoading={tabData.isLoading}
+                        error={tabData.error}
+                        getBrancaById={getBrancaByIdSafe}
+                      />
+                    );
+                  })()}
                 </CTabPane>
               </CTabContent>
             </CCardBody>

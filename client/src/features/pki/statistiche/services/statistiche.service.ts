@@ -12,6 +12,7 @@ export interface FornitoreStats {
     contoid: number | null;
     brancaid: number | null;
     sottocontoid: number | null;
+    branca_nome: string | null;
   };
 }
 
@@ -20,6 +21,7 @@ export interface StatisticheFilters {
   brancaid?: number;
   sottocontoid?: number;
   periodo?: string;
+  anni?: number[];        // 🆕 Array di anni per multi-anno
   data_inizio?: string;
   data_fine?: string;
 }
@@ -82,6 +84,12 @@ const statisticheService = {
     if (filters.brancaid) params.append('brancaid', filters.brancaid.toString());
     if (filters.sottocontoid) params.append('sottocontoid', filters.sottocontoid.toString());
     if (filters.periodo) params.append('periodo', filters.periodo);
+    
+    // 🆕 Supporto array di anni (converti in stringa comma-separated)
+    if (filters.anni && filters.anni.length > 0) {
+      params.append('anni', filters.anni.join(','));
+    }
+    
     if (filters.data_inizio) params.append('data_inizio', filters.data_inizio);
     if (filters.data_fine) params.append('data_fine', filters.data_fine);
     

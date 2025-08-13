@@ -20,7 +20,6 @@ interface Props {
 }
 
 const StatisticheSpeseCard: React.FC<Props> = ({ fornitore, statistiche: statisticheProp, compact = false }) => {
-  console.log('🔍 StatisticheSpeseCard render:', fornitore.codice_riferimento, { hasProp: !!statisticheProp });
   // Se abbiamo le statistiche come prop, usiamo quelle, altrimenti carichiamole
   const [statisticheLocal, setStatisticheLocal] = useState<StatisticheSpeseFornitore | null>(null);
   const [loading, setLoading] = useState(!statisticheProp);

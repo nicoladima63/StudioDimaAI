@@ -20,6 +20,15 @@ interface RaggruppamentoFornitore {
   count: number;
   brancaid: number | null;
   contoid: number | null;
+  branca_nome: string | null;
+  statistiche?: {
+    totale_fatturato: number;
+    numero_fatture: number;
+    media_fattura: number;
+    ultimo_lavoro: string | null;
+    percentuale_sul_totale: number;
+    totali_mensili: any[];
+  };
 }
 
 interface TabData {
@@ -42,7 +51,7 @@ const UtenzeTab: React.FC<Props> = ({ data, isLoading, error, getBrancaById }) =
     const gruppiPerBranca = new Map<string, typeof utenze>();
     
     utenze.forEach(utenza => {
-      const nomeBranca = getBrancaById(utenza.brancaid) || 'Non classificato';
+      const nomeBranca = utenza.branca_nome || 'Non classificato';
       if (!gruppiPerBranca.has(nomeBranca)) {
         gruppiPerBranca.set(nomeBranca, []);
       }
@@ -126,6 +135,7 @@ const UtenzeTab: React.FC<Props> = ({ data, isLoading, error, getBrancaById }) =
                         codice_riferimento: utenza.codice_riferimento,
                         fornitore_nome: utenza.fornitore_nome
                       }}
+                      statistiche={utenza.statistiche}
                     />
                   </CCardBody>
                 </CCard>

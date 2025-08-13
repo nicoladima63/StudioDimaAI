@@ -33,6 +33,15 @@ interface RaggruppamentoFornitore {
   count: number;
   brancaid: number | null;
   contoid: number | null;
+  branca_nome: string | null;
+  statistiche?: {
+    totale_fatturato: number;
+    numero_fatture: number;
+    media_fattura: number;
+    ultimo_lavoro: string | null;
+    percentuale_sul_totale: number;
+    totali_mensili: any[];
+  };
 }
 
 interface TabData {
@@ -51,16 +60,9 @@ const CollaboratoriTab: React.FC<Props> = ({ data, isLoading, error, getBrancaBy
   const { raggruppamenti: fornitori } = data;
 
 
-  // Funzione per ottenere il colore in base al brancaid
-  const getColoreCollaboratore = React.useCallback((brancaid: number | null): string => {
-    // DEBUG: Mostra info nella console
-    if (brancaid) {
-      const nomeBranca = getBrancaById(brancaid);
-    }
-    
-    if (!brancaid) return COLORI_COLLABORATORI.default;
-
-    const nomeBranca = getBrancaById(brancaid);
+  // Funzione per ottenere il colore in base al nome branca
+  const getColoreCollaboratore = React.useCallback((nomeBranca: string | null): string => {
+    if (!nomeBranca || nomeBranca === 'Non classificato') return COLORI_COLLABORATORI.default;
     if (!nomeBranca) return COLORI_COLLABORATORI.default;
 
     // Match case-insensitive
@@ -78,7 +80,7 @@ const CollaboratoriTab: React.FC<Props> = ({ data, isLoading, error, getBrancaBy
     const gruppiPerBranca = new Map<string, typeof fornitori>();
     
     fornitori.forEach(fornitore => {
-      const nomeBranca = getBrancaById(fornitore.brancaid) || 'Non classificato';
+      const nomeBranca = fornitore.branca_nome || 'Non classificato';
       if (!gruppiPerBranca.has(nomeBranca)) {
         gruppiPerBranca.set(nomeBranca, []);
       }
@@ -88,7 +90,7 @@ const CollaboratoriTab: React.FC<Props> = ({ data, isLoading, error, getBrancaBy
     return Array.from(gruppiPerBranca.entries()).map(([nomeBranca, fornitori]) => ({
       nomeBranca,
       fornitori,
-      colore: getColoreCollaboratore(fornitori[0]?.brancaid || null)
+      colore: getColoreCollaboratore(nomeBranca)
     }));
   }, [fornitori, getBrancaById, getColoreCollaboratore]);
 
@@ -160,6 +162,7 @@ const CollaboratoriTab: React.FC<Props> = ({ data, isLoading, error, getBrancaBy
                         codice_riferimento: fornitore.codice_riferimento,
                         fornitore_nome: fornitore.fornitore_nome,
                       }}
+                      statistiche={fornitore.statistiche}
                     />
                   </CCardBody>
                 </CCard>

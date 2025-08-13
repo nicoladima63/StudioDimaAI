@@ -20,6 +20,15 @@ interface RaggruppamentoFornitore {
   count: number;
   brancaid: number | null;
   contoid: number | null;
+  branca_nome: string | null;
+  statistiche?: {
+    totale_fatturato: number;
+    numero_fatture: number;
+    media_fattura: number;
+    ultimo_lavoro: string | null;
+    percentuale_sul_totale: number;
+    totali_mensili: any[];
+  };
 }
 
 interface TabData {
@@ -43,7 +52,7 @@ const AutostradaTab: React.FC<Props> = ({ data, isLoading, error, getBrancaById 
     const gruppiPerBranca = new Map<string, typeof fornitori>();
     
     fornitori.forEach(fornitore => {
-      const nomeBranca = getBrancaById(fornitore.brancaid) || 'Non classificato';
+      const nomeBranca = fornitore.branca_nome || 'Non classificato';
       if (!gruppiPerBranca.has(nomeBranca)) {
         gruppiPerBranca.set(nomeBranca, []);
       }
@@ -127,6 +136,7 @@ const AutostradaTab: React.FC<Props> = ({ data, isLoading, error, getBrancaById 
                         codice_riferimento: fornitore.codice_riferimento,
                         fornitore_nome: fornitore.fornitore_nome
                       }}
+                      statistiche={fornitore.statistiche}
                     />
                   </CCardBody>
                 </CCard>
