@@ -21,8 +21,11 @@ export const SelectSottoconto: React.FC<SelectSottocontoProps> = ({
   const { sottoconti, isLoading, error } = useSottoconti(brancaId);
 
   useEffect(() => {
-    onChange(null); // reset quando cambia branca
-  }, [brancaId]);
+    // Reset solo se il value attuale non è più valido per questa brancaId
+    if (value && sottoconti.length > 0 && !sottoconti.some(s => s.id === value)) {
+      onChange(null);
+    }
+  }, [brancaId, sottoconti, value, onChange]);
 
   useEffect(() => {
     if (

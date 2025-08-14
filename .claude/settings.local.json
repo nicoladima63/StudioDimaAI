@@ -21,6 +21,7 @@
       "Bash(sqlite3:*)",
       "Bash(npm run build:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

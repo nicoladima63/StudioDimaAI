@@ -62,7 +62,7 @@ export async function saveClassificazioneMateriale(payload: {
   metodo_classificazione?: 'manuale' | 'confermato' | 'automatico' | 'pattern';
   confidence?: number;
 }) {
-  const res = await apiClient.post('/api/materiali/save-classificazione', payload);
+  const res = await apiClient.post('/api/materiali/salva-classificazione', payload);
   return res.data; // { success, message, data: { id, operazione } }
 }
 

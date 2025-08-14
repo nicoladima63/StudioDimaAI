@@ -87,6 +87,27 @@ def test_with_sqlalchemy():
     except Exception as e:
         print(f"⚠️  Test SQLAlchemy fallito: {e}")
 
+def create_table_acquisti_materiali(db_path: str):
+    """Crea la tabella acquisti_materiali se non esiste già."""
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS acquisti_materiali (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        materiale_id INTEGER NOT NULL,
+        data_acquisto DATE NOT NULL,
+        quantita REAL,
+        prezzo_unitario REAL,
+        fornitore_id INTEGER,
+        numero_fattura TEXT,
+        UNIQUE(materiale_id, data_acquisto, numero_fattura)
+    );
+    """)
+
+    conn.commit()
+    conn.close()
+
 if __name__ == "__main__":
     print("=== Creazione database con SQLite puro ===")
     create_database_with_sqlite()

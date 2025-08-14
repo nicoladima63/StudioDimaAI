@@ -470,7 +470,7 @@ def get_all_spese_fornitori():
         }), 500
 
 @spese_fornitori_bp.route('/fornitore/<string:fornitore_id>/all', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def get_all_fatture_fornitore(fornitore_id):
     """
     Ottieni TUTTE le fatture di un fornitore specifico senza filtri temporali di default
@@ -745,7 +745,7 @@ def get_riepilogo_spese():
         }), 500
 
 @spese_fornitori_bp.route('/<string:fattura_id>/dettagli', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def get_dettagli_fattura(fattura_id):
     """
     Ottieni i dettagli/righe di una specifica fattura fornitore

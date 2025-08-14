@@ -22,7 +22,7 @@ const FornitoriPage: React.FC = () => {
             onClick={() => setActiveTab("elenco")}
             style={{ cursor: "pointer" }}
           >
-            Elenco Fornitori
+            Classificazione
           </CNavLink>
         </CNavItem>
         <CNavItem>
@@ -31,7 +31,7 @@ const FornitoriPage: React.FC = () => {
             onClick={() => setActiveTab("fatture")}
             style={{ cursor: "pointer" }}
           >
-            Tutte le Fatture
+            Fatture
           </CNavLink>
         </CNavItem>
       </CNav>

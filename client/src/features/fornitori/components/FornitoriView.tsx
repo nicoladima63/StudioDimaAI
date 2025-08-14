@@ -311,7 +311,7 @@ const FornitoriView: React.FC = () => {
           <CRow className="align-items-center mb-3">
             <CCol>
               <h5 className="mb-0">
-                Elenco Fornitori
+                Fornitori
                 <CBadge color="info" className="ms-2">
                   {allFornitori.length}
                 </CBadge>

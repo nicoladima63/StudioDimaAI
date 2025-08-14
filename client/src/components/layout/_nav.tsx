@@ -15,7 +15,8 @@ import {
   cilUserPlus,
   cilCode,
   cilAccountLogout,
-  cilBarChart
+  cilBarChart,
+  cilMedicalCross
 } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
 
@@ -131,6 +132,24 @@ const _nav = [
     name: 'Conti',
     to: '/studio/conti',
     icon: <CIcon icon={cilAccountLogout} customClassName="nav-icon" />,
+  },
+
+  {
+    component: CNavTitle,
+    name: 'Materiali',
+  },
+
+  {
+    component: CNavItem,
+    name: 'Classificazione',
+    to: '/materiali',
+    icon: <CIcon icon={cilMedicalCross} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Catalogazione Bundle',
+    to: '/materiali/bundle',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

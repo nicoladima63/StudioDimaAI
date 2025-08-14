@@ -26,6 +26,8 @@ import KpiPage from '@/features/kpi/pages/KpiPage';
 // import CollaboratoriPage from '@/features/collaboratori/pages/CollaboratoriPage';
 import ContiPage from '@/features/studio/pages/ContiPage';
 import StatistichePage from '@/features/pki/statistiche/pages/StatistichePage'
+import MaterialiPage from '@/features/materiali/pages/MaterialiPage';
+import MaterialiBundlePage from '@/features/materiali/pages/MaterialiBundlePage';
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = useAuthStore((state) => state.token);
@@ -70,6 +72,8 @@ const AppRouter: React.FC = () => {
           <Route path="/kpi" element={<KpiPage />} />
           <Route path="/rentri" element={<RentriPage />} />
           <Route path="/studio/conti" element={<ContiPage />} />
+          <Route path="/materiali" element={<MaterialiPage />} />
+          <Route path="/materiali/bundle" element={<MaterialiBundlePage />} />
         </Route>
 
         {/* Route fallback */}

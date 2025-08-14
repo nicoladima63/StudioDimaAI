@@ -21,8 +21,11 @@ export const SelectBranca: React.FC<SelectBrancaProps> = ({
   const { branche, isLoading, error } = useBranche(contoId);
 
   useEffect(() => {
-    onChange(null); // reset quando cambia conto
-  }, [contoId]);
+    // Reset solo se il value attuale non è più valido per questo contoId
+    if (value && branche.length > 0 && !branche.some(b => b.id === value)) {
+      onChange(null);
+    }
+  }, [contoId, branche, value, onChange]);
 
   useEffect(() => {
     if (

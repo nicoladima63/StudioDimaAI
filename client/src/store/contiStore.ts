@@ -153,8 +153,15 @@ export const useContiStore = create<State>()(
           const res = await apiClient.get(`/api/struttura-conti/sottoconti?branca_id=${brancaId}`);
           if (!res.data.success) throw new Error("Errore caricamento sottoconti");
           
+          // Aggiorna mappa sottoconti
+          const newSottocontiMap = { ...state.sottocontiMap };
+          res.data.data.forEach((sottoconto: Sottoconto) => {
+            newSottocontiMap[sottoconto.id] = sottoconto.nome;
+          });
+          
           set({
             sottocontiByBranca: { ...state.sottocontiByBranca, [brancaId]: res.data.data },
+            sottocontiMap: newSottocontiMap,
             isLoading: false,
             lastUpdated: { 
               ...state.lastUpdated, 

@@ -48,6 +48,7 @@ yarn-error.log*
 /client/.vite
 
 # IDE / OS files
+.claude/
 .vscode/
 .idea/
 *.suo
@@ -79,3 +80,4 @@ app.log
 /zzzztest/
 /sample_fatture_xml/
 /zimage/
+/AGENTI/
