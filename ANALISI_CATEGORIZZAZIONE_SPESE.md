@@ -24,7 +24,6 @@
 - **VODAFONE ITALIA S.p.A.** - Pattern: `vodafone`
 - **TIM S.p.A.** - Pattern: `tim`, `telecom italia`
 - **FASTWEB SpA** - Pattern: `fastweb`
-- **DELTA TRE ELABORAZIONI SNC** - Pattern: `delta tre`
 
 **Caratteristiche identificative:**
 - Descrizioni: "decisione commerciale", "canone telefonico"
@@ -33,7 +32,6 @@
 #### Acqua e Utenze (3 fornitori)
 - **Publiacqua S.p.A.** - Pattern: `publiacqua`
 - **EMPIRE POWERGAS & MOBILITY S.R.L.** - Pattern duplicato con energia
-- **Ordine dei Medici Firenze** - Pattern: falso positivo (contiene "acqua" nel matching)
 
 #### Materiali Dentali (7 fornitori) ⭐ **Categoria Principale**
 - **Dentsply Sirona Italia Srl** - Pattern: `dentsply`, `sirona`
@@ -43,6 +41,7 @@
 - **J DENTAL CARE SRL** - Pattern: `dental`
 - **BLUDENTAL DI RUGA FRANCESCO** - Pattern: `dental`
 - **FUTURIMPLANT1 SRL UNIPERSONALE** - Pattern: `implant`
+- **Biaggini Medical Devices s.r.l.** - Pattern: `medical devices`
 
 **Caratteristiche identificative:**
 - Numeri documento: Pattern `FPR` + numeri (125 documenti)
@@ -65,7 +64,6 @@
 - **COMPASS BANCA SPA** - Pattern: `compass banca`
 
 #### Farmaceutici/Medical (2 fornitori)
-- **Biaggini Medical Devices s.r.l.** - Pattern: `medical devices`
 - **FARMACIA SAN MICHELE SAS** - Pattern: `farmacia`
 
 #### Laboratori Odontotecnici (3 fornitori)

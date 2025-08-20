@@ -1,0 +1,159 @@
+/* Studio Dima V2 - Global Styles */
+
+/* Reset e base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #212529;
+  background-color: #f8f9fa;
+}
+
+/* CoreUI customizations */
+.sidebar {
+  --cui-sidebar-brand-color: #fff;
+  --cui-sidebar-brand-bg: #321fdb;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Custom utilities */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(var(--cui-primary-rgb), 0.3);
+  border-radius: 50%;
+  border-top-color: var(--cui-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Error states */
+.error-boundary {
+  padding: 2rem;
+  text-align: center;
+  color: #dc3545;
+}
+
+/* Card improvements */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Table improvements */
+.table {
+  font-size: 0.9rem;
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+/* Form improvements */
+.form-control:focus {
+  border-color: #321fdb;
+  box-shadow: 0 0 0 0.2rem rgba(50, 31, 219, 0.25);
+}
+
+/* Button improvements */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-sm {
+  font-size: 0.8rem;
+}
+
+/* Layout utilities */
+.main-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 1rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Custom CoreUI overrides for better UX */
+.sidebar-nav-link {
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.pagination {
+  margin-bottom: 0;
+}
+
+/* Dark theme compatibility */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cui-body-bg: #1a1a1a;
+    --cui-body-color: #ffffff;
+  }
+}

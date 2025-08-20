@@ -1,0 +1,4 @@
+Pazienti no 730                         
+PAZIENTI.DB_PA730NO='S'                                                                                                                                                                                 
+Ricerca per città FIRENZE               
+'FIRENZE' $ UPPER(PAZIENTI.DB_PACITTA)                                                                                                                                                                  

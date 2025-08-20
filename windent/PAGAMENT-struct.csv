@@ -1,0 +1,7 @@
+Nome,Tipo,Grandezza,Dec
+DB_ACFACOD,Caratteri,6,0
+DB_ACINCOD,Caratteri,6,0
+DB_ACQUANT,Numerico,14,2
+DB_ACVRATA,Caratteri,1,0
+DB_ACDATA,Data,8,0
+DB_ACASSEG,Caratteri,45,0

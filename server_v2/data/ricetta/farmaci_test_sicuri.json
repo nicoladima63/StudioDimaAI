@@ -1,0 +1,60 @@
+{
+  "farmaci_ambiente_test": {
+    "note": "Codici farmaci sicuri per ambiente TEST del Sistema TS - basati su kit ministeriali",
+    "farmaci_sicuri": [
+      {
+        "codice": "A01AD05",
+        "nome": "Ibuprofene 600mg compresse",
+        "principio_attivo": "IBUPROFENE",
+        "classe": "C",
+        "note": "FANS sicuro per test"
+      },
+      {
+        "codice": "N02BE01",
+        "nome": "Paracetamolo 500mg compresse", 
+        "principio_attivo": "PARACETAMOLO",
+        "classe": "C",
+        "note": "Analgesico sicuro"
+      },
+      {
+        "codice": "J01CA04",
+        "nome": "Amoxicillina 500mg capsule",
+        "principio_attivo": "AMOXICILLINA", 
+        "classe": "A",
+        "note": "Antibiotico sicuro"
+      },
+      {
+        "codice": "J01CR02",
+        "nome": "Amoxicillina+Clavulanico 875+125mg",
+        "principio_attivo": "AMOXICILLINA + ACIDO CLAVULANICO",
+        "classe": "A", 
+        "note": "Antibiotico combinato"
+      }
+    ]
+  },
+  "diagnosi_ambiente_test": {
+    "note": "Diagnosi sicure per ambiente TEST - codici che funzionano",
+    "diagnosi_sicure": [
+      {
+        "codice": "M25.50",
+        "descrizione": "Dolore articolare non specificato",
+        "farmaci_appropriati": ["A01AD05", "N02BE01"]
+      },
+      {
+        "codice": "K02.9", 
+        "descrizione": "Carie dentaria, non specificata",
+        "farmaci_appropriati": ["N02BE01"]
+      },
+      {
+        "codice": "K04.7",
+        "descrizione": "Ascesso periapicale senza fistola", 
+        "farmaci_appropriati": ["J01CA04", "J01CR02", "N02BE01"]
+      },
+      {
+        "codice": "J06.9",
+        "descrizione": "Infezione acuta delle vie respiratorie superiori, non specificata",
+        "farmaci_appropriati": ["J01CA04", "N02BE01"]
+      }
+    ]
+  }
+}

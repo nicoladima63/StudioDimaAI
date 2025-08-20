@@ -1,0 +1,8 @@
+{
+  "auth_url": "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=908080553348-qtgika8gljmkf85ruvolo2c8ocf68klj.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar&state=HacUSDOVN5oz7eg80SSoRcL4eMQu1h&access_type=offline&include_granted_scopes=true",
+  "state": "HacUSDOVN5oz7eg80SSoRcL4eMQu1h",
+  "redirect_uri": "http://localhost:8080/callback",
+  "scopes": [
+    "https://www.googleapis.com/auth/calendar"
+  ]
+}

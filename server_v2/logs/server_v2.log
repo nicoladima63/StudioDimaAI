@@ -1,0 +1,492 @@
+2025-08-16 07:03:59,645 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:03:59,645 ERROR [root] Failed to start server: 'Config' object has no attribute 'get_cors_config'
+Traceback (most recent call last):
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\run_v2.py", line 204, in main
+    app = create_app_v2(args.config)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\app_v2.py", line 44, in create_app_v2
+    init_extensions(app)
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\app_v2.py", line 101, in init_extensions
+    f"{app.config['API_PREFIX']}/*": app.config.get_cors_config()
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Config' object has no attribute 'get_cors_config'
+2025-08-16 07:05:33,737 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:05:33,790 INFO [app_v2] Registered 4 API blueprints
+2025-08-16 07:05:33,790 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:06:03,202 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:06:03,217 INFO [app_v2] Registered 4 API blueprints
+2025-08-16 07:06:03,217 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:06:03,345 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:06:03,345 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:06:15,824 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:06:15,824 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:06:15,824 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:06:15,824 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:06:15] "[33mGET /health HTTP/1.1[0m" 404 -
+2025-08-16 07:06:15,953 INFO [request] GET /favicon.ico - 404 - 0.000s
+2025-08-16 07:06:15,953 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:06:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-08-16 07:06:31,010 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:06:31] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 07:06:42,655 INFO [request] GET /api/v2/materiali - 422 - 0.000s
+2025-08-16 07:06:42,655 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:06:42] "[31m[1mGET /api/v2/materiali HTTP/1.1[0m" 422 -
+2025-08-16 07:06:59,149 INFO [request] GET /api/v2/materiali - 401 - 0.000s
+2025-08-16 07:06:59,149 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:06:59] "[31m[1mGET /api/v2/materiali HTTP/1.1[0m" 401 -
+2025-08-16 07:07:21,425 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:07:21] "[33mGET /health HTTP/1.1[0m" 404 -
+2025-08-16 07:07:52,715 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:07:52] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 07:08:24,052 INFO [request] GET /api/v2/materiali - 401 - 0.000s
+2025-08-16 07:08:24,052 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:08:24] "[31m[1mGET /api/v2/materiali HTTP/1.1[0m" 401 -
+2025-08-16 07:11:17,835 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:11:17,861 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:11:17,861 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:11:17,907 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:11:17,907 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:11:44,743 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:11:44,743 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:11:44,743 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:11:44,743 INFO [request] GET /api/v2/test-users - 200 - 0.000s
+2025-08-16 07:11:44,743 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:11:44] "GET /api/v2/test-users HTTP/1.1" 200 -
+2025-08-16 07:11:56,229 INFO [api.v2_auth] Successful login for user: admin
+2025-08-16 07:11:56,229 INFO [request] POST /api/v2/login - 200 - 0.003s
+2025-08-16 07:11:56,229 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:11:56] "POST /api/v2/login HTTP/1.1" 200 -
+2025-08-16 07:12:26,067 ERROR [MaterialiService] Query execution failed: no such table: materiali
+2025-08-16 07:12:26,067 ERROR [MaterialiService] Error in get_materiali_paginated: Database query failed: no such table: materiali
+2025-08-16 07:12:26,067 ERROR [api.v2_materiali] Database error in get_materiali: Failed to retrieve materials: Database query failed: no such table: materiali
+2025-08-16 07:12:26,067 INFO [request] GET /api/v2/materiali - 500 - 0.000s
+2025-08-16 07:12:26,067 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:12:26] "[35m[1mGET /api/v2/materiali HTTP/1.1[0m" 500 -
+2025-08-16 07:14:02,908 ERROR [MaterialiService] Query execution failed: no such table: materiali
+2025-08-16 07:14:02,908 ERROR [MaterialiService] Error in get_materiali_paginated: Database query failed: no such table: materiali
+2025-08-16 07:14:02,908 ERROR [api.v2_materiali] Database error in get_materiali: Failed to retrieve materials: Database query failed: no such table: materiali
+2025-08-16 07:14:02,908 INFO [request] GET /api/v2/materiali - 500 - 0.000s
+2025-08-16 07:14:02,908 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:14:02] "[35m[1mGET /api/v2/materiali?per_page=5 HTTP/1.1[0m" 500 -
+2025-08-16 07:14:37,008 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:14:37,036 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:14:37,036 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:14:37,079 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:14:37,079 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:14:49,887 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:14:49,887 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:14:49,887 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:14:49,887 INFO [api.v2_auth] Successful login for user: admin
+2025-08-16 07:14:49,887 INFO [request] POST /api/v2/login - 200 - 0.004s
+2025-08-16 07:14:49,887 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:14:49] "POST /api/v2/login HTTP/1.1" 200 -
+2025-08-16 07:15:04,127 ERROR [MaterialiService] Query execution failed: no such table: materiali
+2025-08-16 07:15:04,127 ERROR [MaterialiService] Error in get_materiali_paginated: Database query failed: no such table: materiali
+2025-08-16 07:15:04,127 ERROR [api.v2_materiali] Database error in get_materiali: Failed to retrieve materials: Database query failed: no such table: materiali
+2025-08-16 07:15:04,127 INFO [request] GET /api/v2/materiali - 500 - 0.000s
+2025-08-16 07:15:04,127 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:15:04] "[35m[1mGET /api/v2/materiali?per_page=3 HTTP/1.1[0m" 500 -
+2025-08-16 07:17:06,519 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:17:06,535 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:17:06,535 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:17:06,586 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:17:06,588 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:17:24,865 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:17:24] "[35m[1mPOST /api/v2/login HTTP/1.1[0m" 500 -
+2025-08-16 07:17:33,057 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:17:33] "[35m[1mPOST /api/v2/login HTTP/1.1[0m" 500 -
+2025-08-16 07:19:17,294 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:19:17,310 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:19:17,310 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:19:17,342 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:19:17,342 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:19:32,880 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:19:32,880 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:19:32,880 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:19:32,880 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-16 07:19:37,894 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:19:37,894 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:19:37,894 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-16 07:19:37,894 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:19:37,910 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:19:37,910 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:19:37,910 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:19:37] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 07:19:50,970 INFO [api.v2_auth] Successful login for user: admin
+2025-08-16 07:19:50,971 INFO [request] POST /api/v2/login - 200 - 0.001s
+2025-08-16 07:19:50,971 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:19:50] "POST /api/v2/login HTTP/1.1" 200 -
+2025-08-16 07:20:21,948 INFO [api.v2_auth] Successful login for user: admin
+2025-08-16 07:20:21,949 INFO [request] POST /api/v2/login - 200 - 0.001s
+2025-08-16 07:20:21,949 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:20:21] "POST /api/v2/login HTTP/1.1" 200 -
+2025-08-16 07:20:43,028 ERROR [MaterialiService] Query execution failed: no such column: descrizione
+2025-08-16 07:20:43,028 ERROR [MaterialiService] Error in get_materiali_paginated: Database query failed: no such column: descrizione
+2025-08-16 07:20:43,028 ERROR [api.v2_materiali] Database error in get_materiali: Failed to retrieve materials: Database query failed: no such column: descrizione
+2025-08-16 07:20:43,028 INFO [request] GET /api/v2/materiali - 500 - 0.001s
+2025-08-16 07:20:43,028 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:20:43] "[35m[1mGET /api/v2/materiali?per_page=3 HTTP/1.1[0m" 500 -
+2025-08-16 07:35:39,778 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:35:39,780 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:35:39,780 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:35:39,839 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:35:39,840 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:35:55,710 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:35:55,712 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:35:55,712 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:35:55,712 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-16 07:36:00,723 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:36:00,723 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:36:00,723 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-16 07:36:00,730 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:36:00,730 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:36:00,730 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:36:00,730 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:36:00] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 07:44:57,761 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:44:57,778 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:44:57,778 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:44:57,810 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:44:57,810 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:45:11,417 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:45:11,433 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:45:11,434 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:45:11,435 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-16 07:45:16,448 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:45:16,448 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:45:16,448 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-16 07:45:16,452 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:45:16,452 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:45:16,452 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:45:16,452 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:45:16] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 07:46:00,613 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:46:00,629 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:46:00,629 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:46:00,677 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:46:00,677 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:46:16,770 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:46:16,773 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:46:16,774 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:46:16,774 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-16 07:46:21,779 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:46:21,779 DEBUG [core.database_manager] Closed database connection
+2025-08-16 07:46:21,779 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-16 07:46:21,779 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:46:21,779 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:46:21,779 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:46:21,779 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:46:21] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 07:46:29,902 INFO [request] GET /api/v2/materiali - 401 - 0.000s
+2025-08-16 07:46:29,902 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:46:29] "[31m[1mGET /api/v2/materiali HTTP/1.1[0m" 401 -
+2025-08-16 07:46:48,284 INFO [api.v2_auth] Successful login for user: admin
+2025-08-16 07:46:48,285 INFO [request] POST /api/v2/login - 200 - 0.001s
+2025-08-16 07:46:48,285 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:46:48] "POST /api/v2/login HTTP/1.1" 200 -
+2025-08-16 07:46:58,761 ERROR [MaterialiService] Query execution failed: no such column: descrizione
+2025-08-16 07:46:58,761 ERROR [MaterialiService] Error in get_materiali_paginated: Database query failed: no such column: descrizione
+2025-08-16 07:46:58,761 ERROR [api.v2_materiali] Database error in get_materiali: Failed to retrieve materials: Database query failed: no such column: descrizione
+2025-08-16 07:46:58,761 INFO [request] GET /api/v2/materiali - 500 - 0.001s
+2025-08-16 07:46:58,761 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:46:58] "[35m[1mGET /api/v2/materiali HTTP/1.1[0m" 500 -
+2025-08-16 07:49:57,365 ERROR [MaterialiService] Query execution failed: no such column: descrizione
+2025-08-16 07:49:57,365 ERROR [MaterialiService] Error in get_materiali_paginated: Database query failed: no such column: descrizione
+2025-08-16 07:49:57,365 ERROR [api.v2_materiali] Database error in get_materiali: Failed to retrieve materials: Database query failed: no such column: descrizione
+2025-08-16 07:49:57,368 INFO [request] GET /api/v2/materiali - 500 - 0.000s
+2025-08-16 07:49:57,368 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:49:57] "[35m[1mGET /api/v2/materiali HTTP/1.1[0m" 500 -
+2025-08-16 07:52:15,238 ERROR [MaterialiService] Query execution failed: no such column: descrizione
+2025-08-16 07:52:15,238 ERROR [MaterialiService] Error in get_materiali_paginated: Database query failed: no such column: descrizione
+2025-08-16 07:52:15,238 ERROR [api.v2_materiali] Database error in get_materiali: Failed to retrieve materials: Database query failed: no such column: descrizione
+2025-08-16 07:52:15,238 INFO [request] GET /api/v2/materiali - 500 - 0.001s
+2025-08-16 07:52:15,238 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:52:15] "[35m[1mGET /api/v2/materiali HTTP/1.1[0m" 500 -
+2025-08-16 07:52:36,175 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 07:52:36,191 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 07:52:36,191 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 07:52:36,231 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 07:52:36,231 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 07:53:03,558 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 07:53:03,564 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 07:53:03,564 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 07:53:03,564 INFO [request] GET /api/v2/materiali - 200 - 0.005s
+2025-08-16 07:53:03,564 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 07:53:03] "GET /api/v2/materiali?page=1&per_page=5 HTTP/1.1" 200 -
+2025-08-16 10:30:33,760 INFO [request] GET /api/v2/auth/verify - 404 - 0.002s
+2025-08-16 10:30:33,766 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:30:33] "[33mGET /api/v2/auth/verify HTTP/1.1[0m" 404 -
+2025-08-16 10:30:33,981 INFO [request] GET /api/v2/auth/verify - 404 - 0.000s
+2025-08-16 10:30:33,981 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:30:33] "[33mGET /api/v2/auth/verify HTTP/1.1[0m" 404 -
+2025-08-16 10:30:46,907 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 10:30:46,907 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:30:46] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 10:31:02,826 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 10:31:02,826 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:31:02] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 10:31:15,188 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 10:31:15,188 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:31:15] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 10:31:50,242 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-16 10:31:55,253 DEBUG [core.database_manager] Closed database connection
+2025-08-16 10:31:55,255 DEBUG [core.database_manager] Closed database connection
+2025-08-16 10:31:55,255 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-16 10:31:55,256 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 10:31:55,256 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 10:31:55,256 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 10:31:55,256 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:31:55] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 10:31:55,273 INFO [request] GET /api/v2/materiali - 401 - 0.000s
+2025-08-16 10:31:55,273 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:31:55] "[31m[1mGET /api/v2/materiali?page=1&per_page=5 HTTP/1.1[0m" 401 -
+2025-08-16 10:32:50,996 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 10:32:50,996 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:32:50] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 10:39:30,539 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 10:39:30,539 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:39:30] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 10:39:35,783 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 10:39:35,784 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:39:35] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 10:42:03,388 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 10:42:03,388 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:42:03] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 10:46:10,647 INFO [request] GET /api/v2/login - 405 - 0.000s
+2025-08-16 10:46:10,647 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:46:10] "[31m[1mGET /api/v2/login HTTP/1.1[0m" 405 -
+2025-08-16 10:46:21,667 INFO [request] GET /.well-known/appspecific/com.chrome.devtools.json - 404 - 0.000s
+2025-08-16 10:46:21,668 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:46:21] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-08-16 10:46:23,997 INFO [request] GET /api/v2/login - 405 - 0.000s
+2025-08-16 10:46:23,997 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:46:23] "[31m[1mGET /api/v2/login HTTP/1.1[0m" 405 -
+2025-08-16 10:46:24,297 INFO [request] GET /.well-known/appspecific/com.chrome.devtools.json - 404 - 0.000s
+2025-08-16 10:46:24,297 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:46:24] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-08-16 10:46:39,774 INFO [request] GET /api/v2/materiali - 401 - 0.000s
+2025-08-16 10:46:39,774 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 10:46:39] "[31m[1mGET /api/v2/materiali HTTP/1.1[0m" 401 -
+2025-08-16 11:01:25,180 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:01:25,204 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:01:25,204 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:01:25,270 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:01:25,270 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:01:38,822 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 11:01:38,822 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 11:01:38,822 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 11:01:38,822 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.007s
+2025-08-16 11:01:38,822 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:01:38] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 11:02:03,361 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-16 11:02:08,365 DEBUG [core.database_manager] Closed database connection
+2025-08-16 11:02:08,367 DEBUG [core.database_manager] Closed database connection
+2025-08-16 11:02:08,368 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-16 11:02:08,370 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 11:02:08,370 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 11:02:08,371 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 11:02:08,372 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:02:08] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-16 11:02:23,489 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 11:02:23,489 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:02:23] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 11:03:46,349 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:03:46,365 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:03:46,365 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:03:46,413 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:03:46,413 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:04:05,854 INFO [request] GET /api/v2/auth/verify - 404 - 0.000s
+2025-08-16 11:04:05,854 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:04:05] "[33mGET /api/v2/auth/verify HTTP/1.1[0m" 404 -
+2025-08-16 11:04:06,109 INFO [request] GET /api/v2/auth/verify - 404 - 0.000s
+2025-08-16 11:04:06,109 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:04:06] "[33mGET /api/v2/auth/verify HTTP/1.1[0m" 404 -
+2025-08-16 11:04:18,963 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 11:04:18,963 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:04:18] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 11:04:43,853 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 11:04:43,853 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:04:43] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 11:05:06,005 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 11:05:06,005 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:05:06] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 11:06:32,514 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:06:32,530 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:06:32,530 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:06:32,578 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:06:32,578 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:07:00,400 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.000s
+2025-08-16 11:07:00,400 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:07:00] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 11:07:10,641 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:07:10,657 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:07:10,657 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:07:10,719 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:07:10,719 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:07:37,330 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 11:07:37,337 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 11:07:37,337 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 11:07:37,337 INFO [request] OPTIONS /api/v2/auth/login - 404 - 0.007s
+2025-08-16 11:07:37,337 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:07:37] "[33mOPTIONS /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-16 11:10:47,876 INFO [request] OPTIONS /api/v2/login - 200 - 0.000s
+2025-08-16 11:10:47,876 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:10:47] "OPTIONS /api/v2/login HTTP/1.1" 200 -
+2025-08-16 11:10:48,133 ERROR [api.v2_auth] Login error: 'name'
+Traceback (most recent call last):
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\api\v2_auth.py", line 90, in login
+    'name': user['name']
+            ~~~~^^^^^^^^
+KeyError: 'name'
+2025-08-16 11:10:48,134 INFO [request] POST /api/v2/login - 500 - 0.002s
+2025-08-16 11:10:48,134 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:10:48] "[35m[1mPOST /api/v2/login HTTP/1.1[0m" 500 -
+2025-08-16 11:13:57,631 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:13:57,653 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:13:57,654 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:13:57,704 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:13:57,705 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:14:36,462 INFO [request] OPTIONS /api/v2/login - 200 - 0.000s
+2025-08-16 11:14:36,462 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:14:36] "OPTIONS /api/v2/login HTTP/1.1" 200 -
+2025-08-16 11:14:36,719 ERROR [api.v2_auth] Login error: 'name'
+Traceback (most recent call last):
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\api\v2_auth.py", line 90, in login
+    'name': user['name']
+            ~~~~^^^^^^^^
+KeyError: 'name'
+2025-08-16 11:14:36,719 INFO [request] POST /api/v2/login - 500 - 0.000s
+2025-08-16 11:14:36,719 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:14:36] "[35m[1mPOST /api/v2/login HTTP/1.1[0m" 500 -
+2025-08-16 11:14:52,926 INFO [request] OPTIONS /api/v2/login - 200 - 0.000s
+2025-08-16 11:14:52,926 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:14:52] "OPTIONS /api/v2/login HTTP/1.1" 200 -
+2025-08-16 11:14:53,229 ERROR [api.v2_auth] Login error: 'name'
+Traceback (most recent call last):
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\api\v2_auth.py", line 90, in login
+    'name': user['name']
+            ~~~~^^^^^^^^
+KeyError: 'name'
+2025-08-16 11:14:53,229 INFO [request] POST /api/v2/login - 500 - 0.000s
+2025-08-16 11:14:53,229 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:14:53] "[35m[1mPOST /api/v2/login HTTP/1.1[0m" 500 -
+2025-08-16 11:15:52,373 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:15:52,409 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:15:52,409 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:15:52,458 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:15:52,458 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:16:24,277 INFO [request] OPTIONS /api/v2/login - 200 - 0.000s
+2025-08-16 11:16:24,277 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:16:24] "OPTIONS /api/v2/login HTTP/1.1" 200 -
+2025-08-16 11:16:24,533 ERROR [api.v2_auth] Login error: 'name'
+Traceback (most recent call last):
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\api\v2_auth.py", line 90, in login
+    'name': user['name']
+            ~~~~^^^^^^^^
+KeyError: 'name'
+2025-08-16 11:16:24,533 INFO [request] POST /api/v2/login - 500 - 0.000s
+2025-08-16 11:16:24,533 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:16:24] "[35m[1mPOST /api/v2/login HTTP/1.1[0m" 500 -
+2025-08-16 11:18:40,353 INFO [request] OPTIONS /api/v2/login - 200 - 0.000s
+2025-08-16 11:18:40,353 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:18:40] "OPTIONS /api/v2/login HTTP/1.1" 200 -
+2025-08-16 11:18:40,603 ERROR [api.v2_auth] Login error: 'name'
+Traceback (most recent call last):
+  File "C:\Users\gengi\Desktop\StudioDimaAI\server_v2\api\v2_auth.py", line 90, in login
+    'name': user['name']
+            ~~~~^^^^^^^^
+KeyError: 'name'
+2025-08-16 11:18:40,603 INFO [request] POST /api/v2/login - 500 - 0.001s
+2025-08-16 11:18:40,603 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:18:40] "[35m[1mPOST /api/v2/login HTTP/1.1[0m" 500 -
+2025-08-16 11:19:34,035 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:19:34,051 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:19:34,051 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:19:34,099 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:19:34,099 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:20:51,741 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-16 11:20:51,757 INFO [app_v2] Registered 5 API blueprints
+2025-08-16 11:20:51,757 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-16 11:20:51,805 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.100:5001
+2025-08-16 11:20:51,805 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-16 11:21:22,310 DEBUG [core.database_manager] Created new database connection #1
+2025-08-16 11:21:22,310 DEBUG [core.database_manager] Created new database connection #2
+2025-08-16 11:21:22,310 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-16 11:21:22,310 INFO [request] OPTIONS /api/v2/login - 200 - 0.000s
+2025-08-16 11:21:22,310 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:21:22] "OPTIONS /api/v2/login HTTP/1.1" 200 -
+2025-08-16 11:21:22,567 INFO [api.v2_auth] Successful login for user: admin
+2025-08-16 11:21:22,567 INFO [request] POST /api/v2/login - 200 - 0.000s
+2025-08-16 11:21:22,567 INFO [werkzeug] 127.0.0.1 - - [16/Aug/2025 11:21:22] "POST /api/v2/login HTTP/1.1" 200 -
+2025-08-17 17:19:24,013 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-17 17:19:24,069 INFO [app_v2] Registered 5 API blueprints
+2025-08-17 17:19:24,069 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-17 17:19:24,184 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.109:5001
+2025-08-17 17:19:24,184 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-18 08:23:31,521 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-18 08:23:31,548 INFO [app_v2] Registered 5 API blueprints
+2025-08-18 08:23:31,549 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-18 08:23:31,562 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.104:5001
+2025-08-18 08:23:31,562 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-18 08:23:46,181 DEBUG [core.database_manager] Created new database connection #1
+2025-08-18 08:23:46,181 DEBUG [core.database_manager] Created new database connection #2
+2025-08-18 08:23:46,181 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-18 08:23:46,181 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-18 08:23:51,201 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:23:51,204 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:23:51,204 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-18 08:23:51,206 DEBUG [core.database_manager] Created new database connection #1
+2025-08-18 08:23:51,207 DEBUG [core.database_manager] Created new database connection #2
+2025-08-18 08:23:51,207 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-18 08:23:51,207 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:23:51] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-18 08:24:33,562 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-18 08:24:38,563 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:24:38,565 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:24:38,565 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-18 08:24:38,568 DEBUG [core.database_manager] Created new database connection #1
+2025-08-18 08:24:38,569 DEBUG [core.database_manager] Created new database connection #2
+2025-08-18 08:24:38,569 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-18 08:24:38,569 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:24:38] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-18 08:24:40,593 INFO [request] GET /api/v2/auth/test-users - 404 - 0.000s
+2025-08-18 08:24:40,594 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:24:40] "[33mGET /api/v2/auth/test-users HTTP/1.1[0m" 404 -
+2025-08-18 08:24:42,629 INFO [request] POST /api/v2/auth/login - 404 - 0.000s
+2025-08-18 08:24:42,630 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:24:42] "[33mPOST /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-18 08:24:44,657 INFO [request] POST /api/v2/auth/login - 404 - 0.000s
+2025-08-18 08:24:44,657 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:24:44] "[33mPOST /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-18 08:25:53,194 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-18 08:25:53,215 INFO [app_v2] Registered 5 API blueprints
+2025-08-18 08:25:53,216 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-18 08:25:53,221 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.104:5001
+2025-08-18 08:25:53,221 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2025-08-18 08:26:08,552 DEBUG [core.database_manager] Created new database connection #1
+2025-08-18 08:26:08,552 DEBUG [core.database_manager] Created new database connection #2
+2025-08-18 08:26:08,552 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-18 08:26:08,552 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-18 08:26:13,568 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:26:13,568 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:26:13,568 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-18 08:26:13,568 DEBUG [core.database_manager] Created new database connection #1
+2025-08-18 08:26:13,568 DEBUG [core.database_manager] Created new database connection #2
+2025-08-18 08:26:13,568 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-18 08:26:13,568 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:26:13] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-18 08:26:15,634 INFO [request] GET /api/v2/auth/test-users - 404 - 0.000s
+2025-08-18 08:26:15,634 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:26:15] "[33mGET /api/v2/auth/test-users HTTP/1.1[0m" 404 -
+2025-08-18 08:26:17,699 INFO [request] POST /api/v2/auth/login - 404 - 0.000s
+2025-08-18 08:26:17,699 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:26:17] "[33mPOST /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-18 08:26:19,756 INFO [request] POST /api/v2/auth/login - 404 - 0.000s
+2025-08-18 08:26:19,756 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:26:19] "[33mPOST /api/v2/auth/login HTTP/1.1[0m" 404 -
+2025-08-18 08:27:01,097 INFO [app_v2] Initializing StudioDimaAI Server V2
+2025-08-18 08:27:01,100 INFO [app_v2] Registered 5 API blueprints
+2025-08-18 08:27:01,100 INFO [app_v2] Server V2 initialized successfully on port 5001
+2025-08-18 08:28:09,927 INFO [core.database_manager] Shutting down DatabaseManager...
+2025-08-18 08:28:13,578 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:28:13,578 DEBUG [core.database_manager] Closed database connection
+2025-08-18 08:28:13,578 INFO [core.database_manager] DatabaseManager shutdown complete
+2025-08-18 08:28:13,578 DEBUG [core.database_manager] Created new database connection #1
+2025-08-18 08:28:13,578 DEBUG [core.database_manager] Created new database connection #2
+2025-08-18 08:28:13,578 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2025-08-18 08:28:13,578 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:28:13] "GET /api/v2/health HTTP/1.1" 200 -
+2025-08-18 08:28:15,665 INFO [request] GET /api/v2/test-users - 200 - 0.000s
+2025-08-18 08:28:15,665 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:28:15] "GET /api/v2/test-users HTTP/1.1" 200 -
+2025-08-18 08:28:17,730 INFO [api.v2_auth] Successful login for user: admin
+2025-08-18 08:28:17,730 INFO [request] POST /api/v2/login - 200 - 0.000s
+2025-08-18 08:28:17,730 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:28:17] "POST /api/v2/login HTTP/1.1" 200 -
+2025-08-18 08:28:19,784 INFO [request] GET /api/v2/me - 200 - 0.001s
+2025-08-18 08:28:19,785 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:28:19] "GET /api/v2/me HTTP/1.1" 200 -
+2025-08-18 08:28:21,845 WARNING [api.v2_auth] Failed login attempt for username: wrong
+2025-08-18 08:28:21,845 INFO [request] POST /api/v2/login - 401 - 0.000s
+2025-08-18 08:28:21,845 INFO [werkzeug] 127.0.0.1 - - [18/Aug/2025 08:28:21] "[31m[1mPOST /api/v2/login HTTP/1.1[0m" 401 -

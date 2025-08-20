@@ -1,0 +1,159 @@
+{
+  "version": "2.0.0",
+  "description": "🚀 StudioDimaAI Calendar System v2 - Enterprise Configuration",
+  "last_updated": "2025-01-18T15:30:00Z",
+  
+  "google_api": {
+    "credentials_path": "server_v2/instance/credentials.json",
+    "token_path": "server_v2/instance/token.json",
+    "scopes": ["https://www.googleapis.com/auth/calendar"],
+    "timezone": "Europe/Rome",
+    "rate_limits": {
+      "max_calls_per_minute": 100,
+      "batch_size": 50,
+      "retry_delays": [1, 2, 4, 8, 16]
+    }
+  },
+  
+  "calendar_mappings": {
+    "studio_blu": {
+      "studio_id": 1,
+      "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+      "name": "Studio Blu",
+      "color": "#1f8efe",
+      "sync_enabled": true
+    },
+    "studio_giallo": {
+      "studio_id": 2,
+      "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+      "name": "Studio Giallo", 
+      "color": "#ffb300",
+      "sync_enabled": true
+    }
+  },
+  
+  "dbf_optimization": {
+    "cache": {
+      "ttl_seconds": 300,
+      "max_memory_items": 1000,
+      "disk_cache_enabled": true,
+      "cache_directory": "server_v2/cache/dbf"
+    },
+    "performance": {
+      "chunk_size": 1000,
+      "max_workers": 4,
+      "use_binary_deleted_scan": true,
+      "parallel_threshold_records": 2000
+    },
+    "file_paths": {
+      "base_path": "server/windent/DATI",
+      "appointments_file": "APPUNTA.DBF",
+      "patients_file": "PAZIENTI.DBF",
+      "backup_paths": [
+        "windent/DATI",
+        "../windent/DATI"
+      ]
+    }
+  },
+  
+  "sync_automation": {
+    "enabled": true,
+    "schedule": {
+      "hour": 21,
+      "minute": 0,
+      "skip_weekends": true
+    },
+    "sync_scope": {
+      "months_ahead": 2,
+      "months_behind": 1,
+      "studios": ["studio_blu", "studio_giallo"]
+    },
+    "batch_processing": {
+      "max_concurrent_studios": 2,
+      "events_per_batch": 50,
+      "batch_delay_ms": 100
+    }
+  },
+  
+  "monitoring": {
+    "metrics_enabled": true,
+    "performance_tracking": {
+      "track_cache_hits": true,
+      "track_execution_times": true,
+      "track_error_rates": true,
+      "retention_days": 30
+    },
+    "health_checks": {
+      "dbf_connectivity": true,
+      "google_api_status": true,
+      "cache_performance": true,
+      "sync_state_integrity": true
+    },
+    "alerts": {
+      "slow_operations_threshold_ms": 5000,
+      "high_error_rate_threshold_percent": 10,
+      "cache_miss_rate_threshold_percent": 50
+    }
+  },
+  
+  "circuit_breaker": {
+    "enabled": true,
+    "failure_threshold": 5,
+    "recovery_timeout_seconds": 60,
+    "half_open_max_calls": 3
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    "handlers": {
+      "file": {
+        "enabled": true,
+        "path": "server_v2/logs/calendar_v2.log",
+        "max_size_mb": 10,
+        "backup_count": 5
+      },
+      "console": {
+        "enabled": true,
+        "level": "INFO"
+      }
+    }
+  },
+  
+  "development": {
+    "debug_mode": false,
+    "mock_google_api": false,
+    "cache_disabled": false,
+    "verbose_logging": false,
+    "test_data_enabled": false
+  },
+  
+  "backup_and_recovery": {
+    "sync_state_backup": {
+      "enabled": true,
+      "backup_path": "server_v2/backups/sync_state",
+      "retention_days": 90,
+      "backup_frequency_hours": 24
+    },
+    "configuration_backup": {
+      "enabled": true,
+      "backup_path": "server_v2/backups/config",
+      "backup_on_change": true
+    }
+  },
+  
+  "feature_flags": {
+    "parallel_processing": true,
+    "advanced_caching": true,
+    "batch_operations": true,
+    "real_time_sync": false,
+    "ai_scheduling_optimization": false,
+    "multi_tenant_support": false
+  },
+  
+  "compatibility": {
+    "v1_fallback_enabled": true,
+    "migration_mode": false,
+    "legacy_api_support": true
+  }
+}

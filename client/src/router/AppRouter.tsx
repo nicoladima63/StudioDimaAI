@@ -28,6 +28,10 @@ import ContiPage from '@/features/studio/pages/ContiPage';
 import StatistichePage from '@/features/pki/statistiche/pages/StatistichePage'
 import MaterialiPage from '@/features/materiali/pages/MaterialiPage';
 import MaterialiBundlePage from '@/features/materiali/pages/MaterialiBundlePage';
+
+import Template from '@/features/test/TemplatePage';
+
+
 // Componente per le route private
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const token = useAuthStore((state) => state.token);
@@ -44,13 +48,7 @@ const AppRouter: React.FC = () => {
         <Route path="/home" element={<HomePage />} />
 
         {/* Route protette con Layout */}
-        <Route 
-          element={
-            <PrivateRoute>
-              <Layout />
-            </PrivateRoute>
-          }
-        >
+        <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/debug" element={<DashboardDebug />} />
@@ -68,7 +66,7 @@ const AppRouter: React.FC = () => {
           <Route path="/fornitori" element={<FornitoriPage />} />
           {/* <Route path="/collaboratori" element={<CollaboratoriPage />} /> */}
           <Route path="/statistiche" element={<StatistichePage />} />
-          
+          <Route path="/test" element={<Template />} />
           <Route path="/kpi" element={<KpiPage />} />
           <Route path="/rentri" element={<RentriPage />} />
           <Route path="/studio/conti" element={<ContiPage />} />
