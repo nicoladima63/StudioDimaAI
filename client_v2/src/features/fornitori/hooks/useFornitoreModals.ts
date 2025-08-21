@@ -55,14 +55,14 @@ export const useFornitoreModals = () => {
     perPage: number
   ): Promise<{ fatture: FatturaBase[]; total: number }> => {
     try {
-      const response = await apiClient.get(`/fornitori/${fornitoreId}/fatture?page=${page}&per_page=${perPage}`);
+      const response = await apiClient.get(`/fornitori/${fornitoreId}/spese?page=${page}&per_page=${perPage}`);
       if (!response.data.success) {
-        throw new Error(response.data.error || 'Errore nel caricamento delle fatture');
+        throw new Error(response.data.error || 'Errore nel caricamento delle spese');
       }
       
       return {
-        fatture: response.data.data.fatture || [],
-        total: response.data.data.total || 0
+        fatture: response.data.data.spese || [],
+        total: response.data.data.pagination?.total || 0
       };
     } catch (err: any) {
       throw new Error(err.message || 'Errore nel caricamento delle fatture');
@@ -71,12 +71,12 @@ export const useFornitoreModals = () => {
 
   const fetchDettagliFatturaRighe = async (fatturaId: string): Promise<DettaglioFatturaBase[]> => {
     try {
-      const response = await apiClient.get(`/fatture/${fatturaId}/dettagli`);
+      const response = await apiClient.get(`/spese/${fatturaId}/righe`);
       if (!response.data.success) {
         throw new Error(response.data.error || 'Errore nel caricamento dei dettagli');
       }
       
-      return response.data.data.dettagli || [];
+      return response.data.data || [];
     } catch (err: any) {
       throw new Error(err.message || 'Errore nel caricamento dei dettagli fattura');
     }
@@ -84,12 +84,12 @@ export const useFornitoreModals = () => {
 
   const fetchFatturaCompleta = async (fatturaId: string): Promise<FatturaDetail> => {
     try {
-      const response = await apiClient.get(`/fatture/${fatturaId}`);
+      const response = await apiClient.get(`/spese/${fatturaId}`);
       if (!response.data.success) {
-        throw new Error(response.data.error || 'Errore nel caricamento della fattura');
+        throw new Error(response.data.error || 'Errore nel caricamento della spesa');
       }
       
-      return response.data.data.fattura;
+      return response.data.data;
     } catch (err: any) {
       throw new Error(err.message || 'Errore nel caricamento della fattura');
     }

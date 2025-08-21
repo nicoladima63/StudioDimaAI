@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import apiClient from "../services/api/client";
+import apiClient from "@/services/api/client";
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minuti
 const MAX_RETRIES = 3;

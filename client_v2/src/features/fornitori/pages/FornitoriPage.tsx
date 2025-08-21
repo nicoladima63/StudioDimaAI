@@ -33,6 +33,7 @@ const FornitoriPage: React.FC = () => {
 
     // Handlers
     openAnagraficaModal,
+    openFattureElencoModal,
     closeAnagraficaModal,
     closeFattureElencoModal,
     closeFatturaDetailModal,
@@ -50,9 +51,13 @@ const FornitoriPage: React.FC = () => {
     loadAll();
   };
 
-  // Gestori azioni tabella (solo visualizzazione anagrafica)
+  // Gestori azioni tabella
   const handleView = (fornitore: Fornitore) => {
     openAnagraficaModal(fornitore);
+  };
+
+  const handleViewSpese = (fornitore: Fornitore) => {
+    openFattureElencoModal(fornitore);
   };
 
   return (
@@ -101,6 +106,7 @@ const FornitoriPage: React.FC = () => {
           loading={isLoading}
           error={error}
           onView={handleView}
+          onViewSpese={handleViewSpese}
         />
       </PageLayout.ContentBody>
 
@@ -114,17 +120,16 @@ const FornitoriPage: React.FC = () => {
           title={`Anagrafica Fornitore: ${selectedFornitore.nome}`}
           subtitle={`Codice: ${selectedFornitore.codice}`}
           campi={getCampiAnagrafica(selectedFornitore)}
-          onViewFatture={switchToFattureFromAnagrafica}
-          showFattureButton={true}
+          showFattureButton={false}
         />
       )}
 
-      {/* 2. Modal Elenco Fatture Fornitore */}
+      {/* 2. Modal Elenco Spese Fornitore */}
       {selectedFornitore && (
         <ModalFattureElenco
           visible={fattureElencoModalVisible}
           onClose={closeFattureElencoModal}
-          title={`Fatture Fornitore: ${selectedFornitore.nome}`}
+          title={`Spese Fornitore: ${selectedFornitore.nome}`}
           subtitle={`Codice: ${selectedFornitore.codice}`}
           entitaId={selectedFornitore.id}
           entitaType="fornitore"
@@ -133,7 +138,7 @@ const FornitoriPage: React.FC = () => {
         />
       )}
 
-      {/* 3. Modal Dettaglio Singola Fattura */}
+      {/* 3. Modal Dettaglio Singola Spesa */}
       <ModalFatturaDetail
         visible={fatturaDetailModalVisible}
         onClose={closeFatturaDetailModal}

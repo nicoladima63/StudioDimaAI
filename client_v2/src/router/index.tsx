@@ -44,7 +44,7 @@ const AppRouter: React.FC = () => {
           {/* Feature routes */}
           <Route path='materiali' element={<MaterialiPage />} />
           <Route path='fornitori' element={<FornitoriPage />} />
-          
+          <Route path='conti' element={React.createElement(React.lazy(() => import('@/features/conti/pages/ContiPage')))} />
           {/* Pagina di test per le select */}
           <Route path='test' element={<TestSelectPage />} />
           {/* Future feature routes will be added here */}

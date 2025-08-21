@@ -21,6 +21,7 @@ fornitori_v2_bp = Blueprint('fornitori_v2', __name__)
 
 
 @fornitori_v2_bp.route('/fornitori', methods=['GET'])
+@jwt_required()
 def get_fornitori():
     """
     Get list of suppliers with pagination and filtering.

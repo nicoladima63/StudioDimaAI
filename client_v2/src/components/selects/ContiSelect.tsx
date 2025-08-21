@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useConti } from "../../store/conti.store";
+import { useConti } from "@/store/conti.store";
 
 interface ContiSelectProps {
   value: number | null;

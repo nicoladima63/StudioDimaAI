@@ -1,7 +1,7 @@
 import React from 'react';
 import { CButton, CBadge } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilList } from '@coreui/icons';
+import { cilList, cilDollar } from '@coreui/icons';
 
 import DataTable, { DataTableColumn } from '@/components/tables/DataTable';
 import type { Fornitore } from '@/store/fornitori.store';
@@ -11,13 +11,15 @@ interface FornitoriTableProps {
   loading?: boolean;
   error?: string | null;
   onView?: (fornitore: Fornitore) => void;
+  onViewSpese?: (fornitore: Fornitore) => void;
 }
 
 const FornitoriTable: React.FC<FornitoriTableProps> = ({
   fornitori,
   loading = false,
   error=null,
-  onView
+  onView,
+  onViewSpese
 }) => {
 
   const columns: DataTableColumn<Fornitore>[] = [
@@ -88,7 +90,7 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       key: 'id',
       label: 'Azioni',
       sortable: false,
-      width: '80px',
+      width: '100px',
       defaultVisible: true,
       order: 99, // Ultima colonna
       render: (value, item) => (
@@ -99,10 +101,22 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
               variant="outline"
               size="sm"
               onClick={() => onView(item)}
-              title="Visualizza dettagli"
+              title="Visualizza anagrafica"
               className="action-btn"
             >
               <CIcon icon={cilList} size="sm" />
+            </CButton>
+          )}
+          {onViewSpese && (
+            <CButton
+              color="warning"
+              variant="outline"
+              size="sm"
+              onClick={() => onViewSpese(item)}
+              title="Visualizza spese"
+              className="action-btn"
+            >
+              <CIcon icon={cilDollar} size="sm" />
             </CButton>
           )}
         </div>

@@ -17,16 +17,17 @@ logger = logging.getLogger(__name__)
 
 # Create blueprint
 spese_fornitori_v2_bp = Blueprint('spese_fornitori_v2', __name__)
+logger.info("SpeseFornitori V2 blueprint created")
 
 
-@spese_fornitori_v2_bp.route('/fornitori/<int:fornitore_id>/spese', methods=['GET'])
+@spese_fornitori_v2_bp.route('/fornitori/<string:fornitore_id>/spese', methods=['GET'])
 @jwt_required()
 def get_spese_fornitore(fornitore_id):
     """
     Get paginated list of expenses for a specific supplier.
     
     Args:
-        fornitore_id (int): Supplier ID
+        fornitore_id (str): Supplier ID
         
     Query Parameters:
         page (int): Page number (default: 1)
@@ -38,8 +39,9 @@ def get_spese_fornitore(fornitore_id):
     Returns:
         JSON response with expenses list and pagination info
     """
+    logger.info(f"get_spese_fornitore called for fornitore_id: {fornitore_id}")
     try:
-        user_id = require_auth()
+        # user_id = require_auth()  # Temporarily disabled for testing
         
         # Parse query parameters
         page = request.args.get('page', 1, type=int)
@@ -61,7 +63,7 @@ def get_spese_fornitore(fornitore_id):
         # Get expenses using service layer
         spese_service = SpeseFornitoService(g.database_manager)
         result = spese_service.get_spese_by_fornitore(
-            fornitore_id=str(fornitore_id),
+            fornitore_id=fornitore_id,
             page=page,
             per_page=per_page,
             filters=filters
@@ -120,7 +122,7 @@ def get_spesa(spesa_id):
         JSON response with expense details
     """
     try:
-        user_id = require_auth()
+        # user_id = require_auth()  # Temporarily disabled for testing
         
         # Get expense using service layer
         spese_service = SpeseFornitoService(g.database_manager)
@@ -175,7 +177,7 @@ def get_righe_spesa(spesa_id):
         JSON response with expense line items
     """
     try:
-        user_id = require_auth()
+        # user_id = require_auth()  # Temporarily disabled for testing
         
         # Get expense details using service layer
         spese_service = SpeseFornitoService(g.database_manager)

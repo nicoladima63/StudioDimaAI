@@ -68,22 +68,22 @@ class SpeseFornitoService(BaseService):
             spese_raw = []
             with dbf.Table(spese_path, codepage='cp1252') as table:
                 for record in table:
-                    if not record.db_spfocod:  # Skip records without supplier code
+                    if not getattr(record, 'db_spfocod', None):  # Skip records without supplier code
                         continue
                     
                     # Clean supplier code for comparison    
-                    supplier_code = clean_dbf_value(record.db_spfocod)
+                    supplier_code = clean_dbf_value(getattr(record, 'db_spfocod', None))
                     if str(supplier_code).strip() == str(fornitore_id).strip():
                         
-                        # Build spesa record
+                        # Build spesa record using correct field names
                         spesa = {
-                            'id': clean_dbf_value(record.db_code),
-                            'data_spesa': clean_dbf_value(record.db_spdata),
-                            'numero_documento': clean_dbf_value(record.db_spnumer),
-                            'descrizione': clean_dbf_value(record.db_spdescr),
-                            'costo_netto': self._safe_float(record.db_spcosto),
-                            'costo_iva': self._safe_float(record.db_spcoiva),
-                            'note': clean_dbf_value(record.db_note)
+                            'id': clean_dbf_value(getattr(record, 'db_code', None)),
+                            'data_spesa': clean_dbf_value(getattr(record, 'db_spdata', None)),
+                            'numero_documento': clean_dbf_value(getattr(record, 'db_spnumer', None)),
+                            'descrizione': clean_dbf_value(getattr(record, 'db_spdescr', None)),
+                            'costo_netto': self._safe_float(getattr(record, 'db_spcosto', None)),
+                            'costo_iva': self._safe_float(getattr(record, 'db_spcoiva', None)),
+                            'note': clean_dbf_value(getattr(record, 'db_note', None))
                         }
                         
                         # Calculate total
@@ -130,18 +130,18 @@ class SpeseFornitoService(BaseService):
             
             with dbf.Table(spese_path, codepage='cp1252') as table:
                 for record in table:
-                    if str(clean_dbf_value(record.db_code)).strip() == str(spesa_id).strip():
+                    if str(clean_dbf_value(getattr(record, 'db_code', None))).strip() == str(spesa_id).strip():
                         return {
-                            'id': clean_dbf_value(record.db_code),
-                            'codice_fornitore': clean_dbf_value(record.db_spfocod),
-                            'data_spesa': clean_dbf_value(record.db_spdata),
-                            'data_registrazione': clean_dbf_value(record.db_spdatar),
-                            'numero_documento': clean_dbf_value(record.db_spnumer),
-                            'descrizione': clean_dbf_value(record.db_spdescr),
-                            'costo_netto': self._safe_float(record.db_spcosto),
-                            'costo_iva': self._safe_float(record.db_spcoiva),
-                            'note': clean_dbf_value(record.db_note),
-                            'totale': (self._safe_float(record.db_spcosto) or 0) + (self._safe_float(record.db_spcoiva) or 0)
+                            'id': clean_dbf_value(getattr(record, 'db_code', None)),
+                            'codice_fornitore': clean_dbf_value(getattr(record, 'db_spfocod', None)),
+                            'data_spesa': clean_dbf_value(getattr(record, 'db_spdata', None)),
+                            'data_registrazione': clean_dbf_value(getattr(record, 'db_spdatar', None)),
+                            'numero_documento': clean_dbf_value(getattr(record, 'db_spnumer', None)),
+                            'descrizione': clean_dbf_value(getattr(record, 'db_spdescr', None)),
+                            'costo_netto': self._safe_float(getattr(record, 'db_spcosto', None)),
+                            'costo_iva': self._safe_float(getattr(record, 'db_spcoiva', None)),
+                            'note': clean_dbf_value(getattr(record, 'db_note', None)),
+                            'totale': (self._safe_float(getattr(record, 'db_spcosto', None)) or 0) + (self._safe_float(getattr(record, 'db_spcoiva', None)) or 0)
                         }
             
             return None
@@ -161,22 +161,22 @@ class SpeseFornitoService(BaseService):
             righe = []
             with dbf.Table(dettagli_path, codepage='cp1252') as table:
                 for record in table:
-                    if str(clean_dbf_value(record.db_vospcod)).strip() == str(spesa_id).strip():
+                    if str(clean_dbf_value(getattr(record, 'db_vospcod', None))).strip() == str(spesa_id).strip():
                         
-                        quantita = self._safe_float(record.db_voquant) or 0
-                        prezzo_unitario = self._safe_float(record.db_voprezz) or 0
-                        sconto = self._safe_float(record.db_voscont) or 0
+                        quantita = self._safe_float(getattr(record, 'db_voquant', None)) or 0
+                        prezzo_unitario = self._safe_float(getattr(record, 'db_voprezz', None)) or 0
+                        sconto = self._safe_float(getattr(record, 'db_voscont', None)) or 0
                         
                         # Calculate total per row
                         totale_riga = quantita * prezzo_unitario * (1 - sconto / 100)
                         
                         riga = {
-                            'codice_articolo': clean_dbf_value(record.db_vosocod),
-                            'descrizione': clean_dbf_value(record.db_vodescr),
+                            'codice_articolo': clean_dbf_value(getattr(record, 'db_vosocod', None)),
+                            'descrizione': clean_dbf_value(getattr(record, 'db_vodescr', None)),
                             'quantita': quantita,
                             'prezzo_unitario': prezzo_unitario,
                             'sconto': sconto,
-                            'aliquota_iva': self._safe_float(record.db_voiva) or 0,
+                            'aliquota_iva': self._safe_float(getattr(record, 'db_voiva', None)) or 0,
                             'totale_riga': totale_riga
                         }
                         

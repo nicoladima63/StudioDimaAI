@@ -339,20 +339,7 @@ class FornitoriService(BaseService):
                 if os.path.exists(fornitori_path):
                     return fornitori_path
             
-            # Fallback paths
-            fallback_paths = [
-                'windent/DATI/FORNITOR.DBF',
-                'server/windent/DATI/FORNITOR.DBF',
-                '../windent/DATI/FORNITOR.DBF',
-                os.path.join(os.path.dirname(__file__), '..', '..', 'windent', 'DATI', 'FORNITOR.DBF')
-            ]
-            
-            for path in fallback_paths:
-                if os.path.exists(path):
-                    self.logger.warning(f"Using fallback path for FORNITOR.DBF: {path}")
-                    return path
-            
-            raise FileNotFoundError(f"FORNITOR.DBF not found in any known location")
+            raise FileNotFoundError(f"FORNITOR.DBF not found in configured location: {base_path}")
             
         except Exception as e:
             raise DatabaseError(f"Could not locate fornitori DBF file: {str(e)}")
