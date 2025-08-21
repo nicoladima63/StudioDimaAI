@@ -10,6 +10,16 @@ export interface Fornitore {
   nome: string;
   codice?: string;
   partita_iva?: string;
+  telefono?: string;
+  email?: string;
+  indirizzo?: string;
+  citta?: string;
+  provincia?: string;
+  cap?: string;
+  codice_fiscale?: string;
+  sito_web?: string;
+  note?: string;
+  classificazione_status?: string;
   // Altri campi secondo necessità
 }
 

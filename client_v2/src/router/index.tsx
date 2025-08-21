@@ -12,6 +12,7 @@ const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
 const NotFoundPage = React.lazy(() => import('@/components/ui/NotFoundPage'))
 const TestSelectPage = React.lazy(() => import('@/features/test/TestSelectPage'))
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
+const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -42,6 +43,7 @@ const AppRouter: React.FC = () => {
           
           {/* Feature routes */}
           <Route path='materiali' element={<MaterialiPage />} />
+          <Route path='fornitori' element={<FornitoriPage />} />
           
           {/* Pagina di test per le select */}
           <Route path='test' element={<TestSelectPage />} />

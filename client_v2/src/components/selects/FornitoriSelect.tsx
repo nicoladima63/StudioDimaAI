@@ -7,6 +7,7 @@ interface FornitoriSelectProps {
   placeholder?: string;
   disabled?: boolean;
   searchable?: boolean;
+  clearable?: boolean;
   className?: string;
   filterByClassificazione?: {
     contoid?: number;
@@ -21,6 +22,7 @@ const FornitoriSelect: React.FC<FornitoriSelectProps> = ({
   placeholder = "-- Seleziona fornitore --",
   disabled = false,
   searchable = true,
+  clearable = false,
   className = "",
   filterByClassificazione
 }) => {
@@ -103,17 +105,49 @@ const FornitoriSelect: React.FC<FornitoriSelectProps> = ({
   // Versione con ricerca
   return (
     <div className={`position-relative ${className}`}>
-      <input
-        type="text"
-        className="form-control"
-        placeholder={selectedFornitore ? `${selectedFornitore.nome} ${selectedFornitore.codice ? `(${selectedFornitore.codice})` : ''}` : placeholder}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        onFocus={() => setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
-        disabled={disabled || isLoading}
-        aria-invalid={!!error}
-      />
+      <div className="position-relative">
+        <input
+          type="text"
+          className="form-control"
+          placeholder={selectedFornitore ? `${selectedFornitore.nome} ${selectedFornitore.codice ? `(${selectedFornitore.codice})` : ''}` : placeholder}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+          disabled={disabled || isLoading}
+          aria-invalid={!!error}
+          style={clearable && selectedFornitore ? { paddingRight: '40px' } : {}}
+        />
+        
+        {clearable && selectedFornitore && (
+          <button
+            type="button"
+            className="btn btn-link position-absolute top-50 translate-middle-y p-0"
+            style={{ 
+              right: '8px', 
+              zIndex: 10,
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              color: '#6c757d',
+              textDecoration: 'none'
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onChange(null);
+              setSearchTerm("");
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            title="Cancella selezione"
+          >
+            ✕
+          </button>
+        )}
+      </div>
       
       {isOpen && (
         <div className="position-absolute w-100" style={{ zIndex: 1050, top: '100%' }}>

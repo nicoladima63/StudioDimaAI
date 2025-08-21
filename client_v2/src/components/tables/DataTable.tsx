@@ -28,6 +28,7 @@ export interface DataTableColumn<T> {
   width?: string;
   defaultVisible?: boolean; // Colonna visibile di default
   order?: number; // Ordine di visualizzazione
+  align?: 'left' | 'center' | 'right' | 'auto'; // Allineamento colonna
 }
 
 interface DataTableProps<T> {
@@ -220,6 +221,47 @@ const DataTable = <T extends Record<string, any>>({
 
   // Filtra solo le colonne visibili
   const visibleColumnsData = orderedColumns.filter(col => visibleColumns.has(col.key));
+
+  // Funzione per determinare l'allineamento automatico intelligente
+  const getColumnAlignment = (column: DataTableColumn<T>, value: any): 'left' | 'center' | 'right' => {
+    // Se è specificato manualmente, usa quello (tranne 'auto')
+    if (column.align && column.align !== 'auto') {
+      return column.align;
+    }
+
+    // Allineamento automatico intelligente
+    const key = String(column.key).toLowerCase();
+    
+    // Date: centro
+    if (key.includes('data') || key.includes('date') || key.includes('timestamp')) {
+      return 'center';
+    }
+    
+    // Se il valore è un numero, allinea a destra
+    if (typeof value === 'number' && !isNaN(value)) {
+      return 'right';
+    }
+    
+    // Se il valore è una stringa che sembra un numero o valuta
+    if (typeof value === 'string') {
+      const stringValue = value.trim();
+      
+      // Controlla se è un numero (con possibili separatori)
+      if (/^-?[\d,.]+(€|\$|%)?$/.test(stringValue) || 
+          /^(€|\$)?\s?-?[\d,.]+(€|\$|%)?$/.test(stringValue)) {
+        return 'right';
+      }
+      
+      // Date in formato stringa
+      if (/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}$/.test(stringValue) ||
+          /^\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}$/.test(stringValue)) {
+        return 'center';
+      }
+    }
+    
+    // Default: testo a sinistra
+    return 'left';
+  };
 
   // Filtra i dati in base alla ricerca
   const filteredData = useMemo(() => {
@@ -419,6 +461,37 @@ const DataTable = <T extends Record<string, any>>({
   // Drag & Drop handlers
   const [draggedColumn, setDraggedColumn] = useState<number | null>(null);
   
+  // Stato per controllare l'apertura del dropdown colonne
+  const [columnSelectorOpen, setColumnSelectorOpen] = useState(false);
+  
+  // Chiudi dropdown quando si clicca fuori o si preme ESC
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      const columnSelector = target?.closest('.column-selector-wrapper');
+      
+      if (!columnSelector && columnSelectorOpen) {
+        setColumnSelectorOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && columnSelectorOpen) {
+        setColumnSelectorOpen(false);
+      }
+    };
+
+    if (columnSelectorOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [columnSelectorOpen]);
+  
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedColumn(index);
     e.dataTransfer.effectAllowed = 'move';
@@ -437,25 +510,45 @@ const DataTable = <T extends Record<string, any>>({
     setDraggedColumn(null);
   };
 
-  // Componente selettore colonne
+  // Componente selettore colonne custom
   const ColumnSelectorComponent = () => (
-    <CDropdown>
-      <CDropdownToggle size="sm" color="secondary" variant="outline" className="d-flex align-items-center gap-1">
+    <div className="position-relative column-selector-wrapper">
+      <button 
+        type="button"
+        className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+        onClick={() => setColumnSelectorOpen(!columnSelectorOpen)}
+        style={{ border: '1px solid #6c757d' }}
+      >
         <span>📋</span>
         <span>Colonne</span>
         <span className="badge bg-primary rounded-pill ms-1" style={{ fontSize: '0.7rem' }}>
           {visibleColumns.size}/{allColumns.length}
         </span>
-      </CDropdownToggle>
-      <CDropdownMenu 
-        style={{ 
-          maxHeight: '400px', 
-          overflowY: 'auto',
-          minWidth: '280px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          border: '1px solid rgba(0,0,0,0.1)'
-        }}
-      >
+        <span 
+          className="ms-1" 
+          style={{ 
+            fontSize: '0.7rem',
+            transform: columnSelectorOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease'
+          }}
+        >
+          ▼
+        </span>
+      </button>
+      
+      {columnSelectorOpen && (
+        <div 
+          className="position-absolute bg-white border rounded shadow-lg column-selector-dropdown"
+          style={{ 
+            top: '100%', 
+            right: '0',
+            zIndex: 1050,
+            maxHeight: '400px', 
+            overflowY: 'auto',
+            minWidth: '280px',
+            marginTop: '4px'
+          }}
+        >
         <div className="px-3 py-2 bg-light border-bottom">
           <div className="fw-bold text-dark mb-1" style={{ fontSize: '0.9rem' }}>
             Personalizza Colonne
@@ -482,11 +575,17 @@ const DataTable = <T extends Record<string, any>>({
             </div>
             <div className="py-1">
               {initialColumns.map(column => (
-                <div key={String(column.key)} className="px-3 py-1 hover-bg-light column-selector-checkbox">
+                <div 
+                  key={String(column.key)} 
+                  className="px-3 py-1 hover-bg-light column-selector-checkbox"
+                >
                   <CFormCheck
                     id={`col-${String(column.key)}`}
                     checked={visibleColumns.has(column.key)}
-                    onChange={() => toggleColumn(column.key)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleColumn(column.key);
+                    }}
                     label={column.label}
                     className="small text-dark"
                   />
@@ -504,11 +603,17 @@ const DataTable = <T extends Record<string, any>>({
             </div>
             <div className="py-1">
               {autoGeneratedColumns.map(column => (
-                <div key={String(column.key)} className="px-3 py-1 hover-bg-light column-selector-checkbox">
+                <div 
+                  key={String(column.key)} 
+                  className="px-3 py-1 hover-bg-light column-selector-checkbox"
+                >
                   <CFormCheck
                     id={`col-auto-${String(column.key)}`}
                     checked={visibleColumns.has(column.key)}
-                    onChange={() => toggleColumn(column.key)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleColumn(column.key);
+                    }}
                     label={column.label}
                     className="small text-dark"
                   />
@@ -523,7 +628,8 @@ const DataTable = <T extends Record<string, any>>({
           <div className="d-grid">
             <button
               className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center gap-2"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 // Reset alle impostazioni default
                 const defaultVisible = new Set<keyof T>();
                 allColumns.forEach(col => {
@@ -572,8 +678,9 @@ const DataTable = <T extends Record<string, any>>({
             </div>
           </>
         )}
-      </CDropdownMenu>
-    </CDropdown>
+        </div>
+      )}
+    </div>
   );
 
   // Icona ordinamento
@@ -594,12 +701,38 @@ const DataTable = <T extends Record<string, any>>({
         <div className="row align-items-center">
           <div className="col-md-4">
             {searchable && (
-              <CFormInput
-                type="text"
-                placeholder={searchPlaceholder}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <div className="position-relative">
+                <CFormInput
+                  type="text"
+                  placeholder={searchPlaceholder}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={searchTerm ? { paddingRight: '35px' } : {}}
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    className="btn btn-link position-absolute top-50 translate-middle-y p-0"
+                    style={{ 
+                      right: '8px', 
+                      zIndex: 10,
+                      width: '20px',
+                      height: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      color: '#6c757d',
+                      textDecoration: 'none'
+                    }}
+                    onClick={() => setSearchTerm('')}
+                    onMouseDown={(e) => e.preventDefault()}
+                    title="Cancella ricerca"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             )}
           </div>
           
@@ -638,6 +771,18 @@ const DataTable = <T extends Record<string, any>>({
                   const isActionsColumn = column.key === 'id' && column.label === 'Azioni';
                   const isLastColumn = index === visibleColumnsData.length - 1;
                   
+                  // Determina l'allineamento dell'header basato sulla colonna
+                  let headerAlign = 'left';
+                  if (isActionsColumn) {
+                    headerAlign = 'right';
+                  } else if (column.align && column.align !== 'auto') {
+                    headerAlign = column.align;
+                  } else {
+                    // Per l'header, usa il primo valore disponibile per determinare l'allineamento
+                    const firstValue = currentData.length > 0 ? currentData[0][column.key] : null;
+                    headerAlign = getColumnAlignment(column, firstValue);
+                  }
+                  
                   return (
                     <CTableHeaderCell
                       key={String(column.key)}
@@ -652,12 +797,16 @@ const DataTable = <T extends Record<string, any>>({
                         opacity: draggedColumn === index ? 0.5 : 1,
                         transition: 'opacity 0.2s ease',
                         position: 'relative',
-                        ...(isActionsColumn ? { textAlign: 'right' } : {})
+                        textAlign: headerAlign as any
                       }}
                       onClick={() => column.sortable && handleSort(column.key)}
-                      className={`${draggedColumn === index ? 'border border-primary' : ''} ${isActionsColumn ? 'text-end' : ''}`}
+                      className={`${draggedColumn === index ? 'border border-primary' : ''} text-${headerAlign === 'left' ? 'start' : headerAlign === 'right' ? 'end' : 'center'}`}
                     >
-                      <div className={`d-flex align-items-center ${isActionsColumn ? 'justify-content-end' : ''}`}>
+                      <div className={`d-flex align-items-center ${
+                        headerAlign === 'right' ? 'justify-content-end' : 
+                        headerAlign === 'center' ? 'justify-content-center' : 
+                        'justify-content-start'
+                      }`}>
                         {!isActionsColumn && (
                           <span className="me-1" style={{ cursor: 'grab' }}>⋮⋮</span>
                         )}
@@ -681,15 +830,25 @@ const DataTable = <T extends Record<string, any>>({
                   <CTableRow key={index}>
                     {visibleColumnsData.map((column) => {
                       const isActionsColumn = column.key === 'id' && column.label === 'Azioni';
+                      const cellValue = item[column.key];
+                      
+                      // Determina l'allineamento della cella
+                      let cellAlign = 'left';
+                      if (isActionsColumn) {
+                        cellAlign = 'right';
+                      } else {
+                        cellAlign = getColumnAlignment(column, cellValue);
+                      }
                       
                       return (
                         <CTableDataCell 
                           key={String(column.key)}
-                          className={isActionsColumn ? 'text-end' : ''}
+                          className={`text-${cellAlign === 'left' ? 'start' : cellAlign === 'right' ? 'end' : 'center'}`}
+                          style={{ textAlign: cellAlign as any }}
                         >
                           {column.render 
-                            ? column.render(item[column.key], item)
-                            : String(item[column.key] ?? '-')
+                            ? column.render(cellValue, item)
+                            : String(cellValue ?? '-')
                           }
                         </CTableDataCell>
                       );

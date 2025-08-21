@@ -1,12 +1,12 @@
 import React from 'react'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth.store'
+import AppSidebar from './AppSidebar'
 
-// Layout con hamburger menu
+// Layout CoreUI con AppSidebar moderna
 const Layout: React.FC = () => {
   const [sidebarVisible, setSidebarVisible] = React.useState(true)
   const navigate = useNavigate()
-  const location = useLocation()
   const { user, isAuthenticated, logout } = useAuthStore()
 
   const handleLogout = () => {
@@ -14,53 +14,20 @@ const Layout: React.FC = () => {
     navigate('/login')
   }
 
-  const isActivePage = (path: string) => location.pathname === path
-
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      {/* Sidebar Test */}
-      <div style={{ 
-        width: sidebarVisible ? '250px' : '0px', 
-        backgroundColor: '#2c3e50', 
-        color: 'white',
-        padding: sidebarVisible ? '20px' : '0px',
-        overflow: 'hidden',
-        transition: 'all 0.3s ease'
-      }}>
-        <h3>Studio Dima V2</h3>
-        <div style={{ marginTop: '20px' }}>
-          <div 
-            style={{ 
-              padding: '10px', 
-              borderBottom: '1px solid #34495e', 
-              cursor: 'pointer',
-              backgroundColor: isActivePage('/dashboard') ? '#34495e' : 'transparent'
-            }}
-            onClick={() => navigate('/dashboard')}
-          >
-            📊 Dashboard
-          </div>
-          <div style={{ padding: '10px', borderBottom: '1px solid #34495e', cursor: 'pointer' }}>👥 Fornitori</div>
-          <div 
-            style={{ 
-              padding: '10px', 
-              borderBottom: '1px solid #34495e', 
-              cursor: 'pointer',
-              backgroundColor: isActivePage('/materiali') ? '#34495e' : 'transparent'
-            }}
-            onClick={() => navigate('/materiali')}
-          >
-            📦 Materiali
-          </div>
-          <div style={{ padding: '10px', borderBottom: '1px solid #34495e', cursor: 'pointer' }}>💰 Spese</div>
-          <div style={{ padding: '10px', borderBottom: '1px solid #34495e', cursor: 'pointer' }}>📈 Statistiche</div>
-          <div style={{ padding: '10px', borderBottom: '1px solid #34495e', cursor: 'pointer' }}>⚙️ Impostazioni</div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
-        {/* Header con hamburger */}
+    <div>
+      <AppSidebar 
+        visible={sidebarVisible}
+        onVisibleChange={setSidebarVisible}
+      />
+      <div 
+        className="wrapper d-flex flex-column min-vh-100"
+        style={{
+          marginLeft: sidebarVisible ? '256px' : '0',
+          transition: 'margin-left 0.15s ease-in-out'
+        }}
+      >
+        {/* Header con auth */}
         <header style={{ 
           padding: '15px 20px', 
           borderBottom: '1px solid #dee2e6',
@@ -103,19 +70,26 @@ const Layout: React.FC = () => {
                 }}>
                   <span style={{ 
                     background: '#e9ecef', 
-                    padding: '4px 8px', 
+                    padding: '6px 8px', 
                     borderRadius: '4px',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: '32px',
+                    fontSize: '12px'
                   }}>
                     👤 {user.name || user.username}
                   </span>
                   <span style={{ 
                     background: user.role === 'admin' ? '#28a745' : '#007bff', 
                     color: 'white',
-                    padding: '2px 6px', 
-                    borderRadius: '3px',
+                    padding: '6px 8px', 
+                    borderRadius: '4px',
                     fontSize: '12px',
-                    textTransform: 'uppercase'
+                    fontWeight: '500',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: '32px'
                   }}>
                     {user.role}
                   </span>
@@ -129,8 +103,11 @@ const Layout: React.FC = () => {
                     padding: '6px 12px',
                     borderRadius: '4px',
                     cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500'
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: '32px'
                   }}
                   title="Logout"
                 >
@@ -150,9 +127,11 @@ const Layout: React.FC = () => {
         </header>
         
         {/* Content area */}
-        <main style={{ padding: '20px' }}>
-          <Outlet />
-        </main>
+        <div className="body flex-grow-1">
+          <main className="container-fluid p-4">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   )

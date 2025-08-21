@@ -29,6 +29,15 @@
   }
 }
 
+/* Custom column selector styles */
+.data-table .column-selector-dropdown {
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+.data-table .column-selector-button:focus {
+  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
 .data-table .form-check-input {
   margin-top: 0.125rem;
 }
