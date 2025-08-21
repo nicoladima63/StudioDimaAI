@@ -9,7 +9,7 @@ import type { Fornitore } from '@/store/fornitori.store';
 interface FornitoriTableProps {
   fornitori: Fornitore[];
   loading?: boolean;
-  error?: string;
+  error?: string | null;
   onEdit?: (fornitore: Fornitore) => void;
   onDelete?: (fornitore: Fornitore) => void;
   onView?: (fornitore: Fornitore) => void;
@@ -18,12 +18,12 @@ interface FornitoriTableProps {
 const FornitoriTable: React.FC<FornitoriTableProps> = ({
   fornitori,
   loading = false,
-  error,
+  error=null,
   onEdit,
   onDelete,
   onView
 }) => {
-  // Configurazione colonne della tabella
+
   const columns: DataTableColumn<Fornitore>[] = [
     {
       key: 'nome',
@@ -201,25 +201,19 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
     }
   ];
 
-  // Gestione errori
-  if (error) {
-    return (
-      <div className="alert alert-danger" role="alert">
-        <strong>Errore nel caricamento:</strong> {error}
-      </div>
-    );
-  }
-
   return (
     <DataTable
       data={fornitori}
       columns={columns}
       loading={loading}
+      error={error}
       searchable={true}
-      paginated={true}
+      searchPlaceholder="Cerca per nome, codice, fornitore..."
       pageSize={20}
+      pageSizeOptions={[10, 20, 50, 100]}
+      className="materiali-table"
       tableId="fornitori-table"
-      className="fornitori-table"
+      autoDetectColumns={true}
     />
   );
 };
