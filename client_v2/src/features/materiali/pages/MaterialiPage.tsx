@@ -54,7 +54,6 @@ const MaterialiPage: React.FC = () => {
             <CButton color='primary' onClick={() => load(true)} disabled={isLoading}>
               {isLoading ? 'Caricamento...' : 'Aggiorna'}
             </CButton>
-            <CButton color='success'>Aggiungi Materiale</CButton>
           </div>
         }
       />

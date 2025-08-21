@@ -5,6 +5,15 @@ import apiClient from "../services/api/client";
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minuti
 const MAX_RETRIES = 3;
 
+interface ClassificazioneFornitore {
+  contoid: number | null;
+  brancaid: number | null;
+  sottocontoid: number | null;
+  tipo_di_costo: number | null;
+  is_classificato: boolean;
+  is_completo: boolean;
+}
+
 export interface Fornitore {
   id: string;
   nome: string;
@@ -19,8 +28,9 @@ export interface Fornitore {
   codice_fiscale?: string;
   sito_web?: string;
   note?: string;
+  classificazione?: ClassificazioneFornitore;
+  // Campi legacy per compatibilità
   classificazione_status?: string;
-  // Altri campi secondo necessità
 }
 
 interface FornitoriState {

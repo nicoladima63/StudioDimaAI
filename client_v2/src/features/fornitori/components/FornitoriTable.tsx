@@ -1,7 +1,7 @@
 import React from 'react';
 import { CButton, CBadge } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilList, cilPencil, cilTrash } from '@coreui/icons';
+import { cilList } from '@coreui/icons';
 
 import DataTable, { DataTableColumn } from '@/components/tables/DataTable';
 import type { Fornitore } from '@/store/fornitori.store';
@@ -10,8 +10,6 @@ interface FornitoriTableProps {
   fornitori: Fornitore[];
   loading?: boolean;
   error?: string | null;
-  onEdit?: (fornitore: Fornitore) => void;
-  onDelete?: (fornitore: Fornitore) => void;
   onView?: (fornitore: Fornitore) => void;
 }
 
@@ -19,8 +17,6 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
   fornitori,
   loading = false,
   error=null,
-  onEdit,
-  onDelete,
   onView
 }) => {
 
@@ -73,13 +69,17 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       defaultVisible: true,
       order: 6,
       render: (value, item) => {
-        // Determina lo stato della classificazione
-        if (item.contoid && item.brancaid && item.sottocontoid) {
-          return <CBadge color="success">Completo</CBadge>;
-        } else if (item.contoid) {
-          return <CBadge color="warning">Parziale</CBadge>;
-        } else {
+        // Determina lo stato della classificazione dal campo classificazione
+        const classificazione = item.classificazione;
+        
+        if (!classificazione || !classificazione.is_classificato) {
           return <CBadge color="danger">Non classificato</CBadge>;
+        }
+        
+        if (classificazione.is_completo) {
+          return <CBadge color="success">Completo</CBadge>;
+        } else {
+          return <CBadge color="warning">Parziale</CBadge>;
         }
       }
     },
@@ -88,7 +88,7 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       key: 'id',
       label: 'Azioni',
       sortable: false,
-      width: '180px',
+      width: '80px',
       defaultVisible: true,
       order: 99, // Ultima colonna
       render: (value, item) => (
@@ -103,30 +103,6 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
               className="action-btn"
             >
               <CIcon icon={cilList} size="sm" />
-            </CButton>
-          )}
-          {onEdit && (
-            <CButton
-              color="primary"
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(item)}
-              title="Modifica fornitore"
-              className="action-btn"
-            >
-              <CIcon icon={cilPencil} size="sm" />
-            </CButton>
-          )}
-          {onDelete && (
-            <CButton
-              color="danger"
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(item)}
-              title="Elimina fornitore"
-              className="action-btn"
-            >
-              <CIcon icon={cilTrash} size="sm" />
             </CButton>
           )}
         </div>
@@ -208,7 +184,7 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       loading={loading}
       error={error}
       searchable={true}
-      searchPlaceholder="Cerca per nome, codice, fornitore..."
+      searchPlaceholder="Cerca per nome, codice..."
       pageSize={20}
       pageSizeOptions={[10, 20, 50, 100]}
       className="materiali-table"
