@@ -38,7 +38,7 @@ const ContiSelect: React.FC<ContiSelectProps> = ({
     if (!isLoading && !error && conti.length === 1 && autoSelectIfSingle && !value) {
       onChange(conti[0].id);
     }
-  }, [conti, isLoading, error, autoSelectIfSingle, onChange, value]);
+  }, [conti, isLoading, error, autoSelectIfSingle, value]); // Rimosso onChange dalle dipendenze
 
   // Reset search quando chiude
   useEffect(() => {

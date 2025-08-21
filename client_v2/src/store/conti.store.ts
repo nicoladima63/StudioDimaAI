@@ -69,7 +69,7 @@ export const useContiStore = create<ContiState>()(
         let retry = 0;
         while (retry < MAX_RETRIES) {
           try {
-            const res = await apiClient.get("/api/struttura-conti/conti");
+            const res = await apiClient.get("/conti");
             if (!res.data.success) throw new Error(res.data.error || "Errore caricamento conti");
             
             // Crea mappa id→nome per i conti
@@ -110,7 +110,7 @@ export const useContiStore = create<ContiState>()(
         set({ isLoading: true, errors: { ...state.errors, branche: null } });
         
         try {
-          const res = await apiClient.get(`/api/struttura-conti/branche?conto_id=${contoId}`);
+          const res = await apiClient.get(`/branche?conto_id=${contoId}`);
           if (!res.data.success) throw new Error("Errore caricamento branche");
           
           // Aggiorna mappa branche
@@ -149,7 +149,7 @@ export const useContiStore = create<ContiState>()(
         set({ isLoading: true, errors: { ...state.errors, sottoconti: null } });
         
         try {
-          const res = await apiClient.get(`/api/struttura-conti/sottoconti?branca_id=${brancaId}`);
+          const res = await apiClient.get(`/sottoconti?branca_id=${brancaId}`);
           if (!res.data.success) throw new Error("Errore caricamento sottoconti");
           
           // Aggiorna mappa sottoconti

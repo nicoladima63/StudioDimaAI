@@ -40,7 +40,7 @@ const BrancheSelect: React.FC<BrancheSelectProps> = ({
     if (value && branche.length > 0 && !branche.some(b => b.id === value)) {
       onChange(null);
     }
-  }, [contoId, branche, value, onChange]);
+  }, [contoId, branche, value]); // Rimosso onChange dalle dipendenze
 
   // Auto-select se c'è una sola branca
   useEffect(() => {
@@ -54,7 +54,7 @@ const BrancheSelect: React.FC<BrancheSelectProps> = ({
     ) {
       onChange(branche[0].id);
     }
-  }, [branche, isLoading, error, autoSelectIfSingle, contoId, onChange, value]);
+  }, [branche, isLoading, error, autoSelectIfSingle, contoId, value]); // Rimosso onChange dalle dipendenze
 
   // Reset search quando chiude
   useEffect(() => {

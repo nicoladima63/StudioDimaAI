@@ -10,6 +10,8 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute'
 const Dashboard = React.lazy(() => import('@/features/dashboard/pages/Dashboard'))
 const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
 const NotFoundPage = React.lazy(() => import('@/components/ui/NotFoundPage'))
+const TestSelectPage = React.lazy(() => import('@/features/test/TestSelectPage'))
+const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -38,6 +40,11 @@ const AppRouter: React.FC = () => {
           <Route index element={<Navigate to='/dashboard' replace />} />
           <Route path='dashboard' element={<Dashboard />} />
           
+          {/* Feature routes */}
+          <Route path='materiali' element={<MaterialiPage />} />
+          
+          {/* Pagina di test per le select */}
+          <Route path='test' element={<TestSelectPage />} />
           {/* Future feature routes will be added here */}
           {/* 
           <Route path='fornitori/*' element={<FornitoriRoutes />} />

@@ -24,15 +24,15 @@ const FornitoriSelect: React.FC<FornitoriSelectProps> = ({
   className = "",
   filterByClassificazione
 }) => {
-  const { fornitori, isLoading, error } = useFornitori();
+  const { fornitori, isLoading, error, loadAll } = useFornitori();
   const store = useFornitoriStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // Carica fornitori al mount
+  // Carica TUTTI i fornitori al mount (per select serve tutto)
   useEffect(() => {
-    store.loadFornitori();
-  }, [store]);
+    loadAll();
+  }, []); // Solo al mount, store non deve essere nelle dipendenze
 
   // Filtra fornitori in base al termine di ricerca
   const filteredFornitori = useMemo(() => {

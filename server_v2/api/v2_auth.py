@@ -15,8 +15,8 @@ from core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
-# Create blueprint con url_prefix per auth endpoints
-auth_v2_bp = Blueprint('auth_v2', __name__, url_prefix='/auth')
+# Create blueprint (url_prefix will be added at registration)
+auth_v2_bp = Blueprint('auth_v2', __name__)
 
 # Test users for demo (in production this would be from database)
 TEST_USERS = {
@@ -41,7 +41,7 @@ TEST_USERS = {
 }
 
 
-@auth_v2_bp.route('/login', methods=['POST'])
+@auth_v2_bp.route('/auth/login', methods=['POST'])
 def login():
     """
     Login endpoint to generate JWT tokens.
@@ -126,7 +126,7 @@ def login():
         ), 500
 
 
-@auth_v2_bp.route('/refresh', methods=['POST'])
+@auth_v2_bp.route('/auth/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
     """
@@ -163,7 +163,7 @@ def refresh():
         ), 500
 
 
-@auth_v2_bp.route('/me', methods=['GET'])
+@auth_v2_bp.route('/auth/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
     """
@@ -191,7 +191,7 @@ def get_current_user():
         ), 500
 
 
-@auth_v2_bp.route('/logout', methods=['POST'])
+@auth_v2_bp.route('/auth/logout', methods=['POST'])
 @jwt_required()
 def logout():
     """
@@ -218,7 +218,7 @@ def logout():
         ), 500
 
 
-@auth_v2_bp.route('/test-users', methods=['GET'])
+@auth_v2_bp.route('/auth/test-users', methods=['GET'])
 def get_test_users():
     """
     Get list of test users for development/testing.

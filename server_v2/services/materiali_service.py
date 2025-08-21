@@ -60,11 +60,9 @@ class MaterialiService(BaseService):
             has_next = page < pages
             has_prev = page > 1
             
-            # Get materials for current page
+            # Get materials for current page - select all columns for auto-detect
             query = f"""
-                SELECT id, nome, codicearticolo, fornitoreid, fornitorenome,
-                       contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome,
-                       confidence, confermato, categoria_contabile, costo_unitario
+                SELECT *
                 FROM materiali{where_clause}
                 ORDER BY nome
                 LIMIT ? OFFSET ?
@@ -96,9 +94,7 @@ class MaterialiService(BaseService):
         """
         try:
             query = """
-                SELECT id, nome, codicearticolo, fornitoreid, fornitorenome,
-                       contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome,
-                       confidence, confermato, categoria_contabile, costo_unitario
+                SELECT *
                 FROM materiali
                 WHERE id = ?
             """
@@ -198,7 +194,7 @@ class MaterialiService(BaseService):
         """
         try:
             search_query = """
-                SELECT id, nome, codicearticolo, fornitoreid, fornitorenome, categoria_contabile, costo_unitario
+                SELECT *
                 FROM materiali
                 WHERE nome LIKE ? OR codicearticolo LIKE ? OR fornitorenome LIKE ?
                 ORDER BY nome

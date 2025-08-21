@@ -40,7 +40,7 @@ const SottocontiSelect: React.FC<SottocontiSelectProps> = ({
     if (value && sottoconti.length > 0 && !sottoconti.some(s => s.id === value)) {
       onChange(null);
     }
-  }, [brancaId, sottoconti, value, onChange]);
+  }, [brancaId, sottoconti, value]); // Rimosso onChange dalle dipendenze
 
   // Auto-select se c'è un solo sottoconto
   useEffect(() => {
@@ -54,7 +54,7 @@ const SottocontiSelect: React.FC<SottocontiSelectProps> = ({
     ) {
       onChange(sottoconti[0].id);
     }
-  }, [sottoconti, isLoading, error, autoSelectIfSingle, brancaId, onChange, value]);
+  }, [sottoconti, isLoading, error, autoSelectIfSingle, brancaId, value]); // Rimosso onChange dalle dipendenze
 
   // Reset search quando chiude
   useEffect(() => {

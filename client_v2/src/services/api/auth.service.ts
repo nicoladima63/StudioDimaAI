@@ -26,21 +26,21 @@ class AuthService extends BaseService {
    * Login utente
    */
   async apiLogin(credentials: LoginCredentials): Promise<ApiResponse<LoginResponse>> {
-    return this.apiPost<LoginResponse, LoginCredentials>('/login', credentials)
+    return this.apiPost<LoginResponse, LoginCredentials>('/auth/login', credentials)
   }
 
   /**
    * Logout utente
    */
   async apiLogout(): Promise<ApiResponse<null>> {
-    return this.apiPost<null>('/logout')
+    return this.apiPost<null>('/auth/logout')
   }
 
   /**
    * Refresh token
    */
   async apiRefreshToken(refreshToken: string): Promise<ApiResponse<RefreshTokenResponse>> {
-    return this.apiPost<RefreshTokenResponse, { refresh_token: string }>('/refresh', {
+    return this.apiPost<RefreshTokenResponse, { refresh_token: string }>('/auth/refresh', {
       refresh_token: refreshToken,
     })
   }
@@ -49,7 +49,7 @@ class AuthService extends BaseService {
    * Verifica token corrente
    */
   async apiVerifyToken(): Promise<ApiResponse<User>> {
-    return this.apiGet<User>('/verify')
+    return this.apiGet<User>('/auth/me')
   }
 
   /**

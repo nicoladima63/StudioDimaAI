@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useMaterialiSearch, useMaterialiStore, type MaterialeIntelligente } from "../../store/materiali.store";
+import { useMaterialiByFornitore, type Materiale } from "../../store/materiali.store";
 
 interface MaterialiSelectProps {
   fornitoreId?: string;
   value: string | null;
-  onChange: (materiale: MaterialeIntelligente | null) => void;
+  onChange: (materiale: Materiale | null) => void;
   placeholder?: string;
   disabled?: boolean;
   searchable?: boolean;
   className?: string;
-  showClassified?: boolean;
   filterByClassificazione?: {
     contoid?: number;
     brancaid?: number;
@@ -25,37 +24,45 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
   disabled = false,
   searchable = true,
   className = "",
-  showClassified = false,
   filterByClassificazione
 }) => {
-  const { materiali, isLoading, error, search, applyFilters } = useMaterialiSearch();
-  const store = useMaterialiStore();
+  const { materiali, isLoading, error, load } = useMaterialiByFornitore(fornitoreId);
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // Carica materiali quando cambia il fornitore
+  // Carica materiali all'inizializzazione
   useEffect(() => {
-    if (fornitoreId) {
-      store.loadMaterialiByFornitore(fornitoreId, { show_classified: showClassified });
-    }
-  }, [fornitoreId, showClassified, store]);
+    load();
+  }, []); // Carica una volta sola all'avvio
 
-  // Applica filtri quando cambiano
-  useEffect(() => {
-    if (filterByClassificazione) {
-      applyFilters(filterByClassificazione);
-    }
-  }, [filterByClassificazione, applyFilters]);
-
-  // Filtra materiali in base alla ricerca locale
+  // Filtra materiali in base alla ricerca locale e classificazione
   const filteredMateriali = useMemo(() => {
-    if (!searchTerm.trim()) return materiali;
+    let filtered = Array.isArray(materiali) ? materiali : [];
     
-    return materiali.filter(materiale =>
-      materiale.descrizione.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      materiale.codice_articolo?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [materiali, searchTerm]);
+    // Applica filtro di classificazione se specificato
+    if (filterByClassificazione) {
+      if (filterByClassificazione.contoid) {
+        filtered = filtered.filter(m => m.contoid === filterByClassificazione.contoid);
+      }
+      if (filterByClassificazione.brancaid) {
+        filtered = filtered.filter(m => m.brancaid === filterByClassificazione.brancaid);
+      }
+      if (filterByClassificazione.sottocontoid) {
+        filtered = filtered.filter(m => m.sottocontoid === filterByClassificazione.sottocontoid);
+      }
+    }
+    
+    // Applica filtro di ricerca se presente
+    if (searchTerm.trim()) {
+      const searchTermLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(materiale =>
+        materiale.nome.toLowerCase().includes(searchTermLower) ||
+        materiale.codicearticolo?.toLowerCase().includes(searchTermLower)
+      );
+    }
+    
+    return filtered;
+  }, [materiali, searchTerm, filterByClassificazione]);
 
   // Reset search quando chiude
   useEffect(() => {
@@ -65,7 +72,10 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
   }, [isOpen]);
 
   // Trova il materiale selezionato
-  const selectedMateriale = value ? materiali.find(m => m.codice_articolo === value) : null;
+  const selectedMateriale = value ? materiali.find(m => 
+    m.id.toString() === value ||
+    m.codicearticolo === value
+  ) : null;
 
   // Funzione per ottenere il badge di confidence
   const getConfidenceBadge = (confidence: number) => {
@@ -80,8 +90,11 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
       <select
         value={value ?? ""}
         onChange={(e) => {
-          const selectedCodice = e.target.value;
-          const materiale = selectedCodice ? materiali.find(m => m.codice_articolo === selectedCodice) : null;
+          const selectedValue = e.target.value;
+          const materiale = selectedValue ? materiali.find(m => 
+            m.id.toString() === selectedValue ||
+            m.codicearticolo === selectedValue
+          ) : null;
           onChange(materiale || null);
         }}
         disabled={disabled || isLoading || !fornitoreId}
@@ -101,8 +114,8 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
         )}
         
         {filteredMateriali.map((materiale) => (
-          <option key={materiale.codice_articolo} value={materiale.codice_articolo}>
-            {materiale.descrizione} ({materiale.codice_articolo})
+          <option key={materiale.id} value={materiale.id.toString()}>
+            {materiale.nome} {materiale.codicearticolo ? `(${materiale.codicearticolo})` : ''}
           </option>
         ))}
       </select>
@@ -115,7 +128,9 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
       <input
         type="text"
         className="form-control"
-        placeholder={selectedMateriale ? `${selectedMateriale.descrizione} (${selectedMateriale.codice_articolo})` : placeholder}
+        placeholder={selectedMateriale ? 
+          `${selectedMateriale.nome} ${selectedMateriale.codicearticolo ? `(${selectedMateriale.codicearticolo})` : ''}` : 
+          placeholder}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         onFocus={() => setIsOpen(true)}
@@ -153,8 +168,8 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
             
             {filteredMateriali.map((materiale) => (
               <div
-                key={materiale.codice_articolo}
-                className={`px-3 py-2 cursor-pointer hover-bg-light ${value === materiale.codice_articolo ? 'bg-primary text-white' : ''}`}
+                key={materiale.id}
+                className={`px-3 py-2 cursor-pointer hover-bg-light ${value === materiale.id.toString() ? 'bg-primary text-white' : ''}`}
                 onClick={() => {
                   onChange(materiale);
                   setIsOpen(false);
@@ -165,21 +180,26 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
               >
                 <div className="d-flex justify-content-between align-items-start">
                   <div className="flex-grow-1">
-                    <div className="fw-bold">{materiale.descrizione}</div>
-                    <div className="small text-muted">
-                      Codice: {materiale.codice_articolo}
-                    </div>
-                    <div className="small text-muted">
-                      Prezzo: €{materiale.prezzo_unitario?.toFixed(2)} | 
-                      Qty: {materiale.quantita} | 
-                      Tot: €{materiale.totale_riga?.toFixed(2)}
-                    </div>
-                    {materiale.classificazione_suggerita && (
-                      <div className="small">
-                        <span className="text-muted">Classificazione suggerita: </span>
-                        {getConfidenceBadge(materiale.classificazione_suggerita.confidence)}
+                    <div className="fw-bold">{materiale.nome}</div>
+                    {materiale.codicearticolo && (
+                      <div className="small text-muted">
+                        Codice: {materiale.codicearticolo}
                       </div>
                     )}
+                    <div className="small text-muted">
+                      Prezzo: €{materiale.costo_unitario.toFixed(2)}
+                    </div>
+                    {materiale.confidence > 0 && (
+                      <div className="small">
+                        <span className="text-muted">Classificazione: </span>
+                        {getConfidenceBadge(materiale.confidence)}
+                      </div>
+                    )}
+                    <div className="small text-muted">
+                      {materiale.contonome && `${materiale.contonome}`}
+                      {materiale.brancanome && ` > ${materiale.brancanome}`}
+                      {materiale.sottocontonome && ` > ${materiale.sottocontonome}`}
+                    </div>
                   </div>
                 </div>
               </div>
