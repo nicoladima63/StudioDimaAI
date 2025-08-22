@@ -137,6 +137,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_statistiche import statistiche_v2_bp
     from api.v2_classificazioni import classificazioni_v2_bp
     from api.v2_conti import conti_v2_bp
+    from api.v2_ricetta import ricetta_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -146,13 +147,14 @@ def register_blueprints(app: Flask) -> None:
         spese_fornitori_v2_bp,
         statistiche_v2_bp,
         classificazioni_v2_bp,
-        conti_v2_bp
+        conti_v2_bp,
+        ricetta_bp
     ]
     
     for blueprint in blueprints:
         app.register_blueprint(blueprint, url_prefix=app.config['API_PREFIX'])
     
-    logging.getLogger(__name__).info(f"Registered {len(blueprints)} API blueprints")
+    #logging.getLogger(__name__).info(f"Registered {len(blueprints)} API blueprints")
 
 
 def register_error_handlers(app: Flask) -> None:

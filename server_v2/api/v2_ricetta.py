@@ -6,15 +6,14 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 import logging
 from typing import Dict, Any, Optional
-from ..services.ricetta_service import ricetta_service
-from ..utils.ricetta_utils import ricetta_data_manager
-from ..core.exceptions import RicettaServiceError, ValidationError
+from services.ricetta_service import ricetta_service
+from utils.ricetta_utils import ricetta_data_manager
 
 logger = logging.getLogger(__name__)
+print("DEBUG: v2_ricetta.py caricato")
+ricetta_bp = Blueprint("ricetta_bp", __name__)
 
-ricetta_bp = Blueprint("ricetta_v2", __name__, url_prefix="/api/v2/ricetta")
-
-@ricetta_bp.route("/health", methods=['GET'])
+@ricetta_bp.route("/ricetta/health", methods=['GET'])
 def health_check():
     """Health check per il servizio ricetta"""
     try:
@@ -34,7 +33,7 @@ def health_check():
             'message': str(e)
         }), 500
 
-@ricetta_bp.route("/test-connection", methods=['GET'])
+@ricetta_bp.route("/ricetta/test-connection", methods=['GET'])
 @jwt_required()
 def test_connection():
     """Testa la connessione al Sistema Tessera Sanitaria"""
@@ -56,7 +55,7 @@ def test_connection():
             'message': f'Errore durante il test: {e}'
         }), 500
 
-@ricetta_bp.route("/diagnosi", methods=['GET'])
+@ricetta_bp.route("/ricetta/diagnosi", methods=['GET'])
 @jwt_required()
 def search_diagnosi():
     """Ricerca diagnosi ICD9"""
@@ -94,7 +93,7 @@ def search_diagnosi():
             'message': f'Errore durante la ricerca: {e}'
         }), 500
 
-@ricetta_bp.route("/farmaci", methods=['GET'])
+@ricetta_bp.route("/ricetta/farmaci", methods=['GET'])
 @jwt_required()
 def search_farmaci():
     """Ricerca farmaci ATC"""
@@ -132,7 +131,7 @@ def search_farmaci():
             'message': f'Errore durante la ricerca: {e}'
         }), 500
 
-@ricetta_bp.route("/farmaci/per-diagnosi/<codice_diagnosi>", methods=['GET'])
+@ricetta_bp.route("/ricetta/farmaci/per-diagnosi/<codice_diagnosi>", methods=['GET'])
 @jwt_required()
 def get_farmaci_per_diagnosi(codice_diagnosi: str):
     """Ottiene farmaci suggeriti per una diagnosi"""
@@ -169,7 +168,7 @@ def get_farmaci_per_diagnosi(codice_diagnosi: str):
             'message': f'Errore durante la ricerca: {e}'
         }), 500
 
-@ricetta_bp.route("/protocolli", methods=['GET'])
+@ricetta_bp.route("/ricetta/protocolli", methods=['GET'])
 @jwt_required()
 def get_protocolli():
     """Ottiene protocolli terapeutici"""
@@ -190,7 +189,7 @@ def get_protocolli():
             'message': f'Errore caricamento protocolli: {e}'
         }), 500
 
-@ricetta_bp.route("/protocolli/<protocollo_id>", methods=['GET'])
+@ricetta_bp.route("/ricetta/protocolli/<protocollo_id>", methods=['GET'])
 @jwt_required()
 def get_protocollo_by_id(protocollo_id: str):
     """Ottiene protocollo terapeutico per ID"""
@@ -217,7 +216,7 @@ def get_protocollo_by_id(protocollo_id: str):
             'message': f'Errore caricamento protocollo: {e}'
         }), 500
 
-@ricetta_bp.route("/suggestions/posologie", methods=['GET'])
+@ricetta_bp.route("/ricetta/suggestions/posologie", methods=['GET'])
 @jwt_required()
 def get_posologie_suggestions():
     """Ottiene suggerimenti posologie"""
@@ -238,7 +237,7 @@ def get_posologie_suggestions():
             'message': f'Errore caricamento posologie: {e}'
         }), 500
 
-@ricetta_bp.route("/suggestions/durate", methods=['GET'])
+@ricetta_bp.route("/ricetta/suggestions/durate", methods=['GET'])
 @jwt_required()
 def get_durate_suggestions():
     """Ottiene suggerimenti durate terapia"""
@@ -259,7 +258,7 @@ def get_durate_suggestions():
             'message': f'Errore caricamento durate: {e}'
         }), 500
 
-@ricetta_bp.route("/suggestions/note", methods=['GET'])
+@ricetta_bp.route("/ricetta/suggestions/note", methods=['GET'])
 @jwt_required()
 def get_note_suggestions():
     """Ottiene suggerimenti note"""
@@ -280,10 +279,10 @@ def get_note_suggestions():
             'message': f'Errore caricamento note: {e}'
         }), 500
 
-@ricetta_bp.route("/invio", methods=['POST'])
-@jwt_required()
+@ricetta_bp.route("/ricetta/invio", methods=['POST'])
 def invia_ricetta():
     """Invia ricetta elettronica al Sistema TS"""
+    logger.info("=== DEBUG: Richiesta invio ricetta ricevuta ===")
     try:
         # Validazione request
         if not request.is_json:
@@ -292,40 +291,84 @@ def invia_ricetta():
                 'error': 'INVALID_CONTENT_TYPE',
                 'message': 'Content-Type deve essere application/json'
             }), 400
-        
-        dati_ricetta = request.get_json()
-        if not dati_ricetta:
+        dati = request.get_json()
+        if not dati:
             return jsonify({
                 'success': False,
                 'error': 'EMPTY_REQUEST',
                 'message': 'Dati ricetta non presenti'
             }), 400
+
+        # --- MAPPING COME V1: payload -> formato interno ---
+        # V1 mappa payload a formato flat con cf_assistito
+        dati_ricetta = {
+            'cf_assistito': dati['paziente']['codiceFiscale'],
+            'nome_assistito': dati['paziente']['nome'],
+            'cognome_assistito': dati['paziente']['cognome'],
+            'codice_diagnosi': dati['diagnosi']['codice'],
+            'descrizione_diagnosi': dati['diagnosi']['descrizione'],
+            'codice_farmaco': dati['farmaco']['codice'],
+            'denominazione_farmaco': dati['farmaco']['descrizione'],
+            'principio_attivo': dati['farmaco']['principio_attivo'],
+            'posologia': dati['posologia'],
+            'durata': dati['durata'],
+            'note': dati.get('note', ''),
+            'num_iscrizione': dati.get('medico', {}).get('iscrizione', '591')
+        }
+
+        # Validazione base come V1
+        required_fields = ['cf_assistito', 'codice_diagnosi', 'descrizione_diagnosi', 
+                          'codice_farmaco', 'denominazione_farmaco', 'principio_attivo',
+                          'posologia', 'durata']
         
-        # Validazione dati
+        for field in required_fields:
+            if field not in dati_ricetta:
+                return jsonify({
+                    'success': False,
+                    'error': f'Campo obbligatorio mancante: {field}'
+                }), 400
+        
+        logger.info(f"Invio ricetta per CF: {dati_ricetta['cf_assistito']}")
+        
+        # === USA IL SERVIZIO V1 DIRETTAMENTE ===
+        # Importa e usa il servizio V1 che funziona
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), '../../server'))
+        
         try:
-            _validate_ricetta_request(dati_ricetta)
-        except ValidationError as e:
+            from server.app.ricetta_elettronica.ricetta_service import ricetta_service as v1_ricetta_service
+            
+            # Usa il servizio V1 direttamente
+            result = v1_ricetta_service.invia_ricetta(dati_ricetta)
+            
+            if result['success']:
+                return jsonify({
+                    'success': True,
+                    'message': 'Ricetta inviata con successo al Sistema TS',
+                    'data': result
+                }), 200
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Errore invio ricetta al Sistema TS',
+                    'details': result
+                }), 400
+                
+        except ImportError as e:
+            logger.error(f"Impossibile importare servizio V1: {e}")
             return jsonify({
                 'success': False,
-                'error': 'VALIDATION_ERROR',
-                'message': str(e)
-            }), 400
-        
-        # Invio ricetta
-        try:
-            risultato = ricetta_service.invia_ricetta(dati_ricetta)
-            
-            status_code = 200 if risultato['success'] else 422
-            return jsonify(risultato), status_code
-            
-        except RicettaServiceError as e:
-            logger.error(f"Errore servizio ricetta: {e}")
+                'error': 'SERVICE_UNAVAILABLE',
+                'message': f'Servizio ricetta non disponibile: {e}'
+            }), 503
+        except Exception as e:
+            logger.error(f"Errore servizio V1: {e}")
             return jsonify({
                 'success': False,
                 'error': 'SERVICE_ERROR',
-                'message': str(e)
-            }), 502
-        
+                'message': f'Errore durante l\'invio: {e}'
+            }), 500
     except Exception as e:
         logger.error(f"Errore invio ricetta: {e}")
         return jsonify({
@@ -334,7 +377,7 @@ def invia_ricetta():
             'message': f'Errore interno: {e}'
         }), 500
 
-@ricetta_bp.route("/test/farmaci-sicuri", methods=['GET'])
+@ricetta_bp.route("/ricetta/test/farmaci-sicuri", methods=['GET'])
 @jwt_required()
 def get_farmaci_test_sicuri():
     """Ottiene farmaci sicuri per test"""
@@ -356,7 +399,7 @@ def get_farmaci_test_sicuri():
             'message': f'Errore caricamento farmaci test: {e}'
         }), 500
 
-@ricetta_bp.route("/test/ricette-funzionanti", methods=['GET'])
+@ricetta_bp.route("/ricetta/test/ricette-funzionanti", methods=['GET'])
 @jwt_required()
 def get_ricette_test_funzionanti():
     """Ottiene ricette test già funzionanti"""
@@ -378,7 +421,7 @@ def get_ricette_test_funzionanti():
             'message': f'Errore caricamento ricette test: {e}'
         }), 500
 
-@ricetta_bp.route("/environment", methods=['GET'])
+@ricetta_bp.route("/ricetta/environment", methods=['GET'])
 @jwt_required()
 def get_environment_info():
     """Informazioni ambiente corrente"""
@@ -398,50 +441,66 @@ def get_environment_info():
             'message': f'Errore informazioni ambiente: {e}'
         }), 500
 
-def _validate_ricetta_request(dati: Dict[str, Any]) -> None:
-    """Valida i dati della richiesta ricetta"""
-    required_fields = [
-        'paziente',
-        'diagnosi', 
-        'farmaco'
-    ]
-    
-    for field in required_fields:
-        if field not in dati:
-            raise ValidationError(f"Campo obbligatorio mancante: {field}")
-    
-    # Valida paziente
-    paziente = dati['paziente']
-    required_paziente = ['nome', 'cognome', 'codice_fiscale']
-    for field in required_paziente:
-        if field not in paziente or not paziente[field]:
-            raise ValidationError(f"Campo paziente obbligatorio: {field}")
-    
-    # Valida diagnosi
-    diagnosi = dati['diagnosi']
-    if 'codice' not in diagnosi or not diagnosi['codice']:
-        raise ValidationError("Codice diagnosi obbligatorio")
-    
-    # Valida farmaco
-    farmaco = dati['farmaco']
-    required_farmaco = ['codice', 'descrizione', 'principio_attivo']
-    for field in required_farmaco:
-        if field not in farmaco or not farmaco[field]:
-            raise ValidationError(f"Campo farmaco obbligatorio: {field}")
+@ricetta_bp.route("/ricetta/test-endpoint", methods=['GET'])
+def test_simple():
+    return jsonify({"success": True, "message": "Test OK"}), 200
 
-# Error handlers specifici per il blueprint
-@ricetta_bp.errorhandler(ValidationError)
-def handle_validation_error(e):
-    return jsonify({
-        'success': False,
-        'error': 'VALIDATION_ERROR',
-        'message': str(e)
-    }), 400
+@ricetta_bp.route("/ricetta/database/list", methods=['GET'])
+#@jwt_required()
+def list_ricette_database():
+    """Recupera le ricette dal Sistema TS - Replica V1"""
+    try:
+        # Parametri opzionali dalla query string
+        data_da = request.args.get('data_da')
+        data_a = request.args.get('data_a')
+        cf_assistito = request.args.get('cf_assistito')
+        
+        logger.info("Richiesta lista ricette dal Sistema TS")
+        
+        # === MOCK TEMPORANEO PER TEST ===
+        # Dati mock per evitare problemi SOAP
+        ricette_mock = [
+            {
+                'id': 'R001',
+                'cf_paziente': 'RSSMRA80A01H501U',
+                'data': '2025-01-15',
+                'stato': 'Inviata',
+                'numero_ricetta': 'RIC20250115001',
+                'farmaco': 'Amoxicillina 500mg',
+                'diagnosi': 'J06.9 - Infezione acuta delle vie respiratorie superiori'
+            },
+            {
+                'id': 'R002', 
+                'cf_paziente': 'VRDGNN75M15F205Z',
+                'data': '2025-01-14',
+                'stato': 'Elaborata',
+                'numero_ricetta': 'RIC20250114002',
+                'farmaco': 'Ibuprofene 600mg',
+                'diagnosi': 'M79.1 - Mialgia'
+            }
+        ]
+        
+        # Filtra per parametri se presenti
+        ricette_filtrate = ricette_mock
+        if cf_assistito:
+            ricette_filtrate = [r for r in ricette_filtrate if r['cf_paziente'] == cf_assistito]
+            
+        logger.info(f"Ritornate {len(ricette_filtrate)} ricette mock")
+        
+        return jsonify({
+            'success': True,
+            'source': 'mock_data',
+            'count': len(ricette_filtrate),
+            'data': ricette_filtrate
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore lista ricette: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'INTERNAL_ERROR', 
+            'message': f'Errore interno: {e}'
+        }), 500
 
-@ricetta_bp.errorhandler(RicettaServiceError)
-def handle_ricetta_service_error(e):
-    return jsonify({
-        'success': False,
-        'error': 'SERVICE_ERROR',
-        'message': str(e)
-    }), 502
+# Validazione rimossa - ora usa formato flat come V1
+

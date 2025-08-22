@@ -6,7 +6,9 @@ import {
   cilChart,
   cilMoney,
   cilSettings,
-  cilBarChart
+  cilList,
+  cilDescription
+  
 } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
 
@@ -44,6 +46,28 @@ const _nav = [
     name: 'Spese',
     to: '/spese',
     icon: <CIcon icon={cilMoney} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Ricetta elettronica',
+  },
+  {
+    component: CNavItem,
+    name: 'NRE',
+    to: '/ricetta',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Test Ricette',
+    to: '/ricetta/test',
+    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Protocolli',
+    to: '/ricetta/setting',
+    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

@@ -16,10 +16,10 @@ import type {
   Farmaco,
   FarmacoTestSicuro,
   RicettaTestFunzionante
-} from "../../types/ricetta.types";
+} from "@/types/ricetta.types";
 
 class RicettaApiService {
-  private readonly basePath = "/api/v2/ricetta";
+  private readonly basePath = "/ricetta";
 
   // === Health e configurazione ===
   async healthCheck(): Promise<ApiResponse> {
@@ -207,6 +207,27 @@ class RicettaApiService {
     }
   }
 
+  async inviaRicettaEmail(emailPayload: {
+    email_paziente: string;
+    nome_paziente: string;
+    ricetta_data: any;
+    pdf_base64: string;
+  }): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.post(`${this.basePath}/invio/email`, emailPayload);
+      return response.data;
+    } catch (error: any) {
+      const errorData = error.response?.data;
+      
+      return {
+        success: false,
+        error: errorData?.error || 'EMAIL_FAILED',
+        message: errorData?.message || error.message || 'Errore durante l\'invio dell\'email',
+        data: errorData?.data
+      };
+    }
+  }
+
   // === Test e sviluppo ===
   async getFarmaciTestSicuri(): Promise<ApiResponse<FarmacoTestSicuro[]>> {
     try {
@@ -231,6 +252,34 @@ class RicettaApiService {
         success: false,
         error: error.response?.data?.error || 'TEST_DATA_FAILED',
         message: error.message || 'Errore caricamento ricette test',
+        data: []
+      };
+    }
+  }
+
+  // === Lista ricette dal database ===
+  async getRicetteTest(params?: {
+    data_da?: string;
+    data_a?: string;
+    cf_assistito?: string;
+  }): Promise<ApiResponse<any[]>> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params?.data_da) queryParams.append('data_da', params.data_da);
+      if (params?.data_a) queryParams.append('data_a', params.data_a);
+      if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
+      
+      const queryString = queryParams.toString();
+      const url = `${this.basePath}/database/list${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await apiClient.get(url);
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'LIST_FAILED',
+        message: error.message || 'Errore caricamento lista ricette',
         data: []
       };
     }
@@ -323,8 +372,16 @@ export const {
   getDurateSuggestions,
   getNoteSuggestions,
   inviaRicetta,
+  inviaRicettaEmail,
   getFarmaciTestSicuri,
   getRicetteTestFunzionanti,
   validateDiagnosi,
   validateFarmaco
 } = ricettaApi;
+
+// Export diretto per il nuovo metodo
+export const getRicetteTest = (params?: {
+  data_da?: string;
+  data_a?: string;
+  cf_assistito?: string;
+}) => ricettaApi.getRicetteTest(params);

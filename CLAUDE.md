@@ -128,3 +128,12 @@
 - **Service files**: nomeEntitaService.ts per i service
 - **Store files**: nomeEntita.store.ts per gli store Zustand
 - **Utils files**: nomeEntita.ts per utilities (senza suffissi tipo "Utils")
+
+## Regole Problem Solving e Migration V1->V2
+- **Prima guarda V1**: Qualsiasi migration deve iniziare leggendo il file V1 corrispondente, non inventare da zero
+- **Segui le istruzioni letteralmente**: Quando l'utente dice "parti dalla soap e vedi cosa vuole, a ritroso modifichi", fare esattamente quello
+- **V1 funziona = non toccare la logica**: Se V1 "funziona liscio come l'olio", replicare la logica, non reinventarla
+- **Ferma i cerotti**: Evitare soluzioni proxy/wrapper/workaround, sempre replicare V1 direttamente
+- **Timeout di complessità**: Se dopo 10 minuti sto creando codice nuovo invece di copiare/adattare V1, fermarsi e ripartire da V1
+- **Conferma prima di inventare**: Chiedere sempre conferma prima di creare logica nuova se esiste già in V1
+- **Validazioni semplici**: Se mi perdo in validazioni/formati, tornare a vedere come fa V1
