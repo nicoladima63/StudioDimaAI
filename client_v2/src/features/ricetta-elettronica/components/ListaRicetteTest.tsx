@@ -1,27 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { CCard, CCardBody, CCardHeader, CTable, CTableBody, CTableDataCell, CTableHead, CTableHeaderCell, CTableRow, CSpinner, CAlert } from "@coreui/react";
-import { getRicetteTest } from "@/services/api/ricetta.service";
+import { getAllRicette } from "@/api/services/ricette.service";
 
-const ListaRicetteTest: React.FC = () => {
+interface ListaRicetteTestProps {
+  shouldLoad?: boolean;
+}
+
+const ListaRicetteTest: React.FC<ListaRicetteTestProps> = ({ shouldLoad = false }) => {
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
-    getRicetteTest()
-      .then(res => {
-        if (res.success) {
-          setData(res.data || []);
-        } else {
-          setError(res.message || "Errore caricamento ricette");
-        }
-      })
-      .catch(err => setError(err?.message || "Errore sconosciuto"))
-      .finally(() => setLoading(false));
-  }, []);
+    // Carica solo se shouldLoad è true e non ha ancora caricato
+    if (shouldLoad && !hasLoaded) {
+      setLoading(true);
+      setError(null);
+      
+      getAllRicette()
+        .then(res => {
+          if (res.success) {
+            setData(res.data || []);
+          } else {
+            setError(res.message || "Errore caricamento ricette");
+          }
+          setHasLoaded(true);
+        })
+        .catch(err => setError(err?.message || "Errore sconosciuto"))
+        .finally(() => setLoading(false));
+    }
+  }, [shouldLoad, hasLoaded]);
 
   if (loading) return <CSpinner />;
   if (error) return <CAlert color="danger">{error}</CAlert>;
+  
+  // Se non deve ancora caricare, mostra placeholder
+  if (!shouldLoad) {
+    return (
+      <CCard className="mb-3">
+        <CCardHeader>Lista Ricette Test</CCardHeader>
+        <CCardBody>
+          <CAlert color="info">
+            Seleziona questa tab per caricare le ricette dal Sistema TS
+          </CAlert>
+        </CCardBody>
+      </CCard>
+    );
+  }
 
   return (
     <CCard className="mb-3">

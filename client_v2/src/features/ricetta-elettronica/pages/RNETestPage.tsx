@@ -36,7 +36,7 @@ const RNETestPage: React.FC = () => {
             <TestInvioRicetta />
           </CTabPane>
           <CTabPane visible={activeTab === 'lista'} role="tabpanel">
-            <ListaRicetteTest />
+            <ListaRicetteTest shouldLoad={activeTab === 'lista'} />
           </CTabPane>
         </CTabContent>
       </PageLayout.Content>

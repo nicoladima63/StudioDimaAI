@@ -6,7 +6,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 import logging
 from typing import Dict, Any, Optional
-from services.ricetta_service import ricetta_service
+from services.ricette_ts_service import ricette_ts_service
 from utils.ricetta_utils import ricetta_data_manager
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ ricetta_bp = Blueprint("ricetta_bp", __name__)
 def health_check():
     """Health check per il servizio ricetta"""
     try:
-        info = ricetta_service.get_environment_info()
+        info = ricette_ts_service.get_environment_info()
         return jsonify({
             'success': True,
             'service': 'ricetta_elettronica_v2',
@@ -38,7 +38,7 @@ def health_check():
 def test_connection():
     """Testa la connessione al Sistema Tessera Sanitaria"""
     try:
-        result = ricetta_service.test_connection()
+        result = ricette_ts_service.test_connection()
         
         status_code = 200 if result['success'] else 502
         return jsonify({
@@ -330,45 +330,21 @@ def invia_ricetta():
         
         logger.info(f"Invio ricetta per CF: {dati_ricetta['cf_assistito']}")
         
-        # === USA IL SERVIZIO V1 DIRETTAMENTE ===
-        # Importa e usa il servizio V1 che funziona
-        import sys
-        import os
-        sys.path.append(os.path.join(os.path.dirname(__file__), '../../server'))
+        # Usa il servizio V2 corretto
+        result = ricette_ts_service.invia_ricetta(dati_ricetta)
         
-        try:
-            from server.app.ricetta_elettronica.ricetta_service import ricetta_service as v1_ricetta_service
-            
-            # Usa il servizio V1 direttamente
-            result = v1_ricetta_service.invia_ricetta(dati_ricetta)
-            
-            if result['success']:
-                return jsonify({
-                    'success': True,
-                    'message': 'Ricetta inviata con successo al Sistema TS',
-                    'data': result
-                }), 200
-            else:
-                return jsonify({
-                    'success': False,
-                    'error': 'Errore invio ricetta al Sistema TS',
-                    'details': result
-                }), 400
-                
-        except ImportError as e:
-            logger.error(f"Impossibile importare servizio V1: {e}")
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': 'Ricetta inviata con successo al Sistema TS',
+                'data': result
+            }), 200
+        else:
             return jsonify({
                 'success': False,
-                'error': 'SERVICE_UNAVAILABLE',
-                'message': f'Servizio ricetta non disponibile: {e}'
-            }), 503
-        except Exception as e:
-            logger.error(f"Errore servizio V1: {e}")
-            return jsonify({
-                'success': False,
-                'error': 'SERVICE_ERROR',
-                'message': f'Errore durante l\'invio: {e}'
-            }), 500
+                'error': 'Errore invio ricetta al Sistema TS', 
+                'details': result
+            }), 400
     except Exception as e:
         logger.error(f"Errore invio ricetta: {e}")
         return jsonify({
@@ -426,7 +402,7 @@ def get_ricette_test_funzionanti():
 def get_environment_info():
     """Informazioni ambiente corrente"""
     try:
-        info = ricetta_service.get_environment_info()
+        info = ricette_ts_service.get_environment_info()
         
         return jsonify({
             'success': True,
@@ -445,61 +421,107 @@ def get_environment_info():
 def test_simple():
     return jsonify({"success": True, "message": "Test OK"}), 200
 
-@ricetta_bp.route("/ricetta/database/list", methods=['GET'])
-#@jwt_required()
-def list_ricette_database():
-    """Recupera le ricette dal Sistema TS - Replica V1"""
+@ricetta_bp.route("/ricetta/ts/list", methods=['GET'])
+#@jwt_required()  # Temporaneamente rimosso per test
+def list_ricette_from_ts():
+    """
+    Recupera le ricette dal Sistema TS - se offline ritorna errore
+    """
     try:
         # Parametri opzionali dalla query string
-        data_da = request.args.get('data_da')
-        data_a = request.args.get('data_a')
+        data_da = request.args.get('data_da')  # formato YYYY-MM-DD
+        data_a = request.args.get('data_a')    # formato YYYY-MM-DD
         cf_assistito = request.args.get('cf_assistito')
         
-        logger.info("Richiesta lista ricette dal Sistema TS")
+        logger.info(f"Richiesta lista ricette Sistema TS - Da: {data_da}, A: {data_a}, CF: {cf_assistito}")
         
-        # === MOCK TEMPORANEO PER TEST ===
-        # Dati mock per evitare problemi SOAP
-        ricette_mock = [
-            {
-                'id': 'R001',
-                'cf_paziente': 'RSSMRA80A01H501U',
-                'data': '2025-01-15',
-                'stato': 'Inviata',
-                'numero_ricetta': 'RIC20250115001',
-                'farmaco': 'Amoxicillina 500mg',
-                'diagnosi': 'J06.9 - Infezione acuta delle vie respiratorie superiori'
-            },
-            {
-                'id': 'R002', 
-                'cf_paziente': 'VRDGNN75M15F205Z',
-                'data': '2025-01-14',
-                'stato': 'Elaborata',
-                'numero_ricetta': 'RIC20250114002',
-                'farmaco': 'Ibuprofene 600mg',
-                'diagnosi': 'M79.1 - Mialgia'
-            }
-        ]
+        # Usa il servizio TS V2
+        from services.ricette_ts_service import ricette_ts_service
         
-        # Filtra per parametri se presenti
-        ricette_filtrate = ricette_mock
-        if cf_assistito:
-            ricette_filtrate = [r for r in ricette_filtrate if r['cf_paziente'] == cf_assistito]
+        ts_response = ricette_ts_service.get_all_ricette(
+            data_da=data_da,
+            data_a=data_a, 
+            cf_assistito=cf_assistito
+        )
+        
+        if ts_response.get('success'):
+            logger.info(f"Ricette recuperate dal Sistema TS: {ts_response.get('total_count', 0)}")
             
-        logger.info(f"Ritornate {len(ricette_filtrate)} ricette mock")
+            return jsonify({
+                'success': True,
+                'source': 'sistema_ts',
+                'count': ts_response.get('total_count', 0),
+                'data': ts_response.get('ricette', []),
+                'ts_response': {
+                    'message': ts_response.get('message'),
+                    'timestamp': ts_response.get('timestamp'),
+                    'http_status': ts_response.get('http_status')
+                }
+            }), 200
+        else:
+            # Sistema TS offline o errore - ritorna errore senza fallback
+            logger.error(f"Errore Sistema TS: {ts_response.get('error')}")
+            
+            return jsonify({
+                'success': False,
+                'source': 'sistema_ts',
+                'error': 'SISTEMA_TS_ERROR',
+                'message': ts_response.get('error', 'Sistema TS non disponibile'),
+                'details': ts_response
+            }), 503  # Service Unavailable
+        
+    except Exception as e:
+        logger.error(f"Errore chiamata Sistema TS: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'source': 'sistema_ts',
+            'error': 'SISTEMA_TS_EXCEPTION',
+            'message': f'Errore comunicazione Sistema TS: {str(e)}'
+        }), 500
+
+@ricetta_bp.route("/ricetta/db/list", methods=['GET']) 
+#@jwt_required()  # Temporaneamente rimosso per test
+def list_ricette_from_db():
+    """
+    Recupera le ricette dal database locale
+    """
+    try:
+        # Parametri opzionali dalla query string
+        limit = int(request.args.get('limit', 50))
+        cf_assistito = request.args.get('cf_assistito')
+        
+        logger.info(f"Richiesta lista ricette database locale - Limit: {limit}, CF: {cf_assistito}")
+        
+        # Usa il servizio DB V2
+        from services.ricette_db_service import ricette_db_service
+        
+        if cf_assistito:
+            # Ricette di un paziente specifico
+            ricette = ricette_db_service.get_ricette_by_paziente(cf_assistito)
+        else:
+            # Tutte le ricette
+            ricette = ricette_db_service.get_all_ricette(limit)
+        
+        logger.info(f"Ricette recuperate dal database locale: {len(ricette)}")
         
         return jsonify({
             'success': True,
-            'source': 'mock_data',
-            'count': len(ricette_filtrate),
-            'data': ricette_filtrate
+            'source': 'database_locale',
+            'count': len(ricette),
+            'data': ricette,
+            'parameters': {
+                'limit': limit,
+                'cf_assistito': cf_assistito
+            }
         }), 200
         
     except Exception as e:
-        logger.error(f"Errore lista ricette: {e}")
+        logger.error(f"Errore recupero ricette database locale: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
-            'error': 'INTERNAL_ERROR', 
-            'message': f'Errore interno: {e}'
+            'source': 'database_locale',
+            'error': 'DATABASE_ERROR',
+            'message': f'Errore database locale: {str(e)}'
         }), 500
 
 # Validazione rimossa - ora usa formato flat come V1

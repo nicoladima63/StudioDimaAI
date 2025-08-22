@@ -555,7 +555,7 @@ def _test_ricetta_connection(config: Dict[str, Any], environment: Environment) -
     except ImportError:
         return {
             'success': False,
-            'message': 'Servizio ricetta non disponibile'
+            'message': 'Servizio ricetta non disponibile - environment'
         }
     except Exception as e:
         return {

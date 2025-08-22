@@ -26,18 +26,18 @@ const TestInvioRicetta: React.FC = () => {
     nome: 'Maria Prandi' // Nome test di default
   });
 
+
   // Dati hardcodati per ambiente TEST del Ministero - CODICI VALIDI UFFICIALI
   const [datiTest, setDatiTest] = useState({
-    // CF assistito test ufficiale dal kit Ministero
+    // CF assistito test ufficiale dal kit Ministero (assistitoTest.txt)
     cfAssistito: 'PNIMRA70A01H501P',
     nomeAssistito: 'MARIA',
     cognomeAssistito: 'PRANDI',
     
-    // Diagnosi test - CODICE VALIDO dal sistema TS
+    // Diagnosi test - CODICE UFFICIALE dal SoapUI del kit Ministero
     codiceDiagnosi: '521.09',
     descrizioneDiagnosi: 'CARIE DENTALE',
     
-    // Farmaco test - CODICE VALIDO dal sistema TS
     codiceFarmaco: '046580015',
     denominazioneFarmaco: 'AMOXICILLINA AC CLA ALM*12BUST',
     principioAttivo: 'Amoxicillina + Acido Clavulanico',
@@ -58,7 +58,7 @@ const TestInvioRicetta: React.FC = () => {
       medico: {
         cfMedico: 'PROVAX00X00X000Y',  // CF medico test ufficiale
         regione: '020',
-        asl: '101', 
+        asl: '201', 
         specializzazione: 'F',
         iscrizione: '591',
         indirizzo: 'Via Test 123',
@@ -165,14 +165,10 @@ const TestInvioRicetta: React.FC = () => {
         pdf_base64: response.data.pdf_promemoria_b64
       };
 
-      const result = await inviaRicettaEmail(emailPayload);
-
-      if (result.success) {
-        alert('Email inviata con successo!');
-        setShowEmailModal(false);
-      } else {
-        alert(`Errore invio email: ${result.error}`);
-      }
+      // TODO: Implementare inviaRicettaEmail nel service
+      console.log('Email payload:', emailPayload);
+      alert('Funzione email da implementare');
+      setShowEmailModal(false);
 
     } catch (error: any) {
       console.error('Errore invio email:', error);
@@ -181,6 +177,7 @@ const TestInvioRicetta: React.FC = () => {
       setEmailLoading(false);
     }
   };
+
 
   return (
     <div>

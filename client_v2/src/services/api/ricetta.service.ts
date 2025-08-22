@@ -257,7 +257,65 @@ class RicettaApiService {
     }
   }
 
-  // === Lista ricette dal database ===
+  // === Lista ricette - endpoint separati V2 ===
+  
+  // Recupera ricette dal Sistema TS (endpoint dedicato)
+  async getRicetteFromTS(params?: {
+    data_da?: string;
+    data_a?: string;
+    cf_assistito?: string;
+    limit?: number;
+  }): Promise<ApiResponse<any[]>> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params?.data_da) queryParams.append('data_da', params.data_da);
+      if (params?.data_a) queryParams.append('data_a', params.data_a);
+      if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      
+      const queryString = queryParams.toString();
+      const url = `${this.basePath}/ts/list${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await apiClient.get(url);
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'TS_LIST_FAILED',
+        message: error.response?.data?.message || error.message || 'Errore caricamento ricette Sistema TS',
+        data: []
+      };
+    }
+  }
+
+  // Recupera ricette dal Database Locale (endpoint dedicato)
+  async getRicetteFromDB(params?: {
+    cf_assistito?: string;
+    limit?: number;
+  }): Promise<ApiResponse<any[]>> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      
+      const queryString = queryParams.toString();
+      const url = `${this.basePath}/db/list${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await apiClient.get(url);
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'DB_LIST_FAILED',
+        message: error.response?.data?.message || error.message || 'Errore caricamento ricette database locale',
+        data: []
+      };
+    }
+  }
+
+  // === Lista ricette legacy (mantenuto per compatibilità) ===
   async getRicetteTest(params?: {
     data_da?: string;
     data_a?: string;
@@ -375,6 +433,8 @@ export const {
   inviaRicettaEmail,
   getFarmaciTestSicuri,
   getRicetteTestFunzionanti,
+  getRicetteFromTS,
+  getRicetteFromDB,
   validateDiagnosi,
   validateFarmaco
 } = ricettaApi;
