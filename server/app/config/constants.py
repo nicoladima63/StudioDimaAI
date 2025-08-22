@@ -61,6 +61,10 @@ COLONNE = {
         'tipo_richiamo': 'DB_PARIMOT',
         'non_in_cura': 'DB_PANONCU',
         'email': 'DB_PAEMAIL',
+        'sesso': 'DB_PASESSO',
+        'codice_fiscale': 'DB_PACODFI',
+        'da_richiamare': 'DB_PARICHI',
+        'note': 'DB_NOTE',  
     },
     'richiami': {
         'id_paziente': 'DB_CODE',
