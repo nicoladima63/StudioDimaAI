@@ -4,7 +4,7 @@ import {
   CFormTextarea, CRow, CCol, CAlert, CSpinner, CBadge,
   CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle
 } from '@coreui/react';
-import ricettaApi from "@/services/ricette_ts.service";
+import ricettaApi, { saveRicetta } from "@/services/ricette_ts.service";
 import type { RicettaPayload } from '@/types/ricetta.types';
 
 // Tipo per EmailRicettaPayload (da definire meglio in types)
@@ -21,6 +21,7 @@ const TestInvioRicetta: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const [emailData, setEmailData] = useState({
     email: '',
     nome: 'Maria Prandi' // Nome test di default
@@ -146,6 +147,60 @@ const TestInvioRicetta: React.FC = () => {
     } catch (error) {
       console.error('Errore download PDF:', error);
       alert('Errore durante il download del PDF');
+    }
+  };
+
+  const handleSaveRicetta = async () => {
+    if (!response?.success || !response?.data) {
+      alert('Prima devi inviare una ricetta con successo');
+      return;
+    }
+
+    setSaveLoading(true);
+    
+    try {
+      const { nre, pin_ricetta, protocollo_transazione, nome_medico, cognome_medico, data_inserimento, pdf_promemoria_b64 } = response.data;
+      
+      const ricettaData = {
+        nre: nre || 'TEST_NRE_' + Date.now(),
+        codice_pin: pin_ricetta || 'TEST_PIN_123',
+        cf_medico: 'PROVAX00X00X000Y',
+        medico_cognome: cognome_medico || 'TEST',
+        medico_nome: nome_medico || 'DOTTORE',
+        specializzazione: 'F',
+        nr_iscrizione_albo: '591',
+        cf_assistito: datiTest.cfAssistito,
+        paziente_cognome: datiTest.cognomeAssistito,
+        paziente_nome: datiTest.nomeAssistito,
+        data_compilazione: data_inserimento || new Date().toISOString(),
+        codice_diagnosi: datiTest.codiceDiagnosi,
+        descrizione_diagnosi: datiTest.descrizioneDiagnosi,
+        gruppo_equivalenza_farmaco: 'EQUIVALENTE_01', // Campo obbligatorio
+        prodotto_aic: datiTest.codiceFarmaco, // Usa codice farmaco come AIC
+        codice_farmaco: datiTest.codiceFarmaco,
+        denominazione_farmaco: datiTest.denominazioneFarmaco,
+        principio_attivo: datiTest.principioAttivo,
+        posologia: datiTest.posologia,
+        durata_trattamento: datiTest.durata,
+        note: datiTest.note,
+        protocollo_transazione: protocollo_transazione || undefined,
+        pdf_base64: pdf_promemoria_b64 || undefined,
+        response_xml: '' // XML rimosso per risparmiare spazio - ricette recuperabili da Sistema TS
+      };
+
+      const saveResult = await saveRicetta(ricettaData);
+      
+      if (saveResult.success) {
+        alert(`✅ Ricetta salvata nel database!\n\nID Ricetta: ${saveResult.data?.ricetta_id}\nNRE: ${saveResult.data?.nre}\nCF: ${saveResult.data?.cf_assistito}`);
+      } else {
+        alert(`❌ Errore salvataggio: ${saveResult.message}`);
+      }
+
+    } catch (error: any) {
+      console.error('Errore salvataggio ricetta:', error);
+      alert(`❌ Errore durante il salvataggio: ${error.message || 'Errore sconosciuto'}`);
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -347,6 +402,16 @@ const TestInvioRicetta: React.FC = () => {
                               onClick={() => setShowEmailModal(true)}
                             >
                               📧 Invia Email
+                            </CButton>
+                            <CButton 
+                              size="sm" 
+                              color="warning" 
+                              className="me-2"
+                              onClick={handleSaveRicetta}
+                              disabled={saveLoading}
+                            >
+                              {saveLoading ? <CSpinner size="sm" className="me-1" /> : '💾'}
+                              Salva Ricetta
                             </CButton>
                           </div>
                         ) : '❌ Non disponibile'}

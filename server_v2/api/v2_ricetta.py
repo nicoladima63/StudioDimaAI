@@ -320,6 +320,8 @@ def invia_ricetta():
         logger.info(f"Invio ricetta per CF: {dati_ricetta['cf_assistito']}")
         
         # Usa il servizio V2 corretto
+        from services.ricette_ts_service import ricette_ts_service
+
         result = ricette_ts_service.invia_ricetta(dati_ricetta)
         
         if result['success']:
@@ -339,13 +341,15 @@ def invia_ricetta():
         return jsonify({
             'success': False,
             'error': 'INTERNAL_ERROR',
-            'message': f'Errore interno: {e}'
+            'message': f'Errore interno v2_ricetta: {e}'
         }), 500
 
 @ricetta_bp.route("/ricetta/environment", methods=['GET'])
 @jwt_required()
 def get_environment_info():
     """Informazioni ambiente corrente"""
+    from services.ricette_ts_service import ricette_ts_service
+
     try:
         info = ricette_ts_service.get_environment_info()
         
@@ -421,7 +425,7 @@ def list_ricette_from_ts():
         }), 500
 
 @ricetta_bp.route("/ricetta/db/paziente/<cfPaziente>", methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def get_ricette_by_paziente(cfPaziente: str):
     """
     Recupera le ricette di un paziente specifico dal database locale
@@ -461,7 +465,7 @@ def get_ricette_by_paziente(cfPaziente: str):
         }), 500
 
 @ricetta_bp.route("/ricetta/db/list", methods=['GET']) 
-#@jwt_required()  # Temporaneamente rimosso per test
+@jwt_required()  # Temporaneamente rimosso per test
 def list_ricette_from_db():
     """
     Recupera le ricette dal database locale
@@ -567,6 +571,53 @@ def get_farmaci_test_sicuri():
             'success': False,
             'error': 'TEST_DATA_FAILED',
             'message': f'Errore caricamento farmaci test: {e}'
+        }), 500
+
+@ricetta_bp.route("/ricetta/db/save", methods=['POST'])
+@jwt_required()
+def save_ricetta():
+    """Salva ricetta elettronica nel database locale"""
+    try:
+        if not request.is_json:
+            return jsonify({
+                'success': False,
+                'error': 'INVALID_CONTENT_TYPE',
+                'message': 'Content-Type deve essere application/json'
+            }), 400
+            
+        ricetta_data = request.get_json()
+        if not ricetta_data:
+            return jsonify({
+                'success': False,
+                'error': 'EMPTY_REQUEST',
+                'message': 'Dati ricetta non presenti'
+            }), 400
+        
+        logger.info(f"Salvataggio ricetta per CF: {ricetta_data.get('cf_assistito', 'N/A')}")
+        
+        # Usa il servizio DB V2
+        from services.ricette_db_service import ricette_db_service
+        
+        ricetta_id = ricette_db_service.save_ricetta(ricetta_data)
+        
+        logger.info(f"Ricetta salvata con ID: {ricetta_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Ricetta salvata con successo',
+            'data': {
+                'ricetta_id': ricetta_id,
+                'nre': ricetta_data.get('nre'),
+                'cf_assistito': ricetta_data.get('cf_assistito')
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore salvataggio ricetta: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'SAVE_FAILED',
+            'message': f'Errore salvataggio ricetta: {str(e)}'
         }), 500
 
 @ricetta_bp.route("/ricetta/test/ricette-funzionanti", methods=['GET'])

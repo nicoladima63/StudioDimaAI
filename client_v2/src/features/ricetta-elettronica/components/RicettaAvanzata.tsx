@@ -10,6 +10,7 @@ import {
   getDurateStandard,
   getNoteFrequenti,
   inviaRicetta,
+  saveRicetta,
   type FarmacoProtocollo} from '@/services/ricette_ts.service';
 import  type {Diagnosi, RicettaPayload}  from '@/types/ricetta.types';
 import type { Paziente } from '@/store/pazienti.store';
@@ -184,12 +185,51 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
       const response = await inviaRicetta(payload);
       
       if (response.success && response.data) {
-        const { nre, pin_ricetta, protocollo_transazione } = response.data;
+        const { nre, pin_ricetta, protocollo_transazione, nome_medico, cognome_medico, data_inserimento, pdf_promemoria_b64 } = response.data;
+        
+        // Salva la ricetta nel database locale
+        try {
+          const ricettaData = {
+            nre: nre || '',
+            codice_pin: pin_ricetta || '',
+            cf_medico: datiMedico.cfMedico,
+            medico_cognome: cognome_medico || 'N/A',
+            medico_nome: nome_medico || 'N/A', 
+            specializzazione: datiMedico.specializzazione,
+            nr_iscrizione_albo: datiMedico.iscrizione,
+            cf_assistito: pazienteSelezionato.codice_fiscale || '',
+            paziente_cognome: pazienteSelezionato.cognome || 'N/A',
+            paziente_nome: pazienteSelezionato.nome,
+            data_compilazione: data_inserimento || new Date().toISOString(),
+            codice_diagnosi: diagnosiSelezionata.codice,
+            descrizione_diagnosi: diagnosiSelezionata.descrizione,
+            gruppo_equivalenza_farmaco: 'EQUIVALENTE_01', // Campo obbligatorio
+            prodotto_aic: farmacoSelezionato.codice, // Usa codice farmaco come AIC
+            codice_farmaco: farmacoSelezionato.codice,
+            denominazione_farmaco: farmacoSelezionato.nome,
+            principio_attivo: farmacoSelezionato.principio_attivo,
+            posologia: posologia,
+            durata_trattamento: durata,
+            response_xml: '', // XML rimosso per risparmiare spazio - ricette recuperabili da Sistema TS
+            note: note || undefined,
+            protocollo_transazione: protocollo_transazione || undefined,
+            pdf_base64: pdf_promemoria_b64 || undefined
+          };
+          
+          const saveResult = await saveRicetta(ricettaData);
+          if (saveResult.success) {
+            console.log(`Ricetta salvata nel database con ID: ${saveResult.data?.ricetta_id}`);
+          } else {
+            console.warn(`Avviso salvataggio: ${saveResult.message}`);
+          }
+        } catch (saveError) {
+          console.warn("Avviso: ricetta inviata ma non salvata nel database locale:", saveError);
+        }
         
         if (nre && pin_ricetta) {
-          alert(`✅ Ricetta inviata con successo!\n\n📋 NRE: ${nre}\n🔑 PIN: ${pin_ricetta}${protocollo_transazione ? `\n🔗 Protocollo: ${protocollo_transazione}` : ''}\n\nConserva questi dati per eventuali annullamenti.`);
+          alert(`✅ Ricetta inviata e salvata con successo!\n\n📋 NRE: ${nre}\n🔑 PIN: ${pin_ricetta}${protocollo_transazione ? `\n🔗 Protocollo: ${protocollo_transazione}` : ''}\n\nConserva questi dati per eventuali annullamenti.`);
         } else {
-          alert("✅ Ricetta inviata con successo al Sistema TS.");
+          alert("✅ Ricetta inviata e salvata con successo al Sistema TS.");
         }
       } else {
         alert("✅ Ricetta inviata con successo.");

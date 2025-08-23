@@ -13,13 +13,9 @@ from requests.adapters import HTTPAdapter
 import logging
 from typing import Dict, Any, Optional
 
-from .base_service import BaseService
-#from core.exceptions import ValidationError, DatabaseError
-#from core.database_manager import get_database_manager
-
 logger = logging.getLogger(__name__)
 
-class RicetteTsService(BaseService):
+class RicetteTsService:
     """
     Servizio per la comunicazione con il Sistema Tessera Sanitaria.
     
@@ -28,7 +24,7 @@ class RicetteTsService(BaseService):
     """
     
     def __init__(self):
-        #super().__init__(get_database_manager())
+        self.logger = logging.getLogger(self.__class__.__name__)
         self._load_configuration()
         
     def _load_configuration(self):
@@ -525,80 +521,150 @@ class RicetteTsService(BaseService):
         return soap_xml
     
     def _parse_invio_response(self, response: requests.Response, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
-        """Parsa la risposta dell'invio ricetta - COPIA LOGICA DA V1 CHE FUNZIONA"""
+        """Parsa la risposta dell'invio ricetta - COPIA ESATTA LOGICA DA V1 CHE FUNZIONA"""
         try:
-            response_text = response.text
             self.logger.info(f"Parsing risposta invio ricetta")
             
             if response.status_code == 200:
-                # Parsing XML come V1 - cerca NRE e PIN nella risposta
-                import re
+                # Parse XML response - LOGICA IDENTICA V1
                 from lxml import etree
+                import re
                 
-                try:
-                    # Parse XML
-                    root = etree.fromstring(response_text.encode('utf-8'))
-                    namespaces = {
-                        'ric': 'http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it',
-                        'tip': 'http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it'
-                    }
-                    
-                    # Cerca NRE (Numero Ricetta Elettronica) - nel sistema TS è chiamato "nrbe"
-                    nre_element = root.xpath('//nrbe/text()') or root.xpath('//ric:nre/text()', namespaces=namespaces)
-                    nre = nre_element[0] if nre_element else None
-                    if not nre and ('nre' in response_text.lower() or 'nrbe' in response_text.lower()):
-                        # Fallback: cerca pattern nel testo XML - cerca sia nre che nrbe
-                        nre_match = re.search(r'<[^:]*:?nrbe[^>]*>([^<]+)</[^:]*:?nrbe>', response_text, re.IGNORECASE)
-                        if not nre_match:
-                            nre_match = re.search(r'<[^:]*:?nre[^>]*>([^<]+)</[^:]*:?nre>', response_text, re.IGNORECASE)
-                        if nre_match:
-                            nre = nre_match.group(1)
-                    
-                    # Cerca PIN ricetta
-                    pin_element = root.xpath('//pinNrbe/text()') or root.xpath('//ric:pin/text()', namespaces=namespaces)
-                    pin = pin_element[0] if pin_element else None
-                    if not pin and 'pin' in response_text.lower():
-                        # Fallback: cerca pattern PIN nel testo XML
-                        pin_match = re.search(r'<[^:]*:?pin[^>]*>([^<]+)</[^:]*:?pin>', response_text, re.IGNORECASE)
-                        if pin_match:
-                            pin = pin_match.group(1)
-                    
-                    # Cerca protocollo transazione
-                    prot_element = root.xpath('//protocolloTransazione/text()')
-                    protocollo = prot_element[0] if prot_element else None
-                    
-                    # Cerca codice esito
-                    esito_element = root.xpath('//codEsitoInserimento/text()')
-                    codice_esito = esito_element[0] if esito_element else None
-                    
-                except Exception as xml_error:
-                    self.logger.warning(f"Errore parsing XML strutturato: {xml_error}")
-                    # Fallback con regex se XML parsing fallisce
-                    nre = None
-                    pin = None
-                    protocollo = None
-                    codice_esito = None
+                root = etree.fromstring(response.content)
                 
+                # Namespaces esatti dal V1 che funziona
+                namespaces = {
+                    'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+                    'dem': 'http://dematerializzazione.sanita.finanze.it/',
+                    'ric': 'http://ricetta.sanita.finanze.it/'
+                }
+                
+                # === ESTRAZIONE DATI IDENTICA A V1 ===
+                
+                # Cerca NRE (Numero Ricetta Elettronica) - nel sistema TS è chiamato "nrbe"
+                nre_element = root.xpath('//nrbe/text()') or root.xpath('//ric:nre/text()', namespaces=namespaces)
+                nre = nre_element[0] if nre_element else None
+                
+                # Cerca PIN ricetta - nel sistema TS è chiamato "pinNrbe"
+                pin_element = root.xpath('//pinNrbe/text()') or root.xpath('//ric:pinRicetta/text()', namespaces=namespaces)
+                pin_ricetta = pin_element[0] if pin_element else None
+                
+                # Cerca codice transazione/protocollo
+                protocollo_element = root.xpath('//protocolloTransazione/text()') or root.xpath('//ric:protocolloTransazione/text()', namespaces=namespaces)
+                protocollo_transazione = protocollo_element[0] if protocollo_element else None
+                
+                # Cerca codice autorizzazione (se presente)
+                auth_element = root.xpath('//ric:codiceAutorizzazione/text()', namespaces=namespaces)
+                codice_autorizzazione = auth_element[0] if auth_element else None
+                
+                # Cerca PDF promemoria (ricetta bianca stampabile)
+                pdf_element = root.xpath('//pdfPromemoria/text()')
+                pdf_promemoria_b64 = pdf_element[0] if pdf_element else None
+                
+                # Cerca data inserimento
+                data_element = root.xpath('//dataInserimento/text()')
+                data_inserimento = data_element[0] if data_element else None
+                
+                # Cerca nome e cognome medico dalla risposta
+                nome_medico_element = root.xpath('//nomeMedico/text()')
+                cognome_medico_element = root.xpath('//cognomeMedico/text()')
+                nome_medico = nome_medico_element[0] if nome_medico_element else None
+                cognome_medico = cognome_medico_element[0] if cognome_medico_element else None
+                
+                # Estrai anche informazioni di errore se presenti
+                cod_esito_element = root.xpath('//codEsitoInserimento/text()')
+                cod_esito = cod_esito_element[0] if cod_esito_element else None
+                
+                errore_cod_element = root.xpath('//ns2:codEsito/text()', namespaces={'ns2': 'http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it'})
+                errore_desc_element = root.xpath('//ns2:esito/text()', namespaces={'ns2': 'http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it'})
+                
+                errore_cod = errore_cod_element[0] if errore_cod_element else None
+                errore_desc = errore_desc_element[0] if errore_desc_element else None
+                
+                # === FALLBACK REGEX IDENTICI V1 ===
+                response_text = response.text
+                
+                if not nre and ('nre' in response_text.lower() or 'nrbe' in response_text.lower()):
+                    # Fallback: cerca pattern nel testo XML - cerca sia nre che nrbe
+                    nre_match = re.search(r'<[^:]*:?nrbe[^>]*>([^<]+)</[^:]*:?nrbe>', response_text, re.IGNORECASE)
+                    if not nre_match:
+                        nre_match = re.search(r'<[^:]*:?nre[^>]*>([^<]+)</[^:]*:?nre>', response_text, re.IGNORECASE)
+                    if nre_match:
+                        nre = nre_match.group(1)
+                
+                if not pin_ricetta and ('pin' in response_text.lower()):
+                    # Cerca sia pinNrbe che pinRicetta
+                    pin_match = re.search(r'<[^:]*:?pinNrbe[^>]*>([^<]+)</[^:]*:?pinNrbe>', response_text, re.IGNORECASE)
+                    if not pin_match:
+                        pin_match = re.search(r'<[^:]*:?pin[Rr]icetta[^>]*>([^<]+)</[^:]*:?pin[Rr]icetta>', response_text, re.IGNORECASE)
+                    if pin_match:
+                        pin_ricetta = pin_match.group(1)
+                
+                # Cerca protocollo transazione se non trovato
+                if not protocollo_transazione:
+                    protocollo_match = re.search(r'<protocolloTransazione>([^<]+)</protocolloTransazione>', response_text)
+                    if protocollo_match:
+                        protocollo_transazione = protocollo_match.group(1)
+                
+                # Cerca altri dati con fallback regex
+                if not data_inserimento:
+                    data_match = re.search(r'<dataInserimento>([^<]+)</dataInserimento>', response_text)
+                    if data_match:
+                        data_inserimento = data_match.group(1)
+                
+                if not nome_medico:
+                    nome_match = re.search(r'<nomeMedico>([^<]+)</nomeMedico>', response_text)
+                    if nome_match:
+                        nome_medico = nome_match.group(1)
+                
+                if not cognome_medico:
+                    cognome_match = re.search(r'<cognomeMedico>([^<]+)</cognomeMedico>', response_text)
+                    if cognome_match:
+                        cognome_medico = cognome_match.group(1)
+                
+                if not pdf_promemoria_b64:
+                    pdf_match = re.search(r'<pdfPromemoria>([^<]+)</pdfPromemoria>', response_text)
+                    if pdf_match:
+                        pdf_promemoria_b64 = pdf_match.group(1)
+                
+                # === RETURN IDENTICO V1 ===
                 return {
                     'success': True,
                     'http_status': response.status_code,
-                    'response_xml': response_text,
-                    'timestamp': datetime.now().isoformat(),
-                    'message': 'Ricetta inviata con successo al Sistema TS',
-                    'cf_assistito': dati_ricetta.get('cf_assistito', 'N/A'),
                     'nre': nre,
-                    'pin': pin,
-                    'protocollo_transazione': protocollo,
-                    'codice_esito': codice_esito
+                    'pin_ricetta': pin_ricetta,
+                    'protocollo_transazione': protocollo_transazione,
+                    'codice_autorizzazione': codice_autorizzazione,
+                    'cod_esito_inserimento': cod_esito,
+                    'errore_codice': errore_cod,
+                    'errore_descrizione': errore_desc,
+                    'has_errors': bool(errore_cod),
+                    'response_xml': response.text,
+                    'timestamp': datetime.now().isoformat(),
+                    'pdf_promemoria_b64': pdf_promemoria_b64,
+                    'data_inserimento': data_inserimento,
+                    'nome_medico': nome_medico,
+                    'cognome_medico': cognome_medico,
+                    'pdf_disponibile': bool(pdf_promemoria_b64),
+                    'parsed_data': {
+                        'numero_ricetta': nre,
+                        'codice_pin': pin_ricetta,
+                        'protocollo_transazione': protocollo_transazione,
+                        'esito_inserimento': cod_esito,
+                        'errore': errore_desc if errore_cod else None,
+                        'pdf_ricetta': pdf_promemoria_b64,
+                        'data_creazione': data_inserimento,
+                        'medico_nome': nome_medico,
+                        'medico_cognome': cognome_medico
+                    }
                 }
             else:
                 return {
                     'success': False,
                     'http_status': response.status_code,
                     'error': f'HTTP {response.status_code}',
-                    'response_text': response_text[:500],
-                    'timestamp': datetime.now().isoformat(),
-                    'cf_assistito': dati_ricetta.get('cf_assistito', 'N/A')
+                    'response_text': response.text[:500],
+                    'timestamp': datetime.now().isoformat()
                 }
                 
         except Exception as e:
@@ -606,7 +672,6 @@ class RicetteTsService(BaseService):
             return {
                 'success': False,
                 'error': f'Errore parsing risposta: {str(e)}',
-                'http_status': response.status_code if hasattr(response, 'status_code') else 0,
                 'response_text': response.text[:500] if hasattr(response, 'text') else '',
                 'timestamp': datetime.now().isoformat(),
                 'cf_assistito': dati_ricetta.get('cf_assistito', 'N/A')
@@ -661,4 +726,8 @@ class RicetteTsService(BaseService):
                 'error': f'Errore invio ricetta: {str(e)}',
                 'timestamp': datetime.now().isoformat()
             }
+
+
+# Istanza singleton per uso globale
+ricette_ts_service = RicetteTsService()
 

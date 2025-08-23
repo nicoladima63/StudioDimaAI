@@ -276,6 +276,48 @@ class RicettaApiService {
     }
   }
 
+  // === Salvataggio ricetta nel database locale ===
+  async saveRicetta(ricettaData: {
+    nre: string;
+    codice_pin: string;
+    cf_medico: string;
+    medico_cognome: string;
+    medico_nome: string;
+    specializzazione: string;
+    nr_iscrizione_albo: string;
+    cf_assistito: string;
+    paziente_cognome: string;
+    paziente_nome: string;
+    data_compilazione: string;
+    codice_diagnosi: string;
+    descrizione_diagnosi: string;
+    gruppo_equivalenza_farmaco: string;
+    prodotto_aic: string;
+    codice_farmaco: string;
+    denominazione_farmaco: string;
+    principio_attivo: string;
+    posologia: string;
+    durata_trattamento: string;
+    response_xml: string;
+    note?: string;
+    protocollo_transazione?: string;
+    pdf_base64?: string;
+  }): Promise<ApiResponse<{ ricetta_id: number; nre: string; cf_assistito: string }>> {
+    try {
+      const response = await apiClient.post('/ricetta/db/save', ricettaData);
+      return response.data;
+    } catch (error: any) {
+      const errorData = error.response?.data;
+      
+      return {
+        success: false,
+        error: errorData?.error || 'SAVE_FAILED',
+        message: errorData?.message || error.message || 'Errore durante il salvataggio della ricetta',
+        data: { ricetta_id: 0, nre: '', cf_assistito: '' }
+      };
+    }
+  }
+
   // === Invio ricetta ===
   async inviaRicetta(payload: RicettaPayload): Promise<RicettaResponse> {
     try {
@@ -358,7 +400,7 @@ class RicettaApiService {
       if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
       if (params?.force_local) queryParams.append('force_local', 'true');
       
-      const url = `/api/ricetta/database/list${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const url = `/api/ricetta/db/list${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get(url);
       return response.data;
     } catch (error: any) {
@@ -525,6 +567,7 @@ export const {
   getFarmaciPerDiagnosi,
   getDurateStandard,
   getNoteFrequenti,
+  saveRicetta,
   getAllRicette,
   searchDiagnosi,
   searchFarmaci,

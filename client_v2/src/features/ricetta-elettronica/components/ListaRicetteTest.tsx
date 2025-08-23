@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { CCard, CCardBody, CCardHeader, CTable, CTableBody, CTableDataCell, CTableHead, CTableHeaderCell, CTableRow, CSpinner, CAlert } from "@coreui/react";
-import { getAllRicette } from "@/api/services/ricette.service";
+import { getAllRicette } from "@/services/ricette_ts.service";
 
 interface ListaRicetteTestProps {
   shouldLoad?: boolean;
+  cfPaziente?: string;
 }
 
-const ListaRicetteTest: React.FC<ListaRicetteTestProps> = ({ shouldLoad = false }) => {
+const ListaRicetteTest: React.FC<ListaRicetteTestProps> = ({ shouldLoad = false, cfPaziente }) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,7 @@ const ListaRicetteTest: React.FC<ListaRicetteTestProps> = ({ shouldLoad = false 
       setLoading(true);
       setError(null);
       
-      getAllRicette()
+      getAllRicette(cfPaziente ? { cf_assistito: cfPaziente } : {})
         .then(res => {
           if (res.success) {
             setData(res.data || []);
@@ -30,7 +31,7 @@ const ListaRicetteTest: React.FC<ListaRicetteTestProps> = ({ shouldLoad = false 
         .catch(err => setError(err?.message || "Errore sconosciuto"))
         .finally(() => setLoading(false));
     }
-  }, [shouldLoad, hasLoaded]);
+  }, [shouldLoad, hasLoaded, cfPaziente]);
 
   if (loading) return <CSpinner />;
   if (error) return <CAlert color="danger">{error}</CAlert>;

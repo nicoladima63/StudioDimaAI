@@ -129,6 +129,7 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
               e.stopPropagation();
               onChange(null);
               setSearchTerm("");
+              setIsOpen(true);
             }}
             onMouseDown={(e) => e.preventDefault()}
             title="Cancella selezione"

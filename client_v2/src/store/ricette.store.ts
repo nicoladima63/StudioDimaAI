@@ -87,7 +87,15 @@ export const useRicetteStore = create<RicetteState>()(
               throw new Error(response.data.error || 'Errore nel caricamento delle ricette');
             }
             
-            const { ricette, statistiche } = response.data.data;
+            const ricette = response.data.data || [];
+            
+            // Calcola statistiche dalle ricette
+            const statistiche: StatistichePaziente = {
+              totale_ricette: ricette.length,
+              ricette_inviate: ricette.filter((r: RicettaPaziente) => r.stato === 'inviata').length,
+              ricette_annullate: ricette.filter((r: RicettaPaziente) => r.stato === 'annullata').length,
+              ultima_ricetta: ricette.length > 0 ? ricette[0]?.data_compilazione : undefined
+            };
             
             const ricetteMap = ricette.reduce((map: Record<number, RicettaPaziente>, ricetta: RicettaPaziente) => {
               map[ricetta.id] = ricetta;
