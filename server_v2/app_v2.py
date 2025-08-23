@@ -133,6 +133,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_auth import auth_v2_bp
     from api.v2_materiali import materiali_v2_bp
     from api.v2_fornitori import fornitori_v2_bp
+    from api.v2_pazienti import pazienti_v2_bp
     from api.v2_spese_fornitori import spese_fornitori_v2_bp
     from api.v2_statistiche import statistiche_v2_bp
     from api.v2_classificazioni import classificazioni_v2_bp
@@ -144,6 +145,7 @@ def register_blueprints(app: Flask) -> None:
         auth_v2_bp,
         materiali_v2_bp,
         fornitori_v2_bp,
+        pazienti_v2_bp,
         spese_fornitori_v2_bp,
         statistiche_v2_bp,
         classificazioni_v2_bp,
@@ -151,10 +153,17 @@ def register_blueprints(app: Flask) -> None:
         ricetta_bp
     ]
     
-    for blueprint in blueprints:
-        app.register_blueprint(blueprint, url_prefix=app.config['API_PREFIX'])
+    for i, blueprint in enumerate(blueprints):
+        try:
+            app.register_blueprint(blueprint, url_prefix=app.config['API_PREFIX'])
+            logger = logging.getLogger(__name__)
+            logger.info(f"Registered blueprint {i+1}/{len(blueprints)}: {blueprint.name}")
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to register blueprint {blueprint.name}: {e}")
     
-    #logging.getLogger(__name__).info(f"Registered {len(blueprints)} API blueprints")
+    logger = logging.getLogger(__name__)
+    logger.info(f"Registered {len(blueprints)} API blueprints")
 
 
 def register_error_handlers(app: Flask) -> None:
@@ -238,6 +247,22 @@ def register_request_handlers(app: Flask) -> None:
 def register_health_check(app: Flask) -> None:
     """Register health check endpoint."""
     
+    @app.route(f"{app.config['API_PREFIX']}/debug-routes")
+    def debug_routes():
+        """Debug endpoint to list all routes."""
+        routes = []
+        for rule in app.url_map.iter_rules():
+            routes.append({
+                'endpoint': rule.endpoint,
+                'methods': list(rule.methods),
+                'rule': str(rule)
+            })
+        return jsonify({'routes': routes})
+
+    @app.route(f"{app.config['API_PREFIX']}/test-main")
+    def test_main():
+        return "MAIN SERVER OK"
+
     @app.route(f"{app.config['API_PREFIX']}/health")
     def health_check():
         """

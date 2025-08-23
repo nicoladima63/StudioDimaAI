@@ -101,36 +101,7 @@ def validate_configuration(config_class):
                 logging.warning(f"Setting '{setting}' using default value (not recommended for production)")
 
 
-def print_startup_info(app, args):
-    """Print server startup information."""
-    config_name = args.config.upper()
-    server_type = "Flask Dev Server" if args.use_flask_dev else "Waitress WSGI Server"
-    
-    print("=" * 70)
-    print("StudioDimaAI Server V2 - Starting Up")
-    print("=" * 70)
-    print(f"Configuration: {config_name}")
-    print(f"Server Type: {server_type}")
-    print(f"Host: {args.host}")
-    print(f"Port: {args.port}")
-    print(f"Debug Mode: {'ON' if args.debug else 'OFF'}")
-    print(f"Threads: {args.threads}")
-    print(f"Database: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not configured')}")
-    print("=" * 70)
-    print("API Endpoints:")
-    print(f"   Health Check: http://{args.host}:{args.port}/api/v2/health")
-    print(f"   Materiali: http://{args.host}:{args.port}/api/v2/materiali")
-    print(f"   Fornitori: http://{args.host}:{args.port}/api/v2/fornitori")
-    print(f"   Statistiche: http://{args.host}:{args.port}/api/v2/statistiche")
-    print(f"   Classificazioni: http://{args.host}:{args.port}/api/v2/classificazioni")
-    print("=" * 70)
-    print("Performance Features:")
-    print("   [OK] Connection Pooling Active")
-    print("   [OK] Service Layer Architecture")
-    print("   [OK] Repository Pattern Implementation")
-    print("   [OK] DBF Data Processing Optimized")
-    print("   [OK] Intelligent Caching System")
-    print("=" * 70)
+from collections import defaultdict
 
 
 def run_with_waitress(app, args):
@@ -202,10 +173,7 @@ def main():
         
         # Create Flask application
         app = create_app_v2(args.config)
-        
-        # Print startup information
-        print_startup_info(app, args)
-        
+                
         # Start server
         if args.use_flask_dev:
             run_with_flask_dev(app, args)

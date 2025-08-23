@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CAlert, CSpinner } from "@coreui/react";
-import { healthCheck } from "@/services/api/ricetta.service";
+import { healthCheck } from "@/services/ricette_ts.service";
 
 const RicettaAuthStatus: React.FC = () => {
   const [status, setStatus] = useState<string | null>(null);

@@ -14,6 +14,7 @@ const TestSelectPage = React.lazy(() => import('@/features/test/TestSelectPage')
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
 const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
 const RicettaTestPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RNETestPage'))
+const RicettaElettronicaPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RicettaElettronicaPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -49,6 +50,7 @@ const AppRouter: React.FC = () => {
           {/* Pagina di test per le select */}
           <Route path='test' element={<TestSelectPage />} />
           <Route path='ricetta/test' element={<RicettaTestPage />} />
+          <Route path='ricetta' element={<RicettaElettronicaPage />} />
           
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}

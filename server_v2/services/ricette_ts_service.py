@@ -6,19 +6,18 @@ Replica la logica di visualizza_ricette() da V1 ricetta_service.py
 import os
 import ssl
 import requests
-import logging
 import urllib3
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
 from requests.adapters import HTTPAdapter
 
-from core.exceptions import ValidationError
-from .base_service import BaseService
-from core.database_manager import get_database_manager
+import logging
+from typing import Dict, Any, Optional
 
+from .base_service import BaseService
+#from core.exceptions import ValidationError, DatabaseError
+#from core.database_manager import get_database_manager
 
 logger = logging.getLogger(__name__)
-
 
 class RicetteTsService(BaseService):
     """
@@ -29,7 +28,7 @@ class RicetteTsService(BaseService):
     """
     
     def __init__(self):
-        super().__init__(get_database_manager())
+        #super().__init__(get_database_manager())
         self._load_configuration()
         
     def _load_configuration(self):
@@ -663,6 +662,3 @@ class RicetteTsService(BaseService):
                 'timestamp': datetime.now().isoformat()
             }
 
-
-# Istanza globale del servizio
-ricette_ts_service = RicetteTsService()

@@ -4,7 +4,7 @@ import {
   CFormTextarea, CRow, CCol, CAlert, CSpinner, CBadge,
   CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle
 } from '@coreui/react';
-import ricettaApi from "@/services/api/ricetta.service";
+import ricettaApi from "@/services/ricette_ts.service";
 import type { RicettaPayload } from '@/types/ricetta.types';
 
 // Tipo per EmailRicettaPayload (da definire meglio in types)

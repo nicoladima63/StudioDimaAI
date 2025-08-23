@@ -5,6 +5,7 @@
 
 // === Entità base ===
 export interface Diagnosi {
+  id:number;
   codice: string;
   descrizione: string;
 }

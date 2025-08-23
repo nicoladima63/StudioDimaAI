@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { usePazientiStore, type Paziente } from "../../store/pazienti.store";
+import { usePazienti, usePazientiStore, type Paziente } from "@/store/pazienti.store";
 
 interface PazientiSelectProps {
   value: string | null;
@@ -20,33 +20,33 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
   clearable = false,
   className = ""
 }) => {
-  const { pazienti, isLoading, error, loadAllPazienti } = usePazientiStore();
+  const { pazienti, allPazienti, isLoading, error, loadAll } = usePazienti();
+  const store = usePazientiStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   // Carica TUTTI i pazienti al mount (per select serve tutto)
   useEffect(() => {
-    loadAllPazienti();
-  }, []); // Solo al mount
+    loadAll();
+  }, []); // Solo al mount, store non deve essere nelle dipendenze
 
   // Filtra pazienti in base al termine di ricerca
   const filteredPazienti = useMemo(() => {
-    let filtered = pazienti;
+    let filtered = allPazienti;
 
     // Applica ricerca testuale
     if (searchTerm.trim()) {
-      const searchTermLower = searchTerm.toLowerCase();
       filtered = filtered.filter(paziente =>
-        paziente.nome.toLowerCase().includes(searchTermLower) ||
-        paziente.codice_fiscale?.toLowerCase().includes(searchTermLower) ||
-        paziente.telefono?.toLowerCase().includes(searchTermLower) ||
-        paziente.cellulare?.toLowerCase().includes(searchTermLower) ||
-        paziente.email?.toLowerCase().includes(searchTermLower)
+        paziente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        paziente.codice_fiscale?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        paziente.telefono?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        paziente.cellulare?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        paziente.email?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     return filtered;
-  }, [pazienti, searchTerm]);
+  }, [allPazienti, searchTerm]);
 
   // Reset search quando chiude
   useEffect(() => {
@@ -56,7 +56,7 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
   }, [isOpen]);
 
   // Trova il paziente selezionato per mostrare il nome
-  const selectedPaziente = value ? pazienti.find(p => p.id === value) : null;
+  const selectedPaziente = value ? allPazienti.find(p => p.id === value) : null;
 
   if (!searchable) {
     // Versione semplice senza ricerca

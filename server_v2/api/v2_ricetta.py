@@ -5,92 +5,67 @@ Implementa endpoint modernizzati con architettura repository/service
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 import logging
+import sqlite3
+import os
 from typing import Dict, Any, Optional
-from services.ricette_ts_service import ricette_ts_service
 from utils.ricetta_utils import ricetta_data_manager
 
+# Database path per protocolli
+INSTANCE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance')
+PROTOCOLLI_DB_PATH = os.path.join(INSTANCE_DIR, 'protocolli.db')
+
 logger = logging.getLogger(__name__)
-print("DEBUG: v2_ricetta.py caricato")
+
 ricetta_bp = Blueprint("ricetta_bp", __name__)
 
-@ricetta_bp.route("/ricetta/health", methods=['GET'])
-def health_check():
-    """Health check per il servizio ricetta"""
-    try:
-        info = ricette_ts_service.get_environment_info()
-        return jsonify({
-            'success': True,
-            'service': 'ricetta_elettronica_v2',
-            'environment': info['environment'],
-            'certificates_valid': all(info['certificates'].values()),
-            'credentials_configured': info['credentials_configured']
-        }), 200
-    except Exception as e:
-        logger.error(f"Errore health check: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'HEALTH_CHECK_FAILED',
-            'message': str(e)
-        }), 500
 
-@ricetta_bp.route("/ricetta/test-connection", methods=['GET'])
+@ricetta_bp.route("/ricetta/diagnosi-all", methods=['GET'])
 @jwt_required()
-def test_connection():
-    """Testa la connessione al Sistema Tessera Sanitaria"""
+def get_all_diagnosi():
+    """Get all diagnosi (not search)"""
     try:
-        result = ricette_ts_service.test_connection()
-        
-        status_code = 200 if result['success'] else 502
-        return jsonify({
-            'success': result['success'],
-            'data': result,
-            'message': result.get('message', 'Test completato')
-        }), status_code
-        
-    except Exception as e:
-        logger.error(f"Errore test connessione: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'TEST_CONNECTION_FAILED',
-            'message': f'Errore durante il test: {e}'
-        }), 500
-
-@ricetta_bp.route("/ricetta/diagnosi", methods=['GET'])
-@jwt_required()
-def search_diagnosi():
-    """Ricerca diagnosi ICD9"""
-    try:
-        query = request.args.get('q', '').strip()
-        limit = int(request.args.get('limit', 20))
-        
-        if not query or len(query) < 2:
+        with sqlite3.connect(PROTOCOLLI_DB_PATH) as conn:
+            cursor = conn.cursor()
+            
+            query = """
+            SELECT 
+                d.id,
+                d.codice,
+                d.descrizione,
+                d.categoria,
+                COUNT(DISTINCT p.farmacoId) as num_farmaci
+            FROM diagnosi d
+            LEFT JOIN protocolli_terapeutici p ON d.id = p.diagnosiId
+            GROUP BY d.id, d.codice, d.descrizione, d.categoria
+            ORDER BY d.codice
+            """
+            
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            
+            diagnosi = []
+            for row in rows:
+                diagnosi.append({
+                    'id': row[0],
+                    'codice': row[1],
+                    'descrizione': row[2],
+                    'categoria':row[3],
+                    'num_farmaci': row[4]
+                })
+            
             return jsonify({
                 'success': True,
-                'data': [],
-                'message': 'Query troppo breve'
-            }), 200
-        
-        risultati = ricetta_data_manager.cerca_diagnosi(query, limit)
-        
-        return jsonify({
-            'success': True,
-            'data': risultati,
-            'count': len(risultati),
-            'query': query
-        }), 200
-        
-    except ValueError as e:
-        return jsonify({
-            'success': False,
-            'error': 'INVALID_PARAMETERS',
-            'message': f'Parametri non validi: {e}'
-        }), 400
+                'data': {
+                    'diagnosi': diagnosi,
+                    'count': len(diagnosi)
+                }
+            })
+            
     except Exception as e:
-        logger.error(f"Errore ricerca diagnosi: {e}")
+        logger.error(f"Errore get_all_diagnosi: {e}")
         return jsonify({
             'success': False,
-            'error': 'SEARCH_FAILED',
-            'message': f'Errore durante la ricerca: {e}'
+            'error': 'Database error retrieving diagnosi'
         }), 500
 
 @ricetta_bp.route("/ricetta/farmaci", methods=['GET'])
@@ -168,52 +143,66 @@ def get_farmaci_per_diagnosi(codice_diagnosi: str):
             'message': f'Errore durante la ricerca: {e}'
         }), 500
 
-@ricetta_bp.route("/ricetta/protocolli", methods=['GET'])
+@ricetta_bp.route("/ricetta/protocolli-per-diagnosi/<int:diagnosi_id>", methods=['GET'])
 @jwt_required()
-def get_protocolli():
-    """Ottiene protocolli terapeutici"""
+def get_protocolli_per_diagnosi(diagnosi_id):
+    """Get protocolli for a specific diagnosi by ID"""
     try:
-        protocolli = ricetta_data_manager.get_protocolli_terapeutici()
-        
-        return jsonify({
-            'success': True,
-            'data': protocolli,
-            'count': len(protocolli)
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Errore protocolli: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'PROTOCOLS_FAILED',
-            'message': f'Errore caricamento protocolli: {e}'
-        }), 500
-
-@ricetta_bp.route("/ricetta/protocolli/<protocollo_id>", methods=['GET'])
-@jwt_required()
-def get_protocollo_by_id(protocollo_id: str):
-    """Ottiene protocollo terapeutico per ID"""
-    try:
-        protocollo = ricetta_data_manager.get_protocollo_by_id(protocollo_id)
-        
-        if not protocollo:
+        with sqlite3.connect(PROTOCOLLI_DB_PATH) as conn:
+            cursor = conn.cursor()
+            
+            query = """
+            SELECT 
+                p.id,
+                p.farmacoId,
+                f.principio_attivo as farmaco_codice,
+                f.nomi_commerciali as farmaco_nome,
+                f.principio_attivo,
+                f.categoria,
+                NULL as posologia_custom,
+                NULL as durata_custom,
+                NULL as note_custom,
+                f.posologia_standard,
+                p.ordine
+            FROM protocolli_terapeutici p
+            JOIN farmaci f ON p.farmacoId = f.id
+            WHERE p.diagnosiId = ?
+            ORDER BY p.ordine, f.nomi_commerciali
+            """
+            
+            cursor.execute(query, (diagnosi_id,))
+            rows = cursor.fetchall()
+            
+            protocolli = []
+            for row in rows:
+                protocolli.append({
+                    'id': row[0],
+                    'farmaco_id': row[1],
+                    'farmaco_codice': row[2],
+                    'nomi_commerciali': row[3],
+                    'principio_attivo': row[4],
+                    'categoria': row[5],
+                    'posologia_custom': row[6],
+                    'durata_custom': row[7],
+                    'note_custom': row[8],
+                    'posologia_standard': row[9],
+                    'ordine': row[10] or 0
+                })
+            
             return jsonify({
-                'success': False,
-                'error': 'PROTOCOL_NOT_FOUND',
-                'message': f'Protocollo {protocollo_id} non trovato'
-            }), 404
-        
-        return jsonify({
-            'success': True,
-            'data': protocollo
-        }), 200
-        
+                'success': True,
+                'data': {
+                    'protocolli': protocolli,
+                    'count': len(protocolli),
+                    'diagnosi_id': diagnosi_id
+                }
+            })
+            
     except Exception as e:
-        logger.error(f"Errore protocollo {protocollo_id}: {e}")
+        logger.error(f"Errore protocolli per diagnosi {diagnosi_id}: {e}")
         return jsonify({
             'success': False,
-            'error': 'PROTOCOL_FAILED',
-            'message': f'Errore caricamento protocollo: {e}'
+            'error': 'Database error retrieving protocolli'
         }), 500
 
 @ricetta_bp.route("/ricetta/suggestions/posologie", methods=['GET'])
@@ -353,50 +342,6 @@ def invia_ricetta():
             'message': f'Errore interno: {e}'
         }), 500
 
-@ricetta_bp.route("/ricetta/test/farmaci-sicuri", methods=['GET'])
-@jwt_required()
-def get_farmaci_test_sicuri():
-    """Ottiene farmaci sicuri per test"""
-    try:
-        farmaci = ricetta_data_manager.get_farmaci_test_sicuri()
-        
-        return jsonify({
-            'success': True,
-            'data': farmaci,
-            'count': len(farmaci),
-            'message': 'Farmaci sicuri per ambiente test'
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Errore farmaci test: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'TEST_DATA_FAILED',
-            'message': f'Errore caricamento farmaci test: {e}'
-        }), 500
-
-@ricetta_bp.route("/ricetta/test/ricette-funzionanti", methods=['GET'])
-@jwt_required()
-def get_ricette_test_funzionanti():
-    """Ottiene ricette test già funzionanti"""
-    try:
-        ricette = ricetta_data_manager.get_ricette_test_funzionanti()
-        
-        return jsonify({
-            'success': True,
-            'data': ricette,
-            'count': len(ricette),
-            'message': 'Ricette test funzionanti'
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Errore ricette test: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'TEST_DATA_FAILED',
-            'message': f'Errore caricamento ricette test: {e}'
-        }), 500
-
 @ricetta_bp.route("/ricetta/environment", methods=['GET'])
 @jwt_required()
 def get_environment_info():
@@ -417,12 +362,8 @@ def get_environment_info():
             'message': f'Errore informazioni ambiente: {e}'
         }), 500
 
-@ricetta_bp.route("/ricetta/test-endpoint", methods=['GET'])
-def test_simple():
-    return jsonify({"success": True, "message": "Test OK"}), 200
-
 @ricetta_bp.route("/ricetta/ts/list", methods=['GET'])
-#@jwt_required()  # Temporaneamente rimosso per test
+@jwt_required()  # Temporaneamente rimosso per test
 def list_ricette_from_ts():
     """
     Recupera le ricette dal Sistema TS - se offline ritorna errore
@@ -479,6 +420,46 @@ def list_ricette_from_ts():
             'message': f'Errore comunicazione Sistema TS: {str(e)}'
         }), 500
 
+@ricetta_bp.route("/ricetta/db/paziente/<cfPaziente>", methods=['GET'])
+#@jwt_required()
+def get_ricette_by_paziente(cfPaziente: str):
+    """
+    Recupera le ricette di un paziente specifico dal database locale
+    """
+    try:
+        if not cfPaziente:
+            return jsonify({
+                'success': False,
+                'error': 'MISSING_CF',
+                'message': 'Codice fiscale del paziente mancante'
+            }), 400
+        
+        logger.info(f"Richiesta ricette per paziente CF: {cfPaziente}")
+        
+        # Usa il servizio DB V2
+        from services.ricette_db_service import ricette_db_service
+        
+        ricette = ricette_db_service.get_ricette_by_paziente(cfPaziente)
+        
+        logger.info(f"Ricette recuperate per CF {cfPaziente}: {len(ricette)}")
+        
+        return jsonify({
+            'success': True,
+            'source': 'database_locale',
+            'count': len(ricette),
+            'data': ricette,
+            'cf_paziente': cfPaziente
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore recupero ricette per paziente {cfPaziente}: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'source': 'database_locale',
+            'error': 'DATABASE_ERROR',
+            'message': f'Errore database locale: {str(e)}'
+        }), 500
+
 @ricetta_bp.route("/ricetta/db/list", methods=['GET']) 
 #@jwt_required()  # Temporaneamente rimosso per test
 def list_ricette_from_db():
@@ -524,5 +505,90 @@ def list_ricette_from_db():
             'message': f'Errore database locale: {str(e)}'
         }), 500
 
-# Validazione rimossa - ora usa formato flat come V1
+@ricetta_bp.route("/ricetta/health", methods=['GET'])
+def health_check():
+    """Health check per il servizio ricetta"""
+    try:
+        info = ricette_ts_service.get_environment_info()
+        return jsonify({
+            'success': True,
+            'service': 'ricetta_elettronica_v2',
+            'environment': info['environment'],
+            'certificates_valid': all(info['certificates'].values()),
+            'credentials_configured': info['credentials_configured']
+        }), 200
+    except Exception as e:
+        logger.error(f"Errore health check: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'HEALTH_CHECK_FAILED',
+            'message': str(e)
+        }), 500
+
+@ricetta_bp.route("/ricetta/test-connection", methods=['GET'])
+@jwt_required()
+def test_connection():
+    """Testa la connessione al Sistema Tessera Sanitaria"""
+    try:
+        result = ricette_ts_service.test_connection()
+        
+        status_code = 200 if result['success'] else 502
+        return jsonify({
+            'success': result['success'],
+            'data': result,
+            'message': result.get('message', 'Test completato')
+        }), status_code
+        
+    except Exception as e:
+        logger.error(f"Errore test connessione: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'TEST_CONNECTION_FAILED',
+            'message': f'Errore durante il test: {e}'
+        }), 500
+
+@ricetta_bp.route("/ricetta/test/farmaci-sicuri", methods=['GET'])
+@jwt_required()
+def get_farmaci_test_sicuri():
+    """Ottiene farmaci sicuri per test"""
+    try:
+        farmaci = ricetta_data_manager.get_farmaci_test_sicuri()
+        
+        return jsonify({
+            'success': True,
+            'data': farmaci,
+            'count': len(farmaci),
+            'message': 'Farmaci sicuri per ambiente test'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore farmaci test: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'TEST_DATA_FAILED',
+            'message': f'Errore caricamento farmaci test: {e}'
+        }), 500
+
+@ricetta_bp.route("/ricetta/test/ricette-funzionanti", methods=['GET'])
+@jwt_required()
+def get_ricette_test_funzionanti():
+    """Ottiene ricette test già funzionanti"""
+    try:
+        ricette = ricetta_data_manager.get_ricette_test_funzionanti()
+        
+        return jsonify({
+            'success': True,
+            'data': ricette,
+            'count': len(ricette),
+            'message': 'Ricette test funzionanti'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore ricette test: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'TEST_DATA_FAILED',
+            'message': f'Errore caricamento ricette test: {e}'
+        }), 500
+
 
