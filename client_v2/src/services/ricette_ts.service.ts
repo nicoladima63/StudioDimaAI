@@ -421,6 +421,10 @@ class RicettaApiService {
     data_a?: string;
     cf_assistito?: string;
     limit?: number;
+    nre?: string;  // Per ricerca specifica
+    cf_medico_reale?: string;  // CF medico reale per test
+    use_production?: boolean;  // Flag per usare produzione
+    test_ricerca_specifica?: boolean;  // Flag test
   }): Promise<ApiResponse<any[]>> {
     try {
       const queryParams = new URLSearchParams();
@@ -430,8 +434,14 @@ class RicettaApiService {
       if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
       if (params?.limit) queryParams.append('limit', params.limit.toString());
       
+      // Parametri speciali per test ricerca specifica
+      if (params?.nre) queryParams.append('nre', params.nre);
+      if (params?.cf_medico_reale) queryParams.append('cf_medico_reale', params.cf_medico_reale);
+      if (params?.use_production) queryParams.append('use_production', 'true');
+      if (params?.test_ricerca_specifica) queryParams.append('test_ricerca_specifica', 'true');
+      
       const queryString = queryParams.toString();
-      const url = `${this.basePath}/ts/list${queryString ? `?${queryString}` : ''}`;
+      const url = `/ricetta/ts/list${queryString ? `?${queryString}` : ''}`;
       
       const response = await apiClient.get(url);
       return response.data;

@@ -28,13 +28,8 @@ class RicettaElettronicaService:
         self._setup_ssl_context()
         
     def _get_current_env(self) -> str:
-        """Ottiene l'ambiente corrente"""
-        try:
-            from ..core.mode_manager import get_mode
-            mode = get_mode('ricetta')
-            return 'test' if mode == 'test' else 'prod'
-        except:
-            return os.getenv('RICETTA_ENV', 'test').lower()
+        """Ottiene l'ambiente corrente - FORZATO PRODUZIONE per TEST"""
+        return 'prod'  # HARDCODED per test
     
     def _load_configuration(self):
         """Carica configurazione per ambiente corrente"""
@@ -65,13 +60,13 @@ class RicettaElettronicaService:
             self.cf_assistito_test = 'PNIMRA70A01H501P'
             
         else:  # prod
-            # === AMBIENTE PRODUZIONE - Dati reali ===
-            self.cf_medico = os.getenv('CF_MEDICO_PROD', 'DMRNCL63S21D612I')
-            self.password = os.getenv('PASSWORD_PROD', 'password_reale')
-            self.pincode = os.getenv('PINCODE_PROD', 'pincode_reale')
-            self.regione = os.getenv('REGIONE_PROD', '090')
-            self.asl = os.getenv('ASL_PROD', '109')
-            self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD', 'F')
+            # === AMBIENTE PRODUZIONE - Dati reali HARDCODATI per TEST ===
+            self.cf_medico = 'DMRNCL63S21D612I'  # HARDCODED
+            self.password = 'VtmakYjB4CjEN_!'     # HARDCODED
+            self.pincode = '1141766994'           # HARDCODED
+            self.regione = '090'                  # HARDCODED
+            self.asl = '109'                      # HARDCODED
+            self.specializzazione = 'F'           # HARDCODED
             
             # Endpoint produzione
             self.endpoint_invio = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'

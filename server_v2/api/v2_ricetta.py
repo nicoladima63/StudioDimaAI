@@ -7,12 +7,19 @@ from flask_jwt_extended import jwt_required
 import logging
 import sqlite3
 import os
+import base64
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography import x509
 from typing import Dict, Any, Optional
 from utils.ricetta_utils import ricetta_data_manager
 
 # Database path per protocolli
 INSTANCE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance')
 PROTOCOLLI_DB_PATH = os.path.join(INSTANCE_DIR, 'protocolli.db')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))  # server_V2
+CERTS_DIR = os.path.join(PROJECT_ROOT, 'certs', 'test')
+SANITEL_CERT_PATH = os.path.join(CERTS_DIR, 'SanitelCF-2024-2027.cer')
 
 logger = logging.getLogger(__name__)
 
@@ -370,17 +377,90 @@ def get_environment_info():
 @jwt_required()  # Temporaneamente rimosso per test
 def list_ricette_from_ts():
     """
-    Recupera le ricette dal Sistema TS - se offline ritorna errore
+    Recupera le ricette dal Sistema TS con supporto ricerca specifica per NRE
+    Supporta sia test che produzione con cifratura CF
     """
     try:
-        # Parametri opzionali dalla query string
+        # Parametri dalla query string
         data_da = request.args.get('data_da')  # formato YYYY-MM-DD
         data_a = request.args.get('data_a')    # formato YYYY-MM-DD
         cf_assistito = request.args.get('cf_assistito')
         
-        logger.info(f"Richiesta lista ricette Sistema TS - Da: {data_da}, A: {data_a}, CF: {cf_assistito}")
+        # Parametri speciali per ricerca specifica (dal frontend ListaRicetteTest)
+        nre = request.args.get('nre')  # NRE specifico da cercare
+        cf_medico_reale = request.args.get('cf_medico_reale')  # CF medico per produzione
+        use_production = request.args.get('use_production') == 'true'  # Flag produzione
+        test_ricerca_specifica = request.args.get('test_ricerca_specifica') == 'true'
         
-        # Usa il servizio TS V2
+        logger.info(f"Richiesta lista ricette Sistema TS")
+        logger.info(f"Parametri: Da={data_da}, A={data_a}, CF={cf_assistito}")
+        logger.info(f"Ricerca specifica: NRE={nre}, CF_medico={cf_medico_reale}, Prod={use_production}")
+        
+        # Se è una ricerca specifica con NRE, usa la funzione di visualizzazione ricetta singola
+        if test_ricerca_specifica and nre and cf_assistito:
+            logger.info("🚀🚀🚀 BRUTAL TEST ATTIVATO! 🚀🚀🚀")
+            print("🚀🚀🚀 BRUTAL TEST ATTIVATO! 🚀🚀🚀")
+            logger.info("=== MODALITA RICERCA SPECIFICA RICETTA ===")
+            
+            # Usa il servizio TS V2 con ricerca per NRE specifico
+            from services.ricette_ts_service import ricette_ts_service
+            
+            # Salva configurazione originale per ripristino
+            original_config = {
+                'env': ricette_ts_service.env,
+                'cf_medico': ricette_ts_service.cf_medico,
+                'password': ricette_ts_service.password,
+                'endpoint_visualizza': ricette_ts_service.endpoint_visualizza,
+                'endpoint_invio': ricette_ts_service.endpoint_invio,
+                'regione': ricette_ts_service.regione,
+                'asl': ricette_ts_service.asl,
+                'specializzazione': ricette_ts_service.specializzazione
+            }
+            
+            if use_production and cf_medico_reale:
+                logger.info(f"=== OVERRIDE COMPLETO PRODUZIONE ===")
+                logger.info(f"Prima: env={original_config['env']}, CF={original_config['cf_medico']}")
+                
+                # Forza configurazione produzione completa
+                ricette_ts_service.force_production_config(cf_medico_reale, 'VtmakYjB4CjEN_!')
+                
+                logger.info(f"Dopo: env={ricette_ts_service.env}, CF={ricette_ts_service.cf_medico}")
+                logger.info(f"Endpoint: {ricette_ts_service.endpoint_visualizza}")
+            else:
+                logger.info(f"Usando ambiente TEST: {ricette_ts_service.env}")
+                logger.info(f"Endpoint TEST: {ricette_ts_service.endpoint_visualizza}")
+            
+            try:
+                # Crea richiesta SOAP per visualizzazione ricetta specifica
+                ts_response = ricette_ts_service.visualizza_ricetta_specifica(
+                    nre=nre,
+                    cf_assistito=cf_assistito,
+                    cf_medico=cf_medico_reale if use_production else None
+                )
+                
+                return jsonify({
+                    'success': ts_response.get('success', False),
+                    'source': 'sistema_ts_ricerca_specifica',
+                    'count': 1 if ts_response.get('success') else 0,
+                    'data': [ts_response.get('ricetta_data')] if ts_response.get('success') else [],
+                    'ts_response': {
+                        'message': ts_response.get('message'),
+                        'timestamp': ts_response.get('timestamp'),
+                        'http_status': ts_response.get('http_status'),
+                        'response_xml': ts_response.get('response_xml', ''),
+                        'environment': 'produzione' if use_production else 'test',
+                        'nre_ricercato': nre,
+                        'cf_assistito': cf_assistito
+                    }
+                })
+                
+            finally:
+                # Ripristina configurazione originale
+                if use_production and cf_medico_reale:
+                    logger.info("=== RIPRISTINO CONFIGURAZIONE ORIGINALE ===")
+                    ricette_ts_service.restore_original_config(original_config)
+        
+        # Modalità standard: recupera tutte le ricette
         from services.ricette_ts_service import ricette_ts_service
         
         ts_response = ricette_ts_service.get_all_ricette(
@@ -404,7 +484,7 @@ def list_ricette_from_ts():
                 }
             }), 200
         else:
-            # Sistema TS offline o errore - ritorna errore senza fallback
+            # Sistema TS offline o errore
             logger.error(f"Errore Sistema TS: {ts_response.get('error')}")
             
             return jsonify({
@@ -643,3 +723,52 @@ def get_ricette_test_funzionanti():
         }), 500
 
 
+sanitel_cert = "/path/to/cert.cer"  # percorso certificato
+
+@ricetta_bp.route("/ricetta/cifra-cf", methods=['POST'])
+def encrypt_cf():
+    """
+    Cifra il cf_assistito usando il certificato SanitelCF
+    Seguendo le specifiche del kit ufficiale
+    """
+    try:
+        data = request.get_json()
+        cf_assistito = data["cf_assistito"]
+
+        # Carica il certificato SanitelCF
+        with open(SANITEL_CERT_PATH, 'rb') as f:
+            cert_data = f.read()
+            
+        # Se è un file .cer_, rinominalo
+        if SANITEL_CERT_PATH.endswith('.cer_'):
+            cert_path_fixed = SANITEL_CERT_PATH.replace('.cer_', '.cer')
+            if not os.path.exists(cert_path_fixed):
+                with open(cert_path_fixed, 'wb') as f_out:
+                    f_out.write(cert_data)
+            cert_data = open(cert_path_fixed, 'rb').read()
+        
+        # Parse del certificato
+        if cert_data.startswith(b'-----BEGIN'):
+            cert = x509.load_pem_x509_certificate(cert_data)
+        else:
+            cert = x509.load_der_x509_certificate(cert_data)
+        
+        # Estrai la chiave pubblica
+        public_key = cert.public_key()
+        
+        # Cifra il CF
+        cf_bytes = cf_assistito.encode('utf-8')
+        encrypted = public_key.encrypt(
+            cf_bytes,
+            padding.PKCS1v15()
+        )
+        
+        # Codifica in base64
+        encrypted_b64 = base64.b64encode(encrypted).decode('utf-8')
+        
+        logger.info("Codice fiscale cifrato correttamente")
+        return { "cf_cifrato": encrypted_b64 }
+        
+    except Exception as e:
+        logger.error(f"Errore cifratura CF: {e}")
+        raise

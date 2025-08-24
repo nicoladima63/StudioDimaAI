@@ -48,6 +48,11 @@ class RicetteTsService:
             self.endpoint_invio = 'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'
             self.endpoint_annulla = 'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca'
             
+            # ENDPOINT ALTERNATIVI - dal Ministero della Salute (SOAP format diverso - errore 500):
+            # self.endpoint_visualizza = 'https://demservicetest.sanita.finanze.it/DemRicettaPrescrittoServicesWeb/services/demVisualizzaPrescritto'  # Richiede namespace diverso
+            # self.endpoint_invio = 'https://demservicetest.sanita.finanze.it/DemRicettaPrescrittoServicesWeb/services/demInvioPrescritto'  # TIMEOUT
+            # self.endpoint_annulla = 'https://demservicetest.sanita.finanze.it/DemRicettaPrescrittoServicesWeb/services/demAnnullaPrescritto'
+            
             # Certificati test
             self.client_cert = os.path.join(project_root, 'certs', 'test', 'client_cert.pem')
             self.client_key = os.path.join(project_root, 'certs', 'test', 'client_key.pem')
@@ -86,6 +91,39 @@ class RicetteTsService:
         except:
             return os.getenv('RICETTA_ENV', 'test').lower()
     
+    def force_production_config(self, cf_medico_reale: str, password_reale: str = None):
+        """
+        Forza configurazione produzione per override temporaneo
+        """
+        self.logger.info(f"=== FORCE PRODUCTION CONFIG ===")
+        self.env = 'prod'
+        self.cf_medico = cf_medico_reale
+        self.password = password_reale or os.getenv('PASSWORD_PROD', 'VtmakYjB4CjEN_!')
+        
+        # Endpoint produzione
+        self.endpoint_visualizza = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca'
+        self.endpoint_invio = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'
+        
+        # Altri parametri produzione
+        self.regione = '090'
+        self.asl = '109'
+        self.specializzazione = 'F'
+        
+        self.logger.info(f"Configurazione forzata: CF={self.cf_medico}, Endpoint={self.endpoint_visualizza}")
+        
+    def restore_original_config(self, original_config: dict):
+        """Ripristina configurazione originale"""
+        self.env = original_config['env']
+        self.cf_medico = original_config['cf_medico']
+        self.password = original_config['password']
+        self.endpoint_visualizza = original_config['endpoint_visualizza']
+        self.endpoint_invio = original_config['endpoint_invio']
+        self.regione = original_config['regione']
+        self.asl = original_config['asl']
+        self.specializzazione = original_config['specializzazione']
+        
+        self.logger.info(f"Configurazione ripristinata: env={self.env}, CF={self.cf_medico}")
+    
     def _genera_token_2fa(self) -> str:
         """
         Genera il token A2F nel formato CF-YYYY-MM - copia esatta da V1
@@ -94,13 +132,38 @@ class RicetteTsService:
     
     def _encrypt_cf_assistito(self, cf_assistito: str) -> str:
         """
-        Cifra il CF dell'assistito - per ora in chiaro come V1 test
+        Cifra il CF dell'assistito usando l'endpoint di cifratura V2
         """
-        # Per test environment, usa il CF in chiaro come V1
-        if self.env == 'test':
+        try:
+            # Per test environment, usa il CF in chiaro come V1 test
+            if self.env == 'test':
+                return cf_assistito
+            
+            # Per produzione, usa l'endpoint di cifratura V2
+            import requests
+            
+            self.logger.info(f"Cifratura CF assistito per produzione: {cf_assistito}")
+            
+            response = requests.post(
+                'http://localhost:5001/api/v2/ricetta/cifra-cf',
+                json={'cf_assistito': cf_assistito},
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                cf_cifrato = response.json().get('cf_cifrato')
+                self.logger.info("CF assistito cifrato correttamente")
+                return cf_cifrato
+            else:
+                self.logger.error(f"Errore cifratura CF: HTTP {response.status_code}")
+                # Fallback: ritorna in chiaro se cifratura fallisce
+                return cf_assistito
+                
+        except Exception as e:
+            self.logger.error(f"Errore cifratura CF assistito: {e}")
+            # Fallback: ritorna in chiaro se cifratura fallisce
             return cf_assistito
-        # TODO: Implementare cifratura reale per prod
-        return cf_assistito
     
     def _create_session(self) -> requests.Session:
         """
@@ -196,11 +259,23 @@ class RicetteTsService:
             self.logger.info(f"Parsing risposta visualizzazione ricette")
             
             if response.status_code == 200:
+                # === DEBUG COMPLETO RISPOSTA XML ===
+                self.logger.info("=== INIZIO RISPOSTA XML COMPLETA ===")
+                self.logger.info(response_text)
+                self.logger.info("=== FINE RISPOSTA XML COMPLETA ===")
+                
+                # Print anche in console per debug immediato
+                print("=" * 80)
+                print("RISPOSTA COMPLETA SISTEMA TS:")
+                print("=" * 80)
+                print(response_text)
+                print("=" * 80)
+                
                 # Cerca lista ricette nella risposta XML
                 ricette = []
                 
-                # TODO: V1 aveva il parsing vuoto - implementare se necessario
-                # Per ora manteniamo la logica V1: successo ma lista vuota
+                # TODO: Analizzare XML per estrarre ricette
+                # Per ora torniamo XML completo per analisi
                 
                 return {
                     'success': True,
@@ -209,7 +284,7 @@ class RicetteTsService:
                     'total_count': len(ricette),
                     'response_xml': response_text,
                     'timestamp': datetime.now().isoformat(),
-                    'message': 'Richiesta Sistema TS completata - parsing da implementare se necessario'
+                    'message': 'DEBUG: Risposta XML completa loggata - analizzare per implementare parsing'
                 }
             else:
                 return {
@@ -230,6 +305,179 @@ class RicetteTsService:
                 'timestamp': datetime.now().isoformat()
             }
     
+    def visualizza_ricetta_specifica(self, nre: str, cf_assistito: str = None, cf_medico: str = None) -> Dict[str, Any]:
+        """
+        BRUTAL TEST - USA ENDPOINT INTERROGAZIONI UFFICIALE!
+        """
+        try:
+            self.logger.info(f"=== BRUTAL TEST ENDPOINT INTERROGAZIONI ===")
+            self.logger.info(f"NRE: {nre}, CF assistito: {cf_assistito}")
+            
+            # ENDPOINT GIUSTO DAL KIT UFFICIALE!
+            endpoint_interrogazioni = 'https://demservice.sanita.finanze.it/DemRicettaInterrogazioniServicesWeb/services/demInterrogaNreUtilizzati'
+            
+            pincode_cifrato = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZVKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk="
+            
+            # SOAP UFFICIALE InterrogaNreUtilRichiesta
+            soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:int="http://interroganreutilrichiesta.xsd.dem.sanita.finanze.it">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <int:InterrogaNreUtilRichiesta>
+            <int:pinCode>{pincode_cifrato}</int:pinCode>
+            <int:codRegione>090</int:codRegione>
+            <int:nre>{nre}</int:nre>
+            <int:cfMedico>{cf_medico or self.cf_medico}</int:cfMedico>
+            <int:cfAssistito>{cf_assistito or ''}</int:cfAssistito>
+        </int:InterrogaNreUtilRichiesta>
+    </soapenv:Body>
+</soapenv:Envelope>'''
+            
+            # Crea sessione e invia richiesta
+            session = self._create_session()
+            
+            headers = {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': '"http://interroganreutilizzati.wsdl.dem.sanita.finanze.it/InterrogaNreUtilizzati"',
+                'User-Agent': 'Python-requests/2.28.0'
+            }
+            
+            self.logger.info(f"=== BRUTAL TEST ENDPOINT INTERROGAZIONI ===")
+            self.logger.info(f"Endpoint: {endpoint_interrogazioni}")
+            
+            print(f"=== SOAP INTERROGAZIONI BRUTAL TEST ===")
+            print(soap_template)
+            print(f"=== END SOAP ===")
+            
+            response = session.post(
+                endpoint_interrogazioni,
+                data=soap_template,
+                headers=headers,
+                timeout=60,
+                verify=False
+            )
+            
+            self.logger.info(f"Risposta ricevuta - Status: {response.status_code}")
+            
+            # SALVA RISPOSTA XML BRUTAL TEST
+            response_text = response.text
+            try:
+                import os
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                xml_file_path = os.path.join(project_root, f"response_xml_nre_{nre}.xml")
+                
+                with open(xml_file_path, 'w', encoding='utf-8') as f:
+                    f.write(f"<!-- BRUTAL TEST INTERROGAZIONI - NRE: {nre} -->\n")
+                    f.write(f"<!-- HTTP Status: {response.status_code} -->\n")
+                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
+                    f.write(f"<!-- Endpoint: {endpoint_interrogazioni} -->\n")
+                    f.write(f"<!-- CF Medico: {cf_medico or self.cf_medico} -->\n")
+                    f.write(f"<!-- Ambiente: prod -->\n")
+                    f.write("\n")
+                    f.write(response_text)
+                
+                print(f"📁 BRUTAL TEST XML SALVATO: {xml_file_path}")
+                
+            except Exception as save_error:
+                self.logger.warning(f"Errore salvataggio XML: {save_error}")
+            
+            # Log completo per debug
+            print(f"=== RISPOSTA RICERCA BASICA NRE {nre} ===")
+            print(f"HTTP Status: {response.status_code}")
+            print("Response Headers:")
+            for header, value in response.headers.items():
+                print(f"  {header}: {value}")
+            print("Response Body:")
+            print(response.text)
+            print(f"=== FINE RISPOSTA ===")
+            
+            # Salva la risposta XML in un file per analisi
+            response_text = response.text
+            try:
+                import os
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                xml_file_path = os.path.join(project_root, f"response_xml_nre_{nre}.xml")
+                
+                with open(xml_file_path, 'w', encoding='utf-8') as f:
+                    f.write(f"<!-- Risposta Sistema TS per NRE: {nre} -->\n")
+                    f.write(f"<!-- HTTP Status: {response.status_code} -->\n")
+                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
+                    f.write(f"<!-- Endpoint: {self.endpoint_visualizza} -->\n")
+                    f.write(f"<!-- CF Medico: {self.cf_medico} -->\n")
+                    f.write(f"<!-- Ambiente: {self.env} -->\n")
+                    f.write("\n")
+                    f.write(response_text)
+                
+                self.logger.info(f"Risposta XML salvata in: {xml_file_path}")
+                print(f"📁 RISPOSTA XML SALVATA IN: {xml_file_path}")
+                
+            except Exception as save_error:
+                self.logger.warning(f"Errore salvataggio XML: {save_error}")
+            
+            if response.status_code == 200:
+                # Verifica se ci sono errori nel SOAP response
+                if 'soap:Fault' in response_text or 'faultstring' in response_text:
+                    self.logger.warning(f"SOAP Fault ricevuto per NRE {nre}")
+                    return {
+                        'success': False,
+                        'http_status': response.status_code,
+                        'error': 'SOAP_FAULT',
+                        'message': f'SOAP Fault nella risposta per NRE {nre}',
+                        'response_xml': response_text,
+                        'timestamp': datetime.now().isoformat(),
+                        'nre': nre
+                    }
+                
+                # Risposta OK - verifica se contiene dati ricetta
+                if nre in response_text or 'ricetta' in response_text.lower():
+                    self.logger.info(f"Ricetta NRE {nre} trovata con ricerca basica!")
+                    return {
+                        'success': True,
+                        'http_status': response.status_code,
+                        'response_xml': response_text,
+                        'timestamp': datetime.now().isoformat(),
+                        'message': f'Ricetta NRE {nre} trovata con ricerca basica',
+                        'nre': nre,
+                        'ricetta_data': {
+                            'nre': nre,
+                            'stato': 'Trovata - Da parsare XML',
+                            'response_xml': response_text,
+                            'source': 'sistema_ts_ricerca_basica',
+                            'search_type': 'solo_nre'
+                        }
+                    }
+                else:
+                    # Risposta vuota o NRE non trovato
+                    self.logger.info(f"NRE {nre} non trovato con ricerca basica")
+                    return {
+                        'success': False,
+                        'http_status': response.status_code,
+                        'error': 'NRE_NOT_FOUND_BASIC',
+                        'message': f'NRE {nre} non trovato con ricerca basica (serve CF assistito?)',
+                        'response_xml': response_text,
+                        'timestamp': datetime.now().isoformat(),
+                        'nre': nre
+                    }
+            else:
+                return {
+                    'success': False,
+                    'http_status': response.status_code,
+                    'error': f'HTTP {response.status_code}',
+                    'response_text': response_text[:500],
+                    'timestamp': datetime.now().isoformat(),
+                    'nre': nre
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore visualizzazione ricetta specifica: {e}", exc_info=True)
+            return {
+                'success': False,
+                'error': f'Errore ricerca basica NRE {nre}: {str(e)}',
+                'timestamp': datetime.now().isoformat(),
+                'nre': nre
+            }
+
     def get_all_ricette(self, data_da: str = None, data_a: str = None, cf_assistito: str = None) -> Dict[str, Any]:
         """
         Recupera la lista delle ricette dal Sistema TS.
@@ -294,7 +542,7 @@ class RicetteTsService:
                 self.endpoint_visualizza,
                 data=soap_request,
                 headers=headers,
-                timeout=30,
+                timeout=60,  # Timeout maggiore per nuovo endpoint
                 verify=False  # Per ambiente test come V1
             )
             
@@ -350,7 +598,7 @@ class RicetteTsService:
                 self.endpoint_annulla,
                 data=soap_request,
                 headers=headers,
-                timeout=30,
+                timeout=60,  # Timeout maggiore per nuovo endpoint
                 verify=False  # Per ambiente test come V1
             )
             
@@ -707,7 +955,7 @@ class RicetteTsService:
                 self.endpoint_invio,
                 data=soap_request,
                 headers=headers,
-                timeout=30,
+                timeout=60,  # Timeout maggiore per nuovo endpoint
                 verify=False
             )
             

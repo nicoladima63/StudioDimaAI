@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { CButton, CBadge } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilList, cilDollar } from '@coreui/icons';
 
 import DataTable, { DataTableColumn } from '@/components/tables/DataTable';
 import type { Fornitore } from '@/store/fornitori.store';
+import ClassificazioneToggle from './ClassificazioneToggle';
+import ClassificazioneStatus from './ClassificazioneStatus';
+import classificazioniService from '../services/classificazioni.service';
+import type { ClassificazioneCosto } from '../types';
 
 interface FornitoriTableProps {
   fornitori: Fornitore[];

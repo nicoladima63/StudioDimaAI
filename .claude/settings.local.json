@@ -23,7 +23,9 @@
       "Bash(copy:*)",
       "Bash(cp:*)",
       "Bash(mkdir:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Read(/C:\\Users\\gengi\\Desktop\\Kit per lo sviluppo - A2F Ricetta Bianca Elettronica non a carico SSN - ver. 20231127/**)",
+      "Read(/C:\\Users\\gengi\\Desktop\\kit sviluppo rne\\kit-sviluppo-demErogatore\\kit-sviluppo-demErogatore-20240219/**)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
