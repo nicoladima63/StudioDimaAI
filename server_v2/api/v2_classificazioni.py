@@ -19,7 +19,170 @@ logger = logging.getLogger(__name__)
 # Create blueprint
 classificazioni_v2_bp = Blueprint('classificazioni_v2', __name__)
 
+#FORNITORI
+@classificazioni_v2_bp.route('/classificazioni/fornitori', methods=['GET'])
+@jwt_required()
+def get_fornitori_classificati():
+    """
+    Ottiene tutti i fornitori classificati
+    """
+    try:
+        user_id = require_auth()
+        
+        classificazioni_service = ClassificazioniService()
+        fornitori = classificazioni_service.get_fornitori_classificati()
+        
+        return jsonify({
+            "success": True,
+            "data": fornitori,
+            "count": len(fornitori)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
+@classificazioni_v2_bp.route('/classificazioni/fornitore/<fornitore_id>', methods=['PUT'])
+@jwt_required()
+def classifica_fornitore(fornitore_id):
+    """
+    Classify a supplier (create/update).
+    """
+    try:
+        user_id = require_auth()
+        
+        # Validate request data
+        if not request.is_json:
+            return jsonify({
+                "success": False,
+                "error": "Content-Type must be application/json"
+            }), 400
+        
+        data = request.get_json()
+        
+        # Get classification service
+        classificazioni_service = ClassificazioniService()
+        
+        # Support both legacy and new hierarchical classification
+        if 'contoid' in data:
+            # New hierarchical format
+            contoid = data.get('contoid')
+            if not contoid:
+                return jsonify({
+                    "success": False,
+                    "error": "contoid is required for hierarchical classification"
+                }), 400
+                
+            result = classificazioni_service.classifica_fornitore_completo(
+                codice_fornitore=fornitore_id,
+                contoid=contoid,
+                brancaid=data.get('brancaid', 0),
+                sottocontoid=data.get('sottocontoid', 0),
+                note=data.get('note'),
+                fornitore_nome=data.get('fornitore_nome')
+            )
+        else:
+            # Legacy format with tipo_di_costo
+            tipo_di_costo = data.get('tipo_di_costo')
+            if tipo_di_costo not in [1, 2, 3]:
+                return jsonify({
+                    "success": False,
+                    "error": "tipo_di_costo must be 1 (direct), 2 (indirect) or 3 (non_deductible)"
+                }), 400
+                
+            result = classificazioni_service.classifica_fornitore(
+                codice_fornitore=fornitore_id,
+                tipo_di_costo=tipo_di_costo,
+                categoria=data.get('categoria'),
+                note=data.get('note')
+            )
+        
+        if result:
+            # Get updated classification
+            classificazione = classificazioni_service.get_classificazione_fornitore(fornitore_id)
+            return jsonify({
+                "success": True,
+                "data": classificazione,
+                "message": "Supplier classified successfully"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Error classifying supplier"
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@classificazioni_v2_bp.route('/classificazioni/fornitore/<fornitore_id>', methods=['GET'])
+@jwt_required()
+def get_classificazione_fornitore(fornitore_id):
+    """
+    Get supplier classification.
+    """
+    try:
+        user_id = require_auth()
+        
+        # Get classification using service layer
+        classificazioni_service = ClassificazioniService()
+        classificazione = classificazioni_service.get_classificazione_fornitore(fornitore_id)
+        
+        if classificazione:
+            return jsonify({
+                "success": True,
+                "data": classificazione,
+                "message": "Supplier classification retrieved successfully"
+            }), 200
+        else:
+            return jsonify({
+                "success": True,
+                "data": None,
+                "message": "Supplier not classified"
+            }), 200
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@classificazioni_v2_bp.route('/classificazioni/fornitore/<fornitore_id>', methods=['DELETE'])
+@jwt_required()
+def rimuovi_classificazione_fornitore(fornitore_id):
+    """
+    Remove supplier classification.
+    """
+    try:
+        user_id = require_auth()
+        
+        # Remove classification using service layer
+        classificazioni_service = ClassificazioniService()
+        success = classificazioni_service.rimuovi_classificazione_fornitore(fornitore_id)
+        
+        if success:
+            return jsonify({
+                "success": True,
+                "message": "Supplier classification removed successfully"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Classification not found or error in removal"
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+#CONTI BRANCHE SOTTOCONTI
 @classificazioni_v2_bp.route('/classificazioni/conti', methods=['GET'])
 @jwt_required()
 def get_conti():
@@ -57,7 +220,6 @@ def get_conti():
             success=False,
             error="An unexpected error occurred"
         ), 500
-
 
 @classificazioni_v2_bp.route('/classificazioni/branche/<int:conto_id>', methods=['GET'])
 @jwt_required()
@@ -107,7 +269,6 @@ def get_branche(conto_id):
             error="An unexpected error occurred"
         ), 500
 
-
 @classificazioni_v2_bp.route('/classificazioni/sottoconti/<int:branca_id>', methods=['GET'])
 @jwt_required()
 def get_sottoconti(branca_id):
@@ -155,7 +316,6 @@ def get_sottoconti(branca_id):
             success=False,
             error="An unexpected error occurred"
         ), 500
-
 
 @classificazioni_v2_bp.route('/classificazioni/auto-suggest', methods=['POST'])
 @jwt_required()
@@ -224,7 +384,6 @@ def auto_suggest_classification():
             success=False,
             error="An unexpected error occurred"
         ), 500
-
 
 @classificazioni_v2_bp.route('/classificazioni/learn', methods=['POST'])
 @jwt_required()
@@ -299,7 +458,6 @@ def learn_classification():
             success=False,
             error="An unexpected error occurred"
         ), 500
-
 
 @classificazioni_v2_bp.route('/classificazioni/stats', methods=['GET'])
 @jwt_required()

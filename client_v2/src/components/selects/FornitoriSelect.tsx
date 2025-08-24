@@ -65,6 +65,11 @@ const FornitoriSelect: React.FC<FornitoriSelectProps> = ({
       setSearchTerm("");
     }
   }, [isOpen]);
+  
+  // Reset search quando cambia il value dall'esterno
+  useEffect(() => {
+    setSearchTerm("");
+  }, [value]);
 
   // Trova il fornitore selezionato per mostrare il nome
   const selectedFornitore = value ? fornitori.find(f => f.id === value) : null;
@@ -109,8 +114,8 @@ const FornitoriSelect: React.FC<FornitoriSelectProps> = ({
         <input
           type="text"
           className="form-control"
-          placeholder={selectedFornitore ? `${selectedFornitore.nome} ${selectedFornitore.codice ? `(${selectedFornitore.codice})` : ''}` : placeholder}
-          value={searchTerm}
+          placeholder={placeholder}
+          value={searchTerm || (selectedFornitore && !isOpen ? `${selectedFornitore.nome} ${selectedFornitore.codice ? `(${selectedFornitore.codice})` : ''}` : '')}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsOpen(true)}
           onBlur={() => setTimeout(() => setIsOpen(false), 200)}

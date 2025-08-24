@@ -178,6 +178,38 @@ const DataTable = <T extends Record<string, any>>({
   const [visibleColumns, setVisibleColumns] = useState(columnConfig.visible);
   const [orderedColumns, setOrderedColumns] = useState(columnConfig.order);
   
+  // Stato per resize colonne
+  const [columnWidths, setColumnWidths] = useState<Map<keyof T, number>>(() => {
+    const savedWidths = localStorage.getItem(`table-widths-${tableId}`);
+    try {
+      if (savedWidths) {
+        const parsed = JSON.parse(savedWidths);
+        return new Map(Object.entries(parsed));
+      }
+    } catch (error) {
+      console.warn('Errore caricamento larghezze colonne:', error);
+    }
+    return new Map();
+  });
+  
+  // Salva larghezze colonne
+  const saveColumnWidths = (widths: Map<keyof T, number>) => {
+    if (!tableId) return;
+    
+    try {
+      const widthsObj = Object.fromEntries(widths);
+      localStorage.setItem(`table-widths-${tableId}`, JSON.stringify(widthsObj));
+    } catch (error) {
+      console.warn('Errore salvataggio larghezze colonne:', error);
+    }
+  };
+  
+  // Stato per resize drag
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeColumn, setResizeColumn] = useState<keyof T | null>(null);
+  const [resizeStartX, setResizeStartX] = useState(0);
+  const [resizeStartWidth, setResizeStartWidth] = useState(0);
+  
   // Aggiorna quando cambiano le colonne
   React.useEffect(() => {
     const newConfig = loadColumnConfig();
@@ -196,6 +228,70 @@ const DataTable = <T extends Record<string, any>>({
     saveColumnConfig(newVisible, orderedColumns);
   };
   
+  // Funzioni per resize colonne
+  const handleResizeStart = (e: React.MouseEvent, columnKey: keyof T) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const currentWidth = columnWidths.get(columnKey) || 150; // Default width se non salvata
+    
+    setIsResizing(true);
+    setResizeColumn(columnKey);
+    setResizeStartX(e.clientX);
+    setResizeStartWidth(currentWidth);
+    
+    // Aggiungi classe per disabilitare selezione
+    document.body.classList.add('resizing');
+    
+    // Aggiungi event listeners globali
+    document.addEventListener('mousemove', handleResizeMove);
+    document.addEventListener('mouseup', handleResizeEnd);
+  };
+  
+  const handleResizeMove = (e: MouseEvent) => {
+    if (!isResizing || !resizeColumn) return;
+    
+    const deltaX = e.clientX - resizeStartX;
+    const newWidth = Math.max(50, resizeStartWidth + deltaX); // Larghezza minima 50px
+    
+    const newWidths = new Map(columnWidths);
+    newWidths.set(resizeColumn, newWidth);
+    setColumnWidths(newWidths);
+  };
+  
+  const handleResizeEnd = () => {
+    if (isResizing && resizeColumn) {
+      saveColumnWidths(columnWidths);
+    }
+    
+    setIsResizing(false);
+    setResizeColumn(null);
+    setResizeStartX(0);
+    setResizeStartWidth(0);
+    
+    // Rimuovi classe per riabilitare selezione
+    document.body.classList.remove('resizing');
+    
+    // Rimuovi event listeners globali
+    document.removeEventListener('mousemove', handleResizeMove);
+    document.removeEventListener('mouseup', handleResizeEnd);
+  };
+  
+  // Cleanup event listeners
+  React.useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleResizeMove);
+      document.removeEventListener('mouseup', handleResizeEnd);
+    };
+  }, []);
+  
+  // Ottieni larghezza di una colonna
+  const getColumnWidth = (column: DataTableColumn<T>) => {
+    const savedWidth = columnWidths.get(column.key);
+    if (savedWidth) return `${savedWidth}px`;
+    return column.width || 'auto';
+  };
+
   // Sposta colonna (drag & drop) - lavora con l'ordine completo delle colonne
   const moveColumn = (fromVisibleIndex: number, toVisibleIndex: number) => {
     const visibleCols = orderedColumns.filter(col => visibleColumns.has(col.key));
@@ -791,12 +887,12 @@ const DataTable = <T extends Record<string, any>>({
                       onDragOver={!isActionsColumn ? handleDragOver : undefined}
                       onDrop={!isActionsColumn ? (e) => handleDrop(e, index) : undefined}
                       style={{
-                        width: isActionsColumn && !isLastColumn ? 'auto' : column.width,
+                        width: isActionsColumn && !isLastColumn ? 'auto' : getColumnWidth(column),
                         cursor: column.sortable ? 'pointer' : 'default',
                         userSelect: 'none',
                         opacity: draggedColumn === index ? 0.5 : 1,
-                        transition: 'opacity 0.2s ease',
                         position: 'relative',
+                        transition: 'opacity 0.2s ease',
                         textAlign: headerAlign as any
                       }}
                       onClick={() => column.sortable && handleSort(column.key)}
@@ -813,6 +909,30 @@ const DataTable = <T extends Record<string, any>>({
                         <span>{column.label}</span>
                         {getSortIcon(column.key)}
                       </div>
+                      
+                      {/* Resize handle */}
+                      {!isActionsColumn && (
+                        <div
+                          className="resize-handle"
+                          onMouseDown={(e) => handleResizeStart(e, column.key)}
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: '4px',
+                            cursor: 'col-resize',
+                            backgroundColor: 'transparent',
+                            zIndex: 10,
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.target as HTMLElement).style.backgroundColor = 'rgba(0, 123, 255, 0.3)';
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.target as HTMLElement).style.backgroundColor = 'transparent';
+                          }}
+                        />
+                      )}
                     </CTableHeaderCell>
                   );
                 })}

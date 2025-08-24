@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { CRow, CCol, CSpinner, CBadge, CButton, CTooltip } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilSave } from '@coreui/icons';
-import SelectConto from '@/components/selects/ContiSelect';
-import  SelectBranca  from '@/components/selects/BrancheSelect';
-import  SelectSottoconto  from '@/components/selects/SottocontiSelect';
+import ContiSelect from '@/components/selects/ContiSelect';
+import BrancheSelect from '@/components/selects/BrancheSelect';
+import SottocontiSelect from '@/components/selects/SottocontiSelect';
 import classificazioniService from '../services/classificazioni.service';
-import type { ClassificazioneCosto } from '@/types/classifcazioni.types';
+import type { ClassificazioneCosto } from '../types';
 
 interface ClassificazioneGerarchicaProps {
   fornitoreId?: string;
@@ -78,8 +78,8 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
           );
         }
         
-        console.log('✅ Classificazione salvata con successo!');
         
+        // Aggiorna immediatamente il callback con i nuovi valori per feedback immediato
         if (onClassificazioneChange) {
           onClassificazioneChange(contoId, brancaId, newSottocontoId);
         }
@@ -117,8 +117,8 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
           }
           
           setSottocontoId(0);
-          console.log('💾 Classificazione parziale salvata (conto + branca)');
           
+          // Aggiorna immediatamente il callback per feedback immediato
           if (onClassificazioneChange) {
             onClassificazioneChange(contoId, brancaId, 0);
           }
@@ -142,8 +142,8 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
           setBrancaId(0);
           setSottocontoId(0);
           
-          console.log('💾 Classificazione parziale salvata (solo conto)');
           
+          // Aggiorna immediatamente il callback per feedback immediato
           if (onClassificazioneChange) {
             onClassificazioneChange(contoId, 0, 0);
           }
@@ -163,7 +163,7 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
       {/* Conto */}
       <div className="d-flex gap-2 align-items-center">
         <div style={{ flex: 1 }}>
-          <SelectConto 
+          <ContiSelect 
             value={contoId}
             onChange={handleContoChange}
             autoSelectIfSingle
@@ -189,7 +189,7 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
       {contoId && (
         <div className="d-flex gap-2 align-items-center">
           <div style={{ flex: 1 }}>
-            <SelectBranca
+            <BrancheSelect
               contoId={contoId}
               value={brancaId}
               onChange={handleBrancaChange}
@@ -216,7 +216,7 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
       {/* Sottoconto - appare solo dopo selezione branca */}
       {brancaId && (
         <div>
-          <SelectSottoconto
+          <SottocontiSelect
             brancaId={brancaId}
             value={sottocontoId}
             onChange={handleSottocontoChange}

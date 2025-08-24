@@ -25,6 +25,28 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
   onView,
   onViewSpese
 }) => {
+  // Stato per le classificazioni (come nel V1)
+  const [classificazioni, setClassificazioni] = useState<Map<string, ClassificazioneCosto>>(new Map());
+
+  // Carica classificazioni all'avvio
+  useEffect(() => {
+    fetchClassificazioni();
+  }, []);
+
+  const fetchClassificazioni = async () => {
+    try {
+      const response = await classificazioniService.getFornitoriClassificati();
+      if (response.success) {
+        const classMap = new Map<string, ClassificazioneCosto>();
+        response.data.forEach(c => {
+          classMap.set(c.codice_riferimento, c);
+        });
+        setClassificazioni(classMap);
+      }
+    } catch (error) {
+      console.error("Errore nel caricamento classificazioni:", error);
+    }
+  };
 
   const columns: DataTableColumn<Fornitore>[] = [
     {
@@ -68,26 +90,67 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       order: 5,
     },
     {
-      key: 'classificazione_status',
-      label: 'Classificazione',
+      key: 'classificazione_toggle',
+      label: 'Tipo Costo',
       sortable: false,
-      width: '15%',
+      width: '180px',
       defaultVisible: true,
       order: 6,
-      render: (value, item) => {
-        // Determina lo stato della classificazione dal campo classificazione
-        const classificazione = item.classificazione;
-        
-        if (!classificazione || !classificazione.is_classificato) {
-          return <CBadge color="danger">Non classificato</CBadge>;
-        }
-        
-        if (classificazione.is_completo) {
-          return <CBadge color="success">Completo</CBadge>;
-        } else {
-          return <CBadge color="warning">Parziale</CBadge>;
-        }
-      }
+      render: (value, item) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <ClassificazioneToggle 
+            fornitoreId={item.id}
+            classificazioneIniziale={classificazioni.get(item.id)}
+            onClassificazioneChange={(nuovaClassificazione) => {
+              const newMap = new Map(classificazioni);
+              if (nuovaClassificazione) {
+                newMap.set(item.id, nuovaClassificazione);
+              } else {
+                newMap.delete(item.id);
+              }
+              setClassificazioni(newMap);
+            }}
+          />
+        </div>
+      )
+    },
+    {
+      key: 'classificazione_gerarchica',
+      label: 'Classificazione Gerarchica',
+      sortable: false,
+      width: '550px',
+      defaultVisible: true,
+      order: 7,
+      render: (value, item) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <ClassificazioneStatus
+            fornitoreId={item.id}
+            fornitoreNome={item.nome}
+            classificazione={classificazioni.get(item.id) || null}
+            onClassificazioneChange={(contoid, brancaid, sottocontoid) => {
+              // Aggiorna la classificazione locale
+              const classificazione = classificazioni.get(item.id);
+              const updatedClassificazione = {
+                ...(classificazione || {}), // Gestisce il caso di classificazione undefined
+                codice_riferimento: item.id, // Campo fondamentale per la chiave
+                contoid,
+                brancaid,
+                sottocontoid,
+                data_modifica: new Date().toISOString(),
+                // Campi di default se non esistono
+                tipo_di_costo: classificazione?.tipo_di_costo || 1,
+                fornitore_nome: item.nome
+              } as ClassificazioneCosto;
+              
+              // Forza un nuovo Map reference per triggere React re-render
+              setClassificazioni(new Map([
+                ...classificazioni,
+                [item.id, updatedClassificazione]
+              ]));
+            }}
+          />
+        </div>
+      )
     },
     // Colonna Azioni (sempre visibile e non draggable)
     {
@@ -96,7 +159,7 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       sortable: false,
       width: '100px',
       defaultVisible: true,
-      order: 99, // Ultima colonna
+      order: 8, // Dopo le classificazioni
       render: (value, item) => (
         <div className="d-flex gap-1 justify-content-end">
           {onView && (

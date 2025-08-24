@@ -4,7 +4,7 @@ import CIcon from "@coreui/icons-react";
 import { cilPencil, cilTrash, cilPlus } from "@coreui/icons";
 import ClassificazioneGerarchica from "./ClassificazioneGerarchica";
 import type { ClassificazioneCosto } from "../types";
-import { useConti, useBranche, useSottoconti } from "@/store/contiStore";
+import { useConti, useBranche, useSottoconti } from "@/store/conti.store";
 
 interface ClassificazioneStatusProps {
   fornitoreId: string;
@@ -136,7 +136,7 @@ const ClassificazioneStatus: React.FC<ClassificazioneStatusProps> = ({
             if (onClassificazioneChange) {
               onClassificazioneChange(contoid, brancaid, sottocontoid);
             }
-            setShowEdit(false); // Chiudi la modalità edit dopo QUALSIASI salvataggio (completo o parziale)
+            setShowEdit(false); // Chiudi immediatamente dato che ora abbiamo feedback immediato
           }}
         />
         <CButton

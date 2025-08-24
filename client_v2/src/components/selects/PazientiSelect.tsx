@@ -54,6 +54,11 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
       setSearchTerm("");
     }
   }, [isOpen]);
+  
+  // Reset search quando cambia il value dall'esterno
+  useEffect(() => {
+    setSearchTerm("");
+  }, [value]);
 
   // Trova il paziente selezionato per mostrare il nome
   const selectedPaziente = value ? allPazienti.find(p => p.id === value) : null;
@@ -98,8 +103,8 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
         <input
           type="text"
           className="form-control"
-          placeholder={selectedPaziente ? `${selectedPaziente.nome} ${selectedPaziente.codice_fiscale ? `(${selectedPaziente.codice_fiscale})` : ''}` : placeholder}
-          value={searchTerm}
+          placeholder={placeholder}
+          value={searchTerm || (selectedPaziente && !isOpen ? `${selectedPaziente.nome} ${selectedPaziente.codice_fiscale ? `(${selectedPaziente.codice_fiscale})` : ''}` : '')}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsOpen(true)}
           onBlur={() => setTimeout(() => setIsOpen(false), 200)}
