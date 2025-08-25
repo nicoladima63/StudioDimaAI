@@ -34,7 +34,7 @@ PAZIENTI_FIELDS = {
     'cap': 'DB_PACAP',
     'note': 'DB_NOTE',
     'ultima_visita': 'DB_PAULTVI',
-    'mesi_richiamo': 'DB_PARITAR',
+    'tempo_richiamo': 'DB_PARITAR',
     'tipo_richiamo': 'DB_PARIMOT',
     'da_richiamare': 'DB_PARICHI',
     'non_in_cura': 'DB_PANONCU'
@@ -167,6 +167,9 @@ class PazientiService(BaseService):
             if filters:
                 pazienti_raw = self._apply_filters(pazienti_raw, filters)
             
+            # Merge with richiami table data
+            pazienti_raw = self._merge_with_richiami_data(pazienti_raw)
+            
             # Calculate pagination
             total = len(pazienti_raw)
             start = (page - 1) * per_page
@@ -272,7 +275,7 @@ class PazientiService(BaseService):
                 elif field_name in ['data_nascita', 'ultima_visita']:
                     # Convert date fields if needed
                     paziente[field_name] = self._format_date_field(value)
-                elif field_name in ['mesi_richiamo']:
+                elif field_name in ['tempo_richiamo']:
                     paziente[field_name] = int(value) if value and str(value).isdigit() else None
                 elif field_name in ['non_in_cura']:
                     paziente[field_name] = bool(value) if value else False
@@ -328,6 +331,78 @@ class PazientiService(BaseService):
                        if p.get('non_in_cura') != in_cura]
         
         return filtered
+
+    def _merge_with_richiami_data(self, pazienti: List[Dict]) -> List[Dict]:
+        """Merge pazienti data with richiami table data."""
+        if not pazienti:
+            return pazienti
+        
+        try:
+            # Get all paziente IDs
+            paziente_ids = [p['id'] for p in pazienti if p.get('id')]
+            if not paziente_ids:
+                return pazienti
+            
+            # Query richiami table for these patients
+            placeholders = ','.join(['?' for _ in paziente_ids])
+            query = f"""
+                SELECT paziente_id, nome, data_ultima_visita, data_richiamo, 
+                       tipo_richiamo, tempo_richiamo, da_richiamare, richiamato_il, sms_sent
+                FROM richiami 
+                WHERE paziente_id IN ({placeholders})
+            """
+            
+            richiami_data = {}
+            try:
+                import sqlite3
+                db_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), 
+                    'instance', 
+                    'studio_dima.db'
+                )
+                
+                if os.path.exists(db_path):
+                    conn = sqlite3.connect(db_path)
+                    conn.row_factory = sqlite3.Row
+                    cursor = conn.cursor()
+                    cursor.execute(query, paziente_ids)
+                    
+                    for row in cursor.fetchall():
+                        richiami_data[row['paziente_id']] = dict(row)
+                    
+                    conn.close()
+            except Exception as e:
+                self.logger.warning(f"Could not fetch richiami data: {e}")
+            
+            # Merge data for each paziente
+            for paziente in pazienti:
+                paziente_id = paziente.get('id')
+                if not paziente_id:
+                    continue
+                
+                richiamo = richiami_data.get(paziente_id)
+                if richiamo:
+                    # Patient exists in richiami table - use that data
+                    paziente['is_in_richiami_table'] = True
+                    paziente['tipo_richiamo_gestionale'] = paziente.get('tipo_richiamo')  # Keep original
+                    paziente['tipo_richiamo'] = richiamo['tipo_richiamo']
+                    paziente['tempo_richiamo'] = richiamo['tempo_richiamo']
+                    paziente['da_richiamare'] = richiamo['da_richiamare']
+                    paziente['data_richiamo'] = richiamo['data_richiamo']
+                    paziente['richiamato_il'] = richiamo['richiamato_il']
+                    paziente['sms_sent'] = richiamo['sms_sent']
+                    if richiamo['data_ultima_visita']:
+                        paziente['ultima_visita'] = richiamo['data_ultima_visita']
+                else:
+                    # Patient not in richiami table - use gestionale data
+                    paziente['is_in_richiami_table'] = False
+                    paziente['tipo_richiamo_gestionale'] = paziente.get('tipo_richiamo')
+            
+            return pazienti
+            
+        except Exception as e:
+            self.logger.error(f"Error merging richiami data: {e}")
+            return pazienti
 
     def _get_pazienti_dbf_path(self) -> str:
         """Get path to pazienti DBF file."""

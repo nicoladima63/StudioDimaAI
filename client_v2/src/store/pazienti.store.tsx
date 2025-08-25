@@ -22,11 +22,14 @@ export interface Paziente {
   provincia?: string;
   cap?: string;
   note?: string;
-  ultima_visita?: string; // ISO date string
-  mesi_richiamo?: number;
-  tipo_richiamo?: string;
-  da_richiamare?: string; // 1 carattere: S=si
-  non_in_cura?: boolean;
+  ultima_visita?: string; // ISO date string - DB_PAULTVI
+  richiamo?: string; // DB_PARICHI stringa 1 carattere s se si vuoto se non impostato
+  tempo_richiamo?: number; // DB_PARITAR in mesi= intervallo di tempo per ogni richiamo
+  tipo_richiamo?: string; // DB_PARIMOT due numeri base 10 che rappresentano il tipo di richiamo;21= richiamo igiene=2 e richiamo generico=1, quindi sono due valori
+  non_in_cura?: boolean; // DB_PANONCU
+  da_richiamare?: string; // DB_PARICHI - S=da richiamare, N=non richiamare, R=richiamato
+  data_primo_richiamo?: string; // DB_PAMODA1 - ISO date string
+  data_secondo_richiamo?: string; // DB_PAMODA2 - ISO date string
 }
 
 interface PazientiState {
@@ -50,6 +53,12 @@ interface PazientiState {
   loadAllPazienti: () => Promise<void>;
   searchPazienti: (term: string) => void;
   getPazienteById: (id: string) => Paziente | undefined;
+  
+  // Gestione richiami
+  updateRichiamoStatus: (pazienteId: string, status: string, dataRichiamo?: string) => void;
+  getRichiamiDaFare: () => Paziente[];
+  getRichiamiScaduti: () => Paziente[];
+  calcolaProximoRichiamo: (paziente: Paziente) => Date | null;
   
   // Utilità
   invalidateCache: () => void;
@@ -198,6 +207,66 @@ export const usePazientiStore = create<PazientiState>()(
       getPazienteById: (id: string) => {
         const { pazientiMap } = get();
         return pazientiMap[id];
+      },
+
+      // Gestione richiami
+      updateRichiamoStatus: (pazienteId: string, status: string, dataRichiamo?: string) => {
+        const { pazienti, pazientiMap } = get();
+        const paziente = pazientiMap[pazienteId];
+        if (!paziente) return;
+
+        const updatedPaziente = {
+          ...paziente,
+          da_richiamare: status,
+          ...(dataRichiamo && status === 'R' && {
+            data_primo_richiamo: dataRichiamo
+          })
+        };
+
+        const updatedPazienti = pazienti.map(p => 
+          p.id === pazienteId ? updatedPaziente : p
+        );
+
+        const updatedMap = { ...pazientiMap, [pazienteId]: updatedPaziente };
+
+        set({
+          pazienti: updatedPazienti,
+          pazientiMap: updatedMap,
+          filteredPazienti: get().searchTerm ? 
+            updatedPazienti.filter(p => 
+              p.nome.toLowerCase().includes(get().searchTerm.toLowerCase()) ||
+              (p.codice_fiscale && p.codice_fiscale.toLowerCase().includes(get().searchTerm.toLowerCase()))
+            ) : updatedPazienti
+        });
+      },
+
+      getRichiamiDaFare: () => {
+        const { pazienti } = get();
+        return pazienti.filter(p => p.da_richiamare === 'S');
+      },
+
+      getRichiamiScaduti: () => {
+        const { pazienti } = get();
+        const oggi = new Date();
+        return pazienti.filter(p => {
+          if (!p.ultima_visita || !p.tempo_richiamo || p.da_richiamare !== 'S') return false;
+          
+          const ultimaVisita = new Date(p.ultima_visita);
+          const prossimo = new Date(ultimaVisita);
+          prossimo.setMonth(prossimo.getMonth() + p.tempo_richiamo);
+          
+          return oggi > prossimo;
+        });
+      },
+
+      calcolaProximoRichiamo: (paziente: Paziente) => {
+        if (!paziente.ultima_visita || !paziente.tempo_richiamo) return null;
+        
+        const ultimaVisita = new Date(paziente.ultima_visita);
+        const prossimo = new Date(ultimaVisita);
+        prossimo.setMonth(prossimo.getMonth() + paziente.tempo_richiamo);
+        
+        return prossimo;
       },
 
       // Invalidate cache - Pattern da FornitoriStore

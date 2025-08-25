@@ -139,6 +139,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_classificazioni import classificazioni_v2_bp
     from api.v2_conti import conti_v2_bp
     from api.v2_ricetta import ricetta_bp
+    from api.v2_sms import sms_v2_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -150,7 +151,8 @@ def register_blueprints(app: Flask) -> None:
         statistiche_v2_bp,
         classificazioni_v2_bp,
         conti_v2_bp,
-        ricetta_bp
+        ricetta_bp,
+        sms_v2_bp
     ]
     
     for i, blueprint in enumerate(blueprints):

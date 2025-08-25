@@ -56,33 +56,64 @@
   border-radius: 0.275rem;
 }
 
-/* Column resize styles */
-.data-table th {
-  position: relative;
+/* Column resize styles - Specifico per sovrascrivere Bootstrap */
+.data-table .table > thead > tr > th {
+  position: relative !important;
+  border-right: 1px solid #dee2e6 !important; /* Separatori visibili */
+  min-width: 50px !important;
+}
+
+.data-table .table > tbody > tr > td {
+  border-right: 1px solid #dee2e6 !important; /* Separatori visibili */
+  min-width: 50px !important;
+}
+
+/* Rimuovi bordo destro dall'ultima colonna per evitare doppio bordo */
+.data-table .table > thead > tr > th:last-child,
+.data-table .table > tbody > tr > td:last-child {
+  border-right: none !important;
 }
 
 .data-table .resize-handle {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  cursor: col-resize;
-  background-color: transparent;
-  z-index: 10;
-  transition: background-color 0.2s ease;
+  position: absolute !important;
+  right: -2px !important; /* Centra sul separatore */
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 6px !important; /* Leggermente più largo */
+  cursor: col-resize !important;
+  background-color: transparent !important;
+  z-index: 10 !important;
+  transition: background-color 0.2s ease !important;
 }
 
 .data-table .resize-handle:hover {
-  background-color: rgba(0, 123, 255, 0.3) !important;
+  background-color: rgba(0, 123, 255, 0.4) !important;
+  border-right: 2px solid #007bff !important;
 }
 
 .data-table .resize-handle:active {
-  background-color: rgba(0, 123, 255, 0.5) !important;
+  background-color: rgba(0, 123, 255, 0.6) !important;
+  border-right: 2px solid #0056b3 !important;
+}
+
+/* Forza le larghezze dinamiche */
+.data-table .table[style*="table-layout"] {
+  table-layout: fixed !important;
+}
+
+.data-table .table > thead > tr > th[style*="width"],
+.data-table .table > tbody > tr > td[style*="width"] {
+  width: var(--column-width) !important;
+  max-width: var(--column-width) !important;
+  min-width: 50px !important;
 }
 
 /* Prevent text selection during resize */
 body.resizing {
-  user-select: none;
-  cursor: col-resize;
+  user-select: none !important;
+  cursor: col-resize !important;
+}
+
+body.resizing * {
+  user-select: none !important;
 }

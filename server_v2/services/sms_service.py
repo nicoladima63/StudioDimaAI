@@ -335,6 +335,177 @@ class SMSService:
         
         return clean
     
+    def send_recall_sms(self, richiamo_data: Dict[str, Any], 
+                       custom_message: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Invia SMS di richiamo basato sui dati del richiamo
+        
+        Args:
+            richiamo_data: Dati del richiamo dal database
+            custom_message: Messaggio personalizzato (opzionale)
+            
+        Returns:
+            Risultato invio SMS
+        """
+        try:
+            if not richiamo_data:
+                return {
+                    'success': False,
+                    'error': 'RICHIAMO_DATA_MISSING',
+                    'message': 'Dati richiamo mancanti'
+                }
+            
+            # Estrai dati necessari
+            telefono = richiamo_data.get('telefono')
+            nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
+            tipo_richiamo = richiamo_data.get('tipo_richiamo', 'controllo')
+            
+            if not telefono:
+                return {
+                    'success': False,
+                    'error': 'PHONE_MISSING',
+                    'message': 'Numero telefono non trovato nel richiamo'
+                }
+            
+            # Usa messaggio personalizzato o genera da template
+            if custom_message:
+                message = custom_message
+            else:
+                message = self._generate_recall_message(richiamo_data)
+            
+            return self.send_sms(telefono, message, tag='richiamo')
+            
+        except Exception as e:
+            logger.error(f"Errore invio SMS richiamo: {e}")
+            return {
+                'success': False,
+                'error': 'RECALL_SMS_ERROR',
+                'message': f'Errore invio SMS richiamo: {str(e)}'
+            }
+    
+    def send_bulk_recall_sms(self, richiami_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Invia SMS di richiamo in blocco
+        
+        Args:
+            richiami_data: Lista dati richiami
+            
+        Returns:
+            Risultato invio bulk con dettagli per ogni richiamo
+        """
+        if not richiami_data:
+            return {
+                'success': False,
+                'error': 'NO_RICHIAMI',
+                'message': 'Nessun richiamo specificato'
+            }
+        
+        results = []
+        successful = 0
+        failed = 0
+        
+        for richiamo in richiami_data:
+            result = self.send_recall_sms(richiamo)
+            results.append({
+                'richiamo_id': richiamo.get('id'),
+                'paziente_id': richiamo.get('paziente_id'),
+                'telefono': richiamo.get('telefono'),
+                'nome': richiamo.get('nome'),
+                'success': result['success'],
+                'message_id': result.get('message_id'),
+                'error': result.get('error'),
+                'message': result.get('message')
+            })
+            
+            if result['success']:
+                successful += 1
+            else:
+                failed += 1
+        
+        return {
+            'success': failed == 0,
+            'total_richiami': len(richiami_data),
+            'successful_sends': successful,
+            'failed_sends': failed,
+            'environment': self._current_environment.value,
+            'results': results,
+            'message': f'Invio richiami completato: {successful} successi, {failed} errori'
+        }
+    
+    def preview_recall_message(self, richiamo_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Genera anteprima messaggio richiamo senza inviarlo
+        
+        Args:
+            richiamo_data: Dati del richiamo
+            
+        Returns:
+            Anteprima messaggio con statistiche
+        """
+        try:
+            if not richiamo_data:
+                return {
+                    'success': False,
+                    'error': 'RICHIAMO_DATA_MISSING',
+                    'message': 'Dati richiamo mancanti'
+                }
+            
+            message = self._generate_recall_message(richiamo_data)
+            
+            return {
+                'success': True,
+                'message': message,
+                'length': len(message),
+                'estimated_sms_parts': (len(message) // 160) + 1,
+                'recipient': richiamo_data.get('telefono'),
+                'recipient_name': richiamo_data.get('nome') or richiamo_data.get('nome_completo'),
+                'variables_used': list(richiamo_data.keys()),
+                'template_used': 'recall_reminder'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': 'PREVIEW_ERROR',
+                'message': f'Errore generazione anteprima: {str(e)}'
+            }
+    
+    def _generate_recall_message(self, richiamo_data: Dict[str, Any]) -> str:
+        """
+        Genera messaggio di richiamo usando template
+        
+        Args:
+            richiamo_data: Dati del richiamo
+            
+        Returns:
+            Messaggio formattato
+        """
+        try:
+            # Mappa tipo richiamo da codice a testo leggibile
+            tipo_map = {
+                '1': 'controllo periodico',
+                '2': 'richiamo igiene',
+                '3': 'controllo post-trattamento',
+                '4': 'controllo ortodontico',
+                '5': 'visita di follow-up'
+            }
+            
+            nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
+            tipo_richiamo = tipo_map.get(str(richiamo_data.get('tipo_richiamo', '1')), 'controllo')
+            
+            # Usa template recall_reminder
+            variables = {
+                'nome': nome,
+                'tipo_richiamo': tipo_richiamo
+            }
+            
+            return self.format_message_with_template('recall_reminder', variables)
+            
+        except Exception as e:
+            logger.error(f"Errore generazione messaggio richiamo: {e}")
+            # Fallback a messaggio di base
+            nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
+            return f"Gentile {nome}, è tempo per il suo controllo. Contatti lo studio per fissare un appuntamento. Studio Dima"
+    
     def get_automation_settings(self) -> Dict[str, Any]:
         """Ottiene impostazioni automazione SMS"""
         return environment_manager.get_automation_settings()

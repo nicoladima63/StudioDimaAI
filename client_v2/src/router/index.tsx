@@ -13,6 +13,7 @@ const NotFoundPage = React.lazy(() => import('@/components/ui/NotFoundPage'))
 const TestSelectPage = React.lazy(() => import('@/features/test/TestSelectPage'))
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
 const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
+const PazientiPage = React.lazy(() => import('@/features/pazienti/pages/PazientiPage'))
 const RicettaTestPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RNETestPage'))
 const RicettaElettronicaPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RicettaElettronicaPage'))
 
@@ -46,6 +47,7 @@ const AppRouter: React.FC = () => {
           {/* Feature routes */}
           <Route path='materiali' element={<MaterialiPage />} />
           <Route path='fornitori' element={<FornitoriPage />} />
+          <Route path='pazienti' element={<PazientiPage />} />
           <Route path='conti' element={React.createElement(React.lazy(() => import('@/features/conti/pages/ContiPage')))} />
           {/* Pagina di test per le select */}
           <Route path='test' element={<TestSelectPage />} />
