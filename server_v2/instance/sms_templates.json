@@ -1,0 +1,22 @@
+{
+  "richiamo": {
+    "content": "Ciao {nome_completo},\n\nTi ricordiamo che è tempo per il tuo richiamo ({tipo_richiamo}).\nTi proponiamo un appuntamento intorno al {data_richiamo}.\n\nContattaci per fissarlo.\nGrazie!\n\nStudio Dima",
+    "variables": [
+      "nome_completo",
+      "tipo_richiamo",
+      "data_richiamo"
+    ],
+    "description": "Template per SMS di richiamo controlli"
+  },
+  "promemoria": {
+    "content": "Ciao {nome_completo},\n\nTi ricordiamo l'appuntamento di domani {data_appuntamento} alle ore {ora_appuntamento}.\n\nTipo: {tipo_appuntamento}\nCon: {medico}\n\nPer necessità, contattaci.\nGrazie!\n\nStudio Dima",
+    "variables": [
+      "nome_completo",
+      "data_appuntamento",
+      "ora_appuntamento",
+      "tipo_appuntamento",
+      "medico"
+    ],
+    "description": "Template per SMS promemoria appuntamenti"
+  }
+}

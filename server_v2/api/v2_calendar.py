@@ -1,17 +1,8 @@
 """
-🚀 Studio Dima Calendar API v2 - Architettura Ottimizzata
-==========================================================
+Calendar API V2 - Simplified version based on V1 logic
 
-Migrazione completa del sistema calendario con:
-- DBF Cache intelligente con file watching
-- Google API Batch operations  
-- Queue-based processing con Celery
-- Advanced error handling e recovery
-- Monitoring e metrics avanzate
-- Microservices-ready architecture
-
-Author: Claude Code Studio Architect
-Version: 2.0.0
+Migrated from V1 maintaining exact functionality with V2 architecture patterns.
+Follows V1 working endpoints exactly but with V2 response format and conventions.
 """
 
 from flask import Blueprint, request, jsonify
@@ -22,518 +13,593 @@ import uuid
 import threading
 from typing import Dict, Any, List, Optional
 
-from server_v2.services.calendar_service import CalendarServiceV2
-from server_v2.core.exceptions import (
+from services.calendar_service import CalendarServiceV2
+from core.exceptions import (
     GoogleCredentialsNotFoundError,
-    CalendarSyncError,
-    DBFReadError
+    CalendarSyncError
 )
-from server_v2.core.config import get_config
+from app_v2 import format_response
 
 logger = logging.getLogger(__name__)
 
-calendar_v2_bp = Blueprint('calendar_v2', __name__, url_prefix='/api/v2/calendar')
+calendar_v2_bp = Blueprint('calendar_v2', __name__)
 
-# Job tracking per operazioni asincrone
+# Job tracking per operazioni asincrone (come V1)
 sync_jobs: Dict[str, Dict[str, Any]] = {}
 clear_jobs: Dict[str, Dict[str, Any]] = {}
 
-class CalendarAPIV2:
-    """
-    API Controller v2 per gestione calendario con architettura ottimizzata.
-    Separa chiaramente business logic dal layer di presentazione.
-    """
-    
-    def __init__(self):
-        self.service = CalendarServiceV2()
-        self.config = get_config()
 
 # =============================================================================
-# SECTION 1: STATISTICHE E ANALYTICS
+# SECTION 1: STATISTICHE E ANALYTICS (from V1)
 # =============================================================================
 
-@calendar_v2_bp.route('/stats/overview', methods=['GET'])
+@calendar_v2_bp.route('/stats/year', methods=['GET'])
 @jwt_required()
-def get_appointments_overview():
-    """
-    📊 Dashboard overview con statistiche complete appuntamenti.
-    
-    Ottimizzazioni v2:
-    - Cache intelligente per query frequenti
-    - Aggregazioni pre-calcolate
-    - Response time < 100ms
-    """
+def get_appointments_stats_for_year():
+    """Get appointments statistics by year/month. V1 logic with V2 response."""
     try:
         service = CalendarServiceV2()
+        stats = service.get_db_appointments_stats_for_year()
         
-        # Parametri opzionali
-        year = request.args.get('year', type=int, default=datetime.now().year)
-        studio_id = request.args.get('studio', type=int)
-        
-        overview = service.get_appointments_overview(
-            year=year,
-            studio_id=studio_id
-        )
-        
-        return jsonify({
-            'success': True,
-            'data': overview,
-            'cached': overview.get('_cached', False),
-            'cache_ttl': overview.get('_cache_ttl', 0)
-        })
+        return format_response(
+            success=True,
+            data=stats,
+            message='Year statistics retrieved successfully',
+            state='success'
+        ), 200
         
     except Exception as e:
-        logger.error(f"Errore in appointments overview: {e}", exc_info=True)
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'error_code': 'OVERVIEW_ERROR'
-        }), 500
+        logger.error(f"Error in get_appointments_stats_for_year: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='STATS_ERROR',
+            message=f'Error retrieving year stats: {str(e)}',
+            state='error'
+        ), 500
 
-@calendar_v2_bp.route('/stats/performance', methods=['GET'])
+
+@calendar_v2_bp.route('/stats/summary', methods=['GET'])
 @jwt_required()
-def get_performance_metrics():
-    """
-    🔍 Metriche performance sistema calendario v2.
-    
-    Ritorna:
-    - DBF read times
-    - Google API call latency  
-    - Cache hit rates
-    - Memory usage
-    """
+def get_appointments_stats():
+    """Get appointments summary for current/prev/next month. V1 logic."""
     try:
         service = CalendarServiceV2()
-        metrics = service.get_performance_metrics()
+        overview = service.get_appointments_overview()
         
-        return jsonify({
-            'success': True,
-            'metrics': metrics,
-            'timestamp': datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        logger.error(f"Errore metrics: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-# =============================================================================  
-# SECTION 2: GOOGLE CALENDAR MANAGEMENT
-# =============================================================================
-
-@calendar_v2_bp.route('/google/calendars', methods=['GET'])
-@jwt_required()
-def list_google_calendars():
-    """
-    📅 Lista calendari Google con caching e retry logic.
-    
-    Miglioramenti v2:
-    - Circuit breaker per failures
-    - Response caching (5 min TTL)
-    - Parallel calendar info fetch
-    """
-    try:
-        service = CalendarServiceV2()
-        calendars = service.list_calendars_cached()
-        
-        return jsonify({
-            'success': True,
-            'calendars': calendars,
-            'count': len(calendars)
-        })
-        
-    except GoogleCredentialsNotFoundError as e:
-        return jsonify({
-            'success': False,
-            'error': 'google_auth_required',
-            'message': str(e),
-            'oauth_url': getattr(e, 'oauth_url', None),
-            'instructions': [
-                "1. Usa l'URL OAuth fornito",
-                "2. Autorizza nel browser del TUO PC",
-                "3. Riprova l'operazione"
-            ]
-        }), 401
-        
-    except Exception as e:
-        logger.error(f"Errore list calendars: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'error_code': 'CALENDAR_LIST_ERROR'
-        }), 500
-
-@calendar_v2_bp.route('/google/auth/status', methods=['GET'])
-@jwt_required()
-def get_auth_status():
-    """
-    🔐 Verifica stato autenticazione Google con health check.
-    """
-    try:
-        service = CalendarServiceV2()
-        status = service.check_auth_status()
-        
-        return jsonify({
-            'success': True,
-            'authenticated': status['authenticated'],
-            'expires_at': status.get('expires_at'),
-            'needs_refresh': status.get('needs_refresh', False),
-            'health_check': status.get('health_check', 'unknown')
-        })
-        
-    except Exception as e:
-        logger.error(f"Errore auth status: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-# =============================================================================
-# SECTION 3: SYNC OPERATIONS (BATCH & QUEUE)
-# =============================================================================
-
-@calendar_v2_bp.route('/sync/batch', methods=['POST'])
-@jwt_required()
-def start_batch_sync():
-    """
-    🔄 Avvia sincronizzazione batch ottimizzata con queue.
-    
-    Novità v2:
-    - Processing parallelo multi-studio
-    - Batch Google API calls (50 events/batch)
-    - Real-time progress tracking  
-    - Automatic retry con exponential backoff
-    """
-    try:
-        data = request.get_json() or {}
-        
-        # Validazione parametri
-        calendar_mappings = data.get('calendar_mappings', {})
-        months = data.get('months', [])
-        options = data.get('options', {})
-        
-        if not calendar_mappings:
-            return jsonify({
-                'success': False,
-                'error': 'calendar_mappings richiesto',
-                'error_code': 'MISSING_CALENDARS'
-            }), 400
-            
-        if not months:
-            return jsonify({
-                'success': False, 
-                'error': 'months array richiesto',
-                'error_code': 'MISSING_MONTHS'
-            }), 400
-        
-        # Genera job ID
-        job_id = str(uuid.uuid4())
-        
-        # Inizializza job tracking
-        sync_jobs[job_id] = {
-            'status': 'queued',
-            'progress': 0,
-            'total_operations': 0,
-            'completed_operations': 0,
-            'errors': [],
-            'start_time': datetime.now().isoformat(),
-            'estimated_completion': None,
-            'results': {}
+        # Format as V1 expected
+        summary_data = {
+            'mese_corrente': overview['current_month']['count'],
+            'mese_precedente': overview['previous_month']['count'],
+            'mese_prossimo': overview['next_month']['count']
         }
         
-        # Avvia processing asincrono
-        service = CalendarServiceV2()
+        return format_response(
+            success=True,
+            data=summary_data,
+            message='Statistics summary retrieved successfully',
+            state='success'
+        ), 200
         
-        def batch_sync_worker():
+    except Exception as e:
+        logger.error(f"Error in get_appointments_stats: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='STATS_ERROR',
+            message=f'Error retrieving statistics: {str(e)}',
+            state='error'
+        ), 500
+
+
+@calendar_v2_bp.route('/stats/first-visits', methods=['GET'])
+@jwt_required()
+def get_first_visits_stats():
+    """Get first visits statistics. V1 placeholder logic."""
+    try:
+        service = CalendarServiceV2()
+        today = date.today()
+        appointments_current_month = service.get_db_appointments_for_month(today.month, today.year)
+        
+        # TODO: Implement actual first visits logic from V1
+        count_nuove_visite = len(appointments_current_month)
+        
+        return format_response(
+            success=True,
+            data={'nuove_visite': count_nuove_visite},
+            message='First visits statistics retrieved successfully',
+            state='success'
+        ), 200
+        
+    except Exception as e:
+        logger.error(f"Error in get_first_visits_stats: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='STATS_ERROR',
+            message=f'Error retrieving first visits stats: {str(e)}',
+            state='error'
+        ), 500
+
+
+# =============================================================================
+# SECTION 2: GOOGLE CALENDAR INTEGRATION (from V1)
+# =============================================================================
+
+@calendar_v2_bp.route('/list', methods=['GET'])
+@jwt_required()
+def list_calendars():
+    """List Google calendars. V1 logic with V2 error handling."""
+    try:
+        service = CalendarServiceV2()
+        calendars = service.google_list_calendars()
+        
+        return format_response(
+            success=True,
+            data={'calendars': calendars},
+            message='Calendars retrieved successfully',
+            state='success'
+        ), 200
+        
+    except GoogleCredentialsNotFoundError as e:
+        # Try to generate OAuth URL for re-authentication (like V1)
+        try:
+            service = CalendarServiceV2()
+            auth_url = service.get_google_oauth_url()
+            
+            return format_response(
+                success=False,
+                error='GLOBAL_GOOGLE_AUTH_REQUIRED',
+                message='Autenticazione Google richiesta. Completa il processo di autenticazione.',
+                data={
+                    'action_required': 'Complete Google authentication using the provided OAuth URL',
+                    'auth_url': auth_url,
+                    'error_code': 'GLOBAL_GOOGLE_AUTH_REQUIRED'
+                },
+                state='error'
+            ), 200
+            
+        except Exception as oauth_error:
+            logger.error(f"Error generating OAuth URL: {oauth_error}")
+            return format_response(
+                success=False,
+                error='GOOGLE_AUTH_REQUIRED',
+                message='Google authentication required but cannot generate OAuth URL',
+                data={
+                    'action_required': 'Check Google credentials configuration'
+                },
+                state='error'
+            ), 200
+        
+    except Exception as e:
+        logger.error(f"Error in list_calendars: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='CALENDAR_LIST_ERROR',
+            message=f'Error retrieving calendars: {str(e)}',
+            state='error'
+        ), 500
+
+
+@calendar_v2_bp.route('/sync', methods=['POST'])
+@jwt_required()
+def sync_calendar():
+    """Sync appointments to Google Calendar. V1 logic with job tracking."""
+    try:
+        data = request.get_json()
+        calendar_id = data.get("calendar_id")
+        month = data.get("month")
+        year = data.get("year")
+        studio_id = data.get("studio_id")
+        
+        if not (calendar_id and month and year and studio_id):
+            return format_response(
+                success=False,
+                error='MISSING_PARAMETERS',
+                message='calendar_id, month, year and studio_id are required',
+                state='error'
+            ), 400
+        
+        # Generate job ID
+        job_id = str(uuid.uuid4())
+        
+        # Initialize job tracking
+        sync_jobs[job_id] = {
+            "status": "in_progress",
+            "progress": 0,
+            "synced": 0,
+            "total": 0,
+            "message": "Starting synchronization...",
+            "error": None,
+            "cancelled": False
+        }
+        
+        def sync_job():
             try:
-                service.start_batch_sync(
-                    job_id=job_id,
-                    calendar_mappings=calendar_mappings,
-                    months=months,
-                    options=options,
-                    progress_callback=lambda progress: update_job_progress(job_id, progress)
+                logger.info(f"Starting sync job for studio {studio_id}, month {month}/{year}")
+                
+                service = CalendarServiceV2()
+                
+                # Get appointments
+                appointments = service.get_db_appointments_for_month(month, year)
+                logger.info(f"Retrieved {len(appointments)} total appointments")
+                
+                # Filter by studio
+                filtered_appointments = [app for app in appointments if int(app.get('STUDIO', 0)) == int(studio_id)]
+                logger.info(f"Filtered {len(filtered_appointments)} appointments for studio {studio_id}")
+                
+                # Studio calendar mapping
+                studio_calendar_ids = {int(studio_id): calendar_id}
+                
+                # Progress callback
+                def update_sync_progress(synced, total, message=""):
+                    if sync_jobs[job_id]["cancelled"]:
+                        raise Exception("Synchronization cancelled by user")
+                    
+                    logger.info(f"Sync progress: {synced}/{total} - {message}")
+                    sync_jobs[job_id]["progress"] = int(100 * synced / max(1, total)) if total > 0 else 0
+                    sync_jobs[job_id]["synced"] = synced
+                    sync_jobs[job_id]["total"] = total
+                    if message:
+                        sync_jobs[job_id]["message"] = message
+                
+                # Execute synchronization
+                result = service.sync_appointments_for_month(
+                    month,
+                    year,
+                    studio_calendar_ids,
+                    filtered_appointments,
+                    progress_callback=update_sync_progress
                 )
+                
+                logger.info(f"Synchronization completed: {result}")
+                
+                # Update final status
+                sync_jobs[job_id]["status"] = "completed"
+                sync_jobs[job_id]["message"] = result.get('message', 'Synchronization completed')
+                sync_jobs[job_id]["synced"] = result.get('success', 0)
+                sync_jobs[job_id]["total"] = result.get('total_processed', 0)
+                sync_jobs[job_id]["progress"] = 100
+                
             except Exception as e:
-                logger.error(f"Batch sync worker error: {e}")
-                sync_jobs[job_id]['status'] = 'failed'
-                sync_jobs[job_id]['error'] = str(e)
+                if "cancelled by user" in str(e):
+                    logger.info(f"Synchronization cancelled by user: {e}")
+                    sync_jobs[job_id]["status"] = "cancelled"
+                    sync_jobs[job_id]["message"] = "Synchronization cancelled by user"
+                else:
+                    logger.error(f"Synchronization error: {e}", exc_info=True)
+                    sync_jobs[job_id]["status"] = "error"
+                    sync_jobs[job_id]["error"] = str(e)
+                    sync_jobs[job_id]["message"] = f"Error: {str(e)}"
         
-        # Avvia worker thread
-        worker_thread = threading.Thread(target=batch_sync_worker)
-        worker_thread.daemon = True
-        worker_thread.start()
+        # Start async thread
+        thread = threading.Thread(target=sync_job)
+        thread.start()
         
-        return jsonify({
-            'success': True,
-            'job_id': job_id,
-            'status': 'queued',
-            'message': 'Sincronizzazione batch avviata'
-        }), 202
+        return format_response(
+            success=True,
+            data={'job_id': job_id},
+            message='Synchronization started',
+            state='success'
+        ), 202
         
     except Exception as e:
-        logger.error(f"Errore start batch sync: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'error_code': 'BATCH_SYNC_ERROR'
-        }), 500
+        logger.error(f"Error starting sync: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='SYNC_START_ERROR',
+            message=f'Error starting sync: {str(e)}',
+            state='error'
+        ), 500
 
-@calendar_v2_bp.route('/sync/status/<job_id>', methods=['GET'])
+
+@calendar_v2_bp.route('/sync-status', methods=['GET'])
 @jwt_required()
-def get_sync_status(job_id: str):
-    """
-    📈 Stato dettagliato job sincronizzazione con metrics real-time.
-    """
+def sync_status():
+    """Check sync job status. V1 logic."""
+    job_id = request.args.get("jobId")
+    logger.info(f"Status request for job: {job_id}")
+    
+    if not job_id:
+        return format_response(
+            success=False,
+            error='JOB_ID_REQUIRED',
+            message='jobId parameter is required',
+            state='error'
+        ), 400
+    
     if job_id not in sync_jobs:
-        return jsonify({
-            'success': False,
-            'error': 'Job non trovato',
-            'error_code': 'JOB_NOT_FOUND'
-        }), 404
+        logger.warning(f"Job {job_id} not found. Available jobs: {list(sync_jobs.keys())}")
+        return format_response(
+            success=False,
+            error='JOB_NOT_FOUND',
+            message='Job not found',
+            state='error'
+        ), 404
     
-    job_status = sync_jobs[job_id].copy()
+    status = sync_jobs[job_id]
+    logger.info(f"Status job {job_id}: {status}")
     
-    # Aggiungi metriche calcolate
-    if job_status['status'] == 'running':
-        elapsed = datetime.now() - datetime.fromisoformat(job_status['start_time'].replace('Z', '+00:00'))
-        if job_status['progress'] > 0:
-            estimated_total = elapsed.total_seconds() / (job_status['progress'] / 100)
-            remaining = estimated_total - elapsed.total_seconds()
-            job_status['estimated_remaining_seconds'] = max(0, remaining)
-    
-    return jsonify({
-        'success': True,
-        'job': job_status
-    })
+    return jsonify(status), 200
 
-@calendar_v2_bp.route('/sync/cancel/<job_id>', methods=['POST'])
+
+@calendar_v2_bp.route('/sync/cancel', methods=['POST'])
 @jwt_required()
-def cancel_sync_job(job_id: str):
-    """
-    ❌ Cancella job sincronizzazione con cleanup.
-    """
-    if job_id not in sync_jobs:
-        return jsonify({
-            'success': False,
-            'error': 'Job non trovato'
-        }), 404
-    
-    if sync_jobs[job_id]['status'] not in ['queued', 'running']:
-        return jsonify({
-            'success': False,
-            'error': 'Job non cancellabile (stato: {})'.format(sync_jobs[job_id]['status'])
-        }), 400
-    
-    # Marca per cancellazione
-    sync_jobs[job_id]['status'] = 'cancelling'
-    sync_jobs[job_id]['cancelled_at'] = datetime.now().isoformat()
-    
-    return jsonify({
-        'success': True,
-        'message': 'Job marcato per cancellazione'
-    })
-
-# =============================================================================
-# SECTION 4: APPUNTAMENTI E DBF OPERATIONS
-# =============================================================================
-
-@calendar_v2_bp.route('/appointments/query', methods=['POST'])
-@jwt_required()
-def query_appointments():
-    """
-    🔍 Query appuntamenti con filtri avanzati e cache.
-    
-    Supporta:
-    - Filtri multipli combinati
-    - Paginazione ottimizzata
-    - Ordinamento per qualsiasi campo
-    - Cache intelligente per query frequenti
-    """
+def cancel_sync_job():
+    """Cancel sync job. V1 logic."""
     try:
-        data = request.get_json() or {}
+        data = request.get_json()
+        job_id = data.get("job_id")
         
-        # Parsing filtri
-        filters = data.get('filters', {})
-        pagination = data.get('pagination', {'page': 1, 'limit': 50})
-        sorting = data.get('sorting', {'field': 'DATA', 'direction': 'desc'})
+        if not job_id:
+            return format_response(
+                success=False,
+                error='JOB_ID_REQUIRED',
+                message='job_id is required',
+                state='error'
+            ), 400
         
-        service = CalendarServiceV2()
-        result = service.query_appointments(
-            filters=filters,
-            pagination=pagination,
-            sorting=sorting
-        )
+        if job_id not in sync_jobs:
+            return format_response(
+                success=False,
+                error='JOB_NOT_FOUND',
+                message='Job not found',
+                state='error'
+            ), 404
         
-        return jsonify({
-            'success': True,
-            'data': result['appointments'],
-            'pagination': result['pagination'],
-            'total': result['total'],
-            'cached': result.get('cached', False),
-            'execution_time_ms': result.get('execution_time_ms', 0)
-        })
-        
+        # Mark job as cancelled
+        if sync_jobs[job_id]["status"] == "in_progress":
+            sync_jobs[job_id]["cancelled"] = True
+            logger.info(f"Job {job_id} marked for cancellation")
+            
+            return format_response(
+                success=True,
+                message='Job cancelled successfully',
+                state='success'
+            ), 200
+        else:
+            return format_response(
+                success=False,
+                error='JOB_NOT_IN_PROGRESS',
+                message='Job is not in progress',
+                state='error'
+            ), 400
+            
     except Exception as e:
-        logger.error(f"Errore query appointments: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'error_code': 'QUERY_ERROR'
-        }), 500
+        logger.error(f"Error cancelling sync job: {e}")
+        return format_response(
+            success=False,
+            error='CANCEL_ERROR',
+            message=f'Error cancelling job: {str(e)}',
+            state='error'
+        ), 500
 
-@calendar_v2_bp.route('/appointments/bulk-operations', methods=['POST'])
+
+@calendar_v2_bp.route('/clear/<path:calendar_id>', methods=['DELETE'])
 @jwt_required()
-def bulk_appointment_operations():
-    """
-    ⚡ Operazioni bulk su appuntamenti (create/update/delete).
-    
-    Ottimizzazioni v2:
-    - Transazioni atomiche
-    - Batch processing
-    - Rollback automatico su errori
-    """
-    try:
-        data = request.get_json() or {}
-        operations = data.get('operations', [])
-        
-        if not operations:
-            return jsonify({
-                'success': False,
-                'error': 'Nessuna operazione specificata'
-            }), 400
-        
-        service = CalendarServiceV2()
-        result = service.execute_bulk_operations(operations)
-        
-        return jsonify({
-            'success': True,
-            'results': result['results'],
-            'summary': result['summary'],
-            'execution_time_ms': result.get('execution_time_ms', 0)
-        })
-        
-    except Exception as e:
-        logger.error(f"Errore bulk operations: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'error_code': 'BULK_OPERATION_ERROR'
-        }), 500
-
-# =============================================================================
-# SECTION 5: CACHE E MAINTENANCE
-# =============================================================================
-
-@calendar_v2_bp.route('/cache/stats', methods=['GET'])
-@jwt_required()  
-def get_cache_statistics():
-    """
-    📊 Statistiche cache sistema con dettagli performance.
-    """
+def clear_calendar(calendar_id: str):
+    """Clear all events from Google Calendar. V1 logic."""
     try:
         service = CalendarServiceV2()
-        stats = service.get_cache_statistics()
+        result = service.google_clear_calendar(calendar_id)
         
-        return jsonify({
-            'success': True,
-            'cache_stats': stats,
-            'timestamp': datetime.now().isoformat()
-        })
+        return format_response(
+            success=True,
+            data=result,
+            message=result.get('message', 'Calendar cleared successfully'),
+            state='success'
+        ), 200
+        
+    except GoogleCredentialsNotFoundError as e:
+        return format_response(
+            success=False,
+            error='GOOGLE_AUTH_REQUIRED',
+            message=str(e),
+            state='error'
+        ), 401
+        
+    except CalendarSyncError as e:
+        return format_response(
+            success=False,
+            error='CALENDAR_CLEAR_ERROR',
+            message=str(e),
+            state='error'
+        ), 400
         
     except Exception as e:
-        logger.error(f"Errore cache stats: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        logger.error(f"Unexpected error clearing calendar {calendar_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='INTERNAL_ERROR',
+            message='Internal server error during calendar clear',
+            state='error'
+        ), 500
 
-@calendar_v2_bp.route('/cache/clear', methods=['POST'])
-@jwt_required()
-def clear_cache():
-    """
-    🗑️ Pulizia cache con opzioni granulari.
-    """
-    try:
-        data = request.get_json() or {}
-        cache_types = data.get('cache_types', ['all'])
-        
-        service = CalendarServiceV2()
-        result = service.clear_cache(cache_types)
-        
-        return jsonify({
-            'success': True,
-            'cleared': result['cleared'],
-            'message': f"Cache cleared: {', '.join(result['cleared'])}"
-        })
-        
-    except Exception as e:
-        logger.error(f"Errore clear cache: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-@calendar_v2_bp.route('/maintenance/health-check', methods=['GET'])
-@jwt_required()
-def health_check():
-    """
-    ❤️ Health check completo sistema calendario v2.
-    """
-    try:
-        service = CalendarServiceV2()
-        health = service.perform_health_check()
-        
-        status_code = 200 if health['overall_status'] == 'healthy' else 503
-        
-        return jsonify({
-            'success': True,
-            'health': health,
-            'timestamp': datetime.now().isoformat()
-        }), status_code
-        
-    except Exception as e:
-        logger.error(f"Errore health check: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'overall_status': 'error'
-        }), 503
 
 # =============================================================================
-# HELPER FUNCTIONS
+# SECTION 3: APPOINTMENTS DATA (from V1)
 # =============================================================================
 
-def update_job_progress(job_id: str, progress: Dict[str, Any]):
-    """Aggiorna progresso job con thread safety."""
-    if job_id in sync_jobs:
-        sync_jobs[job_id].update(progress)
+@calendar_v2_bp.route('/appointments', methods=['GET'])
+@jwt_required()
+def get_appointments_for_month():
+    """Get appointments for specific month/year. V1 logic."""
+    try:
+        month = request.args.get('month', type=int)
+        year = request.args.get('year', type=int)
+        studio = request.args.get('studio', type=int)
+        
+        logger.info(f"Request appointments for month={month}, year={year}, studio={studio}")
+        
+        if not month or not year:
+            logger.error("Missing month and year parameters")
+            return format_response(
+                success=False,
+                error='MISSING_PARAMETERS',
+                message='month and year are required',
+                state='error'
+            ), 400
+        
+        service = CalendarServiceV2()
+        appointments = service.get_db_appointments_for_month(month, year)
+        
+        # Filter by studio if specified
+        if studio is not None:
+            appointments = [app for app in appointments if int(app.get('STUDIO', 0)) == studio]
+            logger.info(f"Filtered {len(appointments)} appointments for studio {studio}")
+        
+        logger.info(f"Returning {len(appointments)} appointments")
+        
+        return jsonify({'appointments': appointments})
+        
+    except Exception as e:
+        logger.error(f"Error in get_appointments_for_month: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='APPOINTMENTS_ERROR',
+            message=f'Error retrieving appointments: {str(e)}',
+            state='error'
+        ), 500
+
+
+# =============================================================================
+# SECTION 4: OAUTH AUTHENTICATION (from V1)
+# =============================================================================
+
+@calendar_v2_bp.route('/reauth-url', methods=['GET'])
+@jwt_required()
+def get_google_oauth_url():
+    """Get Google OAuth URL. V1 logic."""
+    try:
+        service = CalendarServiceV2()
+        auth_url = service.get_google_oauth_url()
+        
+        return format_response(
+            success=True,
+            data={'auth_url': auth_url},
+            message='OAuth URL generated successfully',
+            state='success'
+        ), 200
+        
+    except Exception as e:
+        logger.error(f"Error generating OAuth URL: {e}")
+        return format_response(
+            success=False,
+            error='OAUTH_URL_ERROR',
+            message=f'Error generating OAuth URL: {str(e)}',
+            state='error'
+        ), 500
+
+
+# =============================================================================
+# SECTION 5: OAUTH CALLBACK (from V1)
+# =============================================================================
+
+# OAuth callback moved to app_v2.py since Google calls /oauth/callback directly
+
+
+@calendar_v2_bp.route('/oauth/status', methods=['GET'])
+@jwt_required()
+def oauth_status():
+    """Check OAuth authentication status. V1 logic."""
+    try:
+        import os
+        
+        if os.path.exists('instance/token.json'):
+            return format_response(
+                success=True,
+                data={'authenticated': True},
+                message='Google authentication active',
+                state='success'
+            ), 200
+        else:
+            return format_response(
+                success=False,
+                data={'authenticated': False},
+                message='Google authentication required',
+                state='warning'
+            ), 200
+            
+    except Exception as e:
+        logger.error(f"Error checking OAuth status: {e}")
+        return format_response(
+            success=False,
+            error='STATUS_CHECK_ERROR',
+            message=f'Error checking authentication status: {str(e)}',
+            state='error'
+        ), 500
+
+
+# =============================================================================
+# SECTION 6: UTILITIES AND TESTING
+# =============================================================================
+
+@calendar_v2_bp.route('/test-connection', methods=['GET'])
+@jwt_required()
+def test_connection():
+    """Test Google Calendar connection."""
+    try:
+        service = CalendarServiceV2()
+        result = service.test_connection()
+        
+        if result['success']:
+            return format_response(
+                success=True,
+                message=result['message'],
+                state='success'
+            ), 200
+        else:
+            return format_response(
+                success=False,
+                error=result.get('error', 'CONNECTION_ERROR'),
+                message=result['message'],
+                state='error'
+            ), 400
+            
+    except Exception as e:
+        logger.error(f"Error testing connection: {e}")
+        return format_response(
+            success=False,
+            error='TEST_ERROR',
+            message=f'Error testing connection: {str(e)}',
+            state='error'
+        ), 500
+
 
 # Error handlers
 @calendar_v2_bp.errorhandler(GoogleCredentialsNotFoundError)
-def handle_google_auth_error(e):
-    return jsonify({
-        'success': False,
-        'error': 'google_auth_required',
-        'message': str(e),
-        'oauth_url': getattr(e, 'oauth_url', None)
-    }), 401
+def handle_google_credentials_error(e):
+    return format_response(
+        success=False,
+        error='GOOGLE_AUTH_REQUIRED',
+        message=str(e),
+        state='error'
+    ), 401
 
-@calendar_v2_bp.errorhandler(CalendarSyncError)
-def handle_sync_error(e):
-    return jsonify({
-        'success': False,
-        'error': 'calendar_sync_error',
-        'message': str(e),
-        'error_code': getattr(e, 'error_code', 'SYNC_ERROR')
-    }), 500
 
-@calendar_v2_bp.errorhandler(DBFReadError)
-def handle_dbf_error(e):
-    return jsonify({
-        'success': False,
-        'error': 'dbf_read_error', 
-        'message': str(e),
-        'error_code': getattr(e, 'error_code', 'DBF_ERROR')
-    }), 500
+@calendar_v2_bp.errorhandler(CalendarSyncError)  
+def handle_calendar_sync_error(e):
+    return format_response(
+        success=False,
+        error='CALENDAR_SYNC_ERROR',
+        message=str(e),
+        state='error'
+    ), 400
+
+
+@calendar_v2_bp.errorhandler(404)
+def handle_not_found(e):
+    return format_response(
+        success=False,
+        error='NOT_FOUND',
+        message='Calendar endpoint not found',
+        state='error'
+    ), 404
+
+
+@calendar_v2_bp.errorhandler(500)
+def handle_internal_error(e):
+    logger.error(f"Internal error: {e}")
+    return format_response(
+        success=False,
+        error='INTERNAL_ERROR',
+        message='Internal server error',
+        state='error'
+    ), 500

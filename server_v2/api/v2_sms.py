@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional
 from services.sms_service import sms_service
 from services.richiami_service import RichiamiService
 from app_v2 import require_auth, format_response
-from core.exceptions import ValidationError, ServiceError
+from core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 

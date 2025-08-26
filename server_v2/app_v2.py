@@ -18,6 +18,7 @@ from core.database_manager import get_database_manager
 from core.exceptions import StudioDimaError
 from utils.dbf_utils import convert_bytes_to_string, clean_dbf_value
 
+logger = logging.getLogger(__name__)
 
 def create_app_v2(config_name: Optional[str] = None) -> Flask:
     """
@@ -140,6 +141,9 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_conti import conti_v2_bp
     from api.v2_ricetta import ricetta_bp
     from api.v2_sms import sms_v2_bp
+    from api.v2_templates import templates_v2_bp
+    from api.v2_automation import automation_v2_bp
+    from api.v2_calendar import calendar_v2_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -152,9 +156,12 @@ def register_blueprints(app: Flask) -> None:
         classificazioni_v2_bp,
         conti_v2_bp,
         ricetta_bp,
-        sms_v2_bp
+        sms_v2_bp,
+        templates_v2_bp,
+        automation_v2_bp
     ]
     
+    # Register standard blueprints with API prefix only
     for i, blueprint in enumerate(blueprints):
         try:
             app.register_blueprint(blueprint, url_prefix=app.config['API_PREFIX'])
@@ -164,8 +171,17 @@ def register_blueprints(app: Flask) -> None:
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to register blueprint {blueprint.name}: {e}")
     
+    # Register calendar blueprint with specific prefix
+    try:
+        app.register_blueprint(calendar_v2_bp, url_prefix=app.config['API_PREFIX'] + '/calendar')
+        logger = logging.getLogger(__name__)
+        logger.info(f"Registered calendar blueprint: calendar_v2 -> {app.config['API_PREFIX']}/calendar")
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to register calendar blueprint: {e}")
+    
     logger = logging.getLogger(__name__)
-    logger.info(f"Registered {len(blueprints)} API blueprints")
+    logger.info(f"Registered {len(blueprints) + 1} API blueprints")
 
 
 def register_error_handlers(app: Flask) -> None:
@@ -264,6 +280,91 @@ def register_health_check(app: Flask) -> None:
     @app.route(f"{app.config['API_PREFIX']}/test-main")
     def test_main():
         return "MAIN SERVER OK"
+    
+    @app.route("/oauth/callback")
+    def oauth_callback():
+        """Handle OAuth callback from Google Calendar."""
+        try:
+            from flask import request, redirect
+            from services.calendar_service import CalendarServiceV2
+            
+            # Get authorization code and state
+            code = request.args.get('code')
+            state = request.args.get('state') 
+            error = request.args.get('error')
+            
+            if error:
+                logger.error(f"OAuth error from Google: {error}")
+                return redirect(f"/oauth-result?success=false&error={error}")
+            
+            if not code:
+                logger.error("Missing authorization code")
+                return redirect("/oauth-result?success=false&error=missing_code")
+            
+            if not state:
+                logger.error("Missing state parameter")  
+                return redirect("/oauth-result?success=false&error=missing_state")
+            
+            # Handle callback using service
+            service = CalendarServiceV2()
+            result = service.handle_oauth_callback(code, state)
+            
+            if result['success']:
+                logger.info("OAuth callback completed successfully")
+                return redirect("/oauth-result?success=true")
+            else:
+                logger.error(f"OAuth callback failed: {result.get('message', 'Unknown error')}")
+                return redirect("/oauth-result?success=false&error=callback_failed")
+                
+        except Exception as e:
+            logger.error(f"Error in OAuth callback: {e}", exc_info=True)
+            return redirect("/oauth-result?success=false&error=callback_error")
+
+    @app.route("/oauth-result")
+    def oauth_result():
+        """OAuth result page for Google Calendar authentication."""
+        from flask import request
+        
+        success = request.args.get('success', 'false').lower() == 'true'
+        error = request.args.get('error', '')
+        
+        if success:
+            return """
+            <html>
+                <head><title>OAuth Success</title></head>
+                <body style="font-family: Arial; padding: 40px; text-align: center;">
+                    <h2 style="color: #28a745;">✓ Autenticazione Google completata!</h2>
+                    <p>L'autorizzazione è stata completata con successo.</p>
+                    <p><strong>Ora puoi chiudere questa finestra e tornare all'applicazione.</strong></p>
+                    <script>
+                        setTimeout(() => window.close(), 3000);
+                    </script>
+                </body>
+            </html>
+            """
+        else:
+            error_messages = {
+                'access_denied': 'Accesso negato dall\'utente',
+                'missing_code': 'Codice di autorizzazione mancante',
+                'missing_state': 'Parametro di stato mancante',
+                'state_mismatch': 'Stato OAuth non corrispondente (possibile attacco)',
+                'callback_error': 'Errore durante il callback',
+                'callback_failed': 'Callback fallito'
+            }
+            
+            error_msg = error_messages.get(error, f'Errore sconosciuto: {error}')
+            
+            return f"""
+            <html>
+                <head><title>OAuth Error</title></head>
+                <body style="font-family: Arial; padding: 40px; text-align: center;">
+                    <h2 style="color: #dc3545;">✗ Errore di autenticazione</h2>
+                    <p><strong>Errore:</strong> {error_msg}</p>
+                    <p>Riprova l'autenticazione dall'applicazione.</p>
+                    <p><a href="javascript:window.close()">Chiudi questa finestra</a></p>
+                </body>
+            </html>
+            """
 
     @app.route(f"{app.config['API_PREFIX']}/health")
     def health_check():

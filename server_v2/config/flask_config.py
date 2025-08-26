@@ -19,7 +19,7 @@ class FlaskConfig(Config):
     """
     
     # Flask Core Settings
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'studio-dima-v2-dev-secret-key-fixed'
     DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     TESTING = False
     
@@ -29,7 +29,7 @@ class FlaskConfig(Config):
     THREADED = True
     
     # JWT Configuration
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'studio-dima-v2-jwt-secret-key-fixed'
     JWT_TOKEN_LOCATION = ['headers']
     JWT_HEADER_NAME = 'Authorization'
     JWT_HEADER_TYPE = 'Bearer'

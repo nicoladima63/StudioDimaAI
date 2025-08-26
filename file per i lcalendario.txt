@@ -1,0 +1,5 @@
+C:\Users\gengi\Desktop\StudioDimaAI\client\src\api\services\calendar.service.ts
+C:\Users\gengi\Desktop\StudioDimaAI\client\src\features\calendar\pages\CalendarPage.tsx
+
+C:\Users\gengi\Desktop\StudioDimaAI\server\app\api\api_calendar.py
+C:\Users\gengi\Desktop\StudioDimaAI\server\scripts\authenticate_google.py

@@ -1,14 +1,15 @@
 """
 SMS Service V2 
-Servizio unificato per invio SMS con gestione ambienti
+Servizio unificato per invio SMS con gestione ambienti e template system
 """
 import requests
 import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
-from ..core.environment_manager import environment_manager, ServiceType, Environment
-from ..core.config import get_config_value
-from ..core.exceptions import ValidationError, ServiceError
+from core.environment_manager import environment_manager, ServiceType, Environment
+from core.config import get_config_value
+from core.exceptions import ValidationError
+from core.template_manager import template_manager
 
 logger = logging.getLogger(__name__)
 
@@ -434,7 +435,7 @@ class SMSService:
     
     def preview_recall_message(self, richiamo_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Genera anteprima messaggio richiamo senza inviarlo
+        Genera anteprima messaggio richiamo usando template manager V2
         
         Args:
             richiamo_data: Dati del richiamo
@@ -450,19 +451,37 @@ class SMSService:
                     'message': 'Dati richiamo mancanti'
                 }
             
-            message = self._generate_recall_message(richiamo_data)
+            # Usa template manager per preview completo
+            preview_result = template_manager.preview_template(
+                tipo='richiamo',
+                data=richiamo_data
+            )
             
-            return {
-                'success': True,
-                'message': message,
-                'length': len(message),
-                'estimated_sms_parts': (len(message) // 160) + 1,
-                'recipient': richiamo_data.get('telefono'),
-                'recipient_name': richiamo_data.get('nome') or richiamo_data.get('nome_completo'),
-                'variables_used': list(richiamo_data.keys()),
-                'template_used': 'recall_reminder'
-            }
+            if preview_result['success']:
+                # Aggiungi informazioni specifiche per richiamo
+                preview_result.update({
+                    'recipient': richiamo_data.get('telefono'),
+                    'recipient_name': richiamo_data.get('nome') or richiamo_data.get('nome_completo'),
+                    'template_used': 'richiamo'
+                })
+                return preview_result
+            else:
+                # Fallback se template manager fallisce
+                message = self._generate_recall_message(richiamo_data)
+                
+                return {
+                    'success': True,
+                    'message': message,
+                    'length': len(message),
+                    'estimated_sms_parts': (len(message) // 160) + 1,
+                    'recipient': richiamo_data.get('telefono'),
+                    'recipient_name': richiamo_data.get('nome') or richiamo_data.get('nome_completo'),
+                    'variables_used': list(richiamo_data.keys()),
+                    'template_used': 'richiamo_fallback'
+                }
+                
         except Exception as e:
+            logger.error(f"Errore preview messaggio richiamo: {e}")
             return {
                 'success': False,
                 'error': 'PREVIEW_ERROR',
@@ -471,7 +490,7 @@ class SMSService:
     
     def _generate_recall_message(self, richiamo_data: Dict[str, Any]) -> str:
         """
-        Genera messaggio di richiamo usando template
+        Genera messaggio di richiamo usando template manager V2
         
         Args:
             richiamo_data: Dati del richiamo
@@ -483,25 +502,43 @@ class SMSService:
             # Mappa tipo richiamo da codice a testo leggibile
             tipo_map = {
                 '1': 'controllo periodico',
-                '2': 'richiamo igiene',
+                '2': 'richiamo igiene', 
                 '3': 'controllo post-trattamento',
                 '4': 'controllo ortodontico',
-                '5': 'visita di follow-up'
+                '5': 'visita di follow-up',
+                '21': 'controllo + igiene',
+                '12': 'igiene + controllo'
             }
             
             nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
-            tipo_richiamo = tipo_map.get(str(richiamo_data.get('tipo_richiamo', '1')), 'controllo')
+            tipo_richiamo_code = str(richiamo_data.get('tipo_richiamo', '1'))
+            tipo_richiamo = tipo_map.get(tipo_richiamo_code, 'controllo')
             
-            # Usa template recall_reminder
-            variables = {
-                'nome': nome,
-                'tipo_richiamo': tipo_richiamo
+            # Calcola data richiamo se non presente
+            data_richiamo = richiamo_data.get('data_richiamo', 'da concordare')
+            if data_richiamo and isinstance(data_richiamo, str) and len(data_richiamo) >= 10:
+                # Format date from YYYY-MM-DD to DD/MM/YYYY
+                try:
+                    from datetime import datetime
+                    dt = datetime.fromisoformat(data_richiamo[:10])
+                    data_richiamo = dt.strftime('%d/%m/%Y')
+                except:
+                    data_richiamo = 'da concordare'
+            else:
+                data_richiamo = 'da concordare'
+            
+            # Prepara dati per template
+            template_data = {
+                'nome_completo': nome,
+                'tipo_richiamo': tipo_richiamo,
+                'data_richiamo': data_richiamo
             }
             
-            return self.format_message_with_template('recall_reminder', variables)
+            # Usa template manager V2 per generare messaggio
+            return template_manager.render_template('richiamo', template_data)
             
         except Exception as e:
-            logger.error(f"Errore generazione messaggio richiamo: {e}")
+            logger.error(f"Errore generazione messaggio richiamo con template: {e}")
             # Fallback a messaggio di base
             nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
             return f"Gentile {nome}, è tempo per il suo controllo. Contatti lo studio per fissare un appuntamento. Studio Dima"
@@ -513,6 +550,107 @@ class SMSService:
     def set_automation_settings(self, settings: Dict[str, Any]):
         """Imposta impostazioni automazione SMS"""
         environment_manager.set_automation_settings(settings)
+    
+    # Template integration methods
+    def get_template(self, tipo: str) -> Optional[Dict[str, Any]]:
+        """Get SMS template via template manager"""
+        return template_manager.get_template(tipo)
+    
+    def get_all_templates(self) -> Dict[str, Any]:
+        """Get all SMS templates via template manager"""
+        return template_manager.get_all_templates()
+    
+    def update_template(self, tipo: str, content: str, description: str = None) -> bool:
+        """Update SMS template via template manager"""
+        return template_manager.update_template(tipo, content, description)
+    
+    def reset_template(self, tipo: str) -> bool:
+        """Reset SMS template to default via template manager"""
+        return template_manager.reset_template(tipo)
+    
+    def validate_template(self, content: str) -> Dict[str, Any]:
+        """Validate template content via template manager"""
+        return template_manager.validate_template(content)
+    
+    def preview_template(self, tipo: str, data: Dict[str, Any] = None, 
+                        custom_content: str = None) -> Dict[str, Any]:
+        """Preview template with data via template manager"""
+        return template_manager.preview_template(tipo, data, custom_content)
+    
+    def send_appointment_reminder_sms(self, appuntamento_data: Dict[str, Any], 
+                                    custom_message: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Invia SMS promemoria appuntamento usando template V2
+        
+        Args:
+            appuntamento_data: Dati dell'appuntamento
+            custom_message: Messaggio personalizzato (opzionale)
+            
+        Returns:
+            Risultato invio SMS
+        """
+        try:
+            if not appuntamento_data:
+                return {
+                    'success': False,
+                    'error': 'APPUNTAMENTO_DATA_MISSING',
+                    'message': 'Dati appuntamento mancanti'
+                }
+            
+            telefono = appuntamento_data.get('telefono')
+            if not telefono:
+                return {
+                    'success': False,
+                    'error': 'PHONE_MISSING',
+                    'message': 'Numero telefono non trovato nell\'appuntamento'
+                }
+            
+            # Usa messaggio personalizzato o genera da template
+            if custom_message:
+                message = custom_message
+            else:
+                message = self._generate_appointment_reminder_message(appuntamento_data)
+            
+            return self.send_sms(telefono, message, tag='promemoria')
+            
+        except Exception as e:
+            logger.error(f"Errore invio SMS promemoria: {e}")
+            return {
+                'success': False,
+                'error': 'REMINDER_SMS_ERROR',
+                'message': f'Errore invio SMS promemoria: {str(e)}'
+            }
+    
+    def _generate_appointment_reminder_message(self, appuntamento_data: Dict[str, Any]) -> str:
+        """
+        Genera messaggio promemoria appuntamento usando template manager V2
+        
+        Args:
+            appuntamento_data: Dati dell'appuntamento
+            
+        Returns:
+            Messaggio formattato
+        """
+        try:
+            nome = appuntamento_data.get('nome_completo') or appuntamento_data.get('nome', 'Gentile paziente')
+            
+            # Prepara dati per template promemoria
+            template_data = {
+                'nome_completo': nome,
+                'data_appuntamento': appuntamento_data.get('data_appuntamento', 'da confermare'),
+                'ora_appuntamento': appuntamento_data.get('ora_appuntamento', 'da confermare'),
+                'tipo_appuntamento': appuntamento_data.get('tipo_appuntamento', 'visita'),
+                'medico': appuntamento_data.get('medico', 'Studio Dima')
+            }
+            
+            # Usa template manager V2
+            return template_manager.render_template('promemoria', template_data)
+            
+        except Exception as e:
+            logger.error(f"Errore generazione messaggio promemoria con template: {e}")
+            # Fallback a messaggio di base
+            nome = appuntamento_data.get('nome_completo') or appuntamento_data.get('nome', 'Gentile paziente')
+            return f"Gentile {nome}, ricordiamo l'appuntamento di domani. Studio Dima"
 
 # Instance globale singleton
 sms_service = SMSService()

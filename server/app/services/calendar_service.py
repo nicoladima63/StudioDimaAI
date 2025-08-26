@@ -683,12 +683,14 @@ class CalendarService:
         flow = Flow.from_client_secrets_file(
             'server/credentials.json',  # Adatta il percorso se necessario
             scopes=SCOPES,
-            redirect_uri='http://localhost:5000/api/calendar/oauth2callback'
+            redirect_uri='http://localhost:5001/api/calendar/oauth2callback'
         )
         
         auth_url, _ = flow.authorization_url(
             access_type='offline',
-            prompt='select_account consent'
+            prompt='select_account consent',
+            login_hint='studiodrnicoladimartino@gmail.com'
+
         )
         logger.debug(f"Generated auth URL: {auth_url}")
         return auth_url

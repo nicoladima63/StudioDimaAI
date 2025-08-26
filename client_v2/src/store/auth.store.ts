@@ -81,6 +81,13 @@ export const useAuthStore = create<AuthStore>()(
         try {
           set({ isLoading: true })
 
+          // Check if we have tokens first
+          const state = get()
+          if (!state.tokens?.accessToken) {
+            set({ isLoading: false })
+            return
+          }
+
           const response = await authService.apiVerifyToken()
 
           if (response.success && response.data) {
@@ -91,9 +98,12 @@ export const useAuthStore = create<AuthStore>()(
             })
           } else {
             get().clearAuth()
+            set({ isLoading: false })
           }
-        } catch {
+        } catch (error) {
+          console.error('Auth check failed:', error)
           get().clearAuth()
+          set({ isLoading: false })
         }
       },
 

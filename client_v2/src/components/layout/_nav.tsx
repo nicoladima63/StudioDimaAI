@@ -8,7 +8,8 @@ import {
   cilSettings,
   cilList,
   cilDescription,
-  cilUser
+  cilUser,
+  cilCalendar
   
 } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
@@ -75,6 +76,22 @@ const _nav = [
     name: 'Protocolli',
     to: '/ricetta/setting',
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavTitle,
+    name: 'Appuntamenti',
+  },
+  {
+    component: CNavItem,
+    name: 'Calendario',
+    to: '/calendar',
+    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Automazioni',
+    to: '/calendar/automation',
+    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

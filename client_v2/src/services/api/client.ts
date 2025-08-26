@@ -80,15 +80,13 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${access_token}`
           return apiClient(originalRequest)
         } catch (refreshError) {
-          // Refresh failed - redirect to login
+          // Refresh failed - clear tokens and let router handle redirect
           clearTokens()
-          window.location.href = '/login'
           return Promise.reject(refreshError)
         }
       } else {
-        // No refresh token - redirect to login
+        // No refresh token - clear tokens and let router handle redirect
         clearTokens()
-        window.location.href = '/login'
       }
     }
 

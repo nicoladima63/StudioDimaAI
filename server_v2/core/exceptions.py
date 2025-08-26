@@ -390,3 +390,43 @@ class AuthorizationError(StudioDimaError):
     control violations, and resource access denials.
     """
     pass
+
+
+class CalendarSyncError(StudioDimaError):
+    """
+    Exception raised for calendar synchronization errors.
+    
+    This exception is raised when there are issues with Google Calendar
+    synchronization operations.
+    """
+    pass
+
+
+class GoogleCredentialsNotFoundError(StudioDimaError):
+    """
+    Exception raised when Google Calendar credentials are missing or invalid.
+    
+    This exception is raised when the application cannot authenticate
+    with Google Calendar API due to missing or invalid credentials.
+    """
+    pass
+
+
+class CacheError(StudioDimaError):
+    """
+    Exception raised for cache-related errors.
+    
+    This exception is raised when there are issues with cache operations
+    such as redis connectivity or memory cache failures.
+    """
+    pass
+
+
+class DBFReadError(StudioDimaError):
+    """
+    Exception raised for DBF file reading errors.
+    
+    This exception is raised when there are issues reading from DBF files
+    used by the gestionale system.
+    """
+    pass
