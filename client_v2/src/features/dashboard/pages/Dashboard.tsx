@@ -13,6 +13,7 @@ import CIcon from '@coreui/icons-react'
 
 import { useAuthStore } from '@/store/auth.store'
 import { config } from '@/utils'
+import ServicesStatusSection from '../components/ServicesStatusSection'
 
 const Dashboard: React.FC = () => {
   const { user } = useAuthStore()
@@ -169,6 +170,9 @@ const Dashboard: React.FC = () => {
           </CCard>
         </CCol>
       </CRow>
+
+      {/* Services Status Section */}
+      <ServicesStatusSection />
     </div>
   )
 }

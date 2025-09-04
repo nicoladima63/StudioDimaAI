@@ -1369,6 +1369,75 @@ class DBFOptimizedReader:
         
         logger.info("🧹 DBF Optimized Reader cleanup completed")
 
+    def get_tomorrow_appointments_for_reminder(self):
+        """
+        Estrae gli appuntamenti di domani e restituisce un log per i promemoria.
+        Logica identica a V1 per compatibilità scheduler.
+        """
+        from datetime import date, timedelta
+        import json
+        
+        log = []
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        weekday = tomorrow.weekday()  # 0=lun, 5=sab, 6=dom
+
+        if weekday == 5:
+            log.append("Domani è sabato: nessun promemoria inviato.")
+            return log
+        if weekday == 6:
+            log.append("Domani è domenica: nessun promemoria inviato.")
+            return log
+
+        try:
+            # Usa il metodo ottimizzato esistente per gli appuntamenti
+            appointments = self.get_appointments_optimized(tomorrow.month, tomorrow.year)
+            
+            # Filtra solo per il giorno di domani
+            tomorrow_apps = [
+                app for app in appointments 
+                if app.get('DATA') and app['DATA'].date() == tomorrow
+            ]
+            
+            if not tomorrow_apps:
+                log.append("Nessun appuntamento trovato per domani.")
+                return log
+                
+            # Processa gli appuntamenti per i promemoria
+            count = 0
+            success = 0
+            errors = []
+            skipped_appointments = []
+            
+            for app in tomorrow_apps:
+                nome_paziente = app.get('PAZIENTE', '').strip()
+                
+                # Escludi appuntamenti di sistema senza paziente
+                if not nome_paziente or nome_paziente.lower() in ['nan', 'gentile paziente']:
+                    skipped_appointments.append({
+                        'ora': app.get('ORA_INIZIO', ''),
+                        'descrizione': app.get('DESCRIZIONE', '') or app.get('NOTE', ''),
+                        'motivo': 'Appuntamento senza paziente'
+                    })
+                    continue
+                    
+                # Mock dei promemoria (scheduler li implementerà via SMS service)
+                log.append(f"[PROMEMORIA] Appuntamento per {nome_paziente} alle {app.get('ORA_INIZIO', '')} di domani")
+                count += 1
+                success += 1
+            
+            # Resoconto
+            log.append(f"Totale appuntamenti processati: {count}")
+            if skipped_appointments:
+                log.append(f"Appuntamenti saltati (sistema/note): {len(skipped_appointments)}")
+                for skip in skipped_appointments:
+                    log.append(f"  - {skip['ora']}: {skip['descrizione']} ({skip['motivo']})")
+                    
+        except Exception as e:
+            log.append(f"Errore durante l'estrazione appuntamenti: {e}")
+            
+        return log
+
 
 # =============================================================================
 # CONVENIENCE FUNCTIONS PER BACKWARD COMPATIBILITY

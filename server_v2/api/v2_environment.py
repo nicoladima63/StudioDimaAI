@@ -6,14 +6,14 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 import logging
 from typing import Dict, Any
-from ..core.environment_manager import environment_manager, ServiceType, Environment
-from ..core.exceptions import ValidationError, ConfigurationError
+from core.environment_manager import environment_manager, ServiceType, Environment
+from core.exceptions import ValidationError, ConfigurationError
 
 logger = logging.getLogger(__name__)
 
-environment_bp = Blueprint("environment_v2", __name__, url_prefix="/api/v2/environment")
+environment_bp = Blueprint("environment_v2", __name__, url_prefix='/api/v2')
 
-@environment_bp.route("/status", methods=['GET'])
+@environment_bp.route("/environment/status", methods=['GET'])
 @jwt_required()
 def get_environment_status():
     """Ottiene stato completo di tutti gli ambienti"""
@@ -45,7 +45,7 @@ def get_environment_status():
             'message': f'Errore recupero stato: {e}'
         }), 500
 
-@environment_bp.route("/<service>/current", methods=['GET'])
+@environment_bp.route("/environment/<service>/current", methods=['GET'])
 @jwt_required()
 def get_service_environment(service):
     """Ottiene ambiente corrente per un servizio specifico"""
@@ -88,7 +88,7 @@ def get_service_environment(service):
             'message': f'Errore recupero ambiente {service}: {e}'
         }), 500
 
-@environment_bp.route("/<service>/switch", methods=['POST'])
+@environment_bp.route("/environment/<service>/switch", methods=['POST'])
 @jwt_required()
 def switch_service_environment(service):
     """Cambia ambiente per un servizio specifico"""
@@ -189,7 +189,7 @@ def switch_service_environment(service):
             'message': f'Errore durante il cambio: {e}'
         }), 500
 
-@environment_bp.route("/bulk-switch", methods=['POST'])
+@environment_bp.route("/environment/bulk-switch", methods=['POST'])
 @jwt_required()
 def bulk_switch_environments():
     """Cambia ambiente per più servizi contemporaneamente"""
@@ -273,7 +273,7 @@ def bulk_switch_environments():
             'message': f'Errore durante il cambio bulk: {e}'
         }), 500
 
-@environment_bp.route("/<service>/validate", methods=['GET'])
+@environment_bp.route("/environment/<service>/validate", methods=['GET'])
 @jwt_required()
 def validate_service_configuration(service):
     """Valida configurazione di un servizio"""
@@ -329,7 +329,7 @@ def validate_service_configuration(service):
             'message': f'Errore durante la validazione: {e}'
         }), 500
 
-@environment_bp.route("/<service>/test", methods=['POST'])
+@environment_bp.route("/environment/<service>/test", methods=['POST'])
 @jwt_required()
 def test_service_connection(service):
     """Testa connessione per un servizio specifico"""
@@ -380,7 +380,7 @@ def test_service_connection(service):
             'message': f'Errore durante il test: {e}'
         }), 500
 
-@environment_bp.route("/cache/clear", methods=['POST'])
+@environment_bp.route("/environment/cache/clear", methods=['POST'])
 @jwt_required()
 def clear_environment_cache():
     """Pulisce cache configurazioni"""
@@ -405,7 +405,7 @@ def clear_environment_cache():
             'message': f'Errore pulizia cache: {e}'
         }), 500
 
-@environment_bp.route("/reload", methods=['POST'])
+@environment_bp.route("/environment/reload", methods=['POST'])
 @jwt_required()
 def reload_configurations():
     """Ricarica tutte le configurazioni"""

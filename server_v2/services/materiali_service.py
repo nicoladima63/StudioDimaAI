@@ -179,44 +179,117 @@ class MaterialiService(BaseService):
         # Simplified implementation for demo
         return True
     
-    def search_materiali(self, query: str, limit: int = 20, 
-                        include_suggestions: bool = True) -> Dict[str, Any]:
+    def search_materials(self, search_query: str = None, supplier_id: str = None, 
+                        classification_filters: Dict[str, Any] = None,
+                        page: int = 1, page_size: int = 20) -> Dict[str, Any]:
         """
-        Search materials with intelligent suggestions.
+        Search materials with advanced filtering and pagination.
         
         Args:
-            query: Search query
-            limit: Max results
-            include_suggestions: Include suggestions
+            search_query: Search term for material description
+            supplier_id: Filter by supplier ID
+            classification_filters: Filter by classification
+            page: Page number
+            page_size: Items per page
             
         Returns:
-            Search results dictionary
+            Search results with pagination
         """
         try:
-            search_query = """
-                SELECT *
-                FROM materiali
-                WHERE nome LIKE ? OR codicearticolo LIKE ? OR fornitorenome LIKE ?
-                ORDER BY nome
-                LIMIT ?
+            # Build WHERE clause
+            where_conditions = ["is_active = 1"]
+            params = []
+            
+            if search_query:
+                where_conditions.append("(descrizione LIKE ? OR codice_materiale LIKE ? OR nome_fornitore LIKE ?)")
+                search_term = f"%{search_query}%"
+                params.extend([search_term, search_term, search_term])
+            
+            if supplier_id:
+                where_conditions.append("codice_fornitore = ?")
+                params.append(supplier_id)
+            
+            if classification_filters:
+                if classification_filters.get('material_type'):
+                    where_conditions.append("material_type = ?")
+                    params.append(classification_filters['material_type'])
+                
+                if classification_filters.get('categoria_materiale'):
+                    where_conditions.append("categoria_materiale = ?")
+                    params.append(classification_filters['categoria_materiale'])
+            
+            where_clause = " WHERE " + " AND ".join(where_conditions)
+            
+            # Count total results
+            count_query = f"SELECT COUNT(*) as total FROM materiali{where_clause}"
+            total_result = self.execute_single_query(count_query, tuple(params))
+            total = total_result['total'] if total_result else 0
+            
+            # Calculate pagination
+            offset = (page - 1) * page_size
+            total_pages = (total + page_size - 1) // page_size
+            
+            # Get materials for current page
+            query = f"""
+                SELECT id, codice_materiale, descrizione, nome_fornitore,
+                       categoria_materiale, material_type, prezzo, costo_unitario,
+                       quantita_disponibile, quantita_minima, confidence_score,
+                       is_favorite, created_at, updated_at
+                FROM materiali{where_clause}
+                ORDER BY descrizione
+                LIMIT ? OFFSET ?
             """
             
-            search_term = f"%{query}%"
-            materiali = self.execute_query(search_query, (search_term, search_term, search_term, limit))
-            
-            suggestions = []
-            if include_suggestions:
-                # Simplified suggestions
-                suggestions = [{'suggestion': f"Try searching for '{query}' variations"}]
+            materials = self.execute_query(query, tuple(params + [page_size, offset]))
             
             return {
-                'materiali': self.clean_dbf_data(materiali),
-                'suggestions': suggestions
+                'materials': self.clean_dbf_data(materials) if materials else [],
+                'pagination': {
+                    'page': page,
+                    'page_size': page_size,
+                    'total_count': total,
+                    'total_pages': total_pages,
+                    'has_next': page < total_pages,
+                    'has_prev': page > 1
+                }
             }
             
         except Exception as e:
-            self.logger.error(f"Error in search_materiali: {e}")
+            self.logger.error(f"Error in search_materials: {e}")
             raise DatabaseError(f"Search failed: {str(e)}")
+    
+    def get_classification_suggestions(self, material: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Get classification suggestions for a material.
+        
+        Args:
+            material: Material dictionary
+            
+        Returns:
+            List of classification suggestions
+        """
+        # Simplified implementation - could be enhanced with ML
+        suggestions = []
+        
+        descrizione = material.get('descrizione', '').lower()
+        
+        # Basic keyword-based suggestions
+        if 'resina' in descrizione or 'composite' in descrizione:
+            suggestions.append({
+                'material_type': 'resina',
+                'categoria_materiale': 'Materiali da Otturazione',
+                'confidence': 85,
+                'reason': 'Keyword match: resina/composite'
+            })
+        elif 'perno' in descrizione or 'post' in descrizione:
+            suggestions.append({
+                'material_type': 'perni',
+                'categoria_materiale': 'Endodonzia',
+                'confidence': 80,
+                'reason': 'Keyword match: perno/post'
+            })
+        
+        return suggestions[:3]  # Return top 3 suggestions
     
     def get_statistics(self) -> Dict[str, Any]:
         """Get materials statistics."""

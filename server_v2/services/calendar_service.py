@@ -39,6 +39,12 @@ class CalendarServiceV2:
     - Google Calendar synchronization  
     - Statistics and analytics
     - OAuth authentication
+    
+    DEVELOPMENT RULES:
+    - I colori sono basati sul TIPO appuntamento (V, I, C, H, P), NON sullo studio
+    - Usare sempre app.get('GOOGLE_COLOR_ID', '8') per colori Google Calendar
+    - I colori sono definiti in server_v2/core/constants_v2.py
+    - SEMPRE controllare sistemi esistenti prima di crearne di nuovi
     """
     
     def __init__(self):
@@ -58,8 +64,13 @@ class CalendarServiceV2:
         try:
             appointments = self.dbf_reader.get_appointments_optimized(month, year)
             
-            # Apply same transformations as V1
+            # Filter out cancelled appointments and apply transformations
+            filtered_appointments = []
             for app in appointments:
+                # Skip cancelled appointments
+                if self._is_appointment_cancelled(app):
+                    continue
+                    
                 # Convert 8:00 AM appointments to "Nota giornaliera" 
                 ora_inizio = app.get('ORA_INIZIO')
                 is_eight_am = False
@@ -74,8 +85,10 @@ class CalendarServiceV2:
                         app['PAZIENTE'] = "Nota giornaliera"
                     if app.get('DESCRIZIONE') == "Appuntamento" or app.get('DESCRIZIONE') == "":
                         app['DESCRIZIONE'] = "Nota giornaliera"
+                
+                filtered_appointments.append(app)
             
-            return appointments
+            return filtered_appointments
             
         except Exception as e:
             logger.error(f"Error getting appointments for {month}/{year}: {e}")
@@ -301,6 +314,9 @@ class CalendarServiceV2:
             if descrizione and descrizione != summary:
                 summary += f" - {descrizione}"
             
+            # Use existing color system based on appointment type
+            color_id = app.get('GOOGLE_COLOR_ID', '8')  # Default gray if not set
+            
             event = {
                 'summary': summary,
                 'start': {
@@ -311,7 +327,12 @@ class CalendarServiceV2:
                     'dateTime': end_datetime.isoformat(),
                     'timeZone': 'Europe/Rome',
                 },
-                'description': f"Paziente: {paziente}\nDescrizione: {descrizione}"
+                'description': f"Paziente: {paziente}\nDescrizione: {descrizione}",
+                'colorId': color_id,
+                'reminders': {
+                    'useDefault': False,
+                    'overrides': []  # No reminders to avoid notifications
+                }
             }
             
             return event
@@ -322,8 +343,58 @@ class CalendarServiceV2:
             return {
                 'summary': 'Appuntamento',
                 'start': {'dateTime': datetime.now().isoformat(), 'timeZone': 'Europe/Rome'},
-                'end': {'dateTime': datetime.now().isoformat(), 'timeZone': 'Europe/Rome'}
+                'end': {'dateTime': datetime.now().isoformat(), 'timeZone': 'Europe/Rome'},
+                'colorId': '8'  # Default gray color
             }
+    
+    def _is_appointment_cancelled(self, appointment: Dict[str, Any]) -> bool:
+        """
+        Check if an appointment is cancelled based on various indicators.
+        """
+        # Check for explicit cancellation indicators
+        paziente = appointment.get('PAZIENTE', '').lower()
+        descrizione = appointment.get('DESCRIZIONE', '').lower()
+        tipo = appointment.get('TIPO', '').lower()
+        note = appointment.get('NOTE', '').lower()
+        
+        # Common cancellation keywords
+        cancellation_keywords = [
+            'cancellato', 'cancellata', 'cancellazione',
+            'annullato', 'annullata', 'annullamento',
+            'disdetto', 'disdetta', 'disdetta',
+            'rimandato', 'rimandata', 'rimandamento',
+            'spostato', 'spostata', 'spostamento'
+        ]
+        
+        # Check if any field contains cancellation keywords
+        for keyword in cancellation_keywords:
+            if (keyword in paziente or 
+                keyword in descrizione or 
+                keyword in tipo or 
+                keyword in note):
+                return True
+        
+        # Check for empty or invalid appointments
+        if (not paziente or paziente.strip() == '' or 
+            paziente == 'appuntamento' or paziente == 'cancellato'):
+            return True
+            
+        # Check for zero duration appointments (might indicate cancellation)
+        ora_inizio = appointment.get('ORA_INIZIO', 0)
+        ora_fine = appointment.get('ORA_FINE', 0)
+        
+        try:
+            if isinstance(ora_inizio, str):
+                ora_inizio = float(ora_inizio.replace(':', '.'))
+            if isinstance(ora_fine, str):
+                ora_fine = float(ora_fine.replace(':', '.'))
+            
+            if ora_inizio == ora_fine:  # Zero duration
+                return True
+        except (ValueError, TypeError):
+            pass
+        
+        return False
     
     def google_clear_calendar(self, calendar_id: str) -> Dict[str, Any]:
         """
@@ -348,11 +419,18 @@ class CalendarServiceV2:
                 # Delete events in batch
                 for event in events:
                     try:
+                        # Skip events that are not from our system (optional)
+                        event_summary = event.get('summary', '')
+                        if event_summary and not any(keyword in event_summary.lower() for keyword in ['appuntamento', 'nota giornaliera']):
+                            # Skip non-appointment events to avoid deleting user-created events
+                            continue
+                            
                         service.events().delete(
                             calendarId=calendar_id, 
                             eventId=event['id']
                         ).execute()
                         deleted_count += 1
+                        logger.debug(f"Deleted event: {event['id']} - {event_summary}")
                     except Exception as e:
                         logger.warning(f"Error deleting event {event['id']}: {e}")
                         continue

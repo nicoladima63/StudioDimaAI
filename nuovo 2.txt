@@ -1,0 +1,74 @@
+<!-- 🌟 HERO -->
+<section style="background: linear-gradient(135deg, #2a3d66, #4CAF50); color: white;">
+  <h1>La tua musica. La tua armonia.</h1>
+  <p>Impara a suonare e ritrova equilibrio grazie al Metodo Janina.</p>
+  <a href="#contatti" class="cta-btn">Prenota la tua lezione gratuita</a>
+  <img src="https://via.placeholder.com/800x400?text=Hero+Image" alt="Persona che suona chitarra">
+</section>
+
+<!-- 👤 CHI SONO -->
+<section>
+  <h2>Un metodo unico, creato per te</h2>
+  <p>Non solo tecnica, ma un percorso che unisce musica, emozioni e benessere.
+     Dal principiante al musicista avanzato, scopri un approccio su misura.</p>
+  <img src="https://via.placeholder.com/600x400?text=Ritratto+Insegnante" alt="Insegnante musica">
+</section>
+
+<!-- 🎶 PERCORSI -->
+<section>
+  <h2>Scegli il tuo percorso</h2>
+  <div class="cards">
+
+<a href="lezioni-private" class="card-link">
+  <div class="card">
+    <img src="https://via.placeholder.com/400x250?text=Chitarra" alt="Chitarra">
+    <h3>Lezioni individuali</h3>
+    <p>Chitarra, basso, ukulele: impara passo dopo passo.</p>
+  </div>
+</a>
+
+
+<a href="lezioni-di-gruppo" class="card-link">
+    <div class="card">
+      <img src="https://via.placeholder.com/400x250?text=Chitarra" alt="Chitarra">
+      <h3>Lezioni individuali</h3>
+      <p>Chitarra, basso, ukulele: impara passo dopo passo.</p>
+    </div>
+</a>
+<a href="lezioni-private" class="card-link">
+    <div class="card">
+      <img src="https://via.placeholder.com/400x250?text=Gruppo" alt="Musica d'insieme">
+      <h3>Gruppi & Ensemble</h3>
+      <p>Suona insieme ad altri e cresci musicalmente.</p>
+    </div>
+</a>
+<a href="lezioni-private" class="card-link">
+    <div class="card">
+      <img src="https://via.placeholder.com/400x250?text=Relax" alt="Musica vibrazionale">
+      <h3>Musica vibrazionale</h3>
+      <p>Healing music per benessere e rilassamento.</p>
+    </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/400x250?text=Composizione" alt="Composizione musicale">
+      <h3>Composizione & Colonne sonore</h3>
+      <p>Dai vita alle tue idee musicali.</p>
+    </div>
+  </div>
+</a>
+</section>
+
+<!-- 💬 TESTIMONIANZE -->
+<section style="background:#f3f7fa;">
+  <h2>Cosa dicono gli studenti</h2>
+  <p>"Ho ritrovato fiducia e gioia suonando ogni settimana." – Giulia</p>
+  <p>"Un approccio diverso, che mette la persona al centro." – Marco</p>
+  <img src="https://via.placeholder.com/700x300?text=Studenti" alt="Studenti sorridenti">
+</section>
+
+<!-- 📩 CTA FINALE -->
+<section id="contatti">
+  <h2>Sei pronto a iniziare il tuo viaggio musicale?</h2>
+  <a href="https://wa.me/393XXXXXXXXX" class="cta-btn">Contattami su WhatsApp</a>
+  <a href="/contatti" class="cta-btn">Prenota una lezione gratuita</a>
+  <img src="https://via.placeholder.com/600x300?text=Chitarra+in+luce+soft" alt="Chitarra">
+</section>

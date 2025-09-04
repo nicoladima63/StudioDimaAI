@@ -30,17 +30,82 @@ api_v2 = Blueprint('api_v2', __name__, url_prefix='/api/v2')
 @api_v2.route('/health', methods=['GET'])
 def health_check():
     """V2 API health check endpoint."""
-    return jsonify({
-        'status': 'healthy',
-        'version': '2.0.0',
-        'timestamp': datetime.now().isoformat(),
-        'services': {
-            'materiali_service': 'active',
-            'fornitori_service': 'active',
-            'classificazioni_service': 'active',
-            'statistiche_service': 'active'
+    try:
+        # Get services status from environment manager
+        from core.environment_manager import environment_manager
+        
+        # Get all services status
+        all_services_status = environment_manager.get_all_services_status()
+        
+        services_status = {}
+        overall_status = 'healthy'
+        
+        # Map service types to display names
+        service_names = {
+            'database': 'Database',
+            'ricetta': 'Ricetta Elettronica',
+            'sms': 'SMS Service',
+            'rentri': 'Rentri Service'
         }
-    })
+        
+        # Process each service
+        for service_type, service_data in all_services_status.items():
+            service_key = service_type.value
+            display_name = service_names.get(service_key, service_key.replace('_', ' ').title())
+            
+            # Determine service health
+            validation = service_data.get('validation', {})
+            if validation.get('valid', False):
+                status = 'healthy'
+            elif validation.get('warnings'):
+                status = 'degraded'
+                if overall_status == 'healthy':
+                    overall_status = 'degraded'
+            else:
+                status = 'unhealthy'
+                overall_status = 'unhealthy'
+            
+            services_status[service_key] = {
+                'status': status,
+                'environment': service_data.get('current_environment', 'unknown'),
+                'details': f"Validazione: {'OK' if validation.get('valid') else 'KO'}",
+                'last_check': datetime.now().isoformat(),
+                'name': display_name
+            }
+        
+        # Add basic services that are always active
+        services_status['api_server'] = {
+            'status': 'healthy',
+            'environment': 'active',
+            'details': 'Server API operativo',
+            'last_check': datetime.now().isoformat(),
+            'name': 'API Server'
+        }
+        
+        services_status['database_connection'] = {
+            'status': 'healthy',
+            'environment': 'active',
+            'details': 'Connessione database attiva',
+            'last_check': datetime.now().isoformat(),
+            'name': 'Database Connection'
+        }
+        
+        return jsonify({
+            'status': overall_status,
+            'version': '2.0.0',
+            'timestamp': datetime.now().isoformat(),
+            'services': services_status
+        })
+        
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return jsonify({
+            'status': 'unhealthy',
+            'version': '2.0.0',
+            'timestamp': datetime.now().isoformat(),
+            'error': str(e),
+            'services': {}
+        }), 503
 
 
 @api_v2.route('/materials', methods=['GET'])

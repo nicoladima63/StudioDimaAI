@@ -1,0 +1,37 @@
+{
+  "general_rules": {
+    "check_existing": "SEMPRE controllare se esistono già funzioni/configurazioni prima di crearne di nuove",
+    "use_existing_systems": "SEMPRE usare i sistemi esistenti (constants_v2.py, dbf_utils.py, etc.)",
+    "maintain_v1_compatibility": "SEMPRE mantenere compatibilità con V1 quando possibile",
+    "test_before_complete": "SEMPRE testare le modifiche prima di considerarle complete"
+  },
+  "calendar_rules": {
+    "colors_based_on_type": "I colori sono basati sul TIPO appuntamento (V, I, C, H, P), NON sullo studio",
+    "use_google_color_id": "Usare sempre app.get('GOOGLE_COLOR_ID', '8') per colori Google Calendar",
+    "colors_defined_in": "Colori definiti in server_v2/core/constants_v2.py"
+  },
+  "backend_rules": {
+    "use_optimized_reader": "Usare sempre get_optimized_reader() per accesso DBF",
+    "maintain_v1_logic": "Mantenere logica V1 quando possibile",
+    "add_detailed_logging": "Aggiungere logging dettagliato per debug"
+  },
+  "frontend_rules": {
+    "use_coreui": "Usare sempre React Core UI framework",
+    "centralize_api_calls": "Centralizzare chiamate API in apiClient.ts",
+    "use_zustand": "Usare Zustand per state management",
+    "organize_by_feature": "Organizzare per feature: client/src/features/<feature>/"
+  },
+  "structure_rules": {
+    "backend_path": "server_v2/",
+    "frontend_path": "client_v2/",
+    "config_path": "server_v2/core/",
+    "services_path": "server_v2/services/",
+    "api_path": "server_v2/api/"
+  },
+  "forbidden_actions": [
+    "Non creare funzioni duplicate",
+    "Non ignorare sistemi esistenti", 
+    "Non fare modifiche senza controllare l'esistente",
+    "Non usare fetch/axios dirette nel frontend (solo apiClient.ts)"
+  ]
+}

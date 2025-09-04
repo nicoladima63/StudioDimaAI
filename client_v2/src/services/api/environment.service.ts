@@ -20,7 +20,7 @@ import type {
 } from "../../types/environment.types";
 
 class EnvironmentApiService {
-  private readonly basePath = "/api/v2/environment";
+  private readonly basePath = "/environment";
 
   // === Status e informazioni ===
   async getEnvironmentStatus(): Promise<EnvironmentStatusResponse> {

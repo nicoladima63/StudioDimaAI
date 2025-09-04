@@ -101,11 +101,12 @@
   table-layout: fixed !important;
 }
 
-.data-table .table > thead > tr > th[style*="width"],
-.data-table .table > tbody > tr > td[style*="width"] {
-  width: var(--column-width) !important;
-  max-width: var(--column-width) !important;
+.data-table .table > thead > tr > th,
+.data-table .table > tbody > tr > td {
   min-width: 50px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 /* Prevent text selection during resize */

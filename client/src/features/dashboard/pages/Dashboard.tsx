@@ -3,7 +3,8 @@ import { CCol, CRow, CButton, CToast, CToastBody, CToastHeader, CSpinner } from 
 import {
   AppuntamentiChart,
   AppuntamentiCoreUICard,
-  AppuntamentiTotaliBar
+  AppuntamentiTotaliBar,
+  ServicesStatusSection
 } from '../components';
 import { Card } from '@/components/ui';
 import { getPazientiStats } from '@/api/services/pazienti.service'; 
@@ -181,6 +182,12 @@ const Dashboard: React.FC = () => {
             <CRow className="mt-4">
               <CCol xs={12}>
                 <AppuntamentiTotaliBar totali={totali} />
+              </CCol>
+            </CRow>
+
+            <CRow className="mt-4">
+              <CCol xs={12}>
+                <ServicesStatusSection />
               </CCol>
             </CRow>
           </Card>

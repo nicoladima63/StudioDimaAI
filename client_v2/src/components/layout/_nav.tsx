@@ -89,8 +89,8 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Automazioni',
-    to: '/calendar/automation',
+    name: 'Impostazioni Calendario',
+    to: '/settings/calendar',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {

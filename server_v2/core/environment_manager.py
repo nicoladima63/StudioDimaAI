@@ -27,6 +27,7 @@ class ServiceType(str, Enum):
     RICETTA = "ricetta"
     SMS = "sms"
     RENTRI = "rentri"
+    CALENDAR = "calendar"
 
 @dataclass
 class ServiceConfig:
@@ -81,7 +82,8 @@ class EnvironmentManager:
             ServiceType.DATABASE: "database_mode.txt",
             ServiceType.RICETTA: "ricetta_mode.txt", 
             ServiceType.SMS: "sms_mode.txt",
-            ServiceType.RENTRI: "rentri_mode.txt"
+            ServiceType.RENTRI: "rentri_mode.txt",
+            ServiceType.CALENDAR: "calendar_mode.txt"
         }
         
         self._automation_config_file = self.instance_dir / "automation_settings.json"
@@ -106,6 +108,10 @@ class EnvironmentManager:
                 'default_environment': Environment.TEST
             },
             ServiceType.RENTRI: {
+                'available_environments': [Environment.DEV, Environment.PROD],
+                'default_environment': Environment.DEV
+            },
+            ServiceType.CALENDAR: {
                 'available_environments': [Environment.DEV, Environment.PROD],
                 'default_environment': Environment.DEV
             }
@@ -152,11 +158,12 @@ class EnvironmentManager:
             ServiceType.DATABASE: Environment.DEV,
             ServiceType.RICETTA: Environment.TEST,
             ServiceType.SMS: Environment.TEST, 
-            ServiceType.RENTRI: Environment.DEV
+            ServiceType.RENTRI: Environment.DEV,
+            ServiceType.CALENDAR: Environment.DEV
         }
         return defaults.get(service, Environment.DEV)
     
-    def _save_environment_to_file(self, service: ServiceType, environment: Environment) -> bool:
+    def old_save_environment_to_file(self, service: ServiceType, environment: Environment) -> bool:
         """Salva ambiente su file per persistenza"""
         try:
             mode_file = self.instance_dir / self._mode_files[service]
@@ -166,6 +173,46 @@ class EnvironmentManager:
             logger.error(f"Errore salvataggio modalità {service}: {e}")
             return False
     
+
+    #deepseek 
+    def _save_environment_to_file(self, service: ServiceType, environment: Environment) -> bool:
+        """Salva ambiente su file per persistenza con verifica"""
+        try:
+            mode_file = self.instance_dir / self._mode_files[service]
+            
+            # Scrittura del file
+            mode_file.write_text(environment.value)
+            
+            # Verifica immediata: il file esiste?
+            if not mode_file.exists():
+                logger.error(f"File {mode_file} non creato dopo scrittura")
+                return False
+            
+            # Verifica contenuto: leggiamo ciò che abbiamo scritto
+            written_content = mode_file.read_text().strip()
+            if written_content != environment.value:
+                logger.error(f"Contenuto file non corrisponde: atteso '{environment.value}', ottenuto '{written_content}'")
+                return False
+            
+            # Verifica permessi (opzionale)
+            if not mode_file.is_file():
+                logger.error(f"{mode_file} non è un file regolare")
+                return False
+                
+            logger.info(f"Ambiente {environment.value} salvato correttamente per {service}")
+            return True
+            
+        except PermissionError as e:
+            logger.error(f"Permesso negato per salvare {mode_file}: {e}")
+            return False
+        except IOError as e:
+            logger.error(f"Errore I/O durante salvataggio {mode_file}: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Errore imprevisto salvataggio modalità {service}: {e}")
+            return False
+
+
     def _is_cache_valid(self, cache_key: str) -> bool:
         """Verifica validità cache"""
         if cache_key not in self._cache_timestamps:
@@ -189,7 +236,38 @@ class EnvironmentManager:
             return Environment.DEV
         return self._services[service].current_environment
     
+
+
+
+    #deepseek support
     def set_environment(self, service: ServiceType, environment: Environment) -> bool:
+        """Imposta l'ambiente per un servizio con verifica"""
+        try:
+            # ... codice esistente ...
+            
+            # Salva su file
+            file_saved = self._save_environment_to_file(service, environment)
+            if not file_saved:
+                logger.error(f"Salvataggio file fallito per {service}")
+                return False
+            
+            # Verifica aggiuntiva: controlla che il valore sia effettivamente cambiato
+            current_env = self._load_environment_from_file(service)
+            if current_env != environment:
+                logger.error(f"Disallineamento: ambiente impostato a {environment} ma file contiene {current_env}")
+                return False
+            
+            # Aggiorna cache
+            self.get_environment[service] = environment
+            return True
+            
+        except Exception as e:
+            logger.error(f"Errore in set_environment per {service}: {e}")
+            return False
+
+
+
+    def old_set_environment(self, service: ServiceType, environment: Environment) -> bool:
         """Imposta ambiente per servizio"""
         if service not in self._services:
             logger.error(f"Servizio {service} non supportato")
@@ -247,6 +325,8 @@ class EnvironmentManager:
             return self._get_sms_config(environment)
         elif service == ServiceType.RENTRI:
             return self._get_rentri_config(environment)
+        elif service == ServiceType.CALENDAR:
+            return self._get_calendar_config(environment)
         else:
             return {}
     
@@ -343,6 +423,23 @@ class EnvironmentManager:
                 'api_base': 'https://demoapi.rentri.gov.it'
             }
     
+    def _get_calendar_config(self, environment: Environment) -> Dict[str, Any]:
+        """Configurazione Calendar"""
+        if environment == Environment.PROD:
+            return {
+                'credentials_path': self.instance_dir / 'credentials.json',
+                'token_path': self.instance_dir / 'token.json',
+                'scopes': ['https://www.googleapis.com/auth/calendar'],
+                'enabled': True
+            }
+        else:  # DEV
+            return {
+                'credentials_path': self.instance_dir / 'credentials.json',
+                'token_path': self.instance_dir / 'token.json',
+                'scopes': ['https://www.googleapis.com/auth/calendar'],
+                'enabled': True
+            }
+    
     def validate_service_config(self, service: ServiceType, environment: Optional[Environment] = None) -> EnvironmentValidation:
         """Valida configurazione servizio"""
         if environment is None:
@@ -360,6 +457,8 @@ class EnvironmentManager:
             validation = self._validate_sms_config(config, environment)
         elif service == ServiceType.RENTRI:
             validation = self._validate_rentri_config(config, environment)
+        elif service == ServiceType.CALENDAR:
+            validation = self._validate_calendar_config(config, environment)
         
         # Aggiorna stato validazione
         if service in self._services:
@@ -472,6 +571,48 @@ class EnvironmentManager:
             if not exists:
                 validation.valid = False
                 validation.errors.append(f'Chiave privata non trovata: {private_key_path}')
+        
+        return validation
+    
+    def _validate_calendar_config(self, config: Dict[str, Any], environment: Environment) -> EnvironmentValidation:
+        """Valida configurazione Calendar"""
+        validation = EnvironmentValidation(valid=True)
+        
+        # Controlla credenziali Google
+        credentials_path = config.get('credentials_path', '')
+        token_path = config.get('token_path', '')
+        
+        if credentials_path:
+            cred_file = Path(credentials_path)
+            exists = cred_file.exists()
+            validation.checks['credentials_exists'] = exists
+            
+            if not exists:
+                validation.valid = False
+                validation.errors.append(f'File credenziali non trovato: {credentials_path}')
+        
+        if token_path:
+            token_file = Path(token_path)
+            exists = token_file.exists()
+            validation.checks['token_exists'] = exists
+            
+            if not exists:
+                validation.warnings.append(f'Token di accesso non trovato: {token_path}')
+        
+        # Controlla configurazione automazione
+        automation_settings = self.get_automation_settings()
+        calendar_sync_enabled = automation_settings.get('calendar_sync_enabled', False)
+        validation.checks['sync_enabled'] = calendar_sync_enabled
+        
+        if calendar_sync_enabled:
+            studio_blu_id = automation_settings.get('calendar_studio_blu_id', '')
+            studio_giallo_id = automation_settings.get('calendar_studio_giallo_id', '')
+            
+            validation.checks['studio_blu_configured'] = bool(studio_blu_id)
+            validation.checks['studio_giallo_configured'] = bool(studio_giallo_id)
+            
+            if not studio_blu_id or not studio_giallo_id:
+                validation.warnings.append('ID calendari studio non configurati')
         
         return validation
     

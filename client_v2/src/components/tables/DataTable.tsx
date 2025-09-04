@@ -217,6 +217,32 @@ const DataTable = <T extends Record<string, any>>({
     setOrderedColumns(newConfig.order);
   }, [allColumns.length, tableId]);
 
+  // Filtra solo le colonne visibili
+  const visibleColumnsData = orderedColumns.filter(col => visibleColumns.has(col.key));
+
+  // Applica le larghezze salvate quando il componente si monta o cambiano le colonne
+  React.useEffect(() => {
+    if (visibleColumnsData.length > 0) {
+      // Piccolo delay per assicurarsi che il DOM sia renderizzato
+      const timer = setTimeout(() => {
+        visibleColumnsData.forEach(column => {
+          const width = getColumnWidth(column);
+          const columnKey = String(column.key);
+          const elements = document.querySelectorAll(`.data-table [data-column="${columnKey}"]`);
+          
+          elements.forEach(element => {
+            const el = element as HTMLElement;
+            el.style.width = width;
+            el.style.minWidth = width;
+            el.style.maxWidth = width;
+          });
+        });
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [visibleColumnsData, columnWidths]);
+
   const toggleColumn = (columnKey: keyof T) => {
     const newVisible = new Set(visibleColumns);
     if (newVisible.has(columnKey)) {
@@ -257,10 +283,6 @@ const DataTable = <T extends Record<string, any>>({
     const deltaX = e.clientX - resizeStartX;
     const newWidth = Math.max(50, resizeStartWidth + deltaX); // Larghezza minima 50px
 
-    console.log(
-      `Resizing column ${String(resizeColumn)}: deltaX=${deltaX}, newWidth=${newWidth}px`
-    );
-
     const newWidths = new Map(columnWidths);
     newWidths.set(resizeColumn, newWidth);
     setColumnWidths(newWidths);
@@ -271,13 +293,11 @@ const DataTable = <T extends Record<string, any>>({
       `.data-table [data-column="${resizeColumnKey}"]`
     );
 
-    console.log(`Found ${columnsToUpdate.length} elements to update for column ${resizeColumnKey}`);
-
     columnsToUpdate.forEach(element => {
       const el = element as HTMLElement;
-      el.style.setProperty('--column-width', `${newWidth}px`);
       el.style.width = `${newWidth}px`;
-      console.log(`Updated element:`, el, `to width ${newWidth}px`);
+      el.style.minWidth = `${newWidth}px`;
+      el.style.maxWidth = `${newWidth}px`;
     });
   };
 
@@ -313,7 +333,7 @@ const DataTable = <T extends Record<string, any>>({
   // Ottieni larghezza di una colonna
   const getColumnWidth = (column: DataTableColumn<T>) => {
     const savedWidth = columnWidths.get(column.key);
-    if (savedWidth) return `${savedWidth}px`;
+    if (savedWidth && savedWidth > 0) return `${savedWidth}px`;
 
     // Se è specificata una larghezza nella definizione della colonna
     if (column.width && column.width !== 'auto') {
@@ -346,9 +366,6 @@ const DataTable = <T extends Record<string, any>>({
     setOrderedColumns(newOrder);
     saveColumnConfig(visibleColumns, newOrder);
   };
-
-  // Filtra solo le colonne visibili
-  const visibleColumnsData = orderedColumns.filter(col => visibleColumns.has(col.key));
 
   // Funzione per determinare l'allineamento automatico intelligente
   const getColumnAlignment = (
@@ -917,6 +934,8 @@ const DataTable = <T extends Record<string, any>>({
                       scope='col'
                       style={{
                         width: getColumnWidth(column),
+                        minWidth: getColumnWidth(column),
+                        maxWidth: getColumnWidth(column),
                         textAlign: headerAlign,
                       }}
                       draggable
@@ -976,13 +995,12 @@ const DataTable = <T extends Record<string, any>>({
                           key={String(column.key)}
                           data-column={String(column.key)}
                           className={`text-${cellAlign === 'left' ? 'start' : cellAlign === 'right' ? 'end' : 'center'}`}
-                          style={
-                            {
-                              '--column-width': getColumnWidth(column),
-                              width: getColumnWidth(column),
-                              textAlign: cellAlign as any,
-                            } as React.CSSProperties
-                          }
+                          style={{
+                            width: getColumnWidth(column),
+                            minWidth: getColumnWidth(column),
+                            maxWidth: getColumnWidth(column),
+                            textAlign: cellAlign as any,
+                          }}
                         >
                           {column.render
                             ? column.render(cellValue, item)

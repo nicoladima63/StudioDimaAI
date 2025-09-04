@@ -129,8 +129,22 @@ def run_with_waitress(app, args):
         run_with_flask_dev(app, args)
     except KeyboardInterrupt:
         print("\nServer stopped by user")
+        # Shutdown scheduler
+        try:
+            from services.scheduler_service import scheduler_service
+            print("🛑 Stopping scheduler service...")
+            scheduler_service.shutdown()
+            print("✅ Scheduler service stopped")
+        except Exception as e:
+            print(f"⚠️ Error stopping scheduler: {e}")
     except Exception as e:
         print(f"❌ Server error: {e}")
+        # Shutdown scheduler on error
+        try:
+            from services.scheduler_service import scheduler_service
+            scheduler_service.shutdown()
+        except:
+            pass
         sys.exit(1)
 
 
@@ -173,6 +187,12 @@ def main():
         
         # Create Flask application
         app = create_app_v2(args.config)
+        
+        # Initialize scheduler service
+        from services.scheduler_service import scheduler_service
+        print("🔄 Starting scheduler service...")
+        scheduler_service.start()
+        print("✅ Scheduler service started")
                 
         # Start server
         if args.use_flask_dev:

@@ -39,6 +39,7 @@ const LoginPage: React.FC = () => {
   const location = useLocation()
   const { isAuthenticated, login } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -102,13 +103,22 @@ const LoginPage: React.FC = () => {
                         <CIcon icon={cilLockLocked} />
                       </CInputGroupText>
                       <CFormInput
-                        type='password'
+                        type={showPassword ? 'text' : 'password'}
                         placeholder='Password'
                         autoComplete='current-password'
                         {...register('password')}
                         invalid={!!errors.password}
                         disabled={isLoading}
                       />
+                      <CButton
+                        type='button'
+                        variant='outline'
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                        style={{ borderLeft: 'none' }}
+                      >
+                        {showPassword ? '✗' : '✓'}
+                      </CButton>
                       {errors.password && (
                         <CFormFeedback invalid>{errors.password.message}</CFormFeedback>
                       )}

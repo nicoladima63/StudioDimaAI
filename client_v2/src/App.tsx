@@ -14,7 +14,7 @@ import { useAuthStore } from '@/store/auth.store'
 import { config } from '@/utils'
 
 const App: React.FC = () => {
-  const { tokens, clearAuth } = useAuthStore()
+  const { tokens, clearAuth, checkAuth } = useAuthStore()
   
   // Initialize auth tokens on app start
   useEffect(() => {
@@ -28,12 +28,15 @@ const App: React.FC = () => {
       return
     }
     
+    // Initialize tokens and check auth if we have persisted tokens
     if (tokens?.accessToken && tokens?.refreshToken) {
       import('@/services/api/client').then(({ setTokens }) => {
         setTokens(tokens.accessToken, tokens.refreshToken)
+        // Verify token is still valid
+        checkAuth()
       })
     }
-  }, [])
+  }, [tokens, clearAuth, checkAuth])
 
   return (
     <ErrorBoundary
