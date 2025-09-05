@@ -23,7 +23,7 @@ const ProtectedRoute: React.FC<Props> = ({ children }) => {
     if (!user && !isLoading && tokens?.accessToken) {
       checkAuth()
     }
-  }, [user, isLoading, tokens, checkAuth])
+  }, []) // Empty dependency array - run only once on mount
 
   // Show loading while checking authentication
   if (isLoading) {

@@ -135,7 +135,6 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_materiali import materiali_v2_bp
     from api.v2_fornitori import fornitori_v2_bp
     from api.v2_pazienti import pazienti_v2_bp
-    from api.api_materiali_migration import materiali_migration_bp
     from api.v2_spese_fornitori import spese_fornitori_v2_bp
     from api.v2_statistiche import statistiche_v2_bp
     from api.v2_classificazioni import classificazioni_v2_bp
@@ -147,7 +146,6 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_calendar import calendar_v2_bp
     from api.v2_scheduler import scheduler_v2_bp
     from api.v2_environment import environment_bp
-    from api.materiali_migration_endpoints import materiali_migration_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -164,8 +162,7 @@ def register_blueprints(app: Flask) -> None:
         templates_v2_bp,
         automation_v2_bp,
         scheduler_v2_bp,
-        environment_bp,
-        materiali_migration_bp
+        environment_bp
     ]
     
     # Register standard blueprints with API prefix only

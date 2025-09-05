@@ -113,6 +113,12 @@ const _nav = [
     to: '/settings',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
+  {
+    component: CNavItem,
+    name: 'Migrazione Materiali',
+    to: '/materiali/migrazione',
+    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+  },
 ];
 
 export default _nav;

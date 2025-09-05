@@ -1,8 +1,9 @@
-import apiClient from '@/api/client';
+import apiClient from '@/services/api/client';
 
 export interface MaterialeMigrazione {
   id: string;
   nome: string;
+  codice_prodotto: string;
   costo_unitario: number;
   quantita: number;
   confidence: number;
@@ -11,6 +12,13 @@ export interface MaterialeMigrazione {
   contoid?: number;
   brancaid?: number;
   sottocontoid?: number;
+  contonome?: string;
+  brancanome?: string;
+  sottocontonome?: string;
+  fornitoreid: string;
+  fornitorenome: string;
+  data_fattura: string;
+  fattura_id: string;
 }
 
 export interface FornitoreMigrazione {
@@ -50,7 +58,15 @@ export const materialiMigrationService = {
    * Ottieni anteprima dei materiali da migrare raggruppati per fornitore
    */
   async getMigrationPreview(): Promise<RispostaAPI<AnteprimaMigrazione>> {
-    const response = await apiClient.get('/api/materiali-migration/preview');
+    const response = await apiClient.get('/materiali/migrazione/preview');
+    return response.data;
+  },
+
+  /**
+   * Ottieni anteprima dei materiali per un fornitore specifico
+   */
+  async getSupplierPreview(fornitoreId: string): Promise<RispostaAPI<FornitoreMigrazione>> {
+    const response = await apiClient.get(`/materiali/migrazione/preview/${fornitoreId}`);
     return response.data;
   },
 
@@ -58,7 +74,7 @@ export const materialiMigrationService = {
    * Importa tutti i materiali di un fornitore specifico
    */
   async importSupplierMaterials(supplierName: string): Promise<RispostaAPI<RisultatoImportazione>> {
-    const response = await apiClient.post(`/api/materiali-migration/import/${encodeURIComponent(supplierName)}`);
+    const response = await apiClient.post(`/materiali/migrazione/import/${encodeURIComponent(supplierName)}`);
     return response.data;
   },
 
@@ -66,7 +82,7 @@ export const materialiMigrationService = {
    * Importa tutti i materiali dentali disponibili
    */
   async importAllMaterials(): Promise<RispostaAPI<RisultatoImportazione>> {
-    const response = await apiClient.post('/api/materiali-migration/import-all');
+    const response = await apiClient.post('/materiali/migrazione/import-all');
     return response.data;
   }
 };

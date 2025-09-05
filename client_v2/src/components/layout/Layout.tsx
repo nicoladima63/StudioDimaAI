@@ -7,7 +7,7 @@ import AppSidebar from './AppSidebar'
 const Layout: React.FC = () => {
   const [sidebarVisible, setSidebarVisible] = React.useState(true)
   const navigate = useNavigate()
-  const { user, isAuthenticated, logout } = useAuthStore()
+  const { user, isAuthenticated, isLoading, logout } = useAuthStore()
 
   const handleLogout = () => {
     logout()
@@ -78,7 +78,7 @@ const Layout: React.FC = () => {
                     height: '32px',
                     fontSize: '12px'
                   }}>
-                    👤 {user.name || user.username}
+                    👤 {user.username}
                   </span>
                   <span style={{ 
                     background: user.role === 'admin' ? '#28a745' : '#007bff', 

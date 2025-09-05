@@ -140,7 +140,7 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
       />
       
       {isOpen && (
-        <div className="position-absolute w-100" style={{ zIndex: 1050, top: '100%' }}>
+        <div className="position-absolute w-100" style={{ zIndex: 1060, top: '100%' }}>
           <div className="border border-top-0 bg-white shadow-sm" style={{ maxHeight: '400px', overflowY: 'auto' }}>
             {!fornitoreId && (
               <div className="px-3 py-2 text-muted">

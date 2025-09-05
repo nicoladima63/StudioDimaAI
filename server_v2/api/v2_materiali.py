@@ -10,8 +10,11 @@ from flask import Blueprint, request, jsonify, g
 from flask_jwt_extended import jwt_required
 
 from services.materiali_service import MaterialiService
+from services.materiali_migration_service import MaterialiMigrationService
 from app_v2 import require_auth, format_response, handle_dbf_data
-from core.exceptions import ValidationError, DatabaseError
+from core.exceptions import ValidationError, DatabaseError, DbfProcessingError
+from core.database_manager import get_database_manager
+from datetime import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -462,4 +465,192 @@ def get_materiali_stats():
         return format_response(
             success=False,
             error="An unexpected error occurred"
+        ), 500
+
+
+# ============================================================================
+# MATERIALI MIGRATION ENDPOINTS
+# ============================================================================
+
+@materiali_v2_bp.route('/materiali/migrazione/preview', methods=['GET'])
+@materiali_v2_bp.route('/materiali/migrazione/preview/<fornitore_id>', methods=['GET'])
+@jwt_required()
+def preview_migration(fornitore_id=None):
+    """
+    Preview materials migration without actually migrating.
+    Shows what materials would be migrated and their classification.
+    If fornitore_id is provided, shows only materials for that supplier.
+    """
+    try:
+        user_id = require_auth()
+        db_manager = get_database_manager()
+        migration_service = MaterialiMigrationService(db_manager)
+        
+        # Read and filter materials without saving to database
+        materials_data = migration_service.read_spesafo_data()
+        
+        # If fornitore_id is specified, filter materials for that supplier only
+        if fornitore_id:
+            materials_data = [
+                material for material in materials_data 
+                if material.get('fornitoreid', '') == fornitore_id
+            ]
+            logger.info(f"Filtered materials for supplier {fornitore_id}: {len(materials_data)} materials")
+        
+        classified_materials = migration_service.filter_materials_by_classification(materials_data)
+        
+        # Group by supplier for frontend display
+        suppliers_data = {}
+        for material in classified_materials:
+            supplier_name = material.get('fornitore_normalizzato', 'Unknown')
+            if supplier_name not in suppliers_data:
+                suppliers_data[supplier_name] = {
+                    'fornitore': supplier_name,
+                    'materiali': [],
+                    'count': 0
+                }
+            suppliers_data[supplier_name]['materiali'].append(material)
+            suppliers_data[supplier_name]['count'] += 1
+        
+        # Create preview statistics matching frontend interface
+        stats = {
+            'total_valid_materials': len(materials_data),
+            'dental_materials': len(classified_materials),
+            'suppliers_with_materials': len(suppliers_data)
+        }
+        
+        # Transform suppliers data to match frontend interface
+        suppliers_list = []
+        for supplier_name, supplier_data in suppliers_data.items():
+            suppliers_list.append({
+                'fornitore_nome': supplier_name,
+                'fornitore_originale': supplier_name,  # Could be enhanced to show original name
+                'materiali_count': supplier_data['count'],
+                'materiali': supplier_data['materiali']
+            })
+        
+        # If fornitore_id is specified, return single supplier data directly
+        if fornitore_id and suppliers_list:
+            return format_response(
+                data=suppliers_list[0],  # Return first (and only) supplier directly
+                message="Supplier preview generated successfully"
+            )
+        
+        # Otherwise return full preview structure
+        return format_response(
+            data={
+                'suppliers': suppliers_list,
+                'total_suppliers': len(suppliers_list),
+                'total_materials': len(classified_materials),
+                'stats': stats,
+                'preview_generated_at': datetime.now().isoformat()
+            },
+            message="Migration preview generated successfully"
+        )
+        
+    except DbfProcessingError as e:
+        logger.error(f"DBF processing error in preview: {e}")
+        return format_response(
+            success=False,
+            error=f"DBF processing error: {str(e)}"
+        ), 500
+    except Exception as e:
+        logger.error(f"Error in preview_migration: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred during preview"
+        ), 500
+
+
+@materiali_v2_bp.route('/materiali/migrazione/import/<supplier_name>', methods=['POST'])
+@jwt_required()
+def import_supplier_materials(supplier_name):
+    """
+    Import materials for a specific supplier.
+    """
+    try:
+        user_id = require_auth()
+        db_manager = get_database_manager()
+        migration_service = MaterialiMigrationService(db_manager)
+        
+        # Read and filter materials
+        materials_data = migration_service.read_spesafo_data()
+        classified_materials = migration_service.filter_materials_by_classification(materials_data)
+        
+        # Filter by supplier
+        supplier_materials = [
+            m for m in classified_materials 
+            if m.get('fornitore_normalizzato', '').lower() == supplier_name.lower()
+        ]
+        
+        if not supplier_materials:
+            return format_response(
+                success=False,
+                error=f"No materials found for supplier: {supplier_name}"
+            ), 404
+        
+        # Import materials for this supplier
+        result = migration_service.import_materials_for_supplier(supplier_name, supplier_materials)
+        
+        return format_response(
+            data=result,
+            message=f"Successfully imported {result.get('imported_count', 0)} materials for {supplier_name}"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in import_supplier_materials: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+    except DatabaseError as e:
+        logger.error(f"Database error in import_supplier_materials: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+    except Exception as e:
+        logger.error(f"Error in import_supplier_materials: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred during import"
+        ), 500
+
+
+@materiali_v2_bp.route('/materiali/migrazione/import-all', methods=['POST'])
+@jwt_required()
+def import_all_materials():
+    """
+    Import all identified dental materials.
+    """
+    try:
+        user_id = require_auth()
+        db_manager = get_database_manager()
+        migration_service = MaterialiMigrationService(db_manager)
+        
+        # Execute full migration
+        result = migration_service.run_full_migration()
+        
+        return format_response(
+            data=result,
+            message="Full migration completed successfully"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in import_all_materials: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+    except DatabaseError as e:
+        logger.error(f"Database error in import_all_materials: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+    except Exception as e:
+        logger.error(f"Error in import_all_materials: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred during migration"
         ), 500

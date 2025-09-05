@@ -91,8 +91,10 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authService.apiVerifyToken()
 
           if (response.success && response.data) {
+            // Backend returns { user: {...}, authenticated: true }
+            const userData = response.data.user || response.data
             set({
-              user: response.data,
+              user: userData,
               isAuthenticated: true,
               isLoading: false,
             })

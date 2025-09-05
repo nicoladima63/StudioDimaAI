@@ -10,6 +10,7 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute'
 const Dashboard = React.lazy(() => import('@/features/dashboard/pages/Dashboard'))
 const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
+const MaterialiMigrazione = React.lazy(() => import('@/features/materiali/pages/MaterialiMigrazione'))
 const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
 const PazientiPage = React.lazy(() => import('@/features/pazienti/pages/PazientiPage'))
 const RicettaElettronicaPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RicettaElettronicaPage'))
@@ -55,6 +56,8 @@ const AppRouter: React.FC = () => {
           
           {/* Feature routes */}
           <Route path='materiali' element={<MaterialiPage />} />
+          <Route path='materiali/migrazione' element={<MaterialiMigrazione />} />
+          
           <Route path='fornitori' element={<FornitoriPage />} />
           <Route path='pazienti' element={<PazientiPage />} />
           <Route path='conti' element={<ContiPage/>} />

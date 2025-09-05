@@ -22,6 +22,25 @@ export const setTokens = (access: string, refresh: string): void => {
   refreshToken = refresh
   localStorage.setItem('access_token', access)
   localStorage.setItem('refresh_token', refresh)
+  
+  // Also update Zustand store if available
+  try {
+    const authStore = localStorage.getItem('auth-store')
+    if (authStore) {
+      const parsed = JSON.parse(authStore)
+      if (parsed.state) {
+        parsed.state.tokens = {
+          accessToken: access,
+          refreshToken: refresh,
+          expiresIn: parsed.state.tokens?.expiresIn || 3600
+        }
+        parsed.state.isAuthenticated = true
+        localStorage.setItem('auth-store', JSON.stringify(parsed))
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to sync tokens with Zustand store:', error)
+  }
 }
 
 export const clearTokens = (): void => {
@@ -29,6 +48,22 @@ export const clearTokens = (): void => {
   refreshToken = null
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
+  
+  // Also clear Zustand store if available
+  try {
+    const authStore = localStorage.getItem('auth-store')
+    if (authStore) {
+      const parsed = JSON.parse(authStore)
+      if (parsed.state) {
+        parsed.state.tokens = null
+        parsed.state.user = null
+        parsed.state.isAuthenticated = false
+        localStorage.setItem('auth-store', JSON.stringify(parsed))
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to clear Zustand store:', error)
+  }
 }
 
 export const getTokens = (): { accessToken: string | null; refreshToken: string | null } => {

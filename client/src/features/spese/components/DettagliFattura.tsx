@@ -77,7 +77,7 @@ const DettagliFattura: React.FC<DettagliFatturaProps> = ({
     return (
       <div className="text-center p-3">
         <CSpinner color="primary" size="sm" />
-        <span className="ms-2">Caricamento dettagli...</span>
+        <span className="ms-2">Caricamento dettaglixxx...</span>
       </div>
     );
   }

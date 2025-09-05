@@ -3,7 +3,7 @@ import { CCol, CRow, CButton, CSpinner, CAlert } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilReload } from '@coreui/icons';
 import ServiceStatusCard from './ServiceStatusCard';
-import { getServicesStatus, ServiceStatus } from '@/api/services/services-status.service';
+import { getServicesStatus, type ServiceStatus } from '@/api/services/services-status.service';
 
 const ServicesStatusSection: React.FC = () => {
   const [services, setServices] = useState<Record<string, ServiceStatus>>({});

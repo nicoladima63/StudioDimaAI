@@ -18,16 +18,6 @@ const App: React.FC = () => {
   
   // Initialize auth tokens on app start
   useEffect(() => {
-    // TEMPORARY FIX: Clear old tokens due to JWT secret key change
-    // Remove this after users have logged in again
-    const shouldClearOldTokens = !sessionStorage.getItem('jwt_keys_fixed_v2')
-    if (shouldClearOldTokens) {
-      console.log('Clearing old JWT tokens due to server key change')
-      clearAuth()
-      sessionStorage.setItem('jwt_keys_fixed_v2', 'true')
-      return
-    }
-    
     // Initialize tokens and check auth if we have persisted tokens
     if (tokens?.accessToken && tokens?.refreshToken) {
       import('@/services/api/client').then(({ setTokens }) => {
@@ -36,7 +26,7 @@ const App: React.FC = () => {
         checkAuth()
       })
     }
-  }, [tokens, clearAuth, checkAuth])
+  }, []) // Empty dependency array - run only once on mount
 
   return (
     <ErrorBoundary
