@@ -1,212 +1,201 @@
 """
-Spese Fornitori API V2 for StudioDimaAI.
-
-Modern API endpoints for supplier expenses management with optimized performance.
+API endpoints for spese fornitori (fatture fornitori) operations.
 """
 
-import logging
 from flask import Blueprint, request, jsonify, g
 from flask_jwt_extended import jwt_required
-
-from services.spese_fornitori_service import SpeseFornitoService
 from app_v2 import require_auth, format_response, handle_dbf_data
 from core.exceptions import ValidationError, DatabaseError
-
+from services.materiali_migration_service import MaterialiMigrationService
+import logging
 
 logger = logging.getLogger(__name__)
 
 # Create blueprint
-spese_fornitori_v2_bp = Blueprint('spese_fornitori_v2', __name__)
-logger.info("SpeseFornitori V2 blueprint created")
+spese_fornitori_v2_bp = Blueprint('spese_fornitori_v2', __name__, url_prefix='/spese-fornitori')
 
-
-@spese_fornitori_v2_bp.route('/fornitori/<string:fornitore_id>/spese', methods=['GET'])
+@spese_fornitori_v2_bp.route('/ricerca-articoli', methods=['GET'])
 @jwt_required()
-def get_spese_fornitore(fornitore_id):
+def ricerca_articoli():
     """
-    Get paginated list of expenses for a specific supplier.
+    Ricerca articoli nelle fatture fornitori.
     
-    Args:
-        fornitore_id (str): Supplier ID
-        
     Query Parameters:
-        page (int): Page number (default: 1)
-        per_page (int): Items per page (default: 10, max: 100)
-        data_inizio (str): Start date filter (YYYY-MM-DD)
-        data_fine (str): End date filter (YYYY-MM-DD)
-        search (str): Search term for description/document number
+        q (str): Search query (required)
+        limit (int): Max results (default: 20, max: 100)
         
     Returns:
-        JSON response with expenses list and pagination info
+        JSON response with search results
     """
-    logger.info(f"get_spese_fornitore called for fornitore_id: {fornitore_id}")
     try:
-        # user_id = require_auth()  # Temporarily disabled for testing
+        user_id = require_auth()
         
         # Parse query parameters
-        page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 10, type=int), 100)
+        query = request.args.get('q', '').strip()
+        limit = min(request.args.get('limit', 20, type=int), 100)
         
-        # Build filters
-        filters = {}
-        data_inizio = request.args.get('data_inizio')
-        data_fine = request.args.get('data_fine')
-        search = request.args.get('search', '').strip()
+        if not query:
+            return format_response(
+                success=False,
+                error="Search query 'q' is required"
+            ), 400
         
-        if data_inizio and data_fine:
-            filters['data_inizio'] = data_inizio
-            filters['data_fine'] = data_fine
+        # Use migration service to search in DBF data
+        migration_service = MaterialiMigrationService(g.database_manager)
         
-        if search:
-            filters['search'] = search
+        # Read all materials data from DBF
+        materials_data = migration_service.read_spesafo_data()
         
-        # Get expenses using service layer
-        spese_service = SpeseFornitoService(g.database_manager)
-        result = spese_service.get_spese_by_fornitore(
-            fornitore_id=fornitore_id,
-            page=page,
-            per_page=per_page,
-            filters=filters
-        )
+        # Filter materials based on search query
+        search_query_lower = query.lower()
+        filtered_materials = []
         
-        # Clean DBF data for JSON response
-        clean_data = handle_dbf_data(result['spese'])
+        for material in materials_data:
+            # Search in description and codice articolo
+            descrizione = material.get('nome', '').lower()
+            codice_articolo = material.get('codicearticolo', '').lower()
+            
+            if (search_query_lower in descrizione or 
+                search_query_lower in codice_articolo):
+                filtered_materials.append(material)
+        
+        # Limit results
+        limited_materials = filtered_materials[:limit]
+        
+        # Transform to API format
+        articoli = []
+        for material in limited_materials:
+            articolo = {
+                'codice_articolo': material.get('codicearticolo', ''),
+                'descrizione': material.get('nome', ''),
+                'quantita': material.get('quantita', 0),
+                'prezzo_unitario': material.get('costo_unitario', 0),
+                'fattura': {
+                    'id': material.get('id_fattura', ''),
+                    'numero_documento': material.get('numero_documento', ''),
+                    'codice_fornitore': material.get('fornitoreid', ''),
+                    'nome_fornitore': material.get('fornitorenome', ''),
+                    'data_spesa': material.get('data_spesa', ''),
+                    'costo_totale': material.get('costo_netto', 0) + material.get('costo_iva', 0)
+                }
+            }
+            articoli.append(articolo)
         
         return format_response(
             data={
-                'spese': clean_data,
-                'pagination': {
-                    'page': page,
-                    'per_page': per_page,
-                    'total': result['total'],
-                    'pages': result['pages'],
-                    'has_next': result['has_next'],
-                    'has_prev': result['has_prev']
-                }
+                'articoli': articoli,
+                'total_found': len(filtered_materials),
+                'query': query
             },
-            message=f"Retrieved {len(clean_data)} expenses for supplier {fornitore_id}"
+            message=f"Found {len(articoli)} articles"
         )
         
     except ValidationError as e:
-        logger.warning(f"Validation error in get_spese_fornitore: {e}")
+        logger.warning(f"Validation error in ricerca_articoli: {e}")
         return format_response(
             success=False,
             error=str(e)
         ), 400
         
     except DatabaseError as e:
-        logger.error(f"Database error in get_spese_fornitore: {e}")
+        logger.error(f"Database error in ricerca_articoli: {e}")
         return format_response(
             success=False,
             error="Database error occurred"
         ), 500
         
     except Exception as e:
-        logger.error(f"Unexpected error in get_spese_fornitore: {e}", exc_info=True)
+        logger.error(f"Unexpected error in ricerca_articoli: {e}")
         return format_response(
             success=False,
             error="An unexpected error occurred"
         ), 500
 
-
-@spese_fornitori_v2_bp.route('/spese/<string:spesa_id>', methods=['GET'])
+@spese_fornitori_v2_bp.route('/<fattura_id>/dettagli', methods=['GET'])
 @jwt_required()
-def get_spesa(spesa_id):
+def get_dettagli_fattura(fattura_id):
     """
-    Get specific expense by ID.
+    Ottieni dettagli di una specifica fattura.
     
     Args:
-        spesa_id (str): Expense ID
+        fattura_id (str): ID della fattura
         
     Returns:
-        JSON response with expense details
+        JSON response with fattura details
     """
     try:
-        # user_id = require_auth()  # Temporarily disabled for testing
+        user_id = require_auth()
         
-        # Get expense using service layer
-        spese_service = SpeseFornitoService(g.database_manager)
-        spesa = spese_service.get_spesa_by_id(spesa_id)
+        # Use migration service to get fattura details
+        migration_service = MaterialiMigrationService(g.database_manager)
         
-        if not spesa:
+        # Read all materials data from DBF
+        materials_data = migration_service.read_spesafo_data()
+        
+        # Filter materials for specific fattura
+        fattura_materials = [
+            material for material in materials_data 
+            if material.get('id_fattura') == fattura_id
+        ]
+        
+        if not fattura_materials:
             return format_response(
                 success=False,
-                error=f"Expense with ID {spesa_id} not found"
+                error=f"Fattura {fattura_id} not found"
             ), 404
         
-        # Clean DBF data
-        clean_data = handle_dbf_data(spesa)
+        # Get fattura info from first material
+        first_material = fattura_materials[0]
+        fattura_info = {
+            'id': fattura_id,
+            'numero_documento': first_material.get('numero_documento', ''),
+            'codice_fornitore': first_material.get('fornitoreid', ''),
+            'nome_fornitore': first_material.get('fornitorenome', ''),
+            'data_spesa': first_material.get('data_spesa', ''),
+            'costo_netto': first_material.get('costo_netto', 0),
+            'costo_iva': first_material.get('costo_iva', 0),
+            'costo_totale': first_material.get('costo_netto', 0) + first_material.get('costo_iva', 0)
+        }
+        
+        # Transform materials to dettagli format
+        dettagli = []
+        for material in fattura_materials:
+            dettaglio = {
+                'codice_articolo': material.get('codicearticolo', ''),
+                'descrizione': material.get('nome', ''),
+                'quantita': material.get('quantita', 0),
+                'prezzo_unitario': material.get('costo_unitario', 0),
+                'sconto': material.get('sconto', 0),
+                'aliquota_iva': material.get('aliquota_iva', 0),
+                'totale_riga': material.get('quantita', 0) * material.get('costo_unitario', 0)
+            }
+            dettagli.append(dettaglio)
         
         return format_response(
-            data=clean_data,
-            message="Expense retrieved successfully"
+            data={
+                'fattura': fattura_info,
+                'dettagli': dettagli,
+                'total_righe': len(dettagli)
+            },
+            message=f"Retrieved {len(dettagli)} details for fattura {fattura_id}"
         )
         
     except ValidationError as e:
-        logger.warning(f"Validation error in get_spesa: {e}")
+        logger.warning(f"Validation error in get_dettagli_fattura: {e}")
         return format_response(
             success=False,
             error=str(e)
         ), 400
         
     except DatabaseError as e:
-        logger.error(f"Database error in get_spesa: {e}")
+        logger.error(f"Database error in get_dettagli_fattura: {e}")
         return format_response(
             success=False,
             error="Database error occurred"
         ), 500
         
     except Exception as e:
-        logger.error(f"Unexpected error in get_spesa: {e}", exc_info=True)
-        return format_response(
-            success=False,
-            error="An unexpected error occurred"
-        ), 500
-
-
-@spese_fornitori_v2_bp.route('/spese/<string:spesa_id>/righe', methods=['GET'])
-@jwt_required()
-def get_righe_spesa(spesa_id):
-    """
-    Get expense line items/details.
-    
-    Args:
-        spesa_id (str): Expense ID
-        
-    Returns:
-        JSON response with expense line items
-    """
-    try:
-        # user_id = require_auth()  # Temporarily disabled for testing
-        
-        # Get expense details using service layer
-        spese_service = SpeseFornitoService(g.database_manager)
-        righe = spese_service.get_righe_spesa(spesa_id)
-        
-        # Clean DBF data
-        clean_data = handle_dbf_data(righe)
-        
-        return format_response(
-            data=clean_data,
-            message=f"Retrieved {len(clean_data)} line items for expense {spesa_id}"
-        )
-        
-    except ValidationError as e:
-        logger.warning(f"Validation error in get_righe_spesa: {e}")
-        return format_response(
-            success=False,
-            error=str(e)
-        ), 400
-        
-    except DatabaseError as e:
-        logger.error(f"Database error in get_righe_spesa: {e}")
-        return format_response(
-            success=False,
-            error="Database error occurred"
-        ), 500
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in get_righe_spesa: {e}", exc_info=True)
+        logger.error(f"Unexpected error in get_dettagli_fattura: {e}")
         return format_response(
             success=False,
             error="An unexpected error occurred"

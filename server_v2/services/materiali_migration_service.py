@@ -484,27 +484,45 @@ class MaterialiMigrationService(BaseService):
             
             # Verifica se il fornitore è classificato
             fornitore_id = material.get('fornitoreid', '')
-            fornitore_classification = self._get_classification_data(fornitore_id)
+            fattura_id = material.get('id_fattura', '')
             
-            # Prova pattern matching per classificazione specifica
-            pattern_match = self._find_pattern_match(descrizione, existing_patterns)
-            if pattern_match:
-                # Usa classificazione specifica dal pattern
-                classification_data = pattern_match['classification']
-                confidence = pattern_match['confidence']
+            # PRIMA: Controlla se il materiale esiste già nella tabella materiali con classificazione
+            existing_material_classification = self._get_existing_material_classification(
+                descrizione, fornitore_id, fattura_id
+            )
+            
+            if existing_material_classification:
+                # Usa la classificazione esistente dalla tabella materiali
+                classification_data = existing_material_classification
+                confidence = 100  # Massima confidenza per materiali già classificati
                 stats['pattern_matched'] += 1
+                logger.info(f"Materiale già classificato trovato: {descrizione} -> {existing_material_classification}")
             else:
-                # Nessun pattern trovato - usa classificazione del fornitore
-                classification_data = {
-                    'contoid': fornitore_classification['contoid'],
-                    'brancaid': fornitore_classification['brancaid'],
-                    'sottocontoid': fornitore_classification['sottocontoid'],
-                    'contonome': fornitore_classification['contonome'],
-                    'brancanome': fornitore_classification['brancanome'],
-                    'sottocontonome': fornitore_classification['sottocontonome']
-                }
-                confidence = 30  # Bassa confidence per classificazione fornitore
-                stats['supplier_classification'] += 1
+                # SECONDA: Prova pattern matching per classificazione specifica
+                pattern_match = self._find_pattern_match(descrizione, existing_patterns)
+                if pattern_match:
+                    # Usa classificazione specifica dal pattern
+                    classification_data = pattern_match['classification']
+                    confidence = pattern_match['confidence']
+                    stats['pattern_matched'] += 1
+                else:
+                    # TERZA: Usa classificazione del fornitore
+                    fornitore_classification = self._get_classification_data(fornitore_id)
+                    if fornitore_classification:
+                        classification_data = {
+                            'contoid': fornitore_classification['contoid'],
+                            'brancaid': fornitore_classification['brancaid'],
+                            'sottocontoid': fornitore_classification['sottocontoid'],
+                            'contonome': fornitore_classification['contonome'],
+                            'brancanome': fornitore_classification['brancanome'],
+                            'sottocontonome': fornitore_classification['sottocontonome']
+                        }
+                        confidence = 30  # Bassa confidenza per classificazione fornitore
+                        stats['supplier_classification'] += 1
+                    else:
+                        # Nessuna classificazione disponibile
+                        stats['no_classification'] += 1
+                        continue
             
             # Aggiungi il materiale con classificazione
             enriched_material = material.copy()
@@ -678,6 +696,52 @@ class MaterialiMigrationService(BaseService):
         except (ValueError, TypeError):
             return 0.0
     
+    def _get_existing_material_classification(self, nome: str, fornitore_id: str, fattura_id: str = None) -> dict:
+        """Recupera la classificazione di un materiale già esistente nella tabella materiali."""
+        try:
+            import sqlite3
+            conn = sqlite3.connect('instance/studio_dima.db')
+            cursor = conn.cursor()
+            
+            # Cerca il materiale esistente con la sua classificazione
+            if fattura_id:
+                cursor.execute("""
+                    SELECT 
+                        contoid, brancaid, sottocontoid,
+                        contonome, brancanome, sottocontonome
+                    FROM materiali 
+                    WHERE nome = ? AND fornitoreid = ? AND fattura_id = ?
+                    AND contoid IS NOT NULL AND contonome IS NOT NULL
+                """, (nome, fornitore_id, fattura_id))
+            else:
+                cursor.execute("""
+                    SELECT 
+                        contoid, brancaid, sottocontoid,
+                        contonome, brancanome, sottocontonome
+                    FROM materiali 
+                    WHERE nome = ? AND fornitoreid = ?
+                    AND contoid IS NOT NULL AND contonome IS NOT NULL
+                    ORDER BY id DESC LIMIT 1
+                """, (nome, fornitore_id))
+            
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result:
+                return {
+                    'contoid': result[0],
+                    'brancaid': result[1],
+                    'sottocontoid': result[2],
+                    'contonome': result[3] or '',
+                    'brancanome': result[4] or '',
+                    'sottocontonome': result[5] or ''
+                }
+            return None
+            
+        except Exception as e:
+            logger.error(f"Errore nel recupero classificazione materiale esistente {nome}: {e}")
+            return None
+
     def _get_classification_data(self, fornitore_id: str) -> dict:
         """Recupera i dati di classificazione per un fornitore dalla tabella classificazioni_costi."""
         try:
@@ -1106,3 +1170,82 @@ class MaterialiMigrationService(BaseService):
         except Exception as e:
             logger.error(f"Errore nell'importazione per fornitore {supplier_name}: {e}")
             raise DatabaseError(f"Errore nell'importazione: {str(e)}")
+
+    def search_articles_in_spesafo(self, query: str, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Cerca articoli nelle fatture fornitori (SPESAFOR.DBF) con dettagli da VOCISPES.DBF.
+        
+        Args:
+            query: Termine di ricerca
+            limit: Numero massimo di risultati
+            
+        Returns:
+            Lista di articoli trovati con dettagli fattura
+        """
+        try:
+            from dbfread import DBF
+            
+            # Percorsi dei file DBF
+            spesafo_path = os.path.join('..', 'windent', 'DATI', 'SPESAFOR.DBF')
+            fornitor_path = os.path.join('..', 'windent', 'DATI', 'FORNITOR.DBF')
+            vocispes_path = os.path.join('..', 'windent', 'DATI', 'VOCISPES.DBF')
+            
+            logger.info(f"Searching articles in SPESAFOR.DBF with query: {query}")
+            
+            # Carica FORNITOR per i nomi fornitori
+            fornitor_map = {}
+            with DBF(fornitor_path, encoding='latin-1') as fornitor_table:
+                for record in fornitor_table:
+                    fornitor_map[record.get('CODICE', '')] = record.get('NOME', '')
+            
+            results = []
+            query_lower = query.lower()
+            
+            # Cerca in SPESAFOR
+            with DBF(spesafo_path, encoding='latin-1') as spesafo_table:
+                for record in spesafo_table:
+                    # Cerca nel codice articolo e descrizione
+                    codice_articolo = record.get('CODICE', '')
+                    descrizione = record.get('DESCRIZIONE', '')
+                    
+                    if (query_lower in codice_articolo.lower() or 
+                        query_lower in descrizione.lower()):
+                        
+                        # Cerca i dettagli in VOCISPES
+                        vocispes_details = []
+                        with DBF(vocispes_path, encoding='latin-1') as vocispes_table:
+                            for vocispes_record in vocispes_table:
+                                if (vocispes_record.get('CODICE', '') == codice_articolo and
+                                    vocispes_record.get('NUMERO', '') == record.get('NUMERO', '')):
+                                    vocispes_details.append(vocispes_record)
+                        
+                        # Costruisci il risultato
+                        for detail in vocispes_details:
+                            result = {
+                                'codice_articolo': codice_articolo,
+                                'descrizione': descrizione,
+                                'quantita': detail.get('QUANTITA', 0),
+                                'prezzo_unitario': detail.get('PREZZO', 0),
+                                'fattura': {
+                                    'id': f"{record.get('CODICE_FORNITORE', '')}_{record.get('NUMERO', '')}",
+                                    'numero_documento': record.get('NUMERO', ''),
+                                    'codice_fornitore': record.get('CODICE_FORNITORE', ''),
+                                    'nome_fornitore': fornitor_map.get(record.get('CODICE_FORNITORE', ''), ''),
+                                    'data_spesa': record.get('DATA', ''),
+                                    'costo_totale': record.get('TOTALE', 0)
+                                }
+                            }
+                            results.append(result)
+                            
+                            if len(results) >= limit:
+                                break
+                    
+                    if len(results) >= limit:
+                        break
+            
+            logger.info(f"Found {len(results)} articles matching query: {query}")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Errore nella ricerca articoli: {e}")
+            raise DatabaseError(f"Errore nella ricerca: {str(e)}")

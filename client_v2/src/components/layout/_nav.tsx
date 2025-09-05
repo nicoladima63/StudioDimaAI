@@ -119,6 +119,12 @@ const _nav = [
     to: '/materiali/migrazione',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
+  {
+    component: CNavItem,
+    name: 'Ricerca Articoli',
+    to: '/materiali/ricerca',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  },
 ];
 
 export default _nav;

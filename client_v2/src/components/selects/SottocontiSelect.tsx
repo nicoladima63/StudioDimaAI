@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSottoconti } from "../../store/conti.store";
 
 interface SottocontiSelectProps {
@@ -25,6 +25,9 @@ const SottocontiSelect: React.FC<SottocontiSelectProps> = ({
   const { sottoconti, isLoading, error } = useSottoconti(brancaId);
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [zIndex, setZIndex] = useState(2000);
 
   // Filtra sottoconti in base al termine di ricerca
   const filteredSottoconti = useMemo(() => {
@@ -60,6 +63,24 @@ const SottocontiSelect: React.FC<SottocontiSelectProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setSearchTerm("");
+    }
+  }, [isOpen]);
+
+  // Calcola posizione dropdown quando si apre
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+      
+      // Incrementa z-index per questo dropdown (partendo da 2000)
+      const currentZIndex = Math.max(2000, ...Array.from(document.querySelectorAll('[data-dropdown]')).map(el => 
+        parseInt(getComputedStyle(el).zIndex) || 0
+      )) + 1;
+      setZIndex(currentZIndex);
     }
   }, [isOpen]);
 
@@ -99,6 +120,7 @@ const SottocontiSelect: React.FC<SottocontiSelectProps> = ({
   return (
     <div className={`position-relative ${className}`}>
       <input
+        ref={inputRef}
         type="text"
         className="form-control"
         placeholder={selectedSottoconto ? selectedSottoconto.nome : placeholder}
@@ -111,8 +133,17 @@ const SottocontiSelect: React.FC<SottocontiSelectProps> = ({
       />
       
       {isOpen && (
-        <div className="position-absolute w-100" style={{ zIndex: 1050, top: '100%' }}>
-          <div className="border border-top-0 bg-white shadow-sm" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+        <div 
+          className="position-fixed" 
+          data-dropdown="true"
+          style={{ 
+            zIndex: zIndex, 
+            top: `${dropdownPosition.top}px`, 
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`
+          }}
+        >
+          <div className="border border-top-0 bg-white shadow-sm" style={{ maxHeight: '600px', overflowY: 'auto' }}>
             {!brancaId && (
               <div className="px-3 py-2 text-muted">
                 Seleziona prima una branca

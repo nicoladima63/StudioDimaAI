@@ -467,12 +467,410 @@ def get_materiali_stats():
             error="An unexpected error occurred"
         ), 500
 
+@materiali_v2_bp.route('/materiali/classificazione', methods=['POST'])
+@jwt_required()
+def salva_classificazione_materiale():
+    """
+    Salva la classificazione di un materiale nella tabella materiali
+    
+    Body: {
+        "codice_articolo": "REF V04025202502S", 
+        "descrizione": "RECIPROC BLUE FILES",
+        "codice_fornitore": "ZZZZZZO",
+        "nome_fornitore": "Dentsply Sirona Italia Srl",
+        "contoid": 18,
+        "contonome": "MATERIALI DENTALI",
+        "brancaid": 3,
+        "brancanome": "CONSERVATIVA", 
+        "sottocontoid": 7,
+        "sottocontonome": "COMPOSITI"
+    }
+    """
+    try:
+        data = request.get_json()
+        logger.info(f"🔍 MATERIALI: Ricevuta richiesta salvataggio classificazione: {data}")
+        
+        # Validazione campi obbligatori
+        required_fields = ['descrizione', 'fornitore_id', 'nome_fornitore', 'contoid']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({
+                    'success': False,
+                    'error': f'Campo obbligatorio mancante: {field}'
+                }), 400
+        
+        # Estrai dati dal payload
+        #{"codice_articolo":"","descrizione":"AGHI INJECT+ 30GA 0,3X16MM.","fattura_id":"ZZZWHC","fornitore_id":"ZZZZZZ","classificazione":{"contoid":18,"brancaid":1,"sottocontoid":1,"tipo_di_costo":1}}
+
+        codicearticolo = data.get('codice_articolo', '').strip()
+        nome = data.get('descrizione', '').strip()
+        fornitoreid = data.get('fornitore_id', '').strip()
+        fornitorenome = data.get('nome_fornitore', '').strip()
+        contoid = int(data.get('contoid'))
+        contonome = data.get('contonome', '').strip() if data.get('contonome') else ''
+        brancaid = int(data.get('brancaid')) if data.get('brancaid') else None
+        brancanome = data.get('brancanome', '').strip() if data.get('brancanome') else ''
+        sottocontoid = int(data.get('sottocontoid')) if data.get('sottocontoid') else None
+        sottocontonome = data.get('sottocontonome', '').strip() if data.get('sottocontonome') else ''
+        fattura_id = data.get('fattura_id', '').strip() if data.get('fattura_id') else None
+        riga_fattura_id = data.get('riga_fattura_id', '').strip() if data.get('riga_fattura_id') else None
+        data_fattura = data.get('data_fattura', '').strip() if data.get('data_fattura') else None
+        costo_unitario = data.get('costo_unitario')
+
+        # Usa il database manager esistente
+        db_manager = get_database_manager()
+        
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Verifica se esiste già il materiale per questa fattura
+            cursor.execute('''
+                SELECT id FROM materiali 
+                WHERE codicearticolo = ? AND nome = ? AND fornitoreid = ? AND fattura_id = ?
+            ''', (codicearticolo, nome, fornitoreid, fattura_id))
+            
+            existing = cursor.fetchone()
+            
+            if existing:
+                # Aggiorna solo la classificazione del materiale esistente
+                cursor.execute('''
+                    UPDATE materiali 
+                    SET codicearticolo = ?, contoid = ?, contonome = ?, brancaid = ?, brancanome = ?, 
+                        sottocontoid = ?, sottocontonome = ?, confermato = 1,
+                        metodo_classificazione = 'update'
+                    WHERE id = ?
+                ''', (codicearticolo, contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome, existing[0]))
+                
+                operazione = 'aggiornata'
+            else:
+                # Inserisci nuovo materiale
+                cursor.execute('''
+                    INSERT INTO materiali 
+                    (codicearticolo, nome, fornitoreid, fornitorenome, 
+                     contoid, contonome, brancaid, brancanome, 
+                     sottocontoid, sottocontonome, confidence, confermato,
+                     occorrenze, metodo_classificazione, fattura_id, riga_fattura_id, 
+                     data_fattura, costo_unitario)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 100, 1, 1, 'manuale', ?, ?, ?, ?)
+                ''', (codicearticolo, nome, fornitoreid, fornitorenome,
+                      contoid, contonome, brancaid, brancanome,
+                      sottocontoid, sottocontonome, fattura_id, riga_fattura_id, 
+                      data_fattura, costo_unitario))
+                
+                operazione = 'inserita'
+            
+            conn.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Classificazione materiale {operazione} correttamente',
+            'data': {
+                'codicearticolo': codicearticolo,
+                'nome': nome,
+                'contoid': contoid,
+                'brancaid': brancaid,
+                'sottocontoid': sottocontoid,
+                'operazione': operazione
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore salvataggio classificazione materiale: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@materiali_v2_bp.route('/materiali/classificazione/bulk', methods=['POST'])
+@jwt_required()
+def salva_classificazione_materiali_bulk():
+    """
+    Salva classificazioni multiple di materiali nella tabella materiali
+    
+    Body: {
+        "materiali": [
+            {
+                "codice_articolo": "REF V04025202502S", 
+                "descrizione": "RECIPROC BLUE FILES",
+                "fornitore_id": "ZZZZZZO",
+                "nome_fornitore": "Dentsply Sirona Italia Srl",
+                "contoid": 18,
+                "contonome": "MATERIALI DENTALI",
+                "brancaid": 3,
+                "brancanome": "CONSERVATIVA", 
+                "sottocontoid": 7,
+                "sottocontonome": "COMPOSITI",
+                "fattura_id": "ZZZWHC",
+                "data_fattura": "2025-05-31",
+                "costo_unitario": 16.4
+            }
+        ]
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        # Validazione
+        if not data.get('materiali') or not isinstance(data['materiali'], list):
+            return jsonify({
+                'success': False,
+                'error': 'Campo "materiali" obbligatorio e deve essere un array'
+            }), 400
+        
+        materiali = data['materiali']
+        if not materiali:
+            return jsonify({
+                'success': False,
+                'error': 'Array materiali non può essere vuoto'
+            }), 400
+        
+        # Validazione campi obbligatori per ogni materiale
+        for i, materiale in enumerate(materiali):
+            required_fields = ['descrizione', 'fornitore_id', 'nome_fornitore', 'contoid']
+            for field in required_fields:
+                if not materiale.get(field):
+                    return jsonify({
+                        'success': False,
+                        'error': f'Materiale {i+1}: Campo obbligatorio mancante: {field}'
+                    }), 400
+        
+        # Usa il database manager esistente
+        db_manager = get_database_manager()
+        
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            inseriti = 0
+            aggiornati = 0
+            risultati_dettagliati = []
+            
+            for i, materiale in enumerate(materiali):
+                try:
+                    # Estrai dati dal materiale
+                    codicearticolo = materiale.get('codice_articolo', '').strip()
+                    nome = materiale.get('descrizione', '').strip()
+                    fornitoreid = materiale.get('fornitore_id', '').strip()
+                    fornitorenome = materiale.get('nome_fornitore', '').strip()
+                    contoid = int(materiale.get('contoid'))
+                    contonome = materiale.get('contonome', '').strip() if materiale.get('contonome') else ''
+                    brancaid = int(materiale.get('brancaid')) if materiale.get('brancaid') else None
+                    brancanome = materiale.get('brancanome', '').strip() if materiale.get('brancanome') else ''
+                    sottocontoid = int(materiale.get('sottocontoid')) if materiale.get('sottocontoid') else None
+                    sottocontonome = materiale.get('sottocontonome', '').strip() if materiale.get('sottocontonome') else ''
+                    fattura_id = materiale.get('fattura_id', '').strip() if materiale.get('fattura_id') else None
+                    riga_fattura_id = materiale.get('riga_fattura_id', '').strip() if materiale.get('riga_fattura_id') else None
+                    data_fattura = materiale.get('data_fattura', '').strip() if materiale.get('data_fattura') else None
+                    costo_unitario = materiale.get('costo_unitario')
+                    
+                    # Verifica se esiste già il materiale per questa fattura
+                    cursor.execute('''
+                        SELECT id FROM materiali 
+                        WHERE codicearticolo = ? AND nome = ? AND fornitoreid = ? AND fattura_id = ?
+                    ''', (codicearticolo, nome, fornitoreid, fattura_id))
+                    
+                    existing = cursor.fetchone()
+                    
+                    if existing:
+                        # Aggiorna solo la classificazione del materiale esistente
+                        cursor.execute('''
+                            UPDATE materiali 
+                            SET codicearticolo = ?, contoid = ?, contonome = ?, brancaid = ?, brancanome = ?, 
+                                sottocontoid = ?, sottocontonome = ?, confermato = 1,
+                                metodo_classificazione = 'bulk_update'
+                            WHERE id = ?
+                        ''', (codicearticolo, contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome, existing[0]))
+                        
+                        aggiornati += 1
+                        risultati_dettagliati.append({
+                            'indice': i,
+                            'codice_articolo': codicearticolo,
+                            'descrizione': nome,
+                            'fornitore_id': fornitoreid,
+                            'successo': True,
+                            'operazione': 'aggiornato',
+                            'materiale_id': existing[0]
+                        })
+                    else:
+                        # Inserisci nuovo materiale
+                        cursor.execute('''
+                            INSERT INTO materiali 
+                            (codicearticolo, nome, fornitoreid, fornitorenome, 
+                             contoid, contonome, brancaid, brancanome, 
+                             sottocontoid, sottocontonome, confidence, confermato,
+                             occorrenze, metodo_classificazione, fattura_id, riga_fattura_id, 
+                             data_fattura, costo_unitario)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 100, 1, 1, 'bulk_insert', ?, ?, ?, ?)
+                        ''', (codicearticolo, nome, fornitoreid, fornitorenome,
+                              contoid, contonome, brancaid, brancanome,
+                              sottocontoid, sottocontonome, fattura_id, riga_fattura_id, 
+                              data_fattura, costo_unitario))
+                        
+                        # Ottieni l'ID del materiale appena inserito
+                        materiale_id = cursor.lastrowid
+                        inseriti += 1
+                        risultati_dettagliati.append({
+                            'indice': i,
+                            'codice_articolo': codicearticolo,
+                            'descrizione': nome,
+                            'fornitore_id': fornitoreid,
+                            'successo': True,
+                            'operazione': 'inserito',
+                            'materiale_id': materiale_id
+                        })
+                        
+                except Exception as e:
+                    error_msg = str(e)
+                    logger.error(f"Errore nel salvataggio materiale {i+1}: {e}")
+                    risultati_dettagliati.append({
+                        'indice': i,
+                        'codice_articolo': materiale.get('codice_articolo', ''),
+                        'descrizione': materiale.get('descrizione', 'N/A'),
+                        'fornitore_id': materiale.get('fornitore_id', ''),
+                        'successo': False,
+                        'operazione': 'errore',
+                        'errore': error_msg
+                    })
+            
+            conn.commit()
+        
+        # Calcola errori
+        errori = [r for r in risultati_dettagliati if not r['successo']]
+        
+        return jsonify({
+            'success': True,
+            'message': f'Bulk classificazione completata: {inseriti} inseriti, {aggiornati} aggiornati, {len(errori)} errori',
+            'data': {
+                'inseriti': inseriti,
+                'aggiornati': aggiornati,
+                'errori': len(errori),
+                'total_processed': len(materiali),
+                'risultati_dettagliati': risultati_dettagliati,
+                'materiali_da_rimuovere': [r for r in risultati_dettagliati if r['successo']]
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore salvataggio bulk classificazione materiali: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@materiali_v2_bp.route('/materiali/ricerca-articoli', methods=['GET'])
+@jwt_required()
+def ricerca_articoli():
+    """
+    Ricerca articoli nelle fatture fornitori.
+    
+    Query Parameters:
+        q (str): Search query (required)
+        limit (int): Max results (default: 20, max: 100)
+        
+    Returns:
+        JSON response with search results
+    """
+    try:
+        
+        user_id = require_auth()
+        
+        # Parse query parameters
+        query = request.args.get('q', '').strip()
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        
+        if not query:
+            return format_response(
+                success=False,
+                error="Search query 'q' is required"
+            ), 400
+        
+        # Use migration service to search in DBF data
+        migration_service = MaterialiMigrationService(g.database_manager)
+        
+        # Read all materials data from DBF
+        materials_data = migration_service.read_spesafo_data()
+        
+        # Filter materials based on search query
+        search_query_lower = query.lower()
+        filtered_materials = []
+        
+        for material in materials_data:
+            # Search in description and codice articolo
+            descrizione = material.get('nome', '').lower()
+            codice_articolo = material.get('codicearticolo', '').lower()
+            
+            if (search_query_lower in descrizione or 
+                search_query_lower in codice_articolo):
+                filtered_materials.append(material)
+        
+        # Limit results
+        limited_materials = filtered_materials[:limit]
+        
+        # Transform to API format
+        articoli = []
+        for material in limited_materials:
+            articolo = {
+                'codice_articolo': material.get('codicearticolo', ''),
+                'descrizione': material.get('nome', ''),
+                'quantita': material.get('quantita', 0),
+                'prezzo_unitario': material.get('costo_unitario', 0),
+                'fattura': {
+                    'id': material.get('id_fattura', ''),
+                    'numero_documento': material.get('numero_documento', ''),
+                    'codice_fornitore': material.get('fornitoreid', ''),
+                    'nome_fornitore': material.get('fornitorenome', ''),
+                    'data_spesa': material.get('data_spesa', ''),
+                    'costo_totale': material.get('costo_netto', 0) + material.get('costo_iva', 0)
+                }
+            }
+            articoli.append(articolo)
+        
+        
+        return format_response(
+            data={
+                'articoli': articoli,
+                'total_found': len(filtered_materials),
+                'query': query
+            },
+            message=f"Found {len(articoli)} articles"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in ricerca_articoli: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in ricerca_articoli: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"=== RICERCA ARTICOLI ERROR ===")
+        logger.error(f"Unexpected error in ricerca_articoli: {e}")
+        logger.error(f"Error type: {type(e).__name__}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        logger.error(f"Unexpected error in ricerca_articoli: {e}")
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
+
+
+
 
 # ============================================================================
 # MATERIALI MIGRATION ENDPOINTS
 # ============================================================================
 
 @materiali_v2_bp.route('/materiali/migrazione/preview', methods=['GET'])
+
 @materiali_v2_bp.route('/materiali/migrazione/preview/<fornitore_id>', methods=['GET'])
 @jwt_required()
 def preview_migration(fornitore_id=None):
@@ -654,3 +1052,4 @@ def import_all_materials():
             success=False,
             error="An unexpected error occurred during migration"
         ), 500
+

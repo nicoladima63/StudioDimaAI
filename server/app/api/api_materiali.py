@@ -1648,6 +1648,7 @@ def salva_classificazione_materiale():
         "sottocontonome": "COMPOSITI"
     }
     """
+    #{"codice_articolo":"","descrizione":"AGHI INJECT+ 30GA 0,3X16MM.","fattura_id":"ZZZWHC","fornitore_id":"ZZZZZZ","classificazione":{"contoid":18,"brancaid":1,"sottocontoid":1,"tipo_di_costo":1}}
     try:
         data = request.get_json()
         logger.info(f"🔍 MATERIALI: Ricevuta richiesta salvataggio classificazione: {data}")

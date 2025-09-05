@@ -11,6 +11,7 @@ const Dashboard = React.lazy(() => import('@/features/dashboard/pages/Dashboard'
 const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
 const MaterialiMigrazione = React.lazy(() => import('@/features/materiali/pages/MaterialiMigrazione'))
+const RicercaArticoli = React.lazy(() => import('@/features/materiali/pages/RicercaArticoli'))
 const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
 const PazientiPage = React.lazy(() => import('@/features/pazienti/pages/PazientiPage'))
 const RicettaElettronicaPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RicettaElettronicaPage'))
@@ -57,6 +58,7 @@ const AppRouter: React.FC = () => {
           {/* Feature routes */}
           <Route path='materiali' element={<MaterialiPage />} />
           <Route path='materiali/migrazione' element={<MaterialiMigrazione />} />
+          <Route path='materiali/ricerca' element={<RicercaArticoli />} />
           
           <Route path='fornitori' element={<FornitoriPage />} />
           <Route path='pazienti' element={<PazientiPage />} />

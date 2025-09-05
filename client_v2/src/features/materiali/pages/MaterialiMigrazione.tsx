@@ -19,7 +19,6 @@ import {
   CAccordionItem,
   CAccordionHeader,
   CAccordionBody,
-  CProgress,
   CModal,
   CModalHeader,
   CModalTitle,
@@ -30,9 +29,9 @@ import {
   materialiMigrationService,
   type AnteprimaMigrazione,
   type FornitoreMigrazione,
-  type MaterialeMigrazione,
   type RisultatoImportazione,
 } from '../services/materiali-migration.service';
+import { materialiClassificationService } from '../services/materiali-classification.service';
 import { useFornitoriStore } from '@/store/fornitori.store';
 
 const MaterialiMigrazione: React.FC = () => {
@@ -45,6 +44,7 @@ const MaterialiMigrazione: React.FC = () => {
   const [selectedFornitore, setSelectedFornitore] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [erroriImportazione, setErroriImportazione] = useState<Array<{descrizione: string, errore: string}>>([]);
   
   // Store fornitori
   const { fornitori, loadAllFornitori } = useFornitoriStore();
@@ -91,13 +91,106 @@ const MaterialiMigrazione: React.FC = () => {
     setError(null);
 
     try {
-      const response = await materialiMigrationService.importSupplierMaterials(fornitoreNome);
+      // Trova il fornitore nell'anteprima
+      const fornitore = anteprima?.suppliers?.find(s => s.fornitore_nome === fornitoreNome);
+      if (!fornitore) {
+        throw new Error('Fornitore non trovato');
+      }
+
+      // Filtra solo i materiali con classificazione completa
+      const materialiClassificati = fornitore.materiali?.filter(materiale => 
+        materiale.contoid && materiale.brancaid && materiale.sottocontoid &&
+        materiale.contonome && materiale.brancanome && materiale.sottocontonome
+      ) || [];
+
+      if (materialiClassificati.length === 0) {
+        setError('Nessun materiale classificato trovato per questo fornitore');
+        return;
+      }
+
+      // Prepara il payload per il bulk
+      const payload = {
+        materiali: materialiClassificati.map(materiale => ({
+          codice_articolo: materiale.codice_prodotto || '',
+          descrizione: materiale.nome,
+          fornitore_id: materiale.fornitoreid,
+          nome_fornitore: materiale.fornitorenome,
+          contoid: materiale.contoid!,
+          contonome: materiale.contonome!,
+          brancaid: materiale.brancaid!,
+          brancanome: materiale.brancanome!,
+          sottocontoid: materiale.sottocontoid!,
+          sottocontonome: materiale.sottocontonome!,
+          fattura_id: materiale.fattura_id,
+          data_fattura: materiale.data_fattura,
+          costo_unitario: materiale.costo_unitario
+        }))
+      };
+
+      const response = await materialiClassificationService.salvaClassificazioneBulk(payload);
 
       if (response.success && response.data) {
-        setImportResult(response.data);
+        // Crea un risultato compatibile con il modal esistente
+        const result: RisultatoImportazione = {
+          materials_imported: response.data.inseriti,
+          materials_updated: response.data.aggiornati,
+          materials_skipped: response.data.errori,
+          total_processed: response.data.total_processed,
+          supplier_name: fornitoreNome
+        };
+        
+        setImportResult(result);
         setShowImportModal(true);
-        // Ricarica anteprima per aggiornare i dati
-        await caricaAnteprima();
+        
+        // Rimuovi SOLO i materiali che sono stati salvati con successo
+        if (anteprima && response.data.materiali_da_rimuovere.length > 0) {
+          const materialiDaRimuovere = response.data.materiali_da_rimuovere;
+          
+          const updatedSuppliers = anteprima.suppliers.map(s => {
+            if (s.fornitore_nome === fornitoreNome) {
+              // Filtra i materiali rimuovendo solo quelli con successo
+              const materialiRimanenti = s.materiali?.filter(materiale => {
+                // Rimuovi solo se il materiale è stato salvato con successo
+                const daRimuovere = materialiDaRimuovere.find(rm => 
+                  rm.codice_articolo === materiale.codice_prodotto &&
+                  rm.descrizione === materiale.nome &&
+                  rm.fornitore_id === materiale.fornitoreid
+                );
+                return !daRimuovere; // Mantieni se NON è da rimuovere
+              }) || [];
+              
+              return {
+                ...s,
+                materiali: materialiRimanenti,
+                materiali_count: materialiRimanenti.length
+              };
+            }
+            return s;
+          });
+          
+          setAnteprima({
+            ...anteprima,
+            suppliers: updatedSuppliers,
+            total_materials: updatedSuppliers.reduce((sum, s) => sum + s.materiali_count, 0),
+            stats: {
+              ...anteprima.stats,
+              total_valid_materials: updatedSuppliers.reduce((sum, s) => sum + s.materiali_count, 0),
+              dental_materials: updatedSuppliers.reduce((sum, s) => sum + s.materiali_count, 0)
+            }
+          });
+        }
+        
+        // Salva errori specifici se ce ne sono
+        const errori = response.data.risultati_dettagliati.filter(r => !r.successo);
+        if (errori.length > 0) {
+          const erroriFormattati = errori.map(e => ({
+            descrizione: e.descrizione,
+            errore: e.errore || 'Errore sconosciuto'
+          }));
+          setErroriImportazione(erroriFormattati);
+        } else {
+          setErroriImportazione([]);
+        }
       } else {
         setError(response.error || "Errore nell'importazione");
       }
@@ -136,16 +229,6 @@ const MaterialiMigrazione: React.FC = () => {
     loadAllFornitori();
   }, [loadAllFornitori]);
 
-  const handleFornitoreChange = (fornitoreId: string) => {
-    setSelectedFornitore(fornitoreId);
-    setSearchTerm('');
-    setShowDropdown(false);
-    if (fornitoreId) {
-      caricaAnteprima(fornitoreId);
-    } else {
-      setAnteprima(null);
-    }
-  };
 
   // Filtra fornitori basato sul termine di ricerca
   const filteredFornitori = fornitori?.filter(fornitore => 
@@ -166,24 +249,7 @@ const MaterialiMigrazione: React.FC = () => {
     caricaAnteprima(fornitore.id);
   };
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('it-IT', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount);
-  };
 
-  const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 80) return 'success';
-    if (confidence >= 60) return 'warning';
-    return 'danger';
-  };
-
-  const getConfidenceText = (confidence: number): string => {
-    if (confidence >= 80) return 'Alta';
-    if (confidence >= 60) return 'Media';
-    return 'Bassa';
-  };
 
   if (loading) {
     return (
@@ -202,7 +268,7 @@ const MaterialiMigrazione: React.FC = () => {
       <CAlert color='danger' className='m-3'>
         <h4>Errore</h4>
         <p>{error}</p>
-        <CButton color='primary' onClick={caricaAnteprima}>
+        <CButton color='primary' onClick={() => caricaAnteprima()}>
           Riprova
         </CButton>
       </CAlert>
@@ -361,6 +427,16 @@ const MaterialiMigrazione: React.FC = () => {
                           <CBadge color='info' className='me-2'>
                             {fornitore.materiali_count} materiali
                           </CBadge>
+                          {(() => {
+                            const classificati = fornitore.materiali?.filter(m => 
+                              m.contoid && m.brancaid && m.sottocontoid
+                            ).length || 0;
+                            return classificati > 0 ? (
+                              <CBadge color='success' className='me-2'>
+                                {classificati} pronti per import
+                              </CBadge>
+                            ) : null;
+                          })()}
                         </div>
                       </div>
                     </CAccordionHeader>
@@ -370,12 +446,13 @@ const MaterialiMigrazione: React.FC = () => {
                           color='success'
                           size='sm'
                           onClick={() => importaFornitore(fornitore.fornitore_nome)}
-                          disabled={importing === fornitore.fornitore_nome}
+                          disabled={importing === fornitore.fornitore_nome || 
+                            (fornitore.materiali?.filter(m => m.contoid && m.brancaid && m.sottocontoid).length || 0) === 0}
                         >
                           {importing === fornitore.fornitore_nome ? (
                             <CSpinner size='sm' />
                           ) : (
-                            'Importa'
+                            `Importa Classificati (${fornitore.materiali?.filter(m => m.contoid && m.brancaid && m.sottocontoid).length || 0})`
                           )}
                         </CButton>
                       </div>
@@ -399,24 +476,30 @@ const MaterialiMigrazione: React.FC = () => {
                           </CTableRow>
                         </CTableHead>
                         <CTableBody>
-                          {fornitore.materiali?.map((materiale, matIndex) => (
-                            <CTableRow key={matIndex}>
-                              <CTableDataCell>{materiale.id}</CTableDataCell>
-                              <CTableDataCell>{materiale.codice_prodotto}</CTableDataCell>
-                              <CTableDataCell>{materiale.nome}</CTableDataCell>
-                              <CTableDataCell>{materiale.fornitoreid}</CTableDataCell>
-                              <CTableDataCell>{materiale.fornitorenome}</CTableDataCell>
-                              <CTableDataCell>{materiale.contoid || ''}</CTableDataCell>
-                              <CTableDataCell>{materiale.contonome || ''}</CTableDataCell>
-                              <CTableDataCell>{materiale.brancaid || ''}</CTableDataCell>
-                              <CTableDataCell>{materiale.brancanome || ''}</CTableDataCell>
-                              <CTableDataCell>{materiale.sottocontoid || ''}</CTableDataCell>
-                              <CTableDataCell>{materiale.sottocontonome || ''}</CTableDataCell>
-                              <CTableDataCell>{materiale.data_fattura || ''}</CTableDataCell>
-                              <CTableDataCell>{materiale.costo_unitario}</CTableDataCell>
-                              <CTableDataCell>{materiale.fattura_id || ''}</CTableDataCell>
+                          {fornitore.materiali?.map((materiale, matIndex) => {
+                            const isClassificato = materiale.contoid && materiale.brancaid && materiale.sottocontoid;
+                            return (
+                              <CTableRow key={matIndex} className={isClassificato ? 'table-success' : ''}>
+                                <CTableDataCell>
+                                  {materiale.id}
+                                  {isClassificato && <CBadge color='success' size='sm' className='ms-1'>✓</CBadge>}
+                                </CTableDataCell>
+                                <CTableDataCell>{materiale.codice_prodotto}</CTableDataCell>
+                                <CTableDataCell>{materiale.nome}</CTableDataCell>
+                                <CTableDataCell>{materiale.fornitoreid}</CTableDataCell>
+                                <CTableDataCell>{materiale.fornitorenome}</CTableDataCell>
+                                <CTableDataCell>{materiale.contoid || ''}</CTableDataCell>
+                                <CTableDataCell>{materiale.contonome || ''}</CTableDataCell>
+                                <CTableDataCell>{materiale.brancaid || ''}</CTableDataCell>
+                                <CTableDataCell>{materiale.brancanome || ''}</CTableDataCell>
+                                <CTableDataCell>{materiale.sottocontoid || ''}</CTableDataCell>
+                                <CTableDataCell>{materiale.sottocontonome || ''}</CTableDataCell>
+                                <CTableDataCell>{materiale.data_fattura || ''}</CTableDataCell>
+                                <CTableDataCell>{materiale.costo_unitario}</CTableDataCell>
+                                <CTableDataCell>{materiale.fattura_id || ''}</CTableDataCell>
                               </CTableRow>
-                          ))}
+                            );
+                          })}
                         </CTableBody>
                       </CTable>
                     </CAccordionBody>
@@ -449,7 +532,7 @@ const MaterialiMigrazione: React.FC = () => {
                   Materiali aggiornati: <strong>{importResult.materials_updated}</strong>
                 </li>
                 <li>
-                  Materiali saltati: <strong>{importResult.materials_skipped}</strong>
+                  Materiali con errori: <strong>{importResult.materials_skipped}</strong>
                 </li>
                 <li>
                   Totale processati: <strong>{importResult.total_processed}</strong>
@@ -459,6 +542,18 @@ const MaterialiMigrazione: React.FC = () => {
                 <p>
                   <strong>Fornitore:</strong> {importResult.supplier_name}
                 </p>
+              )}
+              {erroriImportazione.length > 0 && (
+                <div className="mt-3">
+                  <h6 className="text-danger">Errori durante l'importazione:</h6>
+                  <ul className="list-unstyled">
+                    {erroriImportazione.map((errore, index) => (
+                      <li key={index} className="text-danger small">
+                        <strong>{errore.descrizione}:</strong> {errore.errore}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           )}
