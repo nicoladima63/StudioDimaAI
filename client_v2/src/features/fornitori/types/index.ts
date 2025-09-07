@@ -15,10 +15,10 @@ export const TipoDiCostoLabels = {
 
 // Interface per la classificazione
 export interface ClassificazioneCosto {
-  id: number;
-  codice_riferimento: string;
-  tipo_entita: 'fornitore' | 'spesa';
-  tipo_di_costo: TipoDiCosto;
+  id?: number;
+  codice_riferimento?: string;
+  tipo_entita?: "fornitore" | "spesa";
+  tipo_di_costo?: TipoDiCosto;
   categoria?: number;
   categoria_conto?: string;  // Codice conto contabile (legacy)
   sottoconto?: string;       // Codice sottoconto (legacy)
@@ -28,8 +28,8 @@ export interface ClassificazioneCosto {
   sottocontoid?: number;
   fornitoreid?: number;
   note?: string;
-  data_classificazione: string;
-  data_modifica: string;
+  data_classificazione?: string;
+  data_modifica?: string;
 }
 
 // Interface per la risposta API classificazione

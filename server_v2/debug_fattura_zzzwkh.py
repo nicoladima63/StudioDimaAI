@@ -7,39 +7,52 @@ import os
 from dbfread import DBF
 
 def debug_fattura_zzzwkh():
-    """Debug della fattura ZZZZYC"""
+    """Debug della fattura ZZZWOI"""
     
-    print("FATTURA ZZZZYC")
+    print("FATTURA ZZZWOI")
     print("=" * 20)
     
     # Percorsi dei file DBF
     spesafo_path = os.path.join('..', 'windent', 'DATI', 'SPESAFOR.DBF')
     
     try:
-        # Cerca fattura ZZZZYC
+        # Cerca TUTTE le righe per fattura ZZZWOI
+        righe_trovate = 0
+        totale_netto = 0
+        totale_iva = 0
+        
         with DBF(spesafo_path, encoding='latin-1') as spesafo_table:
             for record in spesafo_table:
                 if record is None:
                     continue
                 
                 id_fattura = record.get('DB_CODE', '')
-                if str(id_fattura).strip() == 'ZZZZYC':
+                if str(id_fattura).strip() == 'ZZZWOI':
+                    righe_trovate += 1
                     fornitoreid = record.get('DB_SPFOCOD', '')
                     numero_doc = record.get('DB_SPNUMER', '')
+                    costo_netto = float(record.get('DB_SPCOSTO', 0))
+                    costo_iva = float(record.get('DB_SPCOIVA', 0))
                     
-                    print(f"FatturaID: {id_fattura}")
-                    print(f"Numero: {numero_doc}")
-                    print(f"Fornitore: {fornitoreid}")
+                    totale_netto += costo_netto
+                    totale_iva += costo_iva
+                    
+                    print(f"RIGA {righe_trovate}:")
+                    print(f"  FatturaID: {id_fattura}")
+                    print(f"  Numero: {numero_doc}")
+                    print(f"  Fornitore: {fornitoreid}")
+                    print(f"  Costo Netto: {costo_netto} €")
+                    print(f"  Costo IVA: {costo_iva} €")
+                    print(f"  Totale Riga: {costo_netto + costo_iva} €")
                     print()
-                    
-                    # Dettagli
-                    print("DETTAGLI:")
-                    for field_name, value in record.items():
-                        if value and str(value).strip():
-                            print(f"  {field_name}: {value}")
-                    break
-            else:
-                print("❌ Fattura ZZZZYC non trovata")
+        
+        print(f"TOTALE RIGHE TROVATE: {righe_trovate}")
+        print(f"TOTALE NETTO: {totale_netto} €")
+        print(f"TOTALE IVA: {totale_iva} €")
+        print(f"TOTALE GENERALE: {totale_netto + totale_iva} €")
+        
+        if righe_trovate == 0:
+            print("❌ Fattura ZZZWOI non trovata")
         
         # Ora chiama l'API v1 per i dettagli
         print("\n" + "="*50)
@@ -50,7 +63,7 @@ def debug_fattura_zzzwkh():
         
         try:
             # Chiama l'endpoint v1 per i dettagli
-            url = "http://localhost:5000/api/spese-fornitori/ZZZZYC/dettagli"
+            url = "http://localhost:5000/api/spese-fornitori/ZZZWOI/dettagli"
             response = requests.get(url, timeout=10)
             
             if response.status_code == 200:

@@ -22,8 +22,17 @@ const classificazioniService = {
 
   // CREATE/UPDATE - Classificazione completa fornitore (gerarchia)
   salvaClassificazioneFornitoreCompleta: async (fornitoreId: string, request: ClassificazioneCompletaRequest): Promise<ClassificazioneResponse> => {
-    const response = await apiClient.put(`/classificazioni/fornitore/${fornitoreId}`, request);
-    return response.data;
+    try {
+      const response = await apiClient.put(`/classificazioni/fornitore/${fornitoreId}`, request);
+      return response.data;
+    } catch (error: any) {
+      // Se l'errore è del service worker ma la risposta è 200, ignora l'errore
+      if (error.response && error.response.status === 200) {
+        return error.response.data;
+      }
+      
+      throw error;
+    }
   },
 
   // READ - Singola classificazione fornitore
@@ -40,8 +49,17 @@ const classificazioniService = {
 
   // DELETE - Rimuovi classificazione fornitore
   rimuoviClassificazioneFornitore: async (fornitoreId: string): Promise<{ success: boolean; message?: string; error?: string }> => {
-    const response = await apiClient.delete(`/classificazioni/fornitore/${fornitoreId}`);
-    return response.data;
+    try {
+      const response = await apiClient.delete(`/classificazioni/fornitore/${fornitoreId}`);
+      return response.data;
+    } catch (error: any) {
+      // Se l'errore è del service worker ma la risposta è 200, ignora l'errore
+      if (error.response && error.response.status === 200) {
+        return error.response.data;
+      }
+      
+      throw error;
+    }
   }
 };
 

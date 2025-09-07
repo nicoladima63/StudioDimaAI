@@ -453,12 +453,13 @@ class MaterialiMigrationService(BaseService):
     def filter_materials_by_classification(self, materials_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Filtra i materiali per fornitori classificati e applica pattern recognition.
+        ESCLUDE i materiali già importati nella tabella materiali.
         
         Args:
             materials_data: Lista di materiali da VOCISPES.DBF
             
         Returns:
-            Lista di materiali con classificazione e pattern recognition
+            Lista di materiali con classificazione e pattern recognition (solo NON importati)
         """
         classified_materials = []
         stats = {
@@ -467,7 +468,8 @@ class MaterialiMigrationService(BaseService):
             'excluded': 0,
             'no_classification': 0,
             'pattern_matched': 0,
-            'supplier_classification': 0
+            'supplier_classification': 0,
+            'already_imported': 0
         }
         
         # Carica pattern esistenti per il matching
@@ -486,43 +488,42 @@ class MaterialiMigrationService(BaseService):
             fornitore_id = material.get('fornitoreid', '')
             fattura_id = material.get('id_fattura', '')
             
-            # PRIMA: Controlla se il materiale esiste già nella tabella materiali con classificazione
+            # PRIMA: Controlla se il materiale esiste già nella tabella materiali
             existing_material_classification = self._get_existing_material_classification(
                 descrizione, fornitore_id, fattura_id
             )
             
             if existing_material_classification:
-                # Usa la classificazione esistente dalla tabella materiali
-                classification_data = existing_material_classification
-                confidence = 100  # Massima confidenza per materiali già classificati
+                # Materiale già importato - ESCLUDILO dalla migrazione
+                stats['already_imported'] += 1
+                logger.info(f"Materiale già importato - escluso: {descrizione}")
+                continue
+            
+            # SECONDA: Prova pattern matching per classificazione specifica
+            pattern_match = self._find_pattern_match(descrizione, existing_patterns)
+            if pattern_match:
+                # Usa classificazione specifica dal pattern
+                classification_data = pattern_match['classification']
+                confidence = pattern_match['confidence']
                 stats['pattern_matched'] += 1
-                logger.info(f"Materiale già classificato trovato: {descrizione} -> {existing_material_classification}")
             else:
-                # SECONDA: Prova pattern matching per classificazione specifica
-                pattern_match = self._find_pattern_match(descrizione, existing_patterns)
-                if pattern_match:
-                    # Usa classificazione specifica dal pattern
-                    classification_data = pattern_match['classification']
-                    confidence = pattern_match['confidence']
-                    stats['pattern_matched'] += 1
+                # TERZA: Usa classificazione del fornitore
+                fornitore_classification = self._get_classification_data(fornitore_id)
+                if fornitore_classification:
+                    classification_data = {
+                        'contoid': fornitore_classification['contoid'],
+                        'brancaid': fornitore_classification['brancaid'],
+                        'sottocontoid': fornitore_classification['sottocontoid'],
+                        'contonome': fornitore_classification['contonome'],
+                        'brancanome': fornitore_classification['brancanome'],
+                        'sottocontonome': fornitore_classification['sottocontonome']
+                    }
+                    confidence = 30  # Bassa confidenza per classificazione fornitore
+                    stats['supplier_classification'] += 1
                 else:
-                    # TERZA: Usa classificazione del fornitore
-                    fornitore_classification = self._get_classification_data(fornitore_id)
-                    if fornitore_classification:
-                        classification_data = {
-                            'contoid': fornitore_classification['contoid'],
-                            'brancaid': fornitore_classification['brancaid'],
-                            'sottocontoid': fornitore_classification['sottocontoid'],
-                            'contonome': fornitore_classification['contonome'],
-                            'brancanome': fornitore_classification['brancanome'],
-                            'sottocontonome': fornitore_classification['sottocontonome']
-                        }
-                        confidence = 30  # Bassa confidenza per classificazione fornitore
-                        stats['supplier_classification'] += 1
-                    else:
-                        # Nessuna classificazione disponibile
-                        stats['no_classification'] += 1
-                        continue
+                    # Nessuna classificazione disponibile
+                    stats['no_classification'] += 1
+                    continue
             
             # Aggiungi il materiale con classificazione
             enriched_material = material.copy()
@@ -548,7 +549,7 @@ class MaterialiMigrationService(BaseService):
             classified_materials.append(enriched_material)
             stats['classified'] += 1
         
-        logger.info(f"Filtering results: {stats['total']} total, {stats['classified']} classified, {stats['excluded']} excluded, {stats['no_classification']} no classification, {stats['pattern_matched']} pattern matched")
+        logger.info(f"Filtering results: {stats['total']} total, {stats['classified']} classified, {stats['excluded']} excluded, {stats['no_classification']} no classification, {stats['pattern_matched']} pattern matched, {stats['already_imported']} already imported (excluded)")
         
         return classified_materials
     

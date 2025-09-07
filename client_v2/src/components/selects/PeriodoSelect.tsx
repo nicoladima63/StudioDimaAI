@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CForm, CRow, CCol, CFormSelect } from "@coreui/react";
+import Select from 'react-select';
 
 export type PeriodoType = "mese" | "trimestre" | "quadrimestre" | "semestre" | "anno";
 
@@ -71,38 +72,38 @@ const PeriodoSelect: React.FC<PeriodoSelectProps> = ({
 
   useEffect(() => {
     onChange({ anni, tipo, sottoperiodo });
-  }, [anni, tipo, sottoperiodo]); // Rimosso onChange dalle dipendenze
+  }, [anni, tipo, sottoperiodo]);
 
-  const handleAnnoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => Number(option.value));
-    setAnni(selectedOptions);
-  };
+  // Prepara le opzioni per react-select
+  const anniOptions = anniDisponibili
+    .slice() // copia per non mutare la prop
+    .sort((a, b) => b - a) // ordina decrescente
+    .map(anno => ({ value: anno, label: anno.toString() }));
+
+  // Valori selezionati per react-select
+  const selectedAnniValues = anni.map(anno => ({ value: anno, label: anno.toString() }));
 
   return (
     <CForm className={`mb-3 ${className}`}>
       <CRow className="g-2 align-items-end">
         <CCol xs={12} md={4}>
-          <label className="form-label">Anno</label>
-          <select
-            multiple
-            className="form-select"
-            value={anni.map(String)}
-            onChange={handleAnnoChange}
-            disabled={disabled}
-            size={3}
-            style={{ minHeight: '38px' }}
-          >
-            {anniDisponibili.slice().sort((a, b) => b - a).map(anno => (
-              <option key={anno} value={anno}>
-                {anno}
-              </option>
-            ))}
-          </select>
-          {anni.length > 0 && (
-            <small className="text-muted">
-              Selezionati: {anni.sort((a, b) => b - a).join(', ')}
-            </small>
-          )}
+          <label className="form-label">Anni</label>
+          <Select
+            isMulti
+            options={anniOptions}
+            value={selectedAnniValues}
+            onChange={(opts) => {
+              const anniNumerici = opts ? opts.map(o => o.value).sort((a, b) => b - a) : [];
+              setAnni(anniNumerici);
+            }}
+            placeholder="Seleziona anni..."
+            closeMenuOnSelect={false}
+            isDisabled={disabled}
+            styles={{
+              control: base => ({ ...base, minHeight: 38, fontSize: 16 }),
+              multiValue: base => ({ ...base, fontSize: 15 })
+            }}
+          />
         </CCol>
         <CCol xs={12} md={4}>
           <CFormSelect

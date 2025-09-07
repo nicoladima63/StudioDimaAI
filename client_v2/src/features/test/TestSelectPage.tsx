@@ -9,19 +9,7 @@ import { CCard, CCardBody, CCardHeader, CRow, CCol, CBadge } from "@coreui/react
 
 // Import real types from store
 import type { Fornitore } from "../../store/fornitori.store";
-
-// Types per i test
-// interface Fornitore {  // Rimosso - usiamo quello vero dal store
-//   id: number;
-//   nome: string;
-//   codice?: string;
-// }
-
-interface Materiale {
-  id: number;
-  descrizione: string;
-  codice?: string;
-}
+import type { Materiale } from "../../store/materiali.store";
 
 interface PeriodoValue {
   anni: number[];
@@ -55,8 +43,8 @@ const TestSelectPage: React.FC = () => {
   };
 
   // Handler per il cambio materiale
-  const handleMaterialeChange = (id: number | null, selectedMateriale?: Materiale) => {
-    setMateriale(selectedMateriale || null);
+  const handleMaterialeChange = (selectedMateriale: Materiale | null) => {
+    setMateriale(selectedMateriale);
   };
 
   return (
@@ -166,7 +154,7 @@ const TestSelectPage: React.FC = () => {
             <CCol md={6} lg={4} className="mb-3">
               <MaterialiSelect 
                 fornitoreId={fornitoreId || undefined} 
-                value={materiale?.id ?? null} 
+                value={materiale?.id.toString() ?? null} 
                 onChange={handleMaterialeChange} 
               />
               <div className="mt-1">
@@ -175,7 +163,7 @@ const TestSelectPage: React.FC = () => {
                     <>
                       <CBadge color="success">{materiale.id}</CBadge>
                       {' - '}
-                      <span>{materiale.descrizione}</span>
+                      <span>{materiale.nome}</span>
                     </>
                   ) : (
                     <CBadge color="secondary">Nessun materiale</CBadge>
@@ -200,7 +188,7 @@ const TestSelectPage: React.FC = () => {
               <strong>Fornitore:</strong> {fornitore?.nome ?? "Non selezionato"}
             </div>
             <div className="col-md-6">
-              <strong>Materiale:</strong> {materiale?.descrizione ?? "Non selezionato"}
+              <strong>Materiale:</strong> {materiale?.nome ?? "Non selezionato"}
             </div>
           </div>
         </div>

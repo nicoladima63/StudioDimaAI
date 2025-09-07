@@ -167,7 +167,7 @@ class MaterialiService(BaseService):
     
     def delete_materiale(self, materiale_id: int, deleted_by: str) -> bool:
         """
-        Delete material (soft delete).
+        Delete material (hard delete).
         
         Args:
             materiale_id: Material ID
@@ -176,8 +176,29 @@ class MaterialiService(BaseService):
         Returns:
             True if deleted successfully
         """
-        # Simplified implementation for demo
-        return True
+        try:
+            # Hard delete: remove record completely
+            query = """
+                DELETE FROM materiali 
+                WHERE id = ?
+            """
+            
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (materiale_id,))
+                conn.commit()
+                
+                # Check if delete was successful
+                if cursor.rowcount > 0:
+                    self.logger.info(f"Material {materiale_id} deleted")
+                    return True
+                else:
+                    self.logger.warning(f"No rows deleted for material {materiale_id}")
+                    return False
+                    
+        except Exception as e:
+            self.logger.error(f"Error in delete_materiale: {e}")
+            raise DatabaseError(f"Failed to delete material: {str(e)}")
     
     def search_materials(self, search_query: str = None, supplier_id: str = None, 
                         classification_filters: Dict[str, Any] = None,

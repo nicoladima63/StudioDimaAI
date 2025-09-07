@@ -55,6 +55,7 @@ export const useFornitoreModals = () => {
     perPage: number
   ): Promise<{ fatture: FatturaBase[]; total: number }> => {
     try {
+      // Usa l'endpoint corretto del server v2: /api/v2/fornitori/<fornitore_id>/spese
       const response = await apiClient.get(`/fornitori/${fornitoreId}/spese?page=${page}&per_page=${perPage}`);
       if (!response.data.success) {
         throw new Error(response.data.error || 'Errore nel caricamento delle spese');
@@ -71,7 +72,7 @@ export const useFornitoreModals = () => {
 
   const fetchDettagliFatturaRighe = async (fatturaId: string): Promise<DettaglioFatturaBase[]> => {
     try {
-      const response = await apiClient.get(`/spese/${fatturaId}/righe`);
+      const response = await apiClient.get(`/spese/${fatturaId}/dettagli`);
       if (!response.data.success) {
         throw new Error(response.data.error || 'Errore nel caricamento dei dettagli');
       }

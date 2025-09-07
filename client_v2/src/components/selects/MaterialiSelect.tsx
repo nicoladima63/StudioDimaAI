@@ -35,7 +35,15 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
     load();
   }, []); // Carica una volta sola all'avvio
 
-  // Filtra materiali in base alla ricerca locale e classificazione
+  // Reset stato interno quando value cambia dall'esterno
+  useEffect(() => {
+    if (!value) {
+      setSearchTerm("");
+      setIsOpen(false);
+    }
+  }, [value]);
+
+  // Filtra e ordina materiali in base alla ricerca locale e classificazione
   const filteredMateriali = useMemo(() => {
     let filtered = Array.isArray(materiali) ? materiali : [];
     
@@ -54,11 +62,55 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
     
     // Applica filtro di ricerca se presente
     if (searchTerm.trim()) {
-      const searchTermLower = searchTerm.toLowerCase();
+      const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(materiale =>
-        materiale.nome.toLowerCase().includes(searchTermLower) ||
-        materiale.codicearticolo?.toLowerCase().includes(searchTermLower)
+        materiale.nome.toLowerCase().includes(searchLower) ||
+        materiale.codicearticolo?.toLowerCase().includes(searchLower)
       );
+
+      // Ordina per rilevanza: prima quelli che iniziano con il termine di ricerca
+      filtered.sort((a, b) => {
+        const aNome = a.nome.toLowerCase();
+        const bNome = b.nome.toLowerCase();
+        const aCodice = a.codicearticolo?.toLowerCase() || '';
+        const bCodice = b.codicearticolo?.toLowerCase() || '';
+        
+        // Punteggio per rilevanza
+        const getScore = (nome: string, codice: string) => {
+          let score = 0;
+          
+          // Bonus massimo se inizia con il termine di ricerca
+          if (nome.startsWith(searchLower)) score += 100;
+          if (codice.startsWith(searchLower)) score += 90;
+          
+          // Bonus se contiene il termine all'inizio di una parola
+          const words = nome.split(' ');
+          for (const word of words) {
+            if (word.startsWith(searchLower)) {
+              score += 50;
+              break;
+            }
+          }
+          
+          // Bonus per lunghezza del match (più corto = più rilevante)
+          const nomeMatch = nome.indexOf(searchLower);
+          if (nomeMatch !== -1) {
+            score += Math.max(0, 20 - nomeMatch);
+          }
+          
+          return score;
+        };
+        
+        const scoreA = getScore(aNome, aCodice);
+        const scoreB = getScore(bNome, bCodice);
+        
+        // Ordina per punteggio decrescente, poi alfabeticamente
+        if (scoreA !== scoreB) {
+          return scoreB - scoreA;
+        }
+        
+        return aNome.localeCompare(bNome);
+      });
     }
     
     return filtered;
@@ -70,6 +122,11 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
       setSearchTerm("");
     }
   }, [isOpen]);
+  
+  // Reset search quando cambia il value dall'esterno
+  useEffect(() => {
+    setSearchTerm("");
+  }, [value]);
 
   // Trova il materiale selezionato
   const selectedMateriale = value ? materiali.find(m => 
@@ -125,19 +182,68 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
   // Versione con ricerca
   return (
     <div className={`position-relative ${className}`}>
-      <input
-        type="text"
-        className="form-control"
-        placeholder={selectedMateriale ? 
-          `${selectedMateriale.nome} ${selectedMateriale.codicearticolo ? `(${selectedMateriale.codicearticolo})` : ''}` : 
-          placeholder}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        onFocus={() => setIsOpen(true)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
-        disabled={disabled || isLoading || !fornitoreId}
-        aria-invalid={!!error}
-      />
+      <div className="position-relative">
+        <input
+          type="text"
+          className="form-control"
+          placeholder={placeholder}
+          value={isOpen ? searchTerm : (selectedMateriale ? `${selectedMateriale.nome} ${selectedMateriale.codicearticolo ? `(${selectedMateriale.codicearticolo})` : ''}` : '')}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            if (!isOpen) setIsOpen(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && filteredMateriali.length === 1) {
+              e.preventDefault();
+              const materiale = filteredMateriali[0];
+              onChange(materiale);
+              setIsOpen(false);
+              setSearchTerm("");
+            }
+          }}
+          onFocus={() => setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+          disabled={disabled || isLoading || !fornitoreId}
+          aria-invalid={!!error}
+          style={selectedMateriale || searchTerm ? { paddingRight: '40px' } : {}}
+        />
+        
+        {/* Pulsante X per cancellare ricerca o selezione */}
+        {(selectedMateriale || searchTerm) && (
+          <button
+            type="button"
+            className="btn btn-link position-absolute top-50 translate-middle-y p-0"
+            style={{ 
+              right: '8px', 
+              zIndex: 10,
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '14px',
+              color: '#6c757d',
+              textDecoration: 'none'
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (searchTerm) {
+                // Se c'è testo di ricerca, cancella solo la ricerca
+                setSearchTerm("");
+              } else if (selectedMateriale) {
+                // Se c'è una selezione, cancella la selezione
+                onChange(null);
+                setSearchTerm("");
+              }
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+            title={searchTerm ? "Cancella ricerca" : "Cancella selezione"}
+          >
+            ✕
+          </button>
+        )}
+      </div>
       
       {isOpen && (
         <div className="position-absolute w-100" style={{ zIndex: 1060, top: '100%' }}>
@@ -163,6 +269,13 @@ const MaterialiSelect: React.FC<MaterialiSelectProps> = ({
             {fornitoreId && !isLoading && !error && filteredMateriali.length === 0 && (
               <div className="px-3 py-2 text-muted">
                 Nessun materiale trovato
+              </div>
+            )}
+
+            {fornitoreId && !isLoading && !error && filteredMateriali.length === 1 && searchTerm && (
+              <div className="px-3 py-1 text-success small">
+                <i className="fas fa-keyboard me-1"></i>
+                Premi Invio per selezionare
               </div>
             )}
             

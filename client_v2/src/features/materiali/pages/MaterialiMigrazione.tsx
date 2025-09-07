@@ -412,8 +412,18 @@ const MaterialiMigrazione: React.FC = () => {
 
               {/* Lista fornitori */}
               <h5>Fornitori con Materiali Dentali</h5>
-              <CAccordion>
-                {anteprima.suppliers?.map((fornitore, index) => (
+              
+              {/* Messaggio quando non ci sono materiali da classificare */}
+              {anteprima.suppliers?.length === 0 ? (
+                <CAlert color='success' className='text-center'>
+                  <h4>🎉 Tutti i materiali sono stati importati!</h4>
+                  <p className='mb-0'>
+                    Non ci sono più materiali da classificare. Tutti i materiali dentali sono già stati importati nel sistema.
+                  </p>
+                </CAlert>
+              ) : (
+                <CAccordion>
+                  {anteprima.suppliers?.map((fornitore, index) => (
                   <CAccordionItem key={index} itemKey={index.toString()}>
                     <CAccordionHeader>
                       <div className='d-flex justify-content-between align-items-center w-100 me-3'>
@@ -505,7 +515,8 @@ const MaterialiMigrazione: React.FC = () => {
                     </CAccordionBody>
                   </CAccordionItem>
                 ))}
-              </CAccordion>
+                </CAccordion>
+              )}
                 </>
               )}
             </CCardBody>

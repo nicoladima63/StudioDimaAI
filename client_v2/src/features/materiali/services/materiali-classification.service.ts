@@ -131,27 +131,50 @@ class MaterialiClassificationService {
   /**
    * Ricerca articoli nelle fatture fornitori
    */
-          async ricercaArticoli(
-          request: RicercaArticoliRequest
-        ): Promise<RicercaArticoliResponse> {
-          try {
-            const params = new URLSearchParams();
-            params.append('q', request.query);
-            
-            if (request.limit) {
-              params.append('limit', request.limit.toString());
-            }
-            
-            const response = await apiClient.get(`/materiali/ricerca-articoli?${params.toString()}`);
-            return response.data;
-          } catch (error: any) {
-            console.error('Errore nella ricerca articoli:', error);
-            return {
-              success: false,
-              error: error.response?.data?.error || error.message || 'Errore sconosciuto'
-            };
-          }
+    async ricercaArticoli(
+      request: RicercaArticoliRequest
+    ): Promise<RicercaArticoliResponse> {
+      try {
+        const params = new URLSearchParams();
+        params.append('q', request.query);
+        
+        if (request.limit) {
+          params.append('limit', request.limit.toString());
         }
+        
+        const response = await apiClient.get(`/materiali/ricerca-articoli?${params.toString()}`);
+        return response.data;
+      } catch (error: any) {
+        console.error('Errore nella ricerca articoli:', error);
+        return {
+          success: false,
+          error: error.response?.data?.error || error.message || 'Errore sconosciuto'
+        };
+      }
+  }
+
+  /**
+   * Ricerca materiali già classificati nella tabella materiali
+   */
+  async ricercaMaterialiClassificati(params: { query: string; limit?: number }) {
+    try {
+      const urlParams = new URLSearchParams();
+      urlParams.append('q', params.query);
+      
+      if (params.limit) {
+        urlParams.append('limit', params.limit.toString());
+      }
+      
+      const response = await apiClient.get(`/materiali/ricerca-classificati?${urlParams.toString()}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Errore nella ricerca materiali classificati:', error);
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message || 'Errore sconosciuto'
+      };
+    }
+  }
 
   /**
    * Ottieni classificazioni esistenti per un materiale
@@ -170,14 +193,14 @@ class MaterialiClassificationService {
   }
 
   /**
-   * Rimuovi classificazione per un materiale
+   * Cancella definitivamente un materiale dalla tabella materiali
    */
-  async rimuoviClassificazioneMateriale(codice_articolo: string, fattura_id: string) {
+  async cancellaMateriale(materiale_id: number) {
     try {
-      const response = await apiClient.delete(`/materiali/classificazione/${codice_articolo}/${fattura_id}`);
+      const response = await apiClient.delete(`/materiali/${materiale_id}`);
       return response.data;
     } catch (error: any) {
-      console.error('Errore nella rimozione classificazione materiale:', error);
+      console.error('Errore nella cancellazione materiale:', error);
       return {
         success: false,
         error: error.response?.data?.error || error.message || 'Errore sconosciuto'

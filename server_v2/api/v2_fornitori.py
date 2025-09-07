@@ -314,3 +314,191 @@ def get_fornitori_stats():
             success=False,
             error="An unexpected error occurred"
         ), 500
+
+
+@fornitori_v2_bp.route('/fornitori/<fornitore_id>/spese', methods=['GET'])
+@jwt_required()
+def get_spese_fornitore(fornitore_id):
+    """
+    Ottieni tutte le spese (fatture) di un fornitore specifico con paginazione.
+    
+    Args:
+        fornitore_id (str): ID del fornitore
+        
+    Query Parameters:
+        page (int): Numero pagina (default: 1)
+        per_page (int): Elementi per pagina (default: 10, max: 100)
+        
+    Returns:
+        JSON response con lista spese e info paginazione
+    """
+    try:
+        # Temporarily disable auth for testing
+        # user_id = require_auth()
+        
+        # Parse query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 10, type=int), 100)
+        
+        # Read directly from SPESAFOR.DBF
+        import os
+        from dbfread import DBF
+        
+        spesafo_path = os.path.join('..', 'windent', 'DATI', 'SPESAFOR.DBF')
+        
+        # Read all records from DBF
+        fornitore_materials = []
+        with DBF(spesafo_path, encoding='latin-1') as spesafo_table:
+            for record in spesafo_table:
+                if record is None:
+                    continue
+                
+                # Check if this record belongs to the requested fornitore
+                if str(record.get('DB_SPFOCOD', '')).strip() == fornitore_id:
+                    fornitore_materials.append({
+                        'id_fattura': str(record.get('DB_CODE', '')).strip(),
+                        'numero_documento': str(record.get('DB_SPNUMER', '')).strip(),
+                        'fornitoreid': str(record.get('DB_SPFOCOD', '')).strip(),
+                        'fornitorenome': str(record.get('DB_SPDESCR', '')).strip(),
+                        'data_spesa': str(record.get('DB_SPDATA', '')).strip(),
+                        'costo_netto': float(record.get('DB_SPCOSTO', 0)),
+                        'costo_iva': float(record.get('DB_SPCOIVA', 0))
+                    })
+        
+        # Group by fattura ID to get unique fatture
+        fatture_dict = {}
+        for material in fornitore_materials:
+            fattura_id = material.get('id_fattura')
+            if fattura_id not in fatture_dict:
+                fatture_dict[fattura_id] = {
+                    'id': fattura_id,
+                    'numero_documento': material.get('numero_documento', ''),
+                    'codice_fornitore': material.get('fornitoreid', ''),
+                    'nome_fornitore': material.get('fornitorenome', ''),
+                    'data_spesa': material.get('data_spesa', ''),
+                    'costo_netto': 0,
+                    'costo_iva': 0,
+                    'costo_totale': 0,
+                    'righe_count': 0
+                }
+            
+            # Accumulate costs
+            fatture_dict[fattura_id]['costo_netto'] += material.get('costo_netto', 0)
+            fatture_dict[fattura_id]['costo_iva'] += material.get('costo_iva', 0)
+            fatture_dict[fattura_id]['righe_count'] += 1
+        
+        # Convert to list and calculate total
+        fatture_list = list(fatture_dict.values())
+        for fattura in fatture_list:
+            fattura['costo_totale'] = fattura['costo_netto'] + fattura['costo_iva']
+        
+        # Sort by data_spesa (most recent first)
+        fatture_list.sort(key=lambda x: x.get('data_spesa', ''), reverse=True)
+        
+        # Apply pagination
+        total = len(fatture_list)
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        paginated_fatture = fatture_list[start_idx:end_idx]
+        
+        return format_response(
+            data={
+                'spese': paginated_fatture,
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total': total,
+                    'pages': (total + per_page - 1) // per_page
+                }
+            },
+            message=f"Retrieved {len(paginated_fatture)} expenses for supplier {fornitore_id}"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in get_spese_fornitore: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_spese_fornitore: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in get_spese_fornitore: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
+
+
+@fornitori_v2_bp.route('/spese/<fattura_id>/dettagli', methods=['GET'])
+@jwt_required()
+def get_dettagli_fattura(fattura_id):
+    """
+    Ottieni dettagli di una specifica fattura.
+    
+    Args:
+        fattura_id (str): ID della fattura
+        
+    Returns:
+        JSON response with fattura details
+    """
+    try:
+        # Temporarily disable auth for testing
+        # user_id = require_auth()
+        
+        # Read dettagli from VOCISPES.DBF only
+        import os
+        from dbfread import DBF
+        
+        vocispes_path = os.path.join('..', 'windent', 'DATI', 'VOCISPES.DBF')
+        
+        # Get dettagli from VOCISPES.DBF
+        dettagli = []
+        with DBF(vocispes_path, encoding='latin-1') as vocispes_table:
+            for record in vocispes_table:
+                if record is None:
+                    continue
+                
+                # Check if this record belongs to the requested fattura
+                if str(record.get('DB_VOSPCOD', '')).strip() == fattura_id:
+                    dettagli.append({
+                        'codice_articolo': str(record.get('DB_VOSOCOD', '')).strip(),
+                        'descrizione': str(record.get('DB_VODESCR', '')).strip(),
+                        'quantita': float(record.get('DB_VOQUANT', 0)),
+                        'prezzo_unitario': float(record.get('DB_VOPREZZ', 0)),
+                        'sconto': float(record.get('DB_VOSCONT', 0)),
+                        'aliquota_iva': float(record.get('DB_VOIVA', 0)),
+                        'totale_riga': float(record.get('DB_VOQUANT', 0)) * float(record.get('DB_VOPREZZ', 0))
+                    })
+        
+        return format_response(
+            data=dettagli,
+            message=f"Retrieved {len(dettagli)} details for fattura {fattura_id}"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in get_dettagli_fattura: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_dettagli_fattura: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in get_dettagli_fattura: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500

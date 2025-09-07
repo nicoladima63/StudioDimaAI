@@ -12,8 +12,13 @@ interface ClassificazioneGerarchicaProps {
   fornitoreId?: string;
   fornitoreNome?: string;
   classificazione: ClassificazioneCosto | null;
-  onClassificazioneChange?: (contoid: number | null, brancaid: number | null, sottocontoid: number | null) => void;
-  onSave?: (contoid: number, brancaid: number | null, sottocontoid: number | null, tipo: 'solo-conto' | 'conto-branca' | 'completa') => Promise<void>;
+  onClassificazioneChange?: (nuovaClassificazione: ClassificazioneCosto | null) => void;
+  onSave?: (
+    contoid: number,
+    brancaid: number | null,
+    sottocontoid: number | null,
+    tipo: 'solo-conto' | 'conto-branca' | 'completa'
+  ) => Promise<void>;
 }
 
 const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
@@ -21,27 +26,24 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
   fornitoreNome,
   classificazione,
   onClassificazioneChange,
-  onSave
+  onSave,
 }) => {
   const [updating, setUpdating] = useState(false);
   const [contoId, setContoId] = useState<number | null>(null);
   const [brancaId, setBrancaId] = useState<number | null>(null);
   const [sottocontoId, setSottocontoId] = useState<number | null>(null);
 
-  // Carica la classificazione esistente SOLO quando cambia la prop classificazione
   useEffect(() => {
     if (classificazione) {
-      // Se esiste una classificazione con i nuovi campi numerici, usali
       setContoId(classificazione.contoid || null);
       setBrancaId(classificazione.brancaid || null);
       setSottocontoId(classificazione.sottocontoid || null);
     } else {
-      // Reset quando non c'è classificazione
       setContoId(null);
       setBrancaId(null);
       setSottocontoId(null);
     }
-  }, [classificazione]); // SOLO classificazione nelle dipendenze!
+  }, [classificazione]);
 
   const handleContoChange = (newContoId: number | null) => {
     setContoId(newContoId);
@@ -56,38 +58,34 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
 
   const handleSottocontoChange = async (newSottocontoId: number | null) => {
     setSottocontoId(newSottocontoId);
-    
-    // Solo quando abbiamo tutti i campi, salva (e non stiamo già aggiornando)
+
     if (contoId && brancaId && newSottocontoId && !updating) {
       setUpdating(true);
       try {
         if (onSave) {
-          // Usa callback personalizzato
           await onSave(contoId, brancaId, newSottocontoId, 'completa');
         } else if (fornitoreId) {
-          // Salvataggio standard per fornitori
-          await classificazioniService.salvaClassificazioneFornitoreCompleta(
-            fornitoreId,
-            {
-              tipo_di_costo: classificazione?.tipo_di_costo || 1,
-              contoid: contoId,
-              brancaid: brancaId,
-              sottocontoid: newSottocontoId,
-              fornitore_nome: fornitoreNome
-            }
-          );
-        }
-        
-        
-        // Aggiorna immediatamente il callback con i nuovi valori per feedback immediato
-        if (onClassificazioneChange) {
-          onClassificazioneChange(contoId, brancaId, newSottocontoId);
+          await classificazioniService.salvaClassificazioneFornitoreCompleta(fornitoreId, {
+            tipo_di_costo: classificazione?.tipo_di_costo || 1,
+            contoid: contoId,
+            brancaid: brancaId,
+            sottocontoid: newSottocontoId,
+            fornitore_nome: fornitoreNome || '',
+          });
         }
       } catch (error) {
         console.error('❌ Errore nel salvataggio della classificazione:', error);
       } finally {
         setUpdating(false);
       }
+
+          onClassificazioneChange?.({
+            ...classificazione,
+            contoid: contoId,
+            brancaid: brancaId,
+            sottocontoid: newSottocontoId,
+            data_modifica: new Date().toISOString(),
+          });
     }
   };
 
@@ -96,7 +94,9 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
   const isContoSolamente = contoId && !brancaId && !sottocontoId;
   const isContoBranca = contoId && brancaId && brancaId > 0 && !sottocontoId;
 
-  const handleSalvaParziale = async (tipo: 'solo-conto' | 'conto-branca' = 'solo-conto') => {
+  const handleSalvaParziale = async (
+    tipo: 'solo-conto' | 'conto-branca' = 'solo-conto'
+  ) => {
     if (contoId) {
       setUpdating(true);
       try {
@@ -104,49 +104,46 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
           if (onSave) {
             await onSave(contoId, brancaId, 0, 'conto-branca');
           } else if (fornitoreId) {
-            await classificazioniService.salvaClassificazioneFornitoreCompleta(
-              fornitoreId,
-              {
-                tipo_di_costo: classificazione?.tipo_di_costo || 1,
-                contoid: contoId,
-                brancaid: brancaId,
-                sottocontoid: 0,
-                fornitore_nome: fornitoreNome
-              }
-            );
+            await classificazioniService.salvaClassificazioneFornitoreCompleta(fornitoreId, {
+              tipo_di_costo: classificazione?.tipo_di_costo || 1,
+              contoid: contoId,
+              brancaid: brancaId,
+              sottocontoid: 0,
+              fornitore_nome: fornitoreNome || '',
+            });
           }
-          
           setSottocontoId(0);
+
+          onClassificazioneChange?.({
+            ...classificazione,
+            contoid: contoId,
+            brancaid: tipo === 'conto-branca' ? brancaId : 0,
+            sottocontoid: 0,
+            data_modifica: new Date().toISOString(),
+          });
           
-          // Aggiorna immediatamente il callback per feedback immediato
-          if (onClassificazioneChange) {
-            onClassificazioneChange(contoId, brancaId, 0);
-          }
         } else {
           if (onSave) {
             await onSave(contoId, 0, 0, 'solo-conto');
           } else if (fornitoreId) {
-            await classificazioniService.salvaClassificazioneFornitoreCompleta(
-              fornitoreId,
-              {
-                tipo_di_costo: classificazione?.tipo_di_costo || 1,
-                contoid: contoId,
-                brancaid: 0,
-                sottocontoid: 0,
-                fornitore_nome: fornitoreNome
-              }
-            );
+            await classificazioniService.salvaClassificazioneFornitoreCompleta(fornitoreId, {
+              tipo_di_costo: classificazione?.tipo_di_costo || 1,
+              contoid: contoId,
+              brancaid: 0,
+              sottocontoid: 0,
+              fornitore_nome: fornitoreNome || '',
+            });
           }
-          
-          // Aggiorna stato locale per riflettere il salvataggio parziale
           setBrancaId(0);
           setSottocontoId(0);
-          
-          
-          // Aggiorna immediatamente il callback per feedback immediato
-          if (onClassificazioneChange) {
-            onClassificazioneChange(contoId, 0, 0);
-          }
+
+          onClassificazioneChange?.({
+            ...classificazione,
+            contoid: contoId,
+            brancaid: 0,
+            sottocontoid: 0,
+            data_modifica: new Date().toISOString(),
+          });
         }
       } catch (error) {
         console.error('❌ Errore nel salvataggio della classificazione parziale:', error);
@@ -155,7 +152,6 @@ const ClassificazioneGerarchica: React.FC<ClassificazioneGerarchicaProps> = ({
       }
     }
   };
-
   // Rimuovo il return early per updating - ora mostriamo il spinner inline
 
   return (

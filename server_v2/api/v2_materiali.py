@@ -467,6 +467,168 @@ def get_materiali_stats():
             error="An unexpected error occurred"
         ), 500
 
+@materiali_v2_bp.route('/materiali/ricerca-classificati', methods=['GET'])
+@jwt_required()
+def ricerca_materiali_classificati():
+    """
+    Ricerca materiali già classificati nella tabella materiali
+    
+    Query Parameters:
+        q (str): Search query (required)
+        limit (int): Max results (default: 20, max: 100)
+        
+    Returns:
+        JSON response with classified materials
+    """
+    try:
+        user_id = require_auth()
+        
+        # Parse query parameters
+        query = request.args.get('q', '').strip()
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        
+        if not query:
+            return format_response(
+                success=False,
+                error="Search query 'q' is required"
+            ), 400
+        
+        # Usa il database manager esistente
+        db_manager = get_database_manager()
+        
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Cerca materiali classificati
+            search_query_lower = query.lower()
+            cursor.execute('''
+                SELECT id, codicearticolo, nome, fornitoreid, fornitorenome,
+                       contoid, contonome, brancaid, brancanome, 
+                       sottocontoid, sottocontonome, confermato, 
+                       metodo_classificazione, fattura_id, data_fattura, costo_unitario
+                FROM materiali 
+                WHERE (LOWER(codicearticolo) LIKE ? OR LOWER(nome) LIKE ?)
+                AND confermato = 1
+                ORDER BY nome
+                LIMIT ?
+            ''', (f'%{search_query_lower}%', f'%{search_query_lower}%', limit))
+            
+            materiali = cursor.fetchall()
+            
+            # Trasforma i risultati
+            materiali_list = []
+            for materiale in materiali:
+                materiale_dict = {
+                    'id': materiale[0],
+                    'codice_articolo': materiale[1],
+                    'descrizione': materiale[2],
+                    'fornitore_id': materiale[3],
+                    'nome_fornitore': materiale[4],
+                    'contoid': materiale[5],
+                    'contonome': materiale[6],
+                    'brancaid': materiale[7],
+                    'brancanome': materiale[8],
+                    'sottocontoid': materiale[9],
+                    'sottocontonome': materiale[10],
+                    'confermato': materiale[11],
+                    'metodo_classificazione': materiale[12],
+                    'fattura_id': materiale[13],
+                    'data_fattura': materiale[14],
+                    'costo_unitario': materiale[15]
+                }
+                materiali_list.append(materiale_dict)
+            
+            return format_response(
+                data={
+                    'materiali': materiali_list,
+                    'total_found': len(materiali_list),
+                    'query': query
+                },
+                message=f"Found {len(materiali_list)} classified materials"
+            )
+            
+    except Exception as e:
+        logger.error(f"Errore ricerca materiali classificati: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
+
+
+@materiali_v2_bp.route('/materiali/classificazione/<codice_articolo>/<fattura_id>', methods=['GET'])
+@jwt_required()
+def get_classificazione_materiale(codice_articolo, fattura_id):
+    """
+    Recupera la classificazione esistente di un materiale dalla tabella materiali
+    
+    Args:
+        codice_articolo (str): Codice articolo
+        fattura_id (str): ID fattura
+        
+    Returns:
+        JSON response with existing classification
+    """
+    try:
+        user_id = require_auth()
+        
+        # Usa il database manager esistente
+        db_manager = get_database_manager()
+        
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Cerca il materiale nella tabella materiali (anche quelli cancellati per recuperare la classificazione)
+            cursor.execute('''
+                SELECT id, codicearticolo, nome, fornitoreid, fornitorenome,
+                       contoid, contonome, brancaid, brancanome, 
+                       sottocontoid, sottocontonome, confermato, 
+                       metodo_classificazione, fattura_id, data_fattura, costo_unitario
+                FROM materiali 
+                WHERE codicearticolo = ? AND fattura_id = ?
+            ''', (codice_articolo, fattura_id))
+            
+            materiale = cursor.fetchone()
+            
+            if not materiale:
+                return jsonify({
+                    'success': False,
+                    'error': 'Materiale non trovato nella tabella materiali'
+                }), 404
+            
+            # Trasforma il risultato in dizionario
+            materiale_dict = {
+                'id': materiale[0],
+                'codice_articolo': materiale[1],
+                'descrizione': materiale[2],
+                'fornitore_id': materiale[3],
+                'nome_fornitore': materiale[4],
+                'contoid': materiale[5],
+                'contonome': materiale[6],
+                'brancaid': materiale[7],
+                'brancanome': materiale[8],
+                'sottocontoid': materiale[9],
+                'sottocontonome': materiale[10],
+                'confermato': materiale[11],
+                'metodo_classificazione': materiale[12],
+                'fattura_id': materiale[13],
+                'data_fattura': materiale[14],
+                'costo_unitario': materiale[15]
+            }
+            
+            return jsonify({
+                'success': True,
+                'data': materiale_dict,
+                'message': 'Classificazione esistente trovata'
+            })
+            
+    except Exception as e:
+        logger.error(f"Errore recupero classificazione materiale: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @materiali_v2_bp.route('/materiali/classificazione', methods=['POST'])
 @jwt_required()
 def salva_classificazione_materiale():
@@ -762,17 +924,16 @@ def salva_classificazione_materiali_bulk():
 @jwt_required()
 def ricerca_articoli():
     """
-    Ricerca articoli nelle fatture fornitori.
+    Ricerca articoli: PRIMA controlla tabella materiali, POI cerca in DBF.
     
     Query Parameters:
         q (str): Search query (required)
         limit (int): Max results (default: 20, max: 100)
         
     Returns:
-        JSON response with search results
+        JSON response with search results (classificati + non classificati)
     """
     try:
-        
         user_id = require_auth()
         
         # Parse query parameters
@@ -785,52 +946,137 @@ def ricerca_articoli():
                 error="Search query 'q' is required"
             ), 400
         
-        # Use migration service to search in DBF data
+        db_manager = get_database_manager()
         migration_service = MaterialiMigrationService(g.database_manager)
         
-        # Read all materials data from DBF
-        materials_data = migration_service.read_spesafo_data()
-        
-        # Filter materials based on search query
-        search_query_lower = query.lower()
-        filtered_materials = []
-        
-        for material in materials_data:
-            # Search in description and codice articolo
-            descrizione = material.get('nome', '').lower()
-            codice_articolo = material.get('codicearticolo', '').lower()
+        # PRIMA: Cerca nella tabella materiali (già classificati)
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            search_query_lower = query.lower()
             
-            if (search_query_lower in descrizione or 
-                search_query_lower in codice_articolo):
-                filtered_materials.append(material)
+            # Cerca materiali già classificati
+            cursor.execute('''
+                SELECT id, codicearticolo, nome, fornitoreid, fornitorenome,
+                       contoid, contonome, brancaid, brancanome, 
+                       sottocontoid, sottocontonome, confermato, 
+                       metodo_classificazione, fattura_id, data_fattura, costo_unitario
+                FROM materiali 
+                WHERE (LOWER(codicearticolo) LIKE ? OR LOWER(nome) LIKE ?)
+                AND confermato = 1
+                ORDER BY nome
+                LIMIT ?
+            ''', (f'%{search_query_lower}%', f'%{search_query_lower}%', limit))
+            
+            materiali_classificati = cursor.fetchall()
         
-        # Limit results
-        limited_materials = filtered_materials[:limit]
+        # Trasforma materiali classificati
+        materiali_list = []
+        for materiale in materiali_classificati:
+            materiale_dict = {
+                'id': materiale[0],
+                'codice_articolo': materiale[1],
+                'descrizione': materiale[2],
+                'fornitore_id': materiale[3],
+                'nome_fornitore': materiale[4],
+                'contoid': materiale[5],
+                'contonome': materiale[6],
+                'brancaid': materiale[7],
+                'brancanome': materiale[8],
+                'sottocontoid': materiale[9],
+                'sottocontonome': materiale[10],
+                'confermato': materiale[11],
+                'metodo_classificazione': materiale[12],
+                'fattura_id': materiale[13],
+                'data_fattura': materiale[14],
+                'costo_unitario': materiale[15],
+                'già_classificato': True,
+                'materiale_id': materiale[0]
+            }
+            materiali_list.append(materiale_dict)
+        
+        # Se non abbiamo raggiunto il limite, cerca in DBF
+        if len(materiali_list) < limit:
+            # SECONDA: Cerca nelle fatture DBF
+            materials_data = migration_service.read_spesafo_data()
+            
+            # Filtra materiali DBF
+            filtered_materials = []
+            for material in materials_data:
+                descrizione = material.get('nome', '').lower()
+                codice_articolo = material.get('codicearticolo', '').lower()
+                
+                if (search_query_lower in descrizione or 
+                    search_query_lower in codice_articolo):
+                    filtered_materials.append(material)
+            
+            # Aggiungi materiali DBF non ancora classificati
+            remaining_limit = limit - len(materiali_list)
+            for material in filtered_materials[:remaining_limit]:
+                # Controlla se non è già presente nei classificati (per descrizione)
+                descrizione_materiale = material.get('nome', '').lower()
+                
+                already_classified = any(
+                    m['descrizione'].lower() == descrizione_materiale
+                    for m in materiali_list
+                )
+                
+                if not already_classified:
+                    materiale_dict = {
+                        'id': None,
+                        'codice_articolo': codice_articolo,
+                        'descrizione': material.get('nome', ''),
+                        'fornitore_id': material.get('fornitoreid', ''),
+                        'nome_fornitore': material.get('fornitorenome', ''),
+                        'contoid': None,
+                        'contonome': None,
+                        'brancaid': None,
+                        'brancanome': None,
+                        'sottocontoid': None,
+                        'sottocontonome': None,
+                        'confermato': 0,
+                        'metodo_classificazione': None,
+                        'fattura_id': fattura_id,
+                        'data_fattura': material.get('data_fattura', ''),
+                        'costo_unitario': material.get('costo_unitario', 0),
+                        'già_classificato': False,
+                        'materiale_id': None
+                    }
+                    materiali_list.append(materiale_dict)
         
         # Transform to API format
         articoli = []
-        for material in limited_materials:
+        for material in materiali_list:
             articolo = {
-                'codice_articolo': material.get('codicearticolo', ''),
-                'descrizione': material.get('nome', ''),
-                'quantita': material.get('quantita', 0),
+                'codice_articolo': material.get('codice_articolo', ''),
+                'descrizione': material.get('descrizione', ''),
+                'quantita': 1,  # Default per materiali classificati
                 'prezzo_unitario': material.get('costo_unitario', 0),
                 'fattura': {
-                    'id': material.get('id_fattura', ''),
-                    'numero_documento': material.get('numero_documento', ''),
-                    'codice_fornitore': material.get('fornitoreid', ''),
-                    'nome_fornitore': material.get('fornitorenome', ''),
-                    'data_spesa': material.get('data_spesa', ''),
-                    'costo_totale': material.get('costo_netto', 0) + material.get('costo_iva', 0)
-                }
+                    'id': material.get('fattura_id', ''),
+                    'numero_documento': material.get('fattura_id', ''),
+                    'codice_fornitore': material.get('fornitore_id', ''),
+                    'nome_fornitore': material.get('nome_fornitore', ''),
+                    'data_spesa': material.get('data_fattura', ''),
+                    'costo_totale': material.get('costo_unitario', 0)
+                },
+                # Aggiungi informazioni classificazione
+                'classificazioneEsistente': {
+                    'contoid': material.get('contoid'),
+                    'brancaid': material.get('brancaid'),
+                    'sottocontoid': material.get('sottocontoid'),
+                    'contonome': material.get('contonome'),
+                    'brancanome': material.get('brancanome'),
+                    'sottocontonome': material.get('sottocontonome'),
+                } if material.get('già_classificato') else None,
+                'materiale_id': material.get('materiale_id'),
+                'già_classificato': material.get('già_classificato', False)
             }
             articoli.append(articolo)
-        
         
         return format_response(
             data={
                 'articoli': articoli,
-                'total_found': len(filtered_materials),
+                'total_found': len(materiali_list),
                 'query': query
             },
             message=f"Found {len(articoli)} articles"

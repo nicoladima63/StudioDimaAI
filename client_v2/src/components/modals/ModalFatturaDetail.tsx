@@ -156,6 +156,18 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
     return righe.reduce((sum, riga) => sum + (riga.totale_riga || 0), 0);
   };
 
+  // Filtra le righe per mostrare solo quelle con quantità e prezzo maggiori di zero
+  const getRigheFiltrate = () => {
+    const filtrate = righe.filter(riga => {
+      const quantita = riga.quantita || 0;
+      const prezzo = riga.prezzo_unitario || 0;
+      // Mostra solo le righe con quantità E prezzo maggiori di zero
+      return quantita > 0 && prezzo > 0;
+    });
+    console.warn('Righe totali:', righe.length, 'Righe filtrate:', filtrate.length);
+    return filtrate;
+  };
+
   if (!fatturaId) return null;
 
   return (
@@ -280,12 +292,12 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
               </h6>
               {righe.length > 0 && (
                 <CBadge color="primary">
-                  {righe.length} righe - Totale: {formatCurrency(getTotaleRighe())}
+                  {getRigheFiltrate().length} righe (da {righe.length} totali) - Totale: {formatCurrency(getTotaleRighe())}
                 </CBadge>
               )}
             </div>
 
-            {righe.length > 0 ? (
+            {getRigheFiltrate().length > 0 ? (
               <CTable striped hover responsive>
                 <CTableHead>
                   <CTableRow>
@@ -299,7 +311,7 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {righe.map((riga, index) => (
+                  {getRigheFiltrate().map((riga, index) => (
                     <CTableRow key={index}>
                       <CTableDataCell>
                         <code className="text-muted small">

@@ -184,13 +184,13 @@ const ModalFattureElenco: React.FC<ModalFattureElencoProps> = ({
   return (
     <CModal visible={visible} onClose={onClose} size={size} scrollable className="modal-fatture-elenco">
       <CModalHeader>
-        <CModalTitle>
+        <CModalTitle className="d-flex align-items-center">
           <CIcon icon={cilList} className="me-2" />
-          {title}
+          <span>{title}</span>
           {subtitle && (
-            <div className="text-muted fs-6 fw-normal mt-1">
-              {subtitle}
-            </div>
+            <span className="text-muted fs-6 fw-normal ms-2">
+              - {subtitle}
+            </span>
           )}
           {totalFatture > 0 && (
             <CBadge color="info" className="ms-2">
@@ -296,7 +296,13 @@ const ModalFattureElenco: React.FC<ModalFattureElencoProps> = ({
                                       </CTableRow>
                                     </CTableHead>
                                     <CTableBody>
-                                      {dettagliFatture.get(fattura.id)!.map((dettaglio, index) => (
+                                      {dettagliFatture.get(fattura.id)!
+                                        .filter(dettaglio => {
+                                          const quantita = dettaglio.quantita || 0;
+                                          const prezzo = dettaglio.prezzo_unitario || 0;
+                                          return quantita > 0 && prezzo > 0;
+                                        })
+                                        .map((dettaglio, index) => (
                                         <CTableRow key={index}>
                                           <CTableDataCell>{dettaglio.codice_articolo || '-'}</CTableDataCell>
                                           <CTableDataCell>{dettaglio.descrizione || '-'}</CTableDataCell>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CButton, CBadge } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilList, cilDollar } from '@coreui/icons';
@@ -21,14 +21,14 @@ interface FornitoriTableProps {
 const FornitoriTable: React.FC<FornitoriTableProps> = ({
   fornitori,
   loading = false,
-  error=null,
+  error = null,
   onView,
-  onViewSpese
+  onViewSpese,
 }) => {
-  // Stato per le classificazioni (come nel V1)
-  const [classificazioni, setClassificazioni] = useState<Map<string, ClassificazioneCosto>>(new Map());
+  const [classificazioni, setClassificazioni] = useState<Map<string, ClassificazioneCosto>>(
+    new Map()
+  );
 
-  // Carica classificazioni all'avvio
   useEffect(() => {
     fetchClassificazioni();
   }, []);
@@ -44,7 +44,7 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
         setClassificazioni(classMap);
       }
     } catch (error) {
-      console.error("Errore nel caricamento classificazioni:", error);
+      console.error('Errore nel caricamento classificazioni:', error);
     }
   };
 
@@ -97,10 +97,36 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       defaultVisible: true,
       order: 6,
       render: (value, item) => (
-        <div onClick={(e) => e.stopPropagation()}>
-          <ClassificazioneToggle 
+        <div onClick={e => e.stopPropagation()}>
+          <ClassificazioneToggle
             fornitoreId={item.id}
             classificazioneIniziale={classificazioni.get(item.id)}
+            onClassificazioneChange={nuovaClassificazione => {
+              const newMap = new Map(classificazioni);
+              if (nuovaClassificazione) {
+                newMap.set(item.id, nuovaClassificazione);
+              } else {
+                newMap.delete(item.id);
+              }
+              setClassificazioni(newMap);
+            }}
+          />
+        </div>
+      ),
+    },
+    {
+      key: 'classificazione_gerarchica',
+      label: 'Classificazione Gerarchica',
+      sortable: false,
+      width: '550px',
+      defaultVisible: true,
+      order: 7,
+      render: (value, item) => (
+        <div onClick={(e) => e.stopPropagation()} key={`status-${item.id}-${classificazioni.get(item.id)?.data_modifica || 'no-class'}`}>
+          <ClassificazioneStatus
+            fornitoreId={item.id}
+            fornitoreNome={item.nome}
+            classificazione={classificazioni.get(item.id) || null}
             onClassificazioneChange={(nuovaClassificazione) => {
               const newMap = new Map(classificazioni);
               if (nuovaClassificazione) {
@@ -112,47 +138,9 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
             }}
           />
         </div>
-      )
+      ),
     },
-    {
-      key: 'classificazione_gerarchica',
-      label: 'Classificazione Gerarchica',
-      sortable: false,
-      width: '550px',
-      defaultVisible: true,
-      order: 7,
-      render: (value, item) => (
-        <div onClick={(e) => e.stopPropagation()}>
-          <ClassificazioneStatus
-            fornitoreId={item.id}
-            fornitoreNome={item.nome}
-            classificazione={classificazioni.get(item.id) || null}
-            onClassificazioneChange={(contoid, brancaid, sottocontoid) => {
-              // Aggiorna la classificazione locale
-              const classificazione = classificazioni.get(item.id);
-              const updatedClassificazione = {
-                ...(classificazione || {}), // Gestisce il caso di classificazione undefined
-                codice_riferimento: item.id, // Campo fondamentale per la chiave
-                contoid,
-                brancaid,
-                sottocontoid,
-                data_modifica: new Date().toISOString(),
-                // Campi di default se non esistono
-                tipo_di_costo: classificazione?.tipo_di_costo || 1,
-                fornitore_nome: item.nome
-              } as ClassificazioneCosto;
-              
-              // Forza un nuovo Map reference per triggere React re-render
-              setClassificazioni(new Map([
-                ...classificazioni,
-                [item.id, updatedClassificazione]
-              ]));
-            }}
-          />
-        </div>
-      )
-    },
-    // Colonna Azioni (sempre visibile e non draggable)
+        // Colonna Azioni (sempre visibile e non draggable)
     {
       key: 'id',
       label: 'Azioni',
@@ -161,33 +149,33 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       defaultVisible: true,
       order: 8, // Dopo le classificazioni
       render: (value, item) => (
-        <div className="d-flex gap-1 justify-content-end">
+        <div className='d-flex gap-1 justify-content-end'>
           {onView && (
             <CButton
-              color="primary"
-              variant="outline"
-              size="sm"
+              color='primary'
+              variant='outline'
+              size='sm'
               onClick={() => onView(item)}
-              title="Visualizza anagrafica"
-              className="action-btn"
+              title='Visualizza anagrafica'
+              className='action-btn'
             >
-              <CIcon icon={cilList} size="sm" />
+              <CIcon icon={cilList} size='sm' />
             </CButton>
           )}
           {onViewSpese && (
             <CButton
-              color="warning"
-              variant="outline"
-              size="sm"
+              color='warning'
+              variant='outline'
+              size='sm'
               onClick={() => onViewSpese(item)}
-              title="Visualizza spese"
-              className="action-btn"
+              title='Visualizza spese'
+              className='action-btn'
             >
-              <CIcon icon={cilDollar} size="sm" />
+              <CIcon icon={cilDollar} size='sm' />
             </CButton>
           )}
         </div>
-      )
+      ),
     },
     // Colonne aggiuntive nascoste di default
     {
@@ -237,11 +225,19 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       width: '18%',
       defaultVisible: false,
       order: 16,
-      render: (value) => value ? (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="text-decoration-none">
-          {value}
-        </a>
-      ) : '-'
+      render: value =>
+        value ? (
+          <a
+            href={value}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-decoration-none'
+          >
+            {value}
+          </a>
+        ) : (
+          '-'
+        ),
     },
     {
       key: 'note',
@@ -250,26 +246,28 @@ const FornitoriTable: React.FC<FornitoriTableProps> = ({
       width: '20%',
       defaultVisible: false,
       order: 17,
-      render: (value) => value ? (
-        <span title={value}>
-          {value.length > 50 ? `${value.substring(0, 50)}...` : value}
-        </span>
-      ) : '-'
-    }
+      render: value =>
+        value ? (
+          <span title={value}>{value.length > 50 ? `${value.substring(0, 50)}...` : value}</span>
+        ) : (
+          '-'
+        ),
+    },
   ];
 
   return (
     <DataTable
+      key={classificazioni.size}
       data={fornitori}
       columns={columns}
       loading={loading}
       error={error}
       searchable={true}
-      searchPlaceholder="Cerca per nome, codice..."
+      searchPlaceholder='Cerca per nome, codice...'
       pageSize={20}
       pageSizeOptions={[10, 20, 50, 100]}
-      className="materiali-table"
-      tableId="fornitori-table"
+      className='materiali-table'
+      tableId='fornitori-table'
       autoDetectColumns={true}
     />
   );

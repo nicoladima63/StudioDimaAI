@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { CBadge, CButton, CTooltip, CSpinner } from "@coreui/react";
-import CIcon from "@coreui/icons-react";
-import { cilPencil, cilTrash, cilPlus } from "@coreui/icons";
-import ClassificazioneGerarchica from "./ClassificazioneGerarchica";
-import type { ClassificazioneCosto } from "../types";
-import { useConti, useBranche, useSottoconti } from "@/store/conti.store";
+import React, { useState, useEffect } from 'react';
+import { CBadge, CButton, CTooltip, CSpinner } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilPencil, cilTrash } from '@coreui/icons';
+import ClassificazioneGerarchica from './ClassificazioneGerarchica';
+import type { ClassificazioneCosto } from '../types';
+import { useConti, useBranche, useSottoconti } from '@/store/conti.store';
 
 interface ClassificazioneStatusProps {
   fornitoreId: string;
@@ -25,74 +25,51 @@ const ClassificazioneStatus: React.FC<ClassificazioneStatusProps> = ({
 }) => {
   const [showEdit, setShowEdit] = useState(false);
   const [removing, setRemoving] = useState(false);
-  const [contoNome, setContoNome] = useState<string>("");
-  const [brancaNome, setBrancaNome] = useState<string>("");
-  const [sottocontoNome, setSottocontoNome] = useState<string>("");
+  // Calcola i nomi direttamente dal render (senza useState)
+  const getContoNome = () => {
+    if (!classificazione?.contoid || conti.length === 0) return '';
+    const conto = conti.find(c => c.id === classificazione.contoid);
+    return conto?.nome || `Conto ID: ${classificazione.contoid}`;
+  };
+
+  const getBrancaNome = () => {
+    if (!classificazione?.brancaid || branche.length === 0) return '';
+    const branca = branche.find(b => b.id === classificazione.brancaid);
+    return branca?.nome || `Branca ID: ${classificazione.brancaid}`;
+  };
+
+  const getSottocontoNome = () => {
+    if (!classificazione?.sottocontoid || sottoconti.length === 0) return '';
+    const sottoconto = sottoconti.find(s => s.id === classificazione.sottocontoid);
+    return sottoconto?.nome || `Sottoconto ID: ${classificazione.sottocontoid}`;
+  };
 
   // Hooks per ottenere i nomi
   const { conti, isLoading: contiLoading } = useConti();
-  const { branche, isLoading: brancheLoading } = useBranche(
-    classificazione?.contoid || null
-  );
+  const { branche, isLoading: brancheLoading } = useBranche(classificazione?.contoid || null);
   const { sottoconti, isLoading: sottocontiLoading } = useSottoconti(
     classificazione?.brancaid || null
   );
 
-  // Aggiorna i nomi quando cambiano i dati
-  useEffect(() => {
-    if (classificazione && conti.length > 0) {
-      const conto = conti.find((c) => c.id === classificazione.contoid);
-      setContoNome(conto?.nome || `Conto ID: ${classificazione.contoid}`);
-    } else {
-      setContoNome("");
-    }
-  }, [classificazione, conti]);
-
-  useEffect(() => {
-    if (classificazione?.brancaid && branche.length > 0) {
-      const branca = branche.find((b) => b.id === classificazione.brancaid);
-      setBrancaNome(branca?.nome || `Branca ID: ${classificazione.brancaid}`);
-    } else {
-      setBrancaNome("");
-    }
-  }, [classificazione, branche]);
-
-  useEffect(() => {
-    if (classificazione?.sottocontoid && sottoconti.length > 0) {
-      const sottoconto = sottoconti.find(
-        (s) => s.id === classificazione.sottocontoid
-      );
-      setSottocontoNome(
-        sottoconto?.nome || `Sottoconto ID: ${classificazione.sottocontoid}`
-      );
-    } else {
-      setSottocontoNome("");
-    }
-  }, [classificazione, sottoconti]);
-
   // Determina il tipo di classificazione
   const getClassificationType = () => {
-    if (!classificazione) return "non_classificato";
+    if (!classificazione) return 'non_classificato';
 
     const hasContoid = classificazione.contoid && classificazione.contoid > 0;
-    const hasBrancaid =
-      classificazione.brancaid && classificazione.brancaid > 0;
-    const hasSottocontoid =
-      classificazione.sottocontoid && classificazione.sottocontoid > 0;
+    const hasBrancaid = classificazione.brancaid && classificazione.brancaid > 0;
+    const hasSottocontoid = classificazione.sottocontoid && classificazione.sottocontoid > 0;
 
     if (hasContoid && hasBrancaid && hasSottocontoid) {
-      return "completo";
+      return 'completo';
     } else if (
       hasContoid &&
       (!classificazione.brancaid ||
         classificazione.brancaid === 0 || // Solo conto
-        (hasBrancaid &&
-          (!classificazione.sottocontoid ||
-            classificazione.sottocontoid === 0))) // Conto + branca
+        (hasBrancaid && (!classificazione.sottocontoid || classificazione.sottocontoid === 0))) // Conto + branca
     ) {
-      return "parziale";
+      return 'parziale';
     } else {
-      return "non_classificato";
+      return 'non_classificato';
     }
   };
 
@@ -101,50 +78,41 @@ const ClassificazioneStatus: React.FC<ClassificazioneStatusProps> = ({
   const handleRemoveClassificazione = async () => {
     if (removing || !classificazione) return;
 
+    // Dialog di conferma
+    if (!window.confirm('Sei sicuro di voler rimuovere la classificazione?')) {
+      return;
+    }
+
     setRemoving(true);
     try {
-      const classificazioniService = await import(
-        "../services/classificazioni.service"
-      );
+      const classificazioniService = await import('../services/classificazioni.service');
       const response =
-        await classificazioniService.default.rimuoviClassificazioneFornitore(
-          fornitoreId
-        );
+        await classificazioniService.default.rimuoviClassificazioneFornitore(fornitoreId);
 
       if (response.success) {
-        if (onClassificazioneChange) {
-          onClassificazioneChange(null, null, null);
-        }
+        onClassificazioneChange?.(null);
       }
     } catch (error) {
-      console.error("Errore nella rimozione classificazione:", error);
+      console.error('Errore nella rimozione classificazione:', error);
     } finally {
       setRemoving(false);
     }
   };
 
-
   // Se stiamo modificando, mostra il componente di modifica
   if (showEdit) {
     return (
-      <div className="d-flex flex-column gap-2">
+      <div className='d-flex flex-column gap-2'>
         <ClassificazioneGerarchica
           fornitoreId={fornitoreId}
           fornitoreNome={fornitoreNome}
           classificazione={classificazione}
-          onClassificazioneChange={(contoid, brancaid, sottocontoid) => {
-            if (onClassificazioneChange) {
-              onClassificazioneChange(contoid, brancaid, sottocontoid);
-            }
-            setShowEdit(false); // Chiudi immediatamente dato che ora abbiamo feedback immediato
+          onClassificazioneChange={nuova => {
+            onClassificazioneChange?.(nuova);
+            setShowEdit(false);
           }}
         />
-        <CButton
-          color="secondary"
-          size="sm"
-          variant="ghost"
-          onClick={() => setShowEdit(false)}
-        >
+        <CButton color='secondary' size='sm' variant='ghost' onClick={() => setShowEdit(false)}>
           Annulla
         </CButton>
       </div>
@@ -153,188 +121,176 @@ const ClassificazioneStatus: React.FC<ClassificazioneStatusProps> = ({
 
   const styled = () => {
     return {
-      padding: "0.575rem 0.75rem", // Stesse dimensioni del CButton size="sm"
-      fontSize: "0.875rem", // Font size uguale al CButton
-      fontWeight: "400",
-      borderRadius: "0.25rem",
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      minWidth: "80px",
+      padding: '0.575rem 0.75rem', // Stesse dimensioni del CButton size="sm"
+      fontSize: '0.875rem', // Font size uguale al CButton
+      fontWeight: '400',
+      borderRadius: '0.25rem',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: '80px',
     };
   };
 
   // Visualizzazione dello stato
   const renderStatus = () => {
     if (contiLoading || brancheLoading || sottocontiLoading) {
-      return <CSpinner size="sm" />;
+      return <CSpinner size='sm' />;
     }
 
     switch (classificationType) {
-      case "completo":
+      case 'completo':
         return (
           <div
-            className="d-flex align-items-center justify-content-between"
-            style={{ width: "100%" }}
+            className='d-flex align-items-center justify-content-between'
+            style={{ width: '100%' }}
           >
             {/* Badge container - float left */}
-            <div className="d-flex align-items-center gap-2">
+            <div className='d-flex align-items-center gap-2'>
               {/* Badge conto */}
-              <CBadge color="primary" className="text-nowrap" style={styled()}>
-                {contoNome}
+              <CBadge color='primary' className='text-nowrap' style={styled()}>
+                {getContoNome()}
               </CBadge>
 
               {/* Badge branca con freccia condizionale */}
-              {brancaNome && (
+              {getBrancaNome() && (
                 <>
-                  <span style={{ color: "#666", fontSize: "14px" }}>→</span>
-                  <CBadge color="info" className="text-nowrap" style={styled()}>
-                    {brancaNome}
+                  <span style={{ color: '#666', fontSize: '14px' }}>→</span>
+                  <CBadge color='info' className='text-nowrap' style={styled()}>
+                    {getBrancaNome()}
                   </CBadge>
                 </>
               )}
 
               {/* Badge sottoconto con freccia condizionale */}
-              {sottocontoNome && (
+              {getSottocontoNome() && (
                 <>
-                  <span style={{ color: "#666", fontSize: "14px" }}>→</span>
-                  <CBadge
-                    color="success"
-                    className="text-nowrap"
-                    style={styled()}
-                  >
-                    {sottocontoNome}
+                  <span style={{ color: '#666', fontSize: '14px' }}>→</span>
+                  <CBadge color='success' className='text-nowrap' style={styled()}>
+                    {getSottocontoNome()}
                   </CBadge>
                 </>
               )}
             </div>
 
             {/* Action buttons - float right */}
-            <div className="d-flex align-items-center gap-1">
-              <CTooltip content="Modifica classificazione">
+            <div className='d-flex align-items-center gap-1'>
+              <CTooltip content='Modifica classificazione'>
                 <CButton
-                  color="secondary"
-                  size="sm"
-                  variant="outline"
+                  color='secondary'
+                  size='sm'
+                  variant='outline'
                   onClick={() => setShowEdit(true)}
                   disabled={removing}
                 >
-                  <CIcon icon={cilPencil} size="sm" />
+                  <CIcon icon={cilPencil} size='sm' />
                 </CButton>
               </CTooltip>
 
-              <CTooltip content="Rimuovi classificazione">
+              <CTooltip content='Rimuovi classificazione'>
                 <CButton
-                  color="danger"
-                  size="sm"
-                  variant="outline"
+                  color='danger'
+                  size='sm'
+                  variant='outline'
                   onClick={handleRemoveClassificazione}
                   disabled={removing}
                 >
-                  {removing ? (
-                    <CSpinner size="sm" />
-                  ) : (
-                    <CIcon icon={cilTrash} size="sm" />
-                  )}
+                  {removing ? <CSpinner size='sm' /> : <CIcon icon={cilTrash} size='sm' />}
                 </CButton>
               </CTooltip>
             </div>
           </div>
         );
 
-      case "parziale":
+      case 'parziale':
         return (
           <div
-            className="d-flex align-items-center justify-content-between"
-            style={{ width: "100%" }}
+            className='d-flex align-items-center justify-content-between'
+            style={{ width: '100%' }}
           >
             {/* Badge container - float left */}
-            <div className="d-flex align-items-center gap-2">
+            <div className='d-flex align-items-center gap-2'>
               {/* Badge conto (sempre presente) */}
-              <CBadge color="primary" className="text-nowrap" style={styled()}>
-                {contoNome.length > 12
-                  ? contoNome.substring(0, 12) + "..."
-                  : contoNome}
+              <CBadge color='primary' className='text-nowrap' style={styled()}>
+                {getContoNome().length > 12
+                  ? getContoNome().substring(0, 12) + '...'
+                  : getContoNome()}
               </CBadge>
 
               {/* Badge branca con freccia condizionale (se presente) */}
-              {brancaNome && (
+              {getBrancaNome() && (
                 <>
-                  <span style={{ color: "#666", fontSize: "14px" }}>→</span>
+                  <span style={{ color: '#666', fontSize: '14px' }}>→</span>
                   <CBadge
-                    className="text-nowrap"
+                    className='text-nowrap'
                     style={{
-                      padding: "0.375rem 0.75rem",
-                      fontSize: "0.875rem",
-                      fontWeight: "400",
-                      borderRadius: "0.25rem",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minWidth: "80px",
-                      backgroundColor: "#ff8c00", // Arancione per parziale
-                      color: "white",
-                      border: "none",
+                      padding: '0.375rem 0.75rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '400',
+                      borderRadius: '0.25rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minWidth: '80px',
+                      backgroundColor: '#ff8c00', // Arancione per parziale
+                      color: 'white',
+                      border: 'none',
                     }}
                   >
-                    {brancaNome.length > 12
-                      ? brancaNome.substring(0, 12) + "..."
-                      : brancaNome}
+                    {getBrancaNome().length > 12
+                      ? getBrancaNome().substring(0, 12) + '...'
+                      : getBrancaNome()}
                   </CBadge>
                 </>
               )}
             </div>
 
             {/* Action buttons - float right */}
-            <div className="d-flex align-items-center gap-1">
-              <CTooltip content="Completa classificazione">
+            <div className='d-flex align-items-center gap-1'>
+              <CTooltip content='Completa classificazione'>
                 <CButton
-                  size="sm"
-                  variant="outline"
+                  size='sm'
+                  variant='outline'
                   onClick={() => setShowEdit(true)}
                   disabled={removing}
                   style={{
-                    color: "#ff8c00", // Testo arancione
-                    borderColor: "#ff8c00",
+                    color: '#ff8c00', // Testo arancione
+                    borderColor: '#ff8c00',
                   }}
                 >
-                  <CIcon icon={cilPencil} size="sm" />
+                  <CIcon icon={cilPencil} size='sm' />
                 </CButton>
               </CTooltip>
 
-              <CTooltip content="Rimuovi classificazione">
+              <CTooltip content='Rimuovi classificazione'>
                 <CButton
-                  color="danger"
-                  size="sm"
-                  variant="outline"
+                  color='danger'
+                  size='sm'
+                  variant='outline'
                   onClick={handleRemoveClassificazione}
                   disabled={removing}
                 >
-                  {removing ? (
-                    <CSpinner size="sm" />
-                  ) : (
-                    <CIcon icon={cilTrash} size="sm" />
-                  )}
+                  {removing ? <CSpinner size='sm' /> : <CIcon icon={cilTrash} size='sm' />}
                 </CButton>
               </CTooltip>
             </div>
           </div>
         );
 
-      case "non_classificato":
+      case 'non_classificato':
       default:
         return (
           <div
-            className="d-flex align-items-center justify-content-between"
-            style={{ width: "100%" }}
+            className='d-flex align-items-center justify-content-between'
+            style={{ width: '100%' }}
           >
             {/* Badge container - float left */}
-            <div className="d-flex align-items-center gap-2">
+            <div className='d-flex align-items-center gap-2'>
               <CButton
-                color="warning"
-                variant="outline"
-                size="sm"
-                className="text-nowrap"
+                color='warning'
+                variant='outline'
+                size='sm'
+                className='text-nowrap'
                 onClick={() => setShowEdit(true)}
               >
                 DA CLASSIFICARE
@@ -342,15 +298,15 @@ const ClassificazioneStatus: React.FC<ClassificazioneStatusProps> = ({
             </div>
 
             {/* Action buttons - float right */}
-            <div className="d-flex align-items-center gap-1">
-              <CTooltip content="Aggiungi classificazione">
+            <div className='d-flex align-items-center gap-1'>
+              <CTooltip content='Aggiungi classificazione'>
                 <CButton
-                  color="primary"
-                  size="sm"
-                  variant="outline"
+                  color='primary'
+                  size='sm'
+                  variant='outline'
                   onClick={() => setShowEdit(true)}
                 >
-                  <CIcon icon={cilPencil} size="sm" />
+                  <CIcon icon={cilPencil} size='sm' />
                 </CButton>
               </CTooltip>
             </div>

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import apiClient from "../services/api/client";
+import apiClient from "@/services/api/client";
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minuti
 const MAX_RETRIES = 3;
@@ -11,6 +11,7 @@ export interface Materiale {
   nome: string;
   codicearticolo: string | null;
   costo_unitario: number;
+  quantita: number;
   fornitoreid: string;
   fornitorenome: string;
   contoid: number | null;
@@ -22,6 +23,8 @@ export interface Materiale {
   confermato: number;
   confidence: number;
   categoria_contabile: string | null;
+  data_fattura?: string;
+  fattura_id?: string;
 }
 
 // Filtri per materiali

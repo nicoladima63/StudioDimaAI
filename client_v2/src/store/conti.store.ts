@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import apiClient from "@/services/api/client";
@@ -715,7 +715,7 @@ export const useConti = () => {
   
   useEffect(() => {
     loadConti();
-  }, [loadConti]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     conti,
@@ -734,9 +734,13 @@ export const useConti = () => {
 export const useBranche = (contoId: number | null) => {
   const { brancheByConto, isLoading, errors, loadBranche, createBranca, updateBranca, deleteBranca, operations } = useContiStore();
   
+  const stableLoadBranche = useCallback((id: number) => {
+    loadBranche(id);
+  }, [loadBranche]);
+  
   useEffect(() => {
-    if (contoId) loadBranche(contoId);
-  }, [contoId, loadBranche]);
+    if (contoId) stableLoadBranche(contoId);
+  }, [contoId, stableLoadBranche]);
 
   return {
     branche: contoId ? (brancheByConto[contoId] || []) : [],
@@ -755,9 +759,13 @@ export const useBranche = (contoId: number | null) => {
 export const useSottoconti = (brancaId: number | null) => {
   const { sottocontiByBranca, isLoading, errors, loadSottoconti, createSottoconto, updateSottoconto, deleteSottoconto, operations } = useContiStore();
   
+  const stableLoadSottoconti = useCallback((id: number) => {
+    loadSottoconti(id);
+  }, [loadSottoconti]);
+  
   useEffect(() => {
-    if (brancaId) loadSottoconti(brancaId);
-  }, [brancaId, loadSottoconti]);
+    if (brancaId) stableLoadSottoconti(brancaId);
+  }, [brancaId, stableLoadSottoconti]);
 
   return {
     sottoconti: brancaId ? (sottocontiByBranca[brancaId] || []) : [],

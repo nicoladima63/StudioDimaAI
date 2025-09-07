@@ -3,6 +3,7 @@ import { CButton } from '@coreui/react';
 
 import PageLayout from '@/components/layout/PageLayout';
 import MaterialiTable from '@/features/materiali/components/MaterialiTable';
+//import MaterialiAccordion from '@/features/materiali/components/MaterialiAccordion';
 import FornitoriSelect from '@/components/selects/FornitoriSelect';
 import { useMateriali, type Materiale } from '@/store/materiali.store';
 import type { Fornitore } from '@/store/fornitori.store';
@@ -109,6 +110,11 @@ const MaterialiPage: React.FC = () => {
           onDelete={handleDelete}
           onView={handleView}
         />
+        {/* <MaterialiAccordion
+          materiali={filteredMateriali}
+          loading={isLoading}
+          error={error}
+        /> */}
       </PageLayout.ContentBody>
 
       <PageLayout.Footer text='Gestione completa dei materiali del magazzino' />

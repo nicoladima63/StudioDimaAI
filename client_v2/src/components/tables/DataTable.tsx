@@ -177,38 +177,7 @@ const DataTable = <T extends Record<string, any>>({
   const [visibleColumns, setVisibleColumns] = useState(columnConfig.visible);
   const [orderedColumns, setOrderedColumns] = useState(columnConfig.order);
 
-  // Stato per resize colonne
-  const [columnWidths, setColumnWidths] = useState<Map<keyof T, number>>(() => {
-    const savedWidths = localStorage.getItem(`table-widths-${tableId}`);
-    try {
-      if (savedWidths) {
-        const parsed = JSON.parse(savedWidths);
-        return new Map(Object.entries(parsed));
-      }
-    } catch (error) {
-      console.warn('Errore caricamento larghezze colonne:', error);
-    }
-    return new Map();
-  });
 
-  // Salva larghezze colonne
-  const saveColumnWidths = (widths: Map<keyof T, number>) => {
-    if (!tableId) return;
-
-    try {
-      const widthsObj = Object.fromEntries(widths);
-      localStorage.setItem(`table-widths-${tableId}`, JSON.stringify(widthsObj));
-    } catch (error) {
-      console.warn('Errore salvataggio larghezze colonne:', error);
-    }
-  };
-
-  // Stato per resize drag
-  const [isResizing, setIsResizing] = useState(false);
-  const [resizeColumn, setResizeColumn] = useState<keyof T | null>(null);
-  const [resizeStartX, setResizeStartX] = useState(0);
-  const [resizeStartWidth, setResizeStartWidth] = useState(0);
-  const [justResized, setJustResized] = useState(false);
 
   // Aggiorna quando cambiano le colonne
   React.useEffect(() => {
@@ -241,7 +210,7 @@ const DataTable = <T extends Record<string, any>>({
 
       return () => clearTimeout(timer);
     }
-  }, [visibleColumnsData, columnWidths]);
+  }, [visibleColumnsData]);
 
   const toggleColumn = (columnKey: keyof T) => {
     const newVisible = new Set(visibleColumns);
@@ -254,94 +223,10 @@ const DataTable = <T extends Record<string, any>>({
     saveColumnConfig(newVisible, orderedColumns);
   };
 
-  // Funzioni per resize colonne
-  const handleResizeStart = (e: React.MouseEvent, columnKey: keyof T) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // Ottieni larghezza attuale dal CSS o default
-    const currentWidth = columnWidths.get(columnKey) || 150; // Default width se non salvata
-
-    console.log(`Resize start for column ${String(columnKey)}: currentWidth = ${currentWidth}px`);
-
-    setIsResizing(true);
-    setResizeColumn(columnKey);
-    setResizeStartX(e.clientX);
-    setResizeStartWidth(currentWidth);
-
-    // Aggiungi classe per disabilitare selezione
-    document.body.classList.add('resizing');
-
-    // Aggiungi event listeners globali
-    document.addEventListener('mousemove', handleResizeMove);
-    document.addEventListener('mouseup', handleResizeEnd);
-  };
-
-  const handleResizeMove = (e: MouseEvent) => {
-    if (!isResizing || !resizeColumn) return;
-
-    const deltaX = e.clientX - resizeStartX;
-    const newWidth = Math.max(50, resizeStartWidth + deltaX); // Larghezza minima 50px
-
-    const newWidths = new Map(columnWidths);
-    newWidths.set(resizeColumn, newWidth);
-    setColumnWidths(newWidths);
-
-    // Aggiorna immediatamente le colonne visibili per feedback in tempo reale
-    const resizeColumnKey = String(resizeColumn);
-    const columnsToUpdate = document.querySelectorAll(
-      `.data-table [data-column="${resizeColumnKey}"]`
-    );
-
-    columnsToUpdate.forEach(element => {
-      const el = element as HTMLElement;
-      el.style.width = `${newWidth}px`;
-      el.style.minWidth = `${newWidth}px`;
-      el.style.maxWidth = `${newWidth}px`;
-    });
-  };
-
-  const handleResizeEnd = () => {
-    if (isResizing && resizeColumn) {
-      saveColumnWidths(columnWidths);
-      // Imposta flag per prevenire sorting per un breve momento
-      setJustResized(true);
-      setTimeout(() => setJustResized(false), 100); // Reset dopo 100ms
-    }
-
-    setIsResizing(false);
-    setResizeColumn(null);
-    setResizeStartX(0);
-    setResizeStartWidth(0);
-
-    // Rimuovi classe per riabilitare selezione
-    document.body.classList.remove('resizing');
-
-    // Rimuovi event listeners globali
-    document.removeEventListener('mousemove', handleResizeMove);
-    document.removeEventListener('mouseup', handleResizeEnd);
-  };
-
-  // Cleanup event listeners
-  React.useEffect(() => {
-    return () => {
-      document.removeEventListener('mousemove', handleResizeMove);
-      document.removeEventListener('mouseup', handleResizeEnd);
-    };
-  }, []);
 
   // Ottieni larghezza di una colonna
   const getColumnWidth = (column: DataTableColumn<T>) => {
-    const savedWidth = columnWidths.get(column.key);
-    if (savedWidth && savedWidth > 0) return `${savedWidth}px`;
-
-    // Se è specificata una larghezza nella definizione della colonna
-    if (column.width && column.width !== 'auto') {
-      return column.width;
-    }
-
-    // Default width per table-layout fixed
-    return '150px';
+    return column.width || 'auto';
   };
 
   // Sposta colonna (drag & drop) - lavora con l'ordine completo delle colonne
@@ -892,7 +777,7 @@ const DataTable = <T extends Record<string, any>>({
           </div>
 
           <div className='col-md-4 d-flex justify-content-end gap-2'>
-            <ColumnSelectorComponent />
+            {/* <ColumnSelectorComponent /> */}
           </div>
         </div>
       </div>
@@ -947,7 +832,7 @@ const DataTable = <T extends Record<string, any>>({
                       <div
                         className='d-flex align-items-center justify-content-between'
                         onClick={() => {
-                          if (!justResized) handleSort(column.key);
+                          handleSort(column.key);
                         }}
                         style={{ cursor: column.sortable ? 'pointer' : 'default' }}
                       >
@@ -955,13 +840,6 @@ const DataTable = <T extends Record<string, any>>({
                           {column.label}
                           {getSortIcon(column.key)}
                         </span>
-                        {/* Resizer handle */}
-                        {!isActionsColumn && (
-                          <span
-                            className='resize-handle'
-                            onMouseDown={e => handleResizeStart(e, column.key)}
-                          />
-                        )}
                       </div>
                     </CTableHeaderCell>
                   );

@@ -9,8 +9,8 @@ import {
   cilList,
   cilDescription,
   cilUser,
-  cilCalendar
-  
+  cilCalendar,
+  cilSearch
 } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
 
@@ -114,6 +114,10 @@ const _nav = [
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {
+    component: CNavTitle,
+    name: 'Materiali',
+  },
+  {
     component: CNavItem,
     name: 'Migrazione Materiali',
     to: '/materiali/migrazione',
@@ -121,9 +125,9 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Ricerca Articoli',
+    name: 'Classifica Materiali',
     to: '/materiali/ricerca',
-    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
   },
 ];
 
