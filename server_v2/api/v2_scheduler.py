@@ -6,9 +6,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-scheduler_v2_bp = Blueprint('scheduler_v2', __name__, url_prefix='/api/v2/scheduler')
+scheduler_v2_bp = Blueprint('scheduler_v2', __name__)
 
-@scheduler_v2_bp.route('/status', methods=['GET'])
+@scheduler_v2_bp.route('/scheduler/status', methods=['GET'])
 @jwt_required()
 def get_scheduler_status():
     """Ottieni status dello scheduler e job attivi"""
@@ -42,7 +42,7 @@ def get_scheduler_status():
             'error': f'Errore ottenimento status scheduler: {str(e)}'
         }), 500
 
-@scheduler_v2_bp.route('/reminder/settings', methods=['PUT'])
+@scheduler_v2_bp.route('/scheduler/reminder/settings', methods=['PUT'])
 @jwt_required()
 def update_reminder_settings():
     """Aggiorna impostazioni promemoria appuntamenti"""
@@ -82,7 +82,7 @@ def update_reminder_settings():
             'error': f'Errore aggiornamento settings promemoria: {str(e)}'
         }), 500
 
-@scheduler_v2_bp.route('/recall/settings', methods=['PUT'])
+@scheduler_v2_bp.route('/scheduler/recall/settings', methods=['PUT'])
 @jwt_required()
 def update_recall_settings():
     """Aggiorna impostazioni richiami"""
@@ -122,7 +122,7 @@ def update_recall_settings():
             'error': f'Errore aggiornamento settings richiami: {str(e)}'
         }), 500
 
-@scheduler_v2_bp.route('/calendar/settings', methods=['PUT'])
+@scheduler_v2_bp.route('/scheduler/calendar/settings', methods=['PUT'])
 @jwt_required()
 def update_calendar_sync_settings():
     """Aggiorna impostazioni sincronizzazione calendario"""
@@ -168,7 +168,7 @@ def update_calendar_sync_settings():
             'error': f'Errore aggiornamento settings calendario: {str(e)}'
         }), 500
 
-@scheduler_v2_bp.route('/start', methods=['POST'])
+@scheduler_v2_bp.route('/scheduler/start', methods=['POST'])
 @jwt_required()
 def start_scheduler():
     """Avvia lo scheduler"""
@@ -190,7 +190,7 @@ def start_scheduler():
             'error': f'Errore avvio scheduler: {str(e)}'
         }), 500
 
-@scheduler_v2_bp.route('/stop', methods=['POST'])
+@scheduler_v2_bp.route('/scheduler/stop', methods=['POST'])
 @jwt_required()
 def stop_scheduler():
     """Ferma lo scheduler"""
@@ -210,7 +210,7 @@ def stop_scheduler():
             'error': f'Errore stop scheduler: {str(e)}'
         }), 500
 
-@scheduler_v2_bp.route('/logs/recall', methods=['GET'])
+@scheduler_v2_bp.route('/scheduler/logs/recall', methods=['GET'])
 @jwt_required()
 def get_recall_logs():
     """Ottieni log richiami automatici"""
@@ -237,7 +237,7 @@ def get_recall_logs():
             'error': f'Errore lettura log richiami: {str(e)}'
         }), 500
 
-@scheduler_v2_bp.route('/logs/calendar', methods=['GET'])
+@scheduler_v2_bp.route('/scheduler/logs/calendar', methods=['GET'])
 @jwt_required()
 def get_calendar_sync_logs():
     """Ottieni log sincronizzazione calendario"""

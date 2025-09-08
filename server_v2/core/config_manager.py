@@ -107,8 +107,10 @@ class ConfigManager:
         """Imposta valori di default per configurazioni mancanti."""
         defaults = {
             'APP_MODE': 'dev',
-            'DEV_DB_BASE_PATH': 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\server\\windent',
-            'PROD_DB_BASE_PATH': '\\\\serverdima\\windent',
+            'DEV_DB_BASE_PATH': 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\windent',
+            'PROD_DB_BASE_PATH': '\\\\serverdima\\pixel\\windent',
+            'PROD_DBF_APPOINTMENTS_PATH': '\\\\serverdima\\pixel\\windent\\USER\\APPUNTA.DBF',
+            'PROD_DBF_PATIENTS_PATH': '\\\\serverdima\\pixel\\windent\\DATI\\PAZIENTI.DBF',
             'GOOGLE_TIMEZONE': 'Europe/Rome',
             'DBF_CACHE_TTL_SECONDS': '300',
             'DBF_MAX_CACHE_ITEMS': '1000', 
@@ -144,6 +146,19 @@ class ConfigManager:
     
     def get_mode(self) -> str:
         """Recupera modalità operativa (dev/prod)."""
+        # Prima prova a leggere da database_mode.txt (environment_manager)
+        try:
+            from pathlib import Path
+            instance_dir = Path(__file__).parent.parent / 'instance'
+            database_mode_file = instance_dir / 'database_mode.txt'
+            if database_mode_file.exists():
+                mode = database_mode_file.read_text().strip().lower()
+                if mode in ['dev', 'prod']:
+                    return mode
+        except Exception as e:
+            logger.warning(f"Errore lettura database_mode.txt: {e}")
+        
+        # Fallback su APP_MODE
         return self.config.get('APP_MODE', 'dev').lower()
     
     def get_dbf_path(self, file_type: str) -> str:

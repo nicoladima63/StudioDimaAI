@@ -188,6 +188,8 @@ def sync_calendar():
         month = data.get("month")
         year = data.get("year")
         studio_id = data.get("studio_id")
+        end_month = data.get("end_month")
+        end_year = data.get("end_year")
         
         if not (calendar_id and month and year and studio_id):
             return format_response(
@@ -213,16 +215,36 @@ def sync_calendar():
         
         def sync_job():
             try:
-                logger.info(f"Starting sync job for studio {studio_id}, month {month}/{year}")
+                # Determine date range
+                if end_month and end_year:
+                    logger.info(f"Starting sync job for studio {studio_id}, range {month}/{year} to {end_month}/{end_year}")
+                else:
+                    logger.info(f"Starting sync job for studio {studio_id}, month {month}/{year}")
                 
                 service = CalendarServiceV2()
                 
-                # Get appointments
-                appointments = service.get_db_appointments_for_month(month, year)
-                logger.info(f"Retrieved {len(appointments)} total appointments")
+                # Get appointments for date range
+                all_appointments = []
+                if end_month and end_year:
+                    # Range sync: iterate through months
+                    current_month, current_year = month, year
+                    while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
+                        month_appointments = service.get_db_appointments_for_month(current_month, current_year)
+                        all_appointments.extend(month_appointments)
+                        logger.info(f"Retrieved {len(month_appointments)} appointments for {current_month}/{current_year}")
+                        
+                        # Move to next month
+                        current_month += 1
+                        if current_month > 12:
+                            current_month = 1
+                            current_year += 1
+                else:
+                    # Single month sync (backward compatibility)
+                    all_appointments = service.get_db_appointments_for_month(month, year)
+                    logger.info(f"Retrieved {len(all_appointments)} total appointments")
                 
                 # Filter by studio
-                filtered_appointments = [app for app in appointments if int(app.get('STUDIO', 0)) == int(studio_id)]
+                filtered_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == int(studio_id)]
                 logger.info(f"Filtered {len(filtered_appointments)} appointments for studio {studio_id}")
                 
                 # Studio calendar mapping
@@ -273,12 +295,7 @@ def sync_calendar():
         thread = threading.Thread(target=sync_job)
         thread.start()
         
-        return format_response(
-            success=True,
-            data={'job_id': job_id},
-            message='Synchronization started',
-            state='success'
-        ), 202
+        return jsonify({"job_id": job_id}), 202
         
     except Exception as e:
         logger.error(f"Error starting sync: {e}", exc_info=True)
@@ -375,40 +392,159 @@ def cancel_sync_job():
 @calendar_v2_bp.route('/clear/<path:calendar_id>', methods=['DELETE'])
 @jwt_required()
 def clear_calendar(calendar_id: str):
-    """Clear all events from Google Calendar. V1 logic."""
+    """Clear all events from Google Calendar using async job. V1 logic."""
     try:
-        service = CalendarServiceV2()
-        result = service.google_clear_calendar(calendar_id)
+        # Generate unique job ID
+        job_id = str(uuid.uuid4())
         
-        return format_response(
-            success=True,
-            data=result,
-            message=result.get('message', 'Calendar cleared successfully'),
-            state='success'
-        ), 200
+        # Initialize job tracking
+        clear_jobs[job_id] = {
+            "status": "in_progress",
+            "progress": 0,
+            "deleted": 0,
+            "total": 0,
+            "message": "Starting calendar clearing...",
+            "error": None,
+            "cancelled": False,
+            "calendar_id": calendar_id
+        }
         
-    except GoogleCredentialsNotFoundError as e:
-        return format_response(
-            success=False,
-            error='GOOGLE_AUTH_REQUIRED',
-            message=str(e),
-            state='error'
-        ), 401
+        def clear_job():
+            try:
+                logger.info(f"Starting clear job for calendar {calendar_id}")
+                
+                service = CalendarServiceV2()
+                
+                # Progress callback function
+                def update_clear_progress(deleted: int, total: int, message: str = None):
+                    if clear_jobs[job_id]["cancelled"]:
+                        raise Exception("Clear operation cancelled by user")
+                    
+                    logger.info(f"Clear progress: {deleted}/{total} - {message}")
+                    clear_jobs[job_id]["progress"] = int(100 * deleted / max(1, total)) if total > 0 else 0
+                    clear_jobs[job_id]["deleted"] = deleted
+                    clear_jobs[job_id]["total"] = total
+                    if message:
+                        clear_jobs[job_id]["message"] = message
+                
+                # Execute clearing with progress tracking
+                result = service.google_clear_calendar_with_progress(
+                    calendar_id, 
+                    progress_callback=update_clear_progress
+                )
+                
+                # Mark as completed
+                clear_jobs[job_id]["status"] = "completed"
+                clear_jobs[job_id]["message"] = result.get('message', 'Calendar cleared successfully')
+                clear_jobs[job_id]["deleted"] = result.get('deleted_count', 0)
+                clear_jobs[job_id]["total"] = result.get('deleted_count', 0)
+                clear_jobs[job_id]["progress"] = 100
+                
+            except Exception as e:
+                if "cancelled by user" in str(e):
+                    logger.info(f"Clear operation cancelled by user: {e}")
+                    clear_jobs[job_id]["status"] = "cancelled"
+                    clear_jobs[job_id]["message"] = "Clear operation cancelled by user"
+                else:
+                    logger.error(f"Clear operation error: {e}", exc_info=True)
+                    clear_jobs[job_id]["status"] = "error"
+                    clear_jobs[job_id]["error"] = str(e)
+                    clear_jobs[job_id]["message"] = f"Error: {str(e)}"
         
-    except CalendarSyncError as e:
-        return format_response(
-            success=False,
-            error='CALENDAR_CLEAR_ERROR',
-            message=str(e),
-            state='error'
-        ), 400
+        # Start async thread
+        thread = threading.Thread(target=clear_job)
+        thread.start()
+        
+        return jsonify({"job_id": job_id}), 202
         
     except Exception as e:
-        logger.error(f"Unexpected error clearing calendar {calendar_id}: {e}", exc_info=True)
+        logger.error(f"Error starting clear: {e}", exc_info=True)
         return format_response(
             success=False,
-            error='INTERNAL_ERROR',
-            message='Internal server error during calendar clear',
+            error='CLEAR_START_ERROR',
+            message=f'Error starting clear: {str(e)}',
+            state='error'
+        ), 500
+
+
+@calendar_v2_bp.route('/clear-status', methods=['GET'])
+@jwt_required()
+def get_clear_status():
+    """Get clear job status. V1 logic."""
+    job_id = request.args.get("jobId")
+    logger.info(f"Clear status request for job: {job_id}")
+    
+    if not job_id:
+        return format_response(
+            success=False,
+            error='JOB_ID_REQUIRED',
+            message='jobId parameter is required',
+            state='error'
+        ), 400
+    
+    if job_id not in clear_jobs:
+        logger.warning(f"Clear job {job_id} not found. Available jobs: {list(clear_jobs.keys())}")
+        return format_response(
+            success=False,
+            error='JOB_NOT_FOUND',
+            message='Clear job not found',
+            state='error'
+        ), 404
+    
+    status = clear_jobs[job_id]
+    logger.info(f"Clear status job {job_id}: {status}")
+    
+    return jsonify(status), 200
+
+
+@calendar_v2_bp.route('/clear/cancel', methods=['POST'])
+@jwt_required()
+def cancel_clear_job():
+    """Cancel clear job. V1 logic."""
+    try:
+        data = request.get_json()
+        job_id = data.get("job_id")
+        
+        if not job_id:
+            return format_response(
+                success=False,
+                error='JOB_ID_REQUIRED',
+                message='job_id is required',
+                state='error'
+            ), 400
+        
+        if job_id not in clear_jobs:
+            return format_response(
+                success=False,
+                error='JOB_NOT_FOUND',
+                message='Clear job not found',
+                state='error'
+            ), 404
+        
+        # Mark job as cancelled
+        if clear_jobs[job_id]["status"] == "in_progress":
+            clear_jobs[job_id]["cancelled"] = True
+            logger.info(f"Clear job {job_id} marked for cancellation")
+            
+            return format_response(
+                success=True,
+                message='Clear job cancelled successfully',
+                state='success'
+            ), 200
+        else:
+            return format_response(
+                success=False,
+                error='JOB_NOT_IN_PROGRESS',
+                message='Clear job is not in progress',
+                state='error'
+            ), 400
+            
+    except Exception as e:
+        logger.error(f"Error cancelling clear job: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='CANCEL_CLEAR_ERROR',
+            message=f'Error cancelling clear job: {str(e)}',
             state='error'
         ), 500
 

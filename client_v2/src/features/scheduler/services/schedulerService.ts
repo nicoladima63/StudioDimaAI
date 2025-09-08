@@ -1,4 +1,4 @@
-import apiClient from '@/api/client';
+import apiClient from '@/services/api/client';
 
 export interface SchedulerJob {
     id: string;
@@ -45,17 +45,17 @@ const schedulerService = {
         scheduler: SchedulerStatus;
         settings: SchedulerSettings;
     }> {
-        const response = await apiClient.get('/v2/scheduler/status');
+        const response = await apiClient.get('/scheduler/status');
         return response.data.data;
     },
 
     async apiStart(): Promise<{ message: string; status: SchedulerStatus }> {
-        const response = await apiClient.post('/v2/scheduler/start');
+        const response = await apiClient.post('/scheduler/start');
         return response.data.data;
     },
 
     async apiStop(): Promise<{ message: string }> {
-        const response = await apiClient.post('/v2/scheduler/stop');
+        const response = await apiClient.post('/scheduler/stop');
         return response.data.data;
     },
 
@@ -70,21 +70,21 @@ const schedulerService = {
         let payload: any = {};
 
         if (service === 'reminder') {
-            endpoint = '/v2/scheduler/reminder/settings';
+            endpoint = '/scheduler/reminder/settings';
             payload = {
                 enabled: settings.reminder_enabled,
                 hour: settings.reminder_hour,
                 minute: settings.reminder_minute
             };
         } else if (service === 'recall') {
-            endpoint = '/v2/scheduler/recall/settings';
+            endpoint = '/scheduler/recall/settings';
             payload = {
                 enabled: settings.recall_enabled,
                 hour: settings.recall_hour,
                 minute: settings.recall_minute
             };
         } else if (service === 'calendar') {
-            endpoint = '/v2/scheduler/calendar/settings';
+            endpoint = '/scheduler/calendar/settings';
             payload = {
                 enabled: settings.calendar_sync_enabled,
                 hour: settings.calendar_sync_hour,
@@ -100,8 +100,8 @@ const schedulerService = {
 
     async apiGetLogs(type: 'recall' | 'calendar'): Promise<LogEntry[]> {
         const endpoint = type === 'recall' 
-            ? '/v2/scheduler/logs/recall'
-            : '/v2/scheduler/logs/calendar';
+            ? '/scheduler/logs/recall'
+            : '/scheduler/logs/calendar';
         
         const response = await apiClient.get(endpoint);
         return response.data.data;

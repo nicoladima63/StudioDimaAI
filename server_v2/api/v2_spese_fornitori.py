@@ -12,9 +12,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create blueprint
-spese_fornitori_v2_bp = Blueprint('spese_fornitori_v2', __name__, url_prefix='/spese-fornitori')
+spese_fornitori_v2_bp = Blueprint('spese_fornitori_v2', __name__)
 
-@spese_fornitori_v2_bp.route('/ricerca-articoli', methods=['GET'])
+@spese_fornitori_v2_bp.route('/spese-fornitori/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for spese fornitori"""
+    return jsonify({
+        'status': 'ok',
+        'service': 'spese-fornitori',
+        'message': 'Service is running'
+    }), 200
+
+
+
+@spese_fornitori_v2_bp.route('/spese-fornitori/ricerca-articoli', methods=['GET'])
 @jwt_required()
 def ricerca_articoli():
     """

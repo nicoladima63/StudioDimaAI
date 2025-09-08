@@ -275,7 +275,7 @@ class CalendarServiceV2:
             else:
                 event_date = datetime.now()
             
-            # Parse times
+            # Parse times - gestione formato decimale del gestionale
             try:
                 if isinstance(ora_inizio, str):
                     if ':' in ora_inizio:
@@ -283,11 +283,15 @@ class CalendarServiceV2:
                         start_hour = int(hour)
                         start_minute = int(minute)
                     else:
-                        start_hour = int(float(ora_inizio))
-                        start_minute = 0
+                        # Formato decimale: 14.5 = 14 ore e 50 minuti
+                        decimal_time = float(ora_inizio)
+                        start_hour = int(decimal_time)
+                        start_minute = int((decimal_time - start_hour) * 100)
                 else:
-                    start_hour = int(ora_inizio)
-                    start_minute = 0
+                    # Formato decimale: 14.5 = 14 ore e 50 minuti
+                    decimal_time = float(ora_inizio)
+                    start_hour = int(decimal_time)
+                    start_minute = int((decimal_time - start_hour) * 100)
                 
                 if isinstance(ora_fine, str):
                     if ':' in ora_fine:
@@ -295,11 +299,15 @@ class CalendarServiceV2:
                         end_hour = int(hour)
                         end_minute = int(minute)
                     else:
-                        end_hour = int(float(ora_fine))
-                        end_minute = 0
+                        # Formato decimale: 14.5 = 14 ore e 50 minuti
+                        decimal_time = float(ora_fine)
+                        end_hour = int(decimal_time)
+                        end_minute = int((decimal_time - end_hour) * 100)
                 else:
-                    end_hour = int(ora_fine)
-                    end_minute = 0
+                    # Formato decimale: 14.5 = 14 ore e 50 minuti
+                    decimal_time = float(ora_fine)
+                    end_hour = int(decimal_time)
+                    end_minute = int((decimal_time - end_hour) * 100)
                     
             except (ValueError, TypeError):
                 start_hour, start_minute = 9, 0
@@ -352,10 +360,10 @@ class CalendarServiceV2:
         Check if an appointment is cancelled based on various indicators.
         """
         # Check for explicit cancellation indicators
-        paziente = appointment.get('PAZIENTE', '').lower()
-        descrizione = appointment.get('DESCRIZIONE', '').lower()
-        tipo = appointment.get('TIPO', '').lower()
-        note = appointment.get('NOTE', '').lower()
+        paziente = (appointment.get('PAZIENTE') or '').lower()
+        descrizione = (appointment.get('DESCRIZIONE') or '').lower()
+        tipo = (appointment.get('TIPO') or '').lower()
+        note = (appointment.get('NOTE') or '').lower()
         
         # Common cancellation keywords
         cancellation_keywords = [
@@ -401,11 +409,38 @@ class CalendarServiceV2:
         Clear all events from Google Calendar.
         Maintains V1 logic.
         """
+        return self.google_clear_calendar_with_progress(calendar_id, None)
+    
+    def google_clear_calendar_with_progress(self, calendar_id: str, progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
+        """
+        Clear all events from Google Calendar with progress tracking.
+        Maintains V1 logic.
+        """
         try:
             service = self._get_calendar_service()
             deleted_count = 0
+            total_events = 0
             
-            # Get all events (paginated)
+            # First pass: count total events
+            logger.info(f"Counting events in calendar {calendar_id}")
+            page_token = None
+            while True:
+                events_result = service.events().list(
+                    calendarId=calendar_id,
+                    pageToken=page_token,
+                    maxResults=2500  # Max allowed by Google
+                ).execute()
+                
+                events = events_result.get('items', [])
+                total_events += len(events)
+                
+                page_token = events_result.get('nextPageToken')
+                if not page_token:
+                    break
+            
+            logger.info(f"Found {total_events} events to delete")
+            
+            # Second pass: delete events with progress tracking
             page_token = None
             while True:
                 events_result = service.events().list(
@@ -419,18 +454,22 @@ class CalendarServiceV2:
                 # Delete events in batch
                 for event in events:
                     try:
-                        # Skip events that are not from our system (optional)
                         event_summary = event.get('summary', '')
-                        if event_summary and not any(keyword in event_summary.lower() for keyword in ['appuntamento', 'nota giornaliera']):
-                            # Skip non-appointment events to avoid deleting user-created events
-                            continue
-                            
                         service.events().delete(
                             calendarId=calendar_id, 
                             eventId=event['id']
                         ).execute()
                         deleted_count += 1
                         logger.debug(f"Deleted event: {event['id']} - {event_summary}")
+                        
+                        # Update progress
+                        if progress_callback:
+                            progress_callback(
+                                deleted_count, 
+                                total_events, 
+                                f"Deleted {deleted_count} of {total_events} events"
+                            )
+                            
                     except Exception as e:
                         logger.warning(f"Error deleting event {event['id']}: {e}")
                         continue
@@ -439,9 +478,12 @@ class CalendarServiceV2:
                 if not page_token:
                     break
             
+            final_message = f"Deleted {deleted_count} events from calendar"
+            logger.info(final_message)
+            
             return {
                 'deleted_count': deleted_count,
-                'message': f"Deleted {deleted_count} events from calendar"
+                'message': final_message
             }
             
         except GoogleCredentialsNotFoundError:
@@ -466,7 +508,7 @@ class CalendarServiceV2:
             )
             
             # Use localhost for development - must match authorized redirect URI
-            flow.redirect_uri = 'http://localhost'
+            flow.redirect_uri = 'http://localhost:5001/oauth/callback'
             
             auth_url, state = flow.authorization_url(
                 access_type='offline',
@@ -522,7 +564,7 @@ class CalendarServiceV2:
                 flow_data,
                 scopes=['https://www.googleapis.com/auth/calendar']
             )
-            flow.redirect_uri = 'http://localhost'
+            flow.redirect_uri = 'http://localhost:5001/oauth/callback'
             
             # Exchange code for token
             flow.fetch_token(code=code)

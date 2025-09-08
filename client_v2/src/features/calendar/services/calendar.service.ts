@@ -33,6 +33,17 @@ export interface SyncJob {
   error?: string;
 }
 
+export interface ClearJob {
+  job_id: string;
+  status: 'in_progress' | 'completed' | 'error' | 'cancelled';
+  progress: number;
+  deleted: number;
+  total: number;
+  message: string;
+  error?: string;
+  calendar_id: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -89,15 +100,25 @@ const calendar = {
     calendarId: string,
     month: number,
     year: number,
-    studioId: number
+    studioId: number,
+    endMonth?: number,
+    endYear?: number
   ): Promise<{ job_id: string }> => {
     try {
-      const response = await apiClient.post('/calendar/sync', {
+      const payload: any = {
         calendar_id: calendarId,
         month,
         year,
         studio_id: studioId
-      });
+      };
+      
+      // Add end date if provided (for range sync)
+      if (endMonth && endYear) {
+        payload.end_month = endMonth;
+        payload.end_year = endYear;
+      }
+      
+      const response = await apiClient.post('/calendar/sync', payload);
       return response.data.data || response.data;
     } catch (error: any) {
       throw {
@@ -138,7 +159,7 @@ const calendar = {
   },
 
   // Clear calendar
-  apiClearCalendar: async (calendarId: string): Promise<ApiResponse<{ deleted_count: number; message: string }>> => {
+  apiClearCalendar: async (calendarId: string): Promise<ApiResponse<{ job_id: string }>> => {
     try {
       const encodedCalendarId = encodeURIComponent(calendarId);
       const response = await apiClient.delete(`/calendar/clear/${encodedCalendarId}`);
@@ -147,14 +168,42 @@ const calendar = {
       if (error.response?.data?.message) {
         throw {
           message: error.response.data.message,
-          error: true,
-          deleted_count: 0
+          error: true
         };
       }
       throw {
         message: "Impossibile contattare il server. Verifica la tua connessione e riprova.",
-        error: true,
-        deleted_count: 0
+        error: true
+      };
+    }
+  },
+
+  apiGetClearStatus: async (jobId: string): Promise<ClearJob> => {
+    try {
+      const response = await apiClient.get(`/calendar/clear-status?jobId=${jobId}`);
+      return response.data;
+    } catch (error: any) {
+      throw {
+        message: 'Errore durante il recupero dello stato di cancellazione',
+        error: true
+      };
+    }
+  },
+
+  apiCancelClear: async (jobId: string): Promise<ApiResponse<{ message: string }>> => {
+    try {
+      const response = await apiClient.post('/calendar/clear/cancel', { job_id: jobId });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        throw {
+          message: error.response.data.message,
+          error: true
+        };
+      }
+      throw {
+        message: 'Errore durante la cancellazione del job',
+        error: true
       };
     }
   },
@@ -265,6 +314,8 @@ export const {
   apiGetSyncStatus,
   apiCancelSync,
   apiClearCalendar,
+  apiGetClearStatus,
+  apiCancelClear,
   apiGetReauthUrl,
   apiGetAppuntamentiStats,
   apiGetPrimeVisiteStats,

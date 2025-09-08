@@ -21,7 +21,7 @@ import {
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilCalendar, cilSync, cilTrash, cilWarning } from '@coreui/icons';
-import calendarService, { type Calendar, type Appointment } from '../services/calendar.service';
+import calendarService, { type Calendar, type Appointment, type ClearJob } from '../services/calendar.service';
 import PageLayout from '@/components/layout/PageLayout';
 
 const MONTHS = [
@@ -87,8 +87,15 @@ const CalendarPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState<'success' | 'danger' | 'warning'>('success');
 
-  // Clear states (simplified - not using the complex V1 version)
+  // Clear states (async job management)
   const [clearLoading, setClearLoading] = useState(false);
+  const [clearJobId, setClearJobId] = useState<string | null>(null);
+  const [clearProgress, setClearProgress] = useState(0);
+  const [clearDeleted, setClearDeleted] = useState(0);
+  const [clearTotal, setClearTotal] = useState(0);
+  const [clearStatus, setClearStatus] = useState<'idle' | 'in_progress' | 'completed' | 'error' | 'cancelled'>('idle');
+  const [clearCancelling, setClearCancelling] = useState(false);
+  const clearPollingRef = React.useRef<number | null>(null);
 
   const showToastMessage = (message: string, color: 'success' | 'danger' | 'warning') => {
     setToastMessage(message);
@@ -340,28 +347,98 @@ const CalendarPage: React.FC = () => {
   const confirmClear = async () => {
     setShowClearConfirmation(false);
     setClearLoading(true);
+    setClearStatus('in_progress');
+    setClearProgress(0);
+    setClearDeleted(0);
+    setClearTotal(0);
 
     try {
       const result = await calendarService.apiClearCalendar(selectedCalendar);
       if (result.success && result.data) {
-        showToastMessage(
-          `Cancellazione completata! ${result.data.deleted_count} eventi rimossi.`,
-          'success'
-        );
+        const { job_id } = result.data;
+        setClearJobId(job_id);
+
+        // Start polling for progress
+        const pollClearStatus = async () => {
+          try {
+            const statusResponse = await calendarService.apiGetClearStatus(job_id);
+
+            if (!statusResponse || typeof statusResponse !== 'object') {
+              throw new Error('Risposta status non valida');
+            }
+
+            const { status, progress, deleted, total, message, error } = statusResponse;
+
+            setClearProgress(progress || 0);
+            setClearDeleted(deleted || 0);
+            setClearTotal(total || 0);
+
+            if (status === 'completed') {
+              setClearStatus('completed');
+              showToastMessage(
+                `Cancellazione completata! ${deleted} eventi rimossi.`,
+                'success'
+              );
+              setTimeout(() => {
+                setClearStatus('idle');
+                setClearJobId(null);
+              }, 2000);
+              return;
+            } else if (status === 'error') {
+              console.error('Errore nella cancellazione:', error);
+              setClearStatus('error');
+              showToastMessage(`Errore: ${error || 'Errore sconosciuto'}`, 'danger');
+              return;
+            } else if (status === 'cancelled') {
+              setClearStatus('cancelled');
+              showToastMessage("Cancellazione interrotta dall'utente", 'warning');
+              setClearCancelling(false);
+              return;
+            }
+
+            // Continue polling if still in progress
+            if (status === 'in_progress') {
+              clearPollingRef.current = window.setTimeout(pollClearStatus, 1000);
+            }
+          } catch (pollError) {
+            console.error('Errore nel polling:', pollError);
+            setClearStatus('error');
+            showToastMessage('Errore durante il monitoraggio della cancellazione', 'danger');
+          }
+        };
+
+        // Start polling
+        pollClearStatus();
       } else {
         showToastMessage(
-          result.message || 'Errore durante la cancellazione',
+          result.message || 'Errore durante l\'avvio della cancellazione',
           'danger'
         );
+        setClearStatus('error');
       }
     } catch (error: any) {
       console.error('Clear calendar error:', error);
       showToastMessage(
-        error.message || 'Errore durante la cancellazione',
+        error.message || 'Errore durante l\'avvio della cancellazione',
         'danger'
       );
+      setClearStatus('error');
     } finally {
       setClearLoading(false);
+    }
+  };
+
+  // Cancel clear job
+  const handleCancelClear = async () => {
+    if (!clearJobId) return;
+
+    setClearCancelling(true);
+    try {
+      await calendarService.apiCancelClear(clearJobId);
+    } catch (error) {
+      console.error('Errore durante la cancellazione:', error);
+      setClearCancelling(false);
+      showToastMessage('Errore durante la cancellazione del job', 'danger');
     }
   };
 
@@ -370,6 +447,9 @@ const CalendarPage: React.FC = () => {
     return () => {
       if (syncPollingRef.current) {
         clearTimeout(syncPollingRef.current);
+      }
+      if (clearPollingRef.current) {
+        clearTimeout(clearPollingRef.current);
       }
     };
   }, []);
@@ -382,6 +462,12 @@ const CalendarPage: React.FC = () => {
     setSyncTotal(0);
     setSyncJobId(null);
     setSyncCancelling(false);
+    setClearStatus('idle');
+    setClearProgress(0);
+    setClearDeleted(0);
+    setClearTotal(0);
+    setClearJobId(null);
+    setClearCancelling(false);
   }, [selectedCalendar]);
 
   return (
@@ -472,9 +558,9 @@ const CalendarPage: React.FC = () => {
                 <CButton
                   color='danger'
                   onClick={handleClear}
-                  disabled={clearLoading || !selectedCalendar}
+                  disabled={clearLoading || clearStatus === 'in_progress' || !selectedCalendar}
                 >
-                  {clearLoading ? (
+                  {clearLoading || clearStatus === 'in_progress' ? (
                     <>
                       <CSpinner size='sm' className='me-2' />
                       Cancellazione...
@@ -562,26 +648,114 @@ const CalendarPage: React.FC = () => {
         )}
 
         {/* Clear Confirmation Modal */}
-        <CModal visible={showClearConfirmation} onClose={() => setShowClearConfirmation(false)}>
+        <CModal 
+          visible={showClearConfirmation} 
+          onClose={() => setShowClearConfirmation(false)}
+          backdrop={clearStatus === 'in_progress' ? 'static' : true}
+        >
           <CModalHeader>
-            <h5>Conferma Cancellazione</h5>
+            <h5>
+              {clearStatus === 'in_progress'
+                ? 'Cancellazione in corso'
+                : clearStatus === 'completed'
+                  ? 'Cancellazione Completata'
+                  : clearStatus === 'error'
+                    ? 'Errore Cancellazione'
+                    : clearStatus === 'cancelled'
+                      ? 'Cancellazione Interrotta'
+                      : 'Conferma Cancellazione'}
+            </h5>
           </CModalHeader>
           <CModalBody>
-            <p>
-              Sei sicuro di voler cancellare <strong>TUTTI</strong> gli eventi dal calendario{' '}
-              <strong>"{selectedCalendarName}"</strong>?
-            </p>
-            <p className='text-danger'>
-              <strong>ATTENZIONE:</strong> Questa operazione non può essere annullata!
-            </p>
+            {clearStatus === 'idle' && (
+              <>
+                <p>
+                  Sei sicuro di voler cancellare <strong>TUTTI</strong> gli eventi dal calendario{' '}
+                  <strong>"{selectedCalendarName}"</strong>?
+                </p>
+                <p className='text-danger'>
+                  <strong>ATTENZIONE:</strong> Questa operazione non può essere annullata!
+                </p>
+              </>
+            )}
+            
+            {clearStatus === 'in_progress' && (
+              <CAlert color='info'>
+                <div className='d-flex align-items-center'>
+                  <CSpinner size='sm' className='me-2' />
+                  <span>Cancellazione eventi in corso...</span>
+                </div>
+                {clearTotal > 0 && (
+                  <div className='mt-2'>
+                    <div className='progress'>
+                      <div className='progress-bar' style={{ width: `${clearProgress}%` }}></div>
+                    </div>
+                    <small className='text-muted'>
+                      Progresso: {clearProgress}% ({clearDeleted}/{clearTotal})
+                    </small>
+                  </div>
+                )}
+              </CAlert>
+            )}
+            
+            {(clearStatus === 'completed' || clearStatus === 'error' || clearStatus === 'cancelled') && (
+              <CAlert
+                color={
+                  clearStatus === 'completed'
+                    ? 'success'
+                    : clearStatus === 'error'
+                      ? 'danger'
+                      : 'warning'
+                }
+              >
+                <div>
+                  {clearStatus === 'completed' && (
+                    <span>Cancellazione completata! {clearDeleted} eventi rimossi.</span>
+                  )}
+                  {clearStatus === 'error' && (
+                    <span>Errore durante la cancellazione.</span>
+                  )}
+                  {clearStatus === 'cancelled' && (
+                    <span>Cancellazione interrotta dall'utente.</span>
+                  )}
+                </div>
+              </CAlert>
+            )}
           </CModalBody>
           <CModalFooter>
-            <CButton color='secondary' onClick={() => setShowClearConfirmation(false)}>
-              Annulla
-            </CButton>
-            <CButton color='danger' onClick={confirmClear}>
-              Conferma Cancellazione
-            </CButton>
+            {clearStatus === 'idle' && (
+              <>
+                <CButton color='secondary' onClick={() => setShowClearConfirmation(false)}>
+                  Annulla
+                </CButton>
+                <CButton color='danger' onClick={confirmClear}>
+                  Conferma Cancellazione
+                </CButton>
+              </>
+            )}
+            
+            {clearStatus === 'in_progress' && (
+              <CButton color='danger' onClick={handleCancelClear} disabled={clearCancelling}>
+                {clearCancelling ? (
+                  <>
+                    <CSpinner size='sm' className='me-2' />
+                    Interruzione...
+                  </>
+                ) : (
+                  'Interrompi'
+                )}
+              </CButton>
+            )}
+            
+            {(clearStatus === 'completed' || clearStatus === 'error' || clearStatus === 'cancelled') && (
+              <CButton color='primary' onClick={() => {
+                setShowClearConfirmation(false);
+                setClearStatus('idle');
+                setClearJobId(null);
+              }}>
+                Chiudi
+              </CButton>
+            )}
           </CModalFooter>
         </CModal>
 

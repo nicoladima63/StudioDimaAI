@@ -257,8 +257,12 @@ class EnvironmentManager:
                 logger.error(f"Disallineamento: ambiente impostato a {environment} ma file contiene {current_env}")
                 return False
             
-            # Aggiorna cache
-            self.get_environment[service] = environment
+            # Aggiorna configurazione in memoria
+            if service in self._services:
+                self._services[service].current_environment = environment
+            
+            # Invalida cache correlate
+            self._invalidate_service_cache(service)
             return True
             
         except Exception as e:
@@ -331,19 +335,19 @@ class EnvironmentManager:
             return {}
     
     def _get_database_config(self, environment: Environment) -> Dict[str, Any]:
-        """Configurazione database"""
+        """Configurazione database DBF del gestionale"""
         if environment == Environment.PROD:
             return {
                 'type': 'network',
-                'path': r'\\SERVERDIMA\Pixel\WINDENT',
-                'host': 'SERVERDIMA',
+                'path': r'\\serverdima\pixel\windent',
+                'host': 'serverdima',
                 'validation_required': True,
                 'network_check': True
             }
         else:  # DEV
             return {
                 'type': 'local',
-                'path': str(self.project_root / 'studio_dima.db'),
+                'path': str(self.project_root / 'windent'),
                 'validation_required': False,
                 'network_check': False
             }

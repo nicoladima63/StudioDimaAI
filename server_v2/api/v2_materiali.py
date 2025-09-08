@@ -650,7 +650,7 @@ def salva_classificazione_materiale():
     """
     try:
         data = request.get_json()
-        logger.info(f"🔍 MATERIALI: Ricevuta richiesta salvataggio classificazione: {data}")
+        logger.info(f"MATERIALI: Ricevuta richiesta salvataggio classificazione: {data}")
         
         # Validazione campi obbligatori
         required_fields = ['descrizione', 'fornitore_id', 'nome_fornitore', 'contoid']
@@ -1035,7 +1035,7 @@ def ricerca_articoli():
                         'sottocontonome': None,
                         'confermato': 0,
                         'metodo_classificazione': None,
-                        'fattura_id': fattura_id,
+                        'fattura_id': material.get('id_fattura', ''),
                         'data_fattura': material.get('data_fattura', ''),
                         'costo_unitario': material.get('costo_unitario', 0),
                         'già_classificato': False,
