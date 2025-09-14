@@ -10,7 +10,8 @@ import {
   cilDescription,
   cilUser,
   cilCalendar,
-  cilSearch
+  cilSearch,
+  cilMonitor
 } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
 
@@ -92,6 +93,12 @@ const _nav = [
     name: 'Impostazioni Calendario',
     to: '/settings/calendar',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Monitoraggio DBF',
+    to: '/settings/monitoring',
+    icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

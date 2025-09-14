@@ -199,7 +199,9 @@ class EnvironmentManager:
                 logger.error(f"{mode_file} non è un file regolare")
                 return False
                 
-            logger.info(f"Ambiente {environment.value} salvato correttamente per {service}")
+            # Log con ambiente effettivamente letto dal file
+            read_back = mode_file.read_text().strip()
+            logger.info(f"Cambio modalità {service.value}: ora in ambiente '{read_back}'")
             return True
             
         except PermissionError as e:

@@ -1,0 +1,281 @@
+"""
+SyncStateManager - Gestisce lo stato di sincronizzazione con Google Calendar
+Evita duplicati e gestisce aggiornamenti incrementali.
+"""
+
+import json
+import hashlib
+import logging
+from typing import Dict, Any, Optional, Set
+from pathlib import Path
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+
+class SyncStateManager:
+    """
+    Gestisce lo stato di sincronizzazione per evitare duplicati.
+    Mantiene traccia degli appuntamenti già sincronizzati con Google Calendar.
+    """
+    
+    def __init__(self, sync_state_file: str = "sync_state.json"):
+        """
+        Inizializza il manager dello stato di sincronizzazione.
+        
+        Args:
+            sync_state_file: Percorso del file per salvare lo stato
+        """
+        self.sync_state_file = Path(sync_state_file)
+        self.sync_state: Dict[str, Dict[str, Any]] = {}
+        self._load_sync_state()
+    
+    def _load_sync_state(self) -> None:
+        """Carica lo stato di sincronizzazione dal file."""
+        try:
+            if self.sync_state_file.exists():
+                with open(self.sync_state_file, 'r', encoding='utf-8') as f:
+                    self.sync_state = json.load(f)
+                logger.info(f"Caricato stato sincronizzazione: {len(self.sync_state)} eventi")
+            else:
+                self.sync_state = {}
+                logger.info("Nessuno stato sincronizzazione esistente, inizializzazione vuota")
+        except Exception as e:
+            logger.error(f"Errore caricamento stato sincronizzazione: {e}")
+            self.sync_state = {}
+    
+    def _save_sync_state(self) -> None:
+        """Salva lo stato di sincronizzazione su file."""
+        try:
+            # Crea directory se non esiste
+            self.sync_state_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(self.sync_state_file, 'w', encoding='utf-8') as f:
+                json.dump(self.sync_state, f, ensure_ascii=False, indent=2)
+            logger.debug(f"Salvato stato sincronizzazione: {len(self.sync_state)} eventi")
+        except Exception as e:
+            logger.error(f"Errore salvataggio stato sincronizzazione: {e}")
+    
+    def generate_appointment_id(self, appointment: Dict[str, Any]) -> str:
+        """
+        Genera un ID univoco per un appuntamento.
+        
+        Args:
+            appointment: Dati dell'appuntamento dal DBF
+            
+        Returns:
+            ID univoco dell'appuntamento
+        """
+        try:
+            data = appointment.get('DATA', '')
+            ora_inizio = appointment.get('ORA_INIZIO', '')
+            studio = appointment.get('STUDIO', '')
+            paziente = appointment.get('PAZIENTE', '') or appointment.get('DESCRIZIONE', '') or ''
+            
+            # Pulisce il paziente per evitare caratteri problematici
+            paziente_clean = str(paziente).replace(' ', '').replace('\n', '').replace('\r', '')
+            
+            return f"{data}_{ora_inizio}_{studio}_{paziente_clean}"
+        except Exception as e:
+            logger.error(f"Errore generazione ID appuntamento: {e}")
+            # Fallback con timestamp
+            return f"fallback_{datetime.now().timestamp()}"
+    
+    def generate_appointment_hash(self, appointment: Dict[str, Any]) -> str:
+        """
+        Genera un hash per verificare se un appuntamento è cambiato.
+        
+        Args:
+            appointment: Dati dell'appuntamento dal DBF
+            
+        Returns:
+            Hash SHA256 dell'appuntamento
+        """
+        try:
+            # Campi che determinano se l'appuntamento è cambiato
+            fields = [
+                appointment.get('DATA', ''),
+                appointment.get('ORA_INIZIO', ''),
+                appointment.get('ORA_FINE', ''),
+                appointment.get('TIPO', ''),
+                appointment.get('STUDIO', ''),
+                appointment.get('NOTE', ''),
+                appointment.get('DESCRIZIONE', ''),
+                appointment.get('PAZIENTE', '')
+            ]
+            
+            # Crea stringa concatenata
+            content = '|'.join(str(field) for field in fields)
+            
+            # Genera hash SHA256
+            return hashlib.sha256(content.encode('utf-8')).hexdigest()
+        except Exception as e:
+            logger.error(f"Errore generazione hash appuntamento: {e}")
+            return hashlib.sha256(str(datetime.now().timestamp()).encode()).hexdigest()
+    
+    def get_sync_state_for_studios(self, studio_ids: Set[int]) -> Dict[str, Dict[str, Any]]:
+        """
+        Filtra lo stato di sincronizzazione per studi specifici.
+        
+        Args:
+            studio_ids: Set di ID studi da includere
+            
+        Returns:
+            Stato sincronizzazione filtrato per gli studi specificati
+        """
+        filtered_state = {}
+        
+        for app_id, sync_data in self.sync_state.items():
+            try:
+                # Estrae studio ID dall'app_id (formato: DATA_ORA_STUDIO_PAZIENTE)
+                parts = app_id.split('_')
+                if len(parts) >= 3:
+                    studio_from_id = int(parts[2])
+                    if studio_from_id in studio_ids:
+                        filtered_state[app_id] = sync_data
+            except (IndexError, ValueError) as e:
+                logger.warning(f"Errore parsing app_id {app_id}: {e}")
+                continue
+        
+        logger.info(f"Filtrato stato sincronizzazione: {len(filtered_state)} eventi per studi {studio_ids}")
+        return filtered_state
+    
+    def is_appointment_synced(self, appointment: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Verifica se un appuntamento è già sincronizzato e se è cambiato.
+        
+        Args:
+            appointment: Dati dell'appuntamento dal DBF
+            
+        Returns:
+            Dati sincronizzazione se esiste e non è cambiato, None altrimenti
+        """
+        app_id = self.generate_appointment_id(appointment)
+        app_hash = self.generate_appointment_hash(appointment)
+        
+        if app_id in self.sync_state:
+            existing_data = self.sync_state[app_id]
+            existing_hash = existing_data.get('hash', '')
+            
+            if existing_hash == app_hash:
+                # Appuntamento già sincronizzato e non cambiato
+                return existing_data
+            else:
+                # Appuntamento cambiato, va aggiornato
+                logger.info(f"Appuntamento {app_id} modificato, richiede aggiornamento")
+                return None
+        else:
+            # Nuovo appuntamento
+            logger.info(f"Nuovo appuntamento {app_id}")
+            return None
+    
+    def mark_appointment_synced(self, appointment: Dict[str, Any], 
+                               calendar_id: str, event_id: str, 
+                               month: int, year: int) -> None:
+        """
+        Marca un appuntamento come sincronizzato.
+        
+        Args:
+            appointment: Dati dell'appuntamento dal DBF
+            calendar_id: ID del calendario Google
+            event_id: ID dell'evento Google Calendar
+            month: Mese dell'appuntamento
+            year: Anno dell'appuntamento
+        """
+        app_id = self.generate_appointment_id(appointment)
+        app_hash = self.generate_appointment_hash(appointment)
+        
+        self.sync_state[app_id] = {
+            'calendar_id': calendar_id,
+            'event_id': event_id,
+            'hash': app_hash,
+            'month': month,
+            'year': year,
+            'synced_at': datetime.now().isoformat()
+        }
+        
+        logger.debug(f"Marcato appuntamento {app_id} come sincronizzato")
+        self._save_sync_state()
+    
+    def remove_appointment_sync(self, appointment: Dict[str, Any]) -> None:
+        """
+        Rimuove un appuntamento dallo stato di sincronizzazione.
+        
+        Args:
+            appointment: Dati dell'appuntamento dal DBF
+        """
+        app_id = self.generate_appointment_id(appointment)
+        
+        if app_id in self.sync_state:
+            del self.sync_state[app_id]
+            logger.debug(f"Rimosso appuntamento {app_id} dallo stato sincronizzazione")
+            self._save_sync_state()
+    
+    def get_appointments_to_delete(self, current_appointment_ids: Set[str], 
+                                  month: int, year: int) -> Set[str]:
+        """
+        Identifica appuntamenti da cancellare (non più presenti nel DBF).
+        
+        Args:
+            current_appointment_ids: Set di ID appuntamenti attualmente nel DBF
+            month: Mese di riferimento
+            year: Anno di riferimento
+            
+        Returns:
+            Set di app_id da cancellare dal calendario
+        """
+        to_delete = set()
+        
+        for app_id, sync_data in self.sync_state.items():
+            sync_month = sync_data.get('month')
+            sync_year = sync_data.get('year')
+            
+            # Solo appuntamenti del mese/anno corrente
+            if sync_month == month and sync_year == year:
+                if app_id not in current_appointment_ids:
+                    to_delete.add(app_id)
+        
+        logger.info(f"Identificati {len(to_delete)} appuntamenti da cancellare")
+        return to_delete
+    
+    def get_sync_statistics(self) -> Dict[str, Any]:
+        """
+        Restituisce statistiche sullo stato di sincronizzazione.
+        
+        Returns:
+            Dizionario con statistiche
+        """
+        total_synced = len(self.sync_state)
+        
+        # Raggruppa per mese/anno
+        by_month_year = {}
+        for sync_data in self.sync_state.values():
+            month = sync_data.get('month', 0)
+            year = sync_data.get('year', 0)
+            key = f"{year}-{month:02d}"
+            by_month_year[key] = by_month_year.get(key, 0) + 1
+        
+        return {
+            'total_synced': total_synced,
+            'by_month_year': by_month_year,
+            'last_updated': datetime.now().isoformat()
+        }
+
+
+# Singleton per accesso globale
+_sync_state_manager: Optional[SyncStateManager] = None
+
+
+def get_sync_state_manager() -> SyncStateManager:
+    """
+    Restituisce l'istanza singleton del SyncStateManager.
+    
+    Returns:
+        Istanza del SyncStateManager
+    """
+    global _sync_state_manager
+    
+    if _sync_state_manager is None:
+        _sync_state_manager = SyncStateManager()
+    
+    return _sync_state_manager

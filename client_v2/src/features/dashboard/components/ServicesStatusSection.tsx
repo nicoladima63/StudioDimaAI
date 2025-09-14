@@ -14,6 +14,7 @@ import { cilReload } from '@coreui/icons';
 import ServiceStatusCard from './ServiceStatusCard';
 import { getServicesStatus, ServiceStatus } from '@/services/api/services-status.service';
 import { useNavigate } from 'react-router-dom';
+import { environmentService } from '@/features/settings/services/environment.service';
 import { environmentApi } from '@/services/api/environment.service';
 
 const ServicesStatusSection: React.FC = () => {
@@ -45,11 +46,7 @@ const ServicesStatusSection: React.FC = () => {
 
   useEffect(() => {
     fetchServicesStatus();
-
-    // Refresh automatico ogni 30 secondi
-    const interval = setInterval(fetchServicesStatus, 30000);
-
-    return () => clearInterval(interval);
+    // Rimosso refresh automatico per permettere test configurazioni
   }, []);
 
   const getServiceColor = (serviceName: string): string => {
@@ -115,6 +112,19 @@ const ServicesStatusSection: React.FC = () => {
     }
   };
 
+  const handleForceFallback = async (serviceKey: string) => {
+    try {
+      console.log(`Forzando fallback a DEV per ${serviceKey}`);
+      const response = await environmentService.switchServiceEnvironment(serviceKey, 'dev');
+      if (response.success) {
+        // Ricarica lo status dei servizi
+        await fetchServicesStatus();
+      }
+    } catch (error) {
+      console.error('Errore fallback automatico:', error);
+    }
+  };
+
   return (
     <CCard className='mb-4'>
       <CCardHeader>
@@ -169,6 +179,7 @@ const ServicesStatusSection: React.FC = () => {
                     color={getServiceColor(serviceKey)}
                     onToggleService={handleToggleService}
                     onOpenSettings={handleOpenSettings}
+                    onForceFallback={handleForceFallback}
                   />
                 </CCol>
               ))}

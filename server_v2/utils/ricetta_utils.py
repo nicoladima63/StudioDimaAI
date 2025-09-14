@@ -25,49 +25,49 @@ class RicettaDataManager:
             if icd9_path.exists():
                 with open(icd9_path, 'r', encoding='utf-8') as f:
                     self._cache['diagnosi'] = json.load(f)
-                logger.info(f"Caricate {len(self._cache['diagnosi'])} diagnosi ICD9")
+                # Diagnosi ICD9 caricate
             
             # Carica farmaci ATC
             atc_path = self.data_dir / "atc_farmaci.json"
             if atc_path.exists():
                 with open(atc_path, 'r', encoding='utf-8') as f:
                     self._cache['farmaci'] = json.load(f)
-                logger.info(f"Caricati {len(self._cache['farmaci'])} farmaci ATC")
+                # Farmaci ATC caricati
             
             # Carica farmaci AIC validi
             aic_path = self.data_dir / "farmaci_aic_validi.json"
             if aic_path.exists():
                 with open(aic_path, 'r', encoding='utf-8') as f:
                     self._cache['farmaci_aic'] = json.load(f)
-                logger.info(f"Caricati {len(self._cache['farmaci_aic'])} farmaci AIC")
+                # Farmaci AIC caricati
             
             # Carica mapping diagnosi-farmaco
             mapping_path = self.data_dir / "mapping_diagnosi_farmaco.json"
             if mapping_path.exists():
                 with open(mapping_path, 'r', encoding='utf-8') as f:
                     self._cache['mapping'] = json.load(f)
-                logger.info("Caricato mapping diagnosi-farmaco")
+                # Mapping diagnosi-farmaco caricato
             
             # Carica protocolli terapeutici
             protocolli_path = self.data_dir / "protocolli_terapeutici.json"
             if protocolli_path.exists():
                 with open(protocolli_path, 'r', encoding='utf-8') as f:
                     self._cache['protocolli'] = json.load(f)
-                logger.info(f"Caricati {len(self._cache['protocolli'])} protocolli terapeutici")
+                # Protocolli terapeutici caricati
             
             # Carica farmaci test sicuri
             test_farmaci_path = self.data_dir / "farmaci_test_sicuri.json"
             if test_farmaci_path.exists():
                 with open(test_farmaci_path, 'r', encoding='utf-8') as f:
                     self._cache['farmaci_test'] = json.load(f)
-                logger.info(f"Caricati {len(self._cache['farmaci_test'])} farmaci test sicuri")
+                # Farmaci test sicuri caricati
             
             # Carica ricette funzionanti test
             ricette_test_path = self.data_dir / "ricette_funzionanti_test.json"
             if ricette_test_path.exists():
                 with open(ricette_test_path, 'r', encoding='utf-8') as f:
                     self._cache['ricette_test'] = json.load(f)
-                logger.info(f"Caricate {len(self._cache['ricette_test'])} ricette test")
+                # Ricette test caricate
                     
         except Exception as e:
             logger.error(f"Errore caricamento dati ricetta: {e}")

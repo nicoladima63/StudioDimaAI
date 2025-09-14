@@ -8,6 +8,7 @@ import {
   cilInfo,
   cilSettings,
   cilPowerStandby,
+  cilReload,
 } from '@coreui/icons';
 
 interface ServiceStatus {
@@ -24,6 +25,7 @@ interface Props {
   color?: string;
   onToggleService?: (serviceKey: string, enabled: boolean) => void;
   onOpenSettings?: (serviceKey: string) => void;
+  onForceFallback?: (serviceKey: string) => void;
 }
 
 const ServiceStatusCard: React.FC<Props> = ({
@@ -31,6 +33,7 @@ const ServiceStatusCard: React.FC<Props> = ({
   color = '#3399ff',
   onToggleService,
   onOpenSettings,
+  onForceFallback,
 }) => {
   const getStatusIcon = () => {
     switch (service.status) {
@@ -65,6 +68,21 @@ const ServiceStatusCard: React.FC<Props> = ({
 
   const getActionButton = () => {
     const serviceKey = service.name.toLowerCase().replace(/\s+/g, '_');
+
+    // Servizio database con fallback automatico
+    if (serviceKey === 'database' && service.environment === 'prod' && service.status === 'unhealthy' && onForceFallback) {
+      return (
+        <CButton
+          size='sm'
+          color='warning'
+          onClick={() => onForceFallback(serviceKey)}
+          className='w-100'
+        >
+          <CIcon icon={cilReload} size='sm' className='me-1' />
+          Fallback a DEV
+        </CButton>
+      );
+    }
 
     // Servizi con toggle on/off
     const toggleServices = ['database', 'api_server', 'database_connection'];

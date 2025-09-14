@@ -72,7 +72,7 @@ class TemplateManager:
             if os.path.exists(self.template_file):
                 with open(self.template_file, 'r', encoding='utf-8') as f:
                     self.templates = json.load(f)
-                    logger.info("SMS templates loaded from file")
+                    # SMS templates loaded
             else:
                 self.templates = DEFAULT_TEMPLATES.copy()
                 self._save_templates()

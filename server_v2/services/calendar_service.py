@@ -26,6 +26,7 @@ from core.exceptions import (
 )
 from core.environment_manager import environment_manager
 from utils.dbf_utils import get_optimized_reader
+from services.sync_state_manager import get_sync_state_manager
 
 logger = logging.getLogger(__name__)
 
@@ -187,23 +188,34 @@ class CalendarServiceV2:
                                   progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
         """
         Sync appointments to Google Calendar for specific month.
-        Maintains V1 exact logic with progress callback.
+        Includes duplicate detection and incremental updates (V1 logic).
         """
         try:
             service = self._get_calendar_service()
+            sync_manager = get_sync_state_manager()
             
             # Get appointments if not provided
             if appointments is None:
                 appointments = self.get_db_appointments_for_month(month, year)
             
+            # Filter sync state for current studios
+            studio_ids = set(studio_calendar_ids.keys())
+            sync_state = sync_manager.get_sync_state_for_studios(studio_ids)
+            
             success_count = 0
             error_count = 0
             total_count = len(appointments)
+            updated_count = 0
+            new_count = 0
+            skipped_count = 0
             
-            logger.info(f"Starting sync of {total_count} appointments")
+            logger.info(f"Starting intelligent sync of {total_count} appointments")
             
             if progress_callback:
                 progress_callback(0, total_count, "Starting synchronization...")
+            
+            # Track current appointment IDs for deletion detection
+            current_appointment_ids = set()
             
             for i, app in enumerate(appointments):
                 try:
@@ -215,25 +227,118 @@ class CalendarServiceV2:
                         logger.warning(f"No calendar ID for studio {studio_id}, skipping appointment")
                         continue
                     
-                    # Create event (V1 logic)
-                    event = self._create_event_from_appointment(app)
+                    # Generate appointment ID and hash
+                    app_id = sync_manager.generate_appointment_id(app)
+                    app_hash = sync_manager.generate_appointment_hash(app)
+                    current_appointment_ids.add(app_id)
                     
-                    # Insert to calendar
-                    service.events().insert(calendarId=calendar_id, body=event).execute()
-                    success_count += 1
+                    # Check if appointment needs sync
+                    existing_sync = sync_manager.is_appointment_synced(app)
+                    
+                    if existing_sync:
+                        # Already synced and unchanged, skip
+                        skipped_count += 1
+                        logger.debug(f"Skipping unchanged appointment {app_id}")
+                    else:
+                        # Need to sync (new or changed)
+                        event = self._create_event_from_appointment(app)
+                        
+                        if app_id in sync_state:
+                            # Update existing event
+                            try:
+                                # Delete old event
+                                old_event_id = sync_state[app_id]['event_id']
+                                service.events().delete(
+                                    calendarId=sync_state[app_id]['calendar_id'], 
+                                    eventId=old_event_id
+                                ).execute()
+                                logger.debug(f"Deleted old event {old_event_id}")
+                                
+                                # Create new event
+                                created_event = service.events().insert(
+                                    calendarId=calendar_id, 
+                                    body=event
+                                ).execute()
+                                
+                                # Update sync state
+                                sync_manager.mark_appointment_synced(
+                                    app, calendar_id, created_event['id'], month, year
+                                )
+                                
+                                updated_count += 1
+                                success_count += 1
+                                logger.info(f"Updated appointment {app_id}")
+                                
+                            except Exception as e:
+                                logger.error(f"Error updating appointment {app_id}: {e}")
+                                error_count += 1
+                        else:
+                            # Create new event
+                            try:
+                                created_event = service.events().insert(
+                                    calendarId=calendar_id, 
+                                    body=event
+                                ).execute()
+                                
+                                # Mark as synced
+                                sync_manager.mark_appointment_synced(
+                                    app, calendar_id, created_event['id'], month, year
+                                )
+                                
+                                new_count += 1
+                                success_count += 1
+                                logger.info(f"Created new appointment {app_id}")
+                                
+                            except Exception as e:
+                                logger.error(f"Error creating appointment {app_id}: {e}")
+                                error_count += 1
                     
                     # Progress update
-                    if progress_callback and i % 5 == 0:  # Update every 5 items
+                    if progress_callback and i % 5 == 0:
                         progress_callback(
                             success_count + error_count, 
                             total_count, 
-                            f"Synchronized {success_count} of {total_count} appointments"
+                            f"Processed {i+1}/{total_count} appointments"
                         )
                     
                 except Exception as e:
-                    logger.error(f"Error syncing appointment {i}: {e}")
+                    logger.error(f"Error processing appointment {i}: {e}")
                     error_count += 1
                     continue
+            
+            # Handle deletions (appointments in calendar but not in DBF)
+            deleted_count = 0
+            appointments_to_delete = sync_manager.get_appointments_to_delete(
+                current_appointment_ids, month, year
+            )
+            
+            if progress_callback:
+                progress_callback(
+                    success_count + error_count, 
+                    total_count, 
+                    f"Cleaning up deleted appointments... ({deleted_count}/{len(appointments_to_delete)})"
+                )
+            
+            for app_id in appointments_to_delete:
+                try:
+                    sync_data = sync_state[app_id]
+                    service.events().delete(
+                        calendarId=sync_data['calendar_id'], 
+                        eventId=sync_data['event_id']
+                    ).execute()
+                    
+                    # Remove from sync state
+                    sync_manager.remove_appointment_sync(
+                        {'DATA': app_id.split('_')[0], 'ORA_INIZIO': app_id.split('_')[1], 
+                         'STUDIO': app_id.split('_')[2]}
+                    )
+                    
+                    deleted_count += 1
+                    logger.info(f"Deleted appointment {app_id}")
+                    
+                except Exception as e:
+                    logger.error(f"Error deleting appointment {app_id}: {e}")
+                    error_count += 1
             
             # Final progress update
             if progress_callback:
@@ -243,12 +348,19 @@ class CalendarServiceV2:
                     f"Sync completed: {success_count} success, {error_count} errors"
                 )
             
-            return {
+            result = {
                 'success': success_count,
                 'errors': error_count,
                 'total_processed': total_count,
+                'new_appointments': new_count,
+                'updated_appointments': updated_count,
+                'skipped_appointments': skipped_count,
+                'deleted_appointments': deleted_count,
                 'message': f"Sync completed: {success_count} success, {error_count} errors"
             }
+            
+            logger.info(f"Sync results: {result}")
+            return result
             
         except GoogleCredentialsNotFoundError:
             raise

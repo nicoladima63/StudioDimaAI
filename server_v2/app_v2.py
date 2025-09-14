@@ -39,7 +39,7 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     # Configure logging
     setup_logging(app)
     logger = logging.getLogger(__name__)
-    logger.info("Initializing StudioDimaAI Server V2")
+    # Server V2 initialization
     
     # Initialize extensions
     init_extensions(app)
@@ -59,7 +59,7 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     # Health check endpoint
     register_health_check(app)
     
-    logger.info(f"Server V2 initialized successfully on port {app.config.get('PORT', 5001)}")
+    # Server ready
     return app
 
 
@@ -90,6 +90,10 @@ def setup_logging(app: Flask) -> None:
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
     root_logger.addHandler(file_handler)
+    
+    # Disabilita completamente log delle richieste HTTP
+    logging.getLogger('werkzeug').disabled = True
+    logging.getLogger('request').disabled = True
     
     if app.config.get('LOG_TO_STDOUT', False) or app.debug:
         root_logger.addHandler(console_handler)
@@ -146,6 +150,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_calendar import calendar_v2_bp
     from api.v2_scheduler import scheduler_v2_bp
     from api.v2_environment import environment_bp
+    from api.api_monitoring import monitoring_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -162,7 +167,8 @@ def register_blueprints(app: Flask) -> None:
         templates_v2_bp,
         automation_v2_bp,
         scheduler_v2_bp,
-        environment_bp
+        environment_bp,
+        monitoring_bp
     ]
     
     # Register standard blueprints with API prefix only
@@ -170,7 +176,7 @@ def register_blueprints(app: Flask) -> None:
         try:
             app.register_blueprint(blueprint, url_prefix=app.config['API_PREFIX'])
             logger = logging.getLogger(__name__)
-            logger.info(f"Registered blueprint {i+1}/{len(blueprints)}: {blueprint.name}")
+            # Blueprint registered
         except Exception as e:
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to register blueprint {blueprint.name}: {e}")
@@ -179,13 +185,13 @@ def register_blueprints(app: Flask) -> None:
     try:
         app.register_blueprint(calendar_v2_bp, url_prefix=app.config['API_PREFIX'] + '/calendar')
         logger = logging.getLogger(__name__)
-        logger.info(f"Registered calendar blueprint: calendar_v2 -> {app.config['API_PREFIX']}/calendar")
+        # Calendar blueprint registered
     except Exception as e:
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to register calendar blueprint: {e}")
     
     logger = logging.getLogger(__name__)
-    logger.info(f"Registered {len(blueprints) + 1} API blueprints")
+    # All blueprints registered
 
 
 def register_error_handlers(app: Flask) -> None:

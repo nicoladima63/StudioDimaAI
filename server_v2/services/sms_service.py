@@ -26,7 +26,7 @@ class SMSService:
         """Ricarica configurazione basata su ambiente corrente"""
         self._current_environment = environment_manager.get_environment(self.service_type)
         self._current_config = environment_manager.get_service_config(self.service_type)
-        logger.info(f"SMS Service configurato per ambiente: {self._current_environment.value}")
+        # SMS Service configurato
     
     def get_current_environment(self) -> Environment:
         """Ottiene ambiente corrente"""

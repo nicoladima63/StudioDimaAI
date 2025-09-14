@@ -64,7 +64,7 @@ COLONNE = {
 # =============================================================================
 
 DBF_TABLES = {
-    'agenda': {
+    'APPUNTA': {
         'file': 'APPUNTA.DBF',
         'categoria': 'DATI',
         'descrizione': 'Appuntamenti calendario'
@@ -246,7 +246,12 @@ def get_dbf_table_info(table_name: str) -> dict:
         KeyError: Se tabella non esiste
     """
     if table_name not in DBF_TABLES:
-        raise KeyError(f"Tabella '{table_name}' non trovata in DBF_TABLES")
+        # Se tabella non è in DBF_TABLES, crea configurazione di default
+        return {
+            'file': f'{table_name.upper()}.DBF',
+            'categoria': 'DATI',
+            'descrizione': f'Tabella {table_name}'
+        }
     
     return DBF_TABLES[table_name]
 

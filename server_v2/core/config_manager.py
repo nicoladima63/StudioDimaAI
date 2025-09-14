@@ -107,7 +107,7 @@ class ConfigManager:
         """Imposta valori di default per configurazioni mancanti."""
         defaults = {
             'APP_MODE': 'dev',
-            'DEV_DB_BASE_PATH': 'C:\\Users\\gengi\\Desktop\\StudioDimaAI\\windent',
+            'DEV_DB_BASE_PATH': 'C:\\windent',
             'PROD_DB_BASE_PATH': '\\\\serverdima\\pixel\\windent',
             'PROD_DBF_APPOINTMENTS_PATH': '\\\\serverdima\\pixel\\windent\\USER\\APPUNTA.DBF',
             'PROD_DBF_PATIENTS_PATH': '\\\\serverdima\\pixel\\windent\\DATI\\PAZIENTI.DBF',
@@ -145,7 +145,7 @@ class ConfigManager:
         return self.config.get(key, default)
     
     def get_mode(self) -> str:
-        """Recupera modalità operativa (dev/prod)."""
+        """Recupera modalità operativa (dev/prod) con fallback automatico."""
         # Prima prova a leggere da database_mode.txt (environment_manager)
         try:
             from pathlib import Path
@@ -154,6 +154,11 @@ class ConfigManager:
             if database_mode_file.exists():
                 mode = database_mode_file.read_text().strip().lower()
                 if mode in ['dev', 'prod']:
+                    # Se è prod, verifica se è raggiungibile
+                    if mode == 'prod':
+                        if not self._is_prod_reachable():
+                            logger.warning("Ambiente PROD non raggiungibile, fallback automatico a DEV")
+                            return 'dev'
                     return mode
         except Exception as e:
             logger.warning(f"Errore lettura database_mode.txt: {e}")
@@ -161,34 +166,63 @@ class ConfigManager:
         # Fallback su APP_MODE
         return self.config.get('APP_MODE', 'dev').lower()
     
-    def get_dbf_path(self, file_type: str) -> str:
+    def _is_prod_reachable(self) -> bool:
+        """Verifica se l'ambiente prod è raggiungibile."""
+        try:
+            import subprocess
+            # Test ping al server
+            result = subprocess.run(['ping', '-n', '1', 'SERVERDIMA'], 
+                                 capture_output=True, timeout=5)
+            if result.returncode != 0:
+                return False
+            
+            # Test accesso cartella condivisa
+            prod_path = r'\\serverdima\pixel\windent'
+            if not os.path.exists(prod_path):
+                return False
+                
+            return True
+        except Exception as e:
+            logger.debug(f"Test connettività PROD fallito: {e}")
+            return False
+    
+    def get_dbf_path(self, table_name: str) -> str:
         """
-        Recupera path DBF basato su modalità operativa.
+        Recupera path DBF basato su nome tabella.
+        Legge direttamente dal file database_mode.txt nella cartella instance.
         
         Args:
-            file_type: 'appointments' o 'patients'
+            table_name: Nome tabella (es. 'appointments', 'patients', 'APPUNTA')
             
         Returns:
             Path completo al file DBF
         """
-        mode = self.get_mode()
+        # Leggi direttamente dal file database_mode.txt (sempre fresh, no cache)
+        mode = 'dev'  # default
+        try:
+            from pathlib import Path
+            instance_dir = Path(__file__).parent.parent / 'instance'
+            database_mode_file = instance_dir / 'database_mode.txt'
+            if database_mode_file.exists():
+                mode = database_mode_file.read_text().strip().lower()
+        except Exception:
+            pass
         
-        if file_type == 'appointments':
+        # Codifica il nome tabella
+        if table_name == 'appointments' or table_name == 'APPUNTA':
             if mode == 'prod':
-                return self.get('PROD_DBF_APPOINTMENTS_PATH', '')
+                return r'\\serverdima\pixel\windent\USER\APPUNTA.DBF'
             else:
-                return self.get('DEV_DBF_APPOINTMENTS_PATH', 
-                              os.path.join(self.get('DEV_DB_BASE_PATH', ''), 'DATI', 'APPUNTA.DBF'))
+                return r'C:\windent\USER\APPUNTA.DBF'
         
-        elif file_type == 'patients':
+        elif table_name == 'patients' or table_name == 'PAZIENTI':
             if mode == 'prod':
-                return self.get('PROD_DBF_PATIENTS_PATH', '')
+                return r'\\serverdima\pixel\windent\DATI\PAZIENTI.DBF'
             else:
-                return self.get('DEV_DBF_PATIENTS_PATH',
-                              os.path.join(self.get('DEV_DB_BASE_PATH', ''), 'DATI', 'PAZIENTI.DBF'))
+                return r'C:\windent\DATI\PAZIENTI.DBF'
         
         else:
-            raise ValueError(f"Unknown DBF file type: {file_type}")
+            raise ValueError(f"Unknown table name: {table_name}")
     
     def get_google_config(self) -> Dict[str, Any]:
         """Recupera configurazione Google Calendar."""
@@ -247,9 +281,9 @@ def get_config() -> ConfigManager:
         _config_manager = ConfigManager()
     return _config_manager
 
-def get_dbf_path(file_type: str) -> str:
+def get_dbf_path(table_name: str) -> str:
     """Convenience function per path DBF."""
-    return get_config().get_dbf_path(file_type)
+    return get_config().get_dbf_path(table_name)
 
 def get_mode() -> str:
     """Convenience function per modalità operativa."""

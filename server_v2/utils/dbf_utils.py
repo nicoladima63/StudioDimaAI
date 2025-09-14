@@ -644,7 +644,7 @@ class DBFOptimizedReader:
         self.metrics = []
         self.metrics_lock = threading.Lock()
         
-        logger.info(f"DBF Optimized Reader initialized: chunk_size={self.default_chunk_size}, workers={self.max_workers}")
+        # DBF Optimized Reader initialized
         
     def get_appointments_optimized(self, 
                                  month: int, 
@@ -652,7 +652,7 @@ class DBFOptimizedReader:
                                  studio_id: Optional[int] = None,
                                  chunk_size: Optional[int] = None) -> List[Dict[str, Any]]:
         """
-        🎯 Recupera appuntamenti con ottimizzazioni enterprise complete.
+        Recupera appuntamenti con ottimizzazioni enterprise complete.
         
         Performance optimizations:
         - Smart caching con file mtime tracking
@@ -706,12 +706,12 @@ class DBFOptimizedReader:
             execution_time = (time.time() - start_time) * 1000
             self._record_metrics(appointments_path, len(appointments), 0, execution_time, 0, False)
             
-            logger.info(f"✅ Loaded {len(appointments)} appointments for {month:02d}/{year} in {execution_time:.2f}ms")
+            logger.info(f"Loaded {len(appointments)} appointments for {month:02d}/{year} in {execution_time:.2f}ms")
             
             return appointments
             
         except Exception as e:
-            logger.error(f"❌ Error loading appointments: {e}", exc_info=True)
+            logger.error(f"Error loading appointments: {e}", exc_info=True)
             raise DbfProcessingError(f"Failed to load appointments: {e}")
     
     def _load_appointments_enterprise(self,
