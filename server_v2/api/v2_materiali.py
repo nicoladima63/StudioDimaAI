@@ -652,6 +652,12 @@ def salva_classificazione_materiale():
         data = request.get_json()
         logger.info(f"MATERIALI: Ricevuta richiesta salvataggio classificazione: {data}")
         
+        # Debug dettagliato del payload
+        logger.info(f"MATERIALI: Payload ricevuto - contoid: {data.get('contoid')}, contonome: '{data.get('contonome')}', brancaid: {data.get('brancaid')}, brancanome: '{data.get('brancanome')}', sottocontoid: {data.get('sottocontoid')}, sottocontonome: '{data.get('sottocontonome')}'")
+        
+        # Debug completo del payload
+        logger.info(f"MATERIALI: Payload completo: {data}")
+        
         # Validazione campi obbligatori
         required_fields = ['descrizione', 'fornitore_id', 'nome_fornitore', 'contoid']
         for field in required_fields:
@@ -738,6 +744,9 @@ def salva_classificazione_materiale():
         
     except Exception as e:
         logger.error(f"Errore salvataggio classificazione materiale: {e}")
+        logger.error(f"Errore dettagliato: {type(e).__name__}: {str(e)}")
+        import traceback
+        logger.error(f"Stack trace: {traceback.format_exc()}")
         return jsonify({
             'success': False,
             'error': str(e)

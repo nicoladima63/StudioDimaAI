@@ -25,6 +25,10 @@ import {
   CModalBody,
   CModalFooter,
 } from '@coreui/react';
+import MaterialClassificationForm, { 
+  type MaterialForClassification,
+  type MaterialClassificationData
+} from '@/components/forms/MaterialClassificationForm';
 import {
   materialiMigrationService,
   type AnteprimaMigrazione,
@@ -46,6 +50,11 @@ const MaterialiMigrazione: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [erroriImportazione, setErroriImportazione] = useState<Array<{descrizione: string, errore: string}>>([]);
+  
+  // State per modal classificazione
+  const [showClassificationModal, setShowClassificationModal] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialForClassification | null>(null);
+  const [classificationError, setClassificationError] = useState<string | null>(null);
   
   // Store fornitori
   const { fornitori, loadAllFornitori } = useFornitoriStore();
@@ -105,6 +114,75 @@ const MaterialiMigrazione: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Funzioni per gestire il modal di classificazione
+  const handleRowClick = (materiale: any, fornitore: FornitoreMigrazione) => {
+    // Solo per materiali non ancora classificati (confidence < 100)
+    if (materiale.confidence >= 100) {
+      return; // Non aprire modal per materiali già classificati
+    }
+
+    const materialForClassification: MaterialForClassification = {
+      codice_articolo: materiale.codice_prodotto || '',
+      descrizione: materiale.nome,
+      fornitore_id: materiale.fornitoreid,
+      nome_fornitore: fornitore.fornitore_nome,
+      fattura_id: materiale.fattura_id,
+      data_fattura: materiale.data_fattura,
+      costo_unitario: materiale.costo_unitario,
+    };
+
+    setSelectedMaterial(materialForClassification);
+    setClassificationError(null);
+    setShowClassificationModal(true);
+  };
+
+  const handleClassificationSave = (_materialId: number, classificationData: MaterialClassificationData) => {
+    // Aggiorna l'anteprima per riflettere il cambiamento
+    if (anteprima && selectedMaterial) {
+      // Trova il materiale nell'anteprima e aggiorna il suo stato
+      const updatedAnteprima = { ...anteprima };
+      if (updatedAnteprima.suppliers) {
+        updatedAnteprima.suppliers = updatedAnteprima.suppliers.map(supplier => {
+          if (supplier.materiali) {
+            supplier.materiali = supplier.materiali.map(material => {
+              if (material.nome === selectedMaterial.descrizione && 
+                  material.fornitoreid === selectedMaterial.fornitore_id) {
+                return {
+                  ...material,
+                  confidence: 100, // Marca come classificato
+                  confermato: true,
+                  // Aggiorna anche i campi della classificazione
+                  contoid: classificationData.contoid || 0,
+                  contonome: classificationData.contonome || '',
+                  brancaid: classificationData.brancaid || 0,
+                  brancanome: classificationData.brancanome || '',
+                  sottocontoid: classificationData.sottocontoid || 0,
+                  sottocontonome: classificationData.sottocontonome || '',
+                };
+              }
+              return material;
+            });
+          }
+          return supplier;
+        });
+      }
+      setAnteprima(updatedAnteprima);
+    }
+    
+    setShowClassificationModal(false);
+    setSelectedMaterial(null);
+  };
+
+  const handleClassificationError = (error: string) => {
+    setClassificationError(error);
+  };
+
+  const handleCloseClassificationModal = () => {
+    setShowClassificationModal(false);
+    setSelectedMaterial(null);
+    setClassificationError(null);
   };
 
   const importaFornitore = async (fornitoreNome: string) => {
@@ -555,7 +633,15 @@ const MaterialiMigrazione: React.FC = () => {
                           {fornitore.materiali?.map((materiale, matIndex) => {
                             const isClassificato = materiale.contoid && materiale.brancaid && materiale.sottocontoid;
                             return (
-                              <CTableRow key={matIndex} className={isClassificato ? 'table-success' : ''}>
+                              <CTableRow 
+                                key={matIndex} 
+                                className={isClassificato ? 'table-success' : ''}
+                                style={{ 
+                                  cursor: materiale.confidence < 100 ? 'pointer' : 'default',
+                                  opacity: materiale.confidence < 100 ? 1 : 0.8
+                                }}
+                                onClick={() => handleRowClick(materiale, fornitore)}
+                              >
                                 <CTableDataCell>
                                   {materiale.id}
                                   {isClassificato && <CBadge color='success' size='sm' className='ms-1'>✓</CBadge>}
@@ -646,6 +732,27 @@ const MaterialiMigrazione: React.FC = () => {
           </CButton>
         </CModalFooter>
       </CModal>
+
+      {/* Modal per classificazione materiali */}
+      <MaterialClassificationForm
+        isOpen={showClassificationModal}
+        onClose={handleCloseClassificationModal}
+        material={selectedMaterial}
+        onSave={handleClassificationSave}
+        onError={handleClassificationError}
+      />
+
+      {/* Alert per errori di classificazione */}
+      {classificationError && (
+        <CAlert 
+          color="danger" 
+          className="position-fixed" 
+          style={{ top: '20px', right: '20px', zIndex: 9999 }}
+          onClose={() => setClassificationError(null)}
+        >
+          <strong>Errore classificazione:</strong> {classificationError}
+        </CAlert>
+      )}
     </div>
   );
 };
