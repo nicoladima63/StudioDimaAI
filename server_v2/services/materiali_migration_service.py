@@ -202,7 +202,7 @@ class MaterialiMigrationService(BaseService):
         
         # Filtro intelligente come backend v1: escludi voci secondarie
         descrizione_lower = descrizione.lower()
-        if any(keyword in descrizione_lower for keyword in ['iva', 'imposta', 'sconto', 'trasporto', 'spedizione']):
+        if any(keyword in descrizione_lower for keyword in ['iva', 'imposta', 'sconto', 'trasporto', 'spedizione', 'spese', 'imballo']):
             return False, 0
         
         # Soglia prezzo minimo significativo (come backend v1)
@@ -481,6 +481,12 @@ class MaterialiMigrationService(BaseService):
             
             # Skip materiali senza descrizione
             if not descrizione or len(descrizione.strip()) < 3:
+                stats['excluded'] += 1
+                continue
+            
+            # Filtro materiali dentali - escludi materiali non dentali
+            is_dental, confidence = self.is_dental_material(descrizione)
+            if not is_dental:
                 stats['excluded'] += 1
                 continue
             
