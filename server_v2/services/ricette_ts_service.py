@@ -232,8 +232,7 @@ class RicetteTsService:
     <soapenv:Header/>
     <soapenv:Body>
         <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-            <!-- <vis:dataDa>{data_da or ''}</vis:dataDa> -->
-            <!-- <vis:dataA>{data_a or ''}</vis:dataA> -->
+            <vis:pinCode>{pincode_cifrato}</vis:pinCode>
             <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
             <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
         </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
