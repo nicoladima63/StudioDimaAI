@@ -480,7 +480,8 @@ def list_ricette_from_ts():
                 'ts_response': {
                     'message': ts_response.get('message'),
                     'timestamp': ts_response.get('timestamp'),
-                    'http_status': ts_response.get('http_status')
+                    'http_status': ts_response.get('http_status'),
+                    'response_xml': ts_response.get('response_xml', '')
                 }
             }), 200
         else:
@@ -492,7 +493,13 @@ def list_ricette_from_ts():
                 'source': 'sistema_ts',
                 'error': 'SISTEMA_TS_ERROR',
                 'message': ts_response.get('error', 'Sistema TS non disponibile'),
-                'details': ts_response
+                'details': ts_response,
+                'ts_response': {
+                    'message': ts_response.get('message'),
+                    'timestamp': ts_response.get('timestamp'),
+                    'http_status': ts_response.get('http_status'),
+                    'response_xml': ts_response.get('response_xml', '')
+                }
             }), 503  # Service Unavailable
         
     except Exception as e:

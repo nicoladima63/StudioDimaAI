@@ -359,7 +359,7 @@ class RicetteTsService:
                     'success': False,
                     'http_status': response.status_code,
                     'error': f'HTTP {response.status_code}',
-                    'response_text': response_text[:500],
+                    'response_xml': response_text,
                     'timestamp': datetime.now().isoformat()
                 }
                 
@@ -369,7 +369,7 @@ class RicetteTsService:
                 'success': False,
                 'error': f'Errore parsing risposta: {str(e)}',
                 'http_status': response.status_code if hasattr(response, 'status_code') else 0,
-                'response_text': response.text[:500] if hasattr(response, 'text') else '',
+                'response_xml': response.text if hasattr(response, 'text') else '',
                 'timestamp': datetime.now().isoformat()
             }
     
@@ -756,7 +756,8 @@ class RicetteTsService:
                 'error': f'Errore Sistema TS: {str(e)}',
                 'timestamp': datetime.now().isoformat(),
                 'ricette': [],
-                'total_count': 0
+                'total_count': 0,
+                'response_xml': ''
             }
 
     def annulla_ricetta(self, nre: str, pin: str, motivazione: str = 'Annullamento ricetta') -> Dict[str, Any]:
