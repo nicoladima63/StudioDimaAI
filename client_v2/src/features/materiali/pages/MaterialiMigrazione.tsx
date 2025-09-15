@@ -38,6 +38,7 @@ const MaterialiMigrazione: React.FC = () => {
   const [anteprima, setAnteprima] = useState<AnteprimaMigrazione | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [importing, setImporting] = useState<string | null>(null); // Nome fornitore in importazione
   const [importResult, setImportResult] = useState<RisultatoImportazione | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -52,31 +53,51 @@ const MaterialiMigrazione: React.FC = () => {
   const caricaAnteprima = async (fornitoreId?: string) => {
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
     
     try {
       const response = fornitoreId 
         ? await materialiMigrationService.getSupplierPreview(fornitoreId)
         : await materialiMigrationService.getMigrationPreview();
       
-      if (response.success && response.data) {
-        if (fornitoreId) {
-          // Se è un fornitore specifico, wrappa i dati nel formato AnteprimaMigrazione
-          const supplierData = response.data as FornitoreMigrazione;
-          setAnteprima({
-            suppliers: [supplierData],
-            total_suppliers: 1,
-            total_materials: supplierData.materiali_count,
-            stats: {
-              total_valid_materials: supplierData.materiali_count,
-              dental_materials: supplierData.materiali_count,
-              suppliers_with_materials: 1
-            }
-          });
-        } else {
-          setAnteprima(response.data as AnteprimaMigrazione);
-        }
-      } else {
+      // 1. Controllo success - exit early se fallisce
+      if (!response.success) {
         setError(response.error || "Errore nel caricamento dell'anteprima");
+        return;
+      }
+      
+      // 2. Controllo data - exit early se manca
+      if (!response.data) {
+        setError("Nessun dato ricevuto dal server");
+        return;
+      }
+      
+      // 3. Se è un fornitore specifico, controlla materiali
+      if (fornitoreId) {
+        const supplierData = response.data as FornitoreMigrazione;
+        
+        // 4. Controllo materiali - exit early se vuoti (processo completato)
+        if (!supplierData.materiali || supplierData.materiali.length === 0) {
+          const fornitoreNome = fornitori?.find(f => f.id === fornitoreId)?.nome || 'Fornitore';
+          setSuccessMessage(`Processo completato per ${fornitoreNome}! Tutti i materiali sono stati importati.`);
+          setAnteprima(null);
+          return;
+        }
+        
+        // 5. Tutto OK - mostra materiali
+        setAnteprima({
+          suppliers: [supplierData],
+          total_suppliers: 1,
+          total_materials: supplierData.materiali_count,
+          stats: {
+            total_valid_materials: supplierData.materiali_count,
+            dental_materials: supplierData.materiali_count,
+            suppliers_with_materials: 1
+          }
+        });
+      } else {
+        // Anteprima generale
+        setAnteprima(response.data as AnteprimaMigrazione);
       }
     } catch (err: any) {
       console.error('Errore caricamento anteprima:', err);
@@ -230,11 +251,58 @@ const MaterialiMigrazione: React.FC = () => {
   }, [loadAllFornitori]);
 
 
-  // Filtra fornitori basato sul termine di ricerca
-  const filteredFornitori = fornitori?.filter(fornitore => 
-    fornitore.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fornitore.id.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  // Filtra e ordina fornitori basato sul termine di ricerca
+  const filteredFornitori = fornitori?.filter(fornitore => {
+    if (!searchTerm.trim()) return false;
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    const nomeLower = fornitore.nome.toLowerCase();
+    const idLower = fornitore.id.toLowerCase();
+    
+    return nomeLower.includes(searchLower) || idLower.includes(searchLower);
+  }).sort((a, b) => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    const aNome = a.nome.toLowerCase();
+    const bNome = b.nome.toLowerCase();
+    const aId = a.id.toLowerCase();
+    const bId = b.id.toLowerCase();
+    
+    // Punteggio per rilevanza
+    const getScore = (nome: string, id: string) => {
+      let score = 0;
+      
+      // Bonus massimo se inizia con il termine di ricerca
+      if (nome.startsWith(searchLower)) score += 100;
+      if (id.startsWith(searchLower)) score += 90;
+      
+      // Bonus se contiene il termine all'inizio di una parola
+      const words = nome.split(' ');
+      for (const word of words) {
+        if (word.startsWith(searchLower)) {
+          score += 50;
+          break;
+        }
+      }
+      
+      // Bonus per lunghezza del match (più corto = più rilevante)
+      const nomeMatch = nome.indexOf(searchLower);
+      if (nomeMatch !== -1) {
+        score += Math.max(0, 20 - nomeMatch);
+      }
+      
+      return score;
+    };
+    
+    const scoreA = getScore(aNome, aId);
+    const scoreB = getScore(bNome, bId);
+    
+    // Ordina per punteggio decrescente, poi alfabeticamente
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+    
+    return aNome.localeCompare(bNome);
+  }) || [];
 
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,8 +342,6 @@ const MaterialiMigrazione: React.FC = () => {
       </CAlert>
     );
   }
-
-  // Non mostrare più l'alert, la select sarà sempre visibile
 
   return (
     <div className='container-fluid'>
@@ -317,7 +383,10 @@ const MaterialiMigrazione: React.FC = () => {
                     placeholder='Digita il nome o codice fornitore...'
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    onFocus={() => setShowDropdown(true)}
+                    onFocus={() => {
+                      setShowDropdown(true);
+                      setSuccessMessage(null);
+                    }}
                     onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                   />
                   
@@ -367,7 +436,11 @@ const MaterialiMigrazione: React.FC = () => {
               </div>
             </CCardHeader>
             <CCardBody>
-              {!anteprima ? (
+              {successMessage ? (
+                <CAlert color='warning' className='text-center'>
+                  <h4 className='mb-4 mt-4'>{successMessage}</h4>
+                </CAlert>
+              ) : !anteprima ? (
                 <CAlert color='info'>
                   <h4>Seleziona un fornitore</h4>
                   <p>Usa la select qui sopra per selezionare un fornitore e visualizzare i suoi materiali.</p>
@@ -413,17 +486,10 @@ const MaterialiMigrazione: React.FC = () => {
               {/* Lista fornitori */}
               <h5>Fornitori con Materiali Dentali</h5>
               
-              {/* Messaggio quando non ci sono materiali da classificare */}
-              {anteprima.suppliers?.length === 0 ? (
-                <CAlert color='success' className='text-center'>
-                  <h4>🎉 Tutti i materiali sono stati importati!</h4>
-                  <p className='mb-0'>
-                    Non ci sono più materiali da classificare. Tutti i materiali dentali sono già stati importati nel sistema.
-                  </p>
-                </CAlert>
-              ) : (
+              {/* Lista fornitori */}
+              {anteprima.suppliers && anteprima.suppliers.length > 0 ? (
                 <CAccordion>
-                  {anteprima.suppliers?.map((fornitore, index) => (
+                  {anteprima.suppliers.map((fornitore, index) => (
                   <CAccordionItem key={index} itemKey={index.toString()}>
                     <CAccordionHeader>
                       <div className='d-flex justify-content-between align-items-center w-100 me-3'>
@@ -516,6 +582,11 @@ const MaterialiMigrazione: React.FC = () => {
                   </CAccordionItem>
                 ))}
                 </CAccordion>
+              ) : (
+                <CAlert color='info' className='text-center'>
+                  <h4>Seleziona un fornitore</h4>
+                  <p className='mb-0'>Usa la ricerca qui sopra per selezionare un fornitore e visualizzare i suoi materiali.</p>
+                </CAlert>
               )}
                 </>
               )}

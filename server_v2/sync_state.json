@@ -1206,5 +1206,413 @@
     "month": 10,
     "year": 2025,
     "synced_at": "2025-09-10T11:28:55.855012"
+  },
+  "2025-09-04_16.1_1_RossiKevin": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "8n043m0ion0gbsgpsqnchd7ofo",
+    "hash": "8f6affd13db05664ee9f3a46b69896527b8755b5438f4a6a63779324de068e43",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:02.770960"
+  },
+  "2025-09-08_17.3_1_RicciEnrico": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "ihfqhamtl517l4suqffpgokg1g",
+    "hash": "4515e6c1d40b92160594bcaef2ff9f3ad5959b5c8569c997c1d25fa3bad7babf",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:03.238458"
+  },
+  "2025-09-10_18.3_1_RocchiniMila": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "e195iumu1b33cu0fn0i93h5050",
+    "hash": "1db54e6cce6064bf62a7b812b9d5386f0d072e4a588cc506c0a202ba9e05fb96",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:03.791402"
+  },
+  "2025-09-01_16.3_1_CiricMarieHelene": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "7ub2l1qfth0atfmle99ifen22c",
+    "hash": "709b335c0639be0ab1bb29785095f6d974280d80057abc6962180eee98a4246e",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:04.271099"
+  },
+  "2025-09-03_17.5_1_ArtaleMarco": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "peaipua9aq6eh7b9qah5dcs3ks",
+    "hash": "a87dea7dffb775d38dc9ef96a07124dab9a933f4fc44abb26f37a7155fecebdf",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:04.683750"
+  },
+  "2025-09-08_16.5_1_ConteDaniele": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "mvuaakt7n5fmpokevvfb99v7e4",
+    "hash": "e0d6b6df030d12658a83cfb79b61738f06d114ced33c13f36f7de4a8d12dd531",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:05.091817"
+  },
+  "2025-09-09_14.0_1_CurelloFrancescoAntonio": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "jcn477ldubggl7s8jc07iub9jk",
+    "hash": "c62520db16b0de251f451fec486ad839c4bb9bf05d9dcc3d51f1089917cd0149",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:05.423832"
+  },
+  "2025-09-08_16.2_1_MarinajAnita": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "iq22p1a55bm8ponr9muvtdrnbo",
+    "hash": "d01584f9af13ec0cc728ffa57ffa114ce61c6c950a8949c5e6e8cb1897d17ee9",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:05.897244"
+  },
+  "2025-09-03_18.3_1_RiggilloAndrea": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "8um1qirdsucnfsebd2ofiuvvog",
+    "hash": "2f778f0f98c3c6cabfd68aea7f9bfb0e596212ea7209497db153886118932ba3",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:06.437536"
+  },
+  "2025-09-02_15.0_1_ParricelliMariaDomenica": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "sb64mrtet2urm4aip183tssu8s",
+    "hash": "ffb5188f7fd504a496f7dbfbc405e7708c5564fff9b03037147b8bcdb74e5420",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:06.806415"
+  },
+  "2025-09-01_12.2_1_MeoniFilippo": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "497hsu38r4f0a07l8fg5luha7s",
+    "hash": "f01d61f9c311677155b475f232cdbae9d4d4b55415321e8e28c660f739d477d1",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:07.160775"
+  },
+  "2025-09-08_12.0_1_BartoliniMarco": {
+    "calendar_id": "a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com",
+    "event_id": "drp5fvigjsj0t4mh67arp70u3c",
+    "hash": "6947a0e6a7087e4b55acaff0fcf7cc9acace14d77b088e9399c57de1a4206964",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:07.684458"
+  },
+  "2025-09-17_11.0_2_LazzariniLuca": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "m3rker6j64h0almojpr7v73nhc",
+    "hash": "e6445bad42edd0c934f0d92a1b4693e4a42597047b8a76273bd0485157fe211c",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:20.180148"
+  },
+  "2025-09-03_15.0_2_TielliPompeoGraziano": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "c4lh5kk1cegjhhimm4n58ah7v4",
+    "hash": "9e6800c874ef9f7eb50dd72c4420ea2dcfcbe694e395993397bd8064a8796df5",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:21.163965"
+  },
+  "2025-09-08_15.0_2_FiaschiElena": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "rgah8b08pajb3o4funllml4iqs",
+    "hash": "31c5c48902edc9525cad1f8a072e1acb6c42d82bcc810c238bcc9f817478a9a3",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:22.344232"
+  },
+  "2025-09-08_15.5_2_RossiAndrea": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "k7dj8o5iltnitbasjabji1gjhg",
+    "hash": "3d56f5f23ab5f60f01a4a52771d6b642b7b6a56ac3798a902d9c8fe9f6892f1f",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:23.233356"
+  },
+  "2025-09-03_18.3_2_CiricLindaRose": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "a8kbo232il3jcv7vp3946jae20",
+    "hash": "d0b6e504730225216a29f668fe89d6f20a940c7a0361f382253c4e393fe7462c",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:24.432177"
+  },
+  "2025-09-03_17.4_2_VerdianiFrancesco": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "gfm9uc2iq6jdhc9tm0r4753u0c",
+    "hash": "de8001e768dd47dfa0b2e8c1869b4a55a4921990f5a2351ee2c5cdbf27a8d296",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:25.301404"
+  },
+  "2025-09-03_15.5_2_MalinconiSamuela": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "ih09lobb2s9pqdqc9vhugt1p8c",
+    "hash": "c03f97292c5544875d3434632d82512877ff28a2cb6897fef418e0a5f95fddcb",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:26.537954"
+  },
+  "2025-09-03_14.0_2_MelodiaMaria": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "7oo87855i0lgjdk0ss23ju9hl8",
+    "hash": "5348adc61e73640136401e9203d562786e47019b64aec8c32ebb770f50df6f1b",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:27.667673"
+  },
+  "2025-09-03_9.0_2_MartelliniMarcello": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "i2obfqcrniq10usu3ibpsqdv64",
+    "hash": "e5ce3332e09120e2e3e23070ed4d7a9d0f972e094491bdf618718864becd391f",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:28.690978"
+  },
+  "2025-09-03_11.3_2_RaimondiPaolo": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "g3uvf05l9mlfeni4mn7r4ehsd4",
+    "hash": "1155a576220a9d71513b52de846de65d746eb127f2f4c11b26f601a50f52504f",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:29.556313"
+  },
+  "2025-09-29_14.3_2_PignataroRoberto": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "u77tbo4i8k3ed0f5k1oqsuk5f8",
+    "hash": "9192e811294345c019da877429511e0952d659efae66bf109625314be1a3a7e8",
+    "month": 9,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:30.476692"
+  },
+  "2025-10-01_12.0_2_InnocentiDavide": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "2s1juc3j97iq78iop9srno06us",
+    "hash": "31ce815e65daa8c37622134ef102dd58982f04b7ce2bdc57ce2494271164e4dc",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:37.387462"
+  },
+  "2025-10-01_10.0_2_PaladinoLetizia": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "lvebt76ld4373o7tpv5hmgrhb4",
+    "hash": "21b71bb13dc3615369b72caba2a636cc8cd4939f5fc301ce8f85c02a8d162614",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:38.213329"
+  },
+  "2025-10-13_17.3_2_BardiMassimo": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "ei8eflt1a2vh28g7866tlgs04k",
+    "hash": "419d3a47055a0d7bcb69d1e0266c63487f6f27a0e3dd04af29461c8ecfecfb5c",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:38.993949"
+  },
+  "2025-10-29_10.0_2_FeltrinTiziana": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "t7jml7rt8cm7jkgsutqcq51d88",
+    "hash": "24d7df4863b47b796fd0f716dcf4543ca2e3af177d7bfe46a16793a68fb5a4ba",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:39.850061"
+  },
+  "2025-10-29_11.0_2_BruniPieroGiovanniVittorio": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "u5b073aleegosu60gu3rj3c37s",
+    "hash": "b83b0f5ac922258396360e241f1191da5cdb9c15293de903cc2adbde0bac66e7",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:40.599559"
+  },
+  "2025-10-01_11.0_2_CoraggioPaolo": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "nk8e5svgkj9qrlhj6jknclqca8",
+    "hash": "d285bc9e3a3933ce3c54af364c741d322bf718c3ede2913d84c43f0b92c4ec0d",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:41.518653"
+  },
+  "2025-10-15_10.0_2_FeiNevia": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "005aa7i7d1h45r5it3fndn41eo",
+    "hash": "e15ecbee6873566fadfcec56ba8b54f024e5f74e437d9a4ee6821144ecceacce",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:42.433898"
+  },
+  "2025-10-15_15.0_2_MannarinoLucrezia": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "tiv9jr4ar9i1psgpoghnsnkmr0",
+    "hash": "a226d9c3dab8fbcb8acb263ea9c3ddd6fbb861c225a2af8c4e2ff6d01f1fb48c",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:43.327420"
+  },
+  "2025-10-15_18.3_2_MancosuDavide": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "pco50b287a6vllncfqm75ioki0",
+    "hash": "ff7e7cc770e89ab504cd95c211adb61ab3cd34e323030c71d35f777aa78b2fc8",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:44.184618"
+  },
+  "2025-10-01_17.3_2_BiagioniAlex": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "ei8t0ql5mcmvurfetcfds8h5m0",
+    "hash": "788a17f971b36ce193f7bd730d825e5b1f85d86434522b49c2b3dcd20249252e",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:45.214557"
+  },
+  "2025-10-20_18.3_2_CipriettiLucia": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "gop6l1t21vjcnrg3akrtegumi8",
+    "hash": "508691b2b8a50e3eabecfbd9cb9f6ef0ffbd8a6987626c2cef51d4313992c6df",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:46.051009"
+  },
+  "2025-10-06_18.0_2_BigagliEmiliano": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "oi1pbo7u97l2q7jktfci24sgtc",
+    "hash": "55bfb04cb81957a1d9d30ea5e5a56d23bbe93f3ee31670dea0674ea7a766a974",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:46.838906"
+  },
+  "2025-10-13_18.2_2_RossiAaron": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "nig0mgamdngfsskjeoodhpaaog",
+    "hash": "d0a450b23bc14e270660bb1b8de26c097f1e008ad579a8109f57f81ac61bf8b2",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:47.693043"
+  },
+  "2025-10-15_16.3_2_CobucciAntonia": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "a4a5eb4lmkj9apvchi2q40knrk",
+    "hash": "48e1a1065acce7660f80e0e64eb28a5b11c95873be982819f6ed8b290a944605",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:48.533742"
+  },
+  "2025-10-27_17.3_2_SoldiLuca": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "6gnn6c48e8tl7fhm33i5etune4",
+    "hash": "68be8ef63d5c2e7171413b93fa8bb6d6ed3c7d234f8a182539da8f19d09118c5",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:49.714002"
+  },
+  "2025-10-15_9.0_2_ChitiBarbara": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "kr446atele7o4ak8vgr5odj58g",
+    "hash": "afeeab8788374e4e049af27066c2320017367b8a79290899f85cc8ea2c486ef0",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:50.585379"
+  },
+  "2025-10-29_18.3_2_MastantuonoBarbara": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "93h9duigrs4l928iqgb1urnah4",
+    "hash": "0576f1675481cf10e52af78555b0832e0f302c7fb6098c42dca03d1f2bbf6971",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:51.299337"
+  },
+  "2025-10-29_15.3_2_VermigliMarco": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "rlhj02lk4vj7k0vfmoupneok00",
+    "hash": "d59630c9f1a42d7731ad652a3d269787266e52b40488d486e696bd5834c61a3c",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:52.063857"
+  },
+  "2025-10-06_15.0_2_LongoAndrea": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "mo9b6dnrkkcsd7jdf48808tbmc",
+    "hash": "56cd49b2f2023e98dcc2fd60033d99c2780b33a4c1a00010e9959bc5f448d1b7",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:52.852367"
+  },
+  "2025-10-06_15.5_2_LongoFrancesco": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "vejg6rag3mcrd1hjbmgtgktv08",
+    "hash": "850c65daae31679579038c4ebcf6de8cb18f5b358dd741fe9e800466701ec366",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:53.619461"
+  },
+  "2025-10-06_16.5_2_CiervoLuisa": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "61imeeuucj1i2jctj1q6s8rsak",
+    "hash": "ed0355170a16ebfb8676108681dc44ffe06d39a4a077cdf1cf2f4cc8b10b85ca",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:54.429528"
+  },
+  "2025-10-15_11.0_2_BruniLeonardo": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "fq52oq3cbpddl0noig58ccs7b8",
+    "hash": "1b1c313d73fce6ce84b100c74fa89d4360fa81cec031a6e1dba2c268b511a271",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:55.254320"
+  },
+  "2025-10-01_14.0_2_BecheroniSusanna": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "i1rf0c02ir646m7ka43frpg86s",
+    "hash": "2b6a9d122722e8b80d77896174a869d17e82e0a1958dfbb4dee2599ffa68af23",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:56.025224"
+  },
+  "2025-10-01_18.3_2_DalianaRoberto": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "t7p3e97btvm0dl15lk4h8a0i4o",
+    "hash": "1ec2875c737d3c9cffb971b1166616de1dffc10de721e4f2e53dfe9012638fe8",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:56.823259"
+  },
+  "2025-10-15_12.2_2_AlfanoNatascia": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "ro1lk403tepn655e3vacsq0qk0",
+    "hash": "5b89d7edc5b0b8b332760b6927b35ee19875c7d44beee669f27deafb440570df",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:57.690825"
+  },
+  "2025-10-01_16.4_2_RiggilloAndrea": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "qo5uahva4i34hgecpsgda99auc",
+    "hash": "88c28f407124e689aaf70355b2127aab21ab801e7f85ce84f9bc339dc0039952",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:58.486465"
+  },
+  "2025-10-02_17.0_2_LeporattiSabrina": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "3qomigm1ltqdb4u89icilibr4s",
+    "hash": "4f19f0ba0a908539259070d351bd10c9e43acd77e9ce1234a017cfe7ae922a2d",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:40:59.241694"
+  },
+  "2025-10-15_17.3_2_BartoliniMarco": {
+    "calendar_id": "6b34420df23351c1dc0225cb912d7fb5a8e8aaa5bd0e9a7285a22b86010354b2@group.calendar.google.com",
+    "event_id": "t5m3s5dcilo4eq9k6pp024m2ms",
+    "hash": "926ac9cfacc84e4845ec76ea4ec3a50a6120de7dac4bcd984bc7eafc710a8212",
+    "month": 10,
+    "year": 2025,
+    "synced_at": "2025-09-15T10:41:00.097093"
   }
 }
