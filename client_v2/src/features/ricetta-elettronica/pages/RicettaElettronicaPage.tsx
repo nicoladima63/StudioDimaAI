@@ -14,7 +14,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import RicettaAuthStatus from '../components/RicettaAuthStatus';
 import RicettePaziente from '../components/RicettePaziente';
 import RicettaAvanzata from '../components/RicettaAvanzata';
-//import RicetteTSPaziente from '../components/RicetteTSPaziente';
+import RicetteTSPaziente from '../components/RicetteTSPaziente';
 import PazientiSelect from '@/components/selects/PazientiSelect';
 import { usePazientiStore, type Paziente } from '@/store/pazienti.store';
 
@@ -110,9 +110,9 @@ const RicettaElettronicaPage: React.FC = () => {
           </CTabPane>
 
           <CTabPane visible={activeTab === 'sistema-ts'} role='tabpanel'>
-            {/* <RicetteTSPaziente 
-            pazienteSelezionato={pazienteSelezionato}
-          /> */}
+            <RicetteTSPaziente 
+              pazienteSelezionato={pazienteSelezionato}
+            />
           </CTabPane>
 
           <CTabPane visible={activeTab === 'database'} role='tabpanel'>

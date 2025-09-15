@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   CCard, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell, CButton, CBadge, CSpinner, CAlert,
-  CInputGroup, CInputGroupText, CFormInput, CRow, CCol
+  CInputGroup, CInputGroupText, CFormInput, CRow, CCol, CForm, CFormLabel,
+  CFormSelect, CCol as CColForm
 } from '@coreui/react';
 import { getRicetteFromTS, downloadRicettaPDFByNre } from '@/services/ricette_ts.service';
 import type { Paziente } from '@/store/pazienti.store';
@@ -28,49 +29,123 @@ interface RicetteTSPazienteProps {
   pazienteSelezionato: Paziente | null;
 }
 
+// Funzione per formattare XML in modo leggibile
+const formatXmlForDisplay = (xmlString: string): string => {
+  if (!xmlString || xmlString === 'Nessun XML disponibile') {
+    return xmlString;
+  }
+  
+  try {
+    // Parsing e formattazione XML
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+    
+    // Estrai campi chiave per visualizzazione tabellare
+    const protocollo = xmlDoc.querySelector('protocolloTransazione')?.textContent || 'N/A';
+    const dataRicezione = xmlDoc.querySelector('dataRicezione')?.textContent || 'N/A';
+    const codEsito = xmlDoc.querySelector('codEsitoVisualizzazione')?.textContent || 'N/A';
+    const erroreCodice = xmlDoc.querySelector('erroreRicetta codEsito')?.textContent || 'N/A';
+    const erroreMessaggio = xmlDoc.querySelector('erroreRicetta esito')?.textContent || 'N/A';
+    const tipoErrore = xmlDoc.querySelector('erroreRicetta tipoErrore')?.textContent || 'N/A';
+    const comunicazioneCodice = xmlDoc.querySelector('comunicazione codice')?.textContent || 'N/A';
+    const comunicazioneMessaggio = xmlDoc.querySelector('comunicazione messaggio')?.textContent || 'N/A';
+    
+    // Formatta in modo semplice e leggibile
+    const formatted = `
+=== RISPOSTA SISTEMA TS ===
+
+📋 PROTOCOLLO TRANSAZIONE: ${protocollo}
+📅 DATA RICEZIONE:         ${dataRicezione}
+🔢 CODICE ESITO:           ${codEsito}
+
+🚨 ERRORE RICETTA:
+   Codice:    ${erroreCodice}
+   Messaggio: ${erroreMessaggio}
+   Tipo:      ${tipoErrore}
+
+📢 COMUNICAZIONE:
+   Codice:    ${comunicazioneCodice}
+   Messaggio: ${comunicazioneMessaggio}
+
+📄 XML COMPLETO:
+${xmlString}
+
+=== FINE RISPOSTA ===`;
+    
+    return formatted;
+  } catch (error) {
+    return `Errore formattazione XML: ${error}\n\nXML originale:\n${xmlString}`;
+  }
+};
+
 const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSelezionato }) => {
   const [ricette, setRicette] = useState<RicettaTS[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Filtra ricette in base al paziente selezionato
-  const ricetteFiltrate = ricette.filter(ricetta => {
-    if (!pazienteSelezionato) return false;
-    
-    // Filtra per CF del paziente selezionato
-    const matchPaziente = ricetta.cf_assistito === pazienteSelezionato.codice_fiscale;
-    
-    // Applica filtro di ricerca se presente
-    if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase();
-      const matchSearch = 
-        ricetta.nre?.toLowerCase().includes(searchLower) ||
-        ricetta.prodotto_aic?.toLowerCase().includes(searchLower) ||
-        ricetta.denominazione_farmaco?.toLowerCase().includes(searchLower);
-      return matchPaziente && matchSearch;
-    }
-    
-    return matchPaziente;
+  const [serverResponse, setServerResponse] = useState<string>('');
+  
+  // Filtri di ricerca
+  const [filtri, setFiltri] = useState({
+    dataDa: '',
+    dataA: '',
+    nre: ''
   });
 
-  // Carica ricette all'avvio
+  // Filtra ricette lato frontend solo per ricerca locale
+  const ricetteFiltrate = ricette.filter(ricetta => {
+    if (!searchTerm.trim()) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return 
+      ricetta.nre?.toLowerCase().includes(searchLower) ||
+      ricetta.prodotto_aic?.toLowerCase().includes(searchLower) ||
+      ricetta.denominazione_farmaco?.toLowerCase().includes(searchLower);
+  });
+
+  // Rimuove trigger automatico - solo pulsante "Cerca"
   useEffect(() => {
-    loadRicette();
-  }, []);
+    if (!pazienteSelezionato?.codice_fiscale) {
+      setRicette([]);
+      setError('');
+      setServerResponse('');
+    }
+  }, [pazienteSelezionato?.codice_fiscale]);
 
   const loadRicette = async () => {
+    // Validazione parametri obbligatori
+    if (!pazienteSelezionato?.codice_fiscale) {
+      setError('❌ Seleziona un paziente per cercare le ricette');
+      return;
+    }
+
     setLoading(true);
     setError('');
     
     try {
-      // Carica dal Sistema TS (senza force_local)
-      const response = await getRicetteFromTS();
+      // Carica dal Sistema TS con CF paziente e filtri
+      const params: any = {
+        cf_assistito: pazienteSelezionato.codice_fiscale
+      };
+      
+      if (filtri.dataDa) params.data_da = filtri.dataDa;
+      if (filtri.dataA) params.data_a = filtri.dataA;
+      if (filtri.nre) params.nre = filtri.nre;
+      
+      console.log('🔍 Ricerca ricette TS con parametri:', params);
+      
+      const response = await getRicetteFromTS(params);
+      
+      // Salva XML del Sistema TS per debug - FORMATTATO
+      const xmlResponse = response.ts_response?.response_xml || 'Nessun XML disponibile';
+      const formattedXml = formatXmlForDisplay(xmlResponse);
+      setServerResponse(formattedXml);
       
       if (response.success) {
         setRicette(response.data || []);
+        console.log(`✅ Trovate ${response.data?.length || 0} ricette per CF: ${pazienteSelezionato.codice_fiscale}`);
       } else {
-        setError('Errore nel caricamento delle ricette dal Sistema TS');
+        setError(response.message || 'Errore nel caricamento delle ricette dal Sistema TS');
       }
     } catch (err: any) {
       console.error('Errore caricamento ricette TS:', err);
@@ -99,6 +174,29 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
     } catch (error: any) {
       console.error('Errore stampa PDF:', error);
       alert(`❌ Errore durante la stampa del PDF: ${error.message || 'Errore sconosciuto'}`);
+    }
+  };
+
+  const handleFiltriChange = (field: string, value: string) => {
+    setFiltri(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleCerca = () => {
+    loadRicette();
+  };
+
+  const handleResetFiltri = () => {
+    setFiltri({
+      dataDa: '',
+      dataA: '',
+      nre: ''
+    });
+    // Ricarica senza filtri
+    if (pazienteSelezionato?.codice_fiscale) {
+      loadRicette();
     }
   };
 
@@ -147,13 +245,13 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
               <h5>🌐 Ricette Sistema TS per Paziente</h5>
               {pazienteSelezionato && (
                 <small className="text-muted">
-                  Paziente: <strong>{pazienteSelezionato.nome}</strong>
+                  Paziente: <strong>{pazienteSelezionato.nome}</strong> (CF: {pazienteSelezionato.codice_fiscale})
                 </small>
               )}
             </CCol>
             <CCol md={6} className="text-end">
-              <CButton color="primary" size="sm" onClick={loadRicette}>
-                🔄 Ricarica
+              <CButton color="primary" size="sm" onClick={loadRicette} disabled={!pazienteSelezionato}>
+                🔍 Cerca
               </CButton>
             </CCol>
           </CRow>
@@ -161,17 +259,57 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
           {/* Messaggio se nessun paziente selezionato */}
           {!pazienteSelezionato ? (
             <CAlert color="info">
-              👤 Seleziona un paziente per visualizzare le sue ricette dal Sistema TS.
+              👤 Seleziona un paziente e clicca "Cerca" per visualizzare le sue ricette dal Sistema TS.
             </CAlert>
           ) : (
             <>
-              {/* Campo di ricerca */}
+              {/* Filtri di ricerca avanzata */}
+              <CForm className="mb-4">
+                <CRow className="mb-3">
+                  <CColForm md={3}>
+                    <CFormLabel>📅 Data da</CFormLabel>
+                    <CFormInput
+                      type="date"
+                      value={filtri.dataDa}
+                      onChange={(e) => handleFiltriChange('dataDa', e.target.value)}
+                    />
+                  </CColForm>
+                  <CColForm md={3}>
+                    <CFormLabel>📅 Data a</CFormLabel>
+                    <CFormInput
+                      type="date"
+                      value={filtri.dataA}
+                      onChange={(e) => handleFiltriChange('dataA', e.target.value)}
+                    />
+                  </CColForm>
+                  <CColForm md={3}>
+                    <CFormLabel>🏷️ NRE specifico</CFormLabel>
+                    <CFormInput
+                      placeholder="Inserisci NRE..."
+                      value={filtri.nre}
+                      onChange={(e) => handleFiltriChange('nre', e.target.value)}
+                    />
+                  </CColForm>
+                  <CColForm md={3} className="d-flex align-items-end">
+                    <div>
+                      <CButton color="primary" size="sm" onClick={handleCerca} className="me-2">
+                        🔍 Cerca
+                      </CButton>
+                      <CButton color="secondary" size="sm" onClick={handleResetFiltri}>
+                        🔄 Reset
+                      </CButton>
+                    </div>
+                  </CColForm>
+                </CRow>
+              </CForm>
+
+              {/* Campo di ricerca locale */}
               <CRow className="mb-3">
                 <CCol md={8}>
                   <CInputGroup>
                     <CInputGroupText>🔍</CInputGroupText>
                     <CFormInput
-                      placeholder="Cerca per NRE o farmaco..."
+                      placeholder="Cerca per NRE o farmaco nei risultati..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -193,8 +331,8 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
               {ricetteFiltrate.length === 0 && !error ? (
                 <CAlert color="info">
                   {searchTerm ? 
-                    `Nessuna ricetta trovata con "${searchTerm}" per questo paziente.` :
-                    'Nessuna ricetta trovata dal Sistema TS per questo paziente.'
+                    `Nessuna ricetta trovata con "${searchTerm}" nei risultati.` :
+                    'Nessuna ricetta trovata dal Sistema TS per questo paziente con i filtri selezionati.'
                   }
                 </CAlert>
               ) : (
@@ -248,6 +386,35 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                     ))}
                   </CTableBody>
                 </CTable>
+              )}
+
+              {/* Risposta del Server per Debug */}
+              {serverResponse && (
+                <CRow className="mt-4">
+                  <CCol>
+                    <CAlert color="info">
+                      <strong>📋 XML Sistema TS (Debug)</strong>
+                    </CAlert>
+                    <textarea
+                      className="form-control"
+                      rows={25}
+                      value={serverResponse}
+                      readOnly
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '10px',
+                        backgroundColor: '#f8f9fa',
+                        border: '1px solid #dee2e6',
+                        whiteSpace: 'pre-wrap',
+                        lineHeight: '1.2'
+                      }}
+                      placeholder="La risposta formattata del Sistema TS apparirà qui..."
+                    />
+                    <small className="text-muted">
+                      💡 Questo XML ti mostra esito, codici errore, protocollo transazione e tutti i dettagli della risposta del Sistema TS
+                    </small>
+                  </CCol>
+                </CRow>
               )}
             </>
           )}
