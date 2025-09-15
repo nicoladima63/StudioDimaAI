@@ -772,3 +772,51 @@ def encrypt_cf():
     except Exception as e:
         logger.error(f"Errore cifratura CF: {e}")
         raise
+
+@ricetta_bp.route("/ricetta/cifra-pincode", methods=['POST'])
+def encrypt_pincode():
+    """
+    Cifra il pincode usando il certificato SanitelCF
+    Funzione generica per cifrare pincode o codice fiscale
+    """
+    try:
+        data = request.get_json()
+        pincode = data["pincode"]
+
+        # Carica il certificato SanitelCF
+        with open(SANITEL_CERT_PATH, 'rb') as f:
+            cert_data = f.read()
+            
+        # Se è un file .cer_, rinominalo
+        if SANITEL_CERT_PATH.endswith('.cer_'):
+            cert_path_fixed = SANITEL_CERT_PATH.replace('.cer_', '.cer')
+            if not os.path.exists(cert_path_fixed):
+                with open(cert_path_fixed, 'wb') as f_out:
+                    f_out.write(cert_data)
+            cert_data = open(cert_path_fixed, 'rb').read()
+        
+        # Parse del certificato
+        if cert_data.startswith(b'-----BEGIN'):
+            cert = x509.load_pem_x509_certificate(cert_data)
+        else:
+            cert = x509.load_der_x509_certificate(cert_data)
+        
+        # Estrai la chiave pubblica
+        public_key = cert.public_key()
+        
+        # Cifra il pincode
+        pincode_bytes = pincode.encode('utf-8')
+        encrypted = public_key.encrypt(
+            pincode_bytes,
+            padding.PKCS1v15()
+        )
+        
+        # Codifica in base64
+        encrypted_b64 = base64.b64encode(encrypted).decode('utf-8')
+        
+        logger.info("Pincode cifrato correttamente")
+        return { "pincode_cifrato": encrypted_b64 }
+        
+    except Exception as e:
+        logger.error(f"Errore cifratura pincode: {e}")
+        raise
