@@ -222,7 +222,7 @@ class RicetteTsService:
             else:
                 raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
         
-        # Template SOAP DINAMICO per visualizzazione ricette
+        # Template SOAP DINAMICO per visualizzazione ricetta specifica con pinNrbe
         soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                   xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
@@ -230,7 +230,7 @@ class RicetteTsService:
     <soapenv:Header/>
     <soapenv:Body>
         <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-            <vis:pinCode>{pincode_cifrato}</vis:pinCode>
+            <vis:pinNrbe>{pincode_cifrato}</vis:pinNrbe>
             <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
             <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
         </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
