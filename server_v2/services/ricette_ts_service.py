@@ -63,8 +63,9 @@ class RicetteTsService:
         self.endpoint_annulla = os.getenv('ENDPOINT_ANNULLA_PROD',
             'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
         
-        # Certificati dinamici da env - path relativo alla root del progetto
-        certs_dir = os.getenv('CERTS_DIR_PROD', os.path.join(project_root, 'certs', 'prod'))
+        # Certificati dinamici da env - path relativo a server_v2/certs/prod
+        server_v2_dir = os.path.dirname(os.path.dirname(__file__))  # server_v2/
+        certs_dir = os.getenv('CERTS_DIR_PROD', os.path.join(server_v2_dir, 'certs', 'prod'))
         self.client_cert = os.getenv('CLIENT_CERT_PATH', os.path.join(certs_dir, 'client_cert.pem'))
         self.client_key = os.getenv('CLIENT_KEY_PATH', os.path.join(certs_dir, 'client_key.pem'))
         self.sanitel_cert = os.getenv('SANITEL_CERT_PATH', os.path.join(certs_dir, 'SanitelCF-2024-2027.cer'))
@@ -84,6 +85,7 @@ class RicetteTsService:
         self.logger.info(f"Regione: {self.regione}, ASL: {self.asl}")
         self.logger.info(f"Endpoint visualizzazione: {self.endpoint_visualizza}")
         self.logger.info(f"Certificati: {self.client_cert}")
+        self.logger.info(f"SanitelCF certificato: {self.sanitel_cert} (esiste: {os.path.exists(self.sanitel_cert)})")
     
     def _get_current_env(self) -> str:
         """Ottiene l'ambiente corrente - SEMPRE PRODUZIONE per visualizzazione"""
@@ -222,7 +224,7 @@ class RicetteTsService:
             else:
                 raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
         
-        # Template SOAP DINAMICO per visualizzazione ricetta specifica con pinNrbe
+        # Template SOAP DINAMICO per visualizzazione ricette con data e CF assistito
         soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                   xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
@@ -230,7 +232,8 @@ class RicetteTsService:
     <soapenv:Header/>
     <soapenv:Body>
         <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-            <vis:pinNrbe>{pincode_cifrato}</vis:pinNrbe>
+            <!-- <vis:dataDa>{data_da or ''}</vis:dataDa> -->
+            <!-- <vis:dataA>{data_a or ''}</vis:dataA> -->
             <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
             <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
         </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
@@ -695,6 +698,12 @@ class RicetteTsService:
             # Crea richiesta SOAP per visualizzazione (data_da e data_a non sono usati nel SOAP)
             soap_request = self._create_visualizza_soap_request(data_da, data_a, cf_assistito)
             
+            # Debug: Verifica cifratura
+            print(f"=== VERIFICA CIFRATURA ===")
+            print(f"CF Assistito originale: {cf_assistito}")
+            print(f"Pincode originale: {'*' * len(self.pincode) if self.pincode else 'NONE'}")
+            print(f"=== END VERIFICA ===")
+            
             # Debug: Verifica che il metodo funzioni
             if not soap_request:
                 self.logger.error("SOAP request is None or empty!")
@@ -723,12 +732,31 @@ class RicetteTsService:
                 'User-Agent': 'Python-requests/2.28.0'
             }
             
+            # Debug: Log degli headers
+            print(f"=== HEADERS RICHIESTA ===")
+            for key, value in headers.items():
+                if key == 'Authorization2F':
+                    print(f"{key}: {value[:20]}..." if value else "NONE")
+                else:
+                    print(f"{key}: {value}")
+            print(f"=== END HEADERS ===")
+            
             self.logger.info(f"Invio richiesta PRODUZIONE a: {self.endpoint_visualizza}")
             
             # Debug: Log della richiesta SOAP
             print(f"=== SOAP REQUEST PRODUZIONE ===")
             print(soap_request)
             print(f"=== END SOAP REQUEST ===")
+            
+            # Debug: Log dei parametri di autenticazione
+            print(f"=== PARAMETRI AUTENTICAZIONE ===")
+            print(f"CF Medico: {self.cf_medico}")
+            print(f"Password: {'*' * len(self.password) if self.password else 'NONE'}")
+            print(f"Token 2FA: {token_2fa[:20]}..." if token_2fa else "NONE")
+            print(f"Endpoint: {self.endpoint_visualizza}")
+            print(f"Certificato SanitelCF: {os.path.exists(self.sanitel_cert) if hasattr(self, 'sanitel_cert') else 'N/A'}")
+            print(f"Percorso certificato SanitelCF: {self.sanitel_cert}")
+            print(f"=== END PARAMETRI ===")
             
             response = session.post(
                 self.endpoint_visualizza,
