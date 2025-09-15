@@ -78,6 +78,7 @@ class DatabaseManager:
             'connections_closed': 0,
             'pool_hits': 0,
             'pool_misses': 0,
+            'overflow_reuses': 0,
             'transactions_committed': 0,
             'transactions_rolled_back': 0,
             'queries_executed': 0,
@@ -234,7 +235,19 @@ class DatabaseManager:
             
             # If pool is empty, try overflow
             if connection_info is None:
-                if len(self._overflow_connections) < self.config.max_overflow:
+                # First, try to reuse existing overflow connections
+                if self._overflow_connections:
+                    # Get the least recently used overflow connection
+                    oldest_id = min(self._overflow_connections.keys(), 
+                                  key=lambda k: self._overflow_connections[k].last_used)
+                    connection_info = self._overflow_connections[oldest_id]
+                    overflow_id = oldest_id
+                    connection_info.is_busy = True
+                    connection_info.last_used = time.time()
+                    
+                    with self._stats_lock:
+                        self._stats['overflow_reuses'] += 1
+                elif len(self._overflow_connections) < self.config.max_overflow:
                     connection_info = self._create_connection()
                     overflow_id = str(uuid.uuid4())
                     self._overflow_connections[overflow_id] = connection_info
@@ -271,9 +284,15 @@ class DatabaseManager:
         finally:
             if connection_info:
                 if overflow_id:
-                    # Remove from overflow
-                    self._overflow_connections.pop(overflow_id, None)
-                    self._close_connection(connection_info)
+                    # Try to return overflow connection to pool instead of closing
+                    with self._pool_lock:
+                        if self._pool.qsize() < self.config.pool_size:
+                            # Pool has space, return connection to pool
+                            self._overflow_connections.pop(overflow_id, None)
+                            self._return_connection_to_pool(connection_info)
+                        else:
+                            # Pool full, keep in overflow for reuse
+                            connection_info.last_used = time.time()
                 else:
                     # Return to pool
                     self._return_connection_to_pool(connection_info)
