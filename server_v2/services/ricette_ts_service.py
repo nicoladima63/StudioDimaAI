@@ -70,7 +70,7 @@ class RicetteTsService:
         self.sanitel_cert = os.getenv('SANITEL_CERT_PATH', os.path.join(certs_dir, 'SanitelCF-2024-2027.cer'))
         
         # Validazione configurazione obbligatoria
-        required_vars = ['CF_MEDICO_PROD', 'PASSWORD_PROD', 'PINCODE_PROD', 'REGIONE_PROD', 'ASL_PROD']
+        required_vars = ['CF_MEDICO_PROD', 'PASSWORD_PROD', 'PINCODE_PROD', 'REGIONE_PROD', 'ASL_PROD', 'ID_SESSIONE_PROD']
         missing_vars = [var for var in required_vars if not os.getenv(var)]
         
         if missing_vars:
@@ -96,9 +96,15 @@ class RicetteTsService:
     
     def _genera_token_2fa(self) -> str:
         """
-        Genera il token A2F nel formato CF-YYYY-MM - copia esatta da V1
+        Ottiene l'ID-SESSIONE per il Sistema TS - OBBLIGATORIO
         """
-        return f"{self.cf_medico}-{datetime.now().strftime('%Y-%m')}"
+        id_sessione = os.getenv('ID_SESSIONE_PROD')
+        
+        if not id_sessione:
+            raise ValueError("ID_SESSIONE_PROD deve essere configurato nel file .env")
+        
+        self.logger.info("Usando ID-SESSIONE da variabile d'ambiente")
+        return id_sessione
     
     def _encrypt_cf_assistito(self, cf_assistito: str) -> str:
         """

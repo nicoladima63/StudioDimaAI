@@ -19,6 +19,9 @@ PINCODE_PROD=pincode_reale_medico
 REGIONE_PROD=090
 ASL_PROD=109
 SPECIALIZZAZIONE_PROD=F
+
+# === ID-SESSIONE PER AUTENTICAZIONE (OBBLIGATORIO) ===
+ID_SESSIONE_PROD=id_sessione_valido_dal_sistema_ts
 ```
 
 ## Variabili Opzionali
@@ -48,7 +51,7 @@ CIFRA_PINCODE_ENDPOINT=http://localhost:5001/api/v2/ricetta/cifra-pincode
 ## Note Importanti
 
 1. **Tutti i path sono relativi alla root del progetto**
-2. **Le variabili con `_PROD` sono obbligatorie**
+2. **Le variabili con `_PROD` sono obbligatorie, incluso `ID_SESSIONE_PROD`**
 3. **I certificati devono essere presenti nei path specificati**
 4. **Se `PINCODE_CIFRATO_PROD` non è fornito, viene cifrato dinamicamente usando `PINCODE_PROD`**
 5. **Se `CF_ASSISTITO_DEFAULT_CIFRATO` non è fornito, deve essere fornito un CF assistito specifico**
