@@ -13,6 +13,7 @@ interface MaterialiTableProps {
   onEdit?: (materiale: Materiale) => void;
   onDelete?: (materiale: Materiale) => void;
   onView?: (materiale: Materiale) => void;
+  searchable?: boolean;
 }
 
 const MaterialiTable: React.FC<MaterialiTableProps> = ({
@@ -21,7 +22,8 @@ const MaterialiTable: React.FC<MaterialiTableProps> = ({
   error = null,
   onEdit,
   onDelete,
-  onView
+  onView,
+  searchable = true
 }) => {
   
   const columns: DataTableColumn<Materiale>[] = [
@@ -220,7 +222,7 @@ const MaterialiTable: React.FC<MaterialiTableProps> = ({
       columns={columns}
       loading={loading}
       error={error}
-      searchable={true}
+      searchable={searchable}
       searchPlaceholder="Cerca per nome, codice, fornitore..."
       pageSize={20}
       pageSizeOptions={[10, 20, 50, 100]}

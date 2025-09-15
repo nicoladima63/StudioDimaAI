@@ -15,6 +15,31 @@ from core.exceptions import ValidationError, DatabaseError
 class MaterialiService(BaseService):
     """Service for materials management with optimized queries."""
     
+    def get_all_materiali(self, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        Get all materials 
+            
+        Returns:
+            List of all materials
+        """
+        try:
+            # Build base query
+            query = """
+                SELECT * FROM materiali """
+            
+            
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query)
+                columns = [description[0] for description in cursor.description]
+                materials = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                
+                return materials
+                
+        except Exception as e:
+            logging.error(f"Error getting all materials: {e}")
+            raise DatabaseError(f"Failed to get all materials: {str(e)}")
+
     def get_materiali_paginated(self, page: int = 1, per_page: int = 50, 
                                filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """

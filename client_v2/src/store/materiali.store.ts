@@ -96,13 +96,20 @@ export const useMaterialiStore = create<MaterialiState>()(
         let retry = 0;
         while (retry < MAX_RETRIES) {
           try {
-            const response = await apiClient.get('/materiali');
+            console.log('🔄 Caricamento materiali dal server...');
+            
+            // Carica tutti i materiali usando la route dedicata
+            const response = await apiClient.get('/materiali_all');
+            
+            console.log('📡 Risposta server:', response.data);
             
             if (!response.data.success) {
               throw new Error(response.data.error || "Errore caricamento materiali");
             }
             
             const materiali = response.data.data.materiali || [];
+            console.log(`✅ Materiali totali caricati: ${materiali.length}`);
+            console.log('📡 Paginazione:', response.data.pagination);
             
             set({
               materiali,
@@ -114,8 +121,10 @@ export const useMaterialiStore = create<MaterialiState>()(
             return;
             
           } catch (err: any) {
+            console.error(`❌ Errore caricamento materiali (tentativo ${retry + 1}):`, err);
             retry++;
             if (retry >= MAX_RETRIES) {
+              console.error(`❌ Fallito dopo ${MAX_RETRIES} tentativi`);
               set({
                 isLoading: false,
                 error: err.message || "Errore sconosciuto nel caricamento materiali"

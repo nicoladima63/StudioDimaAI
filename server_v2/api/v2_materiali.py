@@ -110,6 +110,49 @@ def get_materiali():
         ), 500
 
 
+@materiali_v2_bp.route('/materiali_all', methods=['GET'])
+@jwt_required()
+def get_all_materiali():
+    """
+    Get all materials without pagination, filters, or sorting.
+    
+    Returns:
+        JSON response with all materials raw data
+    """
+    try:
+        user_id = require_auth()
+        
+        # Get materials using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        materiali = materiali_service.get_all_materiali()
+        
+        # Clean DBF data for JSON response
+        clean_data = handle_dbf_data(materiali)
+        
+        return format_response(
+            data={
+                'materiali': clean_data,
+                'total': len(clean_data)
+            },
+            message=f"Trovati {len(clean_data)} materiali"
+        )
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_all_materiali: {e}")
+        return format_response(
+            data=None,
+            message="Errore database",
+            success=False
+        ), 500
+    except Exception as e:
+        logger.error(f"Unexpected error in get_all_materiali: {e}")
+        return format_response(
+            data=None,
+            message="Errore interno del server",
+            success=False
+        ), 500
+
+
 @materiali_v2_bp.route('/materiali/<int:materiale_id>', methods=['GET'])
 @jwt_required()
 def get_materiale(materiale_id):
