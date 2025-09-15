@@ -205,13 +205,8 @@ class MaterialiMigrationService(BaseService):
         if any(keyword in descrizione_lower for keyword in ['iva', 'imposta', 'sconto', 'trasporto', 'spedizione', 'spese', 'imballo']):
             return False, 0
         
-        # Soglia prezzo minimo significativo (come backend v1)
-        if prezzo is not None and prezzo < self.min_price_threshold:
-            return False, confidence
-        
-        # Soglia quantità minima
-        if quantita is not None and quantita < self.min_quantity_threshold:
-            return False, confidence
+        # Rimuovo i controlli di prezzo e quantità per mostrare tutti i materiali dentali
+        # (prezzo e quantità non dovrebbero escludere materiali dentali validi)
         
         # Se ha una classificazione dentale specifica
         if material_type != 'unknown' and confidence >= 40:  # Soglia più bassa per catturare più materiali
@@ -484,11 +479,8 @@ class MaterialiMigrationService(BaseService):
                 stats['excluded'] += 1
                 continue
             
-            # Filtro materiali dentali - escludi materiali non dentali
-            is_dental, confidence = self.is_dental_material(descrizione)
-            if not is_dental:
-                stats['excluded'] += 1
-                continue
+            # Controlla se è materiale dentale (per statistiche, ma non escludere)
+            is_dental, dental_confidence = self.is_dental_material(descrizione)
             
             # Verifica se il fornitore è classificato
             fornitore_id = material.get('fornitoreid', '')
@@ -499,37 +491,55 @@ class MaterialiMigrationService(BaseService):
                 descrizione, fornitore_id, fattura_id
             )
             
-            if existing_material_classification:
-                # Materiale già importato - ESCLUDILO dalla migrazione
-                stats['already_imported'] += 1
-                logger.info(f"Materiale già importato - escluso: {descrizione}")
-                continue
+            # Mantieni il materiale anche se già importato per mostrarlo come "già fatto"
             
-            # SECONDA: Prova pattern matching per classificazione specifica
-            pattern_match = self._find_pattern_match(descrizione, existing_patterns)
-            if pattern_match:
-                # Usa classificazione specifica dal pattern
-                classification_data = pattern_match['classification']
-                confidence = pattern_match['confidence']
-                stats['pattern_matched'] += 1
+            # SECONDA: Se già importato, usa la classificazione esistente
+            if existing_material_classification:
+                # Usa classificazione già esistente
+                classification_data = {
+                    'contoid': existing_material_classification['contoid'],
+                    'brancaid': existing_material_classification['brancaid'],
+                    'sottocontoid': existing_material_classification['sottocontoid'],
+                    'contonome': existing_material_classification['contonome'],
+                    'brancanome': existing_material_classification['brancanome'],
+                    'sottocontonome': existing_material_classification['sottocontonome']
+                }
+                confidence = 100  # Massima confidenza per materiali già importati
+                stats['already_imported'] += 1
             else:
-                # TERZA: Usa classificazione del fornitore
-                fornitore_classification = self._get_classification_data(fornitore_id)
-                if fornitore_classification:
-                    classification_data = {
-                        'contoid': fornitore_classification['contoid'],
-                        'brancaid': fornitore_classification['brancaid'],
-                        'sottocontoid': fornitore_classification['sottocontoid'],
-                        'contonome': fornitore_classification['contonome'],
-                        'brancanome': fornitore_classification['brancanome'],
-                        'sottocontonome': fornitore_classification['sottocontonome']
-                    }
-                    confidence = 30  # Bassa confidenza per classificazione fornitore
-                    stats['supplier_classification'] += 1
+                # TERZA: Prova pattern matching per classificazione specifica
+                pattern_match = self._find_pattern_match(descrizione, existing_patterns)
+                if pattern_match:
+                    # Usa classificazione specifica dal pattern
+                    classification_data = pattern_match['classification']
+                    confidence = pattern_match['confidence']
+                    stats['pattern_matched'] += 1
                 else:
-                    # Nessuna classificazione disponibile
-                    stats['no_classification'] += 1
-                    continue
+                    # QUARTA: Usa classificazione del fornitore
+                    fornitore_classification = self._get_classification_data(fornitore_id)
+                    if fornitore_classification:
+                        classification_data = {
+                            'contoid': fornitore_classification['contoid'],
+                            'brancaid': fornitore_classification['brancaid'],
+                            'sottocontoid': fornitore_classification['sottocontoid'],
+                            'contonome': fornitore_classification['contonome'],
+                            'brancanome': fornitore_classification['brancanome'],
+                            'sottocontonome': fornitore_classification['sottocontonome']
+                        }
+                        confidence = 30  # Bassa confidenza per classificazione fornitore
+                        stats['supplier_classification'] += 1
+                    else:
+                        # Nessuna classificazione disponibile - usa classificazione vuota
+                        classification_data = {
+                            'contoid': None,
+                            'brancaid': None,
+                            'sottocontoid': None,
+                            'contonome': None,
+                            'brancanome': None,
+                            'sottocontonome': None
+                        }
+                        confidence = 0  # Nessuna confidenza per materiali non classificati
+                        stats['no_classification'] += 1
             
             # Aggiungi il materiale con classificazione
             enriched_material = material.copy()
