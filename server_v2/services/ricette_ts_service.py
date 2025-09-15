@@ -28,68 +28,38 @@ class RicetteTsService:
         self._load_configuration()
         
     def _load_configuration(self):
-        """Carica configurazione per ambiente corrente - copia da V1"""
-        self.env = self._get_current_env()
+        """Carica configurazione PRODUZIONE - SEMPRE PRODUZIONE per visualizzazione ricette"""
+        self.env = 'prod'  # SEMPRE PRODUZIONE per visualizzazione
         
-        # Path dinamico come V1
+        # Path dinamico
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         
-        if self.env == 'test':
-            # === AMBIENTE TEST - Dati dal kit ufficiale V1 ===
-            self.cf_medico = os.getenv('CF_MEDICO_TEST', 'PROVAX00X00X000Y')
-            self.password = os.getenv('PASSWORD_TEST', 'Salve123')
-            self.pincode = os.getenv('PINCODE_TEST', '1234567890')
-            self.regione = os.getenv('REGIONE_TEST', '020')
-            self.asl = os.getenv('ASL_TEST', '101')
-            self.specializzazione = os.getenv('SPECIALIZZAZIONE_TEST', 'F')
-            
-            # Endpoint test - identici V1
-            self.endpoint_visualizza = 'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca'
-            self.endpoint_invio = 'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'
-            self.endpoint_annulla = 'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca'
-            
-            # ENDPOINT ALTERNATIVI - dal Ministero della Salute (SOAP format diverso - errore 500):
-            # self.endpoint_visualizza = 'https://demservicetest.sanita.finanze.it/DemRicettaPrescrittoServicesWeb/services/demVisualizzaPrescritto'  # Richiede namespace diverso
-            # self.endpoint_invio = 'https://demservicetest.sanita.finanze.it/DemRicettaPrescrittoServicesWeb/services/demInvioPrescritto'  # TIMEOUT
-            # self.endpoint_annulla = 'https://demservicetest.sanita.finanze.it/DemRicettaPrescrittoServicesWeb/services/demAnnullaPrescritto'
-            
-            # Certificati test
-            self.client_cert = os.path.join(project_root, 'certs', 'test', 'client_cert.pem')
-            self.client_key = os.path.join(project_root, 'certs', 'test', 'client_key.pem')
-            self.sanitel_cert = os.path.join(project_root, 'certs', 'test', 'SanitelCF-2024-2027.cer')
-            
-        else:  # prod
-            # === AMBIENTE PRODUZIONE - Dati reali V1 ===
-            self.cf_medico = os.getenv('CF_MEDICO_PROD', 'DMRNCL63S21D612I')
-            self.password = os.getenv('PASSWORD_PROD', 'password_reale')
-            self.pincode = os.getenv('PINCODE_PROD', 'pincode_reale')
-            self.regione = os.getenv('REGIONE_PROD', '090')
-            self.asl = os.getenv('ASL_PROD', '109')
-            self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD', 'F')
-            
-            # Endpoint produzione
-            self.endpoint_visualizza = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca'
-            self.endpoint_invio = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'
-            self.endpoint_annulla = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca'
-            
-            # Certificati produzione
-            self.client_cert = os.path.join(project_root, 'certs', 'prod', 'client_cert.pem')
-            self.client_key = os.path.join(project_root, 'certs', 'prod', 'client_key.pem')
-            self.sanitel_cert = os.path.join(project_root, 'certs', 'prod', 'SanitelCF-2024-2027.cer')
+        # === CONFIGURAZIONE PRODUZIONE - Dati reali ===
+        self.cf_medico = os.getenv('CF_MEDICO_PROD', 'DMRNCL63S21D612I')
+        self.password = os.getenv('PASSWORD_PROD', 'VtmakYjB4CjEN_!')
+        self.pincode = os.getenv('PINCODE_PROD', 'pincode_reale')
+        self.regione = os.getenv('REGIONE_PROD', '090')
+        self.asl = os.getenv('ASL_PROD', '109')
+        self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD', 'F')
         
-        self.logger.info(f"RicetteTsService configurato per ambiente: {self.env.upper()}")
+        # Endpoint PRODUZIONE per visualizzazione ricette
+        self.endpoint_visualizza = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca'
+        self.endpoint_invio = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'
+        self.endpoint_annulla = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca'
+        
+        # Certificati PRODUZIONE
+        self.client_cert = os.path.join(project_root, 'certs', 'prod', 'client_cert.pem')
+        self.client_key = os.path.join(project_root, 'certs', 'prod', 'client_key.pem')
+        self.sanitel_cert = os.path.join(project_root, 'certs', 'prod', 'SanitelCF-2024-2027.cer')
+        
+        self.logger.info(f"RicetteTsService configurato per PRODUZIONE (visualizzazione ricette)")
+        self.logger.info(f"CF Medico: {self.cf_medico}")
         self.logger.info(f"Endpoint visualizzazione: {self.endpoint_visualizza}")
         self.logger.info(f"Endpoint invio: {self.endpoint_invio}")
     
     def _get_current_env(self) -> str:
-        """Ottiene l'ambiente corrente - copia da V1"""
-        try:
-            # Cerca di usare il mode manager se esiste
-            from core.mode_manager import get_mode
-            mode = get_mode('ricetta')
-            return 'test' if mode == 'test' else 'prod'
-        except:
-            return os.getenv('RICETTA_ENV', 'test').lower()
+        """Ottiene l'ambiente corrente - SEMPRE PRODUZIONE per visualizzazione"""
+        return 'prod'  # SEMPRE PRODUZIONE per visualizzazione ricette
     
     def force_production_config(self, cf_medico_reale: str, password_reale: str = None):
         """
@@ -222,20 +192,23 @@ class RicetteTsService:
     
     def _create_visualizza_soap_request(self, data_da: str, data_a: str, cf_assistito: str = None) -> str:
         """
-        Crea richiesta SOAP per visualizzazione ricette - FORMATO XSD UFFICIALE
+        Crea richiesta SOAP per visualizzazione ricette - PRODUZIONE SEMPRE
         Basato sul kit ufficiale del Ministero della Salute v1.2
         """
         
-        # Usa encrypted pinCode dal kit ufficiale
-        pincode_cifrato = "dyGL6AscUj2CaHY2PFLFKHTh0R4btCkTe/imyyjCv6DTmnHZICD3zqPYVVoZrLvI72MrMBz4Tv4dE7Z124qssn2K5/O+OEcjRq3+zwQO6PlO6uQ04fnTEuHtX8yvd6ZrmPuiMhhY7r5OLB05k/a564KKSwcu01Wzhf4If2rw19U="
+        # PINCODE CIFRATO PER PRODUZIONE - dal kit ufficiale
+        pincode_cifrato = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZVKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk="
         
-        # Usa encrypted codicePaziente (CF test) dal kit ufficiale se non specificato
-        if not cf_assistito:
-            cf_assistito = "W2yoR8ESa581Uw8EI0b7MXRjdckNKzCZO2JULzYMhqSFyn7qo8j2Kp3K+kVx8UdYRO20HHIfgjPvCTYeD0rETPtE88d8TJbtrP/07GXAp3QqyHbxy3YVMXTi0T1aye+ET0hKcd5vwWXbpn2TfHT7mbSrrqOxAC2S3VMmRDl+vUU="
+        # CF ASSISTITO CIFRATO - se fornito, lo cifra; altrimenti usa quello di default del kit
+        if cf_assistito:
+            cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
+            self.logger.info(f"CF assistito cifrato per produzione: {cf_assistito}")
         else:
-            cf_assistito = self._encrypt_cf_assistito(cf_assistito)
+            # CF assistito di default dal kit ufficiale per test
+            cf_assistito_cifrato = "iKvd9JQntqxPBT2UA/OFfztSNLidocP8Op+NfODzfTdxFWzkcdZrJz5gvCuqv7Dh/r3Cin1ZQMmg/BofIqYCyq2PcC+PJzbvQCocDdl6FrXVXs3W5JhnX7VpWFGCLPYYY2WL+RWKxhfkGqeY8+NCVfQ1lEA15g3W5AabJ15Tthk="
+            self.logger.info("Usando CF assistito di default dal kit ufficiale")
         
-        # Template SOAP UFFICIALE - formato XSD v1.2 identico a SoapUI
+        # Template SOAP UFFICIALE per visualizzazione ricette - PRODUZIONE
         soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                   xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
@@ -244,22 +217,23 @@ class RicetteTsService:
     <soapenv:Body>
         <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
             <vis:pinCode>{pincode_cifrato}</vis:pinCode>
-            <vis:codicePaziente>{cf_assistito}</vis:codicePaziente>
+            <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
             <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
         </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
     </soapenv:Body>
 </soapenv:Envelope>'''
         
+        self.logger.info(f"SOAP request creata per visualizzazione ricette - CF medico: {self.cf_medico}")
         return soap_template
     
     def _parse_visualizza_response(self, response: requests.Response) -> Dict[str, Any]:
-        """Parsa la risposta della visualizzazione ricette - copia da V1 con miglioramenti"""
+        """Parsa la risposta della visualizzazione ricette - IMPLEMENTAZIONE COMPLETA"""
         try:
             response_text = response.text
             self.logger.info(f"Parsing risposta visualizzazione ricette")
             
             if response.status_code == 200:
-                # === DEBUG COMPLETO RISPOSTA XML ===
+                # === LOGGING RISPOSTA XML ===
                 self.logger.info("=== INIZIO RISPOSTA XML COMPLETA ===")
                 self.logger.info(response_text)
                 self.logger.info("=== FINE RISPOSTA XML COMPLETA ===")
@@ -271,11 +245,58 @@ class RicetteTsService:
                 print(response_text)
                 print("=" * 80)
                 
-                # Cerca lista ricette nella risposta XML
+                # === PARSING XML COMPLETO ===
                 ricette = []
                 
-                # TODO: Analizzare XML per estrarre ricette
-                # Per ora torniamo XML completo per analisi
+                try:
+                    from lxml import etree
+                    import re
+                    
+                    # Parse XML response
+                    root = etree.fromstring(response.content)
+                    
+                    # Namespaces per il parsing
+                    namespaces = {
+                        'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+                        'dem': 'http://dematerializzazione.sanita.finanze.it/',
+                        'ric': 'http://ricetta.sanita.finanze.it/',
+                        'vis': 'http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it'
+                    }
+                    
+                    # Cerca lista ricette nella risposta
+                    # Il Sistema TS può restituire ricette in diversi formati
+                    
+                    # 1. Cerca elemento principale delle ricette
+                    ricette_elements = root.xpath('//ricette | //listaRicette | //ricettaElettronica | //ricetta')
+                    
+                    if ricette_elements:
+                        self.logger.info(f"Trovato elemento ricette principale: {len(ricette_elements)}")
+                        
+                        for ricetta_elem in ricette_elements:
+                            ricetta_data = self._parse_single_ricetta(ricetta_elem, namespaces)
+                            if ricetta_data:
+                                ricette.append(ricetta_data)
+                    
+                    # 2. Se non trova elemento principale, cerca ricette singole
+                    if not ricette:
+                        ricette_singole = root.xpath('//ricetta | //ricettaElettronica')
+                        self.logger.info(f"Trovate ricette singole: {len(ricette_singole)}")
+                        
+                        for ricetta_elem in ricette_singole:
+                            ricetta_data = self._parse_single_ricetta(ricetta_elem, namespaces)
+                            if ricetta_data:
+                                ricette.append(ricetta_data)
+                    
+                    # 3. Fallback: cerca pattern nel testo XML
+                    if not ricette:
+                        ricette = self._parse_ricette_fallback(response_text)
+                    
+                    self.logger.info(f"Parsing completato: {len(ricette)} ricette trovate")
+                    
+                except Exception as parse_error:
+                    self.logger.error(f"Errore parsing XML: {parse_error}")
+                    # Fallback: usa parsing regex
+                    ricette = self._parse_ricette_fallback(response_text)
                 
                 return {
                     'success': True,
@@ -284,7 +305,7 @@ class RicetteTsService:
                     'total_count': len(ricette),
                     'response_xml': response_text,
                     'timestamp': datetime.now().isoformat(),
-                    'message': 'DEBUG: Risposta XML completa loggata - analizzare per implementare parsing'
+                    'message': f'Parsing completato: {len(ricette)} ricette estratte'
                 }
             else:
                 return {
@@ -304,6 +325,128 @@ class RicetteTsService:
                 'response_text': response.text[:500] if hasattr(response, 'text') else '',
                 'timestamp': datetime.now().isoformat()
             }
+    
+    def _parse_single_ricetta(self, ricetta_elem, namespaces: dict) -> dict:
+        """Parsa una singola ricetta dall'elemento XML"""
+        try:
+            ricetta_data = {}
+            
+            # Estrai campi principali
+            nre = self._extract_text(ricetta_elem, ['nre', 'nrbe', 'numeroRicetta'])
+            pin = self._extract_text(ricetta_elem, ['pin', 'pinRicetta', 'pinNrbe'])
+            cf_assistito = self._extract_text(ricetta_elem, ['cfAssistito', 'codiceFiscale', 'cfPaziente'])
+            data_compilazione = self._extract_text(ricetta_elem, ['dataCompilazione', 'dataInserimento', 'dataCreazione'])
+            stato = self._extract_text(ricetta_elem, ['stato', 'statoRicetta', 'esito'])
+            
+            # Dati farmaco
+            prodotto_aic = self._extract_text(ricetta_elem, ['prodottoAic', 'aic', 'codiceFarmaco'])
+            denominazione_farmaco = self._extract_text(ricetta_elem, ['denominazioneFarmaco', 'nomeFarmaco', 'farmaco'])
+            posologia = self._extract_text(ricetta_elem, ['posologia', 'posologiaRicetta'])
+            durata_trattamento = self._extract_text(ricetta_elem, ['durataTrattamento', 'durata'])
+            note = self._extract_text(ricetta_elem, ['note', 'noteRicetta', 'osservazioni'])
+            
+            # Dati medico
+            cf_medico = self._extract_text(ricetta_elem, ['cfMedico', 'codiceFiscaleMedico'])
+            nome_medico = self._extract_text(ricetta_elem, ['nomeMedico', 'medicoNome'])
+            cognome_medico = self._extract_text(ricetta_elem, ['cognomeMedico', 'medicoCognome'])
+            
+            # Costruisci oggetto ricetta
+            if nre:  # Solo se abbiamo almeno l'NRE
+                ricetta_data = {
+                    'id': len(ricetta_data) + 1,  # ID temporaneo
+                    'nre': nre,
+                    'codice_pin': pin,
+                    'cf_assistito': cf_assistito,
+                    'paziente_nome': '',  # Da estrarre se disponibile
+                    'paziente_cognome': '',  # Da estrarre se disponibile
+                    'data_compilazione': data_compilazione,
+                    'stato': stato,
+                    'prodotto_aic': prodotto_aic,
+                    'denominazione_farmaco': denominazione_farmaco,
+                    'posologia': posologia,
+                    'durata_trattamento': durata_trattamento,
+                    'note': note,
+                    'cf_medico': cf_medico,
+                    'nome_medico': nome_medico,
+                    'cognome_medico': cognome_medico,
+                    'source': 'sistema_ts_parsed'
+                }
+                
+                self.logger.info(f"Ricetta parsata: NRE={nre}, Farmaco={denominazione_farmaco}")
+                return ricetta_data
+            
+        except Exception as e:
+            self.logger.error(f"Errore parsing singola ricetta: {e}")
+        
+        return None
+    
+    def _extract_text(self, element, field_names: list) -> str:
+        """Estrae testo da un elemento XML usando una lista di possibili nomi campo"""
+        try:
+            for field_name in field_names:
+                # Cerca con namespace
+                for ns_prefix, ns_uri in [('ric', 'http://ricetta.sanita.finanze.it/'), 
+                                        ('dem', 'http://dematerializzazione.sanita.finanze.it/'),
+                                        ('', '')]:
+                    if ns_prefix:
+                        xpath = f'.//{ns_prefix}:{field_name}'
+                        result = element.xpath(xpath, namespaces={'ric': 'http://ricetta.sanita.finanze.it/', 
+                                                               'dem': 'http://dematerializzazione.sanita.finanze.it/'})
+                    else:
+                        xpath = f'.//{field_name}'
+                        result = element.xpath(xpath)
+                    
+                    if result and result[0].text:
+                        return result[0].text.strip()
+            
+            # Fallback: cerca nel testo dell'elemento
+            if element.text and element.text.strip():
+                return element.text.strip()
+                
+        except Exception as e:
+            self.logger.debug(f"Errore estrazione campo {field_names}: {e}")
+        
+        return ''
+    
+    def _parse_ricette_fallback(self, response_text: str) -> list:
+        """Parsing fallback usando regex per estrarre ricette"""
+        ricette = []
+        
+        try:
+            import re
+            
+            # Pattern per estrarre NRE
+            nre_pattern = r'<[^:]*:?nre[^>]*>([^<]+)</[^:]*:?nre>|<[^:]*:?nrbe[^>]*>([^<]+)</[^:]*:?nrbe>'
+            nre_matches = re.findall(nre_pattern, response_text, re.IGNORECASE)
+            
+            for i, nre_match in enumerate(nre_matches):
+                nre = nre_match[0] or nre_match[1]  # Prende il primo gruppo non vuoto
+                
+                if nre:
+                    ricetta_data = {
+                        'id': i + 1,
+                        'nre': nre,
+                        'codice_pin': '',
+                        'cf_assistito': '',
+                        'paziente_nome': '',
+                        'paziente_cognome': '',
+                        'data_compilazione': '',
+                        'stato': 'Trovata',
+                        'prodotto_aic': '',
+                        'denominazione_farmaco': '',
+                        'posologia': '',
+                        'durata_trattamento': '',
+                        'note': '',
+                        'source': 'sistema_ts_regex_fallback'
+                    }
+                    ricette.append(ricetta_data)
+            
+            self.logger.info(f"Fallback parsing: {len(ricette)} ricette trovate con regex")
+            
+        except Exception as e:
+            self.logger.error(f"Errore parsing fallback: {e}")
+        
+        return ricette
     
     def visualizza_ricetta_specifica(self, nre: str, cf_assistito: str = None, cf_medico: str = None) -> Dict[str, Any]:
         """
@@ -480,27 +623,22 @@ class RicetteTsService:
 
     def get_all_ricette(self, data_da: str = None, data_a: str = None, cf_assistito: str = None) -> Dict[str, Any]:
         """
-        Recupera la lista delle ricette dal Sistema TS.
-        Replica esatta di V1 visualizza_ricette() rinominata per chiarezza.
+        Recupera la lista delle ricette dal Sistema TS - PRODUZIONE SEMPRE
         
         Args:
-            data_da: Data inizio ricerca (formato YYYY-MM-DD)
-            data_a: Data fine ricerca (formato YYYY-MM-DD)  
+            data_da: Data inizio ricerca (formato YYYY-MM-DD) - NON USATO nel SOAP
+            data_a: Data fine ricerca (formato YYYY-MM-DD) - NON USATO nel SOAP  
             cf_assistito: Codice fiscale assistito specifico (opzionale)
             
         Returns:
             Dict con risultato richiesta Sistema TS
         """
         try:
-            self.logger.info(f"Richiesta visualizzazione ricette Sistema TS - Da: {data_da}, A: {data_a}, CF: {cf_assistito}")
+            self.logger.info(f"=== RICHIESTA VISUALIZZAZIONE RICETTE PRODUZIONE ===")
+            self.logger.info(f"CF assistito: {cf_assistito}")
+            self.logger.info(f"CF medico: {self.cf_medico}")
             
-            # Se non specificate, usa ultimi 30 giorni - come V1
-            if not data_da:
-                data_da = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-            if not data_a:
-                data_a = datetime.now().strftime('%Y-%m-%d')
-            
-            # Crea richiesta SOAP per visualizzazione
+            # Crea richiesta SOAP per visualizzazione (data_da e data_a non sono usati nel SOAP)
             soap_request = self._create_visualizza_soap_request(data_da, data_a, cf_assistito)
             
             # Debug: Verifica che il metodo funzioni
@@ -517,13 +655,13 @@ class RicetteTsService:
             # Esegui richiesta
             session = self._create_session()
             
-            # Configurazione autenticazione come da kit ufficiale
+            # Configurazione autenticazione PRODUZIONE
             session.auth = (self.cf_medico, self.password)  # Basic Auth
             
-            # Token 2FA come Bearer token come da SoapUI ufficiale
+            # Token 2FA per produzione
             token_2fa = self._genera_token_2fa()
             
-            # Headers formato XSD ufficiale con Authorization2F
+            # Headers per PRODUZIONE
             headers = {
                 'Content-Type': 'text/xml; charset=utf-8',
                 'SOAPAction': '"http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"',
@@ -531,10 +669,10 @@ class RicetteTsService:
                 'User-Agent': 'Python-requests/2.28.0'
             }
             
-            self.logger.info(f"Invio richiesta visualizzazione a: {self.endpoint_visualizza}")
+            self.logger.info(f"Invio richiesta PRODUZIONE a: {self.endpoint_visualizza}")
             
             # Debug: Log della richiesta SOAP
-            print(f"=== SOAP REQUEST ===")
+            print(f"=== SOAP REQUEST PRODUZIONE ===")
             print(soap_request)
             print(f"=== END SOAP REQUEST ===")
             
@@ -542,17 +680,20 @@ class RicetteTsService:
                 self.endpoint_visualizza,
                 data=soap_request,
                 headers=headers,
-                timeout=60,  # Timeout maggiore per nuovo endpoint
-                verify=False  # Per ambiente test come V1
+                timeout=60,
+                verify=False  # Disabilitato per compatibilità certificati
             )
             
             self.logger.info(f"Risposta ricevuta - Status: {response.status_code}")
             
-            # Debug: Log completo della risposta per capire l'errore
+            # Debug: Log completo della risposta
             self.logger.info(f"Risposta completa: {response.text}")
             
             # Parsa la risposta
-            return self._parse_visualizza_response(response)
+            result = self._parse_visualizza_response(response)
+            
+            self.logger.info(f"Risultato parsing: {result.get('total_count', 0)} ricette trovate")
+            return result
             
         except Exception as e:
             self.logger.error(f"Errore visualizzazione ricette Sistema TS: {e}", exc_info=True)
