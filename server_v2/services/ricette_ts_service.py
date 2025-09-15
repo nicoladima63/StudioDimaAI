@@ -13,6 +13,19 @@ from requests.adapters import HTTPAdapter
 import logging
 from typing import Dict, Any, Optional
 
+# Carica variabili d'ambiente dal file .env nella root del progetto
+try:
+    from dotenv import load_dotenv
+    # Trova la root del progetto (due livelli sopra questo file)
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    env_path = os.path.join(project_root, '.env')
+    load_dotenv(env_path)
+    print(f"✅ File .env caricato da: {env_path}")
+except ImportError:
+    print("⚠️  python-dotenv non installato, usando solo variabili d'ambiente di sistema")
+except Exception as e:
+    print(f"⚠️  Errore caricamento .env: {e}")
+
 logger = logging.getLogger(__name__)
 
 class RicetteTsService:
@@ -28,71 +41,58 @@ class RicetteTsService:
         self._load_configuration()
         
     def _load_configuration(self):
-        """Carica configurazione PRODUZIONE - SEMPRE PRODUZIONE per visualizzazione ricette"""
+        """Carica configurazione dinamica da variabili d'ambiente"""
         self.env = 'prod'  # SEMPRE PRODUZIONE per visualizzazione
         
-        # Path dinamico
+        # Path dinamico - usa la stessa logica del caricamento .env
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         
-        # === CONFIGURAZIONE PRODUZIONE - Dati reali ===
-        self.cf_medico = os.getenv('CF_MEDICO_PROD', 'DMRNCL63S21D612I')
-        self.password = os.getenv('PASSWORD_PROD', 'VtmakYjB4CjEN_!')
-        self.pincode = os.getenv('PINCODE_PROD', 'pincode_reale')
-        self.regione = os.getenv('REGIONE_PROD', '090')
-        self.asl = os.getenv('ASL_PROD', '109')
-        self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD', 'F')
+        # === CONFIGURAZIONE DINAMICA - Tutti i dati da env ===
+        self.cf_medico = os.getenv('CF_MEDICO_PROD')
+        self.password = os.getenv('PASSWORD_PROD')
+        self.pincode = os.getenv('PINCODE_PROD')
+        self.regione = os.getenv('REGIONE_PROD')
+        self.asl = os.getenv('ASL_PROD')
+        self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD')
         
-        # Endpoint PRODUZIONE per visualizzazione ricette
-        self.endpoint_visualizza = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca'
-        self.endpoint_invio = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'
-        self.endpoint_annulla = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca'
+        # Endpoint dinamici da env
+        self.endpoint_visualizza = os.getenv('ENDPOINT_VISUALIZZA_PROD', 
+            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
+        self.endpoint_invio = os.getenv('ENDPOINT_INVIO_PROD',
+            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca')
+        self.endpoint_annulla = os.getenv('ENDPOINT_ANNULLA_PROD',
+            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
         
-        # Certificati PRODUZIONE
-        self.client_cert = os.path.join(project_root, 'certs', 'prod', 'client_cert.pem')
-        self.client_key = os.path.join(project_root, 'certs', 'prod', 'client_key.pem')
-        self.sanitel_cert = os.path.join(project_root, 'certs', 'prod', 'SanitelCF-2024-2027.cer')
+        # Certificati dinamici da env - path relativo alla root del progetto
+        certs_dir = os.getenv('CERTS_DIR_PROD', os.path.join(project_root, 'certs', 'prod'))
+        self.client_cert = os.getenv('CLIENT_CERT_PATH', os.path.join(certs_dir, 'client_cert.pem'))
+        self.client_key = os.getenv('CLIENT_KEY_PATH', os.path.join(certs_dir, 'client_key.pem'))
+        self.sanitel_cert = os.getenv('SANITEL_CERT_PATH', os.path.join(certs_dir, 'SanitelCF-2024-2027.cer'))
         
-        self.logger.info(f"RicetteTsService configurato per PRODUZIONE (visualizzazione ricette)")
+        # Validazione configurazione obbligatoria
+        required_vars = ['CF_MEDICO_PROD', 'PASSWORD_PROD', 'PINCODE_PROD', 'REGIONE_PROD', 'ASL_PROD']
+        missing_vars = [var for var in required_vars if not os.getenv(var)]
+        
+        if missing_vars:
+            self.logger.error(f"Variabili d'ambiente mancanti: {missing_vars}")
+            self.logger.error(f"File .env cercato in: {os.path.join(project_root, '.env')}")
+            raise ValueError(f"Configurazione incompleta: mancano {missing_vars}")
+        
+        self.logger.info(f"RicetteTsService configurato dinamicamente")
+        self.logger.info(f"Project root: {project_root}")
         self.logger.info(f"CF Medico: {self.cf_medico}")
+        self.logger.info(f"Regione: {self.regione}, ASL: {self.asl}")
         self.logger.info(f"Endpoint visualizzazione: {self.endpoint_visualizza}")
-        self.logger.info(f"Endpoint invio: {self.endpoint_invio}")
+        self.logger.info(f"Certificati: {self.client_cert}")
     
     def _get_current_env(self) -> str:
         """Ottiene l'ambiente corrente - SEMPRE PRODUZIONE per visualizzazione"""
         return 'prod'  # SEMPRE PRODUZIONE per visualizzazione ricette
     
-    def force_production_config(self, cf_medico_reale: str, password_reale: str = None):
-        """
-        Forza configurazione produzione per override temporaneo
-        """
-        self.logger.info(f"=== FORCE PRODUCTION CONFIG ===")
-        self.env = 'prod'
-        self.cf_medico = cf_medico_reale
-        self.password = password_reale or os.getenv('PASSWORD_PROD', 'VtmakYjB4CjEN_!')
-        
-        # Endpoint produzione
-        self.endpoint_visualizza = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca'
-        self.endpoint_invio = 'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca'
-        
-        # Altri parametri produzione
-        self.regione = '090'
-        self.asl = '109'
-        self.specializzazione = 'F'
-        
-        self.logger.info(f"Configurazione forzata: CF={self.cf_medico}, Endpoint={self.endpoint_visualizza}")
-        
-    def restore_original_config(self, original_config: dict):
-        """Ripristina configurazione originale"""
-        self.env = original_config['env']
-        self.cf_medico = original_config['cf_medico']
-        self.password = original_config['password']
-        self.endpoint_visualizza = original_config['endpoint_visualizza']
-        self.endpoint_invio = original_config['endpoint_invio']
-        self.regione = original_config['regione']
-        self.asl = original_config['asl']
-        self.specializzazione = original_config['specializzazione']
-        
-        self.logger.info(f"Configurazione ripristinata: env={self.env}, CF={self.cf_medico}")
+    def reload_configuration(self):
+        """Ricarica la configurazione da variabili d'ambiente"""
+        self.logger.info("Ricarico configurazione da variabili d'ambiente")
+        self._load_configuration()
     
     def _genera_token_2fa(self) -> str:
         """
@@ -102,20 +102,18 @@ class RicetteTsService:
     
     def _encrypt_cf_assistito(self, cf_assistito: str) -> str:
         """
-        Cifra il CF dell'assistito usando l'endpoint di cifratura V2
+        Cifra il CF dell'assistito usando l'endpoint di cifratura dinamico
         """
         try:
-            # Per test environment, usa il CF in chiaro come V1 test
-            if self.env == 'test':
-                return cf_assistito
+            # Endpoint di cifratura dinamico da env
+            cifra_endpoint = os.getenv('CIFRA_CF_ENDPOINT', 'http://localhost:5001/api/v2/ricetta/cifra-cf')
             
-            # Per produzione, usa l'endpoint di cifratura V2
+            self.logger.info(f"Cifratura CF assistito: {cf_assistito}")
+            
             import requests
             
-            self.logger.info(f"Cifratura CF assistito per produzione: {cf_assistito}")
-            
             response = requests.post(
-                'http://localhost:5001/api/v2/ricetta/cifra-cf',
+                cifra_endpoint,
                 json={'cf_assistito': cf_assistito},
                 headers={'Content-Type': 'application/json'},
                 timeout=10
@@ -192,23 +190,33 @@ class RicetteTsService:
     
     def _create_visualizza_soap_request(self, data_da: str, data_a: str, cf_assistito: str = None) -> str:
         """
-        Crea richiesta SOAP per visualizzazione ricette - PRODUZIONE SEMPRE
-        Basato sul kit ufficiale del Ministero della Salute v1.2
+        Crea richiesta SOAP per visualizzazione ricette - DINAMICA
         """
         
-        # PINCODE CIFRATO PER PRODUZIONE - dal kit ufficiale
-        pincode_cifrato = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZVKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk="
+        # PINCODE CIFRATO DINAMICO - da variabile d'ambiente o cifrato dinamicamente
+        pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
         
-        # CF ASSISTITO CIFRATO - se fornito, lo cifra; altrimenti usa quello di default del kit
+        if not pincode_cifrato:
+            # Se non è fornito cifrato, usa il pincode in chiaro e lo cifra
+            if self.pincode:
+                pincode_cifrato = self._encrypt_pincode(self.pincode)
+            else:
+                raise ValueError("PINCODE_CIFRATO_PROD o PINCODE_PROD deve essere configurato")
+        
+        # CF ASSISTITO CIFRATO - sempre cifrato dinamicamente se fornito
         if cf_assistito:
             cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
-            self.logger.info(f"CF assistito cifrato per produzione: {cf_assistito}")
+            self.logger.info(f"CF assistito cifrato dinamicamente: {cf_assistito}")
         else:
-            # CF assistito di default dal kit ufficiale per test
-            cf_assistito_cifrato = "iKvd9JQntqxPBT2UA/OFfztSNLidocP8Op+NfODzfTdxFWzkcdZrJz5gvCuqv7Dh/r3Cin1ZQMmg/BofIqYCyq2PcC+PJzbvQCocDdl6FrXVXs3W5JhnX7VpWFGCLPYYY2WL+RWKxhfkGqeY8+NCVfQ1lEA15g3W5AabJ15Tthk="
-            self.logger.info("Usando CF assistito di default dal kit ufficiale")
+            # CF assistito di default da env
+            cf_assistito_default = os.getenv('CF_ASSISTITO_DEFAULT_CIFRATO')
+            if cf_assistito_default:
+                cf_assistito_cifrato = cf_assistito_default
+                self.logger.info("Usando CF assistito di default da env")
+            else:
+                raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
         
-        # Template SOAP UFFICIALE per visualizzazione ricette - PRODUZIONE
+        # Template SOAP DINAMICO per visualizzazione ricette
         soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                   xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
@@ -223,8 +231,41 @@ class RicetteTsService:
     </soapenv:Body>
 </soapenv:Envelope>'''
         
-        self.logger.info(f"SOAP request creata per visualizzazione ricette - CF medico: {self.cf_medico}")
+        self.logger.info(f"SOAP request creata dinamicamente - CF medico: {self.cf_medico}")
         return soap_template
+    
+    def _encrypt_pincode(self, pincode: str) -> str:
+        """
+        Cifra il pincode usando l'endpoint di cifratura dinamico
+        """
+        try:
+            # Endpoint di cifratura pincode dinamico da env
+            cifra_pincode_endpoint = os.getenv('CIFRA_PINCODE_ENDPOINT', 'http://localhost:5001/api/v2/ricetta/cifra-pincode')
+            
+            self.logger.info(f"Cifratura pincode...")
+            
+            import requests
+            
+            response = requests.post(
+                cifra_pincode_endpoint,
+                json={'pincode': pincode},
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                pincode_cifrato = response.json().get('pincode_cifrato')
+                self.logger.info("Pincode cifrato correttamente")
+                return pincode_cifrato
+            else:
+                self.logger.error(f"Errore cifratura pincode: HTTP {response.status_code}")
+                # Fallback: ritorna il pincode originale se cifratura fallisce
+                return pincode
+                
+        except Exception as e:
+            self.logger.error(f"Errore cifratura pincode: {e}")
+            # Fallback: ritorna il pincode originale se cifratura fallisce
+            return pincode
     
     def _parse_visualizza_response(self, response: requests.Response) -> Dict[str, Any]:
         """Parsa la risposta della visualizzazione ricette - IMPLEMENTAZIONE COMPLETA"""
@@ -450,18 +491,25 @@ class RicetteTsService:
     
     def visualizza_ricetta_specifica(self, nre: str, cf_assistito: str = None, cf_medico: str = None) -> Dict[str, Any]:
         """
-        BRUTAL TEST - USA ENDPOINT INTERROGAZIONI UFFICIALE!
+        Visualizza ricetta specifica tramite endpoint interrogazioni - DINAMICA
         """
         try:
-            self.logger.info(f"=== BRUTAL TEST ENDPOINT INTERROGAZIONI ===")
+            self.logger.info(f"=== RICERCA RICETTA SPECIFICA ===")
             self.logger.info(f"NRE: {nre}, CF assistito: {cf_assistito}")
             
-            # ENDPOINT GIUSTO DAL KIT UFFICIALE!
-            endpoint_interrogazioni = 'https://demservice.sanita.finanze.it/DemRicettaInterrogazioniServicesWeb/services/demInterrogaNreUtilizzati'
+            # Endpoint interrogazioni dinamico da env
+            endpoint_interrogazioni = os.getenv('ENDPOINT_INTERROGAZIONI_PROD', 
+                'https://demservice.sanita.finanze.it/DemRicettaInterrogazioniServicesWeb/services/demInterrogaNreUtilizzati')
             
-            pincode_cifrato = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZVKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk="
+            # Pincode cifrato dinamico
+            pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
+            if not pincode_cifrato and self.pincode:
+                pincode_cifrato = self._encrypt_pincode(self.pincode)
             
-            # SOAP UFFICIALE InterrogaNreUtilRichiesta
+            if not pincode_cifrato:
+                raise ValueError("PINCODE_CIFRATO_PROD deve essere configurato")
+            
+            # SOAP DINAMICO InterrogaNreUtilRichiesta
             soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                   xmlns:int="http://interroganreutilrichiesta.xsd.dem.sanita.finanze.it">
@@ -469,7 +517,7 @@ class RicetteTsService:
     <soapenv:Body>
         <int:InterrogaNreUtilRichiesta>
             <int:pinCode>{pincode_cifrato}</int:pinCode>
-            <int:codRegione>090</int:codRegione>
+            <int:codRegione>{self.regione}</int:codRegione>
             <int:nre>{nre}</int:nre>
             <int:cfMedico>{cf_medico or self.cf_medico}</int:cfMedico>
             <int:cfAssistito>{cf_assistito or ''}</int:cfAssistito>
@@ -486,10 +534,10 @@ class RicetteTsService:
                 'User-Agent': 'Python-requests/2.28.0'
             }
             
-            self.logger.info(f"=== BRUTAL TEST ENDPOINT INTERROGAZIONI ===")
+            self.logger.info(f"=== RICERCA RICETTA SPECIFICA ===")
             self.logger.info(f"Endpoint: {endpoint_interrogazioni}")
             
-            print(f"=== SOAP INTERROGAZIONI BRUTAL TEST ===")
+            print(f"=== SOAP INTERROGAZIONI DINAMICA ===")
             print(soap_template)
             print(f"=== END SOAP ===")
             
@@ -511,16 +559,16 @@ class RicetteTsService:
                 xml_file_path = os.path.join(project_root, f"response_xml_nre_{nre}.xml")
                 
                 with open(xml_file_path, 'w', encoding='utf-8') as f:
-                    f.write(f"<!-- BRUTAL TEST INTERROGAZIONI - NRE: {nre} -->\n")
+                    f.write(f"<!-- RICERCA RICETTA SPECIFICA - NRE: {nre} -->\n")
                     f.write(f"<!-- HTTP Status: {response.status_code} -->\n")
                     f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
                     f.write(f"<!-- Endpoint: {endpoint_interrogazioni} -->\n")
                     f.write(f"<!-- CF Medico: {cf_medico or self.cf_medico} -->\n")
-                    f.write(f"<!-- Ambiente: prod -->\n")
+                    f.write(f"<!-- Ambiente: produzione -->\n")
                     f.write("\n")
                     f.write(response_text)
                 
-                print(f"📁 BRUTAL TEST XML SALVATO: {xml_file_path}")
+                print(f"📁 XML RICERCA SALVATO: {xml_file_path}")
                 
             except Exception as save_error:
                 self.logger.warning(f"Errore salvataggio XML: {save_error}")
@@ -860,17 +908,29 @@ class RicetteTsService:
 
     def _create_invio_soap_request(self, dati_ricetta: Dict[str, Any]) -> str:
         """
-        Crea richiesta SOAP per invio ricetta - REPLICA ESATTA V1 CHE FUNZIONA
-        Basato su V1 ricetta_service.py che funziona perfettamente
+        Crea richiesta SOAP per invio ricetta - DINAMICA
         """
         
-        # PinCode cifrato dal kit ufficiale - IDENTICO V1
-        pincode_cifrato = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk="
+        # PinCode cifrato dinamico
+        pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
+        if not pincode_cifrato and self.pincode:
+            pincode_cifrato = self._encrypt_pincode(self.pincode)
         
-        # CF Assistito cifrato dal kit ufficiale - IDENTICO V1
-        cf_assistito_cifrato = "iKvd9JQntqxPBT2UA/OFfztSNLidocP8Op+NfODzfTdxFWzkcdZrJz5gvCuqv7Dh/r3Cin1ZQMmg/BofIqYCyq2PcC+PJzbvQCocDdl6FrXVXs3W5JhnX7VpWFGCLPYYY2WL+RWKxhfkGqeY8+NCVfQ1lEA15g3W5AabJ15Tthk="
+        if not pincode_cifrato:
+            raise ValueError("PINCODE_CIFRATO_PROD deve essere configurato")
         
-        # Timestamp formato V1
+        # CF Assistito cifrato dinamicamente
+        cf_assistito = dati_ricetta.get('cf_assistito')
+        if cf_assistito:
+            cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
+        else:
+            cf_assistito_default = os.getenv('CF_ASSISTITO_DEFAULT_CIFRATO')
+            if cf_assistito_default:
+                cf_assistito_cifrato = cf_assistito_default
+            else:
+                raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
+        
+        # Timestamp dinamico
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         # Template SOAP IDENTICO V1 - che funziona
