@@ -25,6 +25,20 @@ class MaterialiMigrationService(BaseService):
         super().__init__(db_manager)
         self.dbf_reader = DBFOptimizedReader()
         
+        # COSTANTI CONFIGURABILI (GPT suggestion)
+        self.CONFIDENCE_THRESHOLD_DENTAL = 15  # Era 40, abbassato per includere più materiali
+        self.CONFIDENCE_THRESHOLD_UNKNOWN = 10  # Era 30, abbassato per ridurre 'unknown'
+        self.MIN_PATTERN_MATCHES = 1  # Era 2, ridotto per essere più permissivo
+        self.MIN_PRICE = 0.01  # Era 0.10, abbassato
+        self.MAX_PRICE = 1000  # Era 500, aumentato
+        
+        # PESI CONFIGURABILI
+        self.WEIGHT_EXACT_MATCH = 100
+        self.WEIGHT_PARTIAL_MATCH = 80
+        self.WEIGHT_MULTIPLE_MATCHES = 15
+        self.WEIGHT_EXACT_BONUS = 25
+        self.WEIGHT_PHRASE_MATCH = 90
+        
         # Parole chiave per identificare materiali dentali utili (migliorate)
         self.dental_keywords = {
             'conservativa': ['resina', 'composito', 'bonding', 'adhesive', 'etching', 'primer', 'liner', 'base', 'restorative', 'filling', 'flowable', 'bulk fill'],
@@ -76,10 +90,33 @@ class MaterialiMigrationService(BaseService):
         self.min_price_threshold = 5.0  # Importo minimo significativo
         self.min_quantity_threshold = 0.1  # Quantità minima
         
-        # Cache per performance
+        # PRE-COMPILAZIONE REGEX (GPT suggestion)
+        self.compiled_patterns = self._compile_regex_patterns()
+        
+        # INIZIALIZZAZIONE MAPPING FORNITORI (GPT suggestion)
+        self._initialize_supplier_mappings()
+        
+        # CACHE LIMITATA (GPT suggestion)
         self._classification_cache = {}
         self._supplier_cache = {}
+        self._cache_max_size = 1000
         
+    def _compile_regex_patterns(self):
+        """Pre-compila regex patterns per performance (GPT suggestion)."""
+        import re
+        return {
+            'medical_units': re.compile(r'\b(ml|cc|gr|mg)\b', re.IGNORECASE),
+            'percentages': re.compile(r'\b\d+%\b'),
+            'sterile': re.compile(r'\b(sterile|steril)\b', re.IGNORECASE),
+            'disposable': re.compile(r'\b(monouso|disposable)\b', re.IGNORECASE),
+            'dental_ref': re.compile(r'\b(dental|dent|tooth)\b', re.IGNORECASE),
+            'guanti': re.compile(r'\b(guanti|gloves)\b', re.IGNORECASE),
+            'mascherine': re.compile(r'\b(mascherina|mask|ffp2|kn95)\b', re.IGNORECASE),
+            'word_boundaries': re.compile(r'\b\w+\b')  # Per tokenizzazione
+        }
+        
+    def _initialize_supplier_mappings(self):
+        """Inizializza le mappe dei fornitori (GPT suggestion)."""
         # Mappa fornitori simili per aggregazione intelligente
         self.similar_suppliers = {
             'dentsply': ['dentsply', 'sirona', 'dentsply sirona'],
@@ -138,11 +175,11 @@ class MaterialiMigrationService(BaseService):
                     
                     # Peso maggiore per match esatti
                     if keyword == descrizione_lower:
-                        confidence += 100
+                        confidence += self.WEIGHT_EXACT_MATCH
                         exact_matches += 1
                     # Match parziale con peso basato sulla lunghezza
                     else:
-                        weight = min(80, len(keyword) * 5)  # Peso proporzionale alla lunghezza
+                        weight = min(self.WEIGHT_PARTIAL_MATCH, len(keyword) * 5)  # Peso proporzionale alla lunghezza
                         confidence += weight
                         partial_matches += 1
                 
@@ -151,16 +188,16 @@ class MaterialiMigrationService(BaseService):
                     words = keyword.split()
                     if all(word in descrizione_lower for word in words):
                         matches += 1
-                        confidence += min(90, len(keyword) * 4)  # Peso leggermente inferiore per frasi
+                        confidence += min(self.WEIGHT_PHRASE_MATCH, len(keyword) * 4)  # Peso leggermente inferiore per frasi
                         partial_matches += 1
             
             # Bonus per multiple matches nella stessa categoria
             if matches > 1:
-                confidence += matches * 15
+                confidence += matches * self.WEIGHT_MULTIPLE_MATCHES
             
             # Bonus per match esatti
             if exact_matches > 0:
-                confidence += exact_matches * 25
+                confidence += exact_matches * self.WEIGHT_EXACT_BONUS
             
             # Penalità per descrizioni troppo generiche
             if len(descrizione_lower) < 5:
@@ -171,17 +208,27 @@ class MaterialiMigrationService(BaseService):
             if confidence > best_match[1]:
                 best_match = (categoria, confidence)
         
-        # Se la confidence è troppo bassa, classifica come unknown
-        if best_match[1] < 30:
+        # Se la confidence è troppo bassa, classifica come unknown (CONSTANTE CONFIGURABILE)
+        if best_match[1] < self.CONFIDENCE_THRESHOLD_UNKNOWN:
             best_match = ('unknown', best_match[1])
         
-        # Cache del risultato
+        # Cache del risultato con limite (GPT suggestion)
+        self._manage_cache_size()
         self._classification_cache[cache_key] = best_match
         return best_match
     
+    def _manage_cache_size(self):
+        """Gestisce la dimensione della cache per evitare memory leak (GPT suggestion)."""
+        if len(self._classification_cache) >= self._cache_max_size:
+            # Rimuove i primi 100 elementi (FIFO)
+            keys_to_remove = list(self._classification_cache.keys())[:100]
+            for key in keys_to_remove:
+                del self._classification_cache[key]
+    
     def is_dental_material(self, descrizione: str, prezzo: Optional[float] = None, quantita: Optional[float] = None) -> Tuple[bool, int]:
         """
-        Determina se un materiale è dentale e utile con logica intelligente (come backend v1).
+        LOGICA DI ESCLUSIONE: Esclude solo materiali chiaramente non dentali.
+        Tutto il resto è considerato potenzialmente dentale.
         
         Args:
             descrizione: Descrizione del materiale
@@ -194,45 +241,66 @@ class MaterialiMigrationService(BaseService):
         if not descrizione:
             return False, 0
         
-        material_type, confidence = self.classify_material_type(descrizione)
-        
-        # Se è classificato come non dentale
-        if material_type == 'non_dental':
-            return False, 0
-        
-        # Filtro intelligente come backend v1: escludi voci secondarie
         descrizione_lower = descrizione.lower()
-        if any(keyword in descrizione_lower for keyword in ['iva', 'imposta', 'sconto', 'trasporto', 'spedizione', 'spese', 'imballo']):
-            return False, 0
         
-        # Rimuovo i controlli di prezzo e quantità per mostrare tutti i materiali dentali
-        # (prezzo e quantità non dovrebbero escludere materiali dentali validi)
-        
-        # Se ha una classificazione dentale specifica
-        if material_type != 'unknown' and confidence >= 40:  # Soglia più bassa per catturare più materiali
-            return True, confidence
-        
-        # Controlli aggiuntivi per materiali non classificati
-        dental_patterns = [
-            r'\b(ml|cc|gr|mg)\b',  # Unità di misura mediche
-            r'\b\d+%\b',  # Percentuali (es. "2% lidocaina")
-            r'\b(sterile|steril)\b',  # Materiali sterili
-            r'\b(monouso|disposable)\b',  # Materiali monouso
-            r'\b(dental|dent|tooth)\b',  # Riferimenti dentali espliciti
+        # LISTA DI ESCLUSIONE: Solo parole chiaramente NON dentali
+        exclusion_keywords = [
+            # Voci amministrative/fatturazione
+            'iva', 'imposta', 'bollo', 'sconto', 'ritenuta', 'commissione', 'fee', 'tax', 'vat',
+            
+            # Trasporti e spedizioni
+            'trasporto', 'spedizione', 'shipping', 'spese di trasporto', 'spese di spedizione',
+            
+            # Imballaggi e packaging
+            'imballo', 'packaging', 'confezione vuota',
+            
+            # Ufficio e amministrazione
+            'telefono', 'phone', 'computer', 'software', 'licenza', 'license',
+            'stampante', 'printer', 'toner', 'cartuccia', 'ink',
+            'busta', 'envelope', 'timbro', 'stamp', 'cartolina', 'postcard',
+            'penna', 'pen', 'matita', 'pencil', 'cancelleria', 'office supplies',
+            
+            # Servizi amministrativi
+            'assicurazione', 'insurance', 'tasse', 'consulenza', 'consulting',
+            'formazione', 'training', 'corso', 'course', 'abbonamento', 'subscription',
+            'contabilità', 'accounting', 'banca', 'bank', 'finanziario', 'financial',
+            
+            # Carburanti e veicoli
+            'benzina', 'gasolio', 'carburante', 'fuel', 'auto', 'car', 'parcheggio',
+            
+            # Consumabili generali non dentali
+            'caffè', 'coffee', 'acqua', 'water', 'bibite', 'drinks', 'snack',
+            
+            # Pulizia generale non dentale
+            'pulizia ufficio', 'cleaning', 'detergente casa', 'sapone mani',
+            'carta igienica', 'toilet paper', 'asciugamani', 'towels'
         ]
         
-        pattern_matches = sum(1 for pattern in dental_patterns 
-                            if re.search(pattern, descrizione_lower))
+        # CONTROLLO ESCLUSIONE: Se contiene parole di esclusione → NON dentale
+        for exclude_word in exclusion_keywords:
+            if exclude_word in descrizione_lower:
+                return False, 0
         
-        if pattern_matches >= 2:
-            return True, 60 + (pattern_matches * 10)
+        # TUTTO IL RESTO È CONSIDERATO POTENZIALMENTE DENTALE
+        # Assegna confidence basata su indicatori positivi
         
-        # Se ha un prezzo ragionevole per materiali dentali (€0.10 - €500)
-        if prezzo and 0.10 <= prezzo <= 500:
-            return True, 40
+        confidence = 50  # Base confidence per materiali non esclusi
         
-        # Default: probabilmente non è un materiale dentale utile
-        return False, 10
+        # Bonus per indicatori dentali specifici
+        if self.compiled_patterns['medical_units'].search(descrizione_lower):
+            confidence += 20
+        if self.compiled_patterns['sterile'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['disposable'].search(descrizione_lower):
+            confidence += 20
+        if self.compiled_patterns['guanti'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['mascherine'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['dental_ref'].search(descrizione_lower):
+            confidence += 30
+        
+        return True, min(100, confidence)
     
     def normalize_supplier_name(self, supplier_name: str) -> str:
         """
@@ -479,8 +547,11 @@ class MaterialiMigrationService(BaseService):
                 stats['excluded'] += 1
                 continue
             
-            # Controlla se è materiale dentale (per statistiche, ma non escludere)
+            # Controlla se è materiale dentale - ESCLUDI materiali non dentali
             is_dental, dental_confidence = self.is_dental_material(descrizione)
+            if not is_dental:
+                stats['excluded'] += 1
+                continue
             
             # Verifica se il fornitore è classificato
             fornitore_id = material.get('fornitoreid', '')
