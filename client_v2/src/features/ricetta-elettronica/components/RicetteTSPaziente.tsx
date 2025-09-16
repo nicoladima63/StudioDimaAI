@@ -8,7 +8,7 @@ import {
 import { getRicetteFromTS, downloadRicettaPDFByNre } from '@/services/ricette_ts.service';
 import type { Paziente } from '@/store/pazienti.store';
 
-// Tipo per le ricette dal Sistema TS
+// Tipo per le ricette dal Sistema TS (aggiornato con i campi del tracciato ufficiale)
 interface RicettaTS {
   id?: number;
   nre?: string;
@@ -23,6 +23,72 @@ interface RicettaTS {
   posologia?: string;
   durata_trattamento?: string;
   note?: string;
+  // Nuovi campi dal tracciato ufficiale
+  cf_medico?: string;
+  nome_medico?: string;
+  cognome_medico?: string;
+  cod_diagnosi?: string;
+  descr_diagnosi?: string;
+  quantita?: string;
+  data_inserimento?: string;
+  dettagli_prescrizione?: Array<{
+    cod_prod_prest?: string;
+    descr_prod_prest?: string;
+    quantita?: string;
+    posologia?: string;
+    durata_trattamento?: string;
+    descr_testo_libero_note?: string;
+    tdl?: string;
+    non_sost?: string;
+    modalita_impiego?: string;
+    preparaz_farmaceutica?: string;
+    num_ripetibilita?: string;
+    validita_farm?: string;
+    stato?: string;
+  }>;
+  source?: string;
+}
+
+// Tipo per l'analisi degli errori
+interface ErrorAnalysis {
+  has_errors: boolean;
+  error_level: 'info' | 'warning' | 'error';
+  error_messages: string[];
+  suggested_actions: string[];
+}
+
+// Tipo per i metadati della risposta
+interface MetadatiRisposta {
+  protocollo_transazione?: string;
+  data_ricezione?: string;
+  cod_esito_visualizzazione?: string;
+  cf_medico?: string;
+  nome_medico?: string;
+  cognome_medico?: string;
+  cod_regione?: string;
+  cod_asl?: string;
+  cod_specializzazione?: string;
+  codice_paziente?: string;
+  cogn_nome?: string;
+  indirizzo?: string;
+  tipo_prescrizione?: string;
+  cod_diagnosi?: string;
+  descr_diagnosi?: string;
+  data_compilazione?: string;
+  nrbe?: string;
+  pin_nrbe?: string;
+  stato_processo?: string;
+  data_inserimento?: string;
+  errori_ricetta?: Array<{
+    cod_esito?: string;
+    esito?: string;
+    identificativo_prod_prest?: string;
+    tipo_errore?: string;
+  }>;
+  comunicazioni?: Array<{
+    codice?: string;
+    messaggio?: string;
+  }>;
 }
 
 interface RicetteTSPazienteProps {
@@ -84,6 +150,8 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
   const [error, setError] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [serverResponse, setServerResponse] = useState<string>('');
+  const [errorAnalysis, setErrorAnalysis] = useState<ErrorAnalysis | null>(null);
+  const [metadatiRisposta, setMetadatiRisposta] = useState<MetadatiRisposta | null>(null);
   
   // Filtri di ricerca
   const [filtri, setFiltri] = useState({
@@ -109,6 +177,8 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
       setRicette([]);
       setError('');
       setServerResponse('');
+      setErrorAnalysis(null);
+      setMetadatiRisposta(null);
     }
   }, [pazienteSelezionato?.codice_fiscale]);
 
@@ -141,9 +211,19 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
       const formattedXml = formatXmlForDisplay(xmlResponse);
       setServerResponse(formattedXml);
       
+      // Salva metadati e analisi errori
+      setMetadatiRisposta(response.ts_response?.metadati_risposta || null);
+      setErrorAnalysis(response.ts_response?.error_analysis || null);
+      
       if (response.success) {
         setRicette(response.data || []);
         console.log(`✅ Trovate ${response.data?.length || 0} ricette per CF: ${pazienteSelezionato.codice_fiscale}`);
+        
+        // Mostra eventuali errori o comunicazioni
+        if (response.ts_response?.error_analysis?.has_errors) {
+          const errorMessages = response.ts_response.error_analysis.error_messages.join('; ');
+          console.warn(`⚠️ Avvisi dal Sistema TS: ${errorMessages}`);
+        }
       } else {
         setError(response.message || 'Errore nel caricamento delle ricette dal Sistema TS');
       }
@@ -225,6 +305,81 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
     } catch {
       return dataString;
     }
+  };
+
+  const renderDettagliRicetta = (ricetta: RicettaTS) => {
+    if (!ricetta.dettagli_prescrizione || ricetta.dettagli_prescrizione.length === 0) {
+      return (
+        <div className="text-muted">
+          <small>Nessun dettaglio prescrizione disponibile</small>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-2">
+        {ricetta.dettagli_prescrizione.map((dettaglio, index) => (
+          <div key={index} className="border-start border-3 border-info ps-2 mb-2">
+            <div className="fw-bold text-primary">
+              {dettaglio.descr_prod_prest || 'Farmaco non specificato'}
+            </div>
+            <div className="small text-muted">
+              <strong>AIC:</strong> {dettaglio.cod_prod_prest || '-'} | 
+              <strong> Quantità:</strong> {dettaglio.quantita || '-'} | 
+              <strong> TDL:</strong> {dettaglio.tdl === '1' ? 'Sì' : 'No'}
+            </div>
+            {dettaglio.posologia && (
+              <div className="small">
+                <strong>Posologia:</strong> {dettaglio.posologia}
+              </div>
+            )}
+            {dettaglio.durata_trattamento && (
+              <div className="small">
+                <strong>Durata:</strong> {dettaglio.durata_trattamento}
+              </div>
+            )}
+            {dettaglio.descr_testo_libero_note && (
+              <div className="small text-info">
+                <strong>Note:</strong> {dettaglio.descr_testo_libero_note}
+              </div>
+            )}
+            {dettaglio.non_sost === '1' && (
+              <div className="small text-warning">
+                <strong>⚠️ Non sostituibile</strong>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderErrorAnalysis = () => {
+    if (!errorAnalysis || !errorAnalysis.has_errors) return null;
+
+    const alertColor = errorAnalysis.error_level === 'error' ? 'danger' : 
+                      errorAnalysis.error_level === 'warning' ? 'warning' : 'info';
+
+    return (
+      <CAlert color={alertColor} className="mt-3">
+        <strong>📋 Analisi Sistema TS</strong>
+        <ul className="mb-2">
+          {errorAnalysis.error_messages.map((msg, index) => (
+            <li key={index}>{msg}</li>
+          ))}
+        </ul>
+        {errorAnalysis.suggested_actions.length > 0 && (
+          <div>
+            <strong>Suggerimenti:</strong>
+            <ul>
+              {errorAnalysis.suggested_actions.map((action, index) => (
+                <li key={index}>{action}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </CAlert>
+    );
   };
 
   if (loading) {
@@ -344,6 +499,7 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                       <CTableHeaderCell>Stato</CTableHeaderCell>
                       <CTableHeaderCell>Farmaco</CTableHeaderCell>
                       <CTableHeaderCell>Terapia</CTableHeaderCell>
+                      <CTableHeaderCell>Medico</CTableHeaderCell>
                       <CTableHeaderCell>Azioni</CTableHeaderCell>
                     </CTableRow>
                   </CTableHead>
@@ -352,40 +508,135 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                       <CTableRow key={ricetta.id || index}>
                         <CTableDataCell>
                           <small>{ricetta.data_compilazione ? formatData(ricetta.data_compilazione) : '-'}</small>
+                          {ricetta.data_inserimento && (
+                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                              Inserita: {formatData(ricetta.data_inserimento)}
+                            </div>
+                          )}
                         </CTableDataCell>
                         <CTableDataCell>
                           <code>{ricetta.nre || '-'}</code>
+                          {ricetta.codice_pin && (
+                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                              PIN: {ricetta.codice_pin}
+                            </div>
+                          )}
                         </CTableDataCell>
                         <CTableDataCell>
                           {ricetta.stato ? getStatoBadge(ricetta.stato) : '-'}
+                          {ricetta.source && (
+                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                              {ricetta.source === 'sistema_ts_officiale' ? '📋 Ufficiale' : '🔍 Fallback'}
+                            </div>
+                          )}
                         </CTableDataCell>
                         <CTableDataCell>
                           <div>
                             <strong>{ricetta.prodotto_aic || ricetta.denominazione_farmaco || '-'}</strong>
+                            {ricetta.prodotto_aic && (
+                              <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                                AIC: {ricetta.prodotto_aic}
+                              </div>
+                            )}
                           </div>
+                          {ricetta.quantita && (
+                            <div className="text-info" style={{ fontSize: '0.7rem' }}>
+                              Qty: {ricetta.quantita}
+                            </div>
+                          )}
                         </CTableDataCell>
                         <CTableDataCell>
                           <small className="text-muted">
                             {ricetta.posologia || '-'}<br />
                             {ricetta.durata_trattamento || '-'}
                           </small>
+                          {ricetta.note && (
+                            <div className="text-info" style={{ fontSize: '0.7rem' }}>
+                              Note: {ricetta.note}
+                            </div>
+                          )}
                         </CTableDataCell>
                         <CTableDataCell>
-                          {ricetta.nre && (
-                            <CButton 
-                              color="info" 
-                              size="sm"
-                              onClick={() => handleStampaPDF(ricetta)}
-                              title="Stampa PDF"
-                            >
-                              🖨️
-                            </CButton>
+                          <small>
+                            {ricetta.nome_medico && ricetta.cognome_medico ? 
+                              `${ricetta.cognome_medico} ${ricetta.nome_medico}` : 
+                              ricetta.cf_medico || '-'}
+                          </small>
+                          {ricetta.cod_diagnosi && (
+                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>
+                              Dx: {ricetta.cod_diagnosi}
+                            </div>
                           )}
+                        </CTableDataCell>
+                        <CTableDataCell>
+                          <div className="d-flex flex-column gap-1">
+                            {ricetta.nre && (
+                              <CButton 
+                                color="info" 
+                                size="sm"
+                                onClick={() => handleStampaPDF(ricetta)}
+                                title="Stampa PDF"
+                              >
+                                🖨️
+                              </CButton>
+                            )}
+                            {ricetta.dettagli_prescrizione && ricetta.dettagli_prescrizione.length > 0 && (
+                              <CButton 
+                                color="secondary" 
+                                size="sm"
+                                onClick={() => {
+                                  // Toggle dettagli - implementare se necessario
+                                  console.log('Dettagli ricetta:', ricetta.dettagli_prescrizione);
+                                }}
+                                title="Mostra dettagli"
+                              >
+                                📋
+                              </CButton>
+                            )}
+                          </div>
                         </CTableDataCell>
                       </CTableRow>
                     ))}
                   </CTableBody>
                 </CTable>
+              )}
+
+              {/* Analisi Errori Sistema TS */}
+              {renderErrorAnalysis()}
+
+              {/* Metadati Risposta (se disponibili) */}
+              {metadatiRisposta && (
+                <CRow className="mt-3">
+                  <CCol>
+                    <CAlert color="info">
+                      <strong>📊 Metadati Sistema TS</strong>
+                      <div className="mt-2">
+                        <small>
+                          <strong>Protocollo:</strong> {metadatiRisposta.protocollo_transazione || '-'} | 
+                          <strong> Esito:</strong> {metadatiRisposta.cod_esito_visualizzazione || '-'} | 
+                          <strong> Data ricezione:</strong> {metadatiRisposta.data_ricezione ? formatData(metadatiRisposta.data_ricezione) : '-'}
+                        </small>
+                        {metadatiRisposta.nome_medico && metadatiRisposta.cognome_medico && (
+                          <div className="mt-1">
+                            <small>
+                              <strong>Medico:</strong> {metadatiRisposta.cognome_medico} {metadatiRisposta.nome_medico} 
+                              ({metadatiRisposta.cf_medico}) | 
+                              <strong> Regione:</strong> {metadatiRisposta.cod_regione} | 
+                              <strong> ASL:</strong> {metadatiRisposta.cod_asl}
+                            </small>
+                          </div>
+                        )}
+                        {metadatiRisposta.cod_diagnosi && (
+                          <div className="mt-1">
+                            <small>
+                              <strong>Diagnosi:</strong> {metadatiRisposta.cod_diagnosi} - {metadatiRisposta.descr_diagnosi}
+                            </small>
+                          </div>
+                        )}
+                      </div>
+                    </CAlert>
+                  </CCol>
+                </CRow>
               )}
 
               {/* Risposta del Server per Debug */}

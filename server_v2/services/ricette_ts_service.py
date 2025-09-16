@@ -196,7 +196,7 @@ class RicetteTsService:
         
         return session
     
-    def _create_visualizza_soap_request(self, data_da: str, data_a: str, cf_assistito: str = None) -> str:
+    def _create_visualizza_soap_request(self, data_da: str, data_a: str, cf_assistito: str = None, nre: str = None) -> str:
         """
         Crea richiesta SOAP per visualizzazione ricette - DINAMICA
         """
@@ -224,7 +224,7 @@ class RicetteTsService:
             else:
                 raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
         
-        # Template SOAP DINAMICO per visualizzazione ricette con data e CF assistito
+        # Template SOAP DINAMICO per visualizzazione ricette con data, CF assistito e NRE opzionale
         soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                   xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
@@ -234,12 +234,19 @@ class RicetteTsService:
         <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
             <vis:pinCode>{pincode_cifrato}</vis:pinCode>
             <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
-            <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
+            <vis:cfMedico>{self.cf_medico}</vis:cfMedico>'''
+        
+        # Aggiungi NRE se specificato
+        if nre:
+            soap_template += f'''
+            <vis:nrbe>{nre}</vis:nrbe>'''
+        
+        soap_template += '''
         </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
     </soapenv:Body>
 </soapenv:Envelope>'''
         
-        self.logger.info(f"SOAP request creata dinamicamente - CF medico: {self.cf_medico}")
+        self.logger.info(f"SOAP request creata dinamicamente - CF medico: {self.cf_medico}, NRE: {nre or 'N/A'}")
         return soap_template
     
     def _encrypt_pincode(self, pincode: str) -> str:
@@ -276,7 +283,7 @@ class RicetteTsService:
             return pincode
     
     def _parse_visualizza_response(self, response: requests.Response) -> Dict[str, Any]:
-        """Parsa la risposta della visualizzazione ricette - IMPLEMENTAZIONE COMPLETA"""
+        """Parsa la risposta della visualizzazione ricette - BASATO SUI TRACCIATI UFFICIALI"""
         try:
             response_text = response.text
             self.logger.info(f"Parsing risposta visualizzazione ricette")
@@ -294,8 +301,9 @@ class RicetteTsService:
                 print(response_text)
                 print("=" * 80)
                 
-                # === PARSING XML COMPLETO ===
+                # === PARSING XML BASATO SUI TRACCIATI UFFICIALI ===
                 ricette = []
+                metadati_risposta = {}
                 
                 try:
                     from lxml import etree
@@ -304,39 +312,42 @@ class RicetteTsService:
                     # Parse XML response
                     root = etree.fromstring(response.content)
                     
-                    # Namespaces per il parsing
+                    # Namespaces ufficiali dal kit di sviluppo
                     namespaces = {
                         'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
-                        'dem': 'http://dematerializzazione.sanita.finanze.it/',
-                        'ric': 'http://ricetta.sanita.finanze.it/',
-                        'vis': 'http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it'
+                        'ricevuta': 'http://visualizzaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it',
+                        'td': 'http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it'
                     }
                     
-                    # Cerca lista ricette nella risposta
-                    # Il Sistema TS può restituire ricette in diversi formati
+                    # === ESTRAZIONE METADATI RISPOSTA (dal tracciato ufficiale) ===
+                    metadati_risposta = self._extract_response_metadata(root, namespaces)
                     
-                    # 1. Cerca elemento principale delle ricette
-                    ricette_elements = root.xpath('//ricette | //listaRicette | //ricettaElettronica | //ricetta')
+                    # === ANALISI ERRORI ===
+                    error_analysis = self._analyze_response_errors(metadati_risposta)
                     
-                    if ricette_elements:
-                        self.logger.info(f"Trovato elemento ricette principale: {len(ricette_elements)}")
-                        
-                        for ricetta_elem in ricette_elements:
-                            ricetta_data = self._parse_single_ricetta(ricetta_elem, namespaces)
-                            if ricetta_data:
-                                ricette.append(ricetta_data)
+                    # === RICERCA RICETTE SINGOLE ===
+                    # Il Sistema TS restituisce una singola ricetta per richiesta
+                    # Cerca l'elemento principale della risposta
+                    ricetta_principale = root.xpath('//ricevuta:VisualizzaPrescrittoRicettaBiancaRicevuta', namespaces=namespaces)
                     
-                    # 2. Se non trova elemento principale, cerca ricette singole
+                    if ricetta_principale:
+                        self.logger.info("Trovata ricetta principale nel formato ufficiale")
+                        ricetta_data = self._parse_ricetta_officiale(ricetta_principale[0], namespaces)
+                        if ricetta_data:
+                            ricette.append(ricetta_data)
+                    
+                    # === FALLBACK: RICERCA ALTERNATIVA ===
                     if not ricette:
-                        ricette_singole = root.xpath('//ricetta | //ricettaElettronica')
-                        self.logger.info(f"Trovate ricette singole: {len(ricette_singole)}")
+                        # Cerca ricette in altri formati possibili
+                        ricette_alternative = root.xpath('//ricetta | //ricettaElettronica | //dettaglioPrescrizioneRicettaBianca')
+                        self.logger.info(f"Trovate ricette alternative: {len(ricette_alternative)}")
                         
-                        for ricetta_elem in ricette_singole:
+                        for ricetta_elem in ricette_alternative:
                             ricetta_data = self._parse_single_ricetta(ricetta_elem, namespaces)
                             if ricetta_data:
                                 ricette.append(ricetta_data)
                     
-                    # 3. Fallback: cerca pattern nel testo XML
+                    # === FALLBACK FINALE: REGEX ===
                     if not ricette:
                         ricette = self._parse_ricette_fallback(response_text)
                     
@@ -353,6 +364,8 @@ class RicetteTsService:
                     'ricette': ricette,
                     'total_count': len(ricette),
                     'response_xml': response_text,
+                    'metadati_risposta': metadati_risposta,
+                    'error_analysis': error_analysis,
                     'timestamp': datetime.now().isoformat(),
                     'message': f'Parsing completato: {len(ricette)} ricette estratte'
                 }
@@ -375,6 +388,133 @@ class RicetteTsService:
                 'timestamp': datetime.now().isoformat()
             }
     
+    def _extract_response_metadata(self, root, namespaces: dict) -> dict:
+        """Estrae i metadati della risposta dal tracciato ufficiale"""
+        try:
+            metadati = {}
+            
+            # Estrai campi principali della risposta (dal XSD ufficiale)
+            metadati['protocollo_transazione'] = self._extract_text(root, ['protocolloTransazione'])
+            metadati['data_ricezione'] = self._extract_text(root, ['dataRicezione'])
+            metadati['cod_esito_visualizzazione'] = self._extract_text(root, ['codEsitoVisualizzazione'])
+            metadati['cf_medico'] = self._extract_text(root, ['cfMedico'])
+            metadati['nome_medico'] = self._extract_text(root, ['nomeMedico'])
+            metadati['cognome_medico'] = self._extract_text(root, ['cognomeMedico'])
+            metadati['cod_regione'] = self._extract_text(root, ['codRegione'])
+            metadati['cod_asl'] = self._extract_text(root, ['codASLAo'])
+            metadati['cod_specializzazione'] = self._extract_text(root, ['codSpecializzazione'])
+            metadati['codice_paziente'] = self._extract_text(root, ['codicePaziente'])
+            metadati['cogn_nome'] = self._extract_text(root, ['cognNome'])
+            metadati['indirizzo'] = self._extract_text(root, ['indirizzo'])
+            metadati['tipo_prescrizione'] = self._extract_text(root, ['tipoPrescrizione'])
+            metadati['cod_diagnosi'] = self._extract_text(root, ['codDiagnosi'])
+            metadati['descr_diagnosi'] = self._extract_text(root, ['descrDiagnosi'])
+            metadati['data_compilazione'] = self._extract_text(root, ['dataCompilazione'])
+            metadati['nrbe'] = self._extract_text(root, ['nrbe'])
+            metadati['pin_nrbe'] = self._extract_text(root, ['pinNrbe'])
+            metadati['stato_processo'] = self._extract_text(root, ['statoProcesso'])
+            metadati['data_inserimento'] = self._extract_text(root, ['dataInserimento'])
+            
+            # Estrai errori ricetta
+            errori = []
+            errori_elements = root.xpath('//erroreRicetta')
+            for errore_elem in errori_elements:
+                errore = {
+                    'cod_esito': self._extract_text(errore_elem, ['codEsito']),
+                    'esito': self._extract_text(errore_elem, ['esito']),
+                    'identificativo_prod_prest': self._extract_text(errore_elem, ['identificativoProdPrest']),
+                    'tipo_errore': self._extract_text(errore_elem, ['tipoErrore'])
+                }
+                errori.append(errore)
+            metadati['errori_ricetta'] = errori
+            
+            # Estrai comunicazioni
+            comunicazioni = []
+            comm_elements = root.xpath('//comunicazione')
+            for comm_elem in comm_elements:
+                comm = {
+                    'codice': self._extract_text(comm_elem, ['codice']),
+                    'messaggio': self._extract_text(comm_elem, ['messaggio'])
+                }
+                comunicazioni.append(comm)
+            metadati['comunicazioni'] = comunicazioni
+            
+            return metadati
+            
+        except Exception as e:
+            self.logger.error(f"Errore estrazione metadati: {e}")
+            return {}
+    
+    def _parse_ricetta_officiale(self, ricetta_elem, namespaces: dict) -> dict:
+        """Parsa una ricetta usando il formato ufficiale del tracciato"""
+        try:
+            ricetta_data = {}
+            
+            # Estrai dati principali della ricetta
+            ricetta_data['nre'] = self._extract_text(ricetta_elem, ['nrbe'])
+            ricetta_data['codice_pin'] = self._extract_text(ricetta_elem, ['pinNrbe'])
+            ricetta_data['cf_assistito'] = self._extract_text(ricetta_elem, ['codicePaziente'])
+            ricetta_data['paziente_nome'] = self._extract_text(ricetta_elem, ['cognNome'])
+            ricetta_data['data_compilazione'] = self._extract_text(ricetta_elem, ['dataCompilazione'])
+            ricetta_data['stato'] = self._extract_text(ricetta_elem, ['statoProcesso'])
+            ricetta_data['data_inserimento'] = self._extract_text(ricetta_elem, ['dataInserimento'])
+            
+            # Dati medico
+            ricetta_data['cf_medico'] = self._extract_text(ricetta_elem, ['cfMedico'])
+            ricetta_data['nome_medico'] = self._extract_text(ricetta_elem, ['nomeMedico'])
+            ricetta_data['cognome_medico'] = self._extract_text(ricetta_elem, ['cognomeMedico'])
+            
+            # Diagnosi
+            ricetta_data['cod_diagnosi'] = self._extract_text(ricetta_elem, ['codDiagnosi'])
+            ricetta_data['descr_diagnosi'] = self._extract_text(ricetta_elem, ['descrDiagnosi'])
+            
+            # Estrai dettagli prescrizione (farmaci)
+            dettagli_prescrizione = []
+            dettagli_elements = ricetta_elem.xpath('.//dettaglioPrescrizioneRicettaBianca')
+            
+            for dettaglio_elem in dettagli_elements:
+                dettaglio = {
+                    'cod_prod_prest': self._extract_text(dettaglio_elem, ['codProdPrest']),
+                    'descr_prod_prest': self._extract_text(dettaglio_elem, ['descrProdPrest']),
+                    'cod_gruppo_equival': self._extract_text(dettaglio_elem, ['codGruppoEquival']),
+                    'descr_gruppo_equival': self._extract_text(dettaglio_elem, ['descrGruppoEquival']),
+                    'non_sost': self._extract_text(dettaglio_elem, ['nonSost']),
+                    'cod_motivaz_non_sost': self._extract_text(dettaglio_elem, ['codMotivazNonSost']),
+                    'tdl': self._extract_text(dettaglio_elem, ['tdl']),
+                    'descr_testo_libero_note': self._extract_text(dettaglio_elem, ['descrTestoLiberoNote']),
+                    'quantita': self._extract_text(dettaglio_elem, ['quantita']),
+                    'posologia': self._extract_text(dettaglio_elem, ['posologia']),
+                    'durata_trattamento': self._extract_text(dettaglio_elem, ['durataTrattamento']),
+                    'modalita_impiego': self._extract_text(dettaglio_elem, ['modalitaImpiego']),
+                    'preparaz_farmaceutica': self._extract_text(dettaglio_elem, ['preparazFarmaceutica']),
+                    'num_ripetibilita': self._extract_text(dettaglio_elem, ['numRipetibilita']),
+                    'validita_farm': self._extract_text(dettaglio_elem, ['validitaFarm']),
+                    'stato': self._extract_text(dettaglio_elem, ['stato'])
+                }
+                dettagli_prescrizione.append(dettaglio)
+            
+            ricetta_data['dettagli_prescrizione'] = dettagli_prescrizione
+            
+            # Se ci sono dettagli prescrizione, usa il primo per i campi principali
+            if dettagli_prescrizione:
+                primo_dettaglio = dettagli_prescrizione[0]
+                ricetta_data['prodotto_aic'] = primo_dettaglio.get('cod_prod_prest')
+                ricetta_data['denominazione_farmaco'] = primo_dettaglio.get('descr_prod_prest')
+                ricetta_data['posologia'] = primo_dettaglio.get('posologia')
+                ricetta_data['durata_trattamento'] = primo_dettaglio.get('durata_trattamento')
+                ricetta_data['note'] = primo_dettaglio.get('descr_testo_libero_note')
+                ricetta_data['quantita'] = primo_dettaglio.get('quantita')
+            
+            ricetta_data['source'] = 'sistema_ts_officiale'
+            ricetta_data['id'] = len(ricetta_data) + 1  # ID temporaneo
+            
+            self.logger.info(f"Ricetta ufficiale parsata: NRE={ricetta_data.get('nre')}, Farmaco={ricetta_data.get('denominazione_farmaco')}")
+            return ricetta_data
+            
+        except Exception as e:
+            self.logger.error(f"Errore parsing ricetta ufficiale: {e}")
+            return None
+
     def _parse_single_ricetta(self, ricetta_elem, namespaces: dict) -> dict:
         """Parsa una singola ricetta dall'elemento XML"""
         try:
@@ -464,28 +604,70 @@ class RicetteTsService:
         try:
             import re
             
-            # Pattern per estrarre NRE
-            nre_pattern = r'<[^:]*:?nre[^>]*>([^<]+)</[^:]*:?nre>|<[^:]*:?nrbe[^>]*>([^<]+)</[^:]*:?nrbe>'
+            # Pattern per estrarre NRE (basato sui tracciati ufficiali)
+            nre_pattern = r'<[^:]*:?nrbe[^>]*>([^<]+)</[^:]*:?nrbe>|<[^:]*:?nre[^>]*>([^<]+)</[^:]*:?nre>'
             nre_matches = re.findall(nre_pattern, response_text, re.IGNORECASE)
             
             for i, nre_match in enumerate(nre_matches):
                 nre = nre_match[0] or nre_match[1]  # Prende il primo gruppo non vuoto
                 
                 if nre:
+                    # Estrai altri campi con regex
+                    pin_pattern = r'<[^:]*:?pinNrbe[^>]*>([^<]+)</[^:]*:?pinNrbe>'
+                    pin_match = re.search(pin_pattern, response_text, re.IGNORECASE)
+                    pin = pin_match.group(1) if pin_match else ''
+                    
+                    cf_pattern = r'<[^:]*:?codicePaziente[^>]*>([^<]+)</[^:]*:?codicePaziente>'
+                    cf_match = re.search(cf_pattern, response_text, re.IGNORECASE)
+                    cf_assistito = cf_match.group(1) if cf_match else ''
+                    
+                    cogn_nome_pattern = r'<[^:]*:?cognNome[^>]*>([^<]+)</[^:]*:?cognNome>'
+                    cogn_nome_match = re.search(cogn_nome_pattern, response_text, re.IGNORECASE)
+                    cogn_nome = cogn_nome_match.group(1) if cogn_nome_match else ''
+                    
+                    data_comp_pattern = r'<[^:]*:?dataCompilazione[^>]*>([^<]+)</[^:]*:?dataCompilazione>'
+                    data_comp_match = re.search(data_comp_pattern, response_text, re.IGNORECASE)
+                    data_compilazione = data_comp_match.group(1) if data_comp_match else ''
+                    
+                    stato_pattern = r'<[^:]*:?statoProcesso[^>]*>([^<]+)</[^:]*:?statoProcesso>'
+                    stato_match = re.search(stato_pattern, response_text, re.IGNORECASE)
+                    stato = stato_match.group(1) if stato_match else 'Trovata'
+                    
+                    # Estrai dettagli farmaco
+                    farmaco_pattern = r'<[^:]*:?descrProdPrest[^>]*>([^<]+)</[^:]*:?descrProdPrest>'
+                    farmaco_match = re.search(farmaco_pattern, response_text, re.IGNORECASE)
+                    denominazione_farmaco = farmaco_match.group(1) if farmaco_match else ''
+                    
+                    aic_pattern = r'<[^:]*:?codProdPrest[^>]*>([^<]+)</[^:]*:?codProdPrest>'
+                    aic_match = re.search(aic_pattern, response_text, re.IGNORECASE)
+                    prodotto_aic = aic_match.group(1) if aic_match else ''
+                    
+                    posologia_pattern = r'<[^:]*:?posologia[^>]*>([^<]+)</[^:]*:?posologia>'
+                    posologia_match = re.search(posologia_pattern, response_text, re.IGNORECASE)
+                    posologia = posologia_match.group(1) if posologia_match else ''
+                    
+                    durata_pattern = r'<[^:]*:?durataTrattamento[^>]*>([^<]+)</[^:]*:?durataTrattamento>'
+                    durata_match = re.search(durata_pattern, response_text, re.IGNORECASE)
+                    durata_trattamento = durata_match.group(1) if durata_match else ''
+                    
+                    note_pattern = r'<[^:]*:?descrTestoLiberoNote[^>]*>([^<]+)</[^:]*:?descrTestoLiberoNote>'
+                    note_match = re.search(note_pattern, response_text, re.IGNORECASE)
+                    note = note_match.group(1) if note_match else ''
+                    
                     ricetta_data = {
                         'id': i + 1,
                         'nre': nre,
-                        'codice_pin': '',
-                        'cf_assistito': '',
-                        'paziente_nome': '',
+                        'codice_pin': pin,
+                        'cf_assistito': cf_assistito,
+                        'paziente_nome': cogn_nome,
                         'paziente_cognome': '',
-                        'data_compilazione': '',
-                        'stato': 'Trovata',
-                        'prodotto_aic': '',
-                        'denominazione_farmaco': '',
-                        'posologia': '',
-                        'durata_trattamento': '',
-                        'note': '',
+                        'data_compilazione': data_compilazione,
+                        'stato': stato,
+                        'prodotto_aic': prodotto_aic,
+                        'denominazione_farmaco': denominazione_farmaco,
+                        'posologia': posologia,
+                        'durata_trattamento': durata_trattamento,
+                        'note': note,
                         'source': 'sistema_ts_regex_fallback'
                     }
                     ricette.append(ricetta_data)
@@ -497,11 +679,89 @@ class RicetteTsService:
         
         return ricette
     
+    def _get_error_message_from_code(self, cod_esito: str) -> str:
+        """Converte codice errore in messaggio leggibile basato sui diagnostici del sistema"""
+        error_messages = {
+            '0000': 'Operazione completata con successo',
+            '0001': 'Ricetta non trovata',
+            '0002': 'Ricetta già utilizzata',
+            '0003': 'Ricetta scaduta',
+            '0004': 'Ricetta annullata',
+            '0005': 'Errore di validazione dati',
+            '0006': 'Errore di autenticazione',
+            '0007': 'Errore di autorizzazione',
+            '0008': 'Errore di sistema',
+            '0009': 'Ricetta non disponibile per la visualizzazione',
+            '0010': 'Errore di cifratura/decifratura',
+            '0011': 'Errore di connessione al sistema',
+            '0012': 'Timeout della richiesta',
+            '0013': 'Errore di formato dati',
+            '0014': 'Errore di business logic',
+            '0015': 'Errore di configurazione'
+        }
+        
+        return error_messages.get(cod_esito, f'Errore sconosciuto (codice: {cod_esito})')
+    
+    def _analyze_response_errors(self, metadati_risposta: dict) -> dict:
+        """Analizza gli errori nella risposta basandosi sui codici diagnostici"""
+        try:
+            error_analysis = {
+                'has_errors': False,
+                'error_level': 'info',
+                'error_messages': [],
+                'suggested_actions': []
+            }
+            
+            # Analizza codice esito principale
+            cod_esito = metadati_risposta.get('cod_esito_visualizzazione', '')
+            if cod_esito and cod_esito != '0000':
+                error_analysis['has_errors'] = True
+                error_analysis['error_level'] = 'error'
+                error_analysis['error_messages'].append(self._get_error_message_from_code(cod_esito))
+                
+                # Suggerimenti basati sul codice errore
+                if cod_esito in ['0001', '0009']:
+                    error_analysis['suggested_actions'].append('Verificare che l\'NRE sia corretto e che la ricetta esista')
+                elif cod_esito in ['0002', '0004']:
+                    error_analysis['suggested_actions'].append('La ricetta non è più utilizzabile')
+                elif cod_esito == '0003':
+                    error_analysis['suggested_actions'].append('La ricetta è scaduta')
+                elif cod_esito in ['0006', '0007']:
+                    error_analysis['suggested_actions'].append('Verificare le credenziali di accesso')
+                elif cod_esito in ['0008', '0011', '0012']:
+                    error_analysis['suggested_actions'].append('Riprovare più tardi - errore temporaneo del sistema')
+            
+            # Analizza errori ricetta specifici
+            errori_ricetta = metadati_risposta.get('errori_ricetta', [])
+            for errore in errori_ricetta:
+                if errore.get('cod_esito'):
+                    error_analysis['has_errors'] = True
+                    error_analysis['error_level'] = 'warning'
+                    error_analysis['error_messages'].append(f"Errore ricetta: {errore.get('esito', 'Errore sconosciuto')}")
+            
+            # Analizza comunicazioni
+            comunicazioni = metadati_risposta.get('comunicazioni', [])
+            for comm in comunicazioni:
+                if comm.get('codice'):
+                    error_analysis['error_messages'].append(f"Comunicazione: {comm.get('messaggio', 'Messaggio di servizio')}")
+            
+            return error_analysis
+            
+        except Exception as e:
+            self.logger.error(f"Errore analisi errori: {e}")
+            return {
+                'has_errors': True,
+                'error_level': 'error',
+                'error_messages': [f'Errore nell\'analisi della risposta: {str(e)}'],
+                'suggested_actions': ['Contattare il supporto tecnico']
+            }
+    
     def visualizza_ricetta_specifica(self, nre: str, cf_assistito: str = None, cf_medico: str = None) -> Dict[str, Any]:
         """
         Visualizza ricetta specifica tramite endpoint interrogazioni - DINAMICA
         """
         try:
+            import os  # Importa os all'inizio del metodo
             self.logger.info(f"=== RICERCA RICETTA SPECIFICA ===")
             self.logger.info(f"NRE: {nre}, CF assistito: {cf_assistito}")
             
@@ -677,7 +937,7 @@ class RicetteTsService:
                 'nre': nre
             }
 
-    def get_all_ricette(self, data_da: str = None, data_a: str = None, cf_assistito: str = None) -> Dict[str, Any]:
+    def get_all_ricette(self, data_da: str = None, data_a: str = None, cf_assistito: str = None, nre: str = None) -> Dict[str, Any]:
         """
         Recupera la lista delle ricette dal Sistema TS - PRODUZIONE SEMPRE
         
@@ -695,7 +955,7 @@ class RicetteTsService:
             self.logger.info(f"CF medico: {self.cf_medico}")
             
             # Crea richiesta SOAP per visualizzazione (data_da e data_a non sono usati nel SOAP)
-            soap_request = self._create_visualizza_soap_request(data_da, data_a, cf_assistito)
+            soap_request = self._create_visualizza_soap_request(data_da, data_a, cf_assistito, nre)
             
             # Debug: Verifica cifratura
             print(f"=== VERIFICA CIFRATURA ===")
