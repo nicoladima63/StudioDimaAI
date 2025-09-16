@@ -1,0 +1,22 @@
+<!-- RICHIESTA SOAP SISTEMA TS -->
+<!-- Timestamp: 2025-09-16T22:44:25.104260 -->
+<!-- Endpoint: https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca -->
+<!-- CF Medico: DMRNCL63S21D612I -->
+<!-- CF Assistito: RMGFLL37D69D612X -->
+<!-- NRE: X00003504565 -->
+<!-- Ambiente: produzione -->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
+                  xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+            <vis:pinCode>Y1WLSlUv/CFFlV3PSFQJlyJaaxRxqG1cmum9T/MJ8lfgQhmAF8KBMmxNYN9R9V76q83G6mINzzHy5CGb6J3S+n5prUgknHXSGMgQvhM+of4LKJ/IDLOo6iWEX65LAr6A8SOfBfbbMjhNNu5H5ju8ReEZvuHqpZSkVM3tQUL0ZWM=</vis:pinCode>
+            <vis:codicePaziente>j00NRFAKkqT8xp7m+WFgNY5hjHNTtw8FD1z/nhGRia6rcHnjVhKQzSn7ErNLlMzP+B0HGsVjffwWTaAzVyVr9uvPyIdzUBk6uEyG/7iCZTGz62atk3HqncfsLXL2OPigb+9l4xf6mdX4ZEamU+ndMZ2j1hmptDcne1Xpb9sCeOU=</vis:codicePaziente>
+            <vis:cfMedico>DMRNCL63S21D612I</vis:cfMedico>
+            <vis:nrbe>X00003504565</vis:nrbe>
+        </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+    </soapenv:Body>
+</soapenv:Envelope>

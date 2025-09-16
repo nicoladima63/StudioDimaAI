@@ -55,13 +55,13 @@ class RicetteTsService:
         self.asl = os.getenv('ASL_PROD')
         self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD')
         
-        # Endpoint dinamici da env
+        # Endpoint dinamici da env - TEST (prova con i tuoi dati)
         self.endpoint_visualizza = os.getenv('ENDPOINT_VISUALIZZA_PROD', 
-            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
+            'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
         self.endpoint_invio = os.getenv('ENDPOINT_INVIO_PROD',
-            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca')
+            'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca')
         self.endpoint_annulla = os.getenv('ENDPOINT_ANNULLA_PROD',
-            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
+            'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
         
         # Certificati dinamici da env - path relativo a server_v2/certs/prod
         server_v2_dir = os.path.dirname(os.path.dirname(__file__))  # server_v2/
@@ -220,6 +220,7 @@ class RicetteTsService:
     <soapenv:Header/>
     <soapenv:Body>
         <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+            <vis:pinCode>{pincode_cifrato}</vis:pinCode>
             <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
             <vis:cfMedico>{self.cf_medico}</vis:cfMedico>'''
         
@@ -747,18 +748,15 @@ class RicetteTsService:
             if not pincode_cifrato:
                 raise ValueError("PINCODE_CIFRATO_PROD deve essere configurato")
             
-            # SOAP DINAMICO InterrogaNreUtilRichiesta
+            # SOAP MINIMO - Solo NRE e CF Medico
             soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
                 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                                 xmlns:int="http://interroganreutilrichiesta.xsd.dem.sanita.finanze.it">
                     <soapenv:Header/>
                     <soapenv:Body>
                         <int:InterrogaNreUtilRichiesta>
-                            <int:pinCode>{pincode_cifrato}</int:pinCode>
-                            <int:codRegione>{self.regione}</int:codRegione>
                             <int:nre>{nre}</int:nre>
                             <int:cfMedico>{cf_medico or self.cf_medico}</int:cfMedico>
-                            <int:cfAssistito>{cf_assistito or ''}</int:cfAssistito>
                         </int:InterrogaNreUtilRichiesta>
                     </soapenv:Body>
                 </soapenv:Envelope>'''
@@ -927,6 +925,28 @@ class RicetteTsService:
             # Crea richiesta SOAP per visualizzazione (data_da e data_a non sono usati nel SOAP)
             soap_request = self._create_visualizza_soap_request(data_da, data_a, cf_assistito, nre)
             
+            # SALVA RICHIESTA SOAP PER DEBUG
+            try:
+                import os
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                soap_file_path = os.path.join(project_root, f"request_soap_visualizza_{nre or 'no_nre'}.xml")
+                
+                with open(soap_file_path, 'w', encoding='utf-8') as f:
+                    f.write(f"<!-- RICHIESTA SOAP SISTEMA TS -->\n")
+                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
+                    f.write(f"<!-- Endpoint: {self.endpoint_visualizza} -->\n")
+                    f.write(f"<!-- CF Medico: {self.cf_medico} -->\n")
+                    f.write(f"<!-- CF Assistito: {cf_assistito} -->\n")
+                    f.write(f"<!-- NRE: {nre} -->\n")
+                    f.write(f"<!-- Ambiente: produzione -->\n")
+                    f.write("\n")
+                    f.write(soap_request)
+                
+                print(f"📁 RICHIESTA SOAP SALVATA: {soap_file_path}")
+                
+            except Exception as save_error:
+                self.logger.warning(f"Errore salvataggio richiesta SOAP: {save_error}")
+            
             # Esegui richiesta
             session = self._create_session()
             session.auth = (self.cf_medico, self.password)
@@ -948,6 +968,30 @@ class RicetteTsService:
             )
             
             self.logger.info(f"Risposta ricevuta - Status: {response.status_code}")
+            
+            # SALVA RISPOSTA XML PER DEBUG
+            response_text = response.text
+            try:
+                import os
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                xml_file_path = os.path.join(project_root, f"response_xml_visualizza_{nre or 'no_nre'}.xml")
+                
+                with open(xml_file_path, 'w', encoding='utf-8') as f:
+                    f.write(f"<!-- RICERCA RICETTE SISTEMA TS -->\n")
+                    f.write(f"<!-- HTTP Status: {response.status_code} -->\n")
+                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
+                    f.write(f"<!-- Endpoint: {self.endpoint_visualizza} -->\n")
+                    f.write(f"<!-- CF Medico: {self.cf_medico} -->\n")
+                    f.write(f"<!-- CF Assistito: {cf_assistito} -->\n")
+                    f.write(f"<!-- NRE: {nre} -->\n")
+                    f.write(f"<!-- Ambiente: produzione -->\n")
+                    f.write("\n")
+                    f.write(response_text)
+                
+                print(f"📁 XML VISUALIZZA SALVATO: {xml_file_path}")
+                
+            except Exception as save_error:
+                self.logger.warning(f"Errore salvataggio XML: {save_error}")
             
             # Parsa la risposta
             result = self._parse_visualizza_response(response)
@@ -1042,352 +1086,352 @@ class RicetteTsService:
                 </dem:annullaPrescrittoRicettaBianca>
             </soap:Body>
         </soap:Envelope>'''
-                
-                return soap_template
+        
+        return soap_template
+    
+    def _parse_annulla_response(self, response: requests.Response, nre: str) -> Dict[str, Any]:
+        """Parsa la risposta dell'annullamento ricetta"""
+        try:
+            response_text = response.text
+            self.logger.info(f"Parsing risposta annullamento ricetta {nre}")
             
-            def _parse_annulla_response(self, response: requests.Response, nre: str) -> Dict[str, Any]:
-                """Parsa la risposta dell'annullamento ricetta"""
-                try:
-                    response_text = response.text
-                    self.logger.info(f"Parsing risposta annullamento ricetta {nre}")
-                    
-                    if response.status_code == 200:
-                        # TODO: Implementare parsing completo del XML se necessario
-                        # Per ora assumiamo che 200 = successo
-                        
-                        return {
-                            'success': True,
-                            'http_status': response.status_code,
-                            'nre': nre,
-                            'response_xml': response_text,
-                            'timestamp': datetime.now().isoformat(),
-                            'message': 'Ricetta annullata con successo sul Sistema TS'
-                        }
-                    else:
-                        return {
-                            'success': False,
-                            'http_status': response.status_code,
-                            'nre': nre,
-                            'error': f'HTTP {response.status_code}',
-                            'response_text': response_text[:500],
-                            'timestamp': datetime.now().isoformat()
-                        }
-                        
-                except Exception as e:
-                    self.logger.error(f"Errore parsing risposta annullamento: {e}")
-                    return {
-                        'success': False,
-                        'error': f'Errore parsing risposta: {str(e)}',
-                        'http_status': response.status_code if hasattr(response, 'status_code') else 0,
-                        'response_text': response.text[:500] if hasattr(response, 'text') else '',
-                        'timestamp': datetime.now().isoformat(),
-                        'nre': nre
-                    }
-
-            def get_environment_info(self) -> Dict[str, Any]:
-                """Informazioni ambiente corrente"""
+            if response.status_code == 200:
+                # TODO: Implementare parsing completo del XML se necessario
+                # Per ora assumiamo che 200 = successo
+                
                 return {
-                    'environment': self.env,
-                    'cf_medico': self.cf_medico,
-                    'regione': self.regione,
-                    'asl': self.asl,
-                    'specializzazione': self.specializzazione,
-                    'endpoint_visualizza': self.endpoint_visualizza,
-                    'endpoint_invio': self.endpoint_invio,
-                    'endpoint_annulla': self.endpoint_annulla,
-                    'certificates': {
-                        'client_cert': os.path.exists(self.client_cert) if hasattr(self, 'client_cert') else False,
-                        'client_key': os.path.exists(self.client_key) if hasattr(self, 'client_key') else False,
-                        'sanitel_cert': os.path.exists(self.sanitel_cert) if hasattr(self, 'sanitel_cert') else False
-                    },
-                    'credentials_configured': bool(self.cf_medico and self.password)
+                    'success': True,
+                    'http_status': response.status_code,
+                    'nre': nre,
+                    'response_xml': response_text,
+                    'timestamp': datetime.now().isoformat(),
+                    'message': 'Ricetta annullata con successo sul Sistema TS'
                 }
-            
-            def test_connection(self) -> Dict[str, Any]:
-                """Testa connessione Sistema TS"""
-                try:
-                    # Test semplice con richiesta di visualizzazione vuota
-                    result = self.get_all_ricette()
-                    return {
-                        'success': not ('timeout' in result.get('error', '').lower()),
-                        'message': 'Connessione Sistema TS testata',
-                        'details': result
-                    }
-                except Exception as e:
-                    return {
-                        'success': False,
-                        'message': f'Test connessione fallito: {e}'
-                    }
+            else:
+                return {
+                    'success': False,
+                    'http_status': response.status_code,
+                    'nre': nre,
+                    'error': f'HTTP {response.status_code}',
+                    'response_text': response_text[:500],
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore parsing risposta annullamento: {e}")
+            return {
+                'success': False,
+                'error': f'Errore parsing risposta: {str(e)}',
+                'http_status': response.status_code if hasattr(response, 'status_code') else 0,
+                'response_text': response.text[:500] if hasattr(response, 'text') else '',
+                'timestamp': datetime.now().isoformat(),
+                'nre': nre
+            }
 
-            def _create_invio_soap_request(self, dati_ricetta: Dict[str, Any]) -> str:
-                """
-                Crea richiesta SOAP per invio ricetta - DINAMICA
-                """
-                
-                # PinCode cifrato dinamico
-                pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
-                if not pincode_cifrato and self.pincode:
-                    pincode_cifrato = self._encrypt_pincode(self.pincode)
-                
-                if not pincode_cifrato:
-                    raise ValueError("PINCODE_CIFRATO_PROD deve essere configurato")
-                
-                # CF Assistito cifrato dinamicamente
-                cf_assistito = dati_ricetta.get('cf_assistito')
-                if cf_assistito:
-                    cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
-                else:
-                    cf_assistito_default = os.getenv('CF_ASSISTITO_DEFAULT_CIFRATO')
-                    if cf_assistito_default:
-                        cf_assistito_cifrato = cf_assistito_default
-                    else:
-                        raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
-                
-                # Timestamp dinamico
-                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                
-                # Template SOAP IDENTICO V1 - che funziona
-                soap_xml = f"""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-                                xmlns:inv="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it"
-                                xmlns:tip="http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it">
-            <soapenv:Header/>
-            <soapenv:Body>
-                <inv:InvioPrescrittoRicettaBiancaRichiesta>
-                    <inv:pinCode>{pincode_cifrato}</inv:pinCode>
-                    <inv:cfMedico>{self.cf_medico}</inv:cfMedico>
-                    <inv:codRegione>{self.regione}</inv:codRegione>
-                    <inv:codASLAo>{self.asl}</inv:codASLAo>
-                    <inv:codSpecializzazione>{self.specializzazione}</inv:codSpecializzazione>
-                    <inv:numIscrizAlbo>{dati_ricetta.get('num_iscrizione', '12345')}</inv:numIscrizAlbo>
-                    <inv:indirMedico>{dati_ricetta.get('indirizzo_medico', 'Via Roma, 1|00100|Roma|RM')}</inv:indirMedico>
-                    <inv:telefMedico>{dati_ricetta.get('telefono_medico', '+39|0612345678')}</inv:telefMedico>
-                    <inv:codicePaziente>{cf_assistito_cifrato}</inv:codicePaziente>
-                    <inv:cognNome>{dati_ricetta.get('nome_paziente', 'ROSSI MARIO')}</inv:cognNome>
-                    <inv:indirizzo>{dati_ricetta.get('indirizzo_paziente', 'Via Garibaldi, 10|00100|Roma|RM')}</inv:indirizzo>
-                    <inv:tipoPrescrizione>F</inv:tipoPrescrizione>
-                    <inv:codDiagnosi>{dati_ricetta.get('codice_diagnosi', 'Z01.8')}</inv:codDiagnosi>
-                    <inv:descrDiagnosi>{dati_ricetta.get('descrizione_diagnosi', 'Altro esame generale e screening')}</inv:descrDiagnosi>
-                    <inv:dataCompilazione>{timestamp}</inv:dataCompilazione>
-                    <inv:dettaglioPrescrizioneRicettaBianca>
-                        <tip:codProdPrest>{dati_ricetta.get('codice_farmaco', '000123456')}</tip:codProdPrest>
-                        <tip:descrProdPrest>{dati_ricetta.get('denominazione_farmaco', 'TACHIPIRINA 500 mg compresse')}</tip:descrProdPrest>
-                        <tip:tdl>0</tip:tdl>
-                        <tip:descrTestoLiberoNote>{dati_ricetta.get('note', 'Assumere al bisogno per dolore o febbre')}</tip:descrTestoLiberoNote>
-                        <tip:quantita>{dati_ricetta.get('quantita', '1')}</tip:quantita>
-                        <tip:posologia>{dati_ricetta.get('posologia', '1 compressa ogni 6 ore al bisogno')}</tip:posologia>
-                    </inv:dettaglioPrescrizioneRicettaBianca>
-                </inv:InvioPrescrittoRicettaBiancaRichiesta>
-            </soapenv:Body>
+    def get_environment_info(self) -> Dict[str, Any]:
+        """Informazioni ambiente corrente"""
+        return {
+            'environment': self.env,
+            'cf_medico': self.cf_medico,
+            'regione': self.regione,
+            'asl': self.asl,
+            'specializzazione': self.specializzazione,
+            'endpoint_visualizza': self.endpoint_visualizza,
+            'endpoint_invio': self.endpoint_invio,
+            'endpoint_annulla': self.endpoint_annulla,
+            'certificates': {
+                'client_cert': os.path.exists(self.client_cert) if hasattr(self, 'client_cert') else False,
+                'client_key': os.path.exists(self.client_key) if hasattr(self, 'client_key') else False,
+                'sanitel_cert': os.path.exists(self.sanitel_cert) if hasattr(self, 'sanitel_cert') else False
+            },
+            'credentials_configured': bool(self.cf_medico and self.password)
+        }
+            
+    def test_connection(self) -> Dict[str, Any]:
+        """Testa connessione Sistema TS"""
+        try:
+            # Test semplice con richiesta di visualizzazione vuota
+            result = self.get_all_ricette()
+            return {
+                'success': not ('timeout' in result.get('error', '').lower()),
+                'message': 'Connessione Sistema TS testata',
+                'details': result
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'Test connessione fallito: {e}'
+            }
+
+    def _create_invio_soap_request(self, dati_ricetta: Dict[str, Any]) -> str:
+        """
+        Crea richiesta SOAP per invio ricetta - DINAMICA
+        """
+        
+        # PinCode cifrato dinamico
+        pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
+        if not pincode_cifrato and self.pincode:
+            pincode_cifrato = self._encrypt_pincode(self.pincode)
+        
+        if not pincode_cifrato:
+            raise ValueError("PINCODE_CIFRATO_PROD deve essere configurato")
+        
+        # CF Assistito cifrato dinamicamente
+        cf_assistito = dati_ricetta.get('cf_assistito')
+        if cf_assistito:
+            cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
+        else:
+            cf_assistito_default = os.getenv('CF_ASSISTITO_DEFAULT_CIFRATO')
+            if cf_assistito_default:
+                cf_assistito_cifrato = cf_assistito_default
+            else:
+                raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
+        
+        # Timestamp dinamico
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Template SOAP IDENTICO V1 - che funziona
+        soap_xml = f"""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                        xmlns:inv="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it"
+                        xmlns:tip="http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <inv:InvioPrescrittoRicettaBiancaRichiesta>
+                <inv:pinCode>{pincode_cifrato}</inv:pinCode>
+                <inv:cfMedico>{self.cf_medico}</inv:cfMedico>
+                <inv:codRegione>{self.regione}</inv:codRegione>
+                <inv:codASLAo>{self.asl}</inv:codASLAo>
+                <inv:codSpecializzazione>{self.specializzazione}</inv:codSpecializzazione>
+                <inv:numIscrizAlbo>{dati_ricetta.get('num_iscrizione', '12345')}</inv:numIscrizAlbo>
+                <inv:indirMedico>{dati_ricetta.get('indirizzo_medico', 'Via Roma, 1|00100|Roma|RM')}</inv:indirMedico>
+                <inv:telefMedico>{dati_ricetta.get('telefono_medico', '+39|0612345678')}</inv:telefMedico>
+                <inv:codicePaziente>{cf_assistito_cifrato}</inv:codicePaziente>
+                <inv:cognNome>{dati_ricetta.get('nome_paziente', 'ROSSI MARIO')}</inv:cognNome>
+                <inv:indirizzo>{dati_ricetta.get('indirizzo_paziente', 'Via Garibaldi, 10|00100|Roma|RM')}</inv:indirizzo>
+                <inv:tipoPrescrizione>F</inv:tipoPrescrizione>
+                <inv:codDiagnosi>{dati_ricetta.get('codice_diagnosi', 'Z01.8')}</inv:codDiagnosi>
+                <inv:descrDiagnosi>{dati_ricetta.get('descrizione_diagnosi', 'Altro esame generale e screening')}</inv:descrDiagnosi>
+                <inv:dataCompilazione>{timestamp}</inv:dataCompilazione>
+                <inv:dettaglioPrescrizioneRicettaBianca>
+                    <tip:codProdPrest>{dati_ricetta.get('codice_farmaco', '000123456')}</tip:codProdPrest>
+                    <tip:descrProdPrest>{dati_ricetta.get('denominazione_farmaco', 'TACHIPIRINA 500 mg compresse')}</tip:descrProdPrest>
+                    <tip:tdl>0</tip:tdl>
+                    <tip:descrTestoLiberoNote>{dati_ricetta.get('note', 'Assumere al bisogno per dolore o febbre')}</tip:descrTestoLiberoNote>
+                    <tip:quantita>{dati_ricetta.get('quantita', '1')}</tip:quantita>
+                    <tip:posologia>{dati_ricetta.get('posologia', '1 compressa ogni 6 ore al bisogno')}</tip:posologia>
+                </inv:dettaglioPrescrizioneRicettaBianca>
+            </inv:InvioPrescrittoRicettaBiancaRichiesta>
+        </soapenv:Body>
         </soapenv:Envelope>"""
-                
-                return soap_xml
+        
+        return soap_xml
             
-            def _parse_invio_response(self, response: requests.Response, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
-                """Parsa la risposta dell'invio ricetta - COPIA ESATTA LOGICA DA V1 CHE FUNZIONA"""
-                try:
-                    self.logger.info(f"Parsing risposta invio ricetta")
-                    
-                    if response.status_code == 200:
-                        # Parse XML response - LOGICA IDENTICA V1
-                        from lxml import etree
-                        import re
-                        
-                        root = etree.fromstring(response.content)
-                        
-                        # Namespaces esatti dal V1 che funziona
-                        namespaces = {
-                            'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
-                            'dem': 'http://dematerializzazione.sanita.finanze.it/',
-                            'ric': 'http://ricetta.sanita.finanze.it/'
-                        }
-                        
-                        # === ESTRAZIONE DATI IDENTICA A V1 ===
-                        
-                        # Cerca NRE (Numero Ricetta Elettronica) - nel sistema TS è chiamato "nrbe"
-                        nre_element = root.xpath('//nrbe/text()') or root.xpath('//ric:nre/text()', namespaces=namespaces)
-                        nre = nre_element[0] if nre_element else None
-                        
-                        # Cerca PIN ricetta - nel sistema TS è chiamato "pinNrbe"
-                        pin_element = root.xpath('//pinNrbe/text()') or root.xpath('//ric:pinRicetta/text()', namespaces=namespaces)
-                        pin_ricetta = pin_element[0] if pin_element else None
-                        
-                        # Cerca codice transazione/protocollo
-                        protocollo_element = root.xpath('//protocolloTransazione/text()') or root.xpath('//ric:protocolloTransazione/text()', namespaces=namespaces)
-                        protocollo_transazione = protocollo_element[0] if protocollo_element else None
-                        
-                        # Cerca codice autorizzazione (se presente)
-                        auth_element = root.xpath('//ric:codiceAutorizzazione/text()', namespaces=namespaces)
-                        codice_autorizzazione = auth_element[0] if auth_element else None
-                        
-                        # Cerca PDF promemoria (ricetta bianca stampabile)
-                        pdf_element = root.xpath('//pdfPromemoria/text()')
-                        pdf_promemoria_b64 = pdf_element[0] if pdf_element else None
-                        
-                        # Cerca data inserimento
-                        data_element = root.xpath('//dataInserimento/text()')
-                        data_inserimento = data_element[0] if data_element else None
-                        
-                        # Cerca nome e cognome medico dalla risposta
-                        nome_medico_element = root.xpath('//nomeMedico/text()')
-                        cognome_medico_element = root.xpath('//cognomeMedico/text()')
-                        nome_medico = nome_medico_element[0] if nome_medico_element else None
-                        cognome_medico = cognome_medico_element[0] if cognome_medico_element else None
-                        
-                        # Estrai anche informazioni di errore se presenti
-                        cod_esito_element = root.xpath('//codEsitoInserimento/text()')
-                        cod_esito = cod_esito_element[0] if cod_esito_element else None
-                        
-                        errore_cod_element = root.xpath('//ns2:codEsito/text()', namespaces={'ns2': 'http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it'})
-                        errore_desc_element = root.xpath('//ns2:esito/text()', namespaces={'ns2': 'http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it'})
-                        
-                        errore_cod = errore_cod_element[0] if errore_cod_element else None
-                        errore_desc = errore_desc_element[0] if errore_desc_element else None
-                        
-                        # === FALLBACK REGEX IDENTICI V1 ===
-                        response_text = response.text
-                        
-                        if not nre and ('nre' in response_text.lower() or 'nrbe' in response_text.lower()):
-                            # Fallback: cerca pattern nel testo XML - cerca sia nre che nrbe
-                            nre_match = re.search(r'<[^:]*:?nrbe[^>]*>([^<]+)</[^:]*:?nrbe>', response_text, re.IGNORECASE)
-                            if not nre_match:
-                                nre_match = re.search(r'<[^:]*:?nre[^>]*>([^<]+)</[^:]*:?nre>', response_text, re.IGNORECASE)
-                            if nre_match:
-                                nre = nre_match.group(1)
-                        
-                        if not pin_ricetta and ('pin' in response_text.lower()):
-                            # Cerca sia pinNrbe che pinRicetta
-                            pin_match = re.search(r'<[^:]*:?pinNrbe[^>]*>([^<]+)</[^:]*:?pinNrbe>', response_text, re.IGNORECASE)
-                            if not pin_match:
-                                pin_match = re.search(r'<[^:]*:?pin[Rr]icetta[^>]*>([^<]+)</[^:]*:?pin[Rr]icetta>', response_text, re.IGNORECASE)
-                            if pin_match:
-                                pin_ricetta = pin_match.group(1)
-                        
-                        # Cerca protocollo transazione se non trovato
-                        if not protocollo_transazione:
-                            protocollo_match = re.search(r'<protocolloTransazione>([^<]+)</protocolloTransazione>', response_text)
-                            if protocollo_match:
-                                protocollo_transazione = protocollo_match.group(1)
-                        
-                        # Cerca altri dati con fallback regex
-                        if not data_inserimento:
-                            data_match = re.search(r'<dataInserimento>([^<]+)</dataInserimento>', response_text)
-                            if data_match:
-                                data_inserimento = data_match.group(1)
-                        
-                        if not nome_medico:
-                            nome_match = re.search(r'<nomeMedico>([^<]+)</nomeMedico>', response_text)
-                            if nome_match:
-                                nome_medico = nome_match.group(1)
-                        
-                        if not cognome_medico:
-                            cognome_match = re.search(r'<cognomeMedico>([^<]+)</cognomeMedico>', response_text)
-                            if cognome_match:
-                                cognome_medico = cognome_match.group(1)
-                        
-                        if not pdf_promemoria_b64:
-                            pdf_match = re.search(r'<pdfPromemoria>([^<]+)</pdfPromemoria>', response_text)
-                            if pdf_match:
-                                pdf_promemoria_b64 = pdf_match.group(1)
-                        
-                        # === RETURN IDENTICO V1 ===
-                        return {
-                            'success': True,
-                            'http_status': response.status_code,
-                            'nre': nre,
-                            'pin_ricetta': pin_ricetta,
-                            'protocollo_transazione': protocollo_transazione,
-                            'codice_autorizzazione': codice_autorizzazione,
-                            'cod_esito_inserimento': cod_esito,
-                            'errore_codice': errore_cod,
-                            'errore_descrizione': errore_desc,
-                            'has_errors': bool(errore_cod),
-                            'response_xml': response.text,
-                            'timestamp': datetime.now().isoformat(),
-                            'pdf_promemoria_b64': pdf_promemoria_b64,
-                            'data_inserimento': data_inserimento,
-                            'nome_medico': nome_medico,
-                            'cognome_medico': cognome_medico,
-                            'pdf_disponibile': bool(pdf_promemoria_b64),
-                            'parsed_data': {
-                                'numero_ricetta': nre,
-                                'codice_pin': pin_ricetta,
-                                'protocollo_transazione': protocollo_transazione,
-                                'esito_inserimento': cod_esito,
-                                'errore': errore_desc if errore_cod else None,
-                                'pdf_ricetta': pdf_promemoria_b64,
-                                'data_creazione': data_inserimento,
-                                'medico_nome': nome_medico,
-                                'medico_cognome': cognome_medico
-                            }
-                        }
-                    else:
-                        return {
-                            'success': False,
-                            'http_status': response.status_code,
-                            'error': f'HTTP {response.status_code}',
-                            'response_text': response.text[:500],
-                            'timestamp': datetime.now().isoformat()
-                        }
-                        
-                except Exception as e:
-                    self.logger.error(f"Errore parsing risposta invio: {e}")
-                    return {
-                        'success': False,
-                        'error': f'Errore parsing risposta: {str(e)}',
-                        'response_text': response.text[:500] if hasattr(response, 'text') else '',
-                        'timestamp': datetime.now().isoformat(),
-                        'cf_assistito': dati_ricetta.get('cf_assistito', 'N/A')
+    def _parse_invio_response(self, response: requests.Response, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
+        """Parsa la risposta dell'invio ricetta - COPIA ESATTA LOGICA DA V1 CHE FUNZIONA"""
+        try:
+            self.logger.info(f"Parsing risposta invio ricetta")
+            
+            if response.status_code == 200:
+                # Parse XML response - LOGICA IDENTICA V1
+                from lxml import etree
+                import re
+                
+                root = etree.fromstring(response.content)
+                
+                # Namespaces esatti dal V1 che funziona
+                namespaces = {
+                    'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+                    'dem': 'http://dematerializzazione.sanita.finanze.it/',
+                    'ric': 'http://ricetta.sanita.finanze.it/'
+                }
+                
+                # === ESTRAZIONE DATI IDENTICA A V1 ===
+                
+                # Cerca NRE (Numero Ricetta Elettronica) - nel sistema TS è chiamato "nrbe"
+                nre_element = root.xpath('//nrbe/text()') or root.xpath('//ric:nre/text()', namespaces=namespaces)
+                nre = nre_element[0] if nre_element else None
+                
+                # Cerca PIN ricetta - nel sistema TS è chiamato "pinNrbe"
+                pin_element = root.xpath('//pinNrbe/text()') or root.xpath('//ric:pinRicetta/text()', namespaces=namespaces)
+                pin_ricetta = pin_element[0] if pin_element else None
+                
+                # Cerca codice transazione/protocollo
+                protocollo_element = root.xpath('//protocolloTransazione/text()') or root.xpath('//ric:protocolloTransazione/text()', namespaces=namespaces)
+                protocollo_transazione = protocollo_element[0] if protocollo_element else None
+                
+                # Cerca codice autorizzazione (se presente)
+                auth_element = root.xpath('//ric:codiceAutorizzazione/text()', namespaces=namespaces)
+                codice_autorizzazione = auth_element[0] if auth_element else None
+                
+                # Cerca PDF promemoria (ricetta bianca stampabile)
+                pdf_element = root.xpath('//pdfPromemoria/text()')
+                pdf_promemoria_b64 = pdf_element[0] if pdf_element else None
+                
+                # Cerca data inserimento
+                data_element = root.xpath('//dataInserimento/text()')
+                data_inserimento = data_element[0] if data_element else None
+                
+                # Cerca nome e cognome medico dalla risposta
+                nome_medico_element = root.xpath('//nomeMedico/text()')
+                cognome_medico_element = root.xpath('//cognomeMedico/text()')
+                nome_medico = nome_medico_element[0] if nome_medico_element else None
+                cognome_medico = cognome_medico_element[0] if cognome_medico_element else None
+                
+                # Estrai anche informazioni di errore se presenti
+                cod_esito_element = root.xpath('//codEsitoInserimento/text()')
+                cod_esito = cod_esito_element[0] if cod_esito_element else None
+                
+                errore_cod_element = root.xpath('//ns2:codEsito/text()', namespaces={'ns2': 'http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it'})
+                errore_desc_element = root.xpath('//ns2:esito/text()', namespaces={'ns2': 'http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it'})
+                
+                errore_cod = errore_cod_element[0] if errore_cod_element else None
+                errore_desc = errore_desc_element[0] if errore_desc_element else None
+                
+                # === FALLBACK REGEX IDENTICI V1 ===
+                response_text = response.text
+                
+                if not nre and ('nre' in response_text.lower() or 'nrbe' in response_text.lower()):
+                    # Fallback: cerca pattern nel testo XML - cerca sia nre che nrbe
+                    nre_match = re.search(r'<[^:]*:?nrbe[^>]*>([^<]+)</[^:]*:?nrbe>', response_text, re.IGNORECASE)
+                    if not nre_match:
+                        nre_match = re.search(r'<[^:]*:?nre[^>]*>([^<]+)</[^:]*:?nre>', response_text, re.IGNORECASE)
+                    if nre_match:
+                        nre = nre_match.group(1)
+                
+                if not pin_ricetta and ('pin' in response_text.lower()):
+                    # Cerca sia pinNrbe che pinRicetta
+                    pin_match = re.search(r'<[^:]*:?pinNrbe[^>]*>([^<]+)</[^:]*:?pinNrbe>', response_text, re.IGNORECASE)
+                    if not pin_match:
+                        pin_match = re.search(r'<[^:]*:?pin[Rr]icetta[^>]*>([^<]+)</[^:]*:?pin[Rr]icetta>', response_text, re.IGNORECASE)
+                    if pin_match:
+                        pin_ricetta = pin_match.group(1)
+                
+                # Cerca protocollo transazione se non trovato
+                if not protocollo_transazione:
+                    protocollo_match = re.search(r'<protocolloTransazione>([^<]+)</protocolloTransazione>', response_text)
+                    if protocollo_match:
+                        protocollo_transazione = protocollo_match.group(1)
+                
+                # Cerca altri dati con fallback regex
+                if not data_inserimento:
+                    data_match = re.search(r'<dataInserimento>([^<]+)</dataInserimento>', response_text)
+                    if data_match:
+                        data_inserimento = data_match.group(1)
+                
+                if not nome_medico:
+                    nome_match = re.search(r'<nomeMedico>([^<]+)</nomeMedico>', response_text)
+                    if nome_match:
+                        nome_medico = nome_match.group(1)
+                
+                if not cognome_medico:
+                    cognome_match = re.search(r'<cognomeMedico>([^<]+)</cognomeMedico>', response_text)
+                    if cognome_match:
+                        cognome_medico = cognome_match.group(1)
+                
+                if not pdf_promemoria_b64:
+                    pdf_match = re.search(r'<pdfPromemoria>([^<]+)</pdfPromemoria>', response_text)
+                    if pdf_match:
+                        pdf_promemoria_b64 = pdf_match.group(1)
+                
+                # === RETURN IDENTICO V1 ===
+                return {
+                    'success': True,
+                    'http_status': response.status_code,
+                    'nre': nre,
+                    'pin_ricetta': pin_ricetta,
+                    'protocollo_transazione': protocollo_transazione,
+                    'codice_autorizzazione': codice_autorizzazione,
+                    'cod_esito_inserimento': cod_esito,
+                    'errore_codice': errore_cod,
+                    'errore_descrizione': errore_desc,
+                    'has_errors': bool(errore_cod),
+                    'response_xml': response.text,
+                    'timestamp': datetime.now().isoformat(),
+                    'pdf_promemoria_b64': pdf_promemoria_b64,
+                    'data_inserimento': data_inserimento,
+                    'nome_medico': nome_medico,
+                    'cognome_medico': cognome_medico,
+                    'pdf_disponibile': bool(pdf_promemoria_b64),
+                    'parsed_data': {
+                        'numero_ricetta': nre,
+                        'codice_pin': pin_ricetta,
+                        'protocollo_transazione': protocollo_transazione,
+                        'esito_inserimento': cod_esito,
+                        'errore': errore_desc if errore_cod else None,
+                        'pdf_ricetta': pdf_promemoria_b64,
+                        'data_creazione': data_inserimento,
+                        'medico_nome': nome_medico,
+                        'medico_cognome': cognome_medico
                     }
+                }
+            else:
+                return {
+                    'success': False,
+                    'http_status': response.status_code,
+                    'error': f'HTTP {response.status_code}',
+                    'response_text': response.text[:500],
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore parsing risposta invio: {e}")
+            return {
+                'success': False,
+                'error': f'Errore parsing risposta: {str(e)}',
+                'response_text': response.text[:500] if hasattr(response, 'text') else '',
+                'timestamp': datetime.now().isoformat(),
+                'cf_assistito': dati_ricetta.get('cf_assistito', 'N/A')
+            }
 
-            def invia_ricetta(self, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
-                """
-                Invia ricetta elettronica al Sistema TS.
-                Usa formato SOAP corretto del kit ufficiale per l'invio.
-                """
-                try:
-                    self.logger.info(f"Invio ricetta per CF: {dati_ricetta.get('cf_assistito', 'N/A')}")
-                    
-                    # Crea richiesta SOAP per invio
-                    soap_request = self._create_invio_soap_request(dati_ricetta)
-                    
-                    # Crea sessione con autenticazione
-                    session = self._create_session()
-                    session.auth = (self.cf_medico, self.password)  # Basic Auth
-                    
-                    # Headers per invio (diversi da visualizzazione)
-                    token_2fa = self._genera_token_2fa()
-                    headers = {
-                        'Content-Type': 'text/xml; charset=utf-8',
-                        'SOAPAction': 'http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it/InvioPrescrittoRicettaBianca',
-                        'Authorization2F': f'Bearer {token_2fa}',
-                        'User-Agent': 'Python-requests/2.28.0'
-                    }
-                    
-                    self.logger.info(f"Invio richiesta ricetta a: {self.endpoint_invio}")
-                    
-                    response = session.post(
-                        self.endpoint_invio,
-                        data=soap_request,
-                        headers=headers,
-                        timeout=60,  # Timeout maggiore per nuovo endpoint
-                        verify=False
-                    )
-                    
-                    self.logger.info(f"Risposta invio ricevuta - Status: {response.status_code}")
-                    
-                    # Debug: Log completo della risposta per capire l'errore
-                    self.logger.info(f"Risposta completa invio: {response.text}")
-                    
-                    # Parsa la risposta
-                    return self._parse_invio_response(response, dati_ricetta)
-                    
-                except Exception as e:
-                    self.logger.error(f"Errore invio ricetta: {e}", exc_info=True)
-                    return {
-                        'success': False,
-                        'error': f'Errore invio ricetta: {str(e)}',
-                        'timestamp': datetime.now().isoformat()
-                    }
+    def invia_ricetta(self, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Invia ricetta elettronica al Sistema TS.
+        Usa formato SOAP corretto del kit ufficiale per l'invio.
+        """
+        try:
+            self.logger.info(f"Invio ricetta per CF: {dati_ricetta.get('cf_assistito', 'N/A')}")
+            
+            # Crea richiesta SOAP per invio
+            soap_request = self._create_invio_soap_request(dati_ricetta)
+            
+            # Crea sessione con autenticazione
+            session = self._create_session()
+            session.auth = (self.cf_medico, self.password)  # Basic Auth
+            
+            # Headers per invio (diversi da visualizzazione)
+            token_2fa = self._genera_token_2fa()
+            headers = {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': 'http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it/InvioPrescrittoRicettaBianca',
+                'Authorization2F': f'Bearer {token_2fa}',
+                'User-Agent': 'Python-requests/2.28.0'
+            }
+            
+            self.logger.info(f"Invio richiesta ricetta a: {self.endpoint_invio}")
+            
+            response = session.post(
+                self.endpoint_invio,
+                data=soap_request,
+                headers=headers,
+                timeout=60,  # Timeout maggiore per nuovo endpoint
+                verify=False
+            )
+            
+            self.logger.info(f"Risposta invio ricevuta - Status: {response.status_code}")
+            
+            # Debug: Log completo della risposta per capire l'errore
+            self.logger.info(f"Risposta completa invio: {response.text}")
+            
+            # Parsa la risposta
+            return self._parse_invio_response(response, dati_ricetta)
+            
+        except Exception as e:
+            self.logger.error(f"Errore invio ricetta: {e}", exc_info=True)
+            return {
+                'success': False,
+                'error': f'Errore invio ricetta: {str(e)}',
+                'timestamp': datetime.now().isoformat()
+            }
 
 
 # Istanza singleton per uso globale
