@@ -1,6 +1,6 @@
 <!-- RICHIESTA SOAP SISTEMA TS -->
-<!-- Timestamp: 2025-09-16T22:44:25.104260 -->
-<!-- Endpoint: https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca -->
+<!-- Timestamp: 2025-09-16T22:50:42.452822 -->
+<!-- Endpoint: https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca -->
 <!-- CF Medico: DMRNCL63S21D612I -->
 <!-- CF Assistito: RMGFLL37D69D612X -->
 <!-- NRE: X00003504565 -->
@@ -13,8 +13,8 @@
     <soapenv:Header/>
     <soapenv:Body>
         <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-            <vis:pinCode>Y1WLSlUv/CFFlV3PSFQJlyJaaxRxqG1cmum9T/MJ8lfgQhmAF8KBMmxNYN9R9V76q83G6mINzzHy5CGb6J3S+n5prUgknHXSGMgQvhM+of4LKJ/IDLOo6iWEX65LAr6A8SOfBfbbMjhNNu5H5ju8ReEZvuHqpZSkVM3tQUL0ZWM=</vis:pinCode>
-            <vis:codicePaziente>j00NRFAKkqT8xp7m+WFgNY5hjHNTtw8FD1z/nhGRia6rcHnjVhKQzSn7ErNLlMzP+B0HGsVjffwWTaAzVyVr9uvPyIdzUBk6uEyG/7iCZTGz62atk3HqncfsLXL2OPigb+9l4xf6mdX4ZEamU+ndMZ2j1hmptDcne1Xpb9sCeOU=</vis:codicePaziente>
+            <vis:pinCode>YPXpQPFx1ULhfJTsaU2b6meQRZIsmd3wZz336LKOaYLJH9gilZeO+4jKa2J9FV8VqTS8h0nWV1YAelqD+48CzzBgOn3AXlIg8qgBVa05BPIxQKLsFtW+n2BWosGvXpg8PEeh9hWyasjxcesmN6R3Sxblqqw3Big5cBqHfeFSkjc=</vis:pinCode>
+            <vis:codicePaziente>rGR5bjq0VqK8FCIWMT6SS2jXLTkPT53uecLWiFjeXdZCAoOid18ymc2myDYqiv8lLcN3TplGerJw/PJhdam/lwTXR1m538bNIVjKtshkY9U17sWDmELID7CcgP4CkhUbATeRmFPmXoP4kf35FEVCw574ogM5id7Qg4PqFgUGroo=</vis:codicePaziente>
             <vis:cfMedico>DMRNCL63S21D612I</vis:cfMedico>
             <vis:nrbe>X00003504565</vis:nrbe>
         </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>

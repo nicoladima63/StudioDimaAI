@@ -55,13 +55,13 @@ class RicetteTsService:
         self.asl = os.getenv('ASL_PROD')
         self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD')
         
-        # Endpoint dinamici da env - TEST (prova con i tuoi dati)
+        # Endpoint dinamici da env - PRODUZIONE
         self.endpoint_visualizza = os.getenv('ENDPOINT_VISUALIZZA_PROD', 
-            'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
+            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
         self.endpoint_invio = os.getenv('ENDPOINT_INVIO_PROD',
-            'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca')
+            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca')
         self.endpoint_annulla = os.getenv('ENDPOINT_ANNULLA_PROD',
-            'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
+            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
         
         # Certificati dinamici da env - path relativo a server_v2/certs/prod
         server_v2_dir = os.path.dirname(os.path.dirname(__file__))  # server_v2/

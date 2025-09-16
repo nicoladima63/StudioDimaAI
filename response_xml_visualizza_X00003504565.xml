@@ -1,7 +1,7 @@
 <!-- RICERCA RICETTE SISTEMA TS -->
 <!-- HTTP Status: 500 -->
-<!-- Timestamp: 2025-09-16T22:44:25.228190 -->
-<!-- Endpoint: https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca -->
+<!-- Timestamp: 2025-09-16T22:50:42.628153 -->
+<!-- Endpoint: https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca -->
 <!-- CF Medico: DMRNCL63S21D612I -->
 <!-- CF Assistito: RMGFLL37D69D612X -->
 <!-- NRE: X00003504565 -->
@@ -13,7 +13,7 @@
 <env:Header>
 <wsa:To>http://www.w3.org/2005/08/addressing/anonymous</wsa:To>
 <wsa:Action>http://www.w3.org/2005/08/addressing/soap/fault</wsa:Action>
-<wsa:MessageID>urn:uuid:76e5ff78-c501-4392-b4a7-403d3743de99</wsa:MessageID>
+<wsa:MessageID>urn:uuid:02d656f3-fe60-4bb5-9537-9291d0da561f</wsa:MessageID>
 <wsa:RelatesTo/></env:Header>
 <env:Body>
 <env:Fault>
@@ -21,5 +21,5 @@
 <faultstring>General Failure</faultstring>
 <detail>
 <wsrf-r:ResourceUnknownFault>
-<wsrf-bf:Timestamp>2025-09-16T20:44:25.048Z</wsrf-bf:Timestamp>
+<wsrf-bf:Timestamp>2025-09-16T20:50:42.434Z</wsrf-bf:Timestamp>
 <wsrf-bf:Description>Internal Server Error</wsrf-bf:Description></wsrf-r:ResourceUnknownFault></detail></env:Fault></env:Body></env:Envelope>
