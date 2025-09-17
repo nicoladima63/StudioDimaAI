@@ -7,6 +7,8 @@ import os
 import ssl
 import requests
 import urllib3
+import base64
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from requests.adapters import HTTPAdapter
 
@@ -71,7 +73,7 @@ class RicetteTsService:
         self.sanitel_cert = os.getenv('SANITEL_CERT_PATH', os.path.join(certs_dir, 'SanitelCF-2024-2027.cer'))
         
         # Validazione configurazione obbligatoria
-        required_vars = ['CF_MEDICO_PROD', 'PASSWORD_PROD', 'PINCODE_PROD', 'REGIONE_PROD', 'ASL_PROD', 'ID_SESSIONE_PROD']
+        required_vars = ['CF_MEDICO_PROD', 'PASSWORD_PROD', 'PINCODE_PROD', 'REGIONE_PROD', 'ASL_PROD']
         missing_vars = [var for var in required_vars if not os.getenv(var)]
         
         if missing_vars:
@@ -79,14 +81,173 @@ class RicetteTsService:
             self.logger.error(f"File .env cercato in: {os.path.join(project_root, '.env')}")
             raise ValueError(f"Configurazione incompleta: mancano {missing_vars}")
         
+        # ID-SESSIONE per autenticazione (hardcodato per ora)
+        self.id_sessione = os.getenv('ID_SESSIONE_PROD', 'b1391aeb-12b9-44a2-a99d-1eb105b9a92c')
+        
         self.logger.info(f"RicetteTsService configurato dinamicamente")
         self.logger.info(f"Project root: {project_root}")
         self.logger.info(f"CF Medico: {self.cf_medico}")
         self.logger.info(f"Regione: {self.regione}, ASL: {self.asl}")
+        self.logger.info(f"ID-SESSIONE: {self.id_sessione[:20]}...")
         self.logger.info(f"Endpoint visualizzazione: {self.endpoint_visualizza}")
         self.logger.info(f"Certificati: {self.client_cert}")
         self.logger.info(f"SanitelCF certificato: {self.sanitel_cert} (esiste: {os.path.exists(self.sanitel_cert)})")
     
+    def get_ricetta(self, cf_assistito: str, nrbe: str) -> dict:
+        """
+        NUOVA FUNZIONE CHE COPIA ESATTAMENTE IL RICETTA_TESTER.PY CHE FUNZIONAVA
+        Accetta solo CF assistito e NRE, usa la logica identica al tester
+        """
+        try:
+            #self.logger.info(f"=== NUOVA FUNZIONE GET_RICETTA ===")
+            #self.logger.info(f"CF Assistito: {cf_assistito}")
+            #self.logger.info(f"NRE: {nrbe}")
+            
+            # Cifra CF assistito usando il servizio esistente
+            cf_cifrato = self._encrypt_cf_assistito(cf_assistito)
+            self.logger.info(f"CF cifrato: {cf_cifrato[:50]}...")
+            
+            # Cifra PIN usando il servizio esistente  
+            pin_cifrato = self._encrypt_pincode(self.pincode)
+            self.logger.info(f"PIN cifrato: {pin_cifrato[:50]}...")
+            
+            
+            # Crea SOAP request IDENTICA al ricetta_tester.py
+            soap_body = f'''
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                             xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
+                             xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+               <soapenv:Header/>
+               <soapenv:Body>
+                  <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+                     <vis:pinCode>{pin_cifrato}</vis:pinCode>
+                     <vis:codicePaziente>{cf_cifrato}</vis:codicePaziente>
+                     <vis:nrbe>{nrbe}</vis:nrbe>
+                     <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
+                  </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+               </soapenv:Body>
+            </soapenv:Envelope>
+            '''
+            
+            # Headers IDENTICI al ricetta_tester.py
+            headers = {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
+                'Authorization2F': f"Bearer {self.id_sessione}",
+                'SOAPAction': "http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"
+            }
+            
+            # Endpoint IDENTICO al ricetta_tester.py
+            url = "https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca"
+            
+            #self.logger.info(f"URL: {url}")
+            #self.logger.info(f"Headers: {headers}")
+            
+            # Chiamata HTTP IDENTICA al ricetta_tester.py
+            response = requests.post(url, data=soap_body.strip(), headers=headers)
+            
+            self.logger.info(f"Status Code: {response.status_code}")
+            self.logger.info(f"Response: {response.text[:500]}...")
+            
+            # Salva XML per debug
+            xml_file = f"response_xml_get_ricetta_{nrbe}.xml"
+            with open(xml_file, 'w', encoding='utf-8') as f:
+                f.write(response.text)
+            self.logger.info(f"XML salvato: {xml_file}")
+            
+            if response.status_code == 200:
+                # Parsing della risposta XML
+                try:
+                    root = ET.fromstring(response.text)
+                    
+                    # Estrai dati della ricetta
+                    ricetta_data = self._parse_ricetta_response_simple(root)
+                    
+                    return {
+                        'success': True,
+                        'ricetta_data': ricetta_data,
+                        'response_xml': response.text,
+                        'http_status': 200,
+                        'message': 'Ricetta trovata con successo'
+                    }
+                except ET.ParseError as e:
+                    self.logger.error(f"Errore parsing XML: {e}")
+                    return {
+                        'success': False,
+                        'error': 'XML_PARSE_ERROR',
+                        'message': f'Errore parsing risposta XML: {e}',
+                        'response_xml': response.text,
+                        'http_status': response.status_code
+                    }
+            else:
+                return {
+                    'success': False,
+                    'error': f'HTTP_{response.status_code}',
+                    'message': f'Errore HTTP {response.status_code}',
+                    'response_xml': response.text,
+                    'http_status': response.status_code
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore get_ricetta: {e}")
+            return {
+                'success': False,
+                'error': 'EXCEPTION',
+                'message': f'Errore: {e}',
+                'http_status': 0
+            }
+
+    def _parse_ricetta_response_simple(self, root) -> dict:
+        """Parsing semplice della risposta XML per get_ricetta"""
+        try:
+            # Namespace per la risposta
+            ns = {
+                'ns2': 'http://visualizzaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it',
+                'tip': 'http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it'
+            }
+            
+            # Estrai dati base
+            ricetta_data = {
+                'nre': root.find('.//ns2:nrbe', ns).text if root.find('.//ns2:nrbe', ns) is not None else None,
+                'pin_nrbe': root.find('.//ns2:pinNrbe', ns).text if root.find('.//ns2:pinNrbe', ns) is not None else None,
+                'stato_processo': root.find('.//ns2:statoProcesso', ns).text if root.find('.//ns2:statoProcesso', ns) is not None else None,
+                'data_compilazione': root.find('.//ns2:dataCompilazione', ns).text if root.find('.//ns2:dataCompilazione', ns) is not None else None,
+                'cf_medico': root.find('.//ns2:cfMedico', ns).text if root.find('.//ns2:cfMedico', ns) is not None else None,
+                'nome_medico': root.find('.//ns2:nomeMedico', ns).text if root.find('.//ns2:nomeMedico', ns) is not None else None,
+                'cognome_medico': root.find('.//ns2:cognomeMedico', ns).text if root.find('.//ns2:cognomeMedico', ns) is not None else None,
+                'cod_esito': root.find('.//ns2:codEsitoVisualizzazione', ns).text if root.find('.//ns2:codEsitoVisualizzazione', ns) is not None else None,
+                'protocollo_transazione': root.find('.//ns2:protocolloTransazione', ns).text if root.find('.//ns2:protocolloTransazione', ns) is not None else None,
+                'data_ricezione': root.find('.//ns2:dataRicezione', ns).text if root.find('.//ns2:dataRicezione', ns) is not None else None
+            }
+            
+            # Estrai dettagli prescrizione
+            dettaglio = root.find('.//ns2:dettaglioPrescrizioneRicettaBianca', ns)
+            if dettaglio is not None:
+                ricetta_data.update({
+                    'cod_gruppo_equival': dettaglio.find('.//codGruppoEquival').text if dettaglio.find('.//codGruppoEquival') is not None else None,
+                    'descr_gruppo_equival': dettaglio.find('.//descrGruppoEquival').text if dettaglio.find('.//descrGruppoEquival') is not None else None,
+                    'quantita': dettaglio.find('.//quantita').text if dettaglio.find('.//quantita') is not None else None,
+                    'posologia': dettaglio.find('.//posologia').text if dettaglio.find('.//posologia') is not None else None,
+                    'durata_trattamento': dettaglio.find('.//durataTrattamento').text if dettaglio.find('.//durataTrattamento') is not None else None,
+                    'num_ripetibilita': dettaglio.find('.//numRipetibilita').text if dettaglio.find('.//numRipetibilita') is not None else None,
+                    'validita_farm': dettaglio.find('.//validitaFarm').text if dettaglio.find('.//validitaFarm') is not None else None
+                })
+            
+            # Estrai errori se presenti
+            errore = root.find('.//ns2:erroreRicetta', ns)
+            if errore is not None:
+                ricetta_data.update({
+                    'errore_codice': errore.find('.//codEsito').text if errore.find('.//codEsito') is not None else None,
+                    'errore_messaggio': errore.find('.//esito').text if errore.find('.//esito') is not None else None,
+                    'errore_tipo': errore.find('.//tipoErrore').text if errore.find('.//tipoErrore') is not None else None
+                })
+            
+            return ricetta_data
+            
+        except Exception as e:
+            self.logger.error(f"Errore parsing risposta: {e}")
+            return {'errore_parsing': str(e)}
+
     def _get_current_env(self) -> str:
         """Ottiene l'ambiente corrente - SEMPRE PRODUZIONE per visualizzazione"""
         return 'prod'  # SEMPRE PRODUZIONE per visualizzazione ricette

@@ -405,37 +405,20 @@ def list_ricette_from_ts():
             # Usa il servizio TS V2 con ricerca per NRE specifico
             from services.ricette_ts_service import ricette_ts_service
             
-            # Salva configurazione originale per ripristino
-            original_config = {
-                'env': ricette_ts_service.env,
-                'cf_medico': ricette_ts_service.cf_medico,
-                'password': ricette_ts_service.password,
-                'endpoint_visualizza': ricette_ts_service.endpoint_visualizza,
-                'endpoint_invio': ricette_ts_service.endpoint_invio,
-                'regione': ricette_ts_service.regione,
-                'asl': ricette_ts_service.asl,
-                'specializzazione': ricette_ts_service.specializzazione
-            }
-            
             if use_production and cf_medico_reale:
-                logger.info(f"=== OVERRIDE COMPLETO PRODUZIONE ===")
-                logger.info(f"Prima: env={original_config['env']}, CF={original_config['cf_medico']}")
-                
-                # Forza configurazione produzione completa
-                ricette_ts_service.force_production_config(cf_medico_reale, 'VtmakYjB4CjEN_!')
-                
-                logger.info(f"Dopo: env={ricette_ts_service.env}, CF={ricette_ts_service.cf_medico}")
+                logger.info(f"=== USANDO CONFIGURAZIONE PRODUZIONE ===")
+                logger.info(f"CF Medico: {ricette_ts_service.cf_medico}")
                 logger.info(f"Endpoint: {ricette_ts_service.endpoint_visualizza}")
+                logger.info(f"ID-SESSIONE: {ricette_ts_service.id_sessione[:20]}...")
             else:
                 logger.info(f"Usando ambiente TEST: {ricette_ts_service.env}")
                 logger.info(f"Endpoint TEST: {ricette_ts_service.endpoint_visualizza}")
             
             try:
-                # Crea richiesta SOAP per visualizzazione ricetta specifica
-                ts_response = ricette_ts_service.visualizza_ricetta_specifica(
-                    nre=nre,
+                # Usa la NUOVA funzione get_ricetta che copia esattamente il ricetta_tester.py
+                ts_response = ricette_ts_service.get_ricetta(
                     cf_assistito=cf_assistito,
-                    cf_medico=cf_medico_reale if use_production else None
+                    nrbe=nre
                 )
                 
                 return jsonify({
@@ -455,10 +438,8 @@ def list_ricette_from_ts():
                 })
                 
             finally:
-                # Ripristina configurazione originale
-                if use_production and cf_medico_reale:
-                    logger.info("=== RIPRISTINO CONFIGURAZIONE ORIGINALE ===")
-                    ricette_ts_service.restore_original_config(original_config)
+                # Configurazione produzione è permanente, non serve ripristino
+                logger.info("=== RICERCA COMPLETATA ===")
         
         # Modalità standard: recupera tutte le ricette
         from services.ricette_ts_service import ricette_ts_service

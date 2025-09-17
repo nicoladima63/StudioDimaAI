@@ -195,12 +195,17 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
     try {
       // Carica dal Sistema TS con CF paziente e filtri
       const params: any = {
-        cf_assistito: pazienteSelezionato.codice_fiscale
+        cf_assistito: pazienteSelezionato.codice_fiscale,
+        use_production: true,  // Usa ambiente di produzione
+        cf_medico_reale: 'DMRNCL63S21D612I'  // Il tuo CF medico reale
       };
       
       if (filtri.dataDa) params.data_da = filtri.dataDa;
       if (filtri.dataA) params.data_a = filtri.dataA;
-      if (filtri.nre) params.nre = filtri.nre;
+      if (filtri.nre) {
+        params.nre = filtri.nre;
+        params.test_ricerca_specifica = true;  // Attiva ricerca specifica per NRE
+      }
       
       console.log('🔍 Ricerca ricette TS con parametri:', params);
       
@@ -218,6 +223,16 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
       if (response.success) {
         setRicette(response.data || []);
         console.log(`✅ Trovate ${response.data?.length || 0} ricette per CF: ${pazienteSelezionato.codice_fiscale}`);
+        
+        // Log dettagliato per debug
+        if (response.ts_response) {
+          console.log('📋 Dettagli risposta Sistema TS:', {
+            environment: response.ts_response.environment,
+            nre_ricercato: response.ts_response.nre_ricercato,
+            cf_assistito: response.ts_response.cf_assistito,
+            http_status: response.ts_response.http_status
+          });
+        }
         
         // Mostra eventuali errori o comunicazioni
         if (response.ts_response?.error_analysis?.has_errors) {
