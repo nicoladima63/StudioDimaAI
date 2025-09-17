@@ -879,9 +879,9 @@ class DBFOptimizedReader:
                 try:
                     chunk_result = future.result()
                     chunk_results[chunk_id] = chunk_result
-                    logger.debug(f"✅ Chunk {chunk_id}: {len(chunk_result.records)} records processed")
+                    logger.debug(f"Chunk {chunk_id}: {len(chunk_result.records)} records processed")
                 except Exception as e:
-                    logger.error(f"❌ Chunk {chunk_id} failed: {e}")
+                    logger.error(f"Chunk {chunk_id} failed: {e}")
                     # Empty result for failed chunk
                     chunk_results[chunk_id] = ChunkResult(
                         chunk_id, [], 
@@ -892,7 +892,7 @@ class DBFOptimizedReader:
         for chunk_id in sorted(chunk_results.keys()):
             all_appointments.extend(chunk_results[chunk_id].records)
         
-        logger.info(f"🎯 Parallel processing completed: {len(all_appointments)} total appointments")
+        logger.info(f"Parallel processing completed: {len(all_appointments)} total appointments")
         return all_appointments
     
     def _process_chunk_enterprise(self,

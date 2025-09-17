@@ -91,9 +91,9 @@ class SchedulerService:
         def job():
             logger.info(f"[AUTOMAZIONE] Invio richiami: ora={hour}:{minute:02d}")
             
-            # Usa il recall service V2 per ottenere i richiami
-            from .recall_service import RecallService
-            recall_service = RecallService()
+            # Usa il richiami service V2 per ottenere i richiami
+            from .richiami_service import RichiamiService
+            recall_service = RichiamiService()
             recalls = recall_service.get_all_recalls()
             
             sent = 0
