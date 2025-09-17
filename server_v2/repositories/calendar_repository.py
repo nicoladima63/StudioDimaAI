@@ -22,8 +22,8 @@ from typing import Dict, List, Any, Optional, Tuple
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from server_v2.core.database_manager import DatabaseManager
-from server_v2.core.exceptions import DBFReadError
+from ..core.database_manager import DatabaseManager
+from ..core.exceptions import DBFReadError
 
 logger = logging.getLogger(__name__)
 

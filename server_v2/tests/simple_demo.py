@@ -10,9 +10,9 @@ import sqlite3
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from server_v2.core.config import Config
-from server_v2.core.database_manager import DatabaseManager
-from server_v2.utils.dbf_utils import clean_dbf_value, convert_bytes_to_string
+from ..core.config import Config
+from ..core.database_manager import DatabaseManager
+from ..utils.dbf_utils import clean_dbf_value, convert_bytes_to_string
 
 
 def create_test_database():

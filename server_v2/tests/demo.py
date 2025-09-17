@@ -15,11 +15,11 @@ import pandas as pd
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from server_v2.core.config import Config
-from server_v2.core.database_manager import DatabaseManager
-from server_v2.core.base_repository import BaseRepository, QueryOptions
-from server_v2.utils.dbf_utils import DbfProcessor, clean_dbf_value, convert_bytes_to_string
-from server_v2.core.exceptions import StudioDimaError
+from ..core.config import Config
+from ..core.database_manager import DatabaseManager
+from ..core.base_repository import BaseRepository, QueryOptions
+from ..utils.dbf_utils import DbfProcessor, clean_dbf_value, convert_bytes_to_string
+from ..core.exceptions import StudioDimaError
 
 
 class DemoRepository(BaseRepository):
@@ -172,7 +172,7 @@ def demo_dbf_utilities():
     print(f"[SUCCESS] Original data: {len(demo_data)} rows")
     
     # Test fornitori mapping
-    from server_v2.utils.dbf_utils import get_fornitori_mapping
+    from ..utils.dbf_utils import get_fornitori_mapping
     mapping = get_fornitori_mapping(demo_data)
     print(f"[SUCCESS] Fornitori mapping extracted: {len(mapping)} entries")
     for code, name in mapping.items():

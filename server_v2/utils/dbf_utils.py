@@ -1394,10 +1394,18 @@ class DBFOptimizedReader:
             appointments = self.get_appointments_optimized(tomorrow.month, tomorrow.year)
             
             # Filtra solo per il giorno di domani
-            tomorrow_apps = [
-                app for app in appointments 
-                if app.get('DATA') and app['DATA'].date() == tomorrow
-            ]
+            tomorrow_apps = []
+            for app in appointments:
+                if app.get('DATA'):
+                    try:
+                        # DATA è una stringa ISO, convertila in date per il confronto
+                        from datetime import datetime
+                        app_date = datetime.fromisoformat(app['DATA']).date()
+                        if app_date == tomorrow:
+                            tomorrow_apps.append(app)
+                    except (ValueError, TypeError):
+                        # Se DATA non è in formato ISO valido, salta
+                        continue
             
             if not tomorrow_apps:
                 log.append("Nessun appuntamento trovato per domani.")
