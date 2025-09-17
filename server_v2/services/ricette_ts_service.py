@@ -93,109 +93,42 @@ class RicetteTsService:
         self.logger.info(f"Certificati: {self.client_cert}")
         self.logger.info(f"SanitelCF certificato: {self.sanitel_cert} (esiste: {os.path.exists(self.sanitel_cert)})")
     
-    def get_ricetta(self, cf_assistito: str, nrbe: str) -> dict:
-        """
-        NUOVA FUNZIONE CHE COPIA ESATTAMENTE IL RICETTA_TESTER.PY CHE FUNZIONAVA
-        Accetta solo CF assistito e NRE, usa la logica identica al tester
-        """
+    def get_environment_info(self) -> Dict[str, Any]:
+        """Informazioni ambiente corrente"""
+        return {
+            'environment': self.env,
+            'cf_medico': self.cf_medico,
+            'regione': self.regione,
+            'asl': self.asl,
+            'specializzazione': self.specializzazione,
+            'endpoint_visualizza': self.endpoint_visualizza,
+            'endpoint_invio': self.endpoint_invio,
+            'endpoint_annulla': self.endpoint_annulla,
+            'certificates': {
+                'client_cert': os.path.exists(self.client_cert) if hasattr(self, 'client_cert') else False,
+                'client_key': os.path.exists(self.client_key) if hasattr(self, 'client_key') else False,
+                'sanitel_cert': os.path.exists(self.sanitel_cert) if hasattr(self, 'sanitel_cert') else False
+            },
+            'credentials_configured': bool(self.cf_medico and self.password)
+        }
+            
+    def test_connection(self) -> Dict[str, Any]:
+        """Testa connessione Sistema TS"""
         try:
-            #self.logger.info(f"=== NUOVA FUNZIONE GET_RICETTA ===")
-            #self.logger.info(f"CF Assistito: {cf_assistito}")
-            #self.logger.info(f"NRE: {nrbe}")
-            
-            # Cifra CF assistito usando il servizio esistente
-            cf_cifrato = self._encrypt_cf_assistito(cf_assistito)
-            self.logger.info(f"CF cifrato: {cf_cifrato[:50]}...")
-            
-            # Cifra PIN usando il servizio esistente  
-            pin_cifrato = self._encrypt_pincode(self.pincode)
-            self.logger.info(f"PIN cifrato: {pin_cifrato[:50]}...")
-            
-            
-            # Crea SOAP request IDENTICA al ricetta_tester.py
-            soap_body = f'''
-            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-                             xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
-                             xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
-               <soapenv:Header/>
-               <soapenv:Body>
-                  <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-                     <vis:pinCode>{pin_cifrato}</vis:pinCode>
-                     <vis:codicePaziente>{cf_cifrato}</vis:codicePaziente>
-                     <vis:nrbe>{nrbe}</vis:nrbe>
-                     <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
-                  </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-               </soapenv:Body>
-            </soapenv:Envelope>
-            '''
-            
-            # Headers IDENTICI al ricetta_tester.py
-            headers = {
-                'Content-Type': 'text/xml; charset=utf-8',
-                'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
-                'Authorization2F': f"Bearer {self.id_sessione}",
-                'SOAPAction': "http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"
+            # Test semplice con richiesta di visualizzazione vuota
+            result = self.get_all_ricette()
+            return {
+                'success': not ('timeout' in result.get('error', '').lower()),
+                'message': 'Connessione Sistema TS testata',
+                'details': result
             }
-            
-            # Endpoint IDENTICO al ricetta_tester.py
-            url = "https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca"
-            
-            #self.logger.info(f"URL: {url}")
-            #self.logger.info(f"Headers: {headers}")
-            
-            # Chiamata HTTP IDENTICA al ricetta_tester.py
-            response = requests.post(url, data=soap_body.strip(), headers=headers)
-            
-            self.logger.info(f"Status Code: {response.status_code}")
-            self.logger.info(f"Response: {response.text[:500]}...")
-            
-            # Salva XML per debug
-            xml_file = f"response_xml_get_ricetta_{nrbe}.xml"
-            with open(xml_file, 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            self.logger.info(f"XML salvato: {xml_file}")
-            
-            if response.status_code == 200:
-                # Parsing della risposta XML
-                try:
-                    root = ET.fromstring(response.text)
-                    
-                    # Estrai dati della ricetta
-                    ricetta_data = self._parse_ricetta_response_simple(root)
-                    
-                    return {
-                        'success': True,
-                        'ricetta_data': ricetta_data,
-                        'response_xml': response.text,
-                        'http_status': 200,
-                        'message': 'Ricetta trovata con successo'
-                    }
-                except ET.ParseError as e:
-                    self.logger.error(f"Errore parsing XML: {e}")
-                    return {
-                        'success': False,
-                        'error': 'XML_PARSE_ERROR',
-                        'message': f'Errore parsing risposta XML: {e}',
-                        'response_xml': response.text,
-                        'http_status': response.status_code
-                    }
-            else:
-                return {
-                    'success': False,
-                    'error': f'HTTP_{response.status_code}',
-                    'message': f'Errore HTTP {response.status_code}',
-                    'response_xml': response.text,
-                    'http_status': response.status_code
-                }
-                
         except Exception as e:
-            self.logger.error(f"Errore get_ricetta: {e}")
             return {
                 'success': False,
-                'error': 'EXCEPTION',
-                'message': f'Errore: {e}',
-                'http_status': 0
+                'message': f'Test connessione fallito: {e}'
             }
+
+
 
     def _parse_ricetta_response_simple(self, root) -> dict:
         """Parsing semplice della risposta XML per get_ricetta"""
@@ -347,55 +280,6 @@ class RicetteTsService:
         
         return session
     
-    def _create_visualizza_soap_request(self, data_da: str, data_a: str, cf_assistito: str = None, nre: str = None) -> str:
-        """
-        Crea richiesta SOAP per visualizzazione ricette - DINAMICA
-        """
-        
-        # PINCODE CIFRATO DINAMICO - da variabile d'ambiente o cifrato dinamicamente
-        pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
-        
-        if not pincode_cifrato:
-            # Se non è fornito cifrato, usa il pincode in chiaro e lo cifra
-            if self.pincode:
-                pincode_cifrato = self._encrypt_pincode(self.pincode)
-            else:
-                raise ValueError("PINCODE_CIFRATO_PROD o PINCODE_PROD deve essere configurato")
-        
-        # CF ASSISTITO CIFRATO - sempre cifrato dinamicamente se fornito
-        if cf_assistito:
-            cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
-        else:
-            # CF assistito di default da env
-            cf_assistito_default = os.getenv('CF_ASSISTITO_DEFAULT_CIFRATO')
-            if cf_assistito_default:
-                cf_assistito_cifrato = cf_assistito_default
-            else:
-                raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
-        
-        # Template SOAP DINAMICO per visualizzazione ricette con data, CF assistito e NRE opzionale
-        soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-                  xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
-                  xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
-    <soapenv:Header/>
-    <soapenv:Body>
-        <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-            <vis:pinCode>{pincode_cifrato}</vis:pinCode>
-            <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
-            <vis:cfMedico>{self.cf_medico}</vis:cfMedico>'''
-        
-        # Aggiungi NRE se specificato
-        if nre:
-            soap_template += f'''
-            <vis:nrbe>{nre}</vis:nrbe>'''
-        
-        soap_template += '''
-        </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-    </soapenv:Body>
-</soapenv:Envelope>'''
-        
-        return soap_template
     
     def _encrypt_pincode(self, pincode: str) -> str:
         """
@@ -424,101 +308,6 @@ class RicetteTsService:
             self.logger.error(f"Errore cifratura pincode: {e}")
             # Fallback: ritorna il pincode originale se cifratura fallisce
             return pincode
-    
-    def _parse_visualizza_response(self, response: requests.Response) -> Dict[str, Any]:
-        """Parsa la risposta della visualizzazione ricette - BASATO SUI TRACCIATI UFFICIALI"""
-        try:
-            response_text = response.text
-            self.logger.info(f"Parsing risposta visualizzazione ricette")
-            
-            if response.status_code == 200:
-                
-                # === PARSING XML BASATO SUI TRACCIATI UFFICIALI ===
-                ricette = []
-                metadati_risposta = {}
-                
-                try:
-                    from lxml import etree
-                    import re
-                    
-                    # Parse XML response
-                    root = etree.fromstring(response.content)
-                    
-                    # Namespaces ufficiali dal kit di sviluppo
-                    namespaces = {
-                        'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
-                        'ricevuta': 'http://visualizzaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it',
-                        'td': 'http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it'
-                    }
-                    
-                    # === ESTRAZIONE METADATI RISPOSTA (dal tracciato ufficiale) ===
-                    metadati_risposta = self._extract_response_metadata(root, namespaces)
-                    
-                    # === ANALISI ERRORI ===
-                    error_analysis = self._analyze_response_errors(metadati_risposta)
-                    
-                    # === RICERCA RICETTE SINGOLE ===
-                    # Il Sistema TS restituisce una singola ricetta per richiesta
-                    # Cerca l'elemento principale della risposta
-                    ricetta_principale = root.xpath('//ricevuta:VisualizzaPrescrittoRicettaBiancaRicevuta', namespaces=namespaces)
-                    
-                    if ricetta_principale:
-                        self.logger.info("Trovata ricetta principale nel formato ufficiale")
-                        ricetta_data = self._parse_ricetta_officiale(ricetta_principale[0], namespaces)
-                        if ricetta_data:
-                            ricette.append(ricetta_data)
-                    
-                    # === FALLBACK: RICERCA ALTERNATIVA ===
-                    if not ricette:
-                        # Cerca ricette in altri formati possibili
-                        ricette_alternative = root.xpath('//ricetta | //ricettaElettronica | //dettaglioPrescrizioneRicettaBianca')
-                        self.logger.info(f"Trovate ricette alternative: {len(ricette_alternative)}")
-                        
-                        for ricetta_elem in ricette_alternative:
-                            ricetta_data = self._parse_single_ricetta(ricetta_elem, namespaces)
-                            if ricetta_data:
-                                ricette.append(ricetta_data)
-                    
-                    # === FALLBACK FINALE: REGEX ===
-                    if not ricette:
-                        ricette = self._parse_ricette_fallback(response_text)
-                    
-                    self.logger.info(f"Parsing completato: {len(ricette)} ricette trovate")
-                    
-                except Exception as parse_error:
-                    self.logger.error(f"Errore parsing XML: {parse_error}")
-                    # Fallback: usa parsing regex
-                    ricette = self._parse_ricette_fallback(response_text)
-                
-                return {
-                    'success': True,
-                    'http_status': response.status_code,
-                    'ricette': ricette,
-                    'total_count': len(ricette),
-                    'response_xml': response_text,
-                    'metadati_risposta': metadati_risposta,
-                    'error_analysis': error_analysis,
-                    'timestamp': datetime.now().isoformat(),
-                    'message': f'Parsing completato: {len(ricette)} ricette estratte'
-                }
-            else:
-                return {
-                    'success': False,
-                    'http_status': response.status_code,
-                    'error': f'HTTP {response.status_code}',
-                    'response_xml': response_text,
-                    'timestamp': datetime.now().isoformat()
-                }
-                
-        except Exception as e:
-            self.logger.error(f"Errore parsing risposta visualizzazione: {e}")
-            return {
-                'success': False,
-                'error': f'Errore parsing risposta: {str(e)}',
-                'http_status': response.status_code if hasattr(response, 'status_code') else 0,
-                'response_xml': response.text if hasattr(response, 'text') else '',
-                'timestamp': datetime.now().isoformat()
-            }
     
     def _extract_response_metadata(self, root, namespaces: dict) -> dict:
         """Estrae i metadati della risposta dal tracciato ufficiale"""
@@ -888,289 +677,259 @@ class RicetteTsService:
                 'suggested_actions': ['Contattare il supporto tecnico']
             }
     
-    def visualizza_ricetta_specifica(self, nre: str, cf_assistito: str = None, cf_medico: str = None) -> Dict[str, Any]:
+    
+    #sezione visualizza ricetta
+    def get_ricetta(self, cf_assistito: str, nrbe: str) -> dict:
         """
-        Visualizza ricetta specifica tramite endpoint interrogazioni - DINAMICA
+        NUOVA FUNZIONE CHE COPIA ESATTAMENTE IL RICETTA_TESTER.PY CHE FUNZIONAVA
+        Accetta solo CF assistito e NRE, usa la logica identica al tester
         """
         try:
-            import os  # Importa os all'inizio del metodo
-            self.logger.info(f"=== RICERCA RICETTA SPECIFICA ===")
-            self.logger.info(f"NRE: {nre}, CF assistito: {cf_assistito}")
+            #self.logger.info(f"=== NUOVA FUNZIONE GET_RICETTA ===")
+            #self.logger.info(f"CF Assistito: {cf_assistito}")
+            #self.logger.info(f"NRE: {nrbe}")
             
-            # Endpoint interrogazioni dinamico da env
-            endpoint_interrogazioni = os.getenv('ENDPOINT_INTERROGAZIONI_PROD', 
-                'https://demservice.sanita.finanze.it/DemRicettaInterrogazioniServicesWeb/services/demInterrogaNreUtilizzati')
+            # Cifra CF assistito usando il servizio esistente
+            cf_cifrato = self._encrypt_cf_assistito(cf_assistito)
+            self.logger.info(f"CF cifrato: {cf_cifrato[:50]}...")
             
-            # Pincode cifrato dinamico
-            pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
-            if not pincode_cifrato and self.pincode:
-                pincode_cifrato = self._encrypt_pincode(self.pincode)
+            # Cifra PIN usando il servizio esistente  
+            pin_cifrato = self._encrypt_pincode(self.pincode)
+            self.logger.info(f"PIN cifrato: {pin_cifrato[:50]}...")
             
-            if not pincode_cifrato:
-                raise ValueError("PINCODE_CIFRATO_PROD deve essere configurato")
             
-            # SOAP MINIMO - Solo NRE e CF Medico
-            soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
-                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-                                xmlns:int="http://interroganreutilrichiesta.xsd.dem.sanita.finanze.it">
-                    <soapenv:Header/>
-                    <soapenv:Body>
-                        <int:InterrogaNreUtilRichiesta>
-                            <int:nre>{nre}</int:nre>
-                            <int:cfMedico>{cf_medico or self.cf_medico}</int:cfMedico>
-                        </int:InterrogaNreUtilRichiesta>
-                    </soapenv:Body>
-                </soapenv:Envelope>'''
+            # Crea SOAP request IDENTICA al ricetta_tester.py
+            soap_body = f'''
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                             xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
+                             xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+               <soapenv:Header/>
+               <soapenv:Body>
+                  <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+                     <vis:pinCode>{pin_cifrato}</vis:pinCode>
+                     <vis:codicePaziente>{cf_cifrato}</vis:codicePaziente>
+                     <vis:nrbe>{nrbe}</vis:nrbe>
+                     <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
+                  </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+               </soapenv:Body>
+            </soapenv:Envelope>
+            '''
             
-            # Crea sessione e invia richiesta
-            session = self._create_session()
-            
+            # Headers IDENTICI al ricetta_tester.py
             headers = {
                 'Content-Type': 'text/xml; charset=utf-8',
-                'SOAPAction': '"http://interroganreutilizzati.wsdl.dem.sanita.finanze.it/InterrogaNreUtilizzati"',
-                'User-Agent': 'Python-requests/2.28.0'
+                'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
+                'Authorization2F': f"Bearer {self.id_sessione}",
+                'SOAPAction': "http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"
             }
             
-            self.logger.info(f"=== RICERCA RICETTA SPECIFICA ===")
-            self.logger.info(f"Endpoint: {endpoint_interrogazioni}")
+            # Endpoint IDENTICO al ricetta_tester.py
+            url = "https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca"
             
-            print(f"=== SOAP INTERROGAZIONI DINAMICA ===")
-            print(soap_template)
-            print(f"=== END SOAP ===")
+            #self.logger.info(f"URL: {url}")
+            #self.logger.info(f"Headers: {headers}")
             
-            response = session.post(
-                endpoint_interrogazioni,
-                data=soap_template,
-                headers=headers,
-                timeout=60,
-                verify=False
-            )
+            # Chiamata HTTP IDENTICA al ricetta_tester.py
+            response = requests.post(url, data=soap_body.strip(), headers=headers)
             
-            self.logger.info(f"Risposta ricevuta - Status: {response.status_code}")
+            self.logger.info(f"Status Code: {response.status_code}")
+            self.logger.info(f"Response: {response.text[:500]}...")
             
-            # SALVA RISPOSTA XML BRUTAL TEST
-            response_text = response.text
-            try:
-                import os
-                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-                xml_file_path = os.path.join(project_root, f"response_xml_nre_{nre}.xml")
-                
-                with open(xml_file_path, 'w', encoding='utf-8') as f:
-                    f.write(f"<!-- RICERCA RICETTA SPECIFICA - NRE: {nre} -->\n")
-                    f.write(f"<!-- HTTP Status: {response.status_code} -->\n")
-                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
-                    f.write(f"<!-- Endpoint: {endpoint_interrogazioni} -->\n")
-                    f.write(f"<!-- CF Medico: {cf_medico or self.cf_medico} -->\n")
-                    f.write(f"<!-- Ambiente: produzione -->\n")
-                    f.write("\n")
-                    f.write(response_text)
-                
-                print(f"📁 XML RICERCA SALVATO: {xml_file_path}")
-                
-            except Exception as save_error:
-                self.logger.warning(f"Errore salvataggio XML: {save_error}")
-            
-            # Log completo per debug
-            print(f"=== RISPOSTA RICERCA BASICA NRE {nre} ===")
-            print(f"HTTP Status: {response.status_code}")
-            print("Response Headers:")
-            for header, value in response.headers.items():
-                print(f"  {header}: {value}")
-            print("Response Body:")
-            print(response.text)
-            print(f"=== FINE RISPOSTA ===")
-            
-            # Salva la risposta XML in un file per analisi
-            response_text = response.text
-            try:
-                import os
-                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-                xml_file_path = os.path.join(project_root, f"response_xml_nre_{nre}.xml")
-                
-                with open(xml_file_path, 'w', encoding='utf-8') as f:
-                    f.write(f"<!-- Risposta Sistema TS per NRE: {nre} -->\n")
-                    f.write(f"<!-- HTTP Status: {response.status_code} -->\n")
-                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
-                    f.write(f"<!-- Endpoint: {self.endpoint_visualizza} -->\n")
-                    f.write(f"<!-- CF Medico: {self.cf_medico} -->\n")
-                    f.write(f"<!-- Ambiente: {self.env} -->\n")
-                    f.write("\n")
-                    f.write(response_text)
-                
-                self.logger.info(f"Risposta XML salvata in: {xml_file_path}")
-                print(f"📁 RISPOSTA XML SALVATA IN: {xml_file_path}")
-                
-            except Exception as save_error:
-                self.logger.warning(f"Errore salvataggio XML: {save_error}")
+            # Salva XML per debug
+            xml_file = f"response_xml_get_ricetta_{nrbe}.xml"
+            with open(xml_file, 'w', encoding='utf-8') as f:
+                f.write(response.text)
+            self.logger.info(f"XML salvato: {xml_file}")
             
             if response.status_code == 200:
-                # Verifica se ci sono errori nel SOAP response
-                if 'soap:Fault' in response_text or 'faultstring' in response_text:
-                    self.logger.warning(f"SOAP Fault ricevuto per NRE {nre}")
-                    return {
-                        'success': False,
-                        'http_status': response.status_code,
-                        'error': 'SOAP_FAULT',
-                        'message': f'SOAP Fault nella risposta per NRE {nre}',
-                        'response_xml': response_text,
-                        'timestamp': datetime.now().isoformat(),
-                        'nre': nre
-                    }
-                
-                # Risposta OK - verifica se contiene dati ricetta
-                if nre in response_text or 'ricetta' in response_text.lower():
-                    self.logger.info(f"Ricetta NRE {nre} trovata con ricerca basica!")
+                # Parsing della risposta XML
+                try:
+                    root = ET.fromstring(response.text)
+                    
+                    # Estrai dati della ricetta
+                    ricetta_data = self._parse_ricetta_response_simple(root)
+                    
                     return {
                         'success': True,
-                        'http_status': response.status_code,
-                        'response_xml': response_text,
-                        'timestamp': datetime.now().isoformat(),
-                        'message': f'Ricetta NRE {nre} trovata con ricerca basica',
-                        'nre': nre,
-                        'ricetta_data': {
-                            'nre': nre,
-                            'stato': 'Trovata - Da parsare XML',
-                            'response_xml': response_text,
-                            'source': 'sistema_ts_ricerca_basica',
-                            'search_type': 'solo_nre'
-                        }
+                        'ricetta_data': ricetta_data,
+                        'response_xml': response.text,
+                        'http_status': 200,
+                        'message': 'Ricetta trovata con successo'
                     }
-                else:
-                    # Risposta vuota o NRE non trovato
-                    self.logger.info(f"NRE {nre} non trovato con ricerca basica")
+                except ET.ParseError as e:
+                    self.logger.error(f"Errore parsing XML: {e}")
                     return {
                         'success': False,
-                        'http_status': response.status_code,
-                        'error': 'NRE_NOT_FOUND_BASIC',
-                        'message': f'NRE {nre} non trovato con ricerca basica (serve CF assistito?)',
-                        'response_xml': response_text,
-                        'timestamp': datetime.now().isoformat(),
-                        'nre': nre
+                        'error': 'XML_PARSE_ERROR',
+                        'message': f'Errore parsing risposta XML: {e}',
+                        'response_xml': response.text,
+                        'http_status': response.status_code
                     }
+            else:
+                return {
+                    'success': False,
+                    'error': f'HTTP_{response.status_code}',
+                    'message': f'Errore HTTP {response.status_code}',
+                    'response_xml': response.text,
+                    'http_status': response.status_code
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore get_ricetta: {e}")
+            return {
+                'success': False,
+                'error': 'EXCEPTION',
+                'message': f'Errore: {e}',
+                'http_status': 0
+            }
+
+    def _parse_visualizza_response(self, response: requests.Response) -> Dict[str, Any]:
+        """Parsa la risposta della visualizzazione ricette - BASATO SUI TRACCIATI UFFICIALI"""
+        try:
+            response_text = response.text
+            self.logger.info(f"Parsing risposta visualizzazione ricette")
+            
+            if response.status_code == 200:
+                
+                # === PARSING XML BASATO SUI TRACCIATI UFFICIALI ===
+                ricette = []
+                metadati_risposta = {}
+                
+                try:
+                    from lxml import etree
+                    import re
+                    
+                    # Parse XML response
+                    root = etree.fromstring(response.content)
+                    
+                    # Namespaces ufficiali dal kit di sviluppo
+                    namespaces = {
+                        'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+                        'ricevuta': 'http://visualizzaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it',
+                        'td': 'http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it'
+                    }
+                    
+                    # === ESTRAZIONE METADATI RISPOSTA (dal tracciato ufficiale) ===
+                    metadati_risposta = self._extract_response_metadata(root, namespaces)
+                    
+                    # === ANALISI ERRORI ===
+                    error_analysis = self._analyze_response_errors(metadati_risposta)
+                    
+                    # === RICERCA RICETTE SINGOLE ===
+                    # Il Sistema TS restituisce una singola ricetta per richiesta
+                    # Cerca l'elemento principale della risposta
+                    ricetta_principale = root.xpath('//ricevuta:VisualizzaPrescrittoRicettaBiancaRicevuta', namespaces=namespaces)
+                    
+                    if ricetta_principale:
+                        self.logger.info("Trovata ricetta principale nel formato ufficiale")
+                        ricetta_data = self._parse_ricetta_officiale(ricetta_principale[0], namespaces)
+                        if ricetta_data:
+                            ricette.append(ricetta_data)
+                    
+                    # === FALLBACK: RICERCA ALTERNATIVA ===
+                    if not ricette:
+                        # Cerca ricette in altri formati possibili
+                        ricette_alternative = root.xpath('//ricetta | //ricettaElettronica | //dettaglioPrescrizioneRicettaBianca')
+                        self.logger.info(f"Trovate ricette alternative: {len(ricette_alternative)}")
+                        
+                        for ricetta_elem in ricette_alternative:
+                            ricetta_data = self._parse_single_ricetta(ricetta_elem, namespaces)
+                            if ricetta_data:
+                                ricette.append(ricetta_data)
+                    
+                    # === FALLBACK FINALE: REGEX ===
+                    if not ricette:
+                        ricette = self._parse_ricette_fallback(response_text)
+                    
+                    self.logger.info(f"Parsing completato: {len(ricette)} ricette trovate")
+                    
+                except Exception as parse_error:
+                    self.logger.error(f"Errore parsing XML: {parse_error}")
+                    # Fallback: usa parsing regex
+                    ricette = self._parse_ricette_fallback(response_text)
+                
+                return {
+                    'success': True,
+                    'http_status': response.status_code,
+                    'ricette': ricette,
+                    'total_count': len(ricette),
+                    'response_xml': response_text,
+                    'metadati_risposta': metadati_risposta,
+                    'error_analysis': error_analysis,
+                    'timestamp': datetime.now().isoformat(),
+                    'message': f'Parsing completato: {len(ricette)} ricette estratte'
+                }
             else:
                 return {
                     'success': False,
                     'http_status': response.status_code,
                     'error': f'HTTP {response.status_code}',
-                    'response_text': response_text[:500],
-                    'timestamp': datetime.now().isoformat(),
-                    'nre': nre
+                    'response_xml': response_text,
+                    'timestamp': datetime.now().isoformat()
                 }
                 
         except Exception as e:
-            self.logger.error(f"Errore visualizzazione ricetta specifica: {e}", exc_info=True)
+            self.logger.error(f"Errore parsing risposta visualizzazione: {e}")
             return {
                 'success': False,
-                'error': f'Errore ricerca basica NRE {nre}: {str(e)}',
-                'timestamp': datetime.now().isoformat(),
-                'nre': nre
+                'error': f'Errore parsing risposta: {str(e)}',
+                'http_status': response.status_code if hasattr(response, 'status_code') else 0,
+                'response_xml': response.text if hasattr(response, 'text') else '',
+                'timestamp': datetime.now().isoformat()
             }
-
-    def get_all_ricette(self, data_da: str = None, data_a: str = None, cf_assistito: str = None, nre: str = None) -> Dict[str, Any]:
+    
+    def _create_visualizza_soap_request(self, data_da: str, data_a: str, cf_assistito: str = None, nre: str = None) -> str:
         """
-        Recupera la lista delle ricette dal Sistema TS - PRODUZIONE SEMPRE
+        Crea richiesta SOAP per visualizzazione ricette - DINAMICA
+        """
         
-        Args:
-            data_da: Data inizio ricerca (formato YYYY-MM-DD) - NON USATO nel SOAP
-            data_a: Data fine ricerca (formato YYYY-MM-DD) - NON USATO nel SOAP  
-            cf_assistito: Codice fiscale assistito specifico (opzionale)
-            
-        Returns:
-            Dict con risultato richiesta Sistema TS
-        """
-        try:
-            self.logger.info(f"=== RICHIESTA VISUALIZZAZIONE RICETTE PRODUZIONE ===")
-            self.logger.info(f"CF assistito: {cf_assistito}")
-            self.logger.info(f"CF medico: {self.cf_medico}")
-            
-            # Crea richiesta SOAP per visualizzazione (data_da e data_a non sono usati nel SOAP)
-            soap_request = self._create_visualizza_soap_request(data_da, data_a, cf_assistito, nre)
-            
-            # SALVA RICHIESTA SOAP PER DEBUG
-            try:
-                import os
-                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-                soap_file_path = os.path.join(project_root, f"request_soap_visualizza_{nre or 'no_nre'}.xml")
-                
-                with open(soap_file_path, 'w', encoding='utf-8') as f:
-                    f.write(f"<!-- RICHIESTA SOAP SISTEMA TS -->\n")
-                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
-                    f.write(f"<!-- Endpoint: {self.endpoint_visualizza} -->\n")
-                    f.write(f"<!-- CF Medico: {self.cf_medico} -->\n")
-                    f.write(f"<!-- CF Assistito: {cf_assistito} -->\n")
-                    f.write(f"<!-- NRE: {nre} -->\n")
-                    f.write(f"<!-- Ambiente: produzione -->\n")
-                    f.write("\n")
-                    f.write(soap_request)
-                
-                print(f"📁 RICHIESTA SOAP SALVATA: {soap_file_path}")
-                
-            except Exception as save_error:
-                self.logger.warning(f"Errore salvataggio richiesta SOAP: {save_error}")
-            
-            # Esegui richiesta
-            session = self._create_session()
-            session.auth = (self.cf_medico, self.password)
-            token_2fa = self._genera_token_2fa()
-            
-            headers = {
-                'Content-Type': 'text/xml; charset=utf-8',
-                'SOAPAction': '"http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"',
-                'Authorization2F': f'Bearer {token_2fa}',
-                'User-Agent': 'Python-requests/2.28.0'
-            }
-            
-            response = session.post(
-                self.endpoint_visualizza,
-                data=soap_request,
-                headers=headers,
-                timeout=60,
-                verify=False  # Disabilitato per compatibilità certificati
-            )
-            
-            self.logger.info(f"Risposta ricevuta - Status: {response.status_code}")
-            
-            # SALVA RISPOSTA XML PER DEBUG
-            response_text = response.text
-            try:
-                import os
-                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-                xml_file_path = os.path.join(project_root, f"response_xml_visualizza_{nre or 'no_nre'}.xml")
-                
-                with open(xml_file_path, 'w', encoding='utf-8') as f:
-                    f.write(f"<!-- RICERCA RICETTE SISTEMA TS -->\n")
-                    f.write(f"<!-- HTTP Status: {response.status_code} -->\n")
-                    f.write(f"<!-- Timestamp: {datetime.now().isoformat()} -->\n")
-                    f.write(f"<!-- Endpoint: {self.endpoint_visualizza} -->\n")
-                    f.write(f"<!-- CF Medico: {self.cf_medico} -->\n")
-                    f.write(f"<!-- CF Assistito: {cf_assistito} -->\n")
-                    f.write(f"<!-- NRE: {nre} -->\n")
-                    f.write(f"<!-- Ambiente: produzione -->\n")
-                    f.write("\n")
-                    f.write(response_text)
-                
-                print(f"📁 XML VISUALIZZA SALVATO: {xml_file_path}")
-                
-            except Exception as save_error:
-                self.logger.warning(f"Errore salvataggio XML: {save_error}")
-            
-            # Parsa la risposta
-            result = self._parse_visualizza_response(response)
-            
-            self.logger.info(f"Risultato parsing: {result.get('total_count', 0)} ricette trovate")
-            return result
-            
-        except Exception as e:
-            self.logger.error(f"Errore visualizzazione ricette Sistema TS: {e}", exc_info=True)
-            return {
-                'success': False,
-                'error': f'Errore Sistema TS: {str(e)}',
-                'timestamp': datetime.now().isoformat(),
-                'ricette': [],
-                'total_count': 0,
-                'response_xml': ''
-            }
+        # PINCODE CIFRATO DINAMICO - da variabile d'ambiente o cifrato dinamicamente
+        pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
+        
+        if not pincode_cifrato:
+            # Se non è fornito cifrato, usa il pincode in chiaro e lo cifra
+            if self.pincode:
+                pincode_cifrato = self._encrypt_pincode(self.pincode)
+            else:
+                raise ValueError("PINCODE_CIFRATO_PROD o PINCODE_PROD deve essere configurato")
+        
+        # CF ASSISTITO CIFRATO - sempre cifrato dinamicamente se fornito
+        if cf_assistito:
+            cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
+        else:
+            # CF assistito di default da env
+            cf_assistito_default = os.getenv('CF_ASSISTITO_DEFAULT_CIFRATO')
+            if cf_assistito_default:
+                cf_assistito_cifrato = cf_assistito_default
+            else:
+                raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
+        
+        # Template SOAP DINAMICO per visualizzazione ricette con data, CF assistito e NRE opzionale
+        soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                  xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
+                  xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+            <vis:pinCode>{pincode_cifrato}</vis:pinCode>
+            <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
+            <vis:cfMedico>{self.cf_medico}</vis:cfMedico>'''
+        
+        # Aggiungi NRE se specificato
+        if nre:
+            soap_template += f'''
+            <vis:nrbe>{nre}</vis:nrbe>'''
+        
+        soap_template += '''
+        </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+    </soapenv:Body>
+</soapenv:Envelope>'''
+        
+        return soap_template
 
+    
+    #sezione annulla ricetta
     def annulla_ricetta(self, nre: str, pin: str, motivazione: str = 'Annullamento ricetta') -> Dict[str, Any]:
         """
         Annulla una ricetta elettronica sul Sistema TS.
@@ -1289,41 +1048,8 @@ class RicetteTsService:
                 'nre': nre
             }
 
-    def get_environment_info(self) -> Dict[str, Any]:
-        """Informazioni ambiente corrente"""
-        return {
-            'environment': self.env,
-            'cf_medico': self.cf_medico,
-            'regione': self.regione,
-            'asl': self.asl,
-            'specializzazione': self.specializzazione,
-            'endpoint_visualizza': self.endpoint_visualizza,
-            'endpoint_invio': self.endpoint_invio,
-            'endpoint_annulla': self.endpoint_annulla,
-            'certificates': {
-                'client_cert': os.path.exists(self.client_cert) if hasattr(self, 'client_cert') else False,
-                'client_key': os.path.exists(self.client_key) if hasattr(self, 'client_key') else False,
-                'sanitel_cert': os.path.exists(self.sanitel_cert) if hasattr(self, 'sanitel_cert') else False
-            },
-            'credentials_configured': bool(self.cf_medico and self.password)
-        }
-            
-    def test_connection(self) -> Dict[str, Any]:
-        """Testa connessione Sistema TS"""
-        try:
-            # Test semplice con richiesta di visualizzazione vuota
-            result = self.get_all_ricette()
-            return {
-                'success': not ('timeout' in result.get('error', '').lower()),
-                'message': 'Connessione Sistema TS testata',
-                'details': result
-            }
-        except Exception as e:
-            return {
-                'success': False,
-                'message': f'Test connessione fallito: {e}'
-            }
-
+    
+    #sezione invio ricetta
     def _create_invio_soap_request(self, dati_ricetta: Dict[str, Any]) -> str:
         """
         Crea richiesta SOAP per invio ricetta - DINAMICA
