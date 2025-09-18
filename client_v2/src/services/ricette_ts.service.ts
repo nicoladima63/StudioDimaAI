@@ -330,7 +330,9 @@ class RicettaApiService {
         success: false,
         error: errorData?.error || 'INVIO_FAILED',
         message: errorData?.message || error.message || 'Errore durante l\'invio della ricetta',
-        data: errorData?.data
+        data: errorData?.data,
+        details: errorData?.details,  // Includi details per debug
+        response_xml: errorData?.response_xml  // Includi XML per debug
       };
     }
   }

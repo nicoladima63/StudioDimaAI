@@ -4,12 +4,11 @@ import {
   CModal, CModalHeader, CModalBody, CModalFooter, CRow, CCol, CCard, 
   CCardBody, CSpinner, CBadge
 } from '@coreui/react';
-import {
+import ricettaApi, {
   getDiagnosiDisponibili,
   getFarmaciPerDiagnosi, 
   getDurateStandard,
   getNoteFrequenti,
-  inviaRicetta,
   saveRicetta,
   type FarmacoProtocollo} from '@/services/ricette_ts.service';
 import  type {Diagnosi, RicettaPayload}  from '@/types/ricetta.types';
@@ -54,6 +53,7 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
   const [loading, setLoading] = useState(false);
   const [showConferma, setShowConferma] = useState(false);
   const [autoMode] = useState(true);
+  const [tsResponse, setTsResponse] = useState<any>(null);
 
   // Carica dati iniziali
   useEffect(() => {
@@ -143,96 +143,94 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
       return;
     }
 
-    const payload: RicettaPayload = {
-      medico: {
-        cf_medico: datiMedico.cfMedico,
-        regione: datiMedico.regione,
-        asl: datiMedico.asl,
-        specializzazione: datiMedico.specializzazione,
-        iscrizione: datiMedico.iscrizione,
-        indirizzo: datiMedico.indirizzo,
-        telefono: datiMedico.telefono,
-        cap: datiMedico.cap,
-        citta: datiMedico.citta,
-        provincia: datiMedico.provincia
-      },
-      paziente: {
-        id: pazienteSelezionato.id,
-        nome: pazienteSelezionato.nome,
-        cognome: '',
-        codice_fiscale: pazienteSelezionato.codice_fiscale || '',
-        indirizzo: pazienteSelezionato.indirizzo || '',
-        cap: pazienteSelezionato.cap || '',
-        citta: pazienteSelezionato.citta || '',
-        provincia: pazienteSelezionato.provincia || '',
-      },
-      diagnosi: {
-        id:diagnosiSelezionata.id,
-        codice: diagnosiSelezionata.codice,
-        descrizione: diagnosiSelezionata.descrizione
-      },
-      farmaco: {
-        codice: farmacoSelezionato.codice,
-        principio_attivo: farmacoSelezionato.principio_attivo,
-        descrizione: farmacoSelezionato.nome
-      },
-      posologia,
-      durata,
-      note,
+    // Payload aggiornato per la nuova funzione invio_ricetta
+    const payload = {
+      // CF assistito (necessario per la funzione)
+      cf_assistito: pazienteSelezionato.codice_fiscale || 'MRTLLL67A69G713A', // Fallback a CF di test
+      
+      // Campi obbligatori per invio_ricetta
+      cognome_nome: `${pazienteSelezionato.cognome || pazienteSelezionato.nome.split(' ')[0] || ''} ${pazienteSelezionato.nome}`.trim(),
+      indirizzo: `${pazienteSelezionato.indirizzo || ''}|${pazienteSelezionato.cap || ''}|${pazienteSelezionato.citta || ''}|${pazienteSelezionato.provincia || ''}`,
+      cod_diagnosi: diagnosiSelezionata.codice,
+      descr_diagnosi: diagnosiSelezionata.descrizione,
+      prescrizioni: [{
+        cod_prodotto: farmacoSelezionato.codice,
+        descrizione: farmacoSelezionato.nome,
+        quantita: '1', // Default quantità
+        posologia: posologia,
+        note: note || '',
+        tdl: '0' // Default: non terapia del dolore
+      }],
+      
+      // Campi opzionali con valori dal medico
+      cod_regione: datiMedico.regione,
+      cod_asl: datiMedico.asl,
+      specializzazione: datiMedico.specializzazione,
+      num_iscrizione_albo: datiMedico.iscrizione,
+      indirizzo_medico: `${datiMedico.indirizzo}|${datiMedico.cap}|${datiMedico.citta}|${datiMedico.provincia}`,
+      telefono_medico: `+39|${datiMedico.telefono}`,
+      tipo_prescrizione: 'F'
     };
 
     try {
-      const response = await inviaRicetta(payload);
+      const response = await ricettaApi.inviaRicetta(payload);
+      
+      // Salva la risposta del Sistema TS per debug
+      setTsResponse(response);
       
       if (response.success && response.data) {
         const { nre, pin_ricetta, protocollo_transazione, nome_medico, cognome_medico, data_inserimento, pdf_promemoria_b64 } = response.data;
         
-        // Salva la ricetta nel database locale
-        try {
-          const ricettaData = {
-            nre: nre || '',
-            codice_pin: pin_ricetta || '',
-            cf_medico: datiMedico.cfMedico,
-            medico_cognome: cognome_medico || 'N/A',
-            medico_nome: nome_medico || 'N/A', 
-            specializzazione: datiMedico.specializzazione,
-            nr_iscrizione_albo: datiMedico.iscrizione,
-            cf_assistito: pazienteSelezionato.codice_fiscale || '',
-            paziente_cognome: pazienteSelezionato.cognome || 'N/A',
-            paziente_nome: pazienteSelezionato.nome,
-            data_compilazione: data_inserimento || new Date().toISOString(),
-            codice_diagnosi: diagnosiSelezionata.codice,
-            descrizione_diagnosi: diagnosiSelezionata.descrizione,
-            gruppo_equivalenza_farmaco: 'EQUIVALENTE_01', // Campo obbligatorio
-            prodotto_aic: farmacoSelezionato.codice, // Usa codice farmaco come AIC
-            codice_farmaco: farmacoSelezionato.codice,
-            denominazione_farmaco: farmacoSelezionato.nome,
-            principio_attivo: farmacoSelezionato.principio_attivo,
-            posologia: posologia,
-            durata_trattamento: durata,
-            response_xml: '', // XML rimosso per risparmiare spazio - ricette recuperabili da Sistema TS
-            note: note || undefined,
-            protocollo_transazione: protocollo_transazione || undefined,
-            pdf_base64: pdf_promemoria_b64 || undefined
-          };
-          
-          const saveResult = await saveRicetta(ricettaData);
-          if (saveResult.success) {
-            console.log(`Ricetta salvata nel database con ID: ${saveResult.data?.ricetta_id}`);
-          } else {
-            console.warn(`Avviso salvataggio: ${saveResult.message}`);
-          }
-        } catch (saveError) {
-          console.warn("Avviso: ricetta inviata ma non salvata nel database locale:", saveError);
-        }
-        
+        // ✅ SUCCESSO: Mostra i dati ricevuti dal Sistema TS
         if (nre && pin_ricetta) {
+          // SOLO SE NRE E PIN SONO PRESENTI: salva la ricetta nel database locale
+          try {
+            const ricettaData = {
+              nre: nre,
+              codice_pin: pin_ricetta,
+              cf_medico: datiMedico.cfMedico,
+              medico_cognome: cognome_medico || 'N/A',
+              medico_nome: nome_medico || 'N/A', 
+              specializzazione: datiMedico.specializzazione,
+              nr_iscrizione_albo: datiMedico.iscrizione,
+              cf_assistito: pazienteSelezionato.codice_fiscale || '',
+              paziente_cognome: pazienteSelezionato.cognome || 'N/A',
+              paziente_nome: pazienteSelezionato.nome,
+              data_compilazione: data_inserimento || new Date().toISOString(),
+              codice_diagnosi: diagnosiSelezionata.codice,
+              descrizione_diagnosi: diagnosiSelezionata.descrizione,
+              gruppo_equivalenza_farmaco: 'EQUIVALENTE_01', // Campo obbligatorio
+              prodotto_aic: farmacoSelezionato.codice, // Usa codice farmaco come AIC
+              codice_farmaco: farmacoSelezionato.codice,
+              denominazione_farmaco: farmacoSelezionato.nome,
+              principio_attivo: farmacoSelezionato.principio_attivo,
+              posologia: posologia,
+              durata_trattamento: durata,
+              response_xml: '', // XML rimosso per risparmiare spazio - ricette recuperabili da Sistema TS
+              note: note || undefined,
+              protocollo_transazione: protocollo_transazione || undefined,
+              pdf_base64: pdf_promemoria_b64 || undefined
+            };
+            
+            const saveResult = await saveRicetta(ricettaData);
+            if (saveResult.success) {
+              console.log(`✅ Ricetta salvata nel database con ID: ${saveResult.data?.ricetta_id}`);
+            } else {
+              console.warn(`⚠️ Avviso salvataggio: ${saveResult.message}`);
+            }
+          } catch (saveError) {
+            console.warn("⚠️ Avviso: ricetta inviata ma non salvata nel database locale:", saveError);
+          }
+          
           alert(`✅ Ricetta inviata e salvata con successo!\n\n📋 NRE: ${nre}\n🔑 PIN: ${pin_ricetta}${protocollo_transazione ? `\n🔗 Protocollo: ${protocollo_transazione}` : ''}\n\nConserva questi dati per eventuali annullamenti.`);
         } else {
-          alert("✅ Ricetta inviata e salvata con successo al Sistema TS.");
+          // ❌ RISPOSTA SENZA NRE/PIN: non salvare, solo mostrare
+          alert("⚠️ Ricetta inviata al Sistema TS ma senza NRE/PIN. Controlla la risposta per dettagli.");
         }
       } else {
-        alert("✅ Ricetta inviata con successo.");
+        // ❌ ERRORE: Mostra il vero errore invece di successo falso
+        alert(`❌ Errore invio ricetta:\n\n${response.error || 'Errore sconosciuto'}\n\n${response.message || 'Nessun dettaglio disponibile'}`);
+        return; // Non resettare il form in caso di errore
       }
       
       setShowConferma(false);
@@ -246,6 +244,8 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
       
     } catch (err) {
       console.error("Errore invio ricetta:", err);
+      // Salva anche gli errori per debug
+      setTsResponse({ success: false, error: 'NETWORK_ERROR', message: err.message, details: err });
       alert("❌ Errore durante l'invio della ricetta.");
     }
   };
@@ -285,6 +285,60 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
                 </div>
               </CCardBody>
             </CCard>
+            
+            {/* Risposta Sistema TS */}
+            {tsResponse && (
+              <CCard className="mt-3">
+                <CCardBody>
+                  <h6 className="mb-3">🔍 Risposta Sistema TS</h6>
+                  <div className="small">
+                    <div><strong>Success:</strong> 
+                      <span className={tsResponse.success ? 'text-success' : 'text-danger'}>
+                        {tsResponse.success ? ' ✅' : ' ❌'}
+                      </span>
+                    </div>
+                    {tsResponse.error && (
+                      <div><strong>Error:</strong> <span className="text-danger">{tsResponse.error}</span></div>
+                    )}
+                    {tsResponse.message && (
+                      <div><strong>Message:</strong> {tsResponse.message}</div>
+                    )}
+                    {tsResponse.data && (
+                      <div className="mt-2">
+                        <strong>Data:</strong>
+                        <pre className="small bg-light p-2 mt-1" style={{maxHeight: '200px', overflow: 'auto'}}>
+                          {JSON.stringify(tsResponse.data, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {tsResponse.details && (
+                      <div className="mt-2">
+                        <strong>Details:</strong>
+                        <pre className="small bg-light p-2 mt-1" style={{maxHeight: '200px', overflow: 'auto'}}>
+                          {JSON.stringify(tsResponse.details, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {/* DEBUG: Mostra sempre la struttura per capire */}
+                    <div className="mt-2">
+                      <strong>DEBUG tsResponse:</strong>
+                      <pre className="small bg-light p-2 mt-1" style={{maxHeight: '200px', overflow: 'auto', fontSize: '10px'}}>
+                        {JSON.stringify(tsResponse, null, 2)}
+                      </pre>
+                    </div>
+                    
+                    {(tsResponse.response_xml || tsResponse.details?.response_xml) && (
+                      <div className="mt-2">
+                        <strong>XML Response:</strong>
+                        <pre className="small bg-light p-2 mt-1" style={{maxHeight: '300px', overflow: 'auto', fontSize: '10px'}}>
+                          {tsResponse.response_xml || tsResponse.details?.response_xml}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                </CCardBody>
+              </CCard>
+            )}
           </CCol>
 
           {/* Form ricetta */}

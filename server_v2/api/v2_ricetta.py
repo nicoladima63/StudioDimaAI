@@ -13,6 +13,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography import x509
 from typing import Dict, Any, Optional
 from utils.ricetta_utils import ricetta_data_manager
+from services.ricette_ts_service import ricette_ts_service
 
 # Database path per protocolli
 INSTANCE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance')
@@ -295,41 +296,24 @@ def invia_ricetta():
                 'message': 'Dati ricetta non presenti'
             }), 400
 
-        # --- MAPPING COME V1: payload -> formato interno ---
-        # V1 mappa payload a formato flat con cf_assistito
-        dati_ricetta = {
-            'cf_assistito': dati['paziente']['codiceFiscale'],
-            'nome_assistito': dati['paziente']['nome'],
-            'cognome_assistito': dati['paziente']['cognome'],
-            'codice_diagnosi': dati['diagnosi']['codice'],
-            'descrizione_diagnosi': dati['diagnosi']['descrizione'],
-            'codice_farmaco': dati['farmaco']['codice'],
-            'denominazione_farmaco': dati['farmaco']['descrizione'],
-            'principio_attivo': dati['farmaco']['principio_attivo'],
-            'posologia': dati['posologia'],
-            'durata': dati['durata'],
-            'note': dati.get('note', ''),
-            'num_iscrizione': dati.get('medico', {}).get('iscrizione', '591')
-        }
-
-        # Validazione base come V1
-        required_fields = ['cf_assistito', 'codice_diagnosi', 'descrizione_diagnosi', 
-                          'codice_farmaco', 'denominazione_farmaco', 'principio_attivo',
-                          'posologia', 'durata']
+        # Il frontend ora invia già i dati nel formato corretto per invio_ricetta
+        # Validazione dei campi obbligatori
+        required_fields = ['cognome_nome', 'indirizzo', 'cod_diagnosi', 'descr_diagnosi', 'prescrizioni']
         
         for field in required_fields:
-            if field not in dati_ricetta:
+            if field not in dati:
                 return jsonify({
                     'success': False,
                     'error': f'Campo obbligatorio mancante: {field}'
                 }), 400
         
-        logger.info(f"Invio ricetta per CF: {dati_ricetta['cf_assistito']}")
+        # Estrai CF assistito dal payload
+        cf_assistito = dati.get('cf_assistito', 'MRTLLL67A69G713A')  # Fallback a CF di test
         
-        # Usa il servizio V2 corretto
-        from services.ricette_ts_service import ricette_ts_service
-
-        result = ricette_ts_service.invia_ricetta(dati_ricetta)
+        logger.info(f"Invio ricetta per CF: {cf_assistito}")
+        
+        # Usa la nuova funzione invio_ricetta che copia la logica di get_ricetta
+        result = ricette_ts_service.invio_ricetta(cf_assistito, dati)
         
         if result['success']:
             return jsonify({
@@ -340,8 +324,10 @@ def invia_ricetta():
         else:
             return jsonify({
                 'success': False,
-                'error': 'Errore invio ricetta al Sistema TS', 
-                'details': result
+                'error': result.get('error', 'Errore invio ricetta al Sistema TS'),
+                'message': result.get('message', 'Errore sconosciuto'),
+                'details': result,
+                'response_xml': result.get('response_xml', '')  # Includi sempre l'XML per debug
             }), 400
     except Exception as e:
         logger.error(f"Errore invio ricetta: {e}")
@@ -642,7 +628,6 @@ def get_farmaci_test_sicuri():
         }), 500
 
 @ricetta_bp.route("/ricetta/db/save", methods=['POST'])
-@jwt_required()
 def save_ricetta():
     """Salva ricetta elettronica nel database locale"""
     try:

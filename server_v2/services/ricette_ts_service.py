@@ -202,6 +202,13 @@ class RicetteTsService:
         self.logger.info("Usando ID-SESSIONE da variabile d'ambiente")
         return id_sessione
     
+    def _genera_token_2fa(self) -> str:
+        """
+        Genera il token A2F nel formato CF-YYYY-MM come richiesto dal sistema
+        Copiato dal V1 che funziona
+        """
+        return f"{self.cf_medico}-{datetime.now().strftime('%Y-%m')}"
+    
     def _encrypt_cf_assistito(self, cf_assistito: str) -> str:
         """
         Cifra il CF dell'assistito usando l'endpoint di cifratura dinamico
@@ -685,17 +692,11 @@ class RicetteTsService:
         Accetta solo CF assistito e NRE, usa la logica identica al tester
         """
         try:
-            #self.logger.info(f"=== NUOVA FUNZIONE GET_RICETTA ===")
-            #self.logger.info(f"CF Assistito: {cf_assistito}")
-            #self.logger.info(f"NRE: {nrbe}")
-            
             # Cifra CF assistito usando il servizio esistente
             cf_cifrato = self._encrypt_cf_assistito(cf_assistito)
-            self.logger.info(f"CF cifrato: {cf_cifrato[:50]}...")
             
             # Cifra PIN usando il servizio esistente  
             pin_cifrato = self._encrypt_pincode(self.pincode)
-            self.logger.info(f"PIN cifrato: {pin_cifrato[:50]}...")
             
             
             # Crea SOAP request IDENTICA al ricetta_tester.py
@@ -1055,24 +1056,14 @@ class RicetteTsService:
         Crea richiesta SOAP per invio ricetta - DINAMICA
         """
         
-        # PinCode cifrato dinamico
-        pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
-        if not pincode_cifrato and self.pincode:
-            pincode_cifrato = self._encrypt_pincode(self.pincode)
+        # PinCode cifrato dinamico - IDENTICO A GET_RICETTA
+        pin_cifrato = self._encrypt_pincode(self.pincode)
+        self.logger.info(f"PIN cifrato: {pin_cifrato[:50]}...")
         
-        if not pincode_cifrato:
-            raise ValueError("PINCODE_CIFRATO_PROD deve essere configurato")
-        
-        # CF Assistito cifrato dinamicamente
+        # CF Assistito cifrato dinamicamente - IDENTICO A GET_RICETTA
         cf_assistito = dati_ricetta.get('cf_assistito')
-        if cf_assistito:
-            cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
-        else:
-            cf_assistito_default = os.getenv('CF_ASSISTITO_DEFAULT_CIFRATO')
-            if cf_assistito_default:
-                cf_assistito_cifrato = cf_assistito_default
-            else:
-                raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
+        cf_assistito_cifrato = self._encrypt_cf_assistito(cf_assistito)
+        self.logger.info(f"CF cifrato: {cf_assistito_cifrato[:50]}...")
         
         # Timestamp dinamico
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1084,7 +1075,7 @@ class RicetteTsService:
         <soapenv:Header/>
         <soapenv:Body>
             <inv:InvioPrescrittoRicettaBiancaRichiesta>
-                <inv:pinCode>{pincode_cifrato}</inv:pinCode>
+                <inv:pinCode>{pin_cifrato}</inv:pinCode>
                 <inv:cfMedico>{self.cf_medico}</inv:cfMedico>
                 <inv:codRegione>{self.regione}</inv:codRegione>
                 <inv:codASLAo>{self.asl}</inv:codASLAo>
@@ -1270,7 +1261,7 @@ class RicetteTsService:
                 'cf_assistito': dati_ricetta.get('cf_assistito', 'N/A')
             }
 
-    def invia_ricetta(self, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
+    def invia_ricetta_old(self, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
         """
         Invia ricetta elettronica al Sistema TS.
         Usa formato SOAP corretto del kit ufficiale per l'invio.
@@ -1285,13 +1276,12 @@ class RicetteTsService:
             session = self._create_session()
             session.auth = (self.cf_medico, self.password)  # Basic Auth
             
-            # Headers per invio (diversi da visualizzazione)
-            token_2fa = self._genera_token_2fa()
+            # Headers IDENTICI A GET_RICETTA
             headers = {
                 'Content-Type': 'text/xml; charset=utf-8',
-                'SOAPAction': 'http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it/InvioPrescrittoRicettaBianca',
-                'Authorization2F': f'Bearer {token_2fa}',
-                'User-Agent': 'Python-requests/2.28.0'
+                'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
+                'Authorization2F': f"Bearer {self.id_sessione}",
+                'SOAPAction': 'http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it/InvioPrescrittoRicettaBianca'
             }
             
             self.logger.info(f"Invio richiesta ricetta a: {self.endpoint_invio}")
@@ -1309,8 +1299,19 @@ class RicetteTsService:
             # Debug: Log completo della risposta per capire l'errore
             self.logger.info(f"Risposta completa invio: {response.text}")
             
-            # Parsa la risposta
-            return self._parse_invio_response(response, dati_ricetta)
+            # Parsa la risposta usando lo stesso parser di get_ricetta
+            from lxml import etree
+            root = etree.fromstring(response.content)
+            ricetta_data = self._parse_ricetta_response_simple(root)
+            
+            # Adatta il formato per invio_ricetta
+            return {
+                'success': True,
+                'ricetta_data': ricetta_data,
+                'response_xml': response.text,
+                'http_status': response.status_code,
+                'message': 'Ricetta inviata con successo'
+            }
             
         except Exception as e:
             self.logger.error(f"Errore invio ricetta: {e}", exc_info=True)
@@ -1320,6 +1321,263 @@ class RicetteTsService:
                 'timestamp': datetime.now().isoformat()
             }
 
+
+    def invio_ricetta(self, cf_assistito: str, dati_ricetta: dict) -> dict:
+        """
+        FUNZIONE PER INVIO RICETTA CHE COPIA LA LOGICA DELLA VISUALIZZAZIONE
+        Accetta CF assistito e dizionario con i dati della ricetta
+        
+        dati_ricetta deve contenere:
+        - cognome_nome: str (es. "ROSSI MARIO")
+        - indirizzo: str (es. "Via Roma, 1|00100|Roma|RM")
+        - cod_diagnosi: str (es. "V48.4") 
+        - descr_diagnosi: str (es. "Diagnosi di prova")
+        - prescrizioni: list di dict con:
+            - cod_prodotto: str (es. "033052034")
+            - descrizione: str (es. "NIMESULIDE MYL*100MG 30BUST.")
+            - quantita: str (es. "1")
+            - posologia: str (opzionale)
+            - note: str (opzionale)
+            - tdl: str ("0" o "1" per terapia del dolore, default "0")
+        
+        Opzionali in dati_ricetta:
+        - cod_regione: str (default "130")
+        - cod_asl: str (default "201") 
+        - cod_struttura: str (default "")
+        - specializzazione: str (default "F")
+        - special_clinica: str (default "")
+        - num_iscrizione_albo: str (default "123456")
+        - indirizzo_medico: str (default "Via Medico, 88|00100|Roma|RM")
+        - telefono_medico: str (default "+39|0765488120")
+        - tipo_prescrizione: str (default "F")
+        - testata1: str (opzionale)
+        - testata2: str (opzionale)
+        """
+        try:
+            self.logger.info(f"=== INVIO RICETTA ===")
+            self.logger.info(f"CF Assistito: {cf_assistito}")
+            
+            # Validazione dati obbligatori
+            required_fields = ['cognome_nome', 'indirizzo', 'cod_diagnosi', 'descr_diagnosi', 'prescrizioni']
+            for field in required_fields:
+                if field not in dati_ricetta:
+                    return {
+                        'success': False,
+                        'error': 'MISSING_REQUIRED_FIELD',
+                        'message': f'Campo obbligatorio mancante: {field}',
+                        'http_status': 0
+                    }
+            
+            if not dati_ricetta['prescrizioni'] or len(dati_ricetta['prescrizioni']) == 0:
+                return {
+                    'success': False,
+                    'error': 'NO_PRESCRIPTIONS',
+                    'message': 'Almeno una prescrizione è obbligatoria',
+                    'http_status': 0
+                }
+            
+            # Cifra CF assistito usando il servizio esistente
+            cf_cifrato = self._encrypt_cf_assistito(cf_assistito)
+            
+            # Cifra PIN usando il servizio esistente  
+            pin_cifrato = self._encrypt_pincode(self.pincode)
+            
+            # Valori di default CON I TUOI DATI REALI
+            defaults = {
+                'cod_regione': self.regione,  # 090 per Toscana
+                'cod_asl': self.asl,  # 109 per Toscana Centro
+                'cod_struttura': '',
+                'specializzazione': self.specializzazione,  # F per Odontoiatra
+                'special_clinica': '',
+                'num_iscrizione_albo': '591',  # La tua iscrizione reale
+                'indirizzo_medico': 'Via Michelangelo Buonarroti,15|51031|Agliana|PT',  # I tuoi dati reali
+                'telefono_medico': '+39|0574712060',  # Il tuo telefono reale
+                'tipo_prescrizione': 'F',
+                'testata1': '',
+                'testata2': ''
+            }
+            
+            # Applica defaults
+            for key, default_value in defaults.items():
+                if key not in dati_ricetta:
+                    dati_ricetta[key] = default_value
+            
+            # Data compilazione corrente
+            data_compilazione = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Costruisci elementi XML per le prescrizioni
+            prescrizioni_xml = ""
+            for i, prescrizione in enumerate(dati_ricetta['prescrizioni']):
+                # Validazione prescrizione
+                if 'cod_prodotto' not in prescrizione or 'descrizione' not in prescrizione or 'quantita' not in prescrizione:
+                    return {
+                        'success': False,
+                        'error': 'INVALID_PRESCRIPTION',
+                        'message': f'Prescrizione {i+1}: mancano cod_prodotto, descrizione o quantita',
+                        'http_status': 0
+                    }
+                
+                # Valori default per prescrizione
+                tdl = prescrizione.get('tdl', '0')
+                posologia = prescrizione.get('posologia', '')
+                note = prescrizione.get('note', '')
+                
+                # Elementi opzionali
+                posologia_element = f"<tip:posologia>{posologia}</tip:posologia>" if posologia else ""
+                note_element = f"<tip:descrTestoLiberoNote>{note}</tip:descrTestoLiberoNote>" if note else ""
+                
+                prescrizioni_xml += f'''
+                <inv:dettaglioPrescrizioneRicettaBianca>
+                <tip:codProdPrest>{prescrizione['cod_prodotto']}</tip:codProdPrest>
+                <tip:descrProdPrest>{prescrizione['descrizione']}</tip:descrProdPrest>
+                <tip:tdl>{tdl}</tip:tdl>
+                {note_element}
+                <tip:quantita>{prescrizione['quantita']}</tip:quantita>
+                {posologia_element}
+                </inv:dettaglioPrescrizioneRicettaBianca>'''
+            
+            # Elementi opzionali testata
+            cod_struttura_element = f"<inv:codStruttura>{dati_ricetta['cod_struttura']}</inv:codStruttura>" if dati_ricetta.get('cod_struttura') else ""
+            testata1_element = f"<inv:testata1>{dati_ricetta['testata1']}</inv:testata1>" if dati_ricetta.get('testata1') else ""
+            testata2_element = f"<inv:testata2>{dati_ricetta['testata2']}</inv:testata2>" if dati_ricetta.get('testata2') else ""
+            special_clinica_element = f"<inv:specialClinica>{dati_ricetta['special_clinica']}</inv:specialClinica>" if dati_ricetta.get('special_clinica') else ""
+            cognome_nome_element = f"<inv:cognNome>{dati_ricetta['cognome_nome']}</inv:cognNome>" if dati_ricetta.get('cognome_nome') else ""
+            indirizzo_element = f"<inv:indirizzo>{dati_ricetta['indirizzo']}</inv:indirizzo>" if dati_ricetta.get('indirizzo') else ""
+            cod_diagnosi_element = f"<inv:codDiagnosi>{dati_ricetta['cod_diagnosi']}</inv:codDiagnosi>" if dati_ricetta.get('cod_diagnosi') else ""
+            descr_diagnosi_element = f"<inv:descrDiagnosi>{dati_ricetta['descr_diagnosi']}</inv:descrDiagnosi>" if dati_ricetta.get('descr_diagnosi') else ""
+            
+            # Crea SOAP request IDENTICA al pattern della visualizzazione
+            soap_body = f'''
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                            xmlns:inv="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
+                            xmlns:tip="http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+            <soapenv:Header/>
+            <soapenv:Body>
+                <inv:InvioPrescrittoRicettaBiancaRichiesta>
+                    <inv:pinCode>{pin_cifrato}</inv:pinCode>
+                    <inv:cfMedico>{self.cf_medico}</inv:cfMedico>
+                    <inv:codRegione>{dati_ricetta['cod_regione']}</inv:codRegione>
+                    <inv:codASLAo>{dati_ricetta['cod_asl']}</inv:codASLAo>
+                    {cod_struttura_element}
+                    <inv:codSpecializzazione>{dati_ricetta['specializzazione']}</inv:codSpecializzazione>
+                    {special_clinica_element}
+                    <inv:numIscrizAlbo>{dati_ricetta['num_iscrizione_albo']}</inv:numIscrizAlbo>
+                    <inv:indirMedico>{dati_ricetta['indirizzo_medico']}</inv:indirMedico>
+                    <inv:telefMedico>{dati_ricetta['telefono_medico']}</inv:telefMedico>
+                    {testata1_element}
+                    {testata2_element}
+                    <inv:codicePaziente>{cf_cifrato}</inv:codicePaziente>
+                    {cognome_nome_element}
+                    {indirizzo_element}
+                    <inv:tipoPrescrizione>{dati_ricetta['tipo_prescrizione']}</inv:tipoPrescrizione>
+                    {cod_diagnosi_element}
+                    {descr_diagnosi_element}
+                    <inv:dataCompilazione>{data_compilazione}</inv:dataCompilazione>
+                    {prescrizioni_xml}
+                </inv:InvioPrescrittoRicettaBiancaRichiesta>
+            </soapenv:Body>
+            </soapenv:Envelope>
+            '''
+            
+            # Genera token 2FA dinamico come nel V1
+            token_2fa = self._genera_token_2fa()
+            self.logger.info(f"Token 2FA generato: {token_2fa}")
+            
+            # Headers con token 2FA dinamico come nel V1
+            headers = {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
+                'Authorization2F': f"Bearer {token_2fa}",
+                'SOAPAction': "http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it/InvioPrescrittoRicettaBianca"
+            }
+            
+            # Endpoint per invio
+            url = "https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca"
+            
+            #self.logger.info(f"URL: {url}")
+            #self.logger.info(f"Numero prescrizioni: {len(dati_ricetta['prescrizioni'])}")
+            
+            # Chiamata HTTP IDENTICA alla visualizzazione
+            response = requests.post(url, data=soap_body.strip(), headers=headers)
+            
+            self.logger.info(f"Status Code: {response.status_code}")
+            self.logger.info(f"Response: {response.text[:500]}...")
+            
+            if response.status_code == 200:
+                # Parsing della risposta XML
+                try:
+                    root = ET.fromstring(response.text)
+                    
+                    # Estrai NRBE dalla risposta
+                    nrbe_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}nrbe")
+                    pin_nrbe_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}pinNrbe")
+                    codice_esito_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}codEsitoInserimento")
+                    protocollo_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}protocolloTransazione")
+                    data_inserimento_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}dataInserimento")
+                    
+                    # Estrai eventuali errori
+                    errori = []
+                    for errore in root.findall(".//{http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it}erroreRicetta"):
+                        cod_esito = errore.find(".//codEsito")
+                        esito_text = errore.find(".//esito")
+                        tipo_errore = errore.find(".//tipoErrore")
+                        
+                        errori.append({
+                            'codice': cod_esito.text if cod_esito is not None else 'N/A',
+                            'messaggio': esito_text.text if esito_text is not None else 'N/A',
+                            'tipo': tipo_errore.text if tipo_errore is not None else 'N/A'
+                        })
+                    
+                    result_data = {
+                        'nrbe': nrbe_element.text if nrbe_element is not None else None,
+                        'pin_nrbe': pin_nrbe_element.text if pin_nrbe_element is not None else None,
+                        'codice_esito': codice_esito_element.text if codice_esito_element is not None else None,
+                        'protocollo_transazione': protocollo_element.text if protocollo_element is not None else None,
+                        'data_inserimento': data_inserimento_element.text if data_inserimento_element is not None else None,
+                        'errori': errori
+                    }
+                    
+                    # Verifica se l'invio è riuscito
+                    is_success = (result_data['nrbe'] is not None and 
+                                result_data['codice_esito'] == '0000')
+                    
+                    if is_success:
+                        self.logger.info(f"NRBE generato: {result_data['nrbe']}")
+                    
+                    return {
+                        'success': is_success,
+                        'ricetta_data': result_data,
+                        'response_xml': response.text,
+                        'http_status': 200,
+                        'message': 'Ricetta inviata con successo' if is_success else f'Errore invio ricetta: {errori[0]["messaggio"] if errori else "Errore sconosciuto"}'
+                    }
+                    
+                except ET.ParseError as e:
+                    self.logger.error(f"Errore parsing XML: {e}")
+                    return {
+                        'success': False,
+                        'error': 'XML_PARSE_ERROR',
+                        'message': f'Errore parsing risposta XML: {e}',
+                        'response_xml': response.text,
+                        'http_status': response.status_code
+                    }
+            else:
+                return {
+                    'success': False,
+                    'error': f'HTTP_{response.status_code}',
+                    'message': f'Errore HTTP {response.status_code}',
+                    'response_xml': response.text,
+                    'http_status': response.status_code
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore invio_ricetta: {e}")
+            return {
+                'success': False,
+                'error': 'EXCEPTION',
+                'message': f'Errore: {e}',
+                'http_status': 0
+            }
 
 # Istanza singleton per uso globale
 ricette_ts_service = RicetteTsService()

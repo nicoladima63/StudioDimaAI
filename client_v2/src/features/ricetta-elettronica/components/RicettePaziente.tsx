@@ -110,11 +110,12 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
     setCfPaziente(cfPazienteIniziale);
   }, [cfPazienteIniziale]);
 
-  useEffect(() => {
-    if (cfPaziente && cfPaziente.length >= 10) {
-      cercaRicette();
-    }
-  }, [cfPaziente]);
+  // RIMOSSO: Chiamata automatica al cambio paziente
+  // useEffect(() => {
+  //   if (cfPaziente && cfPaziente.length >= 10) {
+  //     cercaRicette();
+  //   }
+  // }, [cfPaziente]);
 
   return (
     <div className="mb-4">

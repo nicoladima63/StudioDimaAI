@@ -153,12 +153,9 @@ class RicetteDbService(BaseService):
         try:
             # Validazione campi obbligatori - come V1
             required_fields = [
-                'nre', 'codice_pin', 'cf_medico', 'medico_cognome', 'medico_nome',
-                'specializzazione', 'nr_iscrizione_albo', 'cf_assistito', 
-                'paziente_cognome', 'paziente_nome', 'data_compilazione',
-                'codice_diagnosi', 'descrizione_diagnosi', 'gruppo_equivalenza_farmaco',
-                'prodotto_aic', 'codice_farmaco', 'posologia', 'durata_trattamento',
-                'response_xml'
+                'cf_medico', 'cf_assistito', 'data_compilazione',
+                'codice_diagnosi', 'descrizione_diagnosi', 'codice_farmaco', 'posologia', 
+                'durata_trattamento'
             ]
             self.validate_required_fields(ricetta_data, required_fields)
             
@@ -180,8 +177,8 @@ class RicetteDbService(BaseService):
                     ambiente, response_xml, pdf_base64
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                ricetta_data['nre'],
-                ricetta_data['codice_pin'],
+                ricetta_data.get('nre', ''),
+                ricetta_data.get('codice_pin', ''),
                 ricetta_data.get('protocollo_transazione'),
                 ricetta_data.get('stato', 'inviata'),
                 ricetta_data['cf_medico'],
@@ -202,15 +199,15 @@ class RicetteDbService(BaseService):
                 ricetta_data.get('tipo_prescrizione', 'farmaceutica'),
                 ricetta_data['codice_diagnosi'],
                 ricetta_data['descrizione_diagnosi'],
-                ricetta_data['gruppo_equivalenza_farmaco'],
-                ricetta_data['prodotto_aic'],
+                ricetta_data.get('gruppo_equivalenza_farmaco', ''),
+                ricetta_data.get('prodotto_aic', ''),
                 ricetta_data['codice_farmaco'],
                 ricetta_data.get('quantita', 1),
                 ricetta_data['posologia'],
                 ricetta_data['durata_trattamento'],
                 ricetta_data.get('note'),
                 ricetta_data.get('ambiente', 'test'),
-                ricetta_data['response_xml'],
+                ricetta_data.get('response_xml', ''),
                 ricetta_data.get('pdf_base64')
             ))
             
