@@ -58,6 +58,30 @@ export interface RicettaPayload {
   codice_ricetta?: string;
 }
 
+// Nuovo tipo per l'invio al Sistema TS
+export interface RicettaInvioPayload {
+  cf_assistito: string;
+  cognome_nome: string;
+  indirizzo: string;
+  cod_diagnosi: string;
+  descr_diagnosi: string;
+  prescrizioni: {
+    cod_prodotto: string;
+    descrizione: string;
+    quantita: string;
+    posologia: string;
+    note: string;
+    tdl: string;
+  }[];
+  cod_regione: string;
+  cod_asl: string;
+  specializzazione: string;
+  num_iscrizione_albo: string;
+  indirizzo_medico: string;
+  telefono_medico: string;
+  tipo_prescrizione: string;
+}
+
 export interface RicettaResponse {
   success: boolean;
   data?: {

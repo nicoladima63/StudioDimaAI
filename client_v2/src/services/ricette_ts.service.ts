@@ -319,7 +319,7 @@ class RicettaApiService {
   }
 
   // === Invio ricetta ===
-  async inviaRicetta(payload: RicettaPayload): Promise<RicettaResponse> {
+  async inviaRicetta(payload: RicettaInvioPayload): Promise<RicettaResponse> {
     try {
       const response = await apiClient.post(`${this.basePath}/invio`, payload);
       return response.data;
@@ -332,7 +332,7 @@ class RicettaApiService {
         message: errorData?.message || error.message || 'Errore durante l\'invio della ricetta',
         data: errorData?.data,
         details: errorData?.details,  // Includi details per debug
-        response_xml: errorData?.response_xml  // Includi XML per debug
+        response_xml: errorData?.response_xml || errorData?.details?.response_xml  // Includi XML per debug da entrambe le posizioni
       };
     }
   }
@@ -383,6 +383,25 @@ class RicettaApiService {
         error: error.response?.data?.error || 'TEST_DATA_FAILED',
         message: error.message || 'Errore caricamento ricette test',
         data: []
+      };
+    }
+  }
+
+  // === Visualizza ricetta dal Sistema TS ===
+  async getRicetta(cf_paziente: string, nrbe?: string): Promise<ApiResponse> {
+    try {
+      const response = await apiClient.get(`${this.basePath}/ricetta`, {
+        params: {
+          cf_assistito: cf_paziente,
+          nre: nrbe
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'GET_RICETTA_FAILED',
+        message: error.response?.data?.message || error.message || 'Errore durante la visualizzazione della ricetta'
       };
     }
   }
@@ -580,6 +599,7 @@ export const {
   getDurateStandard,
   getNoteFrequenti,
   saveRicetta,
+  getRicetta,
   getAllRicette,
   searchDiagnosi,
   searchFarmaci,

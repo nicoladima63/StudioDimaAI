@@ -1,0 +1,37 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                            xmlns:inv="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
+                            xmlns:tip="http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+            <soapenv:Header/>
+            <soapenv:Body>
+                <inv:InvioPrescrittoRicettaBiancaRichiesta>
+                    <inv:pinCode>W0/p9dvoHVqOGcV4uK8bqI3oRly4rz1I/8oVCy+TJMWvHOk4tB25ycq8rUdrzYcf40vPPN30WwHljcpLJDmqhk+8to73IS0s4q0TIidLa6eZzJDlPky9vSTFnE/leQ+92N37hYGZ3VNWGqrcWJQRC4JTZRfqeSQKNIRPW/ebm9Y=</inv:pinCode>
+                    <inv:cfMedico>DMRNCL63S21D612I</inv:cfMedico>
+                    <inv:codRegione>090</inv:codRegione>
+                    <inv:codASLAo>109</inv:codASLAo>
+                    
+                    <inv:codSpecializzazione>F</inv:codSpecializzazione>
+                    
+                    <inv:numIscrizAlbo>591</inv:numIscrizAlbo>
+                    <inv:indirMedico>Via Michelangelo Buonarroti,15|51031|Agliana|PT</inv:indirMedico>
+                    <inv:telefMedico>+39|0574712060</inv:telefMedico>
+                    
+                    
+                    <inv:codicePaziente>dDXsDWuRwqQ9RlMkhNMIzw2KpwdFQIqmdyJQq/K699aCadNuPuYgO8rvQVUXW9JTAh9bzdXwVMevYDFfxLOCwBHPuM67nSb6M6C4pianugLE/vMnTTUZU+sJ7Zt7xTOJ9RjCUlt9UuXZawayRP7/l6kWUXDQm15nbFUk3sSab+s=</inv:codicePaziente>
+                    <inv:cognNome>Baldi Maria Cristina</inv:cognNome>
+                    <inv:indirizzo>Via F. Lippi,11|59013|Montemurlo|PO</inv:indirizzo>
+                    <inv:tipoPrescrizione>F</inv:tipoPrescrizione>
+                    <inv:codDiagnosi>K04.x</inv:codDiagnosi>
+                    <inv:descrDiagnosi>Pulpite, necrosi, ascesso, cisti radicolari</inv:descrDiagnosi>
+                    <inv:dataCompilazione>2025-09-18 11:50:31</inv:dataCompilazione>
+                    
+                <inv:dettaglioPrescrizioneRicettaBianca>
+                <tip:codProdPrest>1</tip:codProdPrest>
+                <tip:descrProdPrest>Augmentin, Clavulin</tip:descrProdPrest>
+                <tip:tdl>0</tip:tdl>
+                <tip:descrTestoLiberoNote></tip:descrTestoLiberoNote>
+                <tip:quantita>1</tip:quantita>
+                <tip:posologia>1 g ogni 8 h x 6 giorni</tip:posologia>
+                </inv:dettaglioPrescrizioneRicettaBianca>
+                </inv:InvioPrescrittoRicettaBiancaRichiesta>
+            </soapenv:Body>
+            </soapenv:Envelope>

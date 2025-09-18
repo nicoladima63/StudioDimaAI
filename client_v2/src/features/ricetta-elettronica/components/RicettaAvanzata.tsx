@@ -11,7 +11,7 @@ import ricettaApi, {
   getNoteFrequenti,
   saveRicetta,
   type FarmacoProtocollo} from '@/services/ricette_ts.service';
-import  type {Diagnosi, RicettaPayload}  from '@/types/ricetta.types';
+import  type {Diagnosi, RicettaInvioPayload}  from '@/types/ricetta.types';
 import type { Paziente } from '@/store/pazienti.store';
 
 interface DatiMedico {
@@ -86,17 +86,27 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
       const loadFarmaci = async () => {
         try {
           const response = await getFarmaciPerDiagnosi(diagnosiSelezionata.id);
-          setFarmaciDisponibili(response.data || []);
-          // Auto-seleziona primo farmaco
           const farmaci = response.data || [];
+          setFarmaciDisponibili(farmaci);
+          
+          // Auto-seleziona primo farmaco SOLO se disponibile
           if (farmaci.length > 0) {
-            setFarmacoSelezionato(farmaci[0]);
-            setPosologia(farmaci[0].posologia_default);
-            setDurata(farmaci[0].durata_default);
-            setNote(farmaci[0].note_default);
+            const primoFarmaco = farmaci[0];
+            setFarmacoSelezionato(primoFarmaco);
+            setPosologia(primoFarmaco.posologia_default || '');
+            setDurata(primoFarmaco.durata_default || '');
+            setNote(primoFarmaco.note_default || '');
+          } else {
+            // Reset se nessun farmaco disponibile
+            setFarmacoSelezionato(null);
+            setPosologia('');
+            setDurata('');
+            setNote('');
           }
         } catch (error) {
           console.error('Errore caricamento farmaci:', error);
+          setFarmaciDisponibili([]);
+          setFarmacoSelezionato(null);
         }
       };
 
@@ -123,33 +133,65 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
     setFarmacoSelezionato(farmaco || null);
     
     if (farmaco && autoMode) {
-      setPosologia(farmaco.posologia_default);
-      setDurata(farmaco.durata_default);
-      setNote(farmaco.note_default);
+      setPosologia(farmaco.posologia_default || '');
+      setDurata(farmaco.durata_default || '');
+      setNote(farmaco.note_default || '');
+    } else if (!farmaco) {
+      // Reset se nessun farmaco selezionato
+      setPosologia('');
+      setDurata('');
+      setNote('');
     }
   };
 
   const handleInvia = () => {
-    if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato || !posologia || !durata) {
-      alert("Compila tutti i campi obbligatori.");
+    // Validazione rapida per abilitare il modal
+    if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato || !posologia.trim() || !durata.trim()) {
+      alert("❌ Compila tutti i campi obbligatori prima di procedere.");
       return;
     }
     setShowConferma(true);
   };
 
   const confermaInvio = async () => {
-    if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato) {
-      alert("Dati mancanti per l'invio della ricetta.");
+    // VALIDAZIONE COMPLETA - ERRORE VINCOLANTE
+    if (!pazienteSelezionato) {
+      alert("❌ ERRORE: Nessun paziente selezionato!");
+      return;
+    }
+    
+    if (!pazienteSelezionato.codice_fiscale) {
+      alert("❌ ERRORE: Il paziente deve avere un codice fiscale per inviare la ricetta!");
+      return;
+    }
+    
+    if (!diagnosiSelezionata) {
+      alert("❌ ERRORE: Seleziona una diagnosi!");
+      return;
+    }
+    
+    if (!farmacoSelezionato) {
+      alert("❌ ERRORE: Seleziona un farmaco!");
+      return;
+    }
+    
+    if (!posologia.trim()) {
+      alert("❌ ERRORE: Inserisci la posologia!");
+      return;
+    }
+    
+    if (!durata.trim()) {
+      alert("❌ ERRORE: Inserisci la durata del trattamento!");
       return;
     }
 
     // Payload aggiornato per la nuova funzione invio_ricetta
-    const payload = {
+    const payload: RicettaInvioPayload = {
       // CF assistito (necessario per la funzione)
-      cf_assistito: pazienteSelezionato.codice_fiscale || 'MRTLLL67A69G713A', // Fallback a CF di test
+      cf_assistito: pazienteSelezionato.codice_fiscale!, // ERRORE VINCOLANTE: CF obbligatorio
       
-      // Campi obbligatori per invio_ricetta
-      cognome_nome: `${pazienteSelezionato.cognome || pazienteSelezionato.nome.split(' ')[0] || ''} ${pazienteSelezionato.nome}`.trim(),
+      // Campi obbligatori per invio_ricetta - VALIDATI
+      cognome_nome: pazienteSelezionato.nome.trim(),
       indirizzo: `${pazienteSelezionato.indirizzo || ''}|${pazienteSelezionato.cap || ''}|${pazienteSelezionato.citta || ''}|${pazienteSelezionato.provincia || ''}`,
       cod_diagnosi: diagnosiSelezionata.codice,
       descr_diagnosi: diagnosiSelezionata.descrizione,
@@ -174,7 +216,7 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
 
     try {
       const response = await ricettaApi.inviaRicetta(payload);
-      
+      console.log('Risposta Sistema TS:', response);
       // Salva la risposta del Sistema TS per debug
       setTsResponse(response);
       
@@ -193,8 +235,8 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
               medico_nome: nome_medico || 'N/A', 
               specializzazione: datiMedico.specializzazione,
               nr_iscrizione_albo: datiMedico.iscrizione,
-              cf_assistito: pazienteSelezionato.codice_fiscale || '',
-              paziente_cognome: pazienteSelezionato.cognome || 'N/A',
+              cf_assistito: pazienteSelezionato.codice_fiscale,
+              paziente_cognome: pazienteSelezionato.nome.split(' ')[0] || 'N/A',
               paziente_nome: pazienteSelezionato.nome,
               data_compilazione: data_inserimento || new Date().toISOString(),
               codice_diagnosi: diagnosiSelezionata.codice,
@@ -207,7 +249,7 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
               posologia: posologia,
               durata_trattamento: durata,
               response_xml: '', // XML rimosso per risparmiare spazio - ricette recuperabili da Sistema TS
-              note: note || undefined,
+              note: note.trim() || '',
               protocollo_transazione: protocollo_transazione || undefined,
               pdf_base64: pdf_promemoria_b64 || undefined
             };
@@ -229,13 +271,14 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
         }
       } else {
         // ❌ ERRORE: Mostra il vero errore invece di successo falso
-        alert(`❌ Errore invio ricetta:\n\n${response.error || 'Errore sconosciuto'}\n\n${response.message || 'Nessun dettaglio disponibile'}`);
+        alert(`❌ Errore invio ricetta:\n\n${response.error || 'Errore sconosciuto'}\n\n${response.message || 'Nessun dettaglio disponibile'}\n\nControlla la sezione "Risposta Sistema TS" qui sotto per l'XML completo.`);
+        setShowConferma(false);
         return; // Non resettare il form in caso di errore
       }
       
       setShowConferma(false);
       
-      // Reset form dopo invio riuscito
+      // Reset form SOLO dopo invio riuscito
       setDiagnosiSelezionata(null);
       setFarmacoSelezionato(null);
       setPosologia("");
@@ -244,9 +287,12 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
       
     } catch (err) {
       console.error("Errore invio ricetta:", err);
+      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
       // Salva anche gli errori per debug
-      setTsResponse({ success: false, error: 'NETWORK_ERROR', message: err.message, details: err });
-      alert("❌ Errore durante l'invio della ricetta.");
+      setTsResponse({ success: false, error: 'NETWORK_ERROR', message: errorMessage, details: err });
+      alert(`❌ Errore durante l'invio della ricetta: ${errorMessage}`);
+      setShowConferma(false);
+      // Non resettare il form in caso di errore di rete
     }
   };
 
@@ -280,8 +326,8 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
                 <h5 className="mb-3">👤 Paziente Selezionato</h5>
                 <div className="small">
                   <div><strong>Nome:</strong> {pazienteSelezionato.nome}</div>
-                  <div><strong>CF:</strong> {pazienteSelezionato.codice_fiscale || '-'}</div>
-                  <div><strong>Indirizzo:</strong> {pazienteSelezionato.indirizzo || '-'}</div>
+                  <div><strong>CF:</strong> {pazienteSelezionato.codice_fiscale || '❌ MANCANTE'}</div>
+                  <div><strong>Indirizzo:</strong> {pazienteSelezionato.indirizzo || '❌ MANCANTE'}</div>
                 </div>
               </CCardBody>
             </CCard>
@@ -303,38 +349,22 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
                     {tsResponse.message && (
                       <div><strong>Message:</strong> {tsResponse.message}</div>
                     )}
-                    {tsResponse.data && (
-                      <div className="mt-2">
-                        <strong>Data:</strong>
-                        <pre className="small bg-light p-2 mt-1" style={{maxHeight: '200px', overflow: 'auto'}}>
-                          {JSON.stringify(tsResponse.data, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                    {tsResponse.details && (
-                      <div className="mt-2">
-                        <strong>Details:</strong>
-                        <pre className="small bg-light p-2 mt-1" style={{maxHeight: '200px', overflow: 'auto'}}>
-                          {JSON.stringify(tsResponse.details, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                    {/* DEBUG: Mostra sempre la struttura per capire */}
+                    {/* XML Response - SEMPRE VISIBILE */}
                     <div className="mt-2">
-                      <strong>DEBUG tsResponse:</strong>
-                      <pre className="small bg-light p-2 mt-1" style={{maxHeight: '200px', overflow: 'auto', fontSize: '10px'}}>
-                        {JSON.stringify(tsResponse, null, 2)}
+                      <strong>XML Response:</strong>
+                      <pre className="small bg-light p-3 mt-1" style={{maxHeight: '500px', overflow: 'auto', fontSize: '12px', lineHeight: '1.4'}}>
+                        {tsResponse.response_xml ? 
+                          tsResponse.response_xml
+                            .replace(/></g, '>\n<')
+                            .replace(/&lt;/g, '<')
+                            .replace(/&gt;/g, '>')
+                            .replace(/&amp;/g, '&')
+                            .replace(/&quot;/g, '"')
+                            .replace(/&#39;/g, "'")
+                          : 'Nessun XML disponibile'
+                        }
                       </pre>
                     </div>
-                    
-                    {(tsResponse.response_xml || tsResponse.details?.response_xml) && (
-                      <div className="mt-2">
-                        <strong>XML Response:</strong>
-                        <pre className="small bg-light p-2 mt-1" style={{maxHeight: '300px', overflow: 'auto', fontSize: '10px'}}>
-                          {tsResponse.response_xml || tsResponse.details?.response_xml}
-                        </pre>
-                      </div>
-                    )}
                   </div>
                 </CCardBody>
               </CCard>
@@ -358,7 +388,7 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
                     <option value="">Seleziona diagnosi...</option>
                     {diagnosiDisponibili && diagnosiDisponibili.map(d => (
                       <option key={d.id} value={d.id}>
-                        {d.codice} - {d.descrizione} ({d.num_farmaci} farmaci)
+                        {d.codice} - {d.descrizione}
                       </option>
                     ))}
                   </CFormSelect>

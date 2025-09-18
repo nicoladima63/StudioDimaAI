@@ -70,7 +70,7 @@ export const useRicetteStore = create<RicetteState>()(
       error: null,
       lastUpdated: null,
       
-      // Carica ricette per paziente dal database locale
+      // Carica ricette per paziente dal Sistema TS
       loadRicettePaziente: async (cfPaziente: string) => {
         const { isLoading } = get();
         
@@ -81,7 +81,12 @@ export const useRicetteStore = create<RicetteState>()(
         let attempts = 0;
         while (attempts < MAX_RETRIES) {
           try {
-            const response = await apiClient.get(`/ricetta/db/paziente/${cfPaziente}`);
+            // Usa getRicetta invece di getAllRicette
+            const response = await apiClient.get(`/ricetta/ricetta`, {
+              params: {
+                cf_assistito: cfPaziente
+              }
+            });
             
             if (!response.data.success) {
               throw new Error(response.data.error || 'Errore nel caricamento delle ricette');

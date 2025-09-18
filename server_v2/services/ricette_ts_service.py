@@ -57,7 +57,7 @@ class RicetteTsService:
         self.asl = os.getenv('ASL_PROD')
         self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD')
         
-        # Endpoint dinamici da env - PRODUZIONE
+        # Endpoint dinamici da env - PRODUZIONE (per dati reali)
         self.endpoint_visualizza = os.getenv('ENDPOINT_VISUALIZZA_PROD', 
             'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
         self.endpoint_invio = os.getenv('ENDPOINT_INVIO_PROD',
@@ -81,8 +81,8 @@ class RicetteTsService:
             self.logger.error(f"File .env cercato in: {os.path.join(project_root, '.env')}")
             raise ValueError(f"Configurazione incompleta: mancano {missing_vars}")
         
-        # ID-SESSIONE per autenticazione (hardcodato per ora)
-        self.id_sessione = os.getenv('ID_SESSIONE_PROD', 'b1391aeb-12b9-44a2-a99d-1eb105b9a92c')
+        # ID-SESSIONE per autenticazione (aggiornato dal portale)
+        self.id_sessione = os.getenv('ID_SESSIONE_PROD', 'ed728769-9fcb-48f7-881f-57f4441d0b8a')
         
         self.logger.info(f"RicetteTsService configurato dinamicamente")
         self.logger.info(f"Project root: {project_root}")
@@ -189,18 +189,6 @@ class RicetteTsService:
         """Ricarica la configurazione da variabili d'ambiente"""
         self.logger.info("Ricarico configurazione da variabili d'ambiente")
         self._load_configuration()
-    
-    def _genera_token_2fa(self) -> str:
-        """
-        Ottiene l'ID-SESSIONE per il Sistema TS - OBBLIGATORIO
-        """
-        id_sessione = os.getenv('ID_SESSIONE_PROD')
-        
-        if not id_sessione:
-            raise ValueError("ID_SESSIONE_PROD deve essere configurato nel file .env")
-        
-        self.logger.info("Usando ID-SESSIONE da variabile d'ambiente")
-        return id_sessione
     
     def _genera_token_2fa(self) -> str:
         """
@@ -686,20 +674,24 @@ class RicetteTsService:
     
     
     #sezione visualizza ricetta
-    def get_ricetta(self, cf_assistito: str, nrbe: str) -> dict:
+    def get_ricetta(self, cf_paziente: str, nrbe: str = None) -> dict:
         """
-        NUOVA FUNZIONE CHE COPIA ESATTAMENTE IL RICETTA_TESTER.PY CHE FUNZIONAVA
-        Accetta solo CF assistito e NRE, usa la logica identica al tester
+        FUNZIONE PER VISUALIZZARE RICETTE
+        Parametri: cf_paziente (obbligatorio), nrbe (opzionale)
         """
         try:
-            # Cifra CF assistito usando il servizio esistente
-            cf_cifrato = self._encrypt_cf_assistito(cf_assistito)
+            # Cifra CF paziente
+            cf_paziente_cifrato = self._encrypt_cf_assistito(cf_paziente)
             
             # Cifra PIN usando il servizio esistente  
             pin_cifrato = self._encrypt_pincode(self.pincode)
             
             
-            # Crea SOAP request IDENTICA al ricetta_tester.py
+            # Elementi opzionali
+            pin_code_element = f"<vis:pinCode>{pin_cifrato}</vis:pinCode>" if pin_cifrato else ""
+            nrbe_element = f"<vis:nrbe>{nrbe}</vis:nrbe>" if nrbe else ""
+            
+            # Crea SOAP request secondo XSD
             soap_body = f'''
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                              xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
@@ -707,20 +699,24 @@ class RicetteTsService:
                <soapenv:Header/>
                <soapenv:Body>
                   <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-                     <vis:pinCode>{pin_cifrato}</vis:pinCode>
-                     <vis:codicePaziente>{cf_cifrato}</vis:codicePaziente>
-                     <vis:nrbe>{nrbe}</vis:nrbe>
+                     {pin_code_element}
+                     <vis:codicePaziente>{cf_paziente_cifrato}</vis:codicePaziente>
+                     {nrbe_element}
                      <vis:cfMedico>{self.cf_medico}</vis:cfMedico>
                   </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
                </soapenv:Body>
             </soapenv:Envelope>
             '''
             
-            # Headers IDENTICI al ricetta_tester.py
+            # Usa ID-SESSIONE statico come nel V1 che funziona
+            token_2fa = self.id_sessione
+            self.logger.info(f"ID-SESSIONE usato per get_ricetta: {token_2fa}")
+            
+            # Headers con token 2FA dinamico
             headers = {
                 'Content-Type': 'text/xml; charset=utf-8',
                 'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
-                'Authorization2F': f"Bearer {self.id_sessione}",
+                'Authorization2F': f"Bearer {token_2fa}",
                 'SOAPAction': "http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"
             }
             
@@ -1261,194 +1257,242 @@ class RicetteTsService:
                 'cf_assistito': dati_ricetta.get('cf_assistito', 'N/A')
             }
 
-    def invia_ricetta_old(self, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Invia ricetta elettronica al Sistema TS.
-        Usa formato SOAP corretto del kit ufficiale per l'invio.
-        """
-        try:
-            self.logger.info(f"Invio ricetta per CF: {dati_ricetta.get('cf_assistito', 'N/A')}")
-            
-            # Crea richiesta SOAP per invio
-            soap_request = self._create_invio_soap_request(dati_ricetta)
-            
-            # Crea sessione con autenticazione
-            session = self._create_session()
-            session.auth = (self.cf_medico, self.password)  # Basic Auth
-            
-            # Headers IDENTICI A GET_RICETTA
-            headers = {
-                'Content-Type': 'text/xml; charset=utf-8',
-                'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
-                'Authorization2F': f"Bearer {self.id_sessione}",
-                'SOAPAction': 'http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it/InvioPrescrittoRicettaBianca'
-            }
-            
-            self.logger.info(f"Invio richiesta ricetta a: {self.endpoint_invio}")
-            
-            response = session.post(
-                self.endpoint_invio,
-                data=soap_request,
-                headers=headers,
-                timeout=60,  # Timeout maggiore per nuovo endpoint
-                verify=False
-            )
-            
-            self.logger.info(f"Risposta invio ricevuta - Status: {response.status_code}")
-            
-            # Debug: Log completo della risposta per capire l'errore
-            self.logger.info(f"Risposta completa invio: {response.text}")
-            
-            # Parsa la risposta usando lo stesso parser di get_ricetta
-            from lxml import etree
-            root = etree.fromstring(response.content)
-            ricetta_data = self._parse_ricetta_response_simple(root)
-            
-            # Adatta il formato per invio_ricetta
-            return {
-                'success': True,
-                'ricetta_data': ricetta_data,
-                'response_xml': response.text,
-                'http_status': response.status_code,
-                'message': 'Ricetta inviata con successo'
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Errore invio ricetta: {e}", exc_info=True)
-            return {
-                'success': False,
-                'error': f'Errore invio ricetta: {str(e)}',
-                'timestamp': datetime.now().isoformat()
-            }
-
-
     def invio_ricetta(self, cf_assistito: str, dati_ricetta: dict) -> dict:
         """
-        FUNZIONE PER INVIO RICETTA CHE COPIA LA LOGICA DELLA VISUALIZZAZIONE
-        Accetta CF assistito e dizionario con i dati della ricetta
+        FUNZIONE PER INVIO RICETTA CORRETTA SECONDO LE SPECIFICHE XSD
         
         dati_ricetta deve contenere:
-        - cognome_nome: str (es. "ROSSI MARIO")
-        - indirizzo: str (es. "Via Roma, 1|00100|Roma|RM")
-        - cod_diagnosi: str (es. "V48.4") 
-        - descr_diagnosi: str (es. "Diagnosi di prova")
+        - cognome_nome: str (opzionale - "ROSSI MARIO")
+        - indirizzo: str (opzionale - "Via Roma, 1|00100|Roma|RM") 
+        - cod_diagnosi: str (opzionale - "V48.4")
+        - descr_diagnosi: str (opzionale - "Diagnosi di prova")
         - prescrizioni: list di dict con:
-            - cod_prodotto: str (es. "033052034")
-            - descrizione: str (es. "NIMESULIDE MYL*100MG 30BUST.")
-            - quantita: str (es. "1")
+            - cod_prodotto: str (opzionale - AIC del prodotto)
+            - descrizione: str (opzionale - descrizione farmaco)
+            - quantita: str (OBBLIGATORIO - numero 1-99)
+            - tdl: str (OBBLIGATORIO - "0" o "1" per terapia del dolore)
             - posologia: str (opzionale)
-            - note: str (opzionale)
-            - tdl: str ("0" o "1" per terapia del dolore, default "0")
+            - note: str (opzionale - descrTestoLiberoNote)
+            - cod_gruppo_equiv: str (opzionale)
+            - descr_gruppo_equiv: str (opzionale)
+            - non_sost: str (opzionale - solo "1" se non sostituibile)
+            - cod_motivaz_non_sost: str (opzionale - "1","2","3","4")
+            - durata_trattamento: str (opzionale)
+            - modalita_impiego: str (opzionale)
+            - preparaz_farmaceutica: str (opzionale)
+            - num_ripetibilita: str (opzionale)
+            - validita_farm: str (opzionale)
+            - prescrizione1: str (opzionale - info aggiuntive)
+            - prescrizione2: str (opzionale - info aggiuntive)
         
-        Opzionali in dati_ricetta:
-        - cod_regione: str (default "130")
-        - cod_asl: str (default "201") 
-        - cod_struttura: str (default "")
-        - specializzazione: str (default "F")
-        - special_clinica: str (default "")
-        - num_iscrizione_albo: str (default "123456")
-        - indirizzo_medico: str (default "Via Medico, 88|00100|Roma|RM")
-        - telefono_medico: str (default "+39|0765488120")
-        - tipo_prescrizione: str (default "F")
-        - testata1: str (opzionale)
-        - testata2: str (opzionale)
+        CAMPI OBBLIGATORI dal XSD:
+        - cfMedico (preso da self)
+        - codSpecializzazione (OBBLIGATORIO)
+        - numIscrizAlbo (OBBLIGATORIO)  
+        - indirMedico (OBBLIGATORIO)
+        - telefMedico (OBBLIGATORIO)
+        - codicePaziente (cf cifrato)
+        - tipoPrescrizione (OBBLIGATORIO - "F")
+        - dataCompilazione (OBBLIGATORIO)
+        - almeno 1 dettaglioPrescrizioneRicettaBianca
         """
         try:
-            self.logger.info(f"=== INVIO RICETTA ===")
+            self.logger.info(f"=== INVIO RICETTA (XSD COMPLIANT) ===")
             self.logger.info(f"CF Assistito: {cf_assistito}")
             
-            # Validazione dati obbligatori
-            required_fields = ['cognome_nome', 'indirizzo', 'cod_diagnosi', 'descr_diagnosi', 'prescrizioni']
-            for field in required_fields:
-                if field not in dati_ricetta:
-                    return {
-                        'success': False,
-                        'error': 'MISSING_REQUIRED_FIELD',
-                        'message': f'Campo obbligatorio mancante: {field}',
-                        'http_status': 0
-                    }
-            
-            if not dati_ricetta['prescrizioni'] or len(dati_ricetta['prescrizioni']) == 0:
+            # Validazione dati obbligatori secondo XSD
+            if 'prescrizioni' not in dati_ricetta or not dati_ricetta['prescrizioni']:
                 return {
                     'success': False,
-                    'error': 'NO_PRESCRIPTIONS',
+                    'error': 'MISSING_PRESCRIPTIONS',
                     'message': 'Almeno una prescrizione è obbligatoria',
                     'http_status': 0
                 }
             
+            # Validazione prescrizioni secondo XSD
+            for i, prescrizione in enumerate(dati_ricetta['prescrizioni']):
+                # Campi obbligatori per ogni prescrizione
+                if 'quantita' not in prescrizione:
+                    return {
+                        'success': False,
+                        'error': 'MISSING_QUANTITA',
+                        'message': f'Prescrizione {i+1}: campo quantita obbligatorio',
+                        'http_status': 0
+                    }
+                
+                if 'tdl' not in prescrizione:
+                    return {
+                        'success': False,
+                        'error': 'MISSING_TDL', 
+                        'message': f'Prescrizione {i+1}: campo tdl obbligatorio (0 o 1)',
+                        'http_status': 0
+                    }
+                
+                # Validazione valori enum
+                if prescrizione['tdl'] not in ['0', '1']:
+                    return {
+                        'success': False,
+                        'error': 'INVALID_TDL',
+                        'message': f'Prescrizione {i+1}: tdl deve essere "0" o "1"',
+                        'http_status': 0
+                    }
+                
+                # Validazione quantita (1-99)
+                try:
+                    qty = int(prescrizione['quantita'])
+                    if qty < 1 or qty > 99:
+                        return {
+                            'success': False,
+                            'error': 'INVALID_QUANTITA',
+                            'message': f'Prescrizione {i+1}: quantita deve essere 1-99',
+                            'http_status': 0
+                        }
+                except ValueError:
+                    return {
+                        'success': False,
+                        'error': 'INVALID_QUANTITA_FORMAT',
+                        'message': f'Prescrizione {i+1}: quantita deve essere un numero',
+                        'http_status': 0
+                    }
+                
+                # Validazione campi enum opzionali
+                if 'non_sost' in prescrizione and prescrizione['non_sost'] != '1':
+                    return {
+                        'success': False,
+                        'error': 'INVALID_NON_SOST',
+                        'message': f'Prescrizione {i+1}: non_sost può essere solo "1" o omesso',
+                        'http_status': 0
+                    }
+                
+                if 'cod_motivaz_non_sost' in prescrizione:
+                    if prescrizione['cod_motivaz_non_sost'] not in ['1', '2', '3', '4']:
+                        return {
+                            'success': False,
+                            'error': 'INVALID_COD_MOTIVAZ',
+                            'message': f'Prescrizione {i+1}: cod_motivaz_non_sost deve essere 1,2,3 o 4',
+                            'http_status': 0
+                        }
+            
             # Cifra CF assistito usando il servizio esistente
             cf_cifrato = self._encrypt_cf_assistito(cf_assistito)
+            self.logger.info(f"CF cifrato: {cf_cifrato[:50]}...")
             
             # Cifra PIN usando il servizio esistente  
             pin_cifrato = self._encrypt_pincode(self.pincode)
+            self.logger.info(f"PIN cifrato: {pin_cifrato[:50]}...")
             
-            # Valori di default CON I TUOI DATI REALI
+            # Valori di default OBBLIGATORI secondo XSD
             defaults = {
-                'cod_regione': self.regione,  # 090 per Toscana
-                'cod_asl': self.asl,  # 109 per Toscana Centro
-                'cod_struttura': '',
-                'specializzazione': self.specializzazione,  # F per Odontoiatra
-                'special_clinica': '',
-                'num_iscrizione_albo': '591',  # La tua iscrizione reale
-                'indirizzo_medico': 'Via Michelangelo Buonarroti,15|51031|Agliana|PT',  # I tuoi dati reali
-                'telefono_medico': '+39|0574712060',  # Il tuo telefono reale
-                'tipo_prescrizione': 'F',
-                'testata1': '',
-                'testata2': ''
+                'cod_regione': '130',  # opzionale
+                'cod_asl': '201',      # opzionale 
+                'cod_struttura': '',   # opzionale
+                'specializzazione': 'F',  # OBBLIGATORIO - 1 char
+                'special_clinica': '',    # opzionale
+                'num_iscrizione_albo': '123456',  # OBBLIGATORIO
+                'indirizzo_medico': 'Via Medico, 88|00100|Roma|RM',  # OBBLIGATORIO
+                'telefono_medico': '+39|0765488120',  # OBBLIGATORIO
+                'tipo_prescrizione': 'F',  # OBBLIGATORIO - 1 char
+                'testata1': '',        # opzionale
+                'testata2': ''         # opzionale
             }
             
             # Applica defaults
             for key, default_value in defaults.items():
-                if key not in dati_ricetta:
+                if key not in dati_ricetta or not dati_ricetta[key]:
                     dati_ricetta[key] = default_value
             
-            # Data compilazione corrente
+            # Data compilazione corrente - OBBLIGATORIO formato aaaa-mm-dd hh24:mm:ss (19 char)
             data_compilazione = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
-            # Costruisci elementi XML per le prescrizioni
+            # Costruisci elementi XML per le prescrizioni secondo XSD
             prescrizioni_xml = ""
-            for i, prescrizione in enumerate(dati_ricetta['prescrizioni']):
-                # Validazione prescrizione
-                if 'cod_prodotto' not in prescrizione or 'descrizione' not in prescrizione or 'quantita' not in prescrizione:
-                    return {
-                        'success': False,
-                        'error': 'INVALID_PRESCRIPTION',
-                        'message': f'Prescrizione {i+1}: mancano cod_prodotto, descrizione o quantita',
-                        'http_status': 0
-                    }
+            for prescrizione in dati_ricetta['prescrizioni']:
                 
-                # Valori default per prescrizione
-                tdl = prescrizione.get('tdl', '0')
-                posologia = prescrizione.get('posologia', '')
-                note = prescrizione.get('note', '')
+                # Elementi opzionali - aggiungi solo se presenti e non vuoti
+                elements = []
                 
-                # Elementi opzionali
-                posologia_element = f"<tip:posologia>{posologia}</tip:posologia>" if posologia else ""
-                note_element = f"<tip:descrTestoLiberoNote>{note}</tip:descrTestoLiberoNote>" if note else ""
+                if prescrizione.get('cod_prodotto'):
+                    elements.append(f"<tip:codProdPrest>{prescrizione['cod_prodotto']}</tip:codProdPrest>")
+                
+                if prescrizione.get('descrizione'):
+                    elements.append(f"<tip:descrProdPrest>{prescrizione['descrizione']}</tip:descrProdPrest>")
+                
+                if prescrizione.get('cod_gruppo_equiv'):
+                    elements.append(f"<tip:codGruppoEquival>{prescrizione['cod_gruppo_equiv']}</tip:codGruppoEquival>")
+                
+                if prescrizione.get('descr_gruppo_equiv'):
+                    elements.append(f"<tip:descrGruppoEquival>{prescrizione['descr_gruppo_equiv']}</tip:descrGruppoEquival>")
+                
+                if prescrizione.get('non_sost') == '1':
+                    elements.append(f"<tip:nonSost>1</tip:nonSost>")
+                
+                if prescrizione.get('cod_motivaz_non_sost'):
+                    elements.append(f"<tip:codMotivazNonSost>{prescrizione['cod_motivaz_non_sost']}</tip:codMotivazNonSost>")
+                
+                # TDL OBBLIGATORIO
+                elements.append(f"<tip:tdl>{prescrizione['tdl']}</tip:tdl>")
+                
+                if prescrizione.get('note'):
+                    elements.append(f"<tip:descrTestoLiberoNote>{prescrizione['note']}</tip:descrTestoLiberoNote>")
+                
+                # QUANTITA OBBLIGATORIA
+                elements.append(f"<tip:quantita>{prescrizione['quantita']}</tip:quantita>")
+                
+                if prescrizione.get('posologia'):
+                    elements.append(f"<tip:posologia>{prescrizione['posologia']}</tip:posologia>")
+                
+                if prescrizione.get('durata_trattamento'):
+                    elements.append(f"<tip:durataTrattamento>{prescrizione['durata_trattamento']}</tip:durataTrattamento>")
+                
+                if prescrizione.get('modalita_impiego'):
+                    elements.append(f"<tip:modalitaImpiego>{prescrizione['modalita_impiego']}</tip:modalitaImpiego>")
+                
+                if prescrizione.get('preparaz_farmaceutica'):
+                    elements.append(f"<tip:preparazFarmaceutica>{prescrizione['preparaz_farmaceutica']}</tip:preparazFarmaceutica>")
+                
+                if prescrizione.get('num_ripetibilita'):
+                    elements.append(f"<tip:numRipetibilita>{prescrizione['num_ripetibilita']}</tip:numRipetibilita>")
+                
+                if prescrizione.get('validita_farm'):
+                    elements.append(f"<tip:validitaFarm>{prescrizione['validita_farm']}</tip:validitaFarm>")
+                
+                if prescrizione.get('prescrizione1'):
+                    elements.append(f"<tip:prescrizione1>{prescrizione['prescrizione1']}</tip:prescrizione1>")
+                
+                if prescrizione.get('prescrizione2'):
+                    elements.append(f"<tip:prescrizione2>{prescrizione['prescrizione2']}</tip:prescrizione2>")
                 
                 prescrizioni_xml += f'''
                 <inv:dettaglioPrescrizioneRicettaBianca>
-                <tip:codProdPrest>{prescrizione['cod_prodotto']}</tip:codProdPrest>
-                <tip:descrProdPrest>{prescrizione['descrizione']}</tip:descrProdPrest>
-                <tip:tdl>{tdl}</tip:tdl>
-                {note_element}
-                <tip:quantita>{prescrizione['quantita']}</tip:quantita>
-                {posologia_element}
+                {chr(10).join(elements)}
                 </inv:dettaglioPrescrizioneRicettaBianca>'''
             
-            # Elementi opzionali testata
-            cod_struttura_element = f"<inv:codStruttura>{dati_ricetta['cod_struttura']}</inv:codStruttura>" if dati_ricetta.get('cod_struttura') else ""
-            testata1_element = f"<inv:testata1>{dati_ricetta['testata1']}</inv:testata1>" if dati_ricetta.get('testata1') else ""
-            testata2_element = f"<inv:testata2>{dati_ricetta['testata2']}</inv:testata2>" if dati_ricetta.get('testata2') else ""
-            special_clinica_element = f"<inv:specialClinica>{dati_ricetta['special_clinica']}</inv:specialClinica>" if dati_ricetta.get('special_clinica') else ""
-            cognome_nome_element = f"<inv:cognNome>{dati_ricetta['cognome_nome']}</inv:cognNome>" if dati_ricetta.get('cognome_nome') else ""
-            indirizzo_element = f"<inv:indirizzo>{dati_ricetta['indirizzo']}</inv:indirizzo>" if dati_ricetta.get('indirizzo') else ""
-            cod_diagnosi_element = f"<inv:codDiagnosi>{dati_ricetta['cod_diagnosi']}</inv:codDiagnosi>" if dati_ricetta.get('cod_diagnosi') else ""
-            descr_diagnosi_element = f"<inv:descrDiagnosi>{dati_ricetta['descr_diagnosi']}</inv:descrDiagnosi>" if dati_ricetta.get('descr_diagnosi') else ""
+            # Elementi opzionali - aggiungi solo se presenti e non vuoti
+            optional_elements = []
             
-            # Crea SOAP request IDENTICA al pattern della visualizzazione
-            soap_body = f'''
-            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+            if dati_ricetta.get('testata1'):
+                optional_elements.append(f"<inv:testata1>{dati_ricetta['testata1']}</inv:testata1>")
+            
+            if dati_ricetta.get('testata2'):
+                optional_elements.append(f"<inv:testata2>{dati_ricetta['testata2']}</inv:testata2>")
+            
+            if dati_ricetta.get('special_clinica'):
+                optional_elements.append(f"<inv:specialClinica>{dati_ricetta['special_clinica']}</inv:specialClinica>")
+            
+            if dati_ricetta.get('cognome_nome'):
+                optional_elements.append(f"<inv:cognNome>{dati_ricetta['cognome_nome']}</inv:cognNome>")
+            
+            if dati_ricetta.get('indirizzo'):
+                optional_elements.append(f"<inv:indirizzo>{dati_ricetta['indirizzo']}</inv:indirizzo>")
+            
+            if dati_ricetta.get('cod_diagnosi'):
+                optional_elements.append(f"<inv:codDiagnosi>{dati_ricetta['cod_diagnosi']}</inv:codDiagnosi>")
+            
+            if dati_ricetta.get('descr_diagnosi'):
+                optional_elements.append(f"<inv:descrDiagnosi>{dati_ricetta['descr_diagnosi']}</inv:descrDiagnosi>")
+            
+            # Crea SOAP request secondo XSD
+            soap_body = f'''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
                             xmlns:inv="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
                             xmlns:tip="http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it">
             <soapenv:Header/>
@@ -1458,32 +1502,25 @@ class RicetteTsService:
                     <inv:cfMedico>{self.cf_medico}</inv:cfMedico>
                     <inv:codRegione>{dati_ricetta['cod_regione']}</inv:codRegione>
                     <inv:codASLAo>{dati_ricetta['cod_asl']}</inv:codASLAo>
-                    {cod_struttura_element}
+                    <inv:codStruttura>{dati_ricetta['cod_struttura']}</inv:codStruttura>
                     <inv:codSpecializzazione>{dati_ricetta['specializzazione']}</inv:codSpecializzazione>
-                    {special_clinica_element}
+                    {chr(10).join(optional_elements)}
                     <inv:numIscrizAlbo>{dati_ricetta['num_iscrizione_albo']}</inv:numIscrizAlbo>
                     <inv:indirMedico>{dati_ricetta['indirizzo_medico']}</inv:indirMedico>
                     <inv:telefMedico>{dati_ricetta['telefono_medico']}</inv:telefMedico>
-                    {testata1_element}
-                    {testata2_element}
                     <inv:codicePaziente>{cf_cifrato}</inv:codicePaziente>
-                    {cognome_nome_element}
-                    {indirizzo_element}
                     <inv:tipoPrescrizione>{dati_ricetta['tipo_prescrizione']}</inv:tipoPrescrizione>
-                    {cod_diagnosi_element}
-                    {descr_diagnosi_element}
                     <inv:dataCompilazione>{data_compilazione}</inv:dataCompilazione>
                     {prescrizioni_xml}
                 </inv:InvioPrescrittoRicettaBiancaRichiesta>
             </soapenv:Body>
-            </soapenv:Envelope>
-            '''
+            </soapenv:Envelope>'''
             
-            # Genera token 2FA dinamico come nel V1
-            token_2fa = self._genera_token_2fa()
-            self.logger.info(f"Token 2FA generato: {token_2fa}")
+            # Usa ID-SESSIONE statico come nel V1 che funziona
+            token_2fa = self.id_sessione
+            self.logger.info(f"ID-SESSIONE usato per invio: {token_2fa}")
             
-            # Headers con token 2FA dinamico come nel V1
+            # Headers con token 2FA dinamico come nella V1
             headers = {
                 'Content-Type': 'text/xml; charset=utf-8',
                 'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
@@ -1494,38 +1531,60 @@ class RicetteTsService:
             # Endpoint per invio
             url = "https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca"
             
-            #self.logger.info(f"URL: {url}")
-            #self.logger.info(f"Numero prescrizioni: {len(dati_ricetta['prescrizioni'])}")
+            self.logger.info(f"URL: {url}")
+            self.logger.info(f"Numero prescrizioni: {len(dati_ricetta['prescrizioni'])}")
             
-            # Chiamata HTTP IDENTICA alla visualizzazione
+            # Chiamata HTTP
             response = requests.post(url, data=soap_body.strip(), headers=headers)
             
             self.logger.info(f"Status Code: {response.status_code}")
             self.logger.info(f"Response: {response.text[:500]}...")
             
+            # Salva XML per debug
+            xml_file = f"response_xml_invio_ricetta_{cf_assistito}_{int(datetime.now().timestamp())}.xml"
+            with open(xml_file, 'w', encoding='utf-8') as f:
+                f.write(response.text)
+            self.logger.info(f"XML salvato: {xml_file}")
+            
             if response.status_code == 200:
-                # Parsing della risposta XML
                 try:
                     root = ET.fromstring(response.text)
                     
-                    # Estrai NRBE dalla risposta
+                    # Parsing secondo XSD della ricevuta
                     nrbe_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}nrbe")
                     pin_nrbe_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}pinNrbe")
                     codice_esito_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}codEsitoInserimento")
                     protocollo_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}protocolloTransazione")
                     data_inserimento_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}dataInserimento")
+                    nome_medico_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}nomeMedico")
+                    cognome_medico_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}cognomeMedico")
+                    flag_promemoria_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}flagPromemoria")
+                    pdf_promemoria_element = root.find(".//{http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it}pdfPromemoria")
                     
                     # Estrai eventuali errori
                     errori = []
                     for errore in root.findall(".//{http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it}erroreRicetta"):
                         cod_esito = errore.find(".//codEsito")
                         esito_text = errore.find(".//esito")
+                        identificativo_prod = errore.find(".//identificativoProdPrest")
                         tipo_errore = errore.find(".//tipoErrore")
                         
                         errori.append({
                             'codice': cod_esito.text if cod_esito is not None else 'N/A',
                             'messaggio': esito_text.text if esito_text is not None else 'N/A',
+                            'identificativo_prodotto': identificativo_prod.text if identificativo_prod is not None else 'N/A',
                             'tipo': tipo_errore.text if tipo_errore is not None else 'N/A'
+                        })
+                    
+                    # Estrai comunicazioni
+                    comunicazioni = []
+                    for comunicazione in root.findall(".//{http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it}comunicazione"):
+                        codice = comunicazione.find(".//codice")
+                        messaggio = comunicazione.find(".//messaggio")
+                        
+                        comunicazioni.append({
+                            'codice': codice.text if codice is not None else 'N/A',
+                            'messaggio': messaggio.text if messaggio is not None else 'N/A'
                         })
                     
                     result_data = {
@@ -1534,12 +1593,18 @@ class RicetteTsService:
                         'codice_esito': codice_esito_element.text if codice_esito_element is not None else None,
                         'protocollo_transazione': protocollo_element.text if protocollo_element is not None else None,
                         'data_inserimento': data_inserimento_element.text if data_inserimento_element is not None else None,
-                        'errori': errori
+                        'nome_medico': nome_medico_element.text if nome_medico_element is not None else None,
+                        'cognome_medico': cognome_medico_element.text if cognome_medico_element is not None else None,
+                        'flag_promemoria': flag_promemoria_element.text if flag_promemoria_element is not None else None,
+                        'pdf_promemoria': pdf_promemoria_element.text if pdf_promemoria_element is not None else None,
+                        'errori': errori,
+                        'comunicazioni': comunicazioni
                     }
                     
-                    # Verifica se l'invio è riuscito
-                    is_success = (result_data['nrbe'] is not None and 
-                                result_data['codice_esito'] == '0000')
+                    # Success: codice 0000 e nessun errore bloccante
+                    is_success = (result_data['codice_esito'] == '0000' and 
+                                result_data['nrbe'] is not None and
+                                not any(e.get('tipo') == 'Bloccante' for e in errori))
                     
                     if is_success:
                         self.logger.info(f"NRBE generato: {result_data['nrbe']}")
@@ -1569,7 +1634,7 @@ class RicetteTsService:
                     'response_xml': response.text,
                     'http_status': response.status_code
                 }
-                
+            
         except Exception as e:
             self.logger.error(f"Errore invio_ricetta: {e}")
             return {

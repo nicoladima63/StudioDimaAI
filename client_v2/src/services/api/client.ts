@@ -137,6 +137,7 @@ apiClient.interceptors.response.use(
       message: errorMessage,
       status: error.response?.status || 500,
       code: error.response?.data?.code,
+      response: error.response, // Preserva la risposta originale per debug
     })
   }
 )

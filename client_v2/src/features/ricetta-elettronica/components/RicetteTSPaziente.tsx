@@ -193,52 +193,28 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
     setError('');
     
     try {
-      // Carica dal Sistema TS con CF paziente e filtri
-      const params: any = {
+      console.log('🔍 Ricerca ricetta TS per CF:', pazienteSelezionato.codice_fiscale, 'NRE:', filtri.nre);
+      
+      const response = await getRicetteFromTS({
         cf_assistito: pazienteSelezionato.codice_fiscale,
-        use_production: true,  // Usa ambiente di produzione
-        cf_medico_reale: 'DMRNCL63S21D612I'  // Il tuo CF medico reale
-      };
-      
-      if (filtri.dataDa) params.data_da = filtri.dataDa;
-      if (filtri.dataA) params.data_a = filtri.dataA;
-      if (filtri.nre) {
-        params.nre = filtri.nre;
-        params.test_ricerca_specifica = true;  // Attiva ricerca specifica per NRE
-      }
-      
-      console.log('🔍 Ricerca ricette TS con parametri:', params);
-      
-      const response = await getRicetteFromTS(params);
+        nre: filtri.nre || undefined
+      });
       
       // Salva XML del Sistema TS per debug - FORMATTATO
-      const xmlResponse = response.ts_response?.response_xml || 'Nessun XML disponibile';
+      const xmlResponse = response.response_xml || 'Nessun XML disponibile';
       const formattedXml = formatXmlForDisplay(xmlResponse);
       setServerResponse(formattedXml);
-      
-      // Salva metadati e analisi errori
-      setMetadatiRisposta(response.ts_response?.metadati_risposta || null);
-      setErrorAnalysis(response.ts_response?.error_analysis || null);
       
       if (response.success) {
         setRicette(response.data || []);
         console.log(`✅ Trovate ${response.data?.length || 0} ricette per CF: ${pazienteSelezionato.codice_fiscale}`);
         
         // Log dettagliato per debug
-        if (response.ts_response) {
-          console.log('📋 Dettagli risposta Sistema TS:', {
-            environment: response.ts_response.environment,
-            nre_ricercato: response.ts_response.nre_ricercato,
-            cf_assistito: response.ts_response.cf_assistito,
-            http_status: response.ts_response.http_status
-          });
-        }
-        
-        // Mostra eventuali errori o comunicazioni
-        if (response.ts_response?.error_analysis?.has_errors) {
-          const errorMessages = response.ts_response.error_analysis.error_messages.join('; ');
-          console.warn(`⚠️ Avvisi dal Sistema TS: ${errorMessages}`);
-        }
+        console.log('📋 Dettagli risposta Sistema TS:', {
+          success: response.success,
+          message: response.message,
+          http_status: response.http_status
+        });
       } else {
         setError(response.message || 'Errore nel caricamento delle ricette dal Sistema TS');
       }

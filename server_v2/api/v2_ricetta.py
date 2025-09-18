@@ -334,7 +334,8 @@ def invia_ricetta():
         return jsonify({
             'success': False,
             'error': 'INTERNAL_ERROR',
-            'message': f'Errore interno v2_ricetta: {e}'
+            'message': f'Errore interno v2_ricetta: {e}',
+            'response_xml': ''  # Includi sempre l'XML anche per errori interni
         }), 500
 
 @ricetta_bp.route("/ricetta/environment", methods=['GET'])
@@ -376,99 +377,50 @@ def list_ricette_from_ts():
         nre = request.args.get('nre')  # NRE specifico da cercare
         cf_medico_reale = request.args.get('cf_medico_reale')  # CF medico per produzione
         use_production = request.args.get('use_production') == 'true'  # Flag produzione
-        test_ricerca_specifica = request.args.get('test_ricerca_specifica') == 'true'
-        
-        logger.info(f"Richiesta lista ricette Sistema TS")
-        logger.info(f"Parametri: Da={data_da}, A={data_a}, CF={cf_assistito}")
-        logger.info(f"Ricerca specifica: NRE={nre}, CF_medico={cf_medico_reale}, Prod={use_production}")
-        
-        # Se è una ricerca specifica con NRE, usa la funzione di visualizzazione ricetta singola
-        if test_ricerca_specifica and nre and cf_assistito:
-            logger.info("🚀🚀🚀 BRUTAL TEST ATTIVATO! 🚀🚀🚀")
-            print("🚀🚀🚀 BRUTAL TEST ATTIVATO! 🚀🚀🚀")
-            logger.info("=== MODALITA RICERCA SPECIFICA RICETTA ===")
-            
-            # Usa il servizio TS V2 con ricerca per NRE specifico
-            from services.ricette_ts_service import ricette_ts_service
-            
-            if use_production and cf_medico_reale:
-                logger.info(f"=== USANDO CONFIGURAZIONE PRODUZIONE ===")
-                logger.info(f"CF Medico: {ricette_ts_service.cf_medico}")
-                logger.info(f"Endpoint: {ricette_ts_service.endpoint_visualizza}")
-                logger.info(f"ID-SESSIONE: {ricette_ts_service.id_sessione[:20]}...")
-            else:
-                logger.info(f"Usando ambiente TEST: {ricette_ts_service.env}")
-                logger.info(f"Endpoint TEST: {ricette_ts_service.endpoint_visualizza}")
-            
-            try:
-                # Usa la NUOVA funzione get_ricetta che copia esattamente il ricetta_tester.py
-                ts_response = ricette_ts_service.get_ricetta(
-                    cf_assistito=cf_assistito,
-                    nrbe=nre
-                )
+                            
+        try:
+            # Usa la funzione get_ricetta con parametri corretti
+            ts_response = ricette_ts_service.get_ricetta(
+                cf_paziente=cf_assistito, nrbe=nre
+            )
+            if ts_response.get('success'):
+                logger.info(f"Ricette recuperate dal Sistema TS: {ts_response.get('total_count', 0)}")
                 
                 return jsonify({
-                    'success': ts_response.get('success', False),
-                    'source': 'sistema_ts_ricerca_specifica',
-                    'count': 1 if ts_response.get('success') else 0,
-                    'data': [ts_response.get('ricetta_data')] if ts_response.get('success') else [],
+                    'success': True,
+                    'source': 'sistema_ts',
+                    'count': ts_response.get('total_count', 0),
+                    'data': ts_response.get('ricette', []),
                     'ts_response': {
                         'message': ts_response.get('message'),
                         'timestamp': ts_response.get('timestamp'),
                         'http_status': ts_response.get('http_status'),
-                        'response_xml': ts_response.get('response_xml', ''),
-                        'environment': 'produzione' if use_production else 'test',
-                        'nre_ricercato': nre,
-                        'cf_assistito': cf_assistito
+                        'response_xml': ts_response.get('response_xml', '')
                     }
-                })
+                }), 200
+            else:
+                # Sistema TS offline o errore
+                logger.error(f"Errore Sistema TS: {ts_response.get('error')}")
                 
-            finally:
-                # Configurazione produzione è permanente, non serve ripristino
-                logger.info("=== RICERCA COMPLETATA ===")
-        
-        # Modalità standard: recupera tutte le ricette
-        from services.ricette_ts_service import ricette_ts_service
-        
-        ts_response = ricette_ts_service.get_all_ricette(
-            data_da=data_da,
-            data_a=data_a, 
-            cf_assistito=cf_assistito
-        )
-        
-        if ts_response.get('success'):
-            logger.info(f"Ricette recuperate dal Sistema TS: {ts_response.get('total_count', 0)}")
+                return jsonify({
+                    'success': False,
+                    'source': 'sistema_ts',
+                    'error': 'SISTEMA_TS_ERROR',
+                    'message': ts_response.get('error', 'Sistema TS non disponibile'),
+                    'details': ts_response,
+                    'ts_response': {
+                        'message': ts_response.get('message'),
+                        'timestamp': ts_response.get('timestamp'),
+                        'http_status': ts_response.get('http_status'),
+                        'response_xml': ts_response.get('response_xml', '')
+                    }
+                }), 503  # Service Unavailable
+
             
-            return jsonify({
-                'success': True,
-                'source': 'sistema_ts',
-                'count': ts_response.get('total_count', 0),
-                'data': ts_response.get('ricette', []),
-                'ts_response': {
-                    'message': ts_response.get('message'),
-                    'timestamp': ts_response.get('timestamp'),
-                    'http_status': ts_response.get('http_status'),
-                    'response_xml': ts_response.get('response_xml', '')
-                }
-            }), 200
-        else:
-            # Sistema TS offline o errore
-            logger.error(f"Errore Sistema TS: {ts_response.get('error')}")
-            
-            return jsonify({
-                'success': False,
-                'source': 'sistema_ts',
-                'error': 'SISTEMA_TS_ERROR',
-                'message': ts_response.get('error', 'Sistema TS non disponibile'),
-                'details': ts_response,
-                'ts_response': {
-                    'message': ts_response.get('message'),
-                    'timestamp': ts_response.get('timestamp'),
-                    'http_status': ts_response.get('http_status'),
-                    'response_xml': ts_response.get('response_xml', '')
-                }
-            }), 503  # Service Unavailable
-        
+        finally:
+            # Configurazione produzione è permanente, non serve ripristino
+            logger.info("=== RICERCA COMPLETATA ===")
+               
     except Exception as e:
         logger.error(f"Errore chiamata Sistema TS: {str(e)}", exc_info=True)
         return jsonify({
