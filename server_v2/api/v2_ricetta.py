@@ -384,20 +384,43 @@ def list_ricette_from_ts():
                 cf_paziente=cf_assistito, nrbe=nre
             )
             if ts_response.get('success'):
-                logger.info(f"Ricette recuperate dal Sistema TS: {ts_response.get('total_count', 0)}")
+                # Controlla se ci sono effettivamente dati della ricetta
+                ricetta_data = ts_response.get('ricetta_data', {})
+                has_data = (ricetta_data and 
+                           ricetta_data.get('nre') and 
+                           ricetta_data.get('cod_esito') == '0000')
                 
-                return jsonify({
-                    'success': True,
-                    'source': 'sistema_ts',
-                    'count': ts_response.get('total_count', 0),
-                    'data': ts_response.get('ricette', []),
-                    'ts_response': {
-                        'message': ts_response.get('message'),
-                        'timestamp': ts_response.get('timestamp'),
-                        'http_status': ts_response.get('http_status'),
-                        'response_xml': ts_response.get('response_xml', '')
-                    }
-                }), 200
+                if has_data:
+                    logger.info(f"Ricetta trovata nel Sistema TS: {ricetta_data.get('nre')}")
+                    
+                    return jsonify({
+                        'success': True,
+                        'source': 'sistema_ts',
+                        'count': 1,
+                        'data': [ricetta_data],  # Array con la ricetta trovata
+                        'ts_response': {
+                            'message': ts_response.get('message'),
+                            'timestamp': ts_response.get('timestamp'),
+                            'http_status': ts_response.get('http_status'),
+                            'response_xml': ts_response.get('response_xml', '')
+                        }
+                    }), 200
+                else:
+                    # Nessuna ricetta trovata
+                    logger.info("Nessuna ricetta trovata nel Sistema TS")
+                    
+                    return jsonify({
+                        'success': True,
+                        'source': 'sistema_ts',
+                        'count': 0,
+                        'data': [],
+                        'ts_response': {
+                            'message': ts_response.get('message', 'Nessuna ricetta trovata'),
+                            'timestamp': ts_response.get('timestamp'),
+                            'http_status': ts_response.get('http_status'),
+                            'response_xml': ts_response.get('response_xml', '')
+                        }
+                    }), 200
             else:
                 # Sistema TS offline o errore
                 logger.error(f"Errore Sistema TS: {ts_response.get('error')}")
@@ -406,7 +429,7 @@ def list_ricette_from_ts():
                     'success': False,
                     'source': 'sistema_ts',
                     'error': 'SISTEMA_TS_ERROR',
-                    'message': ts_response.get('error', 'Sistema TS non disponibile'),
+                    'message': ts_response.get('message', 'Sistema TS non disponibile'),
                     'details': ts_response,
                     'ts_response': {
                         'message': ts_response.get('message'),
