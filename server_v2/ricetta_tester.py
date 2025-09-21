@@ -23,7 +23,7 @@ class RicettaBiancaTester:
             self.auth_token = auth_token if auth_token.startswith('Bearer ') else f"Bearer {auth_token}"
         else:
             # Usa il nuovo ID-SESSIONE valido
-            self.auth_token = "Bearer b1391aeb-12b9-44a2-a99d-1eb105b9a92c"
+            self.auth_token = "Bearer ddf36611-b375-4600-9840-7b9e040cf3b7"
         
         # Valori di default per PRODUZIONE (cifrati dinamicamente)
         self.pincode_plain = "1141766994"  # Il tuo PIN in chiaro
@@ -184,7 +184,7 @@ class RicettaBiancaTester:
            <soapenv:Body>
               <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
                  <vis:pinCode>{self.default_pincode}</vis:pinCode>
-                 <vis:codicePaziente>{codice_paziente}</vis:codicePaziente>
+                 <vis:codicePaziente>{self.default_codice_paziente}</vis:codicePaziente>
                  {nrbe_element}
                  {pin_nrbe_element}
                  <vis:cfMedico>{cf_medico}</vis:cfMedico>

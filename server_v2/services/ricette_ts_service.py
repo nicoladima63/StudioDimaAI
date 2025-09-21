@@ -82,7 +82,7 @@ class RicetteTsService:
             raise ValueError(f"Configurazione incompleta: mancano {missing_vars}")
         
         # ID-SESSIONE per autenticazione (aggiornato dal portale)
-        self.id_sessione = os.getenv('ID_SESSIONE_PROD', 'ed728769-9fcb-48f7-881f-57f4441d0b8a')
+        self.id_sessione = os.getenv('ID_SESSIONE_PROD', 'ddf36611-b375-4600-9840-7b9e040cf3b7')
         
         self.logger.info(f"RicetteTsService configurato dinamicamente")
         self.logger.info(f"Project root: {project_root}")
