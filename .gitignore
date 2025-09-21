@@ -3,7 +3,7 @@
 .env.*
 env/
 venv/
-
+/server_v2/logs/
 # Python
 __pycache__/
 *.pyc
@@ -83,3 +83,5 @@ app.log
 /zimage/
 /AGENTI/
 server_v2/docs/
+server_v2/logs/server_v2.log
+server_v2/logs/server_v2.log

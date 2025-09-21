@@ -197,103 +197,46 @@ class RicetteTsService:
             raise
 
     def _parse_ricetta_response_simple(self, root) -> dict:
-        """Parsing semplice della risposta XML per get_ricetta - CORRETTO"""
+        """Parsing usando la logica del parser_gpt.py - TEST"""
         try:
-            # Namespace per la risposta - CORRETTI
-            ns = {
-                'ns2': 'http://visualizzaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it',
-                'tip': 'http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it'
+            # Importa la funzione di parsing dal parser_gpt.py
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+            from parser_gpt import parse_ricetta_bianca
+            
+            # Converti l'elemento root in stringa XML
+            import xml.etree.ElementTree as ET
+            xml_string = ET.tostring(root, encoding='unicode')
+            
+            # Usa il parser funzionante
+            parsed_data = parse_ricetta_bianca(xml_string)
+            
+            # Mappa i dati nel formato che si aspetta il nostro sistema
+            ricetta_data = {
+                'nre': parsed_data.get('nrbe'),
+                'pin_nrbe': parsed_data.get('pin_nrbe'),
+                'stato_processo': parsed_data.get('stato_processo'),
+                'data_compilazione': parsed_data.get('data_compilazione'),
+                'cf_medico': parsed_data.get('cf_medico'),
+                'nome_medico': parsed_data.get('nome_medico'),
+                'cognome_medico': parsed_data.get('cognome_medico'),
+                'cod_esito': parsed_data.get('cod_esito'),
+                'protocollo_transazione': parsed_data.get('protocollo'),
+                'data_ricezione': parsed_data.get('data_ricezione'),
+                
+                # Dettagli prescrizione dal parser_gpt.py
+                'cod_gruppo_equival': parsed_data.get('dettaglio_prescrizione', {}).get('cod_gruppo'),
+                'descr_gruppo_equival': parsed_data.get('dettaglio_prescrizione', {}).get('descr_gruppo'),
+                'quantita': parsed_data.get('dettaglio_prescrizione', {}).get('quantita'),
+                'posologia': parsed_data.get('dettaglio_prescrizione', {}).get('posologia'),
+                'durata_trattamento': parsed_data.get('dettaglio_prescrizione', {}).get('durata'),
+                'num_ripetibilita': parsed_data.get('dettaglio_prescrizione', {}).get('num_ripetibilita'),
+                'validita_farm': parsed_data.get('dettaglio_prescrizione', {}).get('validita_farm'),
+                
+                # PDF se presente - usa il base64 originale come stringa
+                'pdf_base64': parsed_data.get('pdf_base64')
             }
-            
-            # Estrai dati base usando i namespace corretti
-            ricetta_data = {}
-            
-            # Cerca con namespace
-            nre_elem = root.find('.//ns2:nrbe', ns)
-            if nre_elem is not None:
-                ricetta_data['nre'] = nre_elem.text
-            
-            pin_elem = root.find('.//ns2:pinNrbe', ns)
-            if pin_elem is not None:
-                ricetta_data['pin_nrbe'] = pin_elem.text
-                
-            stato_elem = root.find('.//ns2:statoProcesso', ns)
-            if stato_elem is not None:
-                ricetta_data['stato_processo'] = stato_elem.text
-                
-            data_comp_elem = root.find('.//ns2:dataCompilazione', ns)
-            if data_comp_elem is not None:
-                ricetta_data['data_compilazione'] = data_comp_elem.text
-                
-            cf_medico_elem = root.find('.//ns2:cfMedico', ns)
-            if cf_medico_elem is not None:
-                ricetta_data['cf_medico'] = cf_medico_elem.text
-                
-            nome_medico_elem = root.find('.//ns2:nomeMedico', ns)
-            if nome_medico_elem is not None:
-                ricetta_data['nome_medico'] = nome_medico_elem.text
-                
-            cognome_medico_elem = root.find('.//ns2:cognomeMedico', ns)
-            if cognome_medico_elem is not None:
-                ricetta_data['cognome_medico'] = cognome_medico_elem.text
-                
-            cod_esito_elem = root.find('.//ns2:codEsitoVisualizzazione', ns)
-            if cod_esito_elem is not None:
-                ricetta_data['cod_esito'] = cod_esito_elem.text
-                
-            protocollo_elem = root.find('.//ns2:protocolloTransazione', ns)
-            if protocollo_elem is not None:
-                ricetta_data['protocollo_transazione'] = protocollo_elem.text
-                
-            data_ricezione_elem = root.find('.//ns2:dataRicezione', ns)
-            if data_ricezione_elem is not None:
-                ricetta_data['data_ricezione'] = data_ricezione_elem.text
-            
-            # Estrai dettagli prescrizione
-            dettaglio = root.find('.//ns2:dettaglioPrescrizioneRicettaBianca', ns)
-            if dettaglio is not None:
-                cod_gruppo_elem = dettaglio.find('.//codGruppoEquival')
-                if cod_gruppo_elem is not None:
-                    ricetta_data['cod_gruppo_equival'] = cod_gruppo_elem.text
-                    
-                descr_gruppo_elem = dettaglio.find('.//descrGruppoEquival')
-                if descr_gruppo_elem is not None:
-                    ricetta_data['descr_gruppo_equival'] = descr_gruppo_elem.text
-                    
-                quantita_elem = dettaglio.find('.//quantita')
-                if quantita_elem is not None:
-                    ricetta_data['quantita'] = quantita_elem.text
-                    
-                posologia_elem = dettaglio.find('.//posologia')
-                if posologia_elem is not None:
-                    ricetta_data['posologia'] = posologia_elem.text
-                    
-                durata_elem = dettaglio.find('.//durataTrattamento')
-                if durata_elem is not None:
-                    ricetta_data['durata_trattamento'] = durata_elem.text
-                    
-                ripetibilita_elem = dettaglio.find('.//numRipetibilita')
-                if ripetibilita_elem is not None:
-                    ricetta_data['num_ripetibilita'] = ripetibilita_elem.text
-                    
-                validita_elem = dettaglio.find('.//validitaFarm')
-                if validita_elem is not None:
-                    ricetta_data['validita_farm'] = validita_elem.text
-            
-            # Estrai errori se presenti
-            errore = root.find('.//ns2:erroreRicetta', ns)
-            if errore is not None:
-                errore_cod_elem = errore.find('.//codEsito')
-                if errore_cod_elem is not None:
-                    ricetta_data['errore_codice'] = errore_cod_elem.text
-                    
-                errore_msg_elem = errore.find('.//esito')
-                if errore_msg_elem is not None:
-                    ricetta_data['errore_messaggio'] = errore_msg_elem.text
-                    
-                errore_tipo_elem = errore.find('.//tipoErrore')
-                if errore_tipo_elem is not None:
-                    ricetta_data['errore_tipo'] = errore_tipo_elem.text
             
             # Mappa i campi per il frontend
             if ricetta_data.get('descr_gruppo_equival'):
@@ -303,12 +246,14 @@ class RicetteTsService:
             if ricetta_data.get('pin_nrbe'):
                 ricetta_data['codice_pin'] = ricetta_data['pin_nrbe']
             
-            self.logger.info(f"Parsing completato: NRE={ricetta_data.get('nre')}, PIN={ricetta_data.get('pin_nrbe')}, Esito={ricetta_data.get('cod_esito')}")
-            self.logger.info(f"Farmaco: {ricetta_data.get('denominazione_farmaco')}, Posologia: {ricetta_data.get('posologia')}")
+            self.logger.info(f"Parsing completato: NRE={ricetta_data.get('nre')}, Farmaco={ricetta_data.get('denominazione_farmaco')}, Posologia={ricetta_data.get('posologia')}")
+            
             return ricetta_data
             
         except Exception as e:
-            self.logger.error(f"Errore parsing risposta: {e}")
+            self.logger.error(f"Errore parsing con parser_gpt.py: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
             return {'errore_parsing': str(e)}
 
     def _get_current_env(self) -> str:

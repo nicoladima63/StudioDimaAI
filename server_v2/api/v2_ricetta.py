@@ -392,6 +392,7 @@ def list_ricette_from_ts():
                 
                 if has_data:
                     logger.info(f"Ricetta trovata nel Sistema TS: {ricetta_data.get('nre')}")
+                    logger.info(f"Dati ricetta inviati al frontend: {ricetta_data}")
                     
                     return jsonify({
                         'success': True,
