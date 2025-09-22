@@ -83,51 +83,58 @@ def appointment_change_callback(changes: List[Dict], config: Dict[str, Any]):
         # Ottieni il tracker dei cambiamenti
         tracker = get_changes_tracker()
         
-        # Ottieni il servizio calendario per leggere i dati aggiornati
-        calendar_service = CalendarServiceV2()
-        
         # Aspetta un momento per permettere al DBF di essere completamente aggiornato
         import time
         time.sleep(2)
         
-        # Leggi tutti gli appuntamenti aggiornati
-        current_month = datetime.now().month
-        current_year = datetime.now().year
+        # Leggi TUTTI gli appuntamenti dal DBF (stesso metodo dello snapshot)
+        from core.config_manager import get_config
+        config = get_config()
+        file_path = config.get_dbf_path("appointments")
         
-        # Leggi appuntamenti per i prossimi 3 mesi
-        all_appointments = []
-        for month_offset in range(3):
-            month = current_month + month_offset
-            year = current_year
-            if month > 12:
-                month -= 12
-                year += 1
+        # Usa lo stesso metodo di lettura dello SnapshotManager
+        all_appointments = _read_appunta_only("appointments", file_path)
+        
+        # DEBUG: Controlla stato del tracker
+        logger.info(f"DEBUG: Tracker ha {len(tracker.appointments_data)} appuntamenti precedenti")
+        logger.info(f"DEBUG: Letti {len(all_appointments)} appuntamenti attuali")
+        
+        # Se è la prima volta (dati vuoti), inizializza senza confronto
+        if not tracker.appointments_data or len(tracker.appointments_data) == 0:
+            logger.info(f"Prima inizializzazione: caricando {len(all_appointments)} appuntamenti come baseline")
+            tracker.update_appointments_data(all_appointments)
+            logger.info("Baseline stabilita - prossime modifiche saranno rilevate correttamente")
+            return  # Esce subito senza tracciare cambiamenti
+        else:
+            # Salva i dati precedenti per il confronto
+            previous_appointments = tracker.appointments_data.copy()
             
-            try:
-                month_appointments = calendar_service.get_db_appointments_for_month(month, year)
-                all_appointments.extend(month_appointments)
-            except Exception as e:
-                logger.warning(f"Error reading appointments for {month:02d}/{year}: {e}")
-        
-        # Aggiorna i dati degli appuntamenti
-        tracker.update_appointments_data(all_appointments)
-        
-        # Analizza i cambiamenti specifici
-        _analyze_and_track_changes(tracker, all_appointments)
+            # Aggiorna i dati degli appuntamenti
+            tracker.update_appointments_data(all_appointments)
+            
+            # Analizza i cambiamenti specifici confrontando con i dati precedenti
+            changes_count = _analyze_and_track_changes(tracker, all_appointments, previous_appointments)
+        logger.info(f"DEBUG: Rilevati {changes_count} cambiamenti specifici")
         
         logger.info("Appointment change callback completed successfully")
         
     except Exception as e:
         logger.error(f"Error in appointment change callback: {e}")
 
-def _analyze_and_track_changes(tracker, current_appointments: List[Dict[str, Any]]):
+def _analyze_and_track_changes(tracker, current_appointments: List[Dict[str, Any]], previous_appointments: List[Dict[str, Any]] = None) -> int:
     """
     Analizza i cambiamenti confrontando con i dati precedenti.
     
     Args:
         tracker: Istanza del ChangesTracker
         current_appointments: Lista aggiornata degli appuntamenti
+        previous_appointments: Lista precedente degli appuntamenti (se None, usa tracker.appointments_data)
+        
+    Returns:
+        Numero di cambiamenti rilevati
     """
+    changes_count = 0
+    
     try:
         # Crea dict per accesso rapido
         current_dict = {}
@@ -136,7 +143,16 @@ def _analyze_and_track_changes(tracker, current_appointments: List[Dict[str, Any
             current_dict[app_id] = app
         
         # Confronta con dati precedenti
-        previous_dict = tracker.appointments_data
+        if previous_appointments is not None:
+            # Usa i dati precedenti passati come parametro
+            previous_dict = {}
+            for app in previous_appointments:
+                app_id = tracker._generate_appointment_id(app)
+                previous_dict[app_id] = app
+        else:
+            # Fallback ai dati del tracker (per compatibilità)
+            previous_dict = tracker.appointments_data
+            
         logger.info(f"Confronto: {len(current_dict)} appuntamenti attuali vs {len(previous_dict)} precedenti")
         
         # Trova nuovi appuntamenti
@@ -154,6 +170,8 @@ def _analyze_and_track_changes(tracker, current_appointments: List[Dict[str, Any
                     details=f"Nuovo appuntamento per {app.get('PAZIENTE', 'N/A')}"
                 )
                 tracker.track_change(change)
+                changes_count += 1
+                logger.info(f"NUOVO appuntamento rilevato: {app.get('PAZIENTE', 'N/A')} - {app.get('DATA', '')} {convert_gestionale_time_to_standard(app.get('ORA', ''))}")
         
         # Trova appuntamenti cancellati
         for app_id, app in previous_dict.items():
@@ -170,6 +188,8 @@ def _analyze_and_track_changes(tracker, current_appointments: List[Dict[str, Any
                     details=f"Appuntamento cancellato per {app.get('PAZIENTE', 'N/A')}"
                 )
                 tracker.track_change(change)
+                changes_count += 1
+                logger.info(f"CANCELLATO appuntamento rilevato: {app.get('PAZIENTE', 'N/A')} - {app.get('DATA', '')} {convert_gestionale_time_to_standard(app.get('ORA', ''))}")
         
         # Trova appuntamenti modificati
         for app_id, current_app in current_dict.items():
@@ -194,9 +214,65 @@ def _analyze_and_track_changes(tracker, current_appointments: List[Dict[str, Any
                         details=details
                     )
                     tracker.track_change(change)
+                    changes_count += 1
+                    logger.info(f"MODIFICATO appuntamento rilevato: {current_app.get('PAZIENTE', 'N/A')} - {details}")
+        
+        return changes_count
         
     except Exception as e:
         logger.error(f"Error analyzing changes: {e}")
+        return 0
+
+def _read_appunta_only(table_name: str, file_path: str = None) -> List[Dict[str, Any]]:
+    """Legge solo il file DBF specificato senza join con pazienti (stesso metodo dello SnapshotManager)."""
+    try:
+        import os
+        from dbfread import DBF
+        
+        # Usa percorso fornito (obbligatorio)
+        if file_path is None:
+            raise ValueError(f"file_path is required for table {table_name}")
+        
+        if not os.path.exists(file_path):
+            logger.error(f"DBF file not found: {file_path}")
+            return []
+        
+        # Leggi direttamente con dbfread
+        dbf = DBF(file_path, encoding='latin-1')
+        records = []
+        
+        for record in dbf:
+            # Converti in dict semplice con conversione date e mapping campi
+            record_dict = {}
+            for field, value in record.items():
+                # Converti date in stringhe per JSON serialization
+                if hasattr(value, 'isoformat'):  # datetime/date objects
+                    record_dict[field] = value.isoformat()
+                else:
+                    record_dict[field] = value
+            
+            # Mappa i campi DBF ai nomi che si aspetta il ChangesTracker
+            mapped_record = {
+                'DATA': record_dict.get('DB_APDATA', ''),
+                'ORA': record_dict.get('DB_APOREIN', ''),
+                'STUDIO': record_dict.get('DB_APSTUDI', ''),
+                'PAZIENTE': record_dict.get('DB_APPACOD', ''),  # Codice paziente
+                'MEDICO': record_dict.get('DB_APMEDIC', ''),
+                'ORA_FINE': record_dict.get('DB_APOREOU', ''),
+                'TIPO': record_dict.get('DB_GUARDIA', ''),
+                'NOTE': record_dict.get('DB_NOTE', ''),
+                'DESCRIZIONE': record_dict.get('DB_APDESCR', ''),
+                # Mantieni anche i campi originali per compatibilità
+                **record_dict
+            }
+            records.append(mapped_record)
+        
+        logger.debug(f"Read {len(records)} records from {table_name}")
+        return records
+        
+    except Exception as e:
+        logger.error(f"Error reading {table_name}: {e}")
+        return []
 
 def _appointment_changed(old_app: Dict[str, Any], new_app: Dict[str, Any]) -> bool:
     """Verifica se un appuntamento è cambiato confrontando campi chiave"""

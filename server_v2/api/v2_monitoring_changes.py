@@ -224,3 +224,55 @@ def clear_changes():
             'success': False,
             'error': str(e)
         }), 500
+
+@monitoring_changes_bp.route('/settings', methods=['GET'])
+def get_monitoring_settings():
+    """Ottiene le impostazioni del monitoraggio"""
+    try:
+        from services.monitoring_service import get_monitoring_service
+        monitoring_service = get_monitoring_service()
+        settings = monitoring_service.get_settings()
+        return jsonify({
+            'success': True,
+            'data': settings
+        })
+    except Exception as e:
+        logger.error(f"Error getting monitoring settings: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@monitoring_changes_bp.route('/settings', methods=['POST'])
+def update_monitoring_settings():
+    """Aggiorna le impostazioni del monitoraggio"""
+    try:
+        from services.monitoring_service import get_monitoring_service
+        monitoring_service = get_monitoring_service()
+        
+        new_settings = request.get_json()
+        if not new_settings:
+            return jsonify({
+                'success': False,
+                'error': 'Nessuna impostazione fornita'
+            }), 400
+        
+        success = monitoring_service.update_settings(new_settings)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Impostazioni aggiornate con successo',
+                'data': monitoring_service.get_settings()
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Errore nell\'aggiornamento delle impostazioni'
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error updating monitoring settings: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

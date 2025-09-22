@@ -73,6 +73,7 @@ class ChangesTracker:
         try:
             with open(self.changes_file, 'w', encoding='utf-8') as f:
                 json.dump(self.changes, f, indent=2, ensure_ascii=False)
+            logger.info(f"File cambiamenti salvato: {self.changes_file} ({len(self.changes)} cambiamenti)")
         except Exception as e:
             logger.error(f"Error saving changes: {e}")
     
@@ -96,6 +97,7 @@ class ChangesTracker:
             
             # Salva
             self._save_changes()
+            logger.info(f"CAMBIAMENTO SALVATO: {change.change_type} - {change.patient_name} - {change.appointment_date} {change.appointment_time}")
             
             logger.info(f"Tracked change: {change.change_type} for appointment {change.appointment_id}")
             

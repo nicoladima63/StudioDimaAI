@@ -1,8 +1,8 @@
 {
-  "appointments_periodic_check_1758543648": {
-    "monitor_id": "appointments_periodic_check_1758543648",
+  "appointments_periodic_check_1758572665": {
+    "monitor_id": "appointments_periodic_check_1758572665",
     "table_name": "appointments",
-    "file_path": "\\\\serverdima\\pixel\\windent\\USER\\APPUNTA.DBF",
+    "file_path": "C:\\pixel\\windent\\USER\\APPUNTA.DBF",
     "monitor_type": "periodic_check",
     "interval_seconds": 30,
     "enabled": true,

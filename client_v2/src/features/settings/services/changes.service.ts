@@ -174,6 +174,45 @@ class ChangesService {
       };
     }
   }
+
+  /**
+   * Ottiene le impostazioni del monitoraggio
+   */
+  async getMonitoringSettings(): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.get(`${this.baseUrl}/settings`);
+      return {
+        success: response.data.success,
+        data: response.data.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Errore nel recupero delle impostazioni',
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * Aggiorna le impostazioni del monitoraggio
+   */
+  async updateMonitoringSettings(settings: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await apiClient.post(`${this.baseUrl}/settings`, settings);
+      return {
+        success: response.data.success,
+        message: response.data.message || 'Impostazioni aggiornate con successo',
+        data: response.data.data
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Errore nell\'aggiornamento delle impostazioni',
+        error: error.message
+      };
+    }
+  }
 }
 
 export const changesService = new ChangesService();

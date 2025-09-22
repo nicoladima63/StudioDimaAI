@@ -253,6 +253,17 @@ def main():
         print("🔄 Avvio scheduler...")
         scheduler_service.start()
         print("✅ Scheduler avviato")
+        
+        # Initialize monitoring service
+        from services.monitoring_service import get_monitoring_service
+        print("🔄 Avvio monitoraggio...")
+        monitoring_service = get_monitoring_service()
+        
+        # Controlla se auto-start è abilitato
+        if monitoring_service.should_auto_start():
+            print("✅ Monitoraggio avviato (auto-start)")
+        else:
+            print("⏸️ Monitoraggio pronto (manual-start)")
                 
         # Start server
         if args.use_flask_dev:

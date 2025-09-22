@@ -214,13 +214,13 @@ class ConfigManager:
             if mode == 'prod':
                 return r'\\serverdima\pixel\windent\USER\APPUNTA.DBF'
             else:
-                return r'C:\windent\USER\APPUNTA.DBF'
+                return r'C:\pixel\windent\USER\APPUNTA.DBF'
         
         elif table_name == 'patients' or table_name == 'PAZIENTI':
             if mode == 'prod':
                 return r'\\serverdima\pixel\windent\DATI\PAZIENTI.DBF'
             else:
-                return r'C:\windent\DATI\PAZIENTI.DBF'
+                return r'C:\pixel\windent\DATI\PAZIENTI.DBF'
         
         else:
             raise ValueError(f"Unknown table name: {table_name}")

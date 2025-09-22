@@ -113,6 +113,9 @@ class MonitoringService:
         # Configurazioni salvate
         self.saved_configs: Dict[str, MonitorConfig] = {}
         
+        # Carica impostazioni
+        self.settings = self._load_settings()
+        
         # Carica configurazioni esistenti
         self._load_saved_configs()
         
@@ -434,6 +437,59 @@ class MonitoringService:
                 except Exception as e:
                     logger.error(f"Error executing callback {callback_name}: {e}")
     
+    def _load_settings(self) -> Dict[str, Any]:
+        """Carica impostazioni del monitoraggio."""
+        try:
+            settings_file = self.config_dir / "settings.json"
+            
+            if settings_file.exists():
+                with open(settings_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            else:
+                # Impostazioni di default
+                default_settings = {
+                    "auto_start_monitors": False,
+                    "default_interval_seconds": 30,
+                    "enable_file_watcher": True,
+                    "enable_periodic_check": True,
+                    "log_level": "INFO",
+                    "max_retry_attempts": 3,
+                    "retry_delay_seconds": 5
+                }
+                self._save_settings(default_settings)
+                return default_settings
+                
+        except Exception as e:
+            logger.error(f"Error loading settings: {e}")
+            return {"auto_start_monitors": False}
+    
+    def _save_settings(self, settings: Dict[str, Any]):
+        """Salva impostazioni su disco."""
+        try:
+            settings_file = self.config_dir / "settings.json"
+            with open(settings_file, 'w', encoding='utf-8') as f:
+                json.dump(settings, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Error saving settings: {e}")
+    
+    def should_auto_start(self) -> bool:
+        """Verifica se i monitor dovrebbero partire automaticamente."""
+        return self.settings.get("auto_start_monitors", False)
+    
+    def update_settings(self, new_settings: Dict[str, Any]) -> bool:
+        """Aggiorna le impostazioni del monitoraggio."""
+        try:
+            self.settings.update(new_settings)
+            self._save_settings(self.settings)
+            return True
+        except Exception as e:
+            logger.error(f"Error updating settings: {e}")
+            return False
+    
+    def get_settings(self) -> Dict[str, Any]:
+        """Recupera le impostazioni correnti."""
+        return self.settings.copy()
+
     def _load_saved_configs(self):
         """Carica configurazioni salvate da disco."""
         try:
@@ -448,11 +504,16 @@ class MonitoringService:
                         # Converte stringa enum in MonitorType
                         if 'monitor_type' in config_data and isinstance(config_data['monitor_type'], str):
                             config_data['monitor_type'] = MonitorType(config_data['monitor_type'])
+                        
+                        # RISOLVI DINAMICAMENTE il file_path dal ConfigManager invece di usare quello salvato
+                        table_name = config_data.get('table_name', 'appointments')
+                        config_data['file_path'] = self.config.get_dbf_path(table_name)
+                        
                         config = MonitorConfig(**config_data)
                         self.saved_configs[monitor_id] = config
                         
-                        # Avvia monitor con auto_start
-                        if config.auto_start:
+                        # Avvia monitor con auto_start SOLO se le impostazioni lo permettono
+                        if config.auto_start and self.should_auto_start():
                             self.start_monitor(monitor_id)
                     except Exception as e:
                         logger.warning(f"Error loading config for {monitor_id}: {e}")

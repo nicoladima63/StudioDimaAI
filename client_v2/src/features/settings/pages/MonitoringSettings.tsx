@@ -24,6 +24,7 @@ import {
   CRow,
   CCol,
 } from '@coreui/react';
+import toast from 'react-hot-toast';
 import CIcon from '@coreui/icons-react';
 import { 
   cilMonitor, 
@@ -87,6 +88,8 @@ const MonitoringSettings: React.FC = () => {
   const [showChangesModal, setShowChangesModal] = useState(false);
   const [changesSummary, setChangesSummary] = useState<ChangesSummary | null>(null);
   const [changesLoading, setChangesLoading] = useState(false);
+  const [monitoringSettings, setMonitoringSettings] = useState<any>(null);
+  const [settingsLoading, setSettingsLoading] = useState(false);
   const [newMonitor, setNewMonitor] = useState({
     table_name: 'appointments',
     monitor_type: 'periodic_check' as const,
@@ -101,6 +104,7 @@ const MonitoringSettings: React.FC = () => {
   // Carica dati iniziali e polling automatico
   useEffect(() => {
     loadData();
+    loadMonitoringSettings();
     
     // Polling ogni 30 secondi per aggiornare i dati
     const interval = setInterval(loadData, 30000);
@@ -130,6 +134,43 @@ const MonitoringSettings: React.FC = () => {
       console.error('Error loading monitoring data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMonitoringSettings = async () => {
+    setSettingsLoading(true);
+    try {
+      const response = await changesService.getMonitoringSettings();
+      if (response.success) {
+        setMonitoringSettings(response.data);
+      } else {
+        toast.error(response.message || 'Errore nel recupero delle impostazioni');
+      }
+    } catch (error) {
+      toast.error('Errore nel recupero delle impostazioni');
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleToggleAutoStart = async () => {
+    if (!monitoringSettings) return;
+    
+    const newSettings = {
+      ...monitoringSettings,
+      auto_start_monitors: !monitoringSettings.auto_start_monitors
+    };
+    
+    try {
+      const response = await changesService.updateMonitoringSettings(newSettings);
+      if (response.success) {
+        setMonitoringSettings(response.data);
+        toast.success('Impostazioni aggiornate con successo');
+      } else {
+        toast.error(response.message || 'Errore nell\'aggiornamento delle impostazioni');
+      }
+    } catch (error) {
+      toast.error('Errore nell\'aggiornamento delle impostazioni');
     }
   };
 
@@ -317,6 +358,39 @@ const MonitoringSettings: React.FC = () => {
           </div>
         }
       />
+      
+      {/* Toggle Auto-Start */}
+      <PageLayout.ContentBody>
+        <CRow className="mb-4">
+          <CCol>
+            <CCard>
+              <CCardHeader>
+                <h5>Impostazioni Globali</h5>
+              </CCardHeader>
+              <CCardBody>
+                <div className="d-flex align-items-center justify-content-between">
+                  <div>
+                    <h6>Avvio Automatico Monitor</h6>
+                    <p className="text-muted mb-0">
+                      {monitoringSettings?.auto_start_monitors 
+                        ? 'I monitor partono automaticamente all\'avvio del server'
+                        : 'I monitor devono essere avviati manualmente'
+                      }
+                    </p>
+                  </div>
+                  <CFormSwitch
+                    id="auto-start-toggle"
+                    label=""
+                    checked={monitoringSettings?.auto_start_monitors || false}
+                    onChange={handleToggleAutoStart}
+                    disabled={settingsLoading}
+                  />
+                </div>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
+      </PageLayout.ContentBody>
 
       <PageLayout.ContentBody>
         {/* Alert per messaggi */}
