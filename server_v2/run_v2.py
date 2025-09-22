@@ -9,6 +9,9 @@ Usage:
     python run_v2.py
     python run_v2.py --config production
     python run_v2.py --port 5001 --debug
+    python run_v2.py --log-level INFO
+    python run_v2.py --verbose
+    python run_v2.py --quiet
 """
 
 import os
@@ -76,7 +79,57 @@ def parse_arguments():
         help='Use Flask development server (not recommended for production)'
     )
     
+    parser.add_argument(
+        '--log-level', '-l',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        default='WARNING',
+        help='Set logging level (default: WARNING)'
+    )
+    
+    parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Enable verbose logging (INFO level)'
+    )
+    
+    parser.add_argument(
+        '--quiet', '-q',
+        action='store_true',
+        help='Enable quiet mode (ERROR level only)'
+    )
+    
     return parser.parse_args()
+
+
+def setup_logging(args):
+    """Setup logging configuration based on arguments."""
+    # Determina il livello di log
+    if args.quiet:
+        log_level = 'ERROR'
+    elif args.verbose:
+        log_level = 'INFO'
+    else:
+        log_level = args.log_level
+    
+    # Configura il logging
+    logging.basicConfig(
+        level=getattr(logging, log_level),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Disabilita log inutili se non in modalità verbose
+    if not args.verbose:
+        logging.getLogger('apscheduler').setLevel(logging.WARNING)
+        logging.getLogger('apscheduler.scheduler').setLevel(logging.WARNING)
+        logging.getLogger('apscheduler.executors').setLevel(logging.WARNING)
+        logging.getLogger('apscheduler.jobstores').setLevel(logging.WARNING)
+        logging.getLogger('tzlocal').setLevel(logging.WARNING)
+        logging.getLogger('waitress').setLevel(logging.WARNING)
+        logging.getLogger('urllib3').setLevel(logging.WARNING)
+        logging.getLogger('googleapiclient').setLevel(logging.WARNING)
+    
+    print(f"Logging level set to: {log_level}")
 
 
 def setup_environment_variables(args):
@@ -107,9 +160,13 @@ from collections import defaultdict
 def run_with_waitress(app, args):
     """Run server using Waitress WSGI server."""
     try:
+        import logging
+        # Disabilita log waitress
+        logging.getLogger('waitress').setLevel(logging.WARNING)
+        
         from waitress import serve
         
-        print(f"Starting Waitress server on http://{args.host}:{args.port}")
+        print(f"🚀 Server avviato su http://{args.host}:{args.port}")
         print("Press Ctrl+C to stop the server")
         print()
         
@@ -125,7 +182,7 @@ def run_with_waitress(app, args):
         
     except ImportError:
         print("❌ Waitress not installed. Install with: pip install waitress")
-        print("🔄 Falling back to Flask development server...")
+        # print("🔄 Falling back to Flask development server...")
         run_with_flask_dev(app, args)
     except KeyboardInterrupt:
         print("\nServer stopped by user")
@@ -134,7 +191,7 @@ def run_with_waitress(app, args):
             from services.scheduler_service import scheduler_service
             print("🛑 Stopping scheduler service...")
             scheduler_service.shutdown()
-            print("✅ Scheduler service stopped")
+            # print("✅ Scheduler service stopped")
         except Exception as e:
             print(f"⚠️ Error stopping scheduler: {e}")
     except Exception as e:
@@ -150,8 +207,7 @@ def run_with_waitress(app, args):
 
 def run_with_flask_dev(app, args):
     """Run server using Flask development server."""
-    print(f"WARNING: Using Flask development server (not recommended for production)")
-    print(f"Starting Flask dev server on http://{args.host}:{args.port}")
+    print(f"🚀 Server Flask avviato su http://{args.host}:{args.port}")
     print("Press Ctrl+C to stop the server")
     print()
     
@@ -176,6 +232,9 @@ def main():
         # Parse command line arguments
         args = parse_arguments()
         
+        # Setup logging first
+        setup_logging(args)
+        
         # Set up environment variables
         setup_environment_variables(args)
         
@@ -190,9 +249,9 @@ def main():
         
         # Initialize scheduler service
         from services.scheduler_service import scheduler_service
-        print("🔄 Starting scheduler service...")
+        print("🔄 Avvio scheduler...")
         scheduler_service.start()
-        print("✅ Scheduler service started")
+        print("✅ Scheduler avviato")
                 
         # Start server
         if args.use_flask_dev:
