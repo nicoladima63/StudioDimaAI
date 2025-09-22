@@ -174,7 +174,6 @@ class EnvironmentManager:
             return False
     
 
-    #deepseek 
     def _save_environment_to_file(self, service: ServiceType, environment: Environment) -> bool:
         """Salva ambiente su file per persistenza con verifica"""
         try:
@@ -240,8 +239,6 @@ class EnvironmentManager:
     
 
 
-
-    #deepseek support
     def set_environment(self, service: ServiceType, environment: Environment) -> bool:
         """Imposta l'ambiente per un servizio con verifica"""
         try:
