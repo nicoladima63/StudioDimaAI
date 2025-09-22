@@ -18,6 +18,7 @@ import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
 
+# Configura logger per rispettare il livello globale
 logger = logging.getLogger(__name__)
 
 class ConfigManager:

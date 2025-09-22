@@ -59,7 +59,7 @@ class SnapshotManager:
     - Thread-safe operations
     """
     
-    def __init__(self, snapshot_dir: str = "server_v2/data/snapshots"):
+    def __init__(self, snapshot_dir: str = "data/snapshots"):
         self.config = get_config()
         self.snapshot_dir = Path(snapshot_dir)
         self.snapshot_dir.mkdir(parents=True, exist_ok=True)

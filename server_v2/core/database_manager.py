@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from .config import Config
 from .exceptions import DatabaseError, ConnectionPoolError, TransactionError
 
-
+# Configura logger per rispettare il livello globale
 logger = logging.getLogger(__name__)
 
 # Global database manager instance

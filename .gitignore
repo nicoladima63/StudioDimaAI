@@ -97,4 +97,7 @@ server_v2/token.json
 # Server V2 - File di configurazione sensibili
 server_v2/certs/
 server_v2/instance/certs/
-server_v2/server_v2/
+
+# Server V2 - File di snapshot e monitoraggio
+server_v2/data/snapshots/
+server_v2/data/monitoring/
