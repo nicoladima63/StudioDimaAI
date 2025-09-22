@@ -119,8 +119,14 @@ class EnvironmentManager:
         
         for service_type, config in service_configs.items():
             current_env = self._load_environment_from_file(service_type)
+            # FIX: Validazione corretta del default_environment
             if current_env not in config['available_environments']:
-                current_env = config['default_environment']
+                default_env = config['default_environment']
+                if default_env not in config['available_environments']:
+                    logger.error(f"Default environment {default_env} non valido per {service_type}")
+                    current_env = config['available_environments'][0]  # Fallback al primo disponibile
+                else:
+                    current_env = default_env
                 
             self._services[service_type] = ServiceConfig(
                 service_type=service_type,
@@ -135,22 +141,26 @@ class EnvironmentManager:
         if mode_file.exists():
             try:
                 env_str = mode_file.read_text().strip().lower()
-                if env_str in [e.value for e in Environment]:
+                # FIX: Validazione contenuto file
+                if env_str and env_str in [e.value for e in Environment]:
                     return Environment(env_str)
+                else:
+                    logger.warning(f"Contenuto file {mode_file} non valido: '{env_str}'")
             except Exception as e:
                 logger.warning(f"Errore lettura file modalità {service}: {e}")
         
         # 2. Variabile ambiente specifica
         env_var = f"{service.value.upper()}_ENV"
-        env_str = os.getenv(env_var, '').lower()
-        if env_str in [e.value for e in Environment]:
+        env_str = os.getenv(env_var, '').strip().lower()
+        # FIX: Controllo stringa vuota
+        if env_str and env_str in [e.value for e in Environment]:
             return Environment(env_str)
             
         # 3. Variabile ambiente generale
-        env_str = os.getenv('ENVIRONMENT', '').lower()
+        env_str = os.getenv('ENVIRONMENT', '').strip().lower()
         if env_str == 'production':
             env_str = 'prod'
-        if env_str in [e.value for e in Environment]:
+        if env_str and env_str in [e.value for e in Environment]:
             return Environment(env_str)
             
         # 4. Default per servizio
@@ -163,21 +173,17 @@ class EnvironmentManager:
         }
         return defaults.get(service, Environment.DEV)
     
-    def old_save_environment_to_file(self, service: ServiceType, environment: Environment) -> bool:
-        """Salva ambiente su file per persistenza"""
-        try:
-            mode_file = self.instance_dir / self._mode_files[service]
-            mode_file.write_text(environment.value)
-            return True
-        except Exception as e:
-            logger.error(f"Errore salvataggio modalità {service}: {e}")
-            return False
     
 
     def _save_environment_to_file(self, service: ServiceType, environment: Environment) -> bool:
         """Salva ambiente su file per persistenza con verifica"""
         try:
             mode_file = self.instance_dir / self._mode_files[service]
+            
+            # FIX: Validazione input
+            if not isinstance(environment, Environment):
+                logger.error(f"Environment non valido: {environment}")
+                return False
             
             # Scrittura del file
             mode_file.write_text(environment.value)
@@ -218,7 +224,9 @@ class EnvironmentManager:
         """Verifica validità cache"""
         if cache_key not in self._cache_timestamps:
             return False
-        return datetime.now() - self._cache_timestamps[cache_key] < self._cache_ttl
+        # FIX: Cache timestamp più efficiente
+        cache_time = self._cache_timestamps[cache_key]
+        return (datetime.now() - cache_time) < self._cache_ttl
     
     def _set_cache(self, cache_key: str, value: Any):
         """Imposta cache con timestamp"""
@@ -242,7 +250,15 @@ class EnvironmentManager:
     def set_environment(self, service: ServiceType, environment: Environment) -> bool:
         """Imposta l'ambiente per un servizio con verifica"""
         try:
-            # ... codice esistente ...
+            # FIX: Validazione input
+            if service not in self._services:
+                logger.error(f"Servizio {service} non supportato")
+                return False
+                
+            service_config = self._services[service]
+            if environment not in service_config.available_environments:
+                logger.error(f"Ambiente {environment} non supportato per {service}")
+                return False
             
             # Salva su file
             file_saved = self._save_environment_to_file(service, environment)
@@ -257,11 +273,11 @@ class EnvironmentManager:
                 return False
             
             # Aggiorna configurazione in memoria
-            if service in self._services:
-                self._services[service].current_environment = environment
+            service_config.current_environment = environment
             
             # Invalida cache correlate
             self._invalidate_service_cache(service)
+            logger.info(f"Ambiente {service} cambiato a {environment}")
             return True
             
         except Exception as e:
@@ -270,29 +286,6 @@ class EnvironmentManager:
 
 
 
-    def old_set_environment(self, service: ServiceType, environment: Environment) -> bool:
-        """Imposta ambiente per servizio"""
-        if service not in self._services:
-            logger.error(f"Servizio {service} non supportato")
-            return False
-            
-        service_config = self._services[service]
-        if environment not in service_config.available_environments:
-            logger.error(f"Ambiente {environment} non supportato per {service}")
-            return False
-        
-        # Aggiorna configurazione
-        service_config.current_environment = environment
-        
-        # Persisti su file
-        success = self._save_environment_to_file(service, environment)
-        
-        if success:
-            # Invalida cache correlate
-            self._invalidate_service_cache(service)
-            logger.info(f"Ambiente {service} cambiato a {environment}")
-        
-        return success
     
     def _invalidate_service_cache(self, service: ServiceType):
         """Invalida cache per un servizio"""
@@ -353,12 +346,15 @@ class EnvironmentManager:
     
     def _get_ricetta_config(self, environment: Environment) -> Dict[str, Any]:
         """Configurazione ricetta elettronica - integrazione con sistema esistente"""
-        # Importa la configurazione dal sistema ricetta già migrato
+        # FIX: Import più sicuro per evitare circular imports
         try:
-            from ..config.ricetta_config import ricetta_config
+            # Import dinamico per evitare circular imports
+            import importlib
+            ricetta_config_module = importlib.import_module('server_v2.config.ricetta_config')
+            ricetta_config = ricetta_config_module.ricetta_config
             return ricetta_config.get_full_config(environment.value)
-        except ImportError:
-            logger.warning("Sistema ricetta non disponibile, uso configurazione base")
+        except (ImportError, AttributeError) as e:
+            logger.warning(f"Sistema ricetta non disponibile: {e}, uso configurazione base")
             return self._get_ricetta_config_fallback(environment)
     
     def _get_ricetta_config_fallback(self, environment: Environment) -> Dict[str, Any]:
@@ -388,7 +384,13 @@ class EnvironmentManager:
     
     def _get_sms_config(self, environment: Environment) -> Dict[str, Any]:
         """Configurazione SMS"""
-        from .config import get_config_value
+        # FIX: Import più sicuro
+        try:
+            from .config import get_config_value
+        except ImportError:
+            # Fallback se config non disponibile
+            def get_config_value(key: str, default: str = '') -> str:
+                return os.getenv(key, default)
         
         if environment == Environment.PROD:
             return {
@@ -407,7 +409,13 @@ class EnvironmentManager:
     
     def _get_rentri_config(self, environment: Environment) -> Dict[str, Any]:
         """Configurazione Rentri"""
-        from .config import get_config_value
+        # FIX: Import più sicuro
+        try:
+            from .config import get_config_value
+        except ImportError:
+            # Fallback se config non disponibile
+            def get_config_value(key: str, default: str = '') -> str:
+                return os.getenv(key, default)
         
         if environment == Environment.PROD:
             return {
@@ -593,6 +601,16 @@ class EnvironmentManager:
             if not exists:
                 validation.valid = False
                 validation.errors.append(f'File credenziali non trovato: {credentials_path}')
+            else:
+                # FIX: Validazione contenuto JSON
+                try:
+                    import json
+                    with open(cred_file, 'r') as f:
+                        json.load(f)
+                    validation.checks['credentials_valid_json'] = True
+                except (json.JSONDecodeError, Exception) as e:
+                    validation.valid = False
+                    validation.errors.append(f'File credenziali non valido: {e}')
         
         if token_path:
             token_file = Path(token_path)
@@ -601,6 +619,15 @@ class EnvironmentManager:
             
             if not exists:
                 validation.warnings.append(f'Token di accesso non trovato: {token_path}')
+            else:
+                # FIX: Validazione contenuto JSON
+                try:
+                    import json
+                    with open(token_file, 'r') as f:
+                        json.load(f)
+                    validation.checks['token_valid_json'] = True
+                except (json.JSONDecodeError, Exception) as e:
+                    validation.warnings.append(f'File token non valido: {e}')
         
         # Controlla configurazione automazione
         automation_settings = self.get_automation_settings()
@@ -679,7 +706,12 @@ class EnvironmentManager:
         }
         
         if not self._automation_config_file.exists():
-            self.set_automation_settings(defaults)
+            # FIX: Evita recursion - scrivi direttamente i defaults
+            try:
+                with open(self._automation_config_file, 'w', encoding='utf-8') as f:
+                    json.dump(defaults, f, ensure_ascii=False, indent=2)
+            except Exception as e:
+                logger.error(f"Errore creazione automation settings: {e}")
             return defaults.copy()
             
         try:
@@ -694,7 +726,12 @@ class EnvironmentManager:
                     updated = True
                     
             if updated:
-                self.set_automation_settings(settings)
+                # FIX: Evita recursion - scrivi direttamente
+                try:
+                    with open(self._automation_config_file, 'w', encoding='utf-8') as f:
+                        json.dump(settings, f, ensure_ascii=False, indent=2)
+                except Exception as e:
+                    logger.error(f"Errore aggiornamento automation settings: {e}")
                 
             return settings
             
@@ -705,7 +742,15 @@ class EnvironmentManager:
     def set_automation_settings(self, settings: Dict[str, Any]):
         """Imposta impostazioni automazione"""
         try:
-            current_settings = self.get_automation_settings()
+            # FIX: Evita recursion - leggi direttamente se file esiste
+            current_settings = {}
+            if self._automation_config_file.exists():
+                try:
+                    with open(self._automation_config_file, 'r', encoding='utf-8') as f:
+                        current_settings = json.load(f)
+                except Exception as e:
+                    logger.warning(f"Errore lettura automation settings per merge: {e}")
+            
             current_settings.update(settings)
             
             with open(self._automation_config_file, 'w', encoding='utf-8') as f:
@@ -725,6 +770,64 @@ class EnvironmentManager:
         self.clear_cache()
         self._initialize_services()
         logger.info("Tutte le configurazioni ricaricate")
+    
+    def get_environment_info(self) -> Dict[str, Any]:
+        """Informazioni dettagliate ambiente corrente"""
+        return {
+            'project_root': str(self.project_root),
+            'instance_dir': str(self.instance_dir),
+            'cache_size': len(self._cache),
+            'services_count': len(self._services),
+            'automation_config_exists': self._automation_config_file.exists(),
+            'services': {
+                service.value: {
+                    'current_environment': config.current_environment.value,
+                    'available_environments': [env.value for env in config.available_environments],
+                    'last_validation': config.last_validation.isoformat() if config.last_validation else None,
+                    'validation_status': config.validation_status
+                }
+                for service, config in self._services.items()
+            }
+        }
+    
+    def validate_all_services(self) -> Dict[ServiceType, EnvironmentValidation]:
+        """Valida tutte le configurazioni servizi"""
+        results = {}
+        for service_type in self._services.keys():
+            try:
+                results[service_type] = self.validate_service_config(service_type)
+            except Exception as e:
+                logger.error(f"Errore validazione {service_type}: {e}")
+                results[service_type] = EnvironmentValidation(
+                    valid=False, 
+                    errors=[f"Errore validazione: {e}"]
+                )
+        return results
+    
+    def backup_environment_files(self) -> bool:
+        """Backup dei file di configurazione ambiente"""
+        try:
+            backup_dir = self.instance_dir / "backup" / datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Backup file modalità
+            for service, filename in self._mode_files.items():
+                source_file = self.instance_dir / filename
+                if source_file.exists():
+                    backup_file = backup_dir / filename
+                    backup_file.write_text(source_file.read_text())
+            
+            # Backup automation settings
+            if self._automation_config_file.exists():
+                backup_file = backup_dir / "automation_settings.json"
+                backup_file.write_text(self._automation_config_file.read_text())
+            
+            logger.info(f"Backup creato in: {backup_dir}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Errore creazione backup: {e}")
+            return False
 
 # Instance globale singleton
 environment_manager = EnvironmentManager()

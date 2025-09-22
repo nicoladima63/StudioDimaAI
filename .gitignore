@@ -83,3 +83,24 @@ app.log
 /zimage/
 /AGENTI/
 server_v2/docs/
+
+# Server V2 - Database e file runtime
+server_v2/instance/*.db
+server_v2/instance/*.db-shm
+server_v2/instance/*.db-wal
+server_v2/instance/database_mode.txt
+server_v2/instance/token.json
+server_v2/instance/automation_settings.json
+server_v2/instance/calendar_config_v2.json
+
+# Server V2 - Log e file temporanei
+server_v2/logs/
+server_v2/*.log
+server_v2/automation_*.log
+server_v2/sync_state.json
+server_v2/token.json
+
+# Server V2 - File di configurazione sensibili
+server_v2/certs/
+server_v2/instance/certs/
+server_v2/server_v2/
