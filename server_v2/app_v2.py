@@ -151,6 +151,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_scheduler import scheduler_v2_bp
     from api.v2_environment import environment_bp
     from api.api_monitoring import monitoring_bp
+    from api.v2_monitoring_changes import monitoring_changes_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -189,6 +190,15 @@ def register_blueprints(app: Flask) -> None:
     except Exception as e:
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to register calendar blueprint: {e}")
+    
+    # Register monitoring changes blueprint with specific prefix
+    try:
+        app.register_blueprint(monitoring_changes_bp, url_prefix=app.config['API_PREFIX'] + '/monitoring/changes')
+        logger = logging.getLogger(__name__)
+        # Monitoring changes blueprint registered
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to register monitoring changes blueprint: {e}")
     
     logger = logging.getLogger(__name__)
     # All blueprints registered

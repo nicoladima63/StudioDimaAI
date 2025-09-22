@@ -31,10 +31,12 @@ import {
   cilMediaStop, 
   cilPlus, 
   cilTrash, 
-  cilReload
+  cilReload,
+  cilChart
 } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
 import { monitoringService } from '../services/monitoring.service';
+import { changesService, ChangesSummary, AppointmentChange } from '../services/changes.service';
 
 // Tipi per il sistema di monitoraggio
 interface MonitorConfig {
@@ -80,6 +82,11 @@ const MonitoringSettings: React.FC = () => {
 
   // Stati per modal creazione
   const [showCreateModal, setShowCreateModal] = useState(false);
+  
+  // Stati per modal cambiamenti
+  const [showChangesModal, setShowChangesModal] = useState(false);
+  const [changesSummary, setChangesSummary] = useState<ChangesSummary | null>(null);
+  const [changesLoading, setChangesLoading] = useState(false);
   const [newMonitor, setNewMonitor] = useState({
     table_name: 'appointments',
     monitor_type: 'periodic_check' as const,
@@ -226,6 +233,28 @@ const MonitoringSettings: React.FC = () => {
     }
   };
 
+  const handleShowChanges = async () => {
+    try {
+      setChangesLoading(true);
+      setError(null);
+
+      const response = await changesService.getChangesSummary(undefined, undefined, 7);
+      
+      if (response.success && response.data) {
+        setChangesSummary(response.data);
+        setShowChangesModal(true);
+      } else {
+        setError(response.message || 'Errore nel recupero dei cambiamenti');
+      }
+
+    } catch (err) {
+      setError('Errore nel recupero dei cambiamenti');
+      console.error('Error loading changes:', err);
+    } finally {
+      setChangesLoading(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const statusMap = {
       running: { color: 'success', text: 'Attivo' },
@@ -276,6 +305,10 @@ const MonitoringSettings: React.FC = () => {
             <CButton color="primary" onClick={loadData} disabled={loading}>
               <CIcon icon={cilReload} className="me-2" />
               Aggiorna
+            </CButton>
+            <CButton color="info" onClick={handleShowChanges} disabled={changesLoading}>
+              <CIcon icon={cilChart} className="me-2" />
+              {changesLoading ? 'Caricamento...' : 'Riepilogo Cambiamenti'}
             </CButton>
             <CButton color="success" onClick={() => setShowCreateModal(true)}>
               <CIcon icon={cilPlus} className="me-2" />
@@ -523,6 +556,136 @@ const MonitoringSettings: React.FC = () => {
                   Crea Monitor
                 </>
               )}
+            </CButton>
+          </CModalFooter>
+        </CModal>
+
+        {/* Modal Riepilogo Cambiamenti */}
+        <CModal visible={showChangesModal} onClose={() => setShowChangesModal(false)} size="xl">
+          <CModalHeader>
+            <h5 className="mb-0">
+              <CIcon icon={cilChart} className="me-2" />
+              Riepilogo Cambiamenti Appuntamenti
+            </h5>
+          </CModalHeader>
+          <CModalBody>
+            {changesSummary ? (
+              <div>
+                {/* Statistiche generali */}
+                <CRow className="mb-4">
+                  <CCol md={3}>
+                    <CCard>
+                      <CCardBody className="text-center">
+                        <h4 className="text-primary">{changesSummary.total_changes}</h4>
+                        <p className="mb-0">Totale Cambiamenti</p>
+                      </CCardBody>
+                    </CCard>
+                  </CCol>
+                  <CCol md={3}>
+                    <CCard>
+                      <CCardBody className="text-center">
+                        <h4 className="text-success">{changesSummary.new_appointments}</h4>
+                        <p className="mb-0">Nuovi Appuntamenti</p>
+                      </CCardBody>
+                    </CCard>
+                  </CCol>
+                  <CCol md={3}>
+                    <CCard>
+                      <CCardBody className="text-center">
+                        <h4 className="text-danger">{changesSummary.deleted_appointments}</h4>
+                        <p className="mb-0">Appuntamenti Cancellati</p>
+                      </CCardBody>
+                    </CCard>
+                  </CCol>
+                  <CCol md={3}>
+                    <CCard>
+                      <CCardBody className="text-center">
+                        <h4 className="text-warning">{changesSummary.modified_appointments}</h4>
+                        <p className="mb-0">Appuntamenti Modificati</p>
+                      </CCardBody>
+                    </CCard>
+                  </CCol>
+                </CRow>
+
+                {/* Cambiamenti per studio */}
+                {Object.keys(changesSummary.by_studio).length > 0 && (
+                  <div className="mb-4">
+                    <h6>Cambiamenti per Studio</h6>
+                    <CRow>
+                      {Object.entries(changesSummary.by_studio).map(([studio, count]) => (
+                        <CCol md={4} key={studio}>
+                          <CCard>
+                            <CCardBody className="text-center">
+                              <h5 className="text-info">Studio {studio}</h5>
+                              <h4>{count}</h4>
+                              <p className="mb-0">cambiamenti</p>
+                            </CCardBody>
+                          </CCard>
+                        </CCol>
+                      ))}
+                    </CRow>
+                  </div>
+                )}
+
+                {/* Cambiamenti recenti */}
+                {changesSummary.recent_changes.length > 0 && (
+                  <div>
+                    <h6>Cambiamenti Recenti</h6>
+                    <CTable responsive>
+                      <CTableHead>
+                        <CTableRow>
+                          <CTableHeaderCell>Data/Ora</CTableHeaderCell>
+                          <CTableHeaderCell>Tipo</CTableHeaderCell>
+                          <CTableHeaderCell>Paziente</CTableHeaderCell>
+                          <CTableHeaderCell>Studio</CTableHeaderCell>
+                          <CTableHeaderCell>Dettagli</CTableHeaderCell>
+                        </CTableRow>
+                      </CTableHead>
+                      <CTableBody>
+                        {changesSummary.recent_changes.map((change, index) => (
+                          <CTableRow key={index}>
+                            <CTableDataCell>
+                              {new Date(change.timestamp).toLocaleString('it-IT')}
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <CBadge color={
+                                change.change_type === 'new' ? 'success' :
+                                change.change_type === 'deleted' ? 'danger' :
+                                change.change_type === 'modified' ? 'warning' : 'info'
+                              }>
+                                {change.change_type === 'new' ? 'Nuovo' :
+                                 change.change_type === 'deleted' ? 'Cancellato' :
+                                 change.change_type === 'modified' ? 'Modificato' : 'Spostato'}
+                              </CBadge>
+                            </CTableDataCell>
+                            <CTableDataCell>{change.patient_name}</CTableDataCell>
+                            <CTableDataCell>Studio {change.studio}</CTableDataCell>
+                            <CTableDataCell>
+                              <small>{change.details || '-'}</small>
+                            </CTableDataCell>
+                          </CTableRow>
+                        ))}
+                      </CTableBody>
+                    </CTable>
+                  </div>
+                )}
+
+                {changesSummary.total_changes === 0 && (
+                  <div className="text-center py-4">
+                    <p className="text-muted">Nessun cambiamento rilevato negli ultimi 7 giorni</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <CSpinner color="primary" />
+                <p className="mt-2">Caricamento dati...</p>
+              </div>
+            )}
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="secondary" onClick={() => setShowChangesModal(false)}>
+              Chiudi
             </CButton>
           </CModalFooter>
         </CModal>

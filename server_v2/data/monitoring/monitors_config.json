@@ -7,7 +7,7 @@
     "interval_seconds": 30,
     "enabled": true,
     "auto_start": true,
-    "callback_functions": [],
+    "callback_functions": ["appointment_change"],
     "metadata": {}
   }
 }

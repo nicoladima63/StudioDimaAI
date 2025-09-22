@@ -1,5 +1,5 @@
 """
-🚀 DBF Processing Utilities for StudioDimaAI Server V2
+DBF Processing Utilities for StudioDimaAI Server V2
 =====================================================
 
 This module consolidates all duplicate DBF data processing patterns
@@ -605,7 +605,7 @@ class ChunkResult:
 
 class DBFOptimizedReader:
     """
-    🚀 Lettore DBF Enterprise ottimizzato per StudioDimaAI v2.
+    Lettore DBF Enterprise ottimizzato per StudioDimaAI v2.
     
     Caratteristiche:
     - Chunked reading per file >100MB con parallel processing
@@ -686,7 +686,7 @@ class DBFOptimizedReader:
             if cached_data:
                 execution_time = (time.time() - start_time) * 1000
                 self._record_metrics(appointments_path, len(cached_data), 0, execution_time, 0, True)
-                logger.info(f"🚀 Cache hit: {len(cached_data)} appointments for {month:02d}/{year}")
+                # logger.info(f"Cache hit: {len(cached_data)} appointments for {month:02d}/{year}")
                 return cached_data
             
             # Load con ottimizzazioni enterprise
@@ -706,7 +706,7 @@ class DBFOptimizedReader:
             execution_time = (time.time() - start_time) * 1000
             self._record_metrics(appointments_path, len(appointments), 0, execution_time, 0, False)
             
-            logger.info(f"Loaded {len(appointments)} appointments for {month:02d}/{year} in {execution_time:.2f}ms")
+            # logger.info(f"Loaded {len(appointments)} appointments for {month:02d}/{year} in {execution_time:.2f}ms")
             
             return appointments
             
@@ -722,12 +722,12 @@ class DBFOptimizedReader:
                                     studio_id: Optional[int],
                                     chunk_size: int) -> List[Dict[str, Any]]:
         """
-        🏭 Engine di caricamento enterprise con adaptive chunking.
+        Engine di caricamento enterprise con adaptive chunking.
         """
         
         # 1. Load patients con memory optimization
         patients_dict = self._load_patients_optimized(patients_path)
-        logger.debug(f"📋 Loaded {len(patients_dict)} patients")
+        # logger.debug(f"Loaded {len(patients_dict)} patients")
         
         # 2. Analyze file per chunking strategy
         file_info = self._get_file_info(appointments_path)
@@ -741,7 +741,7 @@ class DBFOptimizedReader:
             )
         else:
             # Large file: parallel chunked processing
-            logger.debug(f"📚 Large file detected: using parallel chunks ({file_info.record_count} records)")
+            # logger.debug(f"Large file detected: using parallel chunks ({file_info.record_count} records)")
             return self._read_appointments_parallel_chunks(
                 appointments_path, patients_dict, month, year, studio_id, chunk_size
             )
@@ -781,7 +781,7 @@ class DBFOptimizedReader:
             
             # Cache con TTL
             self._store_in_cache(cache_key, patients_dict)
-            logger.debug(f"Cached {len(patients_dict)} patients from {name_field}")
+            # logger.debug(f"Cached {len(patients_dict)} patients from {name_field}")
             
         except Exception as e:
             logger.error(f"Error loading patients: {e}")
@@ -852,7 +852,7 @@ class DBFOptimizedReader:
         file_info = self._get_file_info(appointments_path)
         total_chunks = (file_info.record_count + chunk_size - 1) // chunk_size
         
-        logger.info(f"🔄 Processing {file_info.record_count} records in {total_chunks} parallel chunks")
+        # logger.info(f"Processing {file_info.record_count} records in {total_chunks} parallel chunks")
         
         all_appointments = []
         
@@ -879,7 +879,7 @@ class DBFOptimizedReader:
                 try:
                     chunk_result = future.result()
                     chunk_results[chunk_id] = chunk_result
-                    logger.debug(f"Chunk {chunk_id}: {len(chunk_result.records)} records processed")
+                    # logger.debug(f"Chunk {chunk_id}: {len(chunk_result.records)} records processed")
                 except Exception as e:
                     logger.error(f"Chunk {chunk_id} failed: {e}")
                     # Empty result for failed chunk
@@ -892,7 +892,7 @@ class DBFOptimizedReader:
         for chunk_id in sorted(chunk_results.keys()):
             all_appointments.extend(chunk_results[chunk_id].records)
         
-        logger.info(f"Parallel processing completed: {len(all_appointments)} total appointments")
+        # logger.info(f"Parallel processing completed: {len(all_appointments)} total appointments")
         return all_appointments
     
     def _process_chunk_enterprise(self,
@@ -1065,7 +1065,7 @@ class DBFOptimizedReader:
     
     def _get_deleted_records_binary(self, file_path: str) -> set:
         """
-        🚀 Ultra-fast binary deleted record detection.
+        Ultra-fast binary deleted record detection.
         
         Performance: 100x più veloce della lettura record-by-record.
         """
@@ -1108,12 +1108,12 @@ class DBFOptimizedReader:
         # Cache result
         self._store_in_cache(cache_key, deleted_records)
         
-        logger.debug(f"🔍 Found {len(deleted_records)} deleted records in {os.path.basename(file_path)}")
+            # logger.debug(f"Found {len(deleted_records)} deleted records in {os.path.basename(file_path)}")
         return deleted_records
     
     def _get_file_info(self, file_path: str) -> DBFFileInfo:
         """
-        📊 Get DBF file info con caching intelligente.
+        Get DBF file info con caching intelligente.
         """
         
         file_mtime = os.path.getmtime(file_path)
@@ -1148,16 +1148,16 @@ class DBFOptimizedReader:
             # Cache for future use
             self.file_info_cache[file_path] = file_info
             
-            logger.debug(f"📊 File info cached: {record_count} records, {file_size/1024/1024:.1f}MB")
+            # logger.debug(f"File info cached: {record_count} records, {file_size/1024/1024:.1f}MB")
             return file_info
             
         except Exception as e:
-            logger.error(f"❌ Error reading file info: {e}")
+            logger.error(f"Error reading file info: {e}")
             raise DbfProcessingError(f"Cannot read DBF file info: {e}")
     
     def _get_dbf_path(self, filename: str) -> str:
         """
-        🗂️ Smart DBF path resolution usando config_manager con dev/prod support.
+        Smart DBF path resolution usando config_manager con dev/prod support.
         """
         try:
             config = get_config()
@@ -1197,16 +1197,16 @@ class DBFOptimizedReader:
                     f"Configured path: {path}, Mode: {config.get_mode()}"
                 )
             
-            logger.debug(f"🗂️ DBF path resolved ({config.get_mode()}): {filename} -> {path}")
+            # logger.debug(f"DBF path resolved ({config.get_mode()}): {filename} -> {path}")
             return path
             
         except Exception as e:
-            logger.error(f"❌ DBF path resolution failed: {e}")
+            logger.error(f"DBF path resolution failed: {e}")
             raise DbfProcessingError(f"Cannot resolve DBF path for {filename}: {e}")
     
     def _generate_cache_key(self, prefix: str, file_path: str, *args) -> str:
         """
-        🔑 Generate cache key con file mtime per auto-invalidation.
+        Generate cache key con file mtime per auto-invalidation.
         """
         components = [
             prefix,
@@ -1463,7 +1463,7 @@ def get_optimized_reader() -> DBFOptimizedReader:
 
 def get_appointments_fast(month: int, year: int, studio_id: Optional[int] = None) -> List[Dict[str, Any]]:
     """
-    🚀 Fast convenience function per appointments loading.
+    Fast convenience function per appointments loading.
     
     Replacement drop-in per la vecchia funzione, ma con performance 10x migliori.
     """

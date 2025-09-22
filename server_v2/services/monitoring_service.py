@@ -27,6 +27,7 @@ from core.config_manager import get_config
 from core.constants_v2 import DBF_TABLES
 from services.snapshot_manager import get_snapshot_manager
 from services.file_watcher import get_file_watcher
+from services.appointment_change_callback import appointment_change_callback
 from utils.dbf_utils import get_optimized_reader
 
 logger = logging.getLogger(__name__)
@@ -96,6 +97,9 @@ class MonitoringService:
         
         # Callback registry
         self.callback_registry: Dict[str, Callable] = {}
+        
+        # Registra callback predefinite
+        self.register_callback("appointment_change", appointment_change_callback)
         
         # Snapshot manager
         self.snapshot_manager = get_snapshot_manager()
@@ -386,7 +390,16 @@ class MonitoringService:
                         # logger.debug(f"Incremented change_count for {monitor_id}: {instance.change_count}")
                 
                 if updated_count > 0:
-                    logger.info(f"Incremented change_count for {updated_count} monitors of table {table_name}")
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    logger.info(f"Rilevato modifica alle ore {current_time} - {updated_count} monitor aggiornati per tabella {table_name}")
+
+                    # Esegui callback per i monitor attivi
+                    for monitor_id, instance in self.active_monitors.items():
+                        if instance.config.table_name == table_name and instance.status == MonitorStatus.RUNNING:
+                            if instance.config.callback_functions:
+                                logger.info(f"Eseguendo callback per monitor {monitor_id}")
+                                self._execute_callbacks(instance.config.callback_functions, [], instance.config)
+
                     return True
                 else:
                     logger.warning(f"No active monitors found for table {table_name}")
