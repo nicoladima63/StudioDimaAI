@@ -6,6 +6,7 @@ Replica la logica di visualizza_ricette() da V1 ricetta_service.py
 import os
 import ssl
 import requests
+from requests.auth import HTTPBasicAuth
 import urllib3
 import base64
 import xml.etree.ElementTree as ET
@@ -255,6 +256,200 @@ class RicetteTsService:
             import traceback
             self.logger.error(f"Traceback: {traceback.format_exc()}")
             return {'errore_parsing': str(e)}
+
+    def genera_id_sessione(self) -> dict:
+        """
+        Genera un nuovo ID-SESSIONE usando l'operazione 'create'
+        """
+        try:
+            self.logger.info("Richiedo generazione nuovo ID-SESSIONE...")
+            
+            # URL del web service per create (stesso endpoint di checkToken)
+            url = "https://ricettabiancaservice.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service"
+            
+            # Cifra il pincode
+            pin_cifrato = self._encrypt_pincode(self.pincode)
+            
+            # SOAP request per create
+            soap_request = f"""<?xml version="1.0" encoding="UTF-8"?>
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                                    xmlns:auth="http://authenticationservice.ws.ts.sanita.finanze.it/">
+                    <soapenv:Header/>
+                    <soapenv:Body>
+                        <auth:create>
+                            <pinCode>{pin_cifrato}</pinCode>
+                            <cfUtente>{self.cf_medico}</cfUtente>
+                            <codRegione>{self.regione}</codRegione>
+                            <codAslAo>{self.asl}</codAslAo>
+                            <codiceStruttura></codiceStruttura>
+                        </auth:create>
+                    </soapenv:Body>
+                </soapenv:Envelope>"""
+            
+            # Headers
+            headers = {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': '""'
+            }
+            
+            # Chiamata al web service con HTTPBasicAuth - usando credenziali esistenti
+            response = requests.post(
+                url,
+                data=soap_request,
+                headers=headers,
+                auth=HTTPBasicAuth(self.cf_medico, self.password),
+                timeout=30
+            )
+            
+            self.logger.info(f"Genera ID-SESSIONE - Status Code: {response.status_code}")
+            self.logger.info(f"Genera ID-SESSIONE - Response: {response.text[:500]}...")
+            
+            if response.status_code == 200:
+                try:
+                    root = ET.fromstring(response.text)
+                    
+                    # Parsing elementare dell'ID-SESSIONE
+                    ns = {"soapenv": "http://schemas.xmlsoap.org/soap/envelope/"}
+                    body = root.find("soapenv:Body", ns)
+                    id_node = body.find(".//idSessione") if body is not None else None
+                    
+                    if id_node is not None and id_node.text:
+                        id_sessione = id_node.text
+                        self.logger.info(f"ID-SESSIONE generato: {id_sessione[:20]}...")
+                        return {
+                            'success': True,
+                            'id_sessione': id_sessione,
+                            'message': 'ID-SESSIONE generato con successo'
+                        }
+                    
+                    # Se non trova l'ID-SESSIONE, cerca errori
+                    error_elements = root.findall('.//error') + root.findall('.//fault') + root.findall('.//errore')
+                    
+                    if error_elements:
+                        error_msg = error_elements[0].text if error_elements[0].text else "Errore sconosciuto"
+                        return {
+                            'success': False,
+                            'error': error_msg,
+                            'response': response.text
+                        }
+                    else:
+                        return {
+                            'success': False,
+                            'error': 'ID-SESSIONE non trovato nella risposta',
+                            'response': response.text
+                        }
+                        
+                except ET.ParseError as e:
+                    return {
+                        'success': False,
+                        'error': f'Errore parsing risposta: {e}',
+                        'response': response.text
+                    }
+            else:
+                return {
+                    'success': False,
+                    'error': f'HTTP Error {response.status_code}: {response.text}',
+                    'response': response.text
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore generazione ID-SESSIONE: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'response': None
+            }
+
+    def check_id_sessione(self, id_sessione: str) -> dict:
+        """
+        Verifica se un ID-SESSIONE è ancora valido usando l'operation checkToken
+        """
+        try:
+            self.logger.info(f"Verifico validità ID-SESSIONE: {id_sessione[:20]}...")
+            
+            # URL corretto per checkToken
+            url = "https://ricettabiancaservice.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service/checkToken"
+            
+            # Cifra il pincode per la richiesta
+            pin_cifrato = self._encrypt_pincode(self.pincode)
+            
+            # SOAP request per checkToken - usando namespace corretto
+            soap_request = f"""<?xml version="1.0" encoding="UTF-8"?>
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                                xmlns:auth="http://authenticationservice.ws.ts.sanita.finanze.it/">
+                <soapenv:Header/>
+                <soapenv:Body>
+                    <auth:checkToken>
+                        <pinCode>{pin_cifrato}</pinCode>
+                        <cfUtente>{self.cf_medico}</cfUtente>
+                        <codRegione>{self.regione}</codRegione>
+                        <codAslAo>{self.asl}</codAslAo>
+                        <codiceStruttura></codiceStruttura>
+                        <token>{id_sessione}</token>
+                    </auth:checkToken>
+                </soapenv:Body>
+                </soapenv:Envelope>"""
+            
+            # Headers per checkToken
+            headers = {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': 'checkToken'
+            }
+            
+            # Chiamata al web service con HTTPBasicAuth - usando credenziali esistenti
+            response = requests.post(
+                url,
+                data=soap_request,
+                headers=headers,
+                auth=HTTPBasicAuth(self.cf_medico, self.password),
+                timeout=30
+            )
+            
+            self.logger.info(f"Check ID-SESSIONE - Status Code: {response.status_code}")
+            self.logger.info(f"Check ID-SESSIONE - Response: {response.text[:500]}...")
+            
+            if response.status_code == 200:
+                # Parse della risposta per verificare se il token è valido
+                try:
+                    root = ET.fromstring(response.text)
+                    
+                    # Cerca elementi di errore o successo nella risposta
+                    error_elements = root.findall('.//error') + root.findall('.//fault') + root.findall('.//errore')
+                    
+                    if error_elements:
+                        error_msg = error_elements[0].text if error_elements[0].text else "Errore sconosciuto"
+                        return {
+                            'valid': False,
+                            'error': error_msg,
+                            'response': response.text
+                        }
+                    else:
+                        return {
+                            'valid': True,
+                            'message': 'ID-SESSIONE valido',
+                            'response': response.text
+                        }
+                        
+                except ET.ParseError as e:
+                    return {
+                        'valid': False,
+                        'error': f'Errore parsing risposta: {e}',
+                        'response': response.text
+                    }
+            else:
+                return {
+                    'valid': False,
+                    'error': f'HTTP Error {response.status_code}: {response.text}',
+                    'response': response.text
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Errore check ID-SESSIONE: {e}")
+            return {
+                'valid': False,
+                'error': str(e),
+                'response': None
+            }
 
     def _get_current_env(self) -> str:
         """Ottiene l'ambiente corrente - SEMPRE PRODUZIONE per visualizzazione"""
@@ -749,7 +944,7 @@ class RicetteTsService:
     
     
     #sezione visualizza ricetta
-    def get_ricetta(self, cf_paziente: str, nrbe: str = None) -> dict:
+    def get_ricetta(self, cf_paziente: str, nrbe: str = None, id_sessione: str = None) -> dict:
         """
         FUNZIONE PER VISUALIZZARE RICETTE
         Parametri: cf_paziente (obbligatorio), nrbe (opzionale)
@@ -783,15 +978,25 @@ class RicetteTsService:
             </soapenv:Envelope>
             '''
             
-            # Usa ID-SESSIONE statico come nel V1 che funziona
-            token_2fa = self.id_sessione
-            self.logger.info(f"ID-SESSIONE usato per get_ricetta: {token_2fa}")
+            # ID-SESSIONE è obbligatorio - se non fornito, errore
+            if not id_sessione:
+                return {
+                    'success': False,
+                    'error': 'ID_SESSIONE_MANCANTE',
+                    'message': 'ID-SESSIONE obbligatorio. Inserire un ID-SESSIONE valido nel campo del frontend.',
+                    'ricetta_data': {},
+                    'response_xml': '',
+                    'http_status': 400
+                }
+            
+            token_2fa = f"Bearer {id_sessione}"
+            self.logger.info(f"ID-SESSIONE usato per get_ricetta: {token_2fa[:20]}...")
             
             # Headers con token 2FA dinamico - IDENTICO al ricetta_tester.py
             headers = {
                 'Content-Type': 'text/xml; charset=utf-8',
                 'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
-                'Authorization2F': self.id_sessione,
+                'Authorization2F': token_2fa,
                 'SOAPAction': "http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"
             }
             
@@ -1006,25 +1211,25 @@ class RicetteTsService:
         
         # Template SOAP DINAMICO per visualizzazione ricette con data, CF assistito e NRE opzionale
         soap_template = f'''<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
-                  xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
-                  xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
-    <soapenv:Header/>
-    <soapenv:Body>
-        <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-            <vis:pinCode>{pincode_cifrato}</vis:pinCode>
-            <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
-            <vis:cfMedico>{self.cf_medico}</vis:cfMedico>'''
-        
-        # Aggiungi NRE se specificato
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
+                            xmlns:vis="http://visualizzaprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" 
+                            xmlns:tip="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it">
+                <soapenv:Header/>
+                <soapenv:Body>
+                    <vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+                        <vis:pinCode>{pincode_cifrato}</vis:pinCode>
+                        <vis:codicePaziente>{cf_assistito_cifrato}</vis:codicePaziente>
+                        <vis:cfMedico>{self.cf_medico}</vis:cfMedico>'''
+                
+                # Aggiungi NRE se specificato
         if nre:
-            soap_template += f'''
-            <vis:nrbe>{nre}</vis:nrbe>'''
-        
+                    soap_template += f'''
+                    <vis:nrbe>{nre}</vis:nrbe>'''
+                
         soap_template += '''
-        </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
-    </soapenv:Body>
-</soapenv:Envelope>'''
+                    </vis:VisualizzaPrescrittoRicettaBiancaRichiesta>
+                </soapenv:Body>
+            </soapenv:Envelope>'''
         
         return soap_template
 

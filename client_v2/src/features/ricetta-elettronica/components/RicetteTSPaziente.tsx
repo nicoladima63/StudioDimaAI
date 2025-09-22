@@ -157,7 +157,8 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
   const [filtri, setFiltri] = useState({
     dataDa: '',
     dataA: '',
-    nre: ''
+    nre: '',
+    idSessione: ''
   });
 
   // Filtra ricette lato frontend solo per ricerca locale
@@ -188,6 +189,11 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
       setError('❌ Seleziona un paziente per cercare le ricette');
       return;
     }
+    
+    if (!filtri.idSessione.trim()) {
+      setError('❌ ID-SESSIONE obbligatorio. Inserire un ID-SESSIONE valido dal portale.');
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -197,7 +203,8 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
       
       const response = await getRicetteFromTS({
         cf_assistito: pazienteSelezionato.codice_fiscale,
-        nre: filtri.nre || undefined
+        nre: filtri.nre || undefined,
+        id_sessione: filtri.idSessione || undefined
       });
       
       // Salva XML del Sistema TS per debug - FORMATTATO
@@ -263,7 +270,8 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
     setFiltri({
       dataDa: '',
       dataA: '',
-      nre: ''
+      nre: '',
+      idSessione: ''
     });
     // Ricarica senza filtri
     if (pazienteSelezionato?.codice_fiscale) {
@@ -412,7 +420,7 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
               {/* Filtri di ricerca avanzata */}
               <CForm className="mb-4">
                 <CRow className="mb-3">
-                  <CColForm md={3}>
+                  <CColForm md={2}>
                     <CFormLabel>📅 Data da</CFormLabel>
                     <CFormInput
                       type="date"
@@ -420,7 +428,7 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                       onChange={(e) => handleFiltriChange('dataDa', e.target.value)}
                     />
                   </CColForm>
-                  <CColForm md={3}>
+                  <CColForm md={2}>
                     <CFormLabel>📅 Data a</CFormLabel>
                     <CFormInput
                       type="date"
@@ -428,7 +436,7 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                       onChange={(e) => handleFiltriChange('dataA', e.target.value)}
                     />
                   </CColForm>
-                  <CColForm md={3}>
+                  <CColForm md={2}>
                     <CFormLabel>🏷️ NRE specifico</CFormLabel>
                     <CFormInput
                       placeholder="Inserisci NRE..."
@@ -436,7 +444,17 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                       onChange={(e) => handleFiltriChange('nre', e.target.value)}
                     />
                   </CColForm>
-                  <CColForm md={3} className="d-flex align-items-end">
+                  <CColForm md={4}>
+                    <CFormLabel>🔑 ID-SESSIONE <span className="text-danger">*</span></CFormLabel>
+                    <CFormInput
+                      placeholder="Inserisci ID-SESSIONE..."
+                      value={filtri.idSessione}
+                      onChange={(e) => handleFiltriChange('idSessione', e.target.value)}
+                      required
+                    />
+                    <small className="text-muted">Obbligatorio - Inserire ID-SESSIONE valido dal portale</small>
+                  </CColForm>
+                  <CColForm md={2} className="d-flex align-items-end">
                     <div>
                       <CButton color="primary" size="sm" onClick={handleCerca} className="me-2">
                         🔍 Cerca

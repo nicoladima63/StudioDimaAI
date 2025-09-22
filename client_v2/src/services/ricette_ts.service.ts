@@ -446,6 +446,7 @@ class RicettaApiService {
     cf_medico_reale?: string;  // CF medico reale per test
     use_production?: boolean;  // Flag per usare produzione
     test_ricerca_specifica?: boolean;  // Flag test
+    id_sessione?: string;  // ID-SESSIONE personalizzato
   }): Promise<ApiResponse<any[]>> {
     try {
       const queryParams = new URLSearchParams();
@@ -460,6 +461,7 @@ class RicettaApiService {
       if (params?.cf_medico_reale) queryParams.append('cf_medico_reale', params.cf_medico_reale);
       if (params?.use_production) queryParams.append('use_production', 'true');
       if (params?.test_ricerca_specifica) queryParams.append('test_ricerca_specifica', 'true');
+      if (params?.id_sessione) queryParams.append('id_sessione', params.id_sessione);
       
       const queryString = queryParams.toString();
       const url = `/ricetta/ts/list${queryString ? `?${queryString}` : ''}`;

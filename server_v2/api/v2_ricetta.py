@@ -360,6 +360,74 @@ def get_environment_info():
             'message': f'Errore informazioni ambiente: {e}'
         }), 500
 
+@ricetta_bp.route("/ricetta/ts/check-id-sessione", methods=['POST'])
+# @jwt_required()  # Temporaneamente rimosso per test
+def check_id_sessione():
+    """Test endpoint per verificare validità ID-SESSIONE"""
+    try:
+        data = request.get_json()
+        id_sessione = data.get('id_sessione')
+        
+        if not id_sessione:
+            return jsonify({
+                'success': False,
+                'error': 'ID-SESSIONE richiesto'
+            }), 400
+        
+        # Usa il servizio per verificare l'ID-SESSIONE
+        from services.ricette_ts_service import RicetteTsService
+        ts_service = RicetteTsService()
+        
+        result = ts_service.check_id_sessione(id_sessione)
+        
+        # Se c'è un errore nel result, success deve essere False
+        if result.get('error'):
+            return jsonify({
+                'success': False,
+                'result': result
+            }), 200
+        else:
+            return jsonify({
+                'success': True,
+                'result': result
+            }), 200
+        
+    except Exception as e:
+        logger.error(f"Errore check ID-SESSIONE: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@ricetta_bp.route("/ricetta/ts/genera-id-sessione", methods=['POST'])
+# @jwt_required()  # Temporaneamente rimosso per test
+def genera_id_sessione():
+    """Endpoint per generare nuovo ID-SESSIONE"""
+    try:
+        from services.ricette_ts_service import RicetteTsService
+        ts_service = RicetteTsService()
+        
+        result = ts_service.genera_id_sessione()
+        
+        # Se c'è un errore nel result, success deve essere False
+        if result.get('error'):
+            return jsonify({
+                'success': False,
+                'result': result
+            }), 200
+        else:
+            return jsonify({
+                'success': True,
+                'result': result
+            }), 200
+            
+    except Exception as e:
+        logger.error(f"Errore generazione ID-SESSIONE: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @ricetta_bp.route("/ricetta/ts/list", methods=['GET'])
 @jwt_required()  # Temporaneamente rimosso per test
 def list_ricette_from_ts():
@@ -377,11 +445,12 @@ def list_ricette_from_ts():
         nre = request.args.get('nre')  # NRE specifico da cercare
         cf_medico_reale = request.args.get('cf_medico_reale')  # CF medico per produzione
         use_production = request.args.get('use_production') == 'true'  # Flag produzione
+        id_sessione = request.args.get('id_sessione')  # ID-SESSIONE personalizzato
                             
         try:
             # Usa la funzione get_ricetta con parametri corretti
             ts_response = ricette_ts_service.get_ricetta(
-                cf_paziente=cf_assistito, nrbe=nre
+                cf_paziente=cf_assistito, nrbe=nre, id_sessione=id_sessione
             )
             if ts_response.get('success'):
                 # Controlla se ci sono effettivamente dati della ricetta
