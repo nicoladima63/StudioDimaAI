@@ -5,7 +5,7 @@ Gestisce environment switching e configurazioni SSL
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional
-from ..core.config import get_config_value
+from .config import get_config_value
 
 class RicettaConfig:
     """Configurazione per ricetta elettronica"""

@@ -48,7 +48,7 @@ class AppuntaFileHandler(FileSystemEventHandler):
         
         self.last_trigger = current_time
         
-        # logger.info(f"File modified: {Path(event.src_path).name}")
+        logger.info(f"File modified: {Path(event.src_path).name}")
         
         # Chiama callback dopo un piccolo delay
         threading.Timer(1.0, self.callback).start()
@@ -112,7 +112,7 @@ class FileWatcher:
             self.is_running = True
             
             start_time = datetime.now().strftime("%H:%M:%S")
-            # logger.info(f"FileWatcher started monitoring: {watch_dir} at {start_time}")
+            logger.info(f"FileWatcher started monitoring: {watch_dir} at {start_time}")
             return True
             
         except Exception as e:

@@ -346,15 +346,11 @@ class EnvironmentManager:
     
     def _get_ricetta_config(self, environment: Environment) -> Dict[str, Any]:
         """Configurazione ricetta elettronica - integrazione con sistema esistente"""
-        # FIX: Import più sicuro per evitare circular imports
         try:
-            # Import dinamico per evitare circular imports
-            import importlib
-            ricetta_config_module = importlib.import_module('server_v2.config.ricetta_config')
-            ricetta_config = ricetta_config_module.ricetta_config
+            from .ricetta_config import ricetta_config
             return ricetta_config.get_full_config(environment.value)
-        except (ImportError, AttributeError) as e:
-            logger.warning(f"Sistema ricetta non disponibile: {e}, uso configurazione base")
+        except ImportError:
+            logger.warning("Sistema ricetta non disponibile, uso configurazione base")
             return self._get_ricetta_config_fallback(environment)
     
     def _get_ricetta_config_fallback(self, environment: Environment) -> Dict[str, Any]:

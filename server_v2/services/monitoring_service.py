@@ -197,7 +197,7 @@ class MonitoringService:
                 start_time = datetime.now()
                 
                 # 1. Usa percorso già risolto dall'API
-                # logger.info(f"Avviato servizio monitoraggio alle {start_time.strftime('%H:%M:%S')} - File: {config.file_path}")
+                logger.info(f"Avviato servizio monitoraggio alle {start_time.strftime('%H:%M:%S')} - File: {config.file_path}")
                 
                 # 2. Crea snapshot iniziale
                 snapshot_success = self.snapshot_manager.start_monitoring(config.table_name, config.file_path)
@@ -386,7 +386,7 @@ class MonitoringService:
                         # logger.debug(f"Incremented change_count for {monitor_id}: {instance.change_count}")
                 
                 if updated_count > 0:
-                    # logger.info(f"Incremented change_count for {updated_count} monitors of table {table_name}")
+                    logger.info(f"Incremented change_count for {updated_count} monitors of table {table_name}")
                     return True
                 else:
                     logger.warning(f"No active monitors found for table {table_name}")
@@ -515,7 +515,8 @@ class MonitoringService:
                         'last_change': instance.last_change,
                         'change_count': instance.change_count,
                         'error_count': instance.error_count,
-                        'created_at': instance.created_at
+                        'created_at': instance.created_at,
+                        'started_at': instance.started_at
                     }
                 else:
                     status_info = {

@@ -91,9 +91,13 @@ const MonitoringSettings: React.FC = () => {
   // Stati per azioni
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Carica dati iniziali
+  // Carica dati iniziali e polling automatico
   useEffect(() => {
     loadData();
+    
+    // Polling ogni 30 secondi per aggiornare i dati
+    const interval = setInterval(loadData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadData = async () => {

@@ -23,9 +23,6 @@ from typing import Optional
 # Add current directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from app_v2 import create_app_v2
-from config.flask_config import get_config
-
 
 def parse_arguments():
     """Parse command line arguments."""
@@ -234,6 +231,10 @@ def main():
         
         # Setup logging first
         setup_logging(args)
+        
+        # Import modules AFTER logging is configured
+        from app_v2 import create_app_v2
+        from config.flask_config import get_config
         
         # Set up environment variables
         setup_environment_variables(args)

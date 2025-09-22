@@ -76,7 +76,7 @@ class SnapshotManager:
         # Tabelle monitorate (dinamiche)
         self.monitored_tables: Set[str] = set()
         
-        # logger.info(f"SnapshotManager initialized: dir={self.snapshot_dir}")
+        logger.info(f"SnapshotManager initialized: dir={self.snapshot_dir}")
     
     def start_monitoring(self, table_name: str, file_path: str = None) -> bool:
         """
@@ -100,7 +100,7 @@ class SnapshotManager:
                 return True
             
             try:
-                # logger.info(f"Starting monitoring for table: {table_name}")
+                logger.info(f"Starting monitoring for table: {table_name}")
                 
                 # Aggiungi alla lista monitorate
                 self.monitored_tables.add(table_name)
@@ -110,6 +110,7 @@ class SnapshotManager:
                 
                 if success:
                     start_time = datetime.now().strftime("%H:%M:%S")
+                    print(f"✅ Monitor avviato per {table_name} alle {start_time}")
                     # logger.info(f"Monitoring started for {table_name} at {start_time}")
                     return True
                 else:
