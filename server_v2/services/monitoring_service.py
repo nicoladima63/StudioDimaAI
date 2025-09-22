@@ -448,6 +448,7 @@ class MonitoringService:
                 # logger.info(f"Loaded {len(self.saved_configs)} monitor configurations")
             else:
                 # logger.info("No saved configurations found")
+                pass
             
         except Exception as e:
             logger.error(f"Error loading saved configs: {e}")

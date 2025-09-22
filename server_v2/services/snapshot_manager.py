@@ -211,6 +211,7 @@ class SnapshotManager:
                     
                     if success:
                         # logger.debug(f"Snapshot created for {table_name}")
+                        pass
                     else:
                         logger.error(f"Failed to create snapshot for {table_name}")
                         
@@ -246,6 +247,7 @@ class SnapshotManager:
                         
                         if success:
                             # logger.info(f"Snapshot loaded for {table}")
+                            pass
                         else:
                             logger.error(f"Failed to load snapshot for {table}")
                     else:
