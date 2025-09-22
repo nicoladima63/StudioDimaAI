@@ -112,7 +112,7 @@ class MonitoringService:
         # Carica configurazioni esistenti
         self._load_saved_configs()
         
-        logger.info(f"MonitoringService initialized: {len(self.saved_configs)} saved configs")
+        # logger.info(f"MonitoringService initialized: {len(self.saved_configs)} saved configs")
     
     def create_monitor(self,
                        table_name: str,
@@ -168,7 +168,7 @@ class MonitoringService:
             if auto_start:
                 self.start_monitor(monitor_id)
             
-            logger.info(f"Created monitor {monitor_id} for table {table_name}")
+            # logger.info(f"Created monitor {monitor_id} for table {table_name}")
             return monitor_id
     
     def start_monitor(self, monitor_id: str) -> bool:
@@ -197,7 +197,7 @@ class MonitoringService:
                 start_time = datetime.now()
                 
                 # 1. Usa percorso già risolto dall'API
-                logger.info(f"Avviato servizio monitoraggio alle {start_time.strftime('%H:%M:%S')} - File: {config.file_path}")
+                # logger.info(f"Avviato servizio monitoraggio alle {start_time.strftime('%H:%M:%S')} - File: {config.file_path}")
                 
                 # 2. Crea snapshot iniziale
                 snapshot_success = self.snapshot_manager.start_monitoring(config.table_name, config.file_path)
@@ -227,7 +227,7 @@ class MonitoringService:
                 
                 # 4. Notifica avvio con timestamp
                 start_time_str = start_time.strftime("%H:%M:%S")
-                logger.info(f"Servizio monitoraggio avviato alle {start_time_str}")
+                # logger.info(f"Servizio monitoraggio avviato alle {start_time_str}")
                 
                 return True
                 
@@ -265,9 +265,9 @@ class MonitoringService:
                 # Se non ci sono più monitor attivi, ferma il file watcher
                 if not self.active_monitors:
                     self.file_watcher.stop()
-                    logger.info("Stopped file watcher - no active monitors")
+                    # logger.info("Stopped file watcher - no active monitors")
                 
-                logger.info(f"Servizio monitoraggio fermato alle {datetime.now().strftime('%H:%M:%S')}")
+                # logger.info(f"Servizio monitoraggio fermato alle {datetime.now().strftime('%H:%M:%S')}")
                 return True
                 
             except Exception as e:
@@ -281,7 +281,7 @@ class MonitoringService:
                 return False
             
             self.active_monitors[monitor_id].status = MonitorStatus.PAUSED
-            logger.info(f"Paused monitor {monitor_id}")
+            # logger.info(f"Paused monitor {monitor_id}")
             return True
     
     def resume_monitor(self, monitor_id: str) -> bool:
@@ -291,7 +291,7 @@ class MonitoringService:
                 return False
             
             self.active_monitors[monitor_id].status = MonitorStatus.RUNNING
-            logger.info(f"Resumed monitor {monitor_id}")
+            # logger.info(f"Resumed monitor {monitor_id}")
             return True
     
     def delete_monitor(self, monitor_id: str) -> bool:
@@ -314,7 +314,7 @@ class MonitoringService:
                 del self.saved_configs[monitor_id]
                 self._delete_config_file(monitor_id)
             
-            logger.info(f"Deleted monitor {monitor_id}")
+            # logger.info(f"Deleted monitor {monitor_id}")
             return True
     
     def get_monitor_status(self, monitor_id: str = None) -> Dict[str, Any]:
@@ -383,10 +383,10 @@ class MonitoringService:
                         instance.change_count += 1
                         instance.last_change = current_time
                         updated_count += 1
-                        logger.debug(f"Incremented change_count for {monitor_id}: {instance.change_count}")
+                        # logger.debug(f"Incremented change_count for {monitor_id}: {instance.change_count}")
                 
                 if updated_count > 0:
-                    logger.info(f"Incremented change_count for {updated_count} monitors of table {table_name}")
+                    # logger.info(f"Incremented change_count for {updated_count} monitors of table {table_name}")
                     return True
                 else:
                     logger.warning(f"No active monitors found for table {table_name}")
@@ -405,7 +405,7 @@ class MonitoringService:
             callback: Funzione da chiamare
         """
         self.callback_registry[name] = callback
-        logger.info(f"Registered callback: {name}")
+        # logger.info(f"Registered callback: {name}")
     
     # Worker di controllo periodico rimossi - ora usa FileWatcher
     
@@ -445,9 +445,9 @@ class MonitoringService:
                         logger.warning(f"Error loading config for {monitor_id}: {e}")
                         continue
                 
-                logger.info(f"Loaded {len(self.saved_configs)} monitor configurations")
+                # logger.info(f"Loaded {len(self.saved_configs)} monitor configurations")
             else:
-                logger.info("No saved configurations found")
+                # logger.info("No saved configurations found")
             
         except Exception as e:
             logger.error(f"Error loading saved configs: {e}")

@@ -76,7 +76,7 @@ class SnapshotManager:
         # Tabelle monitorate (dinamiche)
         self.monitored_tables: Set[str] = set()
         
-        logger.info(f"SnapshotManager initialized: dir={self.snapshot_dir}")
+        # logger.info(f"SnapshotManager initialized: dir={self.snapshot_dir}")
     
     def start_monitoring(self, table_name: str, file_path: str = None) -> bool:
         """
@@ -96,11 +96,11 @@ class SnapshotManager:
         
         with self.lock:
             if table_name in self.monitored_tables:
-                logger.info(f"Table {table_name} already being monitored")
+                # logger.info(f"Table {table_name} already being monitored")
                 return True
             
             try:
-                logger.info(f"Starting monitoring for table: {table_name}")
+                # logger.info(f"Starting monitoring for table: {table_name}")
                 
                 # Aggiungi alla lista monitorate
                 self.monitored_tables.add(table_name)
@@ -110,7 +110,7 @@ class SnapshotManager:
                 
                 if success:
                     start_time = datetime.now().strftime("%H:%M:%S")
-                    logger.info(f"Monitoring started for {table_name} at {start_time}")
+                    # logger.info(f"Monitoring started for {table_name} at {start_time}")
                     return True
                 else:
                     # Rimuovi dalla lista se fallisce
@@ -143,7 +143,7 @@ class SnapshotManager:
                 self.monitored_tables.discard(table_name)
                 
                 # Mantieni snapshot in memoria per recovery
-                logger.info(f"Monitoring stopped for {table_name}")
+                # logger.info(f"Monitoring stopped for {table_name}")
                 return True
                 
             except Exception as e:
@@ -166,7 +166,7 @@ class SnapshotManager:
                 return False
             
             try:
-                logger.info(f"Updating snapshot for {table_name}")
+                # logger.info(f"Updating snapshot for {table_name}")
                 
                 # Recupera file_path dallo snapshot esistente
                 existing_snapshot = self.snapshots.get(table_name)
@@ -180,7 +180,7 @@ class SnapshotManager:
                 success = self._create_table_snapshot(table_name, file_path)
                 
                 if success:
-                    logger.info(f"Snapshot updated for {table_name}")
+                    # logger.info(f"Snapshot updated for {table_name}")
                     return True
                 else:
                     logger.error(f"Failed to update snapshot for {table_name}")
@@ -202,7 +202,7 @@ class SnapshotManager:
         with self.lock:
             for table_name in self.monitored_tables:
                 try:
-                    logger.info(f"Creating initial snapshot for table: {table_name}")
+                    # logger.info(f"Creating initial snapshot for table: {table_name}")
                     
                     # Recupera file_path da ConfigManager
                     file_path = self.config.get_dbf_path(table_name)
@@ -210,7 +210,7 @@ class SnapshotManager:
                     results[table_name] = success
                     
                     if success:
-                        logger.debug(f"Snapshot created for {table_name}")
+                        # logger.debug(f"Snapshot created for {table_name}")
                     else:
                         logger.error(f"Failed to create snapshot for {table_name}")
                         
@@ -240,16 +240,16 @@ class SnapshotManager:
                     snapshot_file = self.snapshot_dir / f"{table}_snapshot.json"
                     
                     if snapshot_file.exists():
-                        logger.info(f"Loading existing snapshot for {table}")
+                        # logger.info(f"Loading existing snapshot for {table}")
                         success = self._load_table_snapshot(table, snapshot_file)
                         results[table] = success
                         
                         if success:
-                            logger.info(f"Snapshot loaded for {table}")
+                            # logger.info(f"Snapshot loaded for {table}")
                         else:
                             logger.error(f"Failed to load snapshot for {table}")
                     else:
-                        logger.info(f"No existing snapshot for {table}")
+                        # logger.info(f"No existing snapshot for {table}")
                         results[table] = False
                         
                 except Exception as e:
@@ -338,7 +338,7 @@ class SnapshotManager:
                         record_dict[field] = value
                 records.append(record_dict)
             
-            logger.debug(f"Read {len(records)} records from APPUNTA.DBF")
+            # logger.debug(f"Read {len(records)} records from APPUNTA.DBF")
             return records
             
         except Exception as e:
@@ -369,7 +369,7 @@ class SnapshotManager:
             file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path)).isoformat()
             
             # Leggi tutti i record
-            logger.debug(f"Reading all records from {file_path}")
+            # logger.debug(f"Reading all records from {file_path}")
             
             # Leggi i record dal file DBF
             records_data = self._read_appunta_only(table_name, file_path)
@@ -402,7 +402,7 @@ class SnapshotManager:
             self.snapshots[table_name] = snapshot
             self._save_table_snapshot(table_name)
             
-            logger.info(f"Created snapshot for {table_name}: {len(snapshot_records)} records")
+            # logger.info(f"Created snapshot for {table_name}: {len(snapshot_records)} records")
             return True
             
         except Exception as e:
@@ -517,7 +517,7 @@ class SnapshotManager:
                         logger.warning(f"Error reading patient record: {e}")
                         continue
             
-            logger.info(f"Read {len(records)} patient records from {file_path}")
+            # logger.info(f"Read {len(records)} patient records from {file_path}")
             return records
             
         except Exception as e:

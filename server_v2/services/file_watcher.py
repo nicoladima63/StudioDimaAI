@@ -48,7 +48,7 @@ class AppuntaFileHandler(FileSystemEventHandler):
         
         self.last_trigger = current_time
         
-        logger.info(f"File modified: {Path(event.src_path).name}")
+        # logger.info(f"File modified: {Path(event.src_path).name}")
         
         # Chiama callback dopo un piccolo delay
         threading.Timer(1.0, self.callback).start()
@@ -66,7 +66,7 @@ class FileWatcher:
         self.snapshot_manager = get_snapshot_manager()
         self.change_callback = None  # Callback per notificare cambiamenti
         
-        logger.info("FileWatcher initialized")
+        # logger.info("FileWatcher initialized")
     
     def set_change_callback(self, callback: Callable[[str], None]):
         """
@@ -76,7 +76,7 @@ class FileWatcher:
             callback: Funzione che riceve table_name come parametro
         """
         self.change_callback = callback
-        logger.debug("Change callback set for FileWatcher")
+        # logger.debug("Change callback set for FileWatcher")
     
     def start(self, file_path: str = None) -> bool:
         """
@@ -112,7 +112,7 @@ class FileWatcher:
             self.is_running = True
             
             start_time = datetime.now().strftime("%H:%M:%S")
-            logger.info(f"FileWatcher started monitoring: {watch_dir} at {start_time}")
+            # logger.info(f"FileWatcher started monitoring: {watch_dir} at {start_time}")
             return True
             
         except Exception as e:
@@ -135,7 +135,7 @@ class FileWatcher:
             self.observer.join()
             self.is_running = False
             
-            logger.info("FileWatcher stopped")
+            # logger.info("FileWatcher stopped")
             return True
             
         except Exception as e:
@@ -147,14 +147,14 @@ class FileWatcher:
         Callback chiamato quando il file viene modificato.
         """
         try:
-            logger.info("File change detected, updating snapshots...")
+            # logger.info("File change detected, updating snapshots...")
             
             # Aggiorna snapshot per tutte le tabelle monitorate
             monitored_tables = self.snapshot_manager.monitored_tables
             for table_name in monitored_tables:
                 success = self.snapshot_manager.update_snapshot(table_name)
                 if success:
-                    logger.info(f"Snapshot updated for {table_name}")
+                    # logger.info(f"Snapshot updated for {table_name}")
                     
                     # Notifica il cambiamento tramite callback
                     if self.change_callback:
