@@ -27,7 +27,7 @@ from core.config_manager import get_config
 from core.constants_v2 import DBF_TABLES
 from services.snapshot_manager import get_snapshot_manager
 from services.file_watcher import get_file_watcher
-from services.appointment_change_callback import appointment_change_callback
+# Callback per appuntamenti rimossa - ora usa sincronizzazione notturna
 from utils.dbf_utils import get_optimized_reader
 
 logger = logging.getLogger(__name__)
@@ -98,8 +98,7 @@ class MonitoringService:
         # Callback registry
         self.callback_registry: Dict[str, Callable] = {}
         
-        # Registra callback predefinite
-        self.register_callback("appointment_change", appointment_change_callback)
+        # Callback per appuntamenti rimossa - ora usa sincronizzazione notturna
         
         # Snapshot manager
         self.snapshot_manager = get_snapshot_manager()
