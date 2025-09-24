@@ -17,12 +17,15 @@ import {
 } from '@coreui/react'
 import { toast } from 'react-hot-toast'
 import MonitorPrestazioniService, { type MonitorStatus, type MonitorLog } from '@/services/api/monitorPrestazioni'
+import PrestazioniSelect from '@/components/selects/PrestazioniSelect'
+import type { Prestazione } from '@/store/prestazioni.store'
 
 const MonitorPrestazioniPage: React.FC = () => {
   const [status, setStatus] = useState<MonitorStatus | null>(null)
   const [logs, setLogs] = useState<MonitorLog[]>([])
   const [loading, setLoading] = useState(false)
   const [preventPath, setPreventPath] = useState('C:/Pixel/WINDENT/DATI/PREVENT.DBF')
+  const [selectedPrestazione, setSelectedPrestazione] = useState<Prestazione | null>(null)
   const logsEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll dei log
@@ -30,9 +33,7 @@ const MonitorPrestazioniPage: React.FC = () => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [logs])
+  // Auto-scroll rimosso per evitare re-render continui
 
   // Carica stato iniziale
   useEffect(() => {
@@ -40,16 +41,7 @@ const MonitorPrestazioniPage: React.FC = () => {
     loadLogs()  // Carica anche i log esistenti
   }, [])
 
-  // Auto-refresh log quando il monitor è attivo
-  useEffect(() => {
-    if (!status?.is_running) return
-
-    const interval = setInterval(() => {
-      appendNewLogs() // Aggiunge solo i nuovi log
-    }, 2000) // Refresh ogni 2 secondi per essere più reattivo
-
-    return () => clearInterval(interval)
-  }, [status?.is_running])
+  // Auto-refresh log rimosso - implementeremo WebSocket
 
   const loadStatus = async () => {
     try {
@@ -73,27 +65,6 @@ const MonitorPrestazioniPage: React.FC = () => {
     }
   }
 
-  const appendNewLogs = async () => {
-    try {
-      const response = await MonitorPrestazioniService.getLogs()
-      if (response.success && response.data) {
-        const serverLogs = response.data.logs
-        setLogs(prevLogs => {
-          // Trova i log nuovi confrontando con quelli esistenti
-          const existingTimestamps = new Set(prevLogs.map(log => log.timestamp))
-          const newLogs = serverLogs.filter(log => !existingTimestamps.has(log.timestamp))
-          
-          if (newLogs.length > 0) {
-            console.log(`Aggiunti ${newLogs.length} nuovi log`)
-            return [...prevLogs, ...newLogs]
-          }
-          return prevLogs
-        })
-      }
-    } catch (error) {
-      console.error('Errore caricamento nuovi log:', error)
-    }
-  }
 
   const handleStartMonitor = async () => {
     setLoading(true)
@@ -176,7 +147,7 @@ const MonitorPrestazioniPage: React.FC = () => {
   }
 
   const refreshLogs = () => {
-    appendNewLogs()
+    loadLogs()
   }
 
   const getLogBadgeColor = (type: string) => {
@@ -248,6 +219,50 @@ const MonitorPrestazioniPage: React.FC = () => {
                     </>
                   )}
                 </div>
+              </CCol>
+            </CRow>
+
+            {/* Selezione Prestazioni da Monitorare */}
+            <CRow className="mb-4">
+              <CCol xs={12}>
+                <CCard>
+                  <CCardHeader>
+                    <h5 className="mb-0">Prestazioni da Monitorare</h5>
+                    <small className="text-muted">
+                      Seleziona le prestazioni per cui attivare il monitoraggio
+                    </small>
+                  </CCardHeader>
+                  <CCardBody>
+                    <CRow>
+                      <CCol md={6}>
+                        <CFormLabel>Prestazione</CFormLabel>
+                        <PrestazioniSelect
+                          value={selectedPrestazione?.id || null}
+                          onChange={setSelectedPrestazione}
+                          placeholder="-- Seleziona prestazione --"
+                          disabled={status?.is_running || false}
+                          clearable={true}
+                          showCategory={true}
+                        />
+                      </CCol>
+                      <CCol md={6} className="d-flex align-items-end">
+                        {selectedPrestazione && (
+                          <div className="alert alert-info mb-0 w-100">
+                            <strong>Selezionata:</strong> {selectedPrestazione.nome}
+                            <br />
+                            <small>
+                              <strong>Categoria:</strong> {selectedPrestazione.categoria_nome}
+                              <br />
+                              <strong>Codice:</strong> {selectedPrestazione.codice_breve}
+                              <br />
+                              <strong>Costo:</strong> €{selectedPrestazione.costo.toFixed(2)}
+                            </small>
+                          </div>
+                        )}
+                      </CCol>
+                    </CRow>
+                  </CCardBody>
+                </CCard>
               </CCol>
             </CRow>
 

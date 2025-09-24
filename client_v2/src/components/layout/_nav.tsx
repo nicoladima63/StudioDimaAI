@@ -101,6 +101,12 @@ const _nav = [
     icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
   },
   {
+    component: CNavItem,
+    name: 'Monitor Prestazioni',
+    to: '/settings/monitor-prestazioni',
+    icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+  },
+  {
     component: CNavTitle,
     name: 'Analytics',
   },

@@ -114,6 +114,13 @@ COLONNE = {
         'medico': 'DB_DIMEDIC',        #medico che ha esguito la prestazione
         'assistente': 'DB_DIASSIS',    #assistente che ha messo la nota nel diario
         'evidenza': 'DB_DIEVIDE'       #non usato
+    },
+    'onorario': {
+        'id_prestazione': 'DB_CODE',        # ID prestazione (es: ZZZZEC)
+        'categoria': 'DB_ONTIPO',           # Categoria (es: 1, 9, 8, 2)
+        'nome_prestazione': 'DB_ONDESCR',   # Nome prestazione (es: Visita di controllo)
+        'costo': 'DB_ONCOSTO',             # Costo (es: 30,00)
+        'codice_breve': 'DB_ONCODIC'        # Codice breve (es: cont, bott, nylo)
     }
 }
 
@@ -124,7 +131,7 @@ COLONNE = {
 DBF_TABLES = {
     'APPUNTA': {
         'file': 'APPUNTA.DBF',
-        'categoria': 'DATI',
+        'categoria': 'USER',
         'descrizione': 'Appuntamenti calendario'
     },
     'pazienti': {
@@ -141,7 +148,31 @@ DBF_TABLES = {
         'file': 'DIARIO.DBF',
         'categoria': 'DATI',
         'descrizione': 'Diario clinico'
+    },
+    'onorario': {
+        'file': 'ONORARIO.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Tariffario prestazioni'
     }
+}
+
+# =============================================================================
+# CATEGORIE PRESTAZIONI - Per raggruppamento e monitoraggio
+# =============================================================================
+
+CATEGORIE_PRESTAZIONI = {
+    1: 'Parte generale',
+    2: 'Conservativa',
+    3: 'Endodonzia',
+    4: 'Parodontologia',
+    5: 'Chirurgia',
+    6: 'Implantologia',
+    7: 'Protesi Fissa',
+    8: 'Protesi Mobile',
+    9: 'Ortodonzia',
+    10: 'Pedodonzia',
+    11: 'Igiene orale',
+    12: 'Chirurgia implantare'
 }
 
 # =============================================================================
