@@ -23,6 +23,11 @@ import {
   CFormSwitch,
   CRow,
   CCol,
+  CNav,
+  CNavItem,
+  CNavLink,
+  CTabContent,
+  CTabPane,
 } from '@coreui/react';
 import toast from 'react-hot-toast';
 import CIcon from '@coreui/icons-react';
@@ -38,6 +43,7 @@ import {
 import PageLayout from '@/components/layout/PageLayout';
 import { monitoringService } from '../services/monitoring.service';
 import { changesService, ChangesSummary, AppointmentChange } from '../services/changes.service';
+import MonitorPrestazioniPage from './MonitorPrestazioniPage';
 
 // Tipi per il sistema di monitoraggio
 interface MonitorConfig {
@@ -80,6 +86,7 @@ const MonitoringSettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('general');
 
   // Stati per modal creazione
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -358,9 +365,36 @@ const MonitoringSettings: React.FC = () => {
           </div>
         }
       />
-      
-      {/* Toggle Auto-Start */}
+
+      {/* Navigation Tabs */}
       <PageLayout.ContentBody>
+        <CNav variant="tabs" className="mb-4">
+          <CNavItem>
+            <CNavLink
+              active={activeTab === 'general'}
+              onClick={() => setActiveTab('general')}
+              style={{ cursor: 'pointer' }}
+            >
+              <CIcon icon={cilMonitor} className="me-1" />
+              Monitor Generale
+            </CNavLink>
+          </CNavItem>
+          <CNavItem>
+            <CNavLink
+              active={activeTab === 'prestazioni'}
+              onClick={() => setActiveTab('prestazioni')}
+              style={{ cursor: 'pointer' }}
+            >
+              <CIcon icon={cilChart} className="me-1" />
+              Monitor Prestazioni
+            </CNavLink>
+          </CNavItem>
+        </CNav>
+
+        {/* Tab Content */}
+        <CTabContent>
+          <CTabPane visible={activeTab === 'general'}>
+            {/* Toggle Auto-Start */}
         <CRow className="mb-4">
           <CCol>
             <CCard>
@@ -390,9 +424,7 @@ const MonitoringSettings: React.FC = () => {
             </CCard>
           </CCol>
         </CRow>
-      </PageLayout.ContentBody>
 
-      <PageLayout.ContentBody>
         {/* Alert per messaggi */}
         {error && (
           <CAlert color="danger" className="mb-3" onClose={() => setError(null)} dismissible>
@@ -763,6 +795,12 @@ const MonitoringSettings: React.FC = () => {
             </CButton>
           </CModalFooter>
         </CModal>
+          </CTabPane>
+          
+          <CTabPane visible={activeTab === 'prestazioni'}>
+            <MonitorPrestazioniPage />
+          </CTabPane>
+        </CTabContent>
       </PageLayout.ContentBody>
     </PageLayout>
   );

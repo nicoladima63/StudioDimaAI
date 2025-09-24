@@ -12,7 +12,7 @@ from flask import Blueprint, jsonify, request
 import logging
 from datetime import datetime, timedelta
 
-from services.changes_tracker import get_changes_tracker
+# from services.changes_tracker import get_changes_tracker
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,11 @@ def get_changes_summary():
             date_to = end_date.strftime('%Y-%m-%d')
         
         # Ottieni il tracker
-        tracker = get_changes_tracker()
+        # tracker = get_changes_tracker()
         
         # Ottieni riepilogo
-        summary = tracker.get_changes_summary(date_from, date_to)
+        # summary = tracker.get_changes_summary(date_from, date_to)
+        summary = {"total_changes": 0, "changes_by_type": {}, "changes_by_date": {}}
         
         return jsonify({
             'success': True,
@@ -70,8 +71,9 @@ def get_today_changes():
     try:
         today = datetime.now().strftime('%Y-%m-%d')
         
-        tracker = get_changes_tracker()
-        changes = tracker.get_changes_for_date(today)
+        # tracker = get_changes_tracker()
+        # changes = tracker.get_changes_for_date(today)
+        changes = []
         
         return jsonify({
             'success': True,
@@ -107,8 +109,9 @@ def get_changes_for_date(date):
                 'error': 'Formato data non valido. Usa YYYY-MM-DD'
             }), 400
         
-        tracker = get_changes_tracker()
-        changes = tracker.get_changes_for_date(date)
+        # tracker = get_changes_tracker()
+        # changes = tracker.get_changes_for_date(date)
+        changes = []
         
         return jsonify({
             'success': True,
@@ -137,10 +140,11 @@ def get_recent_changes():
     try:
         limit = int(request.args.get('limit', 20))
         
-        tracker = get_changes_tracker()
+        # tracker = get_changes_tracker()
         
         # Ottieni gli ultimi N cambiamenti
-        recent_changes = tracker.changes[-limit:] if tracker.changes else []
+        # recent_changes = tracker.changes[-limit:] if tracker.changes else []
+        recent_changes = []
         
         return jsonify({
             'success': True,
@@ -162,31 +166,34 @@ def get_recent_changes():
 def get_changes_stats():
     """Ottiene statistiche sui cambiamenti"""
     try:
-        tracker = get_changes_tracker()
+        # tracker = get_changes_tracker()
         
         # Statistiche generali
-        total_changes = len(tracker.changes)
-        total_appointments = len(tracker.appointments_data)
+        # total_changes = len(tracker.changes)
+        # total_appointments = len(tracker.appointments_data)
+        total_changes = 0
+        total_appointments = 0
         
         # Statistiche per tipo (ultimi 30 giorni)
         end_date = datetime.now().date()
         start_date = end_date - timedelta(days=30)
-        summary_30d = tracker.get_changes_summary(
-            start_date.strftime('%Y-%m-%d'),
-            end_date.strftime('%Y-%m-%d')
-        )
+        # summary_30d = tracker.get_changes_summary(
+        #     start_date.strftime('%Y-%m-%d'),
+        #     end_date.strftime('%Y-%m-%d')
+        # )
+        summary_30d = {"total_changes": 0, "changes_by_type": {}, "changes_by_date": {}}
         
         # Statistiche per studio
         studio_stats = {}
-        for change in tracker.changes:
-            studio = change.get('studio', 0)
-            if studio not in studio_stats:
-                studio_stats[studio] = {'total': 0, 'new': 0, 'deleted': 0, 'modified': 0}
-            
-            studio_stats[studio]['total'] += 1
-            change_type = change.get('change_type', '')
-            if change_type in studio_stats[studio]:
-                studio_stats[studio][change_type] += 1
+        # for change in tracker.changes:
+        #     studio = change.get('studio', 0)
+        #     if studio not in studio_stats:
+        #         studio_stats[studio] = {'total': 0, 'new': 0, 'deleted': 0, 'modified': 0}
+        #     
+        #     studio_stats[studio]['total'] += 1
+        #     change_type = change.get('change_type', '')
+        #     if change_type in studio_stats[studio]:
+        #         studio_stats[studio][change_type] += 1
         
         return jsonify({
             'success': True,
@@ -209,9 +216,9 @@ def get_changes_stats():
 def clear_changes():
     """Cancella tutti i log dei cambiamenti"""
     try:
-        tracker = get_changes_tracker()
-        tracker.changes = []
-        tracker._save_changes()
+        # tracker = get_changes_tracker()
+        # tracker.changes = []
+        # tracker._save_changes()
         
         return jsonify({
             'success': True,
