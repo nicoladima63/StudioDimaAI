@@ -18,6 +18,7 @@ from watchdog.events import FileSystemEventHandler
 from app_v2 import require_auth, format_response
 from core.exceptions import ValidationError
 from core.constants_v2 import get_campo_dbf
+from services.regole_monitoraggio_service import regole_monitoraggio_service
 # from utils.dbf_utils import read_dbf_file
 
 logger = logging.getLogger(__name__)
@@ -139,15 +140,19 @@ def analyze_prevent_changes():
         logger.error(f"Errore analisi modifiche: {e}")
 
 def send_notifications(nuovi_record, modificati_record):
-    """Invia notifiche per le modifiche rilevate."""
+    """Invia notifiche per le modifiche rilevate e esegue regole di monitoraggio."""
     # Notifica nuovi record
     if nuovi_record:
         log_message(f"Rilevati {len(nuovi_record)} record nuovi", "success")
         for record in nuovi_record:
             if record['tipo'] == 'nuovo_eseguito':
                 log_message(f"NUOVO ESEGUITO: {record['prlavor']} per {record['nome_paziente']}", "success")
+                # Esegui regole per prestazione eseguita
+                execute_monitoring_rules(record['prlavor'], record, 'prestazione_eseguita')
             else:
                 log_message(f"NUOVO DA ESEGUIRE: {record['prlavor']} per {record['nome_paziente']}", "info")
+                # Esegui regole per prestazione programmata
+                execute_monitoring_rules(record['prlavor'], record, 'prestazione_programmata')
     
     # Notifica record modificati
     if modificati_record:
@@ -155,6 +160,42 @@ def send_notifications(nuovi_record, modificati_record):
         for record in modificati_record:
             stato_prec = "da eseguire" if record['stato_precedente'] == 1 else "in corso"
             log_message(f"MODIFICATO A ESEGUITO: {record['prlavor']} per {record['nome_paziente']} (era {stato_prec})", "warning")
+            # Esegui regole per prestazione completata
+            execute_monitoring_rules(record['prlavor'], record, 'prestazione_completata')
+
+def execute_monitoring_rules(tipo_prestazione: str, context_data: dict, event_type: str):
+    """Esegue le regole di monitoraggio per un tipo di prestazione."""
+    try:
+        # Arricchisci context_data con informazioni aggiuntive
+        context_data.update({
+            'tipo_prestazione': tipo_prestazione,
+            'event_type': event_type,
+            'timestamp': datetime.now().isoformat(),
+            'monitor_source': 'prevent_dbf'
+        })
+        
+        # Recupera regole per questo tipo di prestazione
+        regole = regole_monitoraggio_service.get_regole_per_prestazione(tipo_prestazione)
+        
+        if not regole:
+            log_message(f"Nessuna regola trovata per prestazione: {tipo_prestazione}", "info")
+            return
+        
+        log_message(f"Eseguendo {len(regole)} regole per prestazione: {tipo_prestazione}", "info")
+        
+        # Esegui tutte le regole
+        results = regole_monitoraggio_service.execute_regole_per_prestazione(tipo_prestazione, context_data)
+        
+        # Log risultati
+        for result in results:
+            if result['success']:
+                log_message(f"Regola {result['regola_id']} eseguita: {result['callback']}", "success")
+            else:
+                log_message(f"Errore regola {result['regola_id']}: {result['error']}", "error")
+        
+    except Exception as e:
+        log_message(f"Errore esecuzione regole per {tipo_prestazione}: {str(e)}", "error")
+        logger.error(f"Errore esecuzione regole: {e}")
 
 def log_message(message: str, log_type: str = "info"):
     """Invia log a tutti i callback registrati e li salva persistentemente."""

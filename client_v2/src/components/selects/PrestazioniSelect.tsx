@@ -20,7 +20,7 @@ const PrestazioniSelect: React.FC<PrestazioniSelectProps> = ({
   onChange,
   placeholder = "-- Seleziona prestazione --",
   disabled = false,
-  searchable = true,
+  searchable = false,
   clearable = false,
   className = "",
   showCategory = true
@@ -36,7 +36,7 @@ const PrestazioniSelect: React.FC<PrestazioniSelectProps> = ({
   
   const [selectedCategoria, setSelectedCategoria] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  // Dropdown stato non più necessario: usiamo una select nativa
 
   // Carica prestazioni al mount - COME PAZIENTI
   useEffect(() => {
@@ -47,19 +47,26 @@ const PrestazioniSelect: React.FC<PrestazioniSelectProps> = ({
   useEffect(() => {
     if (value && categorieList.length > 0) {
       const prestazione = getPrestazioneById(value);
-      if (prestazione) {
+      // Inizializza la categoria SOLO se non è stata scelta manualmente
+      if (prestazione && selectedCategoria === null) {
         setSelectedCategoria(prestazione.categoria_id);
       }
-    } else if (!value) {
-      setSelectedCategoria(null);
     }
-  }, [value, categorieList, getPrestazioneById]);
+  }, [value, categorieList, getPrestazioneById, selectedCategoria]);
 
   // Trova la prestazione selezionata - STABILIZZATO
   const selectedPrestazione = useMemo(() => {
     if (!value) return null;
     return getPrestazioneById(value);
   }, [value]); // Rimuovo getPrestazioneById dalle dipendenze
+
+  // Mantieni l'input sincronizzato con la selezione
+  useEffect(() => {
+    // Mantieni vuoto il campo ricerca dopo selezione/cambio categoria
+    if (!selectedPrestazione) {
+      setSearchTerm("");
+    }
+  }, [selectedPrestazione?.id]);
 
   // Filtra prestazioni per categoria e ricerca - STABILIZZATO
   const filteredPrestazioni = useMemo(() => {
@@ -99,22 +106,21 @@ const PrestazioniSelect: React.FC<PrestazioniSelectProps> = ({
   // Gestione selezione prestazione
   const handlePrestazioneChange = (prestazione: Prestazione | null) => {
     onChange(prestazione?.id || null);
-    setIsOpen(false);
   };
 
   // Gestione clear
   const handleClear = () => {
     onChange(null);
-    setSelectedCategoria(null);
     setSearchTerm("");
   };
 
   // Formatta display prestazione
   const formatPrestazioneDisplay = (prestazione: Prestazione) => {
+    const label = `${prestazione.codice_breve} - ${prestazione.nome}`;
     if (showCategory) {
-      return `${prestazione.nome} (${prestazione.categoria_nome})`;
+      return `${label}`;
     }
-    return prestazione.nome;
+    return label;
   };
 
   if (error) {
@@ -133,7 +139,7 @@ const PrestazioniSelect: React.FC<PrestazioniSelectProps> = ({
       <div className="mb-2">
         <label className="form-label small text-muted">Categoria</label>
         <select
-          className="form-select form-select-sm"
+          className="form-select"
           value={selectedCategoria || ""}
           onChange={(e) => handleCategoriaChange(e.target.value ? Number(e.target.value) : null)}
           disabled={disabled || isLoading}
@@ -148,89 +154,39 @@ const PrestazioniSelect: React.FC<PrestazioniSelectProps> = ({
       </div>
 
       {/* Select Prestazioni */}
-      <div className="position-relative">
-        <div className="input-group">
-          <input
-            type="text"
-            className="form-control"
-            value={selectedPrestazione ? formatPrestazioneDisplay(selectedPrestazione) : ""}
-            placeholder={placeholder}
-            disabled={disabled || isLoading}
-            readOnly
-            onClick={() => setIsOpen(!isOpen)}
-          />
-          
-          {clearable && selectedPrestazione && (
-            <button
-              className="btn btn-outline-secondary"
-              type="button"
-              onClick={handleClear}
-              disabled={disabled}
-            >
-              ×
-            </button>
-          )}
-          
+      {/* Ricerca prestazione */}
+      {/* Ricerca disabilitata per richiesta utente */}
+
+      {/* Select Prestazioni nativa (stile uguale alle categorie) */}
+      <div className="input-group">
+        <select
+          className="form-select"
+          value={value || ""}
+          onChange={(e) => {
+            const id = e.target.value || null;
+            const p = id ? getPrestazioneById(id) : null;
+            handlePrestazioneChange(p);
+          }}
+          disabled={disabled || isLoading}
+        >
+          <option value="">{placeholder}</option>
+          {filteredPrestazioni.map((prestazione) => (
+            <option key={prestazione.id} value={prestazione.id}>
+              {formatPrestazioneDisplay(prestazione)}
+            </option>
+          ))}
+        </select>
+
+        {clearable && (
           <button
-            className="btn btn-outline-secondary"
+            className="btn btn-outline-secondary btn-sm"
             type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            disabled={disabled || isLoading}
+            onClick={handleClear}
+            disabled={disabled}
+            title="Pulisci selezione"
           >
-            {isLoading ? "..." : "▼"}
+            ×
           </button>
-        </div>
-
-        {/* Dropdown */}
-        {isOpen && (
-          <div className="position-absolute w-100 bg-white border rounded shadow-lg" style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}>
-            {/* Search */}
-            {searchable && (
-              <div className="p-2 border-bottom">
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  placeholder="Cerca prestazione..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            )}
-
-            {/* Lista prestazioni */}
-            <div className="list-group list-group-flush">
-              {filteredPrestazioni.length === 0 ? (
-                <div className="list-group-item text-muted text-center py-3">
-                  {searchTerm ? "Nessuna prestazione trovata" : "Nessuna prestazione disponibile"}
-                </div>
-              ) : (
-                filteredPrestazioni.map(prestazione => (
-                  <button
-                    key={prestazione.id}
-                    type="button"
-                    className={`list-group-item list-group-item-action ${
-                      selectedPrestazione?.id === prestazione.id ? 'active' : ''
-                    }`}
-                    onClick={() => handlePrestazioneChange(prestazione)}
-                  >
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <div className="fw-medium">{prestazione.nome}</div>
-                        {showCategory && (
-                          <small className="text-muted">{prestazione.categoria_nome}</small>
-                        )}
-                      </div>
-                      <div className="text-end">
-                        <small className="text-muted">{prestazione.codice_breve}</small>
-                        <br />
-                        <small className="text-success">€{prestazione.costo.toFixed(2)}</small>
-                      </div>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
         )}
       </div>
 

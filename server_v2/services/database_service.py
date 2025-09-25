@@ -8,9 +8,9 @@ import subprocess
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
-from ..core.environment_manager import environment_manager, ServiceType, Environment
-from ..core.database_manager import DatabaseManager
-from ..core.exceptions import ValidationError, ServiceError
+from core.environment_manager import environment_manager, ServiceType, Environment
+from core.database_manager import DatabaseManager
+from core.exceptions import ValidationError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class DatabaseService:
             # Database locale
             db_path = self._current_config.get('path', 'studio_dima.db')
         
-        self._db_manager = DatabaseManager(db_path=db_path)
+        self._db_manager = DatabaseManager()
         logger.info(f"Database Service configurato per ambiente: {self._current_environment.value}")
     
     def get_current_environment(self) -> Environment:
@@ -277,7 +277,7 @@ class DatabaseService:
                 
         except Exception as e:
             logger.error(f"Errore esecuzione query: {e}")
-            raise ServiceError(f"Errore database: {e}")
+            raise DatabaseError(f"Errore database: {e}")
     
     def execute_command(self, command: str, params: Optional[tuple] = None) -> int:
         """
@@ -306,7 +306,7 @@ class DatabaseService:
                 
         except Exception as e:
             logger.error(f"Errore esecuzione comando: {e}")
-            raise ServiceError(f"Errore database: {e}")
+            raise DatabaseError(f"Errore database: {e}")
     
     def get_table_info(self, table_name: str) -> Dict[str, Any]:
         """Ottiene informazioni su una tabella"""
@@ -329,7 +329,7 @@ class DatabaseService:
             
         except Exception as e:
             logger.error(f"Errore info tabella {table_name}: {e}")
-            raise ServiceError(f"Errore recupero info tabella: {e}")
+            raise DatabaseError(f"Errore recupero info tabella: {e}")
     
     def list_tables(self) -> List[str]:
         """Lista tutte le tabelle nel database"""
@@ -340,7 +340,7 @@ class DatabaseService:
             
         except Exception as e:
             logger.error(f"Errore lista tabelle: {e}")
-            raise ServiceError(f"Errore lista tabelle: {e}")
+            raise DatabaseError(f"Errore lista tabelle: {e}")
     
     def backup_database(self, backup_path: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -389,7 +389,7 @@ class DatabaseService:
             
         except Exception as e:
             logger.error(f"Errore backup database: {e}")
-            raise ServiceError(f"Errore creazione backup: {e}")
+            raise DatabaseError(f"Errore creazione backup: {e}")
     
     def get_database_statistics(self) -> Dict[str, Any]:
         """Ottiene statistiche database"""
