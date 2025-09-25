@@ -23,6 +23,16 @@ regole_monitoraggio_bp = Blueprint('regole_monitoraggio', __name__)
 
 # Le funzioni di validazione sono ora nel servizio
 
+@regole_monitoraggio_bp.route('/callbacks', methods=['GET'])
+def get_callbacks():
+    """Elenco delle callback disponibili."""
+    try:
+        data = regole_monitoraggio_service.list_callbacks()
+        return jsonify({'success': True, 'data': data, 'total': len(data)})
+    except Exception as e:
+        logger.error(f"Errore API get_callbacks: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @regole_monitoraggio_bp.route('/regole', methods=['GET'])
 def get_regole():
     """Recupera tutte le regole di monitoraggio con filtri opzionali."""

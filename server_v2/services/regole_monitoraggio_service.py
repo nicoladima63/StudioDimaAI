@@ -47,6 +47,19 @@ class RegoleMonitoraggioService(BaseService):
             'update_statistics': self._callback_update_stats,
             'generate_report': self._callback_generate_report
         }
+
+    def list_callbacks(self) -> List[Dict[str, Any]]:
+        """Restituisce l'elenco delle callback disponibili con metadati base."""
+        callbacks: List[Dict[str, Any]] = []
+        for name, func in self.callback_registry.items():
+            callbacks.append({
+                'id': name,
+                'name': name,
+                'function': name,
+                'description': (func.__doc__ or '').strip(),
+                'params_schema': {}  # placeholder per futuri schemi parametri
+            })
+        return callbacks
     
     def register_callback(self, name: str, callback_func: Callable):
         """Registra una nuova callback function."""
