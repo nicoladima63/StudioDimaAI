@@ -44,6 +44,7 @@ class RegoleMonitoraggioService(BaseService):
             'notify_igiene_completata': self._callback_notify_igiene,
             'update_costo_materiali': self._callback_update_costi,
             'send_reminder_sms': self._callback_send_sms,
+            'send_sms_link': self._callback_send_sms_link,
             'update_statistics': self._callback_update_stats,
             'generate_report': self._callback_generate_report
         }
@@ -565,6 +566,57 @@ class RegoleMonitoraggioService(BaseService):
         
         logger.info(f"SMS inviato: {result}")
         return result
+
+    def _callback_send_sms_link(self, context_data: Dict[str, Any], parametri: Dict[str, Any]) -> Dict[str, Any]:
+        """Invia un SMS con link informativo pubblico.
+
+        Parametri attesi (parametri_callback):
+        - page_slug: slug/percorso pagina su studiodimartino.eu (es. 'istruzioni-ortodonzia')
+        - template_key: chiave template SMS (default 'send_link')
+        - url_params: dict opzionale di querystring; i valori possono contenere placeholder presenti in context_data
+        - sender: mittente opzionale
+        """
+        from services.sms_service import sms_service
+        from urllib.parse import urlencode
+
+        phone = context_data.get('phone') or context_data.get('telefono')
+        if not phone:
+            raise ValidationError('Numero telefono non disponibile nel contesto')
+
+        page_slug = parametri.get('page_slug') or 'informazioni'
+        template_key = parametri.get('template_key') or 'send_link'
+        url_params = parametri.get('url_params') or {}
+        sender = parametri.get('sender')
+
+        # Render semplice dei placeholder nei parametri URL usando context_data
+        def render_value(v: Any) -> Any:
+            try:
+                if isinstance(v, str):
+                    # sostituisci {{chiave}} con valore da context
+                    out = v
+                    for k, val in context_data.items():
+                        out = out.replace(f'{{{{{k}}}}}', str(val))
+                    return out
+                return v
+            except Exception:
+                return v
+
+        rendered_params = {k: render_value(v) for k, v in url_params.items()}
+        base_url = 'https://studiodimartino.eu/' + page_slug.lstrip('/')
+        query = urlencode(rendered_params) if rendered_params else ''
+        final_url = f"{base_url}?{query}" if query else base_url
+
+        # Prepara dati per template
+        from core.template_manager import template_manager
+        nome = context_data.get('nome_completo') or context_data.get('nome') or 'Gentile paziente'
+        data_template = { 'nome_completo': nome, 'url': final_url, **context_data }
+        try:
+            message = template_manager.render_template(template_key, data_template)
+        except Exception:
+            message = f"Ciao {nome}, informazioni utili: {final_url}"
+
+        result = sms_service.send_sms(phone, message, sender=sender, tag='auto_link')
+        return { **result, 'url': final_url }
     
     def _callback_update_stats(self, context_data: Dict[str, Any], parametri: Dict[str, Any]) -> Dict[str, Any]:
         """Callback per aggiornare statistiche."""

@@ -44,6 +44,17 @@ Grazie!
 Studio Dima''',
         'variables': ['nome_completo', 'data_appuntamento', 'ora_appuntamento', 'tipo_appuntamento', 'medico'],
         'description': 'Template per SMS promemoria appuntamenti'
+    },
+    'send_link': {
+        'content': '''Ciao {nome_completo},
+
+ti inviamo il link con le informazioni utili: {url}
+
+Se hai domande rispondi a questo messaggio o chiamaci.
+
+Studio Dima''',
+        'variables': ['nome_completo', 'url'],
+        'description': 'Template generico per SMS con link informativo'
     }
 }
 
