@@ -4,6 +4,10 @@ import {
   CCardBody,
   CCardHeader,
   CButton,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
   CTextarea,
   CSpinner,
   CAlert,
@@ -12,6 +16,7 @@ import {
   CCol,
   CFormSelect,
   CFormLabel,
+  CFormInput,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import {
@@ -55,6 +60,16 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [callbacks, setCallbacks] = useState<CallbackInfo[]>([]);
   const [selectedCallback, setSelectedCallback] = useState<string>('');
   const [regole, setRegole] = useState<any[]>([]);
+  // Callback config modal state
+  const [showCreateCallback, setShowCreateCallback] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewData, setPreviewData] = useState<{ url: string; message: string } | null>(null);
+  const [cbPageSlug, setCbPageSlug] = useState('istruzioni-ortodonzia');
+  const [cbTemplateKey, setCbTemplateKey] = useState('send_link');
+  const [cbSender, setCbSender] = useState('');
+  const [cbUrlParams, setCbUrlParams] = useState('{"src":"auto"}');
+  const [preparedCallbacks, setPreparedCallbacks] = useState<any[]>([]);
+  const [selectedCallbackParams, setSelectedCallbackParams] = useState<any | null>(null);
 
   // Carica stato iniziale
   useEffect(() => {
@@ -197,11 +212,14 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         categoria_prestazione: selectedPrestazione.categoria_id,
         nome_prestazione: selectedPrestazione.nome,
         callback_function: selectedCallback,
-        attiva: true,
+        parametri_callback: selectedCallbackParams ? JSON.stringify(selectedCallbackParams) : undefined,
+        attiva: false,
+        preview_only: true,
       };
       await regoleMonitoraggioApi.createRegola(payload);
       setSuccess('Associazione creata');
       setSelectedCallback('');
+      setSelectedCallbackParams(null);
       await loadRegole();
     } catch (e: any) {
       setError(e?.message || 'Errore associazione');
@@ -323,23 +341,45 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 </h5>
               </CCardHeader>
               <CCardBody>
-                {callbacks.length === 0 ? (
+                {callbacks.length === 0 && preparedCallbacks.length === 0 ? (
                   <div className='text-center'>
                     <p className='text-muted mb-2'>Nessuna callback disponibile</p>
-                    <CButton color='primary' size='sm'>Crea callback</CButton>
+                    <CButton color='primary' size='sm' onClick={() => setShowCreateCallback(true)}>Crea callback</CButton>
                   </div>
                 ) : (
                   <div className='mb-3'>
                     <label className='form-label'>Seleziona Callback</label>
                     <CFormSelect
                       value={selectedCallback}
-                      onChange={(e) => setSelectedCallback(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setSelectedCallback(val)
+                        // se è una prepared callback, carica i suoi parametri
+                        const found = preparedCallbacks.find(p => p.id === val)
+                        setSelectedCallbackParams(found ? found.params : null)
+                      }}
                     >
                       <option value=''>-- Seleziona callback --</option>
-                      {callbacks.map(cb => (
-                        <option key={cb.id} value={cb.id}>{cb.id}</option>
-                      ))}
+                      {/* Prepared (utente) */}
+                      {preparedCallbacks.length > 0 && (
+                        <optgroup label='Personalizzate'>
+                          {preparedCallbacks.map(cb => (
+                            <option key={cb.id} value={cb.id}>{cb.label}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {/* Dal registro */}
+                      {callbacks.length > 0 && (
+                        <optgroup label='Di sistema'>
+                          {callbacks.map(cb => (
+                            <option key={cb.id} value={cb.id}>{cb.id}</option>
+                          ))}
+                        </optgroup>
+                      )}
                     </CFormSelect>
+                    <div className='mt-2'>
+                      <CButton color='secondary' size='sm' variant='outline' onClick={() => setShowCreateCallback(true)}>Crea callback</CButton>
+                    </div>
                   </div>
                 )}
               </CCardBody>
@@ -413,6 +453,84 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
           </CCol>
         </CRow>
       </PageLayout.ContentHeader>
+
+      {/* Modal crea callback */}
+      <CModal visible={showCreateCallback} onClose={() => setShowCreateCallback(false)} backdrop='static'>
+        <CModalHeader>Nuova Callback (SMS con link)</CModalHeader>
+        <CModalBody>
+          <div className='mb-3'>
+            <CFormLabel>Tipo callback</CFormLabel>
+            <CFormSelect value={'send_sms_link'} disabled>
+              <option value='send_sms_link'>send_sms_link</option>
+            </CFormSelect>
+          </div>
+          <div className='mb-3'>
+            <CFormLabel>Pagina (slug)</CFormLabel>
+            <CFormInput value={cbPageSlug} onChange={(e) => setCbPageSlug(e.target.value)} placeholder='es. istruzioni-ortodonzia' />
+          </div>
+          <div className='mb-3'>
+            <CFormLabel>Template</CFormLabel>
+            <CFormSelect value={cbTemplateKey} onChange={(e) => setCbTemplateKey(e.target.value)}>
+              <option value='send_link'>send_link</option>
+              <option value='richiamo'>richiamo</option>
+              <option value='promemoria'>promemoria</option>
+            </CFormSelect>
+          </div>
+          <div className='mb-3'>
+            <CFormLabel>Mittente (opzionale)</CFormLabel>
+            <CFormInput value={cbSender} onChange={(e) => setCbSender(e.target.value)} placeholder='es. StudioDima' />
+          </div>
+          <div className='mb-3'>
+            <CFormLabel>URL params (JSON)</CFormLabel>
+            <CFormTextarea rows={3} value={cbUrlParams} onChange={(e) => setCbUrlParams(e.target.value)} />
+            <small className='text-muted'>Puoi usare placeholder come {{tipo_prestazione}} che verranno sostituiti dai dati del contesto.</small>
+          </div>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color='secondary' variant='outline' onClick={() => setShowCreateCallback(false)}>Annulla</CButton>
+          <CButton color='primary' onClick={() => {
+            // valida JSON
+            let params: any = {}
+            try { params = cbUrlParams ? JSON.parse(cbUrlParams) : {} } catch { params = {} }
+            const id = `send_sms_link:${cbPageSlug}`
+            const label = `send_sms_link (${cbPageSlug})`
+            const prepared = { id, label, function: 'send_sms_link', params: { page_slug: cbPageSlug, template_key: cbTemplateKey, sender: cbSender || undefined, url_params: params } }
+            setPreparedCallbacks(prev => [...prev, prepared])
+            setSelectedCallback(prepared.id)
+            setSelectedCallbackParams(prepared.params)
+            setShowCreateCallback(false)
+              // apri preview
+              setShowPreview(true)
+              // preview lato server (template + url render)
+              regoleMonitoraggioApi.previewSendSmsLink(prepared.params, {
+                phone: '+390000000000',
+                nome_completo: 'Mario Rossi',
+                tipo_prestazione: selectedPrestazione?.nome || 'Prestazione',
+              })
+                .then(data => setPreviewData(data))
+                .catch(() => setPreviewData({ url: `https://studiodimartino.eu/${cbPageSlug}`, message: '' }))
+          }}>Salva</CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal preview messaggio */}
+      <CModal visible={showPreview} onClose={() => setShowPreview(false)}>
+        <CModalHeader>Anteprima SMS</CModalHeader>
+        <CModalBody>
+          {previewData ? (
+            <>
+              <div className='mb-2'><strong>URL</strong><br />{previewData.url}</div>
+              <div className='mb-2'><strong>Messaggio</strong><br />
+                {(previewData.message && previewData.message.length > 0) ? previewData.message : `Ciao {nome}, informazioni utili: ${previewData.url}`}
+              </div>
+              <small className='text-muted'>Il messaggio effettivo userà il template scelto e i dati reali del paziente.</small>
+            </>
+          ) : 'Caricamento...'}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color='primary' onClick={() => setShowPreview(false)}>Ok</CButton>
+        </CModalFooter>
+      </CModal>
 
       <PageLayout.ContentBody>
         {/* Card Impostazioni Monitor */}

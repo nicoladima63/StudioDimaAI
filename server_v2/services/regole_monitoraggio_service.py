@@ -617,6 +617,40 @@ class RegoleMonitoraggioService(BaseService):
 
         result = sms_service.send_sms(phone, message, sender=sender, tag='auto_link')
         return { **result, 'url': final_url }
+
+    # Preview helpers (no side effects)
+    def preview_sms_link(self, context_data: Dict[str, Any], parametri: Dict[str, Any]) -> Dict[str, Any]:
+        """Genera anteprima messaggio e URL per la callback send_sms_link senza invio."""
+        from urllib.parse import urlencode
+        page_slug = parametri.get('page_slug') or 'informazioni'
+        template_key = parametri.get('template_key') or 'send_link'
+        url_params = parametri.get('url_params') or {}
+
+        def render_value(v: Any) -> Any:
+            try:
+                if isinstance(v, str):
+                    out = v
+                    for k, val in context_data.items():
+                        out = out.replace(f'{{{{{k}}}}}', str(val))
+                    return out
+                return v
+            except Exception:
+                return v
+
+        rendered_params = {k: render_value(v) for k, v in url_params.items()}
+        base_url = 'https://studiodimartino.eu/' + page_slug.lstrip('/')
+        query = urlencode(rendered_params) if rendered_params else ''
+        final_url = f"{base_url}?{query}" if query else base_url
+
+        from core.template_manager import template_manager
+        nome = context_data.get('nome_completo') or context_data.get('nome') or 'Gentile paziente'
+        data_template = { 'nome_completo': nome, 'url': final_url, **context_data }
+        try:
+            message = template_manager.render_template(template_key, data_template)
+        except Exception:
+            message = f"Ciao {nome}, informazioni utili: {final_url}"
+
+        return { 'url': final_url, 'message': message }
     
     def _callback_update_stats(self, context_data: Dict[str, Any], parametri: Dict[str, Any]) -> Dict[str, Any]:
         """Callback per aggiornare statistiche."""

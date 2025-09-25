@@ -54,6 +54,11 @@ export const regoleMonitoraggioApi = {
   async deleteRegola(id: number): Promise<void> {
     await apiClient.delete(`${base}/regole/${id}`)
   },
+
+  async previewSendSmsLink(parametri: any, context_data: any = {}): Promise<{ url: string; message: string }> {
+    const res = await apiClient.post(`${base}/preview/send-sms-link`, { parametri, context_data })
+    return res.data.data
+  },
 }
 
 export default regoleMonitoraggioApi

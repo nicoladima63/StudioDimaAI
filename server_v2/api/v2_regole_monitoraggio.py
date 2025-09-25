@@ -103,6 +103,10 @@ def create_regola():
             }), 400
         
         # Usa il servizio per creare la regola
+        # Forza salvataggio come disattiva per prova UI se richiesto (preview_only)
+        preview_only = bool(data.get('preview_only'))
+        if preview_only:
+            data['attiva'] = False
         new_regola = regole_monitoraggio_service.create_regola(data)
         
         return jsonify({
@@ -117,6 +121,19 @@ def create_regola():
             'success': False,
             'error': str(e)
         }), 500
+
+@regole_monitoraggio_bp.route('/preview/send-sms-link', methods=['POST'])
+def preview_send_sms_link():
+    """Genera anteprima messaggio+URL per callback send_sms_link (senza invio)."""
+    try:
+        data = request.get_json() or {}
+        context = data.get('context_data', {})
+        params = data.get('parametri', {})
+        result = regole_monitoraggio_service.preview_sms_link(context, params)
+        return jsonify({'success': True, 'data': result})
+    except Exception as e:
+        logger.error(f"Errore API preview send_sms_link: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @regole_monitoraggio_bp.route('/regole/<int:regola_id>', methods=['PUT'])
 def update_regola(regola_id: int):
