@@ -27,6 +27,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import { MonitorPrestazioniService } from '@/services/api/monitorPrestazioni';
 import PrestazioniSelect from '@/components/selects/PrestazioniSelect';
 import { Prestazione, usePrestazioniStore } from '@/store/prestazioni.store';
+import regoleMonitoraggioApi, { type CallbackInfo } from '@/features/settings/services/regoleMonitoraggio.service';
 
 interface MonitorStatus {
   is_running: boolean;
@@ -51,11 +52,16 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
   // Stati per selezione prestazioni
   const [selectedPrestazione, setSelectedPrestazione] = useState<Prestazione | null>(null);
+  const [callbacks, setCallbacks] = useState<CallbackInfo[]>([]);
+  const [selectedCallback, setSelectedCallback] = useState<string>('');
+  const [regole, setRegole] = useState<any[]>([]);
 
   // Carica stato iniziale
   useEffect(() => {
     loadStatus();
     loadLogs();
+    loadCallbacks();
+    loadRegole();
   }, []);
 
   const loadStatus = async () => {
@@ -164,6 +170,64 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     loadLogs();
   };
 
+  const loadCallbacks = async () => {
+    try {
+      const data = await regoleMonitoraggioApi.getCallbacks();
+      setCallbacks(data);
+    } catch (e) {
+      console.error('Errore caricamento callbacks', e);
+    }
+  };
+
+  const loadRegole = async () => {
+    try {
+      const data = await regoleMonitoraggioApi.getRegole();
+      setRegole(data);
+    } catch (e) {
+      console.error('Errore caricamento regole', e);
+    }
+  };
+
+  const handleAssocia = async () => {
+    if (!selectedPrestazione || !selectedCallback) return;
+    try {
+      setLoading(true);
+      const payload = {
+        tipo_prestazione_id: selectedPrestazione.id,
+        categoria_prestazione: selectedPrestazione.categoria_id,
+        nome_prestazione: selectedPrestazione.nome,
+        callback_function: selectedCallback,
+        attiva: true,
+      };
+      await regoleMonitoraggioApi.createRegola(payload);
+      setSuccess('Associazione creata');
+      setSelectedCallback('');
+      await loadRegole();
+    } catch (e: any) {
+      setError(e?.message || 'Errore associazione');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleRegola = async (id: number) => {
+    try {
+      await regoleMonitoraggioApi.toggleRegola(id);
+      await loadRegole();
+    } catch (e) {
+      console.error('Errore toggle regola', e);
+    }
+  };
+
+  const handleDeleteRegola = async (id: number) => {
+    try {
+      await regoleMonitoraggioApi.deleteRegola(id);
+      await loadRegole();
+    } catch (e) {
+      console.error('Errore delete regola', e);
+    }
+  };
+
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('it-IT');
   };
@@ -259,19 +323,25 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 </h5>
               </CCardHeader>
               <CCardBody>
-                <div className='mb-3'>
-                  <label className='form-label'>Seleziona Callback da associare alla prestazione</label>
-                  <div className='d-flex gap-2'>
-                    {/* <CallbackSelect
-                      value={selectedCallback?.id || ''}
-                      onChange={callbackId => {
-                        if (callbackId) {
-                          setSelectedCallback(callbackId);
-                        }
-                      }}
-                    /> */}
+                {callbacks.length === 0 ? (
+                  <div className='text-center'>
+                    <p className='text-muted mb-2'>Nessuna callback disponibile</p>
+                    <CButton color='primary' size='sm'>Crea callback</CButton>
                   </div>
-                </div>
+                ) : (
+                  <div className='mb-3'>
+                    <label className='form-label'>Seleziona Callback</label>
+                    <CFormSelect
+                      value={selectedCallback}
+                      onChange={(e) => setSelectedCallback(e.target.value)}
+                    >
+                      <option value=''>-- Seleziona callback --</option>
+                      {callbacks.map(cb => (
+                        <option key={cb.id} value={cb.id}>{cb.id}</option>
+                      ))}
+                    </CFormSelect>
+                  </div>
+                )}
               </CCardBody>
             </CCard>
           </CCol>
@@ -282,7 +352,13 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
               </CCardHeader>
               <CCardBody>
                 <div className='mb-3'>
-                  <button className='btn btn-primary'>Associa</button>
+                  <CButton 
+                    color='primary' 
+                    disabled={!selectedPrestazione || !selectedCallback || loading}
+                    onClick={handleAssocia}
+                  >
+                    Associa
+                  </CButton>
                 </div>
               </CCardBody>
             </CCard>
@@ -296,10 +372,42 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 </h5>
               </CCardHeader>
               <CCardBody>
-                <div className='mb-3'>
-                  <label className='form-label'>Elenco delle regole inserite nel database</label>
-                  <div className='d-flex gap-2'></div>
-                </div>
+                {regole.length === 0 ? (
+                  <div className='text-muted'>Nessuna regola presente</div>
+                ) : (
+                  <div className='table-responsive'>
+                    <table className='table table-sm align-middle'>
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Prestazione</th>
+                          <th>Callback</th>
+                          <th>Attiva</th>
+                          <th>Azione</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {regole.map((r: any) => (
+                          <tr key={r.id}>
+                            <td>{r.id}</td>
+                            <td>{r.tipo_prestazione_id}</td>
+                            <td>{r.callback_function}</td>
+                            <td>
+                              <CButton size='sm' color={r.attiva ? 'warning' : 'success'} onClick={() => handleToggleRegola(r.id)}>
+                                {r.attiva ? 'Ferma' : 'Avvia'}
+                              </CButton>
+                            </td>
+                            <td>
+                              <CButton size='sm' color='danger' variant='outline' onClick={() => handleDeleteRegola(r.id)}>
+                                Elimina
+                              </CButton>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CCardBody>
             </CCard>
           </CCol>
