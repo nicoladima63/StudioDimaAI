@@ -208,12 +208,20 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     if (!selectedPrestazione || !selectedCallback) return;
     try {
       setLoading(true);
+      let paramsString: string | undefined;
+      if (selectedCallbackParams) {
+        try {
+          paramsString = JSON.stringify(selectedCallbackParams);
+        } catch (jsonError) {
+          throw new Error('I parametri della callback non sono in formato JSON valido.');
+        }
+      }
       const payload = {
         tipo_prestazione_id: selectedPrestazione.id,
         categoria_prestazione: selectedPrestazione.categoria_id,
         nome_prestazione: selectedPrestazione.nome,
         callback_function: selectedCallback,
-        parametri_callback: selectedCallbackParams ? JSON.stringify(selectedCallbackParams) : undefined,
+        parametri_callback: paramsString,
         attiva: false,
         preview_only: true,
       };

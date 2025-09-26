@@ -69,8 +69,7 @@ def get_regole():
 def get_regola(regola_id: int):
     """Recupera una singola regola di monitoraggio."""
     try:
-        regole = regole_monitoraggio_service.get_all_regole()
-        regola = next((r for r in regole if r['id'] == regola_id), None)
+        regola = regole_monitoraggio_service.get_regola_by_id(regola_id)
         
         if not regola:
             return jsonify({
@@ -193,9 +192,7 @@ def toggle_regola(regola_id: int):
     """Attiva/disattiva una regola di monitoraggio."""
     try:
         # Recupera regola corrente
-        #regole = regole_monitoraggio_service.get_all_regole()
         regola=regole_monitoraggio_service.get_regola_by_id(regola_id)
-        #regola = next((r for r in regole if r['id'] == regola_id), None)
         
         if not regola:
             return jsonify({
