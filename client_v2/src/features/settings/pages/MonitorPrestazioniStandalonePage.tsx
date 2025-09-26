@@ -9,6 +9,7 @@ import {
   CModalBody,
   CModalFooter,
   CTextarea,
+  CFormTextarea ,
   CSpinner,
   CAlert,
   CBadge,
@@ -19,10 +20,10 @@ import {
   CFormInput,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import {
-  cilMediaPlay,
-  cilMediaStop,
-  cilTrash,
+import { 
+  cilMediaPlay, 
+  cilMediaStop, 
+  cilTrash, 
   cilReload,
   cilSettings,
   cilCog,
@@ -54,7 +55,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
+  
   // Stati per selezione prestazioni
   const [selectedPrestazione, setSelectedPrestazione] = useState<Prestazione | null>(null);
   const [callbacks, setCallbacks] = useState<CallbackInfo[]>([]);
@@ -106,7 +107,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-
+      
       const response = await MonitorPrestazioniService.startMonitor();
       if (response.success) {
         setSuccess('Monitor avviato con successo');
@@ -127,7 +128,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-
+      
       const response = await MonitorPrestazioniService.stopMonitor();
       if (response.success) {
         setSuccess('Monitor fermato con successo');
@@ -148,7 +149,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-
+      
       const response = await MonitorPrestazioniService.testMonitor();
       if (response.success) {
         setSuccess('Test monitor completato');
@@ -167,7 +168,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const clearLogs = async () => {
     try {
       setError(null);
-
+      
       const response = await MonitorPrestazioniService.clearLogs();
       if (response.success) {
         setSuccess('Log puliti con successo');
@@ -246,6 +247,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
+
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('it-IT');
   };
@@ -265,7 +267,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageLayout.Header
+      <PageLayout.Header 
         title='Monitor Prestazioni DBF'
         subtitle='Gestione regole di monitoraggio e controllo prestazioni in tempo reale'
         headerAction={
@@ -300,22 +302,22 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 <div className='mb-3'>
                   <label className='form-label'>Seleziona Prestazione da Monitorare</label>
                   <div className='d-flex gap-2'>
-                    <PrestazioniSelect
-                      value={selectedPrestazione?.id || ''}
+                  <PrestazioniSelect
+                    value={selectedPrestazione?.id || ''}
                       onChange={prestazioneId => {
-                        if (prestazioneId) {
-                          // Trova la prestazione selezionata
+                      if (prestazioneId) {
+                        // Trova la prestazione selezionata
                           const prestazione = usePrestazioniStore
                             .getState()
                             .getPrestazioneById(prestazioneId);
-                          setSelectedPrestazione(prestazione);
-                        } else {
-                          setSelectedPrestazione(null);
-                        }
-                      }}
+                        setSelectedPrestazione(prestazione);
+                      } else {
+                        setSelectedPrestazione(null);
+                      }
+                    }}
                       placeholder='Seleziona prestazione...'
                       className='flex-grow-1'
-                    />
+                  />
                   </div>
                   {selectedPrestazione && (
                     <div className='mt-2 p-2 bg-light rounded'>
@@ -430,7 +432,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                         {regole.map((r: any) => (
                           <tr key={r.id}>
                             <td>{r.id}</td>
-                            <td>{r.tipo_prestazione_id}</td>
+                            <td>{r.nome_prestazione}</td>
                             <td>{r.callback_function}</td>
                             <td>
                               <CButton size='sm' color={r.attiva ? 'warning' : 'success'} onClick={() => handleToggleRegola(r.id)}>
@@ -483,7 +485,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
           <div className='mb-3'>
             <CFormLabel>URL params (JSON)</CFormLabel>
             <CFormTextarea rows={3} value={cbUrlParams} onChange={(e) => setCbUrlParams(e.target.value)} />
-            <small className='text-muted'>Puoi usare placeholder come {{tipo_prestazione}} che verranno sostituiti dai dati del contesto.</small>
+            <small className='text-muted'>Puoi usare placeholder come {'{{tipo_prestazione}}'} che verranno sostituiti dai dati del contesto.</small>
           </div>
         </CModalBody>
         <CModalFooter>
@@ -506,6 +508,9 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 phone: '+390000000000',
                 nome_completo: 'Mario Rossi',
                 tipo_prestazione: selectedPrestazione?.nome || 'Prestazione',
+                prestazione_nome: selectedPrestazione?.nome || '',
+                prestazione_codice: selectedPrestazione?.codice_breve || '',
+                tipo_prestazione_id: selectedPrestazione?.id || '',
               })
                 .then(data => setPreviewData(data))
                 .catch(() => setPreviewData({ url: `https://studiodimartino.eu/${cbPageSlug}`, message: '' }))
@@ -547,9 +552,9 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
               <CCol md={8}>
                 <div className='d-flex align-items-center gap-2'>
                   {status?.is_running ? (
-                    <CButton
+                    <CButton 
                       color='warning'
-                      onClick={handleStopMonitor}
+                      onClick={handleStopMonitor} 
                       disabled={loading}
                       size='sm'
                     >
@@ -561,9 +566,9 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                       Ferma Monitor
                     </CButton>
                   ) : (
-                    <CButton
+                    <CButton 
                       color='success'
-                      onClick={handleStartMonitor}
+                      onClick={handleStartMonitor} 
                       disabled={loading}
                       size='sm'
                     >
@@ -627,57 +632,57 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 )}
               </CCol>
             </CRow>
-          </CCardBody>
-        </CCard>
+              </CCardBody>
+            </CCard>
 
         {/* Card Log Monitor */}
-        <CCard>
-          <CCardHeader>
+            <CCard>
+              <CCardHeader>
             <h5 className='mb-0'>
               <CIcon icon={cilList} className='me-2' />
-              Log Monitor
-            </h5>
-          </CCardHeader>
-          <CCardBody>
-            <div
-              style={{
+                  Log Monitor
+                </h5>
+              </CCardHeader>
+              <CCardBody>
+                <div 
+                  style={{ 
                 height: '400px',
-                overflowY: 'auto',
-                border: '1px solid #dee2e6',
-                borderRadius: '0.375rem',
-                padding: '1rem',
-                backgroundColor: '#f8f9fa',
-                fontFamily: 'monospace',
+                    overflowY: 'auto', 
+                    border: '1px solid #dee2e6', 
+                    borderRadius: '0.375rem',
+                    padding: '1rem',
+                    backgroundColor: '#f8f9fa',
+                    fontFamily: 'monospace',
                 fontSize: '0.875rem',
-              }}
-            >
-              {logs.length === 0 ? (
+                  }}
+                >
+                  {logs.length === 0 ? (
                 <div className='text-center text-muted py-4'>
-                  <p>Nessun log disponibile</p>
-                  <small>Avvia il monitor per vedere i log in tempo reale</small>
-                </div>
-              ) : (
-                logs.map((log, index) => (
+                      <p>Nessun log disponibile</p>
+                      <small>Avvia il monitor per vedere i log in tempo reale</small>
+                    </div>
+                  ) : (
+                    logs.map((log, index) => (
                   <div key={index} className='mb-2'>
                     <div className='d-flex align-items-start'>
-                      <CBadge
-                        color={getLogBadgeColor(log.type)}
+                          <CBadge 
+                            color={getLogBadgeColor(log.type)} 
                         className='me-2 mt-1'
-                        style={{ fontSize: '0.75rem' }}
-                      >
-                        {log.type.toUpperCase()}
-                      </CBadge>
+                            style={{ fontSize: '0.75rem' }}
+                          >
+                            {log.type.toUpperCase()}
+                          </CBadge>
                       <div className='flex-grow-1'>
                         <div className='text-muted small'>{formatTimestamp(log.timestamp)}</div>
                         <div className='mt-1'>{log.message}</div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CCardBody>
-        </CCard>
+                    ))
+                  )}
+                </div>
+              </CCardBody>
+            </CCard>
       </PageLayout.ContentBody>
     </PageLayout>
   );

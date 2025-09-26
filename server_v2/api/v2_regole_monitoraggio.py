@@ -18,7 +18,7 @@ from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
-# Blueprint per le API regole monitoraggio
+# Blueprint per le API regole monitoraggio (prefisso specifico)
 regole_monitoraggio_bp = Blueprint('regole_monitoraggio', __name__)
 
 # Le funzioni di validazione sono ora nel servizio
@@ -193,8 +193,9 @@ def toggle_regola(regola_id: int):
     """Attiva/disattiva una regola di monitoraggio."""
     try:
         # Recupera regola corrente
-        regole = regole_monitoraggio_service.get_all_regole()
-        regola = next((r for r in regole if r['id'] == regola_id), None)
+        #regole = regole_monitoraggio_service.get_all_regole()
+        regola=regole_monitoraggio_service.get_regola_by_id(regola_id)
+        #regola = next((r for r in regole if r['id'] == regola_id), None)
         
         if not regola:
             return jsonify({
@@ -205,7 +206,7 @@ def toggle_regola(regola_id: int):
         new_status = not bool(regola['attiva'])
         
         # Aggiorna stato usando il servizio
-        updated_regola = regole_monitoraggio_service.update_regola(regola_id, {'attiva': new_status})
+        regole_monitoraggio_service.update_regola(regola_id, {'attiva': new_status})
         
         return jsonify({
             'success': True,

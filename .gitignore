@@ -101,3 +101,6 @@ server_v2/instance/certs/
 # Server V2 - File di snapshot e monitoraggio
 server_v2/data/snapshots/
 server_v2/data/monitoring/
+
+#Ignore cursor AI rules
+.cursor\rules\codacy.mdc

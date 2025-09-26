@@ -28,35 +28,34 @@ export interface RegolaItem {
   last_executed?: string | null
 }
 
-const base = '/regole-monitoraggio'
 
 export const regoleMonitoraggioApi = {
   async getCallbacks(): Promise<CallbackInfo[]> {
-    const res = await apiClient.get(`${base}/callbacks`)
+    const res = await apiClient.get(`/callbacks`)
     return res.data.data || []
   },
 
   async createRegola(payload: RegolaDto): Promise<RegolaItem> {
-    const res = await apiClient.post(`${base}/regole`, payload)
+    const res = await apiClient.post(`/regole`, payload)
     return res.data.data
   },
 
   async getRegole(params?: Record<string, any>): Promise<RegolaItem[]> {
-    const res = await apiClient.get(`${base}/regole`, { params })
+    const res = await apiClient.get(`/regole`, { params })
     return res.data.data || []
   },
 
   async toggleRegola(id: number): Promise<{ id: number; attiva: boolean }> {
-    const res = await apiClient.post(`${base}/regole/${id}/toggle`)
+    const res = await apiClient.post(`/regole/${id}/toggle`)
     return res.data.data
   },
 
   async deleteRegola(id: number): Promise<void> {
-    await apiClient.delete(`${base}/regole/${id}`)
+    await apiClient.delete(`/regole/${id}`)
   },
 
   async previewSendSmsLink(parametri: any, context_data: any = {}): Promise<{ url: string; message: string }> {
-    const res = await apiClient.post(`${base}/preview/send-sms-link`, { parametri, context_data })
+    const res = await apiClient.post(`/preview/send-sms-link`, { parametri, context_data })
     return res.data.data
   },
 }

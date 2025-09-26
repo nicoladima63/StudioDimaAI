@@ -83,6 +83,10 @@ class RegoleMonitoraggioService(BaseService):
             params = []
             
             if filters:
+                if filters.get('id'):
+                    query += " AND id = ?"
+                    params.append(filters['id'])
+
                 if filters.get('categoria'):
                     query += " AND categoria_prestazione = ?"
                     params.append(filters['categoria'])
@@ -101,8 +105,15 @@ class RegoleMonitoraggioService(BaseService):
             
             query += " ORDER BY priorita ASC, categoria_prestazione ASC"
             
-            regole = self.execute_query(query, tuple(params) if params else None)
-            
+            #regole = self.execute_query(query, tuple(params) if params else None)
+            #regole = self.execute_query(query, tuple(params))
+            if params:
+                regole = self.execute_query(query, tuple(params))
+            else:
+                regole = self.execute_query(query)
+
+
+
             # Arricchisci con nomi categoria
             for regola in regole:
                 if regola['categoria_prestazione']:
@@ -131,6 +142,11 @@ class RegoleMonitoraggioService(BaseService):
     def get_regole_per_prestazione(self, tipo_prestazione_id: str) -> List[Dict[str, Any]]:
         """Recupera regole per un tipo di prestazione specifico."""
         return self.get_all_regole({'tipo_prestazione': tipo_prestazione_id, 'attiva': True})
+    
+    def get_regola_by_id(self, regola_id: int) -> Optional[Dict[str, Any]]:
+        """Recupera una singola regola per ID."""
+        regole = self.get_all_regole({'id': regola_id})
+        return regole[0] if regole else None
     
     def create_regola(self, regola_data: Dict[str, Any]) -> Dict[str, Any]:
         """Crea una nuova regola di monitoraggio."""
@@ -184,18 +200,28 @@ class RegoleMonitoraggioService(BaseService):
             )
             
             rows_affected = self.execute_command(query, params)
-            
-            if rows_affected > 0:
-                # Recupera la regola appena creata
-                new_regola = self.execute_query(
-                    "SELECT * FROM regole_monitoraggio WHERE id = last_insert_rowid()"
-                )[0]
-                
-                logger.info(f"Regola creata: {new_regola['id']} - {new_regola['tipo_prestazione_id']}")
-                return new_regola
-            else:
+
+            if rows_affected == 0:
                 raise DatabaseError("Errore durante la creazione della regola")
-                
+
+            # Recupero tramite valori unici (tipo_prestazione_id + categoria_prestazione)
+            result = self.execute_query(
+                """
+                SELECT * FROM regole_monitoraggio
+                WHERE tipo_prestazione_id = ? AND categoria_prestazione = ?
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (insert_data['tipo_prestazione_id'], insert_data['categoria_prestazione'])
+            )
+            if not result:
+                raise DatabaseError("Errore durante il recupero della nuova regola")
+
+            new_regola = result[0]
+
+            logger.info(f"Regola creata: {new_regola['id']} - {new_regola['tipo_prestazione_id']}")
+            return new_regola                
+            
         except Exception as e:
             logger.error(f"Errore creazione regola: {e}")
             raise DatabaseError(f"Errore creazione regola: {e}")
