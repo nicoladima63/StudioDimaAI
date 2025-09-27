@@ -652,12 +652,6 @@ class RegoleMonitoraggioService(BaseService):
         template_key = parametri.get('template_key') or 'send_link'
         url_params = parametri.get('url_params') or {}
 
-        """Genera anteprima messaggio e URL per la callback send_sms_link senza invio."""
-        from urllib.parse import urlencode
-        page_slug = parametri.get('page_slug') or 'informazioni'
-        template_key = parametri.get('template_key') or 'send_link'
-        url_params = parametri.get('url_params') or {}
-
         def render_value(v: Any) -> Any:
             try:
                 if isinstance(v, str):

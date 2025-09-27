@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CCard,
-  CCardBody,
-  CCardHeader,
   CButton,
   CModal,
   CModalHeader,
   CModalBody,
   CModalFooter,
-  CTextarea,
   CFormTextarea ,
-  CSpinner,
-  CAlert,
-  CBadge,
   CRow,
   CCol,
   CFormSelect,
@@ -20,20 +13,22 @@ import {
   CFormInput,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { 
-  cilMediaPlay, 
-  cilMediaStop, 
-  cilTrash, 
+import {
+  cilTrash,
   cilReload,
   cilSettings,
-  cilCog,
   cilList,
-} from '@coreui/icons';
-import PageLayout from '@/components/layout/PageLayout';
+} from '@coreui/icons-react';import PageLayout from '@/components/layout/PageLayout';
 import { MonitorPrestazioniService } from '@/services/api/monitorPrestazioni';
 import PrestazioniSelect from '@/components/selects/PrestazioniSelect';
-import { Prestazione, usePrestazioniStore } from '@/store/prestazioni.store';
-import regoleMonitoraggioApi, { type CallbackInfo } from '@/features/settings/services/regoleMonitoraggio.service';
+import { Prestazione, usePrestazioniStore } from '@/store/prestazioni.store'
+import regoleMonitoraggioApi, { type CallbackInfo, type PreparedCallback } from '@/features/settings/services/regoleMonitoraggio.service';
+import ListaRegole from '@/features/settings/components/monitor/ListaRegole';
+import StatoMonitorCard from '@/features/settings/components/monitor/StatoMonitorCard';
+import LogMonitorCard from '@/features/settings/components/monitor/LogMonitorCard';
+import GestioneRegoleCard from '@/features/settings/components/monitor/GestioneRegoleCard';
+import CallbackCard from '@/features/settings/components/monitor/CallbackCard';
+import AssociaRegolaCard from '@/features/settings/components/monitor/AssociaRegolaCard';
 
 interface MonitorStatus {
   is_running: boolean;
@@ -68,13 +63,15 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [cbPageSlug, setCbPageSlug] = useState('istruzioni-ortodonzia');
   const [cbTemplateKey, setCbTemplateKey] = useState('send_link');
   const [cbSender, setCbSender] = useState('');
+  const [cbNome, setCbNome] = useState('');
   const [cbUrlParams, setCbUrlParams] = useState('{"src":"auto"}');
-  const [preparedCallbacks, setPreparedCallbacks] = useState<any[]>([]);
+  const [preparedCallbacks, setPreparedCallbacks] = useState<PreparedCallback[]>([]);
   const [selectedCallbackParams, setSelectedCallbackParams] = useState<any | null>(null);
 
   // Carica stato iniziale
   useEffect(() => {
     loadStatus();
+    // loadStatus();
     loadLogs();
     loadCallbacks();
     loadRegole();
@@ -190,6 +187,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     try {
       const data = await regoleMonitoraggioApi.getCallbacks();
       setCallbacks(data);
+      await loadPreparedCallbacks();
     } catch (e) {
       console.error('Errore caricamento callbacks', e);
     }
@@ -204,14 +202,30 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
-  const handleAssocia = async () => {
+  const loadPreparedCallbacks = async () => {
+    try {
+      const data = await regoleMonitoraggioApi.getPreparedCallbacks();
+      setPreparedCallbacks(data);
+    } catch (e) {
+      console.error('Errore caricamento callback preparate', e);
+    }
+  };
+
+  const handleAssocia = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!selectedPrestazione || !selectedCallback) return;
+
+    // Determina la funzione di callback e i parametri corretti
+    const preparedCb = preparedCallbacks.find(p => p.id === Number(selectedCallback));
+    const callbackFunction = preparedCb ? preparedCb.callback_function : selectedCallback;
+    const callbackParams = preparedCb ? preparedCb.parametri : selectedCallbackParams;
+
     try {
       setLoading(true);
       let paramsString: string | undefined;
-      if (selectedCallbackParams) {
+      if (callbackParams) {
         try {
-          paramsString = JSON.stringify(selectedCallbackParams);
+          paramsString = JSON.stringify(callbackParams);
         } catch (jsonError) {
           throw new Error('I parametri della callback non sono in formato JSON valido.');
         }
@@ -220,7 +234,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         tipo_prestazione_id: selectedPrestazione.id,
         categoria_prestazione: selectedPrestazione.categoria_id,
         nome_prestazione: selectedPrestazione.nome,
-        callback_function: selectedCallback,
+        callback_function: callbackFunction,
         parametri_callback: paramsString,
         attiva: false,
         preview_only: true,
@@ -247,6 +261,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   };
 
   const handleDeleteRegola = async (id: number) => {
+    if (!confirm('Sei sicuro di voler eliminare questa regola?')) return;
     try {
       await regoleMonitoraggioApi.deleteRegola(id);
       await loadRegole();
@@ -255,21 +270,13 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
-
-  const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString('it-IT');
-  };
-
-  const getLogBadgeColor = (type: string) => {
-    switch (type) {
-      case 'error':
-        return 'danger';
-      case 'warning':
-        return 'warning';
-      case 'success':
-        return 'success';
-      default:
-        return 'info';
+  const handleDeletePreparedCallback = async (id: number) => {
+    if (!confirm('Sei sicuro di voler eliminare questa callback personalizzata?')) return;
+    try {
+      await regoleMonitoraggioApi.deletePreparedCallback(id);
+      await loadPreparedCallbacks();
+    } catch (e) {
+      console.error('Errore eliminazione callback preparata', e);
     }
   };
 
@@ -299,119 +306,33 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
       <PageLayout.ContentHeader>
         <CRow>
           <CCol md={3}>
-            <CCard className='mb-4'>
-              <CCardHeader>
-                <h5 className='mb-0'>
-                  <CIcon icon={cilCog} className='me-2' />
-                  Gestione Regole di Monitoraggio
-                </h5>
-              </CCardHeader>
-              <CCardBody>
-                <div className='mb-3'>
-                  <label className='form-label'>Seleziona Prestazione da Monitorare</label>
-                  <div className='d-flex gap-2'>
-                  <PrestazioniSelect
-                    value={selectedPrestazione?.id || ''}
-                      onChange={prestazioneId => {
-                      if (prestazioneId) {
-                        // Trova la prestazione selezionata
-                          const prestazione = usePrestazioniStore
-                            .getState()
-                            .getPrestazioneById(prestazioneId);
-                        setSelectedPrestazione(prestazione);
-                      } else {
-                        setSelectedPrestazione(null);
-                      }
-                    }}
-                      placeholder='Seleziona prestazione...'
-                      className='flex-grow-1'
-                  />
-                  </div>
-                  {selectedPrestazione && (
-                    <div className='mt-2 p-2 bg-light rounded'>
-                      <small>
-                        <strong>{selectedPrestazione.nome}</strong>
-                        <br />
-                        <span className='text-muted'>
-                          {selectedPrestazione.categoria} - {selectedPrestazione.codice_breve}
-                        </span>
-                      </small>
-                    </div>
-                  )}
-                </div>
-              </CCardBody>
-            </CCard>
+            <GestioneRegoleCard 
+              selectedPrestazione={selectedPrestazione}
+              onPrestazioneChange={setSelectedPrestazione}
+            />
           </CCol>
           <CCol md={3}>
-            <CCard className='mb-4'>
-              <CCardHeader>
-              <h5 className='mb-0'>
-                  <CIcon icon={cilList} className='me-2' />
-                  Callback da associare alla prestazione
-                </h5>
-              </CCardHeader>
-              <CCardBody>
-                {callbacks.length === 0 && preparedCallbacks.length === 0 ? (
-                  <div className='text-center'>
-                    <p className='text-muted mb-2'>Nessuna callback disponibile</p>
-                    <CButton color='primary' size='sm' onClick={() => setShowCreateCallback(true)}>Crea callback</CButton>
-                  </div>
-                ) : (
-                  <div className='mb-3'>
-                    <label className='form-label'>Seleziona Callback</label>
-                    <CFormSelect
-                      value={selectedCallback}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        setSelectedCallback(val)
-                        // se è una prepared callback, carica i suoi parametri
-                        const found = preparedCallbacks.find(p => p.id === val)
-                        setSelectedCallbackParams(found ? found.params : null)
-                      }}
-                    >
-                      <option value=''>-- Seleziona callback --</option>
-                      {/* Prepared (utente) */}
-                      {preparedCallbacks.length > 0 && (
-                        <optgroup label='Personalizzate'>
-                          {preparedCallbacks.map(cb => (
-                            <option key={cb.id} value={cb.id}>{cb.label}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                      {/* Dal registro */}
-                      {callbacks.length > 0 && (
-                        <optgroup label='Di sistema'>
-                          {callbacks.map(cb => (
-                            <option key={cb.id} value={cb.id}>{cb.id}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </CFormSelect>
-                    <div className='mt-2'>
-                      <CButton color='secondary' size='sm' variant='outline' onClick={() => setShowCreateCallback(true)}>Crea callback</CButton>
-                    </div>
-                  </div>
-                )}
-              </CCardBody>
-            </CCard>
+            <CallbackCard 
+              callbacks={callbacks}
+              preparedCallbacks={preparedCallbacks}
+              selectedCallback={selectedCallback}
+              onCallbackChange={(value) => {
+                setSelectedCallback(value);
+                const found = preparedCallbacks.find(p => p.id === value)
+                setSelectedCallbackParams(found ? found.params : null)
+              }}
+              onDeletePreparedCallback={handleDeletePreparedCallback}
+              onShowCreateCallback={() => {
+                setCbNome('');
+                setShowCreateCallback(true);
+              }}
+            />
           </CCol>
           <CCol md={1}>
-            <CCard className='mb-4'>
-              <CCardHeader>
-                <h5 className='mb-0'>Associa</h5>
-              </CCardHeader>
-              <CCardBody>
-                <div className='mb-3'>
-                  <CButton 
-                    color='primary' 
-                    disabled={!selectedPrestazione || !selectedCallback || loading}
-                    onClick={handleAssocia}
-                  >
-                    Associa
-                  </CButton>
-                </div>
-              </CCardBody>
-            </CCard>
+            <AssociaRegolaCard 
+              onAssocia={handleAssocia}
+              disabled={!selectedPrestazione || !selectedCallback || loading}
+            />
           </CCol>
           <CCol md={4}>
             <CCard className='mb-4'>
@@ -422,42 +343,12 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 </h5>
               </CCardHeader>
               <CCardBody>
-                {regole.length === 0 ? (
-                  <div className='text-muted'>Nessuna regola presente</div>
-                ) : (
-                  <div className='table-responsive'>
-                    <table className='table table-sm align-middle'>
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>Prestazione</th>
-                          <th>Callback</th>
-                          <th>Attiva</th>
-                          <th>Azione</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {regole.map((r: any) => (
-                          <tr key={r.id}>
-                            <td>{r.id}</td>
-                            <td>{r.nome_prestazione}</td>
-                            <td>{r.callback_function}</td>
-                            <td>
-                              <CButton size='sm' color={r.attiva ? 'warning' : 'success'} onClick={() => handleToggleRegola(r.id)}>
-                                {r.attiva ? 'Ferma' : 'Avvia'}
-                              </CButton>
-                            </td>
-                            <td>
-                              <CButton size='sm' color='danger' variant='outline' onClick={() => handleDeleteRegola(r.id)}>
-                                Elimina
-                              </CButton>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                <ListaRegole 
+                  regole={regole}
+                  onToggle={handleToggleRegola}
+                  onDelete={handleDeleteRegola}
+                  loading={loading}
+                />
               </CCardBody>
             </CCard>
           </CCol>
@@ -473,6 +364,10 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
             <CFormSelect value={'send_sms_link'} disabled>
               <option value='send_sms_link'>send_sms_link</option>
             </CFormSelect>
+          </div>
+          <div className='mb-3'>
+            <CFormLabel>Nome Descrittivo *</CFormLabel>
+            <CFormInput value={cbNome} onChange={(e) => setCbNome(e.target.value)} placeholder='es. SMS Istruzioni Ortodonzia' />
           </div>
           <div className='mb-3'>
             <CFormLabel>Pagina (slug)</CFormLabel>
@@ -498,21 +393,27 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         </CModalBody>
         <CModalFooter>
           <CButton color='secondary' variant='outline' onClick={() => setShowCreateCallback(false)}>Annulla</CButton>
-          <CButton color='primary' onClick={() => {
-            // valida JSON
-            let params: any = {}
+          <CButton color='primary' onClick={async (e) => {
+            e.preventDefault();
+            if (!cbNome) {
+              alert('Il nome descrittivo è obbligatorio.');
+              return;
+            }
+            let params: any = {};
             try { params = cbUrlParams ? JSON.parse(cbUrlParams) : {} } catch { params = {} }
-            const id = `send_sms_link:${cbPageSlug}`
-            const label = `send_sms_link (${cbPageSlug})`
-            const prepared = { id, label, function: 'send_sms_link', params: { page_slug: cbPageSlug, template_key: cbTemplateKey, sender: cbSender || undefined, url_params: params } }
-            setPreparedCallbacks(prev => [...prev, prepared])
-            setSelectedCallback(prepared.id)
-            setSelectedCallbackParams(prepared.params)
+            
+            const payload = {
+              nome: cbNome,
+              callback_function: 'send_sms_link',
+              parametri: { page_slug: cbPageSlug, template_key: cbTemplateKey, sender: cbSender || undefined, url_params: params }
+            };
+            
+            const newPreparedCallback = await regoleMonitoraggioApi.createPreparedCallback(payload);
+            await loadPreparedCallbacks();
+
             setShowCreateCallback(false)
-              // apri preview
-              setShowPreview(true)
-              // preview lato server (template + url render)
-              regoleMonitoraggioApi.previewSendSmsLink(prepared.params, {
+            setShowPreview(true)
+            regoleMonitoraggioApi.previewSendSmsLink(newPreparedCallback.parametri, {
                 phone: '+390000000000',
                 nome_completo: 'Mario Rossi',
                 tipo_prestazione: selectedPrestazione?.nome || 'Prestazione',
@@ -547,150 +448,19 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
       <PageLayout.ContentBody>
         {/* Card Impostazioni Monitor */}
-        <CCard className='mb-4'>
-          <CCardHeader>
-            <h5 className='mb-0'>
-              <CIcon icon={cilSettings} className='me-2' />
-              Impostazioni Monitor
-            </h5>
-          </CCardHeader>
-          <CCardBody>
-            <CRow>
-              {/* Pulsanti di controllo */}
-              <CCol md={8}>
-                <div className='d-flex align-items-center gap-2'>
-                  {status?.is_running ? (
-                    <CButton 
-                      color='warning'
-                      onClick={handleStopMonitor} 
-                      disabled={loading}
-                      size='sm'
-                    >
-                      {loading ? (
-                        <CSpinner size='sm' className='me-1' />
-                      ) : (
-                        <CIcon icon={cilMediaStop} className='me-1' />
-                      )}
-                      Ferma Monitor
-                    </CButton>
-                  ) : (
-                    <CButton 
-                      color='success'
-                      onClick={handleStartMonitor} 
-                      disabled={loading}
-                      size='sm'
-                    >
-                      {loading ? (
-                        <CSpinner size='sm' className='me-1' />
-                      ) : (
-                        <CIcon icon={cilMediaPlay} className='me-1' />
-                      )}
-                      Avvia Monitor
-                    </CButton>
-                  )}
-                  {/* Stato e statistiche */}
-                  {status?.is_running ? (
-                    <CBadge color='success' className='fs-6'>
-                      <CIcon icon={cilMediaPlay} className='me-1' />
-                      Attivo
-                    </CBadge>
-                  ) : (
-                    <CBadge color='secondary' className='fs-6'>
-                      <CIcon icon={cilMediaStop} className='me-1' />
-                      Fermato
-                    </CBadge>
-                  )}
-                  {status && (
-                    <div className='small text-muted'>
-                      <div>
-                        Cambiamenti: <strong>{status.total_changes}</strong>
-                      </div>
-                      {status.last_check && (
-                        <div>
-                          Ultimo: <strong>{formatTimestamp(status.last_check)}</strong>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </CCol>
+        <StatoMonitorCard 
+          status={status}
+          loading={loading}
+          error={error}
+          success={success}
+          onStart={handleStartMonitor}
+          onStop={handleStopMonitor}
+          onTest={handleTestMonitor}
+          onClearError={() => setError(null)}
+          onClearSuccess={() => setSuccess(null)}
+        />
 
-              {/* Toast per messaggi */}
-              <CCol md={4}>
-                {error && (
-                  <CAlert
-                    color='danger'
-                    className='mb-2'
-                    onClose={() => setError(null)}
-                    dismissible
-                  >
-                    {error}
-                  </CAlert>
-                )}
-
-                {success && (
-                  <CAlert
-                    color='success'
-                    className='mb-2'
-                    onClose={() => setSuccess(null)}
-                    dismissible
-                  >
-                    {success}
-                  </CAlert>
-                )}
-              </CCol>
-            </CRow>
-              </CCardBody>
-            </CCard>
-
-        {/* Card Log Monitor */}
-            <CCard>
-              <CCardHeader>
-            <h5 className='mb-0'>
-              <CIcon icon={cilList} className='me-2' />
-                  Log Monitor
-                </h5>
-              </CCardHeader>
-              <CCardBody>
-                <div 
-                  style={{ 
-                height: '400px',
-                    overflowY: 'auto', 
-                    border: '1px solid #dee2e6', 
-                    borderRadius: '0.375rem',
-                    padding: '1rem',
-                    backgroundColor: '#f8f9fa',
-                    fontFamily: 'monospace',
-                fontSize: '0.875rem',
-                  }}
-                >
-                  {logs.length === 0 ? (
-                <div className='text-center text-muted py-4'>
-                      <p>Nessun log disponibile</p>
-                      <small>Avvia il monitor per vedere i log in tempo reale</small>
-                    </div>
-                  ) : (
-                    logs.map((log, index) => (
-                  <div key={index} className='mb-2'>
-                    <div className='d-flex align-items-start'>
-                          <CBadge 
-                            color={getLogBadgeColor(log.type)} 
-                        className='me-2 mt-1'
-                            style={{ fontSize: '0.75rem' }}
-                          >
-                            {log.type.toUpperCase()}
-                          </CBadge>
-                      <div className='flex-grow-1'>
-                        <div className='text-muted small'>{formatTimestamp(log.timestamp)}</div>
-                        <div className='mt-1'>{log.message}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CCardBody>
-            </CCard>
+        <LogMonitorCard logs={logs} />
       </PageLayout.ContentBody>
     </PageLayout>
   );

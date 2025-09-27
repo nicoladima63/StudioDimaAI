@@ -23,7 +23,7 @@ regole_monitoraggio_bp = Blueprint('regole_monitoraggio', __name__)
 
 # Le funzioni di validazione sono ora nel servizio
 
-@regole_monitoraggio_bp.route('/callbacks', methods=['GET'])
+@regole_monitoraggio_bp.route('/regole/callbacks', methods=['GET'])
 def get_callbacks():
     """Elenco delle callback disponibili."""
     try:
