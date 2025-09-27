@@ -280,6 +280,52 @@ class SnapshotManager:
         with self.lock:
             return self.snapshots.copy()
     
+    def get_changes(self, table_name: str) -> List[Dict[str, Any]]:
+        """
+        Compares the current state of a DBF file with the last snapshot and returns changes.
+
+        Args:
+            table_name: The name of the table to check.
+
+        Returns:
+            A list of dictionaries, where each dictionary is a new or modified record.
+        """
+        with self.lock:
+            old_snapshot = self.snapshots.get(table_name)
+            if not old_snapshot:
+                logger.warning(f"No snapshot available for {table_name} to compare changes.")
+                return []
+
+            try:
+                current_records_data = self._read_appunta_only(table_name, old_snapshot.file_path)
+                if not current_records_data:
+                    return []
+
+                changes = []
+                old_records = old_snapshot.records
+
+                for record_data in current_records_data:
+                    record_id = self._generate_record_id(record_data, table_name)
+                    record_hash = self._calculate_record_hash(record_data)
+
+                    old_record = old_records.get(record_id)
+
+                    if not old_record:
+                        # New record
+                        changes.append(record_data)
+                    elif old_record.hash != record_hash:
+                        # Modified record
+                        changes.append(record_data)
+                
+                if changes:
+                    logger.info(f"Detected {len(changes)} changes for table {table_name}.")
+
+                return changes
+
+            except Exception as e:
+                logger.error(f"Error getting changes for {table_name}: {e}")
+                return []
+    
     def get_snapshot_status(self) -> Dict[str, Any]:
         """
         Recupera status di tutti gli snapshot per monitoring.
