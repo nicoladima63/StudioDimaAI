@@ -265,5 +265,17 @@ class AutomationService(BaseService):
         result = sms_service.send_sms(phone, message, sender=sender, tag='auto_link')
         return {**result, 'url': final_url}
 
+import threading
+
 # Singleton instance
-automation_service = AutomationService()
+_automation_service = None
+_automation_service_lock = threading.Lock()
+
+def get_automation_service() -> "AutomationService":
+    """Get singleton automation service instance."""
+    global _automation_service
+    if _automation_service is None:
+        with _automation_service_lock:
+            if _automation_service is None:
+                _automation_service = AutomationService()
+    return _automation_service
