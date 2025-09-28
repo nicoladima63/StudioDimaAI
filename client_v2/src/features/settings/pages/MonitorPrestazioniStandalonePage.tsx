@@ -50,11 +50,14 @@ interface MonitorableTable {
 const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Stati principali
   const [monitorSummary, setMonitorSummary] = useState<MonitorSummary | null>(null);
-  const [selectedMonitorId, setSelectedMonitorId] = useState<string | null>(null);
   const [logs, setLogs] = useState<MonitorLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // Stato per il monitor selezionato (master-detail)
+  const [selectedMonitorId, setSelectedMonitorId] = useState<string | null>(null);
+
   // Conferma eliminazione
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteMonitorId, setPendingDeleteMonitorId] = useState<string | null>(null);
@@ -71,18 +74,25 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [monitorType, setMonitorType] = useState('file_watcher');
   const [monitorableTables, setMonitorableTables] = useState<{name: string, description: string}[]>([]);
 
-  // Modal per configurazione parametri azione (se l'azione selezionata li richiede)
-  const [showActionParamsModal, setShowActionParamsModal] = useState(false);
-  const [currentActionConfig, setCurrentActionConfig] = useState<any>({});
-
   // Carica stato iniziale
   useEffect(() => {
     loadStatus();
     loadLogs();
     loadActions();
-    loadRules();
+    // loadRules(); // Le regole ora vengono caricate quando si seleziona un monitor
     loadMonitorableTables();
   }, []);
+
+  // Carica le regole solo per il monitor selezionato
+  useEffect(() => {
+    setRules([]); // Pulisci subito le regole precedenti
+    if (selectedMonitorId) {
+      loadRules(selectedMonitorId);
+    } else {
+      // Assicura che le regole siano vuote se nessun monitor è selezionato
+      setRules([]); 
+    }
+  }, [selectedMonitorId]);
 
   const loadMonitorableTables = async () => {
     try {
@@ -333,12 +343,14 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
-  const loadRules = async () => {
+  const loadRules = async (monitorId: string | null) => {
     try {
-      const data = await automationApi.getRules();
+      const filters = monitorId ? { monitor_id: monitorId } : {};
+      const data = await automationApi.getRules(filters);
       setRules(data);
     } catch (e) {
       console.error('Errore caricamento regole di automazione', e);
+      setError('Impossibile caricare le regole per il monitor selezionato.');
     }
   };
 
@@ -373,14 +385,17 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
   const handleAssocia = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!selectedPrestazione || !selectedActionId) return;
+    if (!selectedPrestazione || !selectedActionId || !selectedMonitorId) {
+      setError("Seleziona una prestazione, un'azione e un monitor prima di associare.");
+      return;
+    }
 
     const selectedAction = actions.find(a => a.id === selectedActionId);
     if (!selectedAction) return;
 
     // Se l'azione richiede parametri, apri il modal per configurarli
     if (selectedAction.parameters && selectedAction.parameters.length > 0 && !selectedActionParams) {
-      setCurrentActionConfig({ action: selectedAction, prestazione: selectedPrestazione });
+      setCurrentActionConfig({ action: selectedAction, prestazione: selectedPrestazione, initialParams: selectedActionParams });
       setShowActionParamsModal(true);
       return;
     }
@@ -396,12 +411,13 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         action_params: selectedActionParams || {}, // Usa i parametri configurati o un oggetto vuoto
         attiva: true,
         priorita: 10,
+        monitor_id: selectedMonitorId, // *** CHIAVE DELLA NUOVA ARCHITETTURA ***
       };
       await automationApi.createRule(payload);
       setSuccess('Regola di automazione creata con successo');
       setSelectedActionId(null);
       setSelectedActionParams(null);
-      await loadRules();
+      await loadRules(selectedMonitorId); // Ricarica le regole per il monitor corrente
     } catch (e: any) {
       setError(e?.message || 'Errore creazione regola di automazione');
     } finally {
@@ -412,7 +428,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const handleToggleRegola = async (id: number) => {
     try {
       await automationApi.toggleRule(id);
-      await loadRules();
+      await loadRules(selectedMonitorId);
     } catch (e) {
       console.error('Errore toggle regola', e);
     }
@@ -422,30 +438,21 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     if (!confirm('Sei sicuro di voler eliminare questa regola di automazione?')) return;
     try {
       await automationApi.deleteRule(id);
-      await loadRules();
+      await loadRules(selectedMonitorId);
     } catch (e) {
       console.error('Errore eliminazione regola', e);
     }
   };
 
-  const handleActionParamsSave = useCallback((params: any) => {
-    setSelectedActionParams(params);
-    setShowActionParamsModal(false);
-  }, []);
-
   return (
     <PageLayout>
       <PageLayout.Header 
-        title='Monitor Prestazioni DBF'
+        title='Monitoraggio e Automazioni DBF'
         headerAction={
           <div className='d-flex gap-2'>
             <CButton color='info' onClick={refreshLogs} disabled={loading} size='sm'>
               <CIcon icon={cilReload} className='me-1' />
               Aggiorna Log
-            </CButton>
-            <CButton color='warning' onClick={handleTestMonitor} disabled={loading} size='sm'>
-              <CIcon icon={cilSettings} className='me-1' />
-              Test
             </CButton>
             <CButton color='danger' onClick={clearLogs} disabled={loading} size='sm'>
               <CIcon icon={cilTrash} className='me-1' />
@@ -455,192 +462,58 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         }
       />
 
+      {/* Area 1: Gestione Monitor */}
       <PageLayout.ContentHeader>
-        <CRow>
-          <CCol md={3}>
-            <GestioneRegoleCard 
-              selectedPrestazione={selectedPrestazione}
-              onPrestazioneChange={setSelectedPrestazione}
-            />
-          </CCol>
-          <CCol md={3}>
-            <CallbackCard 
-              actions={actions}
-              selectedActionId={selectedActionId}
-              onActionChange={setSelectedActionId}
-              onConfigureActionParams={() => {
-                const selectedAction = actions.find(a => a.id === selectedActionId);
-                if (selectedAction && selectedAction.parameters && selectedAction.parameters.length > 0) {
-                  setCurrentActionConfig({ action: selectedAction, prestazione: selectedPrestazione, initialParams: selectedActionParams });
-                  setShowActionParamsModal(true);
-                }
-              }}
-            />
-          </CCol>
-          <CCol md={1}>
-            <AssociaRegolaCard 
-              onAssocia={handleAssocia}
-              disabled={!selectedPrestazione || !selectedActionId || loading}
-            />
-          </CCol>
-          <CCol md={5}>
-            <CCard className='mb-4'>
-              <CCardHeader>
-                <h5 className='mb-0'>
-                  <CIcon icon={cilList} className='me-2' />
-                  Regole di Automazione
-                </h5>
-              </CCardHeader>
-              <CCardBody>
-                <ListaRegole 
-                  rules={rules} // Pass the new 'rules' data
-                  onToggle={handleToggleRegola}
-                  onDelete={handleDeleteRegola}
-                  loading={loading}
-                />
-              </CCardBody>
-            </CCard>
-          </CCol>
-        </CRow>
-      </PageLayout.ContentHeader>
+        <CCard className='mb-4'>
+          <CCardHeader>
+            <h5 className='mb-0'>
+              <CIcon icon={cilPlus} className='me-2' />
+              Crea Nuovo Monitor
+            </h5>
+          </CCardHeader>
+          <CCardBody>
+            <CRow className='g-3 align-items-end'>
+              <CCol md={4}>
+                <CFormLabel htmlFor='monitorTableName'>Tabella DBF da Monitorare</CFormLabel>
+                <CFormSelect
+                  id='monitorTableName'
+                  value={monitorTableName}
+                  onChange={(e) => setMonitorTableName(e.target.value)}
+                  disabled={loading || monitorableTables.length === 0}>
+                  {monitorableTables.length === 0 ? (
+                    <option>Caricamento tabelle...</option>
+                  ) : (
+                    monitorableTables.map(table => (
+                      <option key={table.name} value={table.name}>
+                        {table.name} ({table.description})
+                      </option>
+                    ))
+                  )}
+                </CFormSelect>
+              </CCol>
+              <CCol md={4}>
+                <CFormLabel htmlFor='monitorType'>Tipo di Monitoraggio</CFormLabel>
+                <CFormSelect
+                  id='monitorType'
+                  value={monitorType}
+                  onChange={(e) => setMonitorType(e.target.value)}
+                  disabled={loading}>
+                  <option value='file_watcher'>File Watcher (in tempo reale)</option>
+                </CFormSelect>
+              </CCol>
+              <CCol md={4}>
+                <CButton 
+                  color='primary' 
+                  onClick={handleCreateMonitor} 
+                  disabled={loading || !monitorTableName || !monitorType}>
+                  <CIcon icon={cilPlus} className='me-1' />
+                  Crea Monitor
+                </CButton>
+              </CCol>
+            </CRow>
+          </CCardBody>
+        </CCard>
 
-      {/* Sezione per la creazione del monitor */}
-      <PageLayout.ContentHeader>
-        <CRow>
-          <CCol md={12}>
-            <CCard className='mb-4'>
-              <CCardHeader>
-                <h5 className='mb-0'>
-                  <CIcon icon={cilPlus} className='me-2' />
-                  Gestione Monitor DBF
-                </h5>
-              </CCardHeader>
-              <CCardBody>
-                <CRow className='g-3 align-items-end'>
-                  <CCol md={4}>
-                    <CFormLabel htmlFor='monitorTableName'>Tabella DBF da Monitorare</CFormLabel>
-                    <CFormSelect
-                      id='monitorTableName'
-                      value={monitorTableName}
-                      onChange={(e) => setMonitorTableName(e.target.value)}
-                      disabled={loading || monitorableTables.length === 0}
-                    >
-                      {monitorableTables.length === 0 ? (
-                        <option>Caricamento tabelle...</option>
-                      ) : (
-                        monitorableTables.map(table => (
-                          <option key={table.name} value={table.name}>
-                            {table.name} ({table.description})
-                          </option>
-                        ))
-                      )}
-                    </CFormSelect>
-                  </CCol>
-                  <CCol md={4}>
-                    <CFormLabel htmlFor='monitorType'>Tipo di Monitoraggio</CFormLabel>
-                    <CFormSelect
-                      id='monitorType'
-                      value={monitorType}
-                      onChange={(e) => setMonitorType(e.target.value)}
-                      disabled={loading}
-                    >
-                      <option value='file_watcher'>File Watcher (in tempo reale)</option>
-                      {/* Aggiungere altri tipi se necessario */}
-                    </CFormSelect>
-                  </CCol>
-                  <CCol md={4}>
-                    <CButton 
-                      color='primary' 
-                      onClick={handleCreateMonitor} 
-                      disabled={loading || !monitorTableName || !monitorType}
-                    >
-                      <CIcon icon={cilPlus} className='me-1' />
-                      Crea Monitor
-                    </CButton>
-                  </CCol>
-                </CRow>
-              </CCardBody>
-            </CCard>
-          </CCol>
-        </CRow>
-      </PageLayout.ContentHeader>
-
-      {/* Modal per configurazione parametri azione */}
-      <CModal visible={showActionParamsModal} onClose={() => setShowActionParamsModal(false)} backdrop='static'>
-        <CModalHeader>Configura Parametri Azione: {currentActionConfig.action?.name}</CModalHeader>
-        <CModalBody>
-          <div className='mb-3'>
-            <CFormLabel>Slug della Pagina di Destinazione (es. promozione)</CFormLabel>
-            <CFormInput 
-              value={currentActionConfig.initialParams?.page_slug || ''}
-              onChange={(e) => {
-                setCurrentActionConfig((prev: any) => ({
-                  ...prev,
-                  initialParams: { ...prev.initialParams, page_slug: e.target.value }
-                }));
-              }}
-              placeholder='es. promozione'
-            />
-          </div>
-          <div className='mb-3'>
-            <CFormLabel>Chiave del Modello SMS (es. promozione_speciale)</CFormLabel>
-            <CFormInput 
-              value={currentActionConfig.initialParams?.template_key || ''}
-              onChange={(e) => {
-                setCurrentActionConfig((prev: any) => ({
-                  ...prev,
-                  initialParams: { ...prev.initialParams, template_key: e.target.value }
-                }));
-              }}
-              placeholder='es. promozione_speciale'
-            />
-          </div>
-          <div className='mb-3'>
-            <CFormLabel>Mittente SMS (opzionale, default: StudioDima)</CFormLabel>
-            <CFormInput 
-              value={currentActionConfig.initialParams?.sender || 'StudioDima'}
-              onChange={(e) => {
-                setCurrentActionConfig((prev: any) => ({
-                  ...prev,
-                  initialParams: { ...prev.initialParams, sender: e.target.value }
-                }));
-              }}
-              placeholder='es. StudioDima'
-            />
-          </div>
-          <div className='mb-3'>
-            <CFormLabel>Parametri URL Aggiuntivi (JSON, opzionale)</CFormLabel>
-            <CFormTextarea 
-              rows={3} 
-              value={currentActionConfig.initialParams?.url_params ? JSON.stringify(currentActionConfig.initialParams.url_params, null, 2) : ''}
-              onChange={(e) => {
-                try {
-                  const parsed = e.target.value ? JSON.parse(e.target.value) : {};
-                  setCurrentActionConfig((prev: any) => ({
-                    ...prev,
-                    initialParams: { ...prev.initialParams, url_params: parsed }
-                  }));
-                } catch (jsonError) {
-                  // Handle invalid JSON input, maybe show an error message
-                  console.error("Invalid JSON for url_params", jsonError);
-                }
-              }}
-              placeholder='{ "codice_paziente": "{DB_APCODP}" }'
-            />
-            <small className='text-muted'>
-              JSON di coppie chiave-valore. I valori possono essere placeholder come {'{{DB_APCODP}}'} che verranno sostituiti dai dati del contesto.
-              Questo campo è opzionale.
-            </small>
-          </div>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color='secondary' variant='outline' onClick={() => setShowActionParamsModal(false)}>Annulla</CButton>
-          <CButton color='primary' onClick={() => handleActionParamsSave(currentActionConfig.initialParams)}>Salva Parametri</CButton>
-        </CModalFooter>
-      </CModal>
-
-      <PageLayout.ContentBody>
-        {/* Lista Monitor */}
         {monitorSummary && (
           <CCard className='mb-4'>
             <CCardHeader>
@@ -654,92 +527,32 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 <CRow>
                   {Object.entries(monitorSummary.monitors).map(([monitorId, monitor]) => (
                     <CCol md={6} lg={4} key={monitorId} className='mb-3'>
-                      <CCard 
-                        className={`h-100 ${selectedMonitorId === monitorId ? 'border-primary' : ''}`}
-                      >
-                        <CCardBody>
+                      <CCard className={`h-100 ${selectedMonitorId === monitorId ? 'border-primary border-2' : ''}`}>
+                        <CCardBody className='d-flex flex-column'>
                           <div className='d-flex justify-content-between align-items-start mb-2'>
                             <h6 className='mb-0'>{monitor.table_name}</h6>
                             <CBadge color={monitor.status === 'running' ? 'success' : 'secondary'}>
                               {monitor.status}
                             </CBadge>
                           </div>
-                          <p className='small text-muted mb-1'>
-                            Tipo: {monitor.config.monitor_type}
-                          </p>
-                          <p className='small text-muted mb-1'>
-                            File: {monitor.config.file_path.split('\\').pop()}
-                          </p>
-                          <p className='small text-muted mb-1'>
-                            Intervallo: {monitor.config.interval_seconds}s
-                          </p>
-                          {/* Sezione riepilogo regole/azioni attive */}
-                          {(monitor as any).rules_summary && (
-                            <div className='small text-muted mb-2'>
-                              <div>
-                                Regole attive: <strong>{(monitor as any).rules_summary.active_rules}</strong>
-                              </div>
-                              {(monitor as any).rules_summary.example_actions && (monitor as any).rules_summary.example_actions.length > 0 && (
-                                <div>
-                                  Azioni: {(monitor as any).rules_summary.example_actions.join(', ')}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          <div className='d-flex justify-content-between mb-3'>
-                            <small className='text-muted'>
-                              Cambiamenti: {monitor.change_count}
-                            </small>
-                            <small className='text-muted'>
-                              Errori: {monitor.error_count}
-                            </small>
-                          </div>
-                          
-                          {/* Pulsanti di controllo */}
-                          <div className='d-flex gap-2 justify-content-between'>
-                            <div className='d-flex gap-1'>
-                              {monitor.status === 'running' ? (
-                                <CButton 
-                                  color='warning'
-                                  size='sm'
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleStopMonitorById(monitorId);
-                                  }}
-                                  disabled={loading}
-                                >
-                                  <CIcon icon={cilMediaStop} className='me-1' />
-                                  Stop
-                                </CButton>
-                              ) : (
-                                <CButton 
-                                  color='success'
-                                  size='sm'
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleStartMonitorById(monitorId);
-                                  }}
-                                  disabled={loading}
-                                >
-                                  <CIcon icon={cilMediaPlay} className='me-1' />
-                                  Avvia
-                                </CButton>
-                              )}
-                            </div>
-                            
-                            <div className='d-flex gap-1'>
+                          <p className='small text-muted mb-1'>ID: {monitorId}</p>
+                          <div className='mt-auto'>
+                            <div className='d-flex justify-content-between mt-3'>
+                              <CButton 
+                                color='primary'
+                                variant='outline'
+                                size='sm'
+                                onClick={() => setSelectedMonitorId(monitorId)}>
+                                <CIcon icon={cilSettings} className='me-1' />
+                                Gestisci Regole
+                              </CButton>
                               <CButton 
                                 color='danger'
                                 size='sm'
                                 variant='outline'
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  requestDeleteMonitor(monitorId);
-                                }}
-                                disabled={loading}
-                              >
-                                <CIcon icon={cilTrash} className='me-1' />
-                                Elimina
+                                onClick={() => requestDeleteMonitor(monitorId)}
+                                disabled={loading}>
+                                <CIcon icon={cilTrash} />
                               </CButton>
                             </div>
                           </div>
@@ -749,40 +562,71 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                   ))}
                 </CRow>
               ) : (
-                <p className='text-muted'>Nessun monitor configurato.</p>
+                <p className='text-muted'>Nessun monitor configurato. Creane uno per iniziare.</p>
               )}
             </CCardBody>
           </CCard>
         )}
+      </PageLayout.ContentHeader>
 
-        {/* Controlli Monitor Selezionato */}
-        {selectedMonitorId && monitorSummary?.monitors[selectedMonitorId] && (
-          <StatoMonitorCard 
-            status={monitorSummary.monitors[selectedMonitorId]}
-            loading={loading}
-            error={error}
-            success={success}
-            onStart={handleStartMonitor}
-            onStop={handleStopMonitor}
-            onTest={handleTestMonitor}
-            onClearError={() => setError(null)}
-            onClearSuccess={() => setSuccess(null)}
-          />
-        )}
+      {/* Area 2: Dettaglio Regole del Monitor Selezionato */}
+      {selectedMonitorId && (
+        <PageLayout.ContentBody>
+          <CCard className='mb-4'>
+            <CCardHeader>
+              <div className='d-flex justify-content-between align-items-center'>
+                <h5 className='mb-0'>
+                  <CIcon icon={cilList} className='me-2' />
+                  Gestione Regole per: <span className='fw-bold'>{monitorSummary?.monitors[selectedMonitorId]?.table_name}</span>
+                </h5>
+                <CButton variant='ghost' color='secondary' size='sm' onClick={() => setSelectedMonitorId(null)}>Chiudi</CButton>
+              </div>
+            </CCardHeader>
+            <CCardBody>
+              <CRow>
+                {/* Colonna Sinistra: Creazione Regola */}
+                <CCol md={4}>
+                  <h6 className='mb-3'>Crea Nuova Regola</h6>
+                  <GestioneRegoleCard 
+                    selectedPrestazione={selectedPrestazione}
+                    onPrestazioneChange={setSelectedPrestazione}
+                  />
+                  <CallbackCard 
+                    actions={actions}
+                    selectedActionId={selectedActionId}
+                    onActionChange={setSelectedActionId}
+                    initialParams={selectedActionParams}
+                    onParamsChange={setSelectedActionParams}
+                  />
+                  <AssociaRegolaCard 
+                    onAssocia={handleAssocia}
+                    disabled={!selectedPrestazione || !selectedActionId || loading}
+                  />
+                </CCol>
 
+                {/* Colonna Destra: Lista Regole */}
+                <CCol md={8}>
+                  <h6 className='mb-3'>Regole per questo Monitor</h6>
+                  <ListaRegole 
+                    rules={rules} 
+                    onToggle={handleToggleRegola}
+                    onDelete={handleDeleteRegola}
+                    loading={loading}
+                  />
+                </CCol>
+              </CRow>
+            </CCardBody>
+          </CCard>
+        </PageLayout.ContentBody>
+      )}
+
+      <PageLayout.ContentBody>
         <LogMonitorCard logs={logs} />
-        
-        {/* Modal conferma eliminazione monitor */}
         <CModal visible={showDeleteModal} onClose={cancelDeleteMonitor} backdrop='static'>
           <CModalHeader>Conferma eliminazione</CModalHeader>
           <CModalBody>
             Sei sicuro di voler eliminare questo monitor?
-            {pendingDeleteMonitorId && (
-              <>
-                <br />
-                <small className='text-muted'>ID: {pendingDeleteMonitorId}</small>
-              </>
-            )}
+            {pendingDeleteMonitorId && <small className='text-muted d-block'>ID: {pendingDeleteMonitorId}</small>}
           </CModalBody>
           <CModalFooter>
             <CButton color='secondary' variant='outline' onClick={cancelDeleteMonitor} disabled={loading}>Annulla</CButton>
@@ -792,6 +636,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
           </CModalFooter>
         </CModal>
       </PageLayout.ContentBody>
+
     </PageLayout>
   );
 };

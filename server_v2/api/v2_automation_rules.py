@@ -38,9 +38,10 @@ def get_rules():
             filters['attiva'] = request.args.get('attiva').lower() == 'true'
         if request.args.get('trigger_id'):
             filters['trigger_id'] = request.args.get('trigger_id')
-        
-        rules = automation_service.get_all_rules(filters if filters else None)
-        
+        if request.args.get('monitor_id'):
+            filters['monitor_id'] = request.args.get('monitor_id')
+    
+        rules = automation_service.get_all_rules(filters if filters else None)        
         return jsonify({
             'success': True,
             'data': rules,

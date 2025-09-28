@@ -72,6 +72,9 @@ class AutomationService(BaseService):
                 if filters.get('id'):
                     query += " AND r.id = ?"
                     params.append(filters['id'])
+                if filters.get('monitor_id'):
+                    query += " AND r.monitor_id = ?"
+                    params.append(filters['monitor_id'])
                 if filters.get('attiva') is not None:
                     query += " AND r.attiva = ?"
                     params.append(1 if filters['attiva'] else 0)
@@ -104,15 +107,15 @@ class AutomationService(BaseService):
     def create_rule(self, rule_data: Dict[str, Any]) -> Dict[str, Any]:
         """Crea una nuova regola di automazione."""
         # Basic validation
-        if not all(k in rule_data for k in ['name', 'trigger_id', 'action_id']):
-            raise ValidationError("Campi 'name', 'trigger_id', 'action_id' sono obbligatori.")
+        if not all(k in rule_data for k in ['name', 'trigger_id', 'action_id', 'monitor_id']):
+            raise ValidationError("Campi 'name', 'trigger_id', 'action_id', 'monitor_id' sono obbligatori.")
 
         query = """
             INSERT INTO automation_rules (
                 name, description, trigger_type, trigger_id, 
-                action_id, action_params_json, attiva, priorita
+                action_id, action_params_json, attiva, priorita, monitor_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         params = (
             rule_data['name'],
@@ -122,7 +125,8 @@ class AutomationService(BaseService):
             rule_data['action_id'],
             json.dumps(rule_data.get('action_params', {})),
             rule_data.get('attiva', True),
-            rule_data.get('priorita', 100)
+            rule_data.get('priorita', 100),
+            rule_data['monitor_id']
         )
         
         try:

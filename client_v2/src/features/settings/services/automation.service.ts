@@ -53,13 +53,16 @@ const automationApi = {
     return response.data.data || [];
   },
 
-  async getRules(filters?: { attiva?: boolean; trigger_id?: string }): Promise<AutomationRule[]> {
+  async getRules(filters?: { attiva?: boolean; trigger_id?: string; monitor_id?: string }): Promise<AutomationRule[]> {
     const queryParams = new URLSearchParams();
     if (filters?.attiva !== undefined) {
       queryParams.append('attiva', String(filters.attiva));
     }
     if (filters?.trigger_id) {
       queryParams.append('trigger_id', filters.trigger_id);
+    }
+    if (filters?.monitor_id) {
+      queryParams.append('monitor_id', filters.monitor_id);
     }
     const response = await apiClient.get(`/automations/rules?${queryParams.toString()}`);
     return response.data.data || [];
