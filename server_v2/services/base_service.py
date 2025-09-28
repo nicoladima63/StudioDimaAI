@@ -108,21 +108,25 @@ class BaseService(ABC):
     
     def execute_command(self, command: str, params: tuple = ()) -> int:
         """
-        Execute a command (INSERT, UPDATE, DELETE) and return affected rows.
+        Execute a command (INSERT, UPDATE, DELETE) and return affected rows or last inserted ID.
         
         Args:
             command: SQL command
             params: Command parameters
             
         Returns:
-            Number of affected rows
+            Number of affected rows for UPDATE/DELETE, or last inserted ID for INSERT.
         """
         try:
             with self.db_manager.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(command, params)
                 conn.commit()
-                return cursor.rowcount
+                
+                if command.strip().upper().startswith("INSERT"):
+                    return cursor.lastrowid
+                else:
+                    return cursor.rowcount
                 
         except Exception as e:
             self.logger.error(f"Command execution failed: {e}")

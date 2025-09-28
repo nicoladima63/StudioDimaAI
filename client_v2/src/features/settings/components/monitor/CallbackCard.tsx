@@ -1,79 +1,58 @@
-
 import React from 'react';
 import { CCard, CCardBody, CCardHeader, CButton, CFormSelect } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilList, cilTrash } from '@coreui/icons';
-import { CallbackInfo, PreparedCallback } from '@/features/settings/services/regoleMonitoraggio.service';
+import { cilList, cilSettings } from '@coreui/icons'; // Added cilSettings for configure button
+import { Action } from '@/features/settings/services/automation.service';
 
-interface CallbackCardProps {
-  callbacks: CallbackInfo[];
-  preparedCallbacks: PreparedCallback[];
-  selectedCallback: string;
-  onCallbackChange: (value: string) => void;
-  onDeletePreparedCallback: (id: number) => void;
-  onShowCreateCallback: () => void;
+interface CallbackCardProps { // Renamed to ActionCardProps conceptually, but keeping for now
+  actions: Action[];
+  selectedActionId: number | null;
+  onActionChange: (value: number | null) => void;
+  onConfigureActionParams: () => void;
 }
 
-const CallbackCard: React.FC<CallbackCardProps> = ({ 
-  callbacks, 
-  preparedCallbacks, 
-  selectedCallback, 
-  onCallbackChange,
-  onDeletePreparedCallback,
-  onShowCreateCallback
+const CallbackCard: React.FC<CallbackCardProps> = ({
+  actions,
+  selectedActionId,
+  onActionChange,
+  onConfigureActionParams,
 }) => {
+  const selectedAction = actions.find(action => action.id === selectedActionId);
+  const requiresParams = selectedAction && selectedAction.parameters && selectedAction.parameters.length > 0;
+
   return (
     <CCard className='mb-4'>
       <CCardHeader>
         <h5 className='mb-0'>
           <CIcon icon={cilList} className='me-2' />
-          Callback da associare
+          Azione da associare
         </h5>
       </CCardHeader>
       <CCardBody>
-        {callbacks.length === 0 && preparedCallbacks.length === 0 ? (
+        {actions.length === 0 ? (
           <div className='text-center'>
-            <p className='text-muted mb-2'>Nessuna callback disponibile</p>
-            <CButton color='primary' size='sm' onClick={onShowCreateCallback}>Crea callback</CButton>
+            <p className='text-muted mb-2'>Nessuna azione disponibile</p>
           </div>
         ) : (
           <div className='mb-3'>
-            <label className='form-label'>Seleziona Callback</label>
+            <label className='form-label'>Seleziona Azione</label>
             <CFormSelect
-              value={selectedCallback}
-              onChange={(e) => onCallbackChange(e.target.value)}
+              value={selectedActionId || ''}
+              onChange={(e) => onActionChange(e.target.value ? Number(e.target.value) : null)}
             >
-              <option value=''>-- Seleziona callback --</option>
-              {preparedCallbacks.length > 0 && (
-                <optgroup label='Personalizzate'>
-                  {preparedCallbacks.map(cb => (
-                    <option key={cb.id} value={String(cb.id)}>{cb.nome}</option>
-                  ))}
-                </optgroup>
-              )}
-              {callbacks.length > 0 && (
-                <optgroup label='Di sistema'>
-                  {callbacks.map(cb => (
-                    <option key={cb.id} value={cb.id}>{cb.id}</option>
-                  ))}
-                </optgroup>
-              )}
-            </CFormSelect>
-            <div className='mt-2'>
-              <CButton color='secondary' size='sm' variant='outline' onClick={onShowCreateCallback}>
-                Crea callback
-              </CButton>
-            </div>
-            <div className='mt-3'>
-              {preparedCallbacks.map(cb => (
-                <div key={cb.id} className='d-flex justify-content-between align-items-center small mb-1'>
-                  <span>{cb.nome}</span>
-                  <CButton size='sm' color='danger' variant='ghost' onClick={() => onDeletePreparedCallback(cb.id)}>
-                    <CIcon icon={cilTrash} />
-                  </CButton>
-                </div>
+              <option value=''>-- Seleziona azione --</option>
+              {actions.map(action => (
+                <option key={action.id} value={action.id}>{action.name} ({action.description})</option>
               ))}
-            </div>
+            </CFormSelect>
+            {selectedActionId && requiresParams && (
+              <div className='mt-2'>
+                <CButton color='info' size='sm' variant='outline' onClick={onConfigureActionParams}>
+                  <CIcon icon={cilSettings} className='me-1' />
+                  Configura Parametri
+                </CButton>
+              </div>
+            )}
           </div>
         )}
       </CCardBody>

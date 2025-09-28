@@ -81,7 +81,7 @@ class AutomationService(BaseService):
             
             query += " ORDER BY r.priorita ASC, r.id ASC"
             
-            rules = self.execute_query(query, tuple(params) if params else None)
+            rules = self.execute_query(query, tuple(params) if params else ())
 
             for rule in rules:
                 if rule.get('action_params_json'):
@@ -126,7 +126,7 @@ class AutomationService(BaseService):
         )
         
         try:
-            rule_id = self.execute_command(query, params, insert=True)
+            rule_id = self.execute_command(query, params)
             if not rule_id:
                 raise DatabaseError("Creazione regola fallita, nessun ID restituito.")
             

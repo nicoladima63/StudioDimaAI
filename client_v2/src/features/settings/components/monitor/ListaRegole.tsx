@@ -2,26 +2,19 @@ import React from 'react';
 import { CButton } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilTrash } from '@coreui/icons';
-
-// Definiamo il tipo per una singola regola per chiarezza
-interface Regola {
-  id: number;
-  nome_prestazione: string;
-  callback_function: string;
-  attiva: boolean;
-}
+import { AutomationRule } from '@/features/settings/services/automation.service';
 
 // Definiamo le props che il componente riceverà
 interface ListaRegoleProps {
-  regole: Regola[];
+  rules: AutomationRule[];
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
   loading: boolean;
 }
 
-const ListaRegole: React.FC<ListaRegoleProps> = ({ regole, onToggle, onDelete, loading }) => {
-  if (regole.length === 0) {
-    return <div className='text-muted'>Nessuna regola presente</div>;
+const ListaRegole: React.FC<ListaRegoleProps> = ({ rules, onToggle, onDelete, loading }) => {
+  if (rules.length === 0) {
+    return <div className='text-muted'>Nessuna regola di automazione presente</div>;
   }
 
   return (
@@ -30,18 +23,20 @@ const ListaRegole: React.FC<ListaRegoleProps> = ({ regole, onToggle, onDelete, l
         <thead>
           <tr>
             <th>ID</th>
-            <th>Prestazione</th>
-            <th>Callback</th>
+            <th>Nome Regola</th>
+            <th>Trigger ID</th>
+            <th>Azione</th>
             <th>Stato</th>
             <th>Azioni</th>
           </tr>
         </thead>
         <tbody>
-          {regole.map((r) => (
+          {rules.map((r) => (
             <tr key={r.id}>
               <td>{r.id}</td>
-              <td>{r.nome_prestazione}</td>
-              <td>{r.callback_function}</td>
+              <td>{r.name}</td>
+              <td>{r.trigger_id}</td>
+              <td>{r.action_name}</td>
               <td>
                 <CButton
                   size='sm'
@@ -49,7 +44,7 @@ const ListaRegole: React.FC<ListaRegoleProps> = ({ regole, onToggle, onDelete, l
                   onClick={() => onToggle(r.id)}
                   disabled={loading}
                 >
-                  {r.attiva ? 'Ferma' : 'Avvia'}
+                  {r.attiva ? 'Disattiva' : 'Attiva'}
                 </CButton>
               </td>
               <td>

@@ -5,10 +5,25 @@ import CIcon from '@coreui/icons-react';
 import { cilMediaPlay, cilMediaStop, cilSettings } from '@coreui/icons';
 
 interface MonitorStatus {
-  is_running: boolean;
-  path: string;
-  last_check?: string;
-  total_changes: number;
+  monitor_id: string;
+  status: 'stopped' | 'running' | 'paused' | 'error';
+  table_name: string;
+  config: {
+    monitor_id: string;
+    table_name: string;
+    file_path: string;
+    monitor_type: string;
+    interval_seconds: number;
+    enabled: boolean;
+    auto_start: boolean;
+    metadata: any;
+  };
+  last_check: string | null;
+  last_change: string | null;
+  change_count: number;
+  error_count: number;
+  created_at: string | null;
+  started_at: string | null;
 }
 
 interface StatoMonitorCardProps {
@@ -43,15 +58,20 @@ const StatoMonitorCard: React.FC<StatoMonitorCardProps> = ({
       <CCardHeader>
         <h5 className='mb-0'>
           <CIcon icon={cilSettings} className='me-2' />
-          Impostazioni Monitor
+          {status ? `Monitor: ${status.table_name}` : 'Impostazioni Monitor'}
         </h5>
+        {status && (
+          <small className='text-muted'>
+            ID: {status.monitor_id} | Tipo: {status.config.monitor_type}
+          </small>
+        )}
       </CCardHeader>
       <CCardBody>
         <CRow>
           {/* Pulsanti di controllo */}
           <CCol md={8}>
             <div className='d-flex align-items-center gap-2'>
-              {status?.is_running ? (
+              {status?.status === 'running' ? (
                 <CButton 
                   color='warning'
                   onClick={onStop} 
@@ -81,7 +101,7 @@ const StatoMonitorCard: React.FC<StatoMonitorCardProps> = ({
                 </CButton>
               )}
               {/* Stato e statistiche */}
-              {status?.is_running ? (
+              {status?.status === 'running' ? (
                 <CBadge color='success' className='fs-6'>
                   <CIcon icon={cilMediaPlay} className='me-1' />
                   Attivo
@@ -92,10 +112,24 @@ const StatoMonitorCard: React.FC<StatoMonitorCardProps> = ({
                   Fermato
                 </CBadge>
               )}
+              <CButton 
+                color='info'
+                onClick={onTest} 
+                disabled={loading}
+                size='sm'
+                variant='outline'
+              >
+                {loading ? (
+                  <CSpinner size='sm' className='me-1' />
+                ) : (
+                  <CIcon icon={cilSettings} className='me-1' />
+                )}
+                Test
+              </CButton>
               {status && (
                 <div className='small text-muted'>
                   <div>
-                    Cambiamenti: <strong>{status.total_changes}</strong>
+                    Cambiamenti: <strong>{status.change_count}</strong>
                   </div>
                   {status.last_check && (
                     <div>

@@ -1,1 +1,62 @@
-{}
+{
+  "preventivi_file_watcher_1758988146": {
+    "monitor_id": "preventivi_file_watcher_1758988146",
+    "table_name": "preventivi",
+    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {}
+  },
+  "preventivi_file_watcher_1758989060": {
+    "monitor_id": "preventivi_file_watcher_1758989060",
+    "table_name": "preventivi",
+    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {}
+  },
+  "preventivi_file_watcher_1758989128": {
+    "monitor_id": "preventivi_file_watcher_1758989128",
+    "table_name": "preventivi",
+    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {}
+  },
+  "preventivi_file_watcher_1758989311": {
+    "monitor_id": "preventivi_file_watcher_1758989311",
+    "table_name": "preventivi",
+    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {}
+  },
+  "preventivi_file_watcher_1758989336": {
+    "monitor_id": "preventivi_file_watcher_1758989336",
+    "table_name": "preventivi",
+    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {}
+  },
+  "preventivi_file_watcher_1758989482": {
+    "monitor_id": "preventivi_file_watcher_1758989482",
+    "table_name": "preventivi",
+    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {}
+  }
+}
