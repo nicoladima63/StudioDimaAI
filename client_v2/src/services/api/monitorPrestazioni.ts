@@ -112,6 +112,14 @@ export class MonitorPrestazioniService {
     const response = await apiClient.delete(`/monitor/monitors/${monitorId}`);
     return response.data;
   }
+
+  /**
+   * Recupera la lista delle tabelle monitorabili
+   */
+  static async getMonitorableTables(): Promise<ApiResponse<{ name: string; description: string }[]>> {
+    const response = await apiClient.get('/monitorable-tables');
+    return response.data;
+  }
 }
 
 export default MonitorPrestazioniService

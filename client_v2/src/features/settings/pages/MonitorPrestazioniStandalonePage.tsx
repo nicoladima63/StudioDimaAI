@@ -28,6 +28,7 @@ import {
 } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
 
+import apiClient from '@/services/api/client';
 import { Prestazione } from '@/store/prestazioni.store'
 import automationApi, { type Action, type AutomationRule } from '@/features/settings/services/automation.service';
 import ListaRegole from '@/features/settings/components/monitor/ListaRegole';
@@ -40,6 +41,11 @@ import AssociaRegolaCard from '@/features/settings/components/monitor/AssociaReg
 import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary } from '@/services/api/monitorPrestazioni';
 
 interface MonitorLog extends BackendMonitorLog {}
+
+interface MonitorableTable {
+  name: string;
+  description: string;
+}
 
 const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Stati principali
@@ -63,6 +69,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Stati per creazione monitor
   const [monitorTableName, setMonitorTableName] = useState('preventivi');
   const [monitorType, setMonitorType] = useState('file_watcher');
+  const [monitorableTables, setMonitorableTables] = useState<{name: string, description: string}[]>([]);
 
   // Modal per configurazione parametri azione (se l'azione selezionata li richiede)
   const [showActionParamsModal, setShowActionParamsModal] = useState(false);
@@ -74,7 +81,26 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     loadLogs();
     loadActions();
     loadRules();
+    loadMonitorableTables();
   }, []);
+
+  const loadMonitorableTables = async () => {
+    try {
+      const response = await MonitorPrestazioniService.getMonitorableTables();
+      if (response.success && Array.isArray(response.data)) {
+        setMonitorableTables(response.data);
+        if (!monitorTableName && response.data.length > 0) {
+          setMonitorTableName(response.data[0].name);
+        }
+      } else {
+        console.error('Failed to load monitorable tables:', response.message);
+        setError(response.message || 'Impossibile caricare la lista delle tabelle monitorabili.');
+      }
+    } catch (error: any) {
+      console.error('Error fetching monitorable tables:', error);
+      setError(error.message || 'Impossibile caricare la lista delle tabelle monitorabili.');
+    }
+  };
 
   const loadStatus = async () => {
     try {
@@ -457,7 +483,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
               disabled={!selectedPrestazione || !selectedActionId || loading}
             />
           </CCol>
-          <CCol md={4}>
+          <CCol md={5}>
             <CCard className='mb-4'>
               <CCardHeader>
                 <h5 className='mb-0'>
@@ -497,10 +523,17 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                       id='monitorTableName'
                       value={monitorTableName}
                       onChange={(e) => setMonitorTableName(e.target.value)}
-                      disabled={loading}
+                      disabled={loading || monitorableTables.length === 0}
                     >
-                      <option value='PREVENT'>PREVENT (Preventivi/Piani di Cura)</option>
-                      {/* Aggiungere altre tabelle se necessario */}
+                      {monitorableTables.length === 0 ? (
+                        <option>Caricamento tabelle...</option>
+                      ) : (
+                        monitorableTables.map(table => (
+                          <option key={table.name} value={table.name}>
+                            {table.name} ({table.description})
+                          </option>
+                        ))
+                      )}
                     </CFormSelect>
                   </CCol>
                   <CCol md={4}>

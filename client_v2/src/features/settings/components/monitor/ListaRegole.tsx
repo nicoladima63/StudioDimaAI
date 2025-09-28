@@ -1,7 +1,7 @@
 import React from 'react';
 import { CButton } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilTrash } from '@coreui/icons';
+import { cilTrash, cilMediaStop, cilMediaPlay } from '@coreui/icons';
 import { AutomationRule } from '@/features/settings/services/automation.service';
 
 // Definiamo le props che il componente riceverà
@@ -44,7 +44,7 @@ const ListaRegole: React.FC<ListaRegoleProps> = ({ rules, onToggle, onDelete, lo
                   onClick={() => onToggle(r.id)}
                   disabled={loading}
                 >
-                  {r.attiva ? 'Disattiva' : 'Attiva'}
+                  {r.attiva ? <CIcon icon={cilMediaStop} /> : <CIcon icon={cilMediaPlay} />}
                 </CButton>
               </td>
               <td>
@@ -55,7 +55,7 @@ const ListaRegole: React.FC<ListaRegoleProps> = ({ rules, onToggle, onDelete, lo
                   onClick={() => onDelete(r.id)}
                   disabled={loading}
                 >
-                  <CIcon icon={cilTrash} /> Elimina
+                  <CIcon icon={cilTrash} />
                 </CButton>
               </td>
             </tr>
