@@ -33,7 +33,7 @@ const App: React.FC = () => {
       FallbackComponent={ErrorFallback}
       onError={(error: Error, errorInfo: any) => {
         // Log errors in development
-        if (config.app.environment === 'development') {
+        if (config && config.app && config.app.environment === 'development') {
           console.error('Application Error:', error)
           console.error('Error Info:', errorInfo)
         }

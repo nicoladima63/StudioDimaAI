@@ -154,6 +154,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_prestazioni import prestazioni_bp
     from api.v2_automation_rules import automation_bp
     from api.v2_tables import tables_bp
+    from api.v2_templates import templates_v2_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -173,7 +174,8 @@ def register_blueprints(app: Flask) -> None:
         monitoring_bp,
         prestazioni_bp,
         automation_bp,
-        tables_bp
+        tables_bp,
+        templates_v2_bp
     ]
     
     # Register standard blueprints with API prefix only

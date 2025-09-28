@@ -203,8 +203,8 @@ class AutomationService(BaseService):
             logger.error(f"Errore esecuzione regole per trigger {trigger_type}:{trigger_id}: {e}")
             raise
 
-    def _execute_single_rule(self, rule: Dict[str, Any], context_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Esegue una singola regola."""
+    def _execute_single_rule(self, rule: Dict[str, Any], initial_context_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Esegue una singola regola.""" 
         rule_id = rule['id']
         action_name = rule['action_name']
         
@@ -217,8 +217,15 @@ class AutomationService(BaseService):
             impl_func = self.action_implementation_registry[action_name]
             action_params = rule.get('action_params', {})
             
-            # Combina contesto e parametri specifici dell'azione
-            full_context = {**context_data, **action_params}
+            # Arricchisci il contesto con i dati del trigger (es. paziente, prestazione)
+            enriched_context_data = self._get_context_data_for_trigger(
+                rule['trigger_type'], 
+                rule['trigger_id'], 
+                initial_context_data
+            )
+            
+            # Combina contesto arricchito e parametri specifici dell'azione
+            full_context = {**enriched_context_data, **action_params}
             
             result = impl_func(full_context)
             
@@ -229,6 +236,35 @@ class AutomationService(BaseService):
             logger.exception(f"Errore durante l'esecuzione della regola {rule_id} (Azione: {action_name}): {e}")
             return {'success': False, 'rule_id': rule_id, 'error': str(e)}
 
+    def _get_context_data_for_trigger(self, trigger_type: str, trigger_id: str, 
+                                       initial_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Recupera dati aggiuntivi per arricchire il contesto in base al tipo e ID del trigger.
+        """
+        context = initial_context.copy()
+        
+        if trigger_type == 'prestazione':
+            try:
+                from services.dbf_data_service import get_dbf_data_service
+                dbf_data_service = get_dbf_data_service()
+                
+                prestazione_data = dbf_data_service.get_prestazione_by_id(trigger_id)
+                if prestazione_data:
+                    context.update(prestazione_data)
+                    
+                    patient_id = prestazione_data.get(COLONNE['preventivi']['id_paziente']) # DB_PRELCOD
+                    if patient_id:
+                        patient_data = dbf_data_service.get_patient_by_id(patient_id)
+                        if patient_data:
+                            context.update(patient_data)
+                            # Aggiungi campi comuni per i template SMS
+                            context['nome_completo'] = patient_data.get(COLONNE['pazienti']['nome'], '')
+                            context['telefono'] = patient_data.get(COLONNE['pazienti']['telefono']) or patient_data.get(COLONNE['pazienti']['cellulare'])
+
+            except Exception as e:
+                logger.warning(f"Impossibile arricchire contesto per prestazione {trigger_id}: {e}", exc_info=True)
+
+        return context
     # =============================================================================
     # ACTION IMPLEMENTATIONS - Logica effettiva delle azioni
     # =============================================================================

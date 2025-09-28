@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CCard,
   CCardBody,
@@ -16,6 +16,12 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilList, cilSettings } from '@coreui/icons';
 import { Action } from '@/features/settings/services/automation.service';
+import apiClient from '@/services/api/client'; // Import apiClient
+
+interface SmsTemplate {
+  key: string;
+  description: string;
+}
 
 interface CallbackCardProps {
   actions: Action[];
@@ -34,6 +40,21 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
 }) => {
   const [showActionParamsModal, setShowActionParamsModal] = useState(false);
   const [currentParams, setCurrentParams] = useState(initialParams || {});
+  const [smsTemplates, setSmsTemplates] = useState<SmsTemplate[]>([]);
+
+  useEffect(() => {
+    const fetchSmsTemplates = async () => {
+      try {
+        const response = await apiClient.get('/sms-templates');
+        if (response.data.success) {
+          setSmsTemplates(response.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch SMS templates", error);
+      }
+    };
+    fetchSmsTemplates();
+  }, []);
 
   const selectedAction = actions.find(action => action.id === selectedActionId);
   const requiresParams = selectedAction && selectedAction.parameters && selectedAction.parameters.length > 0;
@@ -93,29 +114,32 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
       <CModal visible={showActionParamsModal} onClose={() => setShowActionParamsModal(false)} backdrop='static'>
         <CModalHeader>Configura Parametri Azione: {selectedAction?.name}</CModalHeader>
         <CModalBody>
-          {/* Esempio di campi, da rendere dinamici in base a selectedAction.parameters */}
           <div className='mb-3'>
-            <CFormLabel>Slug della Pagina di Destinazione</CFormLabel>
+            <CFormLabel>Nome Pagina nel Link (Slug)</CFormLabel>
             <CFormInput 
               value={currentParams?.page_slug || ''}
               onChange={(e) => handleParamChange('page_slug', e.target.value)}
-              placeholder='es. promozione'
+              placeholder='es. promozione-estiva'
             />
           </div>
           <div className='mb-3'>
-            <CFormLabel>Chiave del Modello SMS</CFormLabel>
-            <CFormInput 
+            <CFormLabel>Modello SMS da Inviare</CFormLabel>
+            <CFormSelect
               value={currentParams?.template_key || ''}
               onChange={(e) => handleParamChange('template_key', e.target.value)}
-              placeholder='es. promozione_speciale'
-            />
+            >
+              <option value=''>-- Seleziona modello --</option>
+              {smsTemplates.map(template => (
+                <option key={template.key} value={template.key}>{template.description}</option>
+              ))}
+            </CFormSelect>
           </div>
           <div className='mb-3'>
             <CFormLabel>Mittente SMS (opzionale)</CFormLabel>
             <CFormInput 
-              value={currentParams?.sender || ''}
+              value={currentParams?.sender || 'StudioDima'}
               onChange={(e) => handleParamChange('sender', e.target.value)}
-              placeholder='es. StudioDima'
+              placeholder='StudioDima'
             />
           </div>
           <div className='mb-3'>
@@ -131,8 +155,11 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
                   console.error("Invalid JSON for url_params", jsonError);
                 }
               }}
-              placeholder='{ "codice_paziente": "{DB_APCODP}" }'
+              placeholder='{\n  "source": "promo_sms",\n  "id_paziente": "{DB_PANOME}"\n}'
             />
+            <small className='text-muted'>
+              Inserire un oggetto JSON. Le chiavi e i valori verranno aggiunti al link (es. `?source=promo_sms`). Puoi usare placeholder come `DB_PANOME` che verranno sostituiti con i dati del paziente.
+            </small>
           </div>
         </CModalBody>
         <CModalFooter>
