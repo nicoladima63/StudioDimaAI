@@ -1,18 +1,8 @@
 {
-  "preventivi_file_watcher_1759066407": {
-    "monitor_id": "preventivi_file_watcher_1759066407",
+  "preventivi_file_watcher_1759145574": {
+    "monitor_id": "preventivi_file_watcher_1759145574",
     "table_name": "preventivi",
-    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
-    "monitor_type": "file_watcher",
-    "interval_seconds": 30,
-    "enabled": true,
-    "auto_start": false,
-    "metadata": {}
-  },
-  "pazienti_file_watcher_1759067631": {
-    "monitor_id": "pazienti_file_watcher_1759067631",
-    "table_name": "pazienti",
-    "file_path": "C:\\pixel\\windent\\DATI\\PAZIENTI.DBF",
+    "file_path": "\\\\serverdima\\pixel\\windent\\DATI\\PREVENT.DBF",
     "monitor_type": "file_watcher",
     "interval_seconds": 30,
     "enabled": true,

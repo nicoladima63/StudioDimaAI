@@ -210,6 +210,15 @@ const MonitoringSettings: React.FC = () => {
   };
 
   const handleStartMonitor = async (monitorId: string) => {
+    const originalMonitors = monitors;
+    
+    // Optimistic update
+    setMonitors(prevMonitors => 
+      prevMonitors.map(m => 
+        m.config.monitor_id === monitorId ? { ...m, status: 'running' } : m
+      )
+    );
+
     try {
       setActionLoading(monitorId);
       setError(null);
@@ -218,13 +227,17 @@ const MonitoringSettings: React.FC = () => {
       
       if (response.success) {
         setSuccess(response.message || 'Monitor avviato con successo');
+        // Refresh data from server to get real status
         await loadData();
       } else {
         setError(response.message || 'Errore nell\'avvio del monitor');
+        // Rollback on failure
+        setMonitors(originalMonitors);
       }
 
     } catch (err) {
       setError('Errore nell\'avvio del monitor');
+      setMonitors(originalMonitors); // Rollback on error
       console.error('Error starting monitor:', err);
     } finally {
       setActionLoading(null);
@@ -232,6 +245,15 @@ const MonitoringSettings: React.FC = () => {
   };
 
   const handleStopMonitor = async (monitorId: string) => {
+    const originalMonitors = monitors;
+
+    // Optimistic update
+    setMonitors(prevMonitors => 
+      prevMonitors.map(m => 
+        m.config.monitor_id === monitorId ? { ...m, status: 'stopped' } : m
+      )
+    );
+
     try {
       setActionLoading(monitorId);
       setError(null);
@@ -240,13 +262,16 @@ const MonitoringSettings: React.FC = () => {
       
       if (response.success) {
         setSuccess('Monitor fermato con successo');
+        // Refresh data from server to get real status
         await loadData();
       } else {
         setError(response.message || 'Errore nella fermata del monitor');
+        setMonitors(originalMonitors); // Rollback on failure
       }
 
     } catch (err) {
       setError('Errore nella fermata del monitor');
+      setMonitors(originalMonitors); // Rollback on error
       console.error('Error stopping monitor:', err);
     } finally {
       setActionLoading(null);

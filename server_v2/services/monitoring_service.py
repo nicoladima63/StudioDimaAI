@@ -28,6 +28,7 @@ from services.snapshot_manager import get_snapshot_manager
 from services.file_watcher import get_file_watcher
 from services.automation_service import get_automation_service
 from utils.dbf_utils import get_optimized_reader
+from core.constants_v2 import DBF_TABLES # <--- NEW IMPORT
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +93,12 @@ class MonitoringService:
         self.logs: List[Dict[str, Any]] = [] # Initialize logs list
         self.settings = self._load_settings()
         self._load_saved_configs()
+
+        # Create reverse mapping from DBF filename base to logical table name
+        self._dbf_filename_to_logical_name = {
+            info['file'].split('.')[0].lower(): logical_name
+            for logical_name, info in DBF_TABLES.items()
+        }
     
     def _get_rules_summary(self) -> Dict[str, Any]:
         """Ritorna un riepilogo delle regole di automazione attive.
@@ -161,10 +168,11 @@ class MonitoringService:
                 return True
             
             config = self.saved_configs[monitor_id]
+            logger.debug(f"start_monitor: Monitor {monitor_id} configured with file_path: {config.file_path}") # Downgraded to DEBUG
             
             try:
                 start_time = datetime.now()
-                logger.info(f"Avviando servizio monitoraggio alle {start_time.strftime('%H:%M:%S')} - File: {config.file_path}")
+                logger.debug(f"Avviando servizio monitoraggio alle {start_time.strftime('%H:%M:%S')} - File: {config.file_path}") # Downgraded to DEBUG
                 self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Avvio monitor {monitor_id}', 'type': 'info'})
                 
                 snapshot_success = self.snapshot_manager.start_monitoring(config.table_name, config.file_path)
@@ -175,23 +183,28 @@ class MonitoringService:
                 logger.info(f"Snapshot iniziale creato per {config.table_name}")
                 self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Snapshot iniziale creato per {config.table_name}', 'type': 'info'})
                 
-                if not self.file_watcher.is_running:
-                    self.file_watcher.set_change_callback(self.handle_file_change)
-                    watcher_success = self.file_watcher.start(os.path.dirname(config.file_path))
-                    if not watcher_success:
-                        logger.error("Failed to start file watcher")
-                        self.logs.append({'timestamp': datetime.now().isoformat(), 'message': 'Errore avvio file watcher', 'type': 'error'})
-                        return False
-                logger.info("File watcher avviato con successo")
-                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': 'File watcher avviato con successo', 'type': 'info'})
-                
                 instance = MonitorInstance(
                     config=config,
                     status=MonitorStatus.RUNNING,
                     created_at=start_time.isoformat(),
                     started_at=start_time.isoformat()
                 )
-                self.active_monitors[monitor_id] = instance
+                self.active_monitors[monitor_id] = instance # <--- MOVED UP
+
+                if not self.file_watcher.is_running:
+                    self.file_watcher.set_change_callback(self.handle_file_change)
+                
+                # Pass the specific file path to the FileWatcher
+                watcher_success = self.file_watcher.start(config.file_path)
+                if not watcher_success:
+                    logger.error("Failed to start file watcher")
+                    self.logs.append({'timestamp': datetime.now().isoformat(), 'message': 'Errore avvio file watcher', 'type': 'error'})
+                    del self.active_monitors[monitor_id] # <--- ROLLBACK
+                    return False
+                logger.info("File watcher avviato con successo")
+                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': 'File watcher avviato con successo', 'type': 'info'})
+                
+                # instance is already created and added to active_monitors
                 self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Monitor {monitor_id} avviato', 'type': 'success'})
                 return True
                 
@@ -233,66 +246,81 @@ class MonitoringService:
         Orchestra il rilevamento delle modifiche e l'innesco delle automazioni.
         """
         with self.lock:
-            log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Rilevata modifica per la tabella {table_name}', 'type': 'info'}
+            log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'MODIFICA RILEVATA: File {table_name}.DBF. Processo in corso...', 'type': 'info'}
             self.logs.append(log_entry)
-            logger.info(f"Rilevata modifica per la tabella {table_name} alle {datetime.now().strftime('%H:%M:%S')}.")
+            logger.info(f"MODIFICA RILEVATA: File {table_name}.DBF. Processo in corso...")
+            
+            # Convert table_name (from FileWatcher) to lowercase for consistent comparison
+            physical_table_base_name = table_name.lower() # e.g., 'prevent'
+            
+            # Map physical base name to logical table name (e.g., 'prevent' -> 'preventivi')
+            logical_table_name = self._dbf_filename_to_logical_name.get(physical_table_base_name, physical_table_base_name)
             
             active_monitors_for_table = [
                 instance for instance in self.active_monitors.values()
-                if instance.config.table_name == table_name and instance.status == MonitorStatus.RUNNING
+                if instance.config.table_name == logical_table_name and instance.status == MonitorStatus.RUNNING
             ]
 
             if not active_monitors_for_table:
-                log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Nessun monitor attivo per processare la modifica per la tabella {table_name}', 'type': 'warning'}
+                log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Nessun monitor attivo per processare la modifica per la tabella {logical_table_name} (da file {physical_table_base_name}.DBF)', 'type': 'warning'}
                 self.logs.append(log_entry)
-                logger.warning(f"Nessun monitor attivo per processare la modifica per la tabella {table_name}.")
+                logger.warning(f"Nessun monitor attivo per processare la modifica per la tabella {logical_table_name} (da file {physical_table_base_name}.DBF).")
                 return
 
             # 1. Ottieni le modifiche effettive dallo snapshot manager
-            changes = self.snapshot_manager.get_changes(table_name)
+            changes = self.snapshot_manager.get_changes(logical_table_name) # <--- CHANGED
             
             if not changes:
-                log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Nessun record nuovo o modificato trovato per {table_name} dopo il controllo.', 'type': 'info'}
+                log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Nessun record nuovo o modificato trovato per {logical_table_name} dopo il controllo.', 'type': 'info'} # <--- CHANGED
                 self.logs.append(log_entry)
-                logger.info(f"Nessun record nuovo o modificato trovato per {table_name} dopo il controllo.")
-                self.snapshot_manager.update_snapshot(table_name)
+                logger.info(f"Nessun record nuovo o modificato trovato per {logical_table_name} dopo il controllo.") # <--- CHANGED
+                self.snapshot_manager.update_snapshot(logical_table_name) # <--- CHANGED
                 return
 
             log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Processando {len(changes)} modifiche per la tabella {table_name}', 'type': 'info'}
             self.logs.append(log_entry)
-            logger.info(f"Processando {len(changes)} modifiche per la tabella {table_name}.")
+            logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.") # Downgraded to DEBUG
 
             # 2. Processa ogni modifica attraverso il motore di automazione
             for change in changes:
-                trigger_id = change.get('DB_APCODP')
+                # Determine trigger_id_column based on logical_table_name and trigger_type
+                # For 'preventivi' and 'prestazione', it's DB_PRONCOD
+                trigger_id_column = 'DB_PRONCOD' # Hardcoding for now, will make dynamic later if needed
+                
+                trigger_id = change.get(trigger_id_column)
                 
                 if not trigger_id:
-                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Salto la modifica perché \'DB_APCODP\' è mancante: {change}', 'type': 'warning'}
+                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Salto la modifica perché \'{trigger_id_column}\' è mancante nel record: {change}', 'type': 'warning'}
                     self.logs.append(log_entry)
-                    logger.warning(f"Salto la modifica perché 'DB_APCODP' è mancante: {change}")
+                    logger.warning(f"Salto la modifica perché \'{trigger_id_column}\' è mancante nel record: {change}")
                     continue
 
                 try:
-                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Eseguendo automazione per trigger \'prestazione\' con ID \'{trigger_id}\'.', 'type': 'info'}
-                    self.logs.append(log_entry)
-                    logger.info(f"Eseguendo automazione per trigger 'prestazione' con ID '{trigger_id}'.")
-                    self.automation_service.execute_rules_for_trigger(
+                    # DRY RUN: Check which rules would be executed without actually executing them
+                    logger.info(f"AUTOMAZIONE (DRY RUN): Tentativo di esecuzione per trigger 'prestazione' con ID '{trigger_id}' (colonna: {trigger_id_column}).")
+                    rules_to_execute = self.automation_service.dry_run_rules_for_trigger(
                         trigger_type='prestazione',
                         trigger_id=str(trigger_id).strip(),
                         context_data=change
                     )
-                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Automazione per trigger {trigger_id} eseguita con successo.', 'type': 'success'}
-                    self.logs.append(log_entry)
+                    
+                    if rules_to_execute:
+                        logger.info(f"AUTOMAZIONE (DRY RUN): Trovate {len(rules_to_execute)} regole da eseguire per trigger '{trigger_id}':")
+                        for rule in rules_to_execute:
+                            logger.info(f"  - Regola ID: {rule['id']}, Nome: {rule['name']}, Azione: {rule['action_name']}")
+                    else:
+                        logger.info(f"AUTOMAZIONE (DRY RUN): Nessuna regola attiva trovata per trigger '{trigger_id}'.")
+
                 except Exception as e:
-                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Errore esecuzione automazione per trigger {trigger_id}: {e}', 'type': 'error'}
+                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Errore durante il DRY RUN per il trigger {trigger_id}: {e}', 'type': 'error'}
                     self.logs.append(log_entry)
-                    logger.error(f"Errore durante l'esecuzione dell'automazione per il trigger {trigger_id}: {e}", exc_info=True)
+                    logger.error(f"Errore durante il DRY RUN per il trigger {trigger_id}: {e}", exc_info=True)
 
             # 3. Update the snapshot to the new state after processing all changes
-            log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Aggiornando lo snapshot per {table_name} dopo aver processato le modifiche.', 'type': 'info'}
+            log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Aggiornando lo snapshot per {logical_table_name} dopo aver processato le modifiche.', 'type': 'info'}
             self.logs.append(log_entry)
-            logger.info(f"Aggiornando lo snapshot per {table_name} dopo aver processato le modifiche.")
-            self.snapshot_manager.update_snapshot(table_name)
+            logger.debug(f"Aggiornando lo snapshot per {logical_table_name} dopo aver processato le modifiche.") # Downgraded to DEBUG
+            self.snapshot_manager.update_snapshot(logical_table_name)
 
             # 4. Aggiorna le statistiche dell'istanza del monitor
             current_time = datetime.now().isoformat()

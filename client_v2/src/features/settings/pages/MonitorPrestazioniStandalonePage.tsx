@@ -47,6 +47,18 @@ interface MonitorableTable {
   description: string;
 }
 
+const getBadgeColor = (status: string) => {
+  switch (status) {
+    case 'running':
+      return 'success';
+    case 'error':
+      return 'danger';
+    case 'stopped':
+    default:
+      return 'secondary';
+  }
+};
+
 const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Stati principali
   const [monitorSummary, setMonitorSummary] = useState<MonitorSummary | null>(null);
@@ -254,6 +266,17 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   };
 
   const handleStartMonitorById = async (monitorId: string) => {
+    const originalSummary = monitorSummary;
+
+    // Optimistic UI update
+    if (monitorSummary) {
+      const newMonitors = { ...monitorSummary.monitors };
+      if (newMonitors[monitorId]) {
+        newMonitors[monitorId] = { ...newMonitors[monitorId], status: 'running' };
+      }
+      setMonitorSummary({ ...monitorSummary, monitors: newMonitors });
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -261,13 +284,14 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
       const response = await MonitorPrestazioniService.startMonitor(monitorId);
       if (response.success) {
         setSuccess('Monitor avviato con successo');
-        await loadStatus();
-        await loadLogs();
+        await loadStatus(); // Resync with the server's actual state
       } else {
         setError(response.message || "Errore nell'avvio del monitor");
+        if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       }
     } catch (error) {
       setError("Errore nell'avvio del monitor");
+      if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       console.error('handleStartMonitorById: Caught exception:', error);
     } finally {
       setLoading(false);
@@ -275,6 +299,17 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   };
 
   const handleStopMonitorById = async (monitorId: string) => {
+    const originalSummary = monitorSummary;
+
+    // Optimistic UI update
+    if (monitorSummary) {
+      const newMonitors = { ...monitorSummary.monitors };
+      if (newMonitors[monitorId]) {
+        newMonitors[monitorId] = { ...newMonitors[monitorId], status: 'stopped' };
+      }
+      setMonitorSummary({ ...monitorSummary, monitors: newMonitors });
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -282,13 +317,14 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
       const response = await MonitorPrestazioniService.stopMonitor(monitorId);
       if (response.success) {
         setSuccess('Monitor fermato con successo');
-        await loadStatus();
-        await loadLogs();
+        await loadStatus(); // Resync
       } else {
         setError(response.message || 'Errore nella fermata del monitor');
+        if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       }
     } catch (error) {
       setError('Errore nella fermata del monitor');
+      if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       console.error('handleStopMonitorById: Caught exception:', error);
     } finally {
       setLoading(false);
@@ -531,29 +567,53 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                         <CCardBody className='d-flex flex-column'>
                           <div className='d-flex justify-content-between align-items-start mb-2'>
                             <h6 className='mb-0'>{monitor.table_name}</h6>
-                            <CBadge color={monitor.status === 'running' ? 'success' : 'secondary'}>
+                            <CBadge color={getBadgeColor(monitor.status)}>
                               {monitor.status}
                             </CBadge>
                           </div>
                           <p className='small text-muted mb-1'>ID: {monitorId}</p>
                           <div className='mt-auto'>
-                            <div className='d-flex justify-content-between mt-3'>
+                            <div className='d-flex justify-content-between align-items-center mt-3'>
                               <CButton 
                                 color='primary'
                                 variant='outline'
                                 size='sm'
                                 onClick={() => setSelectedMonitorId(monitorId)}>
                                 <CIcon icon={cilSettings} className='me-1' />
-                                Gestisci Regole
+                                Gestisci
                               </CButton>
-                              <CButton 
-                                color='danger'
-                                size='sm'
-                                variant='outline'
-                                onClick={() => requestDeleteMonitor(monitorId)}
-                                disabled={loading}>
-                                <CIcon icon={cilTrash} />
-                              </CButton>
+                              <div className='d-flex gap-1'>
+                                {monitor.status === 'running' ? (
+                                  <CButton
+                                    color='warning'
+                                    size='sm'
+                                    variant='outline'
+                                    onClick={() => handleStopMonitorById(monitorId)}
+                                    disabled={loading}
+                                    title="Ferma monitor">
+                                    <CIcon icon={cilMediaStop} />
+                                  </CButton>
+                                ) : (
+                                  <CButton
+                                    color='success'
+                                    size='sm'
+                                    variant='outline'
+                                    onClick={() => handleStartMonitorById(monitorId)}
+                                    disabled={loading}
+                                    title="Avvia monitor">
+                                    <CIcon icon={cilMediaPlay} />
+                                  </CButton>
+                                )}
+                                <CButton 
+                                  color='danger'
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() => requestDeleteMonitor(monitorId)}
+                                  disabled={loading}
+                                  title="Elimina monitor">
+                                  <CIcon icon={cilTrash} />
+                                </CButton>
+                              </div>
                             </div>
                           </div>
                         </CCardBody>

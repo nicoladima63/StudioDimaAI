@@ -158,7 +158,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
               placeholder='{\n  "source": "promo_sms",\n  "id_paziente": "{DB_PANOME}"\n}'
             />
             <small className='text-muted'>
-              Inserire un oggetto JSON. Le chiavi e i valori verranno aggiunti al link (es. `?source=promo_sms`). Puoi usare placeholder come `DB_PANOME` che verranno sostituiti con i dati del paziente.
+              Inserire un oggetto JSON. Le chiavi e i valori verranno aggiunti al link (es. `?source=promo_sms`). Puoi usare placeholder come "DB_PANOME" che verranno sostituiti con i dati del paziente.
             </small>
           </div>
         </CModalBody>

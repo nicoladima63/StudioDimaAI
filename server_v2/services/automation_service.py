@@ -203,6 +203,50 @@ class AutomationService(BaseService):
             logger.error(f"Errore esecuzione regole per trigger {trigger_type}:{trigger_id}: {e}")
             raise
 
+    def dry_run_rules_for_trigger(self, trigger_type: str, trigger_id: str, context_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Simula l'esecuzione delle regole per un dato trigger senza eseguire le azioni.
+        Restituisce le regole che sarebbero state eseguite.
+        """
+        try:
+            rules = self.get_all_rules({'trigger_type': trigger_type, 'trigger_id': trigger_id, 'attiva': True})
+            
+            # Log the rules that would be executed
+            if rules:
+                logger.info(f"DRY RUN: Trovate {len(rules)} regole attive per trigger {trigger_type}:{trigger_id}.")
+                for rule in rules:
+                    logger.info(f"DRY RUN:   - Regola ID: {rule['id']}, Nome: {rule['name']}, Azione: {rule['action_name']}")
+            else:
+                logger.info(f"DRY RUN: Nessuna regola attiva trovata per trigger {trigger_type}:{trigger_id}.")
+            
+            return rules
+            
+        except Exception as e:
+            logger.error(f"Errore DRY RUN regole per trigger {trigger_type}:{trigger_id}: {e}")
+            return []
+
+    def dry_run_rules_for_trigger(self, trigger_type: str, trigger_id: str, context_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Simula l'esecuzione delle regole per un dato trigger senza eseguire le azioni.
+        Restituisce le regole che sarebbero state eseguite.
+        """
+        try:
+            rules = self.get_all_rules({'trigger_type': trigger_type, 'trigger_id': trigger_id, 'attiva': True})
+            
+            # Log the rules that would be executed
+            if rules:
+                logger.info(f"DRY RUN: Trovate {len(rules)} regole attive per trigger {trigger_type}:{trigger_id}.")
+                for rule in rules:
+                    logger.info(f"DRY RUN:   - Regola ID: {rule['id']}, Nome: {rule['name']}, Azione: {rule['action_name']}")
+            else:
+                logger.info(f"DRY RUN: Nessuna regola attiva trovata per trigger {trigger_type}:{trigger_id}.")
+            
+            return rules
+            
+        except Exception as e:
+            logger.error(f"Errore DRY RUN regole per trigger {trigger_type}:{trigger_id}: {e}")
+            return []
+
     def _execute_single_rule(self, rule: Dict[str, Any], initial_context_data: Dict[str, Any]) -> Dict[str, Any]:
         """Esegue una singola regola.""" 
         rule_id = rule['id']

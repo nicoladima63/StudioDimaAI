@@ -100,7 +100,7 @@ class SnapshotManager:
                 return True
             
             try:
-                logger.info(f"Starting monitoring for table: {table_name}")
+                #logger.info(f"SNAPSHOT_MANAGER: Richiesta avvio monitoraggio per tabella: {table_name}") # NEW LOG
                 
                 # Aggiungi alla lista monitorate
                 self.monitored_tables.add(table_name)
@@ -110,18 +110,18 @@ class SnapshotManager:
                 
                 if success:
                     start_time = datetime.now().strftime("%H:%M:%S")
-                    print(f"✅ Monitor avviato per {table_name} alle {start_time}")
-                    # logger.info(f"Monitoring started for {table_name} at {start_time}")
+                    #print(f"✅ Monitor avviato per {table_name} alle {start_time}")
+                    #logger.info(f"SNAPSHOT_MANAGER: Monitoraggio avviato con successo per {table_name}.") # NEW LOG
                     return True
                 else:
                     # Rimuovi dalla lista se fallisce
                     self.monitored_tables.discard(table_name)
-                    logger.error(f"Failed to start monitoring for {table_name}")
+                    logger.error(f"SNAPSHOT_MANAGER: Fallito avvio monitoraggio per {table_name}.") # NEW LOG
                     return False
                     
             except Exception as e:
                 self.monitored_tables.discard(table_name)
-                logger.error(f"Error starting monitoring for {table_name}: {e}")
+                logger.error(f"SNAPSHOT_MANAGER: Errore durante avvio monitoraggio per {table_name}: {e}", exc_info=True)
                 return False
     
     def stop_monitoring(self, table_name: str) -> bool:
@@ -290,10 +290,11 @@ class SnapshotManager:
         Returns:
             A list of dictionaries, where each dictionary is a new or modified record.
         """
+        #logger.info(f"SNAPSHOT_MANAGER.get_changes: Richiesta per tabella: {table_name}") # NEW LOG
         with self.lock:
             old_snapshot = self.snapshots.get(table_name)
             if not old_snapshot:
-                logger.warning(f"No snapshot available for {table_name} to compare changes.")
+                logger.warning(f"SNAPSHOT_MANAGER.get_changes: No snapshot available for {table_name} to compare changes.") # Updated log
                 return []
 
             try:
@@ -397,31 +398,28 @@ class SnapshotManager:
     def _create_table_snapshot(self, table_name: str, file_path: str = None) -> bool:
         """
         Crea snapshot completo di una tabella DBF.
-        
-        Args:
-            table_name: Nome tabella
-            file_path: Percorso file DBF (opzionale, se non fornito usa config)
-            
-        Returns:
-            True se creazione riuscita
         """
+        #logger.debug(f"SNAPSHOT: Inizio creazione snapshot per {table_name} da file: {file_path}") # Downgraded to DEBUG
         try:
             # Recupera info tabella
             table_info = get_dbf_table_info(table_name)
             
             # Usa percorso fornito (obbligatorio)
             if file_path is None:
+                logger.error(f"SNAPSHOT: file_path è obbligatorio per la tabella {table_name}")
                 raise ValueError(f"file_path is required for table {table_name}")
             
             # Calcola hash del file
             file_hash = self._calculate_file_hash(file_path)
+            if not file_hash: # NEW CHECK
+                logger.error(f"SNAPSHOT: Impossibile calcolare hash del file {file_path}")
+                return False
+
             file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path)).isoformat()
-            
-            # Leggi tutti i record
-            # logger.debug(f"Reading all records from {file_path}")
             
             # Leggi i record dal file DBF
             records_data = self._read_appunta_only(table_name, file_path)
+            #logger.debug(f"SNAPSHOT: Letti {len(records_data)} record da {file_path}") # Downgraded to DEBUG
             
             # Crea snapshot records
             snapshot_records = {}
@@ -451,11 +449,11 @@ class SnapshotManager:
             self.snapshots[table_name] = snapshot
             self._save_table_snapshot(table_name)
             
-            # logger.info(f"Created snapshot for {table_name}: {len(snapshot_records)} records")
+            #logger.debug(f"SNAPSHOT: Snapshot creato con successo per {table_name}: {len(snapshot_records)} record.") # Downgraded to DEBUG
             return True
             
         except Exception as e:
-            logger.error(f"Error creating snapshot for {table_name}: {e}")
+            logger.error(f"SNAPSHOT: Errore durante la creazione dello snapshot per {table_name}: {e}", exc_info=True) # Added exc_info
             return False
     
     def _load_table_snapshot(self, table_name: str, snapshot_file: Path) -> bool:
