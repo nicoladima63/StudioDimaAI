@@ -1164,9 +1164,9 @@ class DBFOptimizedReader:
             
             # Map common DBF filenames to config method calls
             if filename.upper() == 'APPUNTA.DBF':
-                path = config.get_dbf_path('appointments')
+                path = config.get_dbf_path('APPUNTA')
             elif filename.upper() == 'PAZIENTI.DBF':
-                path = config.get_dbf_path('patients')
+                path = config.get_dbf_path('pazienti')
             else:
                 # Fallback for other files: use base path
                 mode = config.get_mode()

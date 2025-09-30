@@ -15,6 +15,7 @@ from typing import Dict, Any, List, Optional, Callable
 from datetime import datetime
 from .base_service import BaseService
 from core.exceptions import ValidationError, DatabaseError
+from core.constants_v2 import COLONNE # <--- NEW IMPORT
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +111,18 @@ class AutomationService(BaseService):
         if not all(k in rule_data for k in ['name', 'trigger_id', 'action_id', 'monitor_id']):
             raise ValidationError("Campi 'name', 'trigger_id', 'action_id', 'monitor_id' sono obbligatori.")
 
+        # --- PREVENZIONE REGOLE DUPLICATE ---
+        # Controlla se esiste già una regola attiva con lo stesso monitor, trigger e azione
+        existing_rules = self.get_all_rules({
+            'monitor_id': rule_data['monitor_id'],
+            'trigger_id': rule_data['trigger_id'],
+            'action_id': rule_data['action_id'],
+            'attiva': True # Consideriamo solo le regole attive come duplicati
+        })
+        if existing_rules:
+            raise ValidationError("Esiste già una regola attiva con lo stesso monitor, trigger e azione.")
+        # --- FINE PREVENZIONE REGOLE DUPLICATE ---
+
         query = """
             INSERT INTO automation_rules (
                 name, description, trigger_type, trigger_id, 
@@ -184,6 +197,26 @@ class AutomationService(BaseService):
             logger.error(f"Errore DB durante eliminazione regola {rule_id}: {e}")
             raise DatabaseError(f"Errore DB durante eliminazione regola: {e}")
 
+    def delete_rules_for_monitor(self, monitor_id: str) -> bool:
+        """Elimina tutte le regole di automazione associate a un monitor specifico."""
+        try:
+            self.execute_command("DELETE FROM automation_rules WHERE monitor_id = ?", (monitor_id,))
+            logger.info(f"Tutte le regole di automazione per il monitor {monitor_id} sono state eliminate.")
+            return True
+        except Exception as e:
+            logger.error(f"Errore DB durante eliminazione regole per monitor {monitor_id}: {e}")
+            raise DatabaseError(f"Errore DB durante eliminazione regole per monitor: {e}")
+
+    def delete_rules_for_monitor(self, monitor_id: str) -> bool:
+        """Elimina tutte le regole di automazione associate a un monitor specifico."""
+        try:
+            self.execute_command("DELETE FROM automation_rules WHERE monitor_id = ?", (monitor_id,))
+            logger.info(f"Tutte le regole di automazione per il monitor {monitor_id} sono state eliminate.")
+            return True
+        except Exception as e:
+            logger.error(f"Errore DB durante eliminazione regole per monitor {monitor_id}: {e}")
+            raise DatabaseError(f"Errore DB durante eliminazione regole per monitor: {e}")
+
     # --- Rule Execution ---
 
     def execute_rules_for_trigger(self, trigger_type: str, trigger_id: str, context_data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -248,10 +281,13 @@ class AutomationService(BaseService):
             return []
 
     def _execute_single_rule(self, rule: Dict[str, Any], initial_context_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Esegue una singola regola.""" 
+        """
+        Esegue una singola regola, orchestrando l'arricchimento del contesto e l'esecuzione dell'azione.
+        Implementa un approccio 'fail-fast' per validare i dati necessari prima dell'esecuzione.
+        """
         rule_id = rule['id']
         action_name = rule['action_name']
-        
+
         if action_name not in self.action_implementation_registry:
             error_msg = f"Implementazione per l'azione '{action_name}' non trovata."
             logger.error(error_msg)
@@ -260,16 +296,50 @@ class AutomationService(BaseService):
         try:
             impl_func = self.action_implementation_registry[action_name]
             action_params = rule.get('action_params', {})
-            
-            # Arricchisci il contesto con i dati del trigger (es. paziente, prestazione)
-            enriched_context_data = self._get_context_data_for_trigger(
-                rule['trigger_type'], 
-                rule['trigger_id'], 
-                initial_context_data
-            )
-            
+            context = initial_context_data.copy()
+
+            # --- LOGICA DI ARRICCHIMENTO CONTESTO PER AZIONI SPECIFICHE ---
+            if action_name in ['send_sms_link']:
+                from services.dbf_data_service import get_dbf_data_service
+                dbf_data_service = get_dbf_data_service()
+
+                # NUOVA LOGICA: Usa l'id_paziente se già presente nel contesto (dal monitoring_service)
+                patient_id = context.get('id_paziente')
+                
+                # FALLBACK: Se id_paziente non è nel contesto, prova a recuperarlo alla vecchia maniera
+                if not patient_id:
+                    logger.warning(f"id_paziente non trovato nel contesto iniziale. Tento recupero da prestazione (trigger_id).")
+                    trigger_id = rule.get('trigger_id')
+                    prestazione_data = dbf_data_service.get_prestazione_by_id(trigger_id)
+                    if prestazione_data:
+                        context.update(prestazione_data)
+                        patient_id = prestazione_data.get(COLONNE['preventivi']['id_paziente'])
+
+                if not patient_id:
+                    raise ValidationError(f"Azione '{action_name}' fallita: ID paziente non trovato né nel contesto né tramite trigger.")
+
+                # Ora che abbiamo il patient_id, recuperiamo i dati del paziente
+                patient_data = dbf_data_service.get_patient_by_id(patient_id)
+                if not patient_data:
+                    raise ValidationError(f"Azione '{action_name}' fallita: dati paziente non trovati per ID '{patient_id}'.")
+                
+                # DEBUG: Log dei dati grezzi del paziente per ispezionare il formato del telefono
+                logger.info(f"DEBUG PAZIENTE (Regola {rule_id}): {patient_data}")
+
+                context.update(patient_data)
+                
+                # 4. Recupera il telefono (SOLO DB_PACELLU come da specifica)
+                extracted_phone = patient_data.get(COLONNE['pazienti']['cellulare'])
+                if not extracted_phone:
+                    raise ValidationError(f"Azione '{action_name}' fallita: numero di cellulare non trovato per il paziente con ID '{patient_id}'.")
+                
+                # Arricchisci il contesto finale con i dati necessari all'azione
+                context['nome_completo'] = patient_data.get(COLONNE['pazienti']['nome'], '')
+                context['telefono'] = extracted_phone
+                logger.info(f"Prerequisiti per azione '{action_name}' validati. Dati paziente e telefono aggiunti al contesto.")
+
             # Combina contesto arricchito e parametri specifici dell'azione
-            full_context = {**enriched_context_data, **action_params}
+            full_context = {**context, **action_params}
             
             result = impl_func(full_context)
             
@@ -277,38 +347,9 @@ class AutomationService(BaseService):
             return {'success': True, 'rule_id': rule_id, 'result': result}
 
         except Exception as e:
-            logger.exception(f"Errore durante l'esecuzione della regola {rule_id} (Azione: {action_name}): {e}")
+            # La ValidationError sollevata dai nostri controlli verrà catturata qui.
+            logger.error(f"Errore durante l'esecuzione della regola {rule_id} (Azione: {action_name}): {e}")
             return {'success': False, 'rule_id': rule_id, 'error': str(e)}
-
-    def _get_context_data_for_trigger(self, trigger_type: str, trigger_id: str, 
-                                       initial_context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Recupera dati aggiuntivi per arricchire il contesto in base al tipo e ID del trigger.
-        """
-        context = initial_context.copy()
-        
-        if trigger_type == 'prestazione':
-            try:
-                from services.dbf_data_service import get_dbf_data_service
-                dbf_data_service = get_dbf_data_service()
-                
-                prestazione_data = dbf_data_service.get_prestazione_by_id(trigger_id)
-                if prestazione_data:
-                    context.update(prestazione_data)
-                    
-                    patient_id = prestazione_data.get(COLONNE['preventivi']['id_paziente']) # DB_PRELCOD
-                    if patient_id:
-                        patient_data = dbf_data_service.get_patient_by_id(patient_id)
-                        if patient_data:
-                            context.update(patient_data)
-                            # Aggiungi campi comuni per i template SMS
-                            context['nome_completo'] = patient_data.get(COLONNE['pazienti']['nome'], '')
-                            context['telefono'] = patient_data.get(COLONNE['pazienti']['telefono']) or patient_data.get(COLONNE['pazienti']['cellulare'])
-
-            except Exception as e:
-                logger.warning(f"Impossibile arricchire contesto per prestazione {trigger_id}: {e}", exc_info=True)
-
-        return context
     # =============================================================================
     # ACTION IMPLEMENTATIONS - Logica effettiva delle azioni
     # =============================================================================

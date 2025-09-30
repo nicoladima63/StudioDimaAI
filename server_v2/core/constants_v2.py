@@ -68,41 +68,41 @@ COLONNE = {
         'spesa': 'DB_PRSPESA',            # costo della prestazione
         'dente': 'DB_PRDENTE',            # Dente (1 char)
         'medico': 'DB_PRMEDIC',           # Medico (Decimal 4,0) che esegue la prestazione
-        'prontuario_lyd': 'DB_PRONLYD',     # non so a cosa serve
+        #'prontuario_lyd': 'DB_PRONLYD',     # non so a cosa serve
         'stato_prestazione': 'DB_GUARDIA',          # Guardia (Decimal 1,0) eseguito=1, da eseguire=3, incorso=2
-        'settore': 'DB_PRSETTO',          # Settore (1 char)
+        #'settore': 'DB_PRSETTO',          # Settore (1 char)
         
         # Codici collegati
         'codice_fattura': 'DB_PRFACOD',   # Codice fattura (6 char)
         'codice_anagrafica': 'DB_PRANCOD', # Codice anagrafica (6 char)
         
         # Spese e costi
-        'spesa_anagrafica': 'DB_PRSPEAS', # Spesa anagrafica (Decimal 10,2)
-        'diagnosi': 'DB_PRADIAC',         # Diagnosi (1 char)
-        'spesa_elaborazione': 'DB_PRSPELI', # Spesa elaborazione (Decimal 10,2)
-        'costo_lavoro': 'DB_PRCOSLI',     # Costo lavoro (Decimal 10,2)
-        'costo_lavoro_anagrafica': 'DB_PRCOSLA', # Costo lavoro anagrafica (Decimal 10,2)
+        #'spesa_anagrafica': 'DB_PRSPEAS', # Spesa anagrafica (Decimal 10,2)
+        #'diagnosi': 'DB_PRADIAC',         # Diagnosi (1 char)
+        #'spesa_elaborazione': 'DB_PRSPELI', # Spesa elaborazione (Decimal 10,2)
+        #'costo_lavoro': 'DB_PRCOSLI',     # Costo lavoro (Decimal 10,2)
+        #'costo_lavoro_anagrafica': 'DB_PRCOSLA', # Costo lavoro anagrafica (Decimal 10,2)
         
         # Durata e tempi
-        'durata': 'DB_PRDURAT',           # Durata (Decimal 4,2)
-        'tempo_esposizione': 'DB_PRXESP', # Tempo esposizione (Decimal 4,2)
-        'tempo_integrazione': 'DB_PRXINT', # Tempo integrazione (Decimal 6,2)
-        'tempo_tensione': 'DB_PRXTEN',    # Tempo tensione (Decimal 6,2)
-        'tempo_radiazione': 'DB_PMXRAD',  # Tempo radiazione (Decimal 7,2)
+        #'durata': 'DB_PRDURAT',           # Durata (Decimal 4,2)
+        #'tempo_esposizione': 'DB_PRXESP', # Tempo esposizione (Decimal 4,2)
+        #'tempo_integrazione': 'DB_PRXINT', # Tempo integrazione (Decimal 6,2)
+        #'tempo_tensione': 'DB_PRXTEN',    # Tempo tensione (Decimal 6,2)
+        #'tempo_radiazione': 'DB_PMXRAD',  # Tempo radiazione (Decimal 7,2)
         
         # Codici prodotto
-        'codice_prodotto': 'DB_PRPRCOD',  # Codice prodotto (6 char)
-        'id_prodotto': 'DB_PRPRIDE',      # ID prodotto (4 char)
-        'comprensivo': 'DB_PRCOMPR',      # Comprensivo (1 char)
+        #'codice_prodotto': 'DB_PRPRCOD',  # Codice prodotto (6 char)
+        #'id_prodotto': 'DB_PRPRIDE',      # ID prodotto (4 char)
+        #'comprensivo': 'DB_PRCOMPR',      # Comprensivo (1 char)
         
         # Costi finali
-        'costo_comprensivo': 'DB_PRCOSCO', # Costo comprensivo (Decimal 10,2)
-        'costo_prodotto': 'DB_PRCOSPR',   # Costo prodotto (Decimal 10,2)
+        #'costo_comprensivo': 'DB_PRCOSCO', # Costo comprensivo (Decimal 10,2)
+        #'costo_prodotto': 'DB_PRCOSPR',   # Costo prodotto (Decimal 10,2)
         
         # Codici aggiuntivi
-        'codice_applicazione': 'DB_PRAPXXC', # Codice applicazione (9 char)
-        'codice_planimetria': 'DB_PRPLXXC',  # Codice planimetria (9 char)
-        'codice_xx': 'DB_XXCODE'          # Codice XX (9 char)
+        #'codice_applicazione': 'DB_PRAPXXC', # Codice applicazione (9 char)
+        #'codice_planimetria': 'DB_PRPLXXC',  # Codice planimetria (9 char)
+        #'codice_xx': 'DB_XXCODE'          # Codice XX (9 char)
     },
     'diario': {
         'id_paziente': 'DB_DIPACOD',

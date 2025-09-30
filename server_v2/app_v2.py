@@ -154,7 +154,6 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_prestazioni import prestazioni_bp
     from api.v2_automation_rules import automation_bp
     from api.v2_tables import tables_bp
-    from api.v2_templates import templates_v2_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -168,7 +167,6 @@ def register_blueprints(app: Flask) -> None:
         conti_v2_bp,
         ricetta_bp,
         sms_v2_bp,
-        templates_v2_bp,
         scheduler_v2_bp,
         environment_bp,
         monitoring_bp,

@@ -27,6 +27,7 @@ from core.config_manager import get_config
 from services.snapshot_manager import get_snapshot_manager
 from services.file_watcher import get_file_watcher
 from services.automation_service import get_automation_service
+from services.dbf_data_service import get_dbf_data_service
 from utils.dbf_utils import get_optimized_reader
 from core.constants_v2 import DBF_TABLES # <--- NEW IMPORT
 
@@ -88,6 +89,7 @@ class MonitoringService:
         self.snapshot_manager = get_snapshot_manager()
         self.file_watcher = get_file_watcher()
         self.dbf_reader = get_optimized_reader()
+        self.dbf_data_service = get_dbf_data_service()
         
         self.saved_configs: Dict[str, MonitorConfig] = {}
         self.logs: List[Dict[str, Any]] = [] # Initialize logs list
@@ -283,6 +285,16 @@ class MonitoringService:
 
             # 2. Processa ogni modifica attraverso il motore di automazione
             for change in changes:
+                # --- LOGICA DI ARRICCHIMENTO ASTRATTA ---
+                # Cerca la configurazione di arricchimento in tutti i monitor attivi per questa tabella
+                for instance in active_monitors_for_table:
+                    if instance.config.metadata:
+                        enrichment_config = instance.config.metadata.get('enrichment')
+                        if enrichment_config:
+                            logger.info(f"Trovata configurazione di arricchimento per monitor {instance.config.monitor_id}. Eseguo...")
+                            self.dbf_data_service.enrich_record(change, enrichment_config)
+                # --- FINE LOGICA DI ARRICCHIMENTO ---
+
                 # Determine trigger_id_column based on logical_table_name and trigger_type
                 # For 'preventivi' and 'prestazione', it's DB_PRONCOD
                 trigger_id_column = 'DB_PRONCOD' # Hardcoding for now, will make dynamic later if needed
@@ -296,25 +308,33 @@ class MonitoringService:
                     continue
 
                 try:
-                    # DRY RUN: Check which rules would be executed without actually executing them
-                    logger.info(f"AUTOMAZIONE (DRY RUN): Tentativo di esecuzione per trigger 'prestazione' con ID '{trigger_id}' (colonna: {trigger_id_column}).")
-                    rules_to_execute = self.automation_service.dry_run_rules_for_trigger(
+                    # ESECUZIONE REALE: Esegue le regole per il trigger
+                    logger.info(f"AUTOMAZIONE: Esecuzione regole per trigger 'prestazione' con ID '{trigger_id}' (colonna: {trigger_id_column}).")
+                    results = self.automation_service.execute_rules_for_trigger(
                         trigger_type='prestazione',
                         trigger_id=str(trigger_id).strip(),
                         context_data=change
                     )
                     
-                    if rules_to_execute:
-                        logger.info(f"AUTOMAZIONE (DRY RUN): Trovate {len(rules_to_execute)} regole da eseguire per trigger '{trigger_id}':")
-                        for rule in rules_to_execute:
-                            logger.info(f"  - Regola ID: {rule['id']}, Nome: {rule['name']}, Azione: {rule['action_name']}")
+                    executed_count = sum(1 for r in results if r.get('success'))
+                    failed_count = len(results) - executed_count
+
+                    if executed_count > 0:
+                        logger.info(f"AUTOMAZIONE: Eseguite {executed_count} regole con successo per trigger '{trigger_id}'.")
+                        for res in results:
+                            if res.get('success'):
+                                logger.info(f"  - Regola ID: {res.get('rule_id')}, Azione: {res.get('action_name')} - SUCCESSO. Risultato: {res.get('result')}")
+                            else:
+                                logger.warning(f"  - Regola ID: {res.get('rule_id')}, Azione: {res.get('action_name')} - FALLITO. Errore: {res.get('error')}")
+                    elif failed_count > 0:
+                        logger.warning(f"AUTOMAZIONE: Fallita esecuzione di {failed_count} regole per trigger '{trigger_id}'.")
                     else:
-                        logger.info(f"AUTOMAZIONE (DRY RUN): Nessuna regola attiva trovata per trigger '{trigger_id}'.")
+                        logger.info(f"AUTOMAZIONE: Nessuna regola attiva trovata per trigger '{trigger_id}'.")
 
                 except Exception as e:
-                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Errore durante il DRY RUN per il trigger {trigger_id}: {e}', 'type': 'error'}
+                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Errore durante l\'esecuzione dell\'automazione per il trigger {trigger_id}: {e}', 'type': 'error'}
                     self.logs.append(log_entry)
-                    logger.error(f"Errore durante il DRY RUN per il trigger {trigger_id}: {e}", exc_info=True)
+                    logger.error(f"Errore durante l\'esecuzione dell\'automazione per il trigger {trigger_id}: {e}", exc_info=True)
 
             # 3. Update the snapshot to the new state after processing all changes
             log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Aggiornando lo snapshot per {logical_table_name} dopo aver processato le modifiche.', 'type': 'info'}
@@ -551,6 +571,9 @@ class MonitoringService:
                     if not stop_ok:
                         logger.error(f"delete_monitor: Unable to stop active monitor {monitor_id}")
                         return False
+
+                # Rimuovi le regole di automazione associate a questo monitor
+                self.automation_service.delete_rules_for_monitor(monitor_id)
 
                 # Rimuovi dalle configurazioni in memoria
                 if monitor_id in self.saved_configs:

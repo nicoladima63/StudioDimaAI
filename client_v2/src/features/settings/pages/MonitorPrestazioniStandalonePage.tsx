@@ -395,11 +395,27 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
       setLoading(true);
       setError(null);
       console.log("handleCreateMonitor: Attempting to create monitor with table_name:", monitorTableName, "and monitor_type:", monitorType);
-      const payload = {
+      const payload: any = {
         table_name: monitorTableName,
         monitor_type: monitorType,
         auto_start: false, // Always create as not auto-starting, user can start manually
       };
+
+      // --- LOGICA DI ARRICCHIMENTO DINAMICA ---
+      // Se stiamo creando un monitor per la tabella 'preventivi', aggiungiamo i metadati
+      // per l'arricchimento con l'ID del paziente.
+      if (monitorTableName === 'preventivi') {
+        payload.metadata = {
+          enrichment: {
+            source_field: "DB_PRELCOD",
+            target_table: "ELENCO.DBF",
+            target_key_field: "DB_CODE",
+            target_value_field: "DB_ELPACOD",
+            "new_field_name": "id_paziente"
+          }
+        };
+        console.log("handleCreateMonitor: Aggiunti metadati di arricchimento per 'preventivi'", payload.metadata);
+      }
       const response = await MonitorPrestazioniService.createMonitor(payload);
       console.log("handleCreateMonitor: Response from createMonitor API:", response);
 
