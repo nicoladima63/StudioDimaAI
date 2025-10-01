@@ -53,7 +53,8 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
     data_appuntamento: "10/10/2025",
     ora_appuntamento: "15:00",
     tipo_richiamo: "controllo",
-    medico: "Dr. Bianchi"
+    medico: "Dr. Bianchi",
+    ora: "15:00" // Aggiunto per compatibilità con vecchi template
   });
   const [previewResult, setPreviewResult] = useState<any>(null);
 
@@ -69,7 +70,7 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
       };
       const response = await apiClient.post(`${API_BASE_URL}/preview`, payload);
       if (response.data.success) {
-        setPreviewResult(response.data.data);
+        setPreviewResult(response.data);
       } else {
         setError(response.data.message || 'Errore nella generazione dell\'anteprima.');
       }
