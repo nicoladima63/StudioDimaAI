@@ -35,6 +35,15 @@ interface SmsTemplate {
   updated_at: string;
 }
 
+const PLACEHOLDERS = [
+  '{nome_completo}',
+  '{url}',
+  '{data_appuntamento}',
+  '{ora_appuntamento}',
+  '{tipo_richiamo}',
+  '{medico}',
+];
+
 const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [loading, setLoading] = useState(false);
@@ -57,6 +66,13 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
     ora: "15:00" // Aggiunto per compatibilità con vecchi template
   });
   const [previewResult, setPreviewResult] = useState<any>(null);
+
+  const insertPlaceholder = (placeholder: string) => {
+    setCurrentTemplate(prev => ({
+      ...prev,
+      content: (prev.content || '') + placeholder
+    }));
+  };
 
   const handlePreviewTemplate = async () => {
     setLoading(true);
@@ -300,10 +316,20 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
                 </CCard>
               )}
 
-              <h6 className='mt-4'>Placeholder Suggeriti</h6>
-              <p className='small text-muted'>
-                <code>{'{nome_completo}'}</code>, <code>{'{url}'}</code>, <code>{'{data_appuntamento}'}</code>, <code>{'{ora_appuntamento}'}</code>, <code>{'{tipo_richiamo}'}</code>, <code>{'{medico}'}</code>, ecc.
-              </p>
+              <h6 className='mt-4'>Inserisci Segnaposto</h6>
+              <div className='d-flex flex-wrap gap-2'>
+                {PLACEHOLDERS.map((placeholder) => (
+                  <CButton
+                    key={placeholder}
+                    color='secondary'
+                    variant='outline'
+                    size='sm'
+                    onClick={() => insertPlaceholder(placeholder)}
+                  >
+                    {placeholder}
+                  </CButton>
+                ))}
+              </div>
             </CCol> {/* Fine Colonna destra */}
           </CRow> {/* Fine Contenitore principale */}
         </CModalBody>
