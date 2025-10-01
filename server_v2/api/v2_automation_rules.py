@@ -10,23 +10,40 @@ Version: 2.0.2
 
 from flask import Blueprint, request, jsonify
 from services.automation_service import get_automation_service
+from core.exceptions import ValidationError, DatabaseError
 import logging
+
+# NEW IMPORT
+from core.constants_v2 import TIPI_APPUNTAMENTO
 
 logger = logging.getLogger(__name__)
 
-# Blueprint senza url_prefix, il prefisso verrà aggiunto direttamente nelle route
 automation_bp = Blueprint('automation', __name__)
+automation_service = get_automation_service()
 
 @automation_bp.route('/automations/actions', methods=['GET'])
 def get_actions():
-    """Elenco delle azioni disponibili."""
+    """Restituisce l'elenco delle azioni disponibili."""
     try:
-        automation_service = get_automation_service()
         data = automation_service.list_actions()
-        return jsonify({'success': True, 'data': data, 'total': len(data)})
+        return jsonify({'success': True, 'data': data})
     except Exception as e:
         logger.error(f"Errore API get_actions: {e}", exc_info=True)
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# NEW ENDPOINT
+@automation_bp.route('/automations/available-triggers', methods=['GET'])
+def get_available_triggers():
+    """Restituisce le definizioni dei trigger disponibili."""
+    try:
+        # In futuro, questo endpoint potrà restituire diversi tipi di trigger
+        trigger_definitions = {
+            'appuntamento_tipo': TIPI_APPUNTAMENTO
+        }
+        return jsonify({'success': True, 'data': trigger_definitions})
+    except Exception as e:
+        logger.error(f"Errore API get_available_triggers: {e}", exc_info=True)
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @automation_bp.route('/automations/rules', methods=['GET'])
 def get_rules():

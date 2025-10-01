@@ -34,13 +34,63 @@ class AutomationService(BaseService):
         super().__init__(database_manager or get_database_manager())
         self.action_implementation_registry = {}
         self._register_default_implementations()
+        self._sync_registry_with_db() # Sincronizza azioni all'avvio
     
     def _register_default_implementations(self):
-        """Registra le implementazioni Python per le azioni di sistema."""
-        self.action_implementation_registry = {
-            'send_sms_link': self._impl_send_sms_link,
-            # Aggiungere qui altre implementazioni di azioni
+        """Registra le implementazioni e le definizioni dei parametri per le azioni di sistema."""
+        self.action_definitions = {
+            'send_sms_link': {
+                'function': self._impl_send_sms_link,
+                'parameters': [
+                    {'name': 'template_key', 'type': 'string', 'required': True, 'label': 'Chiave Template SMS'},
+                    {'name': 'page_slug', 'type': 'string', 'required': False, 'label': 'Slug Pagina Destinazione'}
+                ]
+            },
+            'send_appointment_sms': {
+                'function': self._impl_send_appointment_sms,
+                'parameters': [
+                    {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'}
+                ]
+            }
         }
+        self.action_implementation_registry = {
+            name: definition['function'] 
+            for name, definition in self.action_definitions.items()
+        }
+
+    def _sync_registry_with_db(self):
+        """Assicura che tutte le azioni definite nel codice esistano nel DB (logica upsert)."""
+        logger.info("Sincronizzazione azioni (upsert) dal codice al database...")
+        try:
+            db_actions_rows = self.execute_query("SELECT name, parameters_json FROM actions")
+            db_actions = {row['name']: row.get('parameters_json') for row in db_actions_rows}
+            
+            code_actions = self.action_definitions
+
+            for action_name, definition in code_actions.items():
+                params_json_from_code = json.dumps(definition.get('parameters', []))
+
+                if action_name not in db_actions:
+                    # Azione mancante, la inserisco
+                    logger.info(f"Azione '{action_name}' non trovata nel DB. Aggiungo...")
+                    query = "INSERT INTO actions (name, description, parameters_json, is_system_action) VALUES (?, ?, ?, ?)"
+                    params = (action_name, f"Azione di sistema: {action_name}", params_json_from_code, 1)
+                    self.execute_command(query, params)
+                    logger.info(f"Azione '{action_name}' aggiunta con successo.")
+                else:
+                    # Azione esistente, controllo se i parametri sono aggiornati
+                    params_json_from_db = db_actions[action_name]
+                    if params_json_from_db != params_json_from_code:
+                        logger.info(f"Parametri per l'azione '{action_name}' non sono sincronizzati. Aggiorno...")
+                        query = "UPDATE actions SET parameters_json = ? WHERE name = ?"
+                        params = (params_json_from_code, action_name)
+                        self.execute_command(query, params)
+                        logger.info(f"Parametri per '{action_name}' aggiornati con successo.")
+            
+            logger.info("Sincronizzazione azioni completata.")
+
+        except Exception as e:
+            logger.error(f"Errore durante la sincronizzazione delle azioni con il DB: {e}", exc_info=True)
 
     # --- Actions Management ---
 
@@ -389,6 +439,51 @@ class AutomationService(BaseService):
 
         result = sms_service.send_sms(phone, message, sender=sender, tag='auto_link')
         return {**result, 'url': final_url}
+
+    def _impl_send_appointment_sms(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Implementazione per l'azione 'send_appointment_sms'.
+        Estrae il telefono da DB_NOTE e invia un SMS usando un template.
+        """
+        import re
+        from services.sms_service import sms_service
+        from core.template_manager import get_template_manager
+
+        note_content = context.get('DB_NOTE', '')
+        if not note_content:
+            raise ValidationError("Campo DB_NOTE non disponibile nel contesto.")
+
+        # Estrai il primo numero di 10 cifre da DB_NOTE
+        phone_match = re.search(r'\d{10}', note_content)
+        if not phone_match:
+            raise ValidationError(f"Nessun numero di telefono di 10 cifre trovato in DB_NOTE: '{note_content}'")
+        
+        phone = phone_match.group(0)
+        
+        patient_name = context.get('DB_APDESCR', 'Gentile paziente').strip()
+        
+        template_id = context.get('template_id') # CAMBIATO: da template_key a template_id
+        if not template_id:
+            raise ValidationError("Il parametro 'template_id' è obbligatorio per l'azione 'send_appointment_sms'.")
+
+        template_data = {
+            'nome_paziente': patient_name,
+            'data_appuntamento': context.get('DB_APDATA'),
+            'ora_appuntamento': context.get('DB_APOREIN'),
+            **context
+        }
+        
+        template_manager = get_template_manager()
+        try:
+            message = template_manager.render_template_by_id(template_id, template_data) # CAMBIATO: render_template_by_id
+        except Exception as e:
+            logger.error(f"Errore rendering template con ID '{template_id}': {e}")
+            message = f"Ciao {patient_name}, ti confermiamo il tuo appuntamento per il giorno {template_data['data_appuntamento']} alle ore {template_data['ora_appuntamento']}."
+
+        sender = 'StudioDima' # Hardcoded come richiesto
+        result = sms_service.send_sms(phone, message, sender=sender, tag='appuntamento_v')
+        
+        return {**result, 'phone_extracted': phone}
 
 import threading
 

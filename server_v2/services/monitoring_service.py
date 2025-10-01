@@ -252,10 +252,7 @@ class MonitoringService:
             self.logs.append(log_entry)
             logger.info(f"MODIFICA RILEVATA: File {table_name}.DBF. Processo in corso...")
             
-            # Convert table_name (from FileWatcher) to lowercase for consistent comparison
-            physical_table_base_name = table_name.lower() # e.g., 'prevent'
-            
-            # Map physical base name to logical table name (e.g., 'prevent' -> 'preventivi')
+            physical_table_base_name = table_name.lower()
             logical_table_name = self._dbf_filename_to_logical_name.get(physical_table_base_name, physical_table_base_name)
             
             active_monitors_for_table = [
@@ -264,85 +261,69 @@ class MonitoringService:
             ]
 
             if not active_monitors_for_table:
-                log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Nessun monitor attivo per processare la modifica per la tabella {logical_table_name} (da file {physical_table_base_name}.DBF)', 'type': 'warning'}
-                self.logs.append(log_entry)
-                logger.warning(f"Nessun monitor attivo per processare la modifica per la tabella {logical_table_name} (da file {physical_table_base_name}.DBF).")
+                logger.warning(f"Nessun monitor attivo per processare la modifica per la tabella {logical_table_name}.")
                 return
 
-            # 1. Ottieni le modifiche effettive dallo snapshot manager
-            changes = self.snapshot_manager.get_changes(logical_table_name) # <--- CHANGED
-            
+            changes = self.snapshot_manager.get_changes(logical_table_name)
             if not changes:
-                log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Nessun record nuovo o modificato trovato per {logical_table_name} dopo il controllo.', 'type': 'info'} # <--- CHANGED
-                self.logs.append(log_entry)
-                logger.info(f"Nessun record nuovo o modificato trovato per {logical_table_name} dopo il controllo.") # <--- CHANGED
-                self.snapshot_manager.update_snapshot(logical_table_name) # <--- CHANGED
+                logger.info(f"Nessun record nuovo o modificato trovato per {logical_table_name} dopo il controllo.")
+                self.snapshot_manager.update_snapshot(logical_table_name)
                 return
 
-            log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Processando {len(changes)} modifiche per la tabella {table_name}', 'type': 'info'}
-            self.logs.append(log_entry)
-            logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.") # Downgraded to DEBUG
+            logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
 
-            # 2. Processa ogni modifica attraverso il motore di automazione
             for change in changes:
-                # --- LOGICA DI ARRICCHIMENTO ASTRATTA ---
-                # Cerca la configurazione di arricchimento in tutti i monitor attivi per questa tabella
                 for instance in active_monitors_for_table:
-                    if instance.config.metadata:
-                        enrichment_config = instance.config.metadata.get('enrichment')
-                        if enrichment_config:
-                            logger.info(f"Trovata configurazione di arricchimento per monitor {instance.config.monitor_id}. Eseguo...")
-                            self.dbf_data_service.enrich_record(change, enrichment_config)
-                # --- FINE LOGICA DI ARRICCHIMENTO ---
+                    if instance.config.metadata and instance.config.metadata.get('enrichment'):
+                        self.dbf_data_service.enrich_record(change, instance.config.metadata['enrichment'])
 
-                # Determine trigger_id_column based on logical_table_name and trigger_type
-                # For 'preventivi' and 'prestazione', it's DB_PRONCOD
-                trigger_id_column = 'DB_PRONCOD' # Hardcoding for now, will make dynamic later if needed
+                # --- LOGICA TRIGGER DINAMICA CON FALLBACK ---
+                trigger_type = None
+                trigger_id_column = None
+                monitor_instance = active_monitors_for_table[0]
+
+                # 1. Prova a leggere dai metadati per la massima flessibilità
+                if monitor_instance.config.metadata:
+                    trigger_type = monitor_instance.config.metadata.get('trigger_type')
+                    trigger_id_column = monitor_instance.config.metadata.get('trigger_id_column')
+
+                # 2. Se non ci sono metadati, applica la logica pre-impostata (hardcoded)
+                if not (trigger_type and trigger_id_column):
+                    logger.debug(f"Metadati di trigger non trovati per {logical_table_name}, applico logica di fallback.")
+                    if logical_table_name == 'preventivi':
+                        trigger_type = 'prestazione'
+                        trigger_id_column = 'DB_PRONCOD'
+                    elif logical_table_name.lower() == 'appunta':
+                        trigger_type = 'appuntamento_tipo'
+                        trigger_id_column = 'DB_GUARDIA'
+                
+                # 3. Se ancora non c'è una configurazione valida, salta
+                if not (trigger_type and trigger_id_column):
+                    logger.warning(f"Nessuna configurazione trigger valida (né da metadati né da fallback) per la tabella {logical_table_name}. Salto automazione.")
+                    continue
                 
                 trigger_id = change.get(trigger_id_column)
-                
                 if not trigger_id:
-                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Salto la modifica perché \'{trigger_id_column}\' è mancante nel record: {change}', 'type': 'warning'}
-                    self.logs.append(log_entry)
-                    logger.warning(f"Salto la modifica perché \'{trigger_id_column}\' è mancante nel record: {change}")
+                    logger.warning(f"Salto modifica perché colonna trigger '{trigger_id_column}' è mancante: {change}")
                     continue
 
                 try:
-                    # ESECUZIONE REALE: Esegue le regole per il trigger
-                    logger.info(f"AUTOMAZIONE: Esecuzione regole per trigger 'prestazione' con ID '{trigger_id}' (colonna: {trigger_id_column}).")
+                    logger.info(f"AUTOMAZIONE: Esecuzione regole per trigger '{trigger_type}' con ID '{trigger_id}' (da colonna: {trigger_id_column}).")
                     results = self.automation_service.execute_rules_for_trigger(
-                        trigger_type='prestazione',
+                        trigger_type=trigger_type,
                         trigger_id=str(trigger_id).strip(),
                         context_data=change
                     )
                     
                     executed_count = sum(1 for r in results if r.get('success'))
-                    failed_count = len(results) - executed_count
-
                     if executed_count > 0:
                         logger.info(f"AUTOMAZIONE: Eseguite {executed_count} regole con successo per trigger '{trigger_id}'.")
-                        for res in results:
-                            if res.get('success'):
-                                logger.info(f"  - Regola ID: {res.get('rule_id')}, Azione: {res.get('action_name')} - SUCCESSO. Risultato: {res.get('result')}")
-                            else:
-                                logger.warning(f"  - Regola ID: {res.get('rule_id')}, Azione: {res.get('action_name')} - FALLITO. Errore: {res.get('error')}")
-                    elif failed_count > 0:
-                        logger.warning(f"AUTOMAZIONE: Fallita esecuzione di {failed_count} regole per trigger '{trigger_id}'.")
-                    else:
-                        logger.info(f"AUTOMAZIONE: Nessuna regola attiva trovata per trigger '{trigger_id}'.")
 
                 except Exception as e:
-                    log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Errore durante l\'esecuzione dell\'automazione per il trigger {trigger_id}: {e}', 'type': 'error'}
-                    self.logs.append(log_entry)
-                    logger.error(f"Errore durante l\'esecuzione dell\'automazione per il trigger {trigger_id}: {e}", exc_info=True)
+                    logger.error(f"Errore esecuzione automazione per trigger {trigger_id}: {e}", exc_info=True)
 
-            # 3. Update the snapshot to the new state after processing all changes
-            log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'Aggiornando lo snapshot per {logical_table_name} dopo aver processato le modifiche.', 'type': 'info'}
-            self.logs.append(log_entry)
-            logger.debug(f"Aggiornando lo snapshot per {logical_table_name} dopo aver processato le modifiche.") # Downgraded to DEBUG
             self.snapshot_manager.update_snapshot(logical_table_name)
 
-            # 4. Aggiorna le statistiche dell'istanza del monitor
             current_time = datetime.now().isoformat()
             for instance in active_monitors_for_table:
                 instance.change_count += len(changes)

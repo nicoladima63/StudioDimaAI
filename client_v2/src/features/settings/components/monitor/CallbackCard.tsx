@@ -16,10 +16,11 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilList, cilSettings } from '@coreui/icons';
 import { Action } from '@/features/settings/services/automation.service';
-import apiClient from '@/services/api/client'; // Import apiClient
+import apiClient from '@/services/api/client';
 
 interface SmsTemplate {
-  key: string;
+  id: number;
+  name: string;
   description: string;
 }
 
@@ -27,8 +28,8 @@ interface CallbackCardProps {
   actions: Action[];
   selectedActionId: number | null;
   onActionChange: (value: number | null) => void;
-  onParamsChange: (params: any) => void; // Nuova prop per comunicare i dati al genitore
-  initialParams: any; // Parametri iniziali per pre-popolare il form
+  onParamsChange: (params: any) => void;
+  initialParams: any;
 }
 
 const CallbackCard: React.FC<CallbackCardProps> = ({
@@ -60,7 +61,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
   const requiresParams = selectedAction && selectedAction.parameters && selectedAction.parameters.length > 0;
 
   const handleOpenModal = () => {
-    setCurrentParams(initialParams || {}); // Resetta i parametri quando apri
+    setCurrentParams(initialParams || {});
     setShowActionParamsModal(true);
   };
 
@@ -71,6 +72,68 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
 
   const handleParamChange = (field: string, value: any) => {
     setCurrentParams(prev => ({ ...prev, [field]: value }));
+  };
+
+  const renderParamInput = (param: any) => {
+    const paramValue = currentParams[param.name];
+
+    switch (param.name) {
+      case 'template_id':
+        return (
+          <div className='mb-3' key={param.name}>
+            <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
+            <CFormSelect
+              id={param.name}
+              value={paramValue || ''}
+              onChange={(e) => handleParamChange(param.name, Number(e.target.value))}
+              required={param.required}
+            >
+              <option value=''>-- Seleziona template --</option>
+              {smsTemplates.map(template => (
+                <option key={template.id} value={template.id}>
+                  {template.name} ({template.description})
+                </option>
+              ))}
+            </CFormSelect>
+          </div>
+        );
+      case 'url_params':
+        return (
+          <div className='mb-3' key={param.name}>
+            <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
+            <CFormTextarea 
+              rows={3} 
+              id={param.name}
+              value={paramValue ? JSON.stringify(paramValue, null, 2) : ''}
+              onChange={(e) => {
+                try {
+                  const parsed = e.target.value ? JSON.parse(e.target.value) : {};
+                  handleParamChange(param.name, parsed);
+                } catch (jsonError) {
+                  console.error("Invalid JSON for url_params", jsonError);
+                }
+              }}
+              placeholder={param.placeholder}
+            />
+            {param.description && <small className='text-muted'>{param.description}</small>}
+          </div>
+        );
+      default:
+        return (
+          <div className='mb-3' key={param.name}>
+            <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
+            <CFormInput
+              type={param.type === 'number' ? 'number' : 'text'}
+              id={param.name}
+              value={paramValue || ''}
+              onChange={(e) => handleParamChange(param.name, param.type === 'number' ? Number(e.target.value) : e.target.value)}
+              placeholder={param.placeholder}
+              required={param.required}
+            />
+            {param.description && <small className='text-muted'>{param.description}</small>}
+          </div>
+        );
+    }
   };
 
   return (
@@ -110,57 +173,10 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
         </CCardBody>
       </CCard>
 
-      {/* La modale ora vive qui */}
       <CModal visible={showActionParamsModal} onClose={() => setShowActionParamsModal(false)} backdrop='static'>
         <CModalHeader>Configura Parametri Azione: {selectedAction?.name}</CModalHeader>
         <CModalBody>
-          <div className='mb-3'>
-            <CFormLabel>Nome Pagina nel Link (Slug)</CFormLabel>
-            <CFormInput 
-              value={currentParams?.page_slug || ''}
-              onChange={(e) => handleParamChange('page_slug', e.target.value)}
-              placeholder='es. promozione-estiva'
-            />
-          </div>
-          <div className='mb-3'>
-            <CFormLabel>Modello SMS da Inviare</CFormLabel>
-            <CFormSelect
-              value={currentParams?.template_key || ''}
-              onChange={(e) => handleParamChange('template_key', e.target.value)}
-            >
-              <option value=''>-- Seleziona modello --</option>
-              {smsTemplates.map(template => (
-                <option key={template.key} value={template.key}>{template.description}</option>
-              ))}
-            </CFormSelect>
-          </div>
-          <div className='mb-3'>
-            <CFormLabel>Mittente SMS (opzionale)</CFormLabel>
-            <CFormInput 
-              value={currentParams?.sender || 'StudioDima'}
-              onChange={(e) => handleParamChange('sender', e.target.value)}
-              placeholder='StudioDima'
-            />
-          </div>
-          <div className='mb-3'>
-            <CFormLabel>Parametri URL Aggiuntivi (JSON)</CFormLabel>
-            <CFormTextarea 
-              rows={3} 
-              value={currentParams?.url_params ? JSON.stringify(currentParams.url_params, null, 2) : ''}
-              onChange={(e) => {
-                try {
-                  const parsed = e.target.value ? JSON.parse(e.target.value) : {};
-                  handleParamChange('url_params', parsed);
-                } catch (jsonError) {
-                  console.error("Invalid JSON for url_params", jsonError);
-                }
-              }}
-              placeholder='{\n  "source": "promo_sms",\n  "id_paziente": "{DB_PANOME}"\n}'
-            />
-            <small className='text-muted'>
-              Inserire un oggetto JSON. Le chiavi e i valori verranno aggiunti al link (es. `?source=promo_sms`). Puoi usare placeholder come "DB_PANOME" che verranno sostituiti con i dati del paziente.
-            </small>
-          </div>
+          {selectedAction?.parameters?.map(param => renderParamInput(param))}
         </CModalBody>
         <CModalFooter>
           <CButton color='secondary' variant='outline' onClick={() => setShowActionParamsModal(false)}>Annulla</CButton>

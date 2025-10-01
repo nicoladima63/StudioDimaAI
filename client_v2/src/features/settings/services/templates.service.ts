@@ -126,11 +126,31 @@ const templates = {
     data?: Record<string, any>
   ): Promise<ApiResponse<TemplatePreviewResult>> => {
     try {
-      const response = await apiClient.post(`/templates/${tipo}/preview`, {
-        content,
-        data
+      const response = await apiClient.post(`/sms-templates/preview`, { // CAMBIATO: URL corretto
+        name: tipo, // Passa il tipo come nome per il backend
+        custom_content: content,
+        preview_data: data
       });
-      return response.data;
+      
+      // CAMBIATO: Mappa la risposta del backend
+      if (response.data.success) {
+        return {
+          success: true,
+          preview: response.data.message, // Mappa 'message' a 'preview'
+          stats: {
+            length: response.data.length,
+            estimated_sms_parts: response.data.estimated_sms_parts,
+            // Aggiungi altre stats se il backend le fornisce
+          },
+          message: response.data.message // Mantieni anche message se serve
+        };
+      } else {
+        return {
+          success: false,
+          error: response.data.error || response.data.message || `Errore preview template ${tipo}`,
+          state: 'error'
+        };
+      }
     } catch (error: any) {
       return {
         success: false,

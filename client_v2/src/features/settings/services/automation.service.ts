@@ -49,8 +49,12 @@ export interface UpdateRulePayload {
 const automationApi = {
   async getActions(): Promise<Action[]> {
     const response = await apiClient.get('/automations/actions');
-    // handleApiResponse is for fetch, apiClient already handles errors and returns data directly
-    return response.data.data || [];
+    return response.data;
+  },
+
+  async getAvailableTriggers(): Promise<any> {
+    const response = await apiClient.get('/automations/available-triggers');
+    return response.data;
   },
 
   async getRules(filters?: { attiva?: boolean; trigger_id?: string; monitor_id?: string }): Promise<AutomationRule[]> {

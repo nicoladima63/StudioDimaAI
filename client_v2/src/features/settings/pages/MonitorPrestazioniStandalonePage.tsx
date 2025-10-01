@@ -34,9 +34,9 @@ import automationApi, { type Action, type AutomationRule } from '@/features/sett
 import ListaRegole from '@/features/settings/components/monitor/ListaRegole';
 import StatoMonitorCard from '@/features/settings/components/monitor/StatoMonitorCard';
 import LogMonitorCard from '@/features/settings/components/monitor/LogMonitorCard';
-import GestioneRegoleCard from '@/features/settings/components/monitor/GestioneRegoleCard';
 import CallbackCard from '@/features/settings/components/monitor/CallbackCard';
 import AssociaRegolaCard from '@/features/settings/components/monitor/AssociaRegolaCard';
+import TriggerSourceSelector, { Trigger } from '@/features/settings/components/monitor/TriggerSourceSelector';
 
 import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary } from '@/services/api/monitorPrestazioni';
 
@@ -74,12 +74,12 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteMonitorId, setPendingDeleteMonitorId] = useState<string | null>(null);
   
-  // Stati per selezione prestazioni e automazioni
-  const [selectedPrestazione, setSelectedPrestazione] = useState<Prestazione | null>(null);
+  // Stati per la creazione di regole
   const [actions, setActions] = useState<Action[]>([]);
   const [selectedActionId, setSelectedActionId] = useState<number | null>(null);
   const [rules, setRules] = useState<AutomationRule[]>([]);
   const [selectedActionParams, setSelectedActionParams] = useState<any | null>(null);
+  const [trigger, setTrigger] = useState<Trigger | null>(null); // Nuovo stato per il trigger
 
   // Stati per creazione monitor
   const [monitorTableName, setMonitorTableName] = useState('preventivi');
@@ -372,10 +372,16 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
   const loadActions = async () => {
     try {
-      const data = await automationApi.getActions();
-      setActions(data);
+      const responseBody = await automationApi.getActions();
+      if (responseBody && responseBody.success) {
+        setActions(responseBody.data || []);
+      } else {
+        console.error('Failed to load actions:', responseBody?.message);
+        setActions([]);
+      }
     } catch (e) {
       console.error('Errore caricamento azioni', e);
+      setActions([]);
     }
   };
 
@@ -435,48 +441,42 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
-  const handleAssocia = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!selectedPrestazione || !selectedActionId || !selectedMonitorId) {
-      setError("Seleziona una prestazione, un'azione e un monitor prima di associare.");
-      return;
-    }
-
-    const selectedAction = actions.find(a => a.id === selectedActionId);
-    if (!selectedAction) return;
-
-    // Se l'azione richiede parametri, apri il modal per configurarli
-    if (selectedAction.parameters && selectedAction.parameters.length > 0 && !selectedActionParams) {
-      setCurrentActionConfig({ action: selectedAction, prestazione: selectedPrestazione, initialParams: selectedActionParams });
-      setShowActionParamsModal(true);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const payload = {
-        name: `Regola per ${selectedPrestazione.nome} - ${selectedAction.name}`,
-        description: `Associazione automatica per prestazione ${selectedPrestazione.nome}`,
-        trigger_type: "prestazione",
-        trigger_id: String(selectedPrestazione.id), // Assicurati che sia una stringa
-        action_id: selectedActionId,
-        action_params: selectedActionParams || {}, // Usa i parametri configurati o un oggetto vuoto
-        attiva: true,
-        priorita: 10,
-        monitor_id: selectedMonitorId, // *** CHIAVE DELLA NUOVA ARCHITETTURA ***
-      };
-      await automationApi.createRule(payload);
-      setSuccess('Regola di automazione creata con successo');
-      setSelectedActionId(null);
-      setSelectedActionParams(null);
-      await loadRules(selectedMonitorId); // Ricarica le regole per il monitor corrente
-    } catch (e: any) {
-      setError(e?.message || 'Errore creazione regola di automazione');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+      const handleAssocia = async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (!trigger || !selectedActionId || !selectedMonitorId) {
+        setError("Seleziona un trigger, un'azione e un monitor prima di associare.");
+        return;
+      }
+  
+      const selectedAction = actions.find(a => a.id === selectedActionId);
+      if (!selectedAction) return;
+  
+      try {
+        setLoading(true);
+        const payload = {
+          name: `Regola per ${trigger.name} - ${selectedAction.name}`,
+          description: `Associazione automatica per trigger ${trigger.type}: ${trigger.name}`,
+          trigger_type: trigger.type,
+          trigger_id: trigger.id,
+          action_id: selectedActionId,
+          action_params: selectedActionParams || {},
+          attiva: true,
+          priorita: 10,
+          monitor_id: selectedMonitorId,
+        };
+        await automationApi.createRule(payload);
+        setSuccess('Regola di automazione creata con successo');
+        // Reset form
+        setTrigger(null);
+        setSelectedActionId(null);
+        setSelectedActionParams(null);
+        await loadRules(selectedMonitorId); // Ricarica le regole per il monitor corrente
+      } catch (e: any) {
+        setError(e?.message || 'Errore creazione regola di automazione');
+      } finally {
+        setLoading(false);
+      }
+    };
   const handleToggleRegola = async (id: number) => {
     try {
       await automationApi.toggleRule(id);
@@ -663,10 +663,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 {/* Colonna Sinistra: Creazione Regola */}
                 <CCol md={4}>
                   <h6 className='mb-3'>Crea Nuova Regola</h6>
-                  <GestioneRegoleCard 
-                    selectedPrestazione={selectedPrestazione}
-                    onPrestazioneChange={setSelectedPrestazione}
-                  />
+                  <TriggerSourceSelector onChange={setTrigger} />
                   <CallbackCard 
                     actions={actions}
                     selectedActionId={selectedActionId}
@@ -676,7 +673,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                   />
                   <AssociaRegolaCard 
                     onAssocia={handleAssocia}
-                    disabled={!selectedPrestazione || !selectedActionId || loading}
+                    disabled={!trigger || !selectedActionId || loading}
                   />
                 </CCol>
 
