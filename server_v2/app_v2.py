@@ -145,7 +145,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_conti import conti_v2_bp
     from api.v2_ricetta import ricetta_bp
     from api.v2_sms import sms_v2_bp
-    from api.v2_templates import templates_v2_bp
+
     from api.v2_calendar import calendar_v2_bp
     from api.v2_scheduler import scheduler_v2_bp
     from api.v2_environment import environment_bp
@@ -153,6 +153,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_monitoring_changes import monitoring_changes_bp
     from api.v2_prestazioni import prestazioni_bp
     from api.v2_automation_rules import automation_bp
+    from api.v2_templates import templates_v2_bp
     from api.v2_tables import tables_bp
     
     # Register all V2 blueprints

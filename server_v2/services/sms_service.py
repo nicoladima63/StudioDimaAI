@@ -9,7 +9,7 @@ from datetime import datetime
 from core.environment_manager import environment_manager, ServiceType, Environment
 from core.config import get_config_value
 from core.exceptions import ValidationError
-from core.template_manager import template_manager
+from core.template_manager import get_template_manager
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class SMSService:
         self.service_type = ServiceType.SMS
         self._current_config = None
         self._current_environment = None
+        self.template_manager = get_template_manager() # Aggiunto TemplateManager
         self._reload_configuration()
     
     def _reload_configuration(self):
@@ -278,40 +279,26 @@ class SMSService:
             'message': f'Invio bulk completato: {successful} successi, {failed} errori'
         }
     
-    def get_sms_templates(self) -> Dict[str, str]:
-        """Ottiene template SMS predefiniti"""
-        return {
-            'appointment_reminder': 'Gentile {nome}, ricordiamo il suo appuntamento del {data} alle ore {ora}. Studio Dima',
-            'appointment_confirmation': 'Gentile {nome}, confermiamo il suo appuntamento del {data} alle ore {ora}. Studio Dima',
-            'appointment_cancellation': 'Gentile {nome}, il suo appuntamento del {data} alle ore {ora} è stato annullato. Studio Dima',
-            'recall_reminder': 'Gentile {nome}, è tempo per il suo {tipo_richiamo}. Contatti lo studio per fissare un appuntamento. Studio Dima',
-            'treatment_reminder': 'Gentile {nome}, ricordiamo di completare il trattamento come concordato. Studio Dima'
-        }
     
     def format_message_with_template(self, 
                                    template_key: str, 
-                                   variables: Dict[str, str]) -> str:
+                                   variables: Dict[str, Any]) -> str: # Changed type hint to Any
         """
-        Formatta messaggio usando template predefinito
+        Formatta messaggio usando template dal TemplateManager.
         
         Args:
-            template_key: Chiave template
-            variables: Variabili da sostituire
+            template_key: Chiave del template (nome)
+            variables: Variabili da sostituire nel template
             
         Returns:
             Messaggio formattato
         """
-        templates = self.get_sms_templates()
-        
-        if template_key not in templates:
-            raise ValidationError(f"Template {template_key} non trovato")
-        
-        template = templates[template_key]
-        
         try:
-            return template.format(**variables)
+            return self.template_manager.render_template(template_key, variables)
+        except ValueError as e: # TemplateManager solleva ValueError se template non trovato
+            raise ValidationError(f"Errore template SMS: {e}")
         except KeyError as e:
-            raise ValidationError(f"Variabile mancante per template: {e}")
+            raise ValidationError(f"Variabile mancante per template '{template_key}': {e}")
     
     def _clean_phone_number(self, phone: str) -> Optional[str]:
         """Pulisce e valida numero telefono"""
@@ -534,8 +521,8 @@ class SMSService:
                 'data_richiamo': data_richiamo
             }
             
-            # Usa template manager V2 per generare messaggio
-            return template_manager.render_template('richiamo', template_data)
+            # Usa template manager per generare messaggio
+            return self.template_manager.render_template('recall_reminder', template_data) # Usa la key del template
             
         except Exception as e:
             logger.error(f"Errore generazione messaggio richiamo con template: {e}")
@@ -643,8 +630,8 @@ class SMSService:
                 'medico': appuntamento_data.get('medico', 'Studio Dima')
             }
             
-            # Usa template manager V2
-            return template_manager.render_template('promemoria', template_data)
+            # Usa template manager per generare messaggio
+            return self.template_manager.render_template('appointment_reminder', template_data) # Usa la key del template
             
         except Exception as e:
             logger.error(f"Errore generazione messaggio promemoria con template: {e}")

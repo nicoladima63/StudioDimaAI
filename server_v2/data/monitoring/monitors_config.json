@@ -16,5 +16,15 @@
         "new_field_name": "id_paziente"
       }
     }
+  },
+  "APPUNTA_file_watcher_1759301957": {
+    "monitor_id": "APPUNTA_file_watcher_1759301957",
+    "table_name": "APPUNTA",
+    "file_path": "C:\\pixel\\windent\\USER\\APPUNTA.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {}
   }
 }

@@ -127,6 +127,12 @@ const _nav = [
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {
+    component: CNavItem,
+    name: 'Gestione Template SMS',
+    to: '/settings/template', // La route che abbiamo configurato
+    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />, // Un'icona appropriata
+  },
+  {
     component: CNavTitle,
     name: 'Materiali',
   },

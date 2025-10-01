@@ -392,8 +392,13 @@ class DatabaseManager:
                 result = None
                 if fetch_one:
                     result = cursor.fetchone()
+                    if result: # Convert single row
+                        result = dict(result)
                 elif fetch_all and query.strip().upper().startswith('SELECT'):
                     result = cursor.fetchall()
+                    # Convert sqlite3.Row objects to dictionaries for JSON serialization
+                    if result:
+                        result = [dict(row) for row in result]
                 elif not query.strip().upper().startswith('SELECT'):
                     result = cursor.rowcount
                 
