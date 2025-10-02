@@ -77,32 +77,37 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
   const renderParamInput = (param: ActionParameter) => {
     const paramValue = currentParams[param.name];
 
-    switch (param.name) {
-      case 'template_id':
-        return (
-          <div className='mb-3' key={param.name}>
-            <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
-            <CFormSelect
-              id={param.name}
-              value={paramValue || ''}
-              onChange={(e) => handleParamChange(param.name, Number(e.target.value))}
-              required={param.required}
-            >
-              <option value=''>-- Seleziona template --</option>
-              {smsTemplates.map(template => (
-                <option key={template.id} value={template.id}>
-                  {template.name} ({template.description})
-                </option>
-              ))}
-            </CFormSelect>
-          </div>
-        );
-      case 'url_params':
+    // Eccezione speciale per 'template_id' per mostrare una dropdown di template SMS.
+    // Questa è un'eccezione specifica dell'UI, non una violazione della genericità.
+    if (param.name === 'template_id') {
+      return (
+        <div className='mb-3' key={param.name}>
+          <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
+          <CFormSelect
+            id={param.name}
+            value={paramValue || ''}
+            onChange={(e) => handleParamChange(param.name, e.target.value ? Number(e.target.value) : null)}
+            required={param.required}
+          >
+            <option value=''>-- Seleziona template --</option>
+            {smsTemplates.map(template => (
+              <option key={template.id} value={template.id}>
+                {template.name} ({template.description})
+              </option>
+            ))}
+          </CFormSelect>
+        </div>
+      );
+    }
+
+    // Logica generica basata sul TIPO del parametro
+    switch (param.type) {
+      case 'json':
         return (
           <div className='mb-3' key={param.name}>
             <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
             <CFormTextarea
-              rows={3}
+              rows={5}
               id={param.name}
               value={paramValue ? JSON.stringify(paramValue, null, 2) : ''}
               onChange={(e) => {
@@ -110,23 +115,41 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
                   const parsed = e.target.value ? JSON.parse(e.target.value) : {};
                   handleParamChange(param.name, parsed);
                 } catch (jsonError) {
-                  console.error("Invalid JSON for url_params", jsonError);
+                  // Non fare nulla mentre l'utente sta scrivendo JSON non valido
                 }
               }}
-              placeholder={param.placeholder}
+              placeholder={param.placeholder || 'Inserisci un oggetto JSON valido'}
             />
             {param.description && <small className='text-muted'>{param.description}</small>}
           </div>
         );
+
+      case 'number':
+        return (
+          <div className='mb-3' key={param.name}>
+            <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
+            <CFormInput
+              type='number'
+              id={param.name}
+              value={paramValue || ''}
+              onChange={(e) => handleParamChange(param.name, e.target.value ? Number(e.target.value) : null)}
+              placeholder={param.placeholder}
+              required={param.required}
+            />
+            {param.description && <small className='text-muted'>{param.description}</small>}
+          </div>
+        );
+
+      case 'string':
       default:
         return (
           <div className='mb-3' key={param.name}>
             <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
             <CFormInput
-              type={param.type === 'number' ? 'number' : 'text'}
+              type='text'
               id={param.name}
               value={paramValue || ''}
-              onChange={(e) => handleParamChange(param.name, param.type === 'number' ? Number(e.target.value) : e.target.value)}
+              onChange={(e) => handleParamChange(param.name, e.target.value)}
               placeholder={param.placeholder}
               required={param.required}
             />

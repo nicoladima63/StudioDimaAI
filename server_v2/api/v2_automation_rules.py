@@ -9,7 +9,7 @@ Version: 2.0.2
 """
 
 from flask import Blueprint, request, jsonify
-from services.automation_service import get_automation_service
+from services.automation_service import AutomationService
 from core.exceptions import ValidationError, DatabaseError
 import logging
 
@@ -19,7 +19,7 @@ from core.constants_v2 import TIPI_APPUNTAMENTO
 logger = logging.getLogger(__name__)
 
 automation_bp = Blueprint('automation', __name__)
-automation_service = get_automation_service()
+automation_service = AutomationService()
 
 @automation_bp.route('/automations/actions', methods=['GET'])
 def get_actions():
@@ -49,7 +49,6 @@ def get_available_triggers():
 def get_rules():
     """Recupera tutte le regole di automazione con filtri opzionali."""
     try:
-        automation_service = get_automation_service()
         filters = {}
         if request.args.get('attiva') is not None:
             filters['attiva'] = request.args.get('attiva').lower() == 'true'
@@ -73,7 +72,6 @@ def get_rules():
 def get_rule(rule_id: int):
     """Recupera una singola regola di automazione."""
     try:
-        automation_service = get_automation_service()
         rule = automation_service.get_rule_by_id(rule_id)
         if not rule:
             return jsonify({'success': False, 'error': 'Regola non trovata'}), 404
@@ -86,7 +84,6 @@ def get_rule(rule_id: int):
 def create_rule():
     """Crea una nuova regola di automazione."""
     try:
-        automation_service = get_automation_service()
         data = request.get_json()
         if not data:
             return jsonify({'success': False, 'error': 'Dati JSON richiesti'}), 400
@@ -107,7 +104,6 @@ def create_rule():
 def update_rule(rule_id: int):
     """Aggiorna una regola di automazione esistente."""
     try:
-        automation_service = get_automation_service()
         data = request.get_json()
         if not data:
             return jsonify({'success': False, 'error': 'Dati JSON richiesti'}), 400
@@ -128,7 +124,6 @@ def update_rule(rule_id: int):
 def delete_rule(rule_id: int):
     """Elimina una regola di automazione."""
     try:
-        automation_service = get_automation_service()
         success = automation_service.delete_rule(rule_id)
         if success:
             return jsonify({'success': True, 'message': 'Regola eliminata con successo'})
@@ -143,7 +138,6 @@ def delete_rule(rule_id: int):
 def toggle_rule(rule_id: int):
     """Attiva/disattiva una regola di automazione."""
     try:
-        automation_service = get_automation_service()
         rule = automation_service.get_rule_by_id(rule_id)
         if not rule:
             return jsonify({'success': False, 'error': 'Regola non trovata'}), 404

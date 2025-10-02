@@ -26,7 +26,7 @@ from enum import Enum
 from core.config_manager import get_config
 from services.snapshot_manager import get_snapshot_manager
 from services.file_watcher import get_file_watcher
-from services.automation_service import get_automation_service
+from services.automation_service import AutomationService
 from services.dbf_data_service import get_dbf_data_service
 from utils.dbf_utils import get_optimized_reader
 from core.constants_v2 import DBF_TABLES # <--- NEW IMPORT
@@ -85,7 +85,7 @@ class MonitoringService:
         self.lock = threading.RLock()
         self.active_monitors: Dict[str, MonitorInstance] = {}
         
-        self.automation_service = get_automation_service()
+        self.automation_service = AutomationService()
         self.snapshot_manager = get_snapshot_manager()
         self.file_watcher = get_file_watcher()
         self.dbf_reader = get_optimized_reader()

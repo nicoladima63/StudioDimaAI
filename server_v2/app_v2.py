@@ -18,6 +18,9 @@ from core.database_manager import get_database_manager
 from core.exceptions import StudioDimaError
 from utils.dbf_utils import convert_bytes_to_string, clean_dbf_value
 
+# Importa i moduli delle azioni per attivare la registrazione
+from services.actions import system_actions
+
 logger = logging.getLogger(__name__)
 
 def create_app_v2(config_name: Optional[str] = None) -> Flask:
