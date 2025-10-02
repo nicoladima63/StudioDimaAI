@@ -17,8 +17,9 @@ const TipiAppuntamentoSelect: React.FC<TipiAppuntamentoSelectProps> = ({ value, 
       try {
         setLoading(true);
         const response = await automationApi.getAvailableTriggers();
-        if (response.success && response.data?.appuntamento_tipo) {
-          setTipiAppuntamento(response.data.appuntamento_tipo);
+        // CORREZIONE: La risposta ora è direttamente l'oggetto che contiene appuntamento_tipo
+        if (response?.appuntamento_tipo) {
+          setTipiAppuntamento(response.appuntamento_tipo);
         }
       } catch (error) {
         console.error("Errore nel caricamento dei tipi di appuntamento", error);

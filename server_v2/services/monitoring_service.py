@@ -9,7 +9,7 @@ Sistema modulare di monitoraggio che si integra con lo scheduler esistente:
 - Sistema di plugin per estendere funzionalità
 
 Author: Claude Code Studio Architect
-Version: 2.1.0
+Version: 2.2.0
 """
 
 import os
@@ -19,7 +19,7 @@ import threading
 import time
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Set
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from enum import Enum
 
@@ -29,7 +29,7 @@ from services.file_watcher import get_file_watcher
 from services.automation_service import AutomationService
 from services.dbf_data_service import get_dbf_data_service
 from utils.dbf_utils import get_optimized_reader
-from core.constants_v2 import DBF_TABLES # <--- NEW IMPORT
+from core.constants_v2 import DBF_TABLES
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,8 @@ class MonitorConfig:
     interval_seconds: int = 30
     enabled: bool = True
     auto_start: bool = False
-    metadata: Dict[str, Any] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    trigger_filters: Optional[Dict[str, list]] = field(default_factory=dict)
 
 @dataclass
 class MonitorInstance:
@@ -92,31 +93,22 @@ class MonitoringService:
         self.dbf_data_service = get_dbf_data_service()
         
         self.saved_configs: Dict[str, MonitorConfig] = {}
-        self.logs: List[Dict[str, Any]] = [] # Initialize logs list
+        self.logs: List[Dict[str, Any]] = []
         self.settings = self._load_settings()
         self._load_saved_configs()
 
-        # Create reverse mapping from DBF filename base to logical table name
         self._dbf_filename_to_logical_name = {
             info['file'].split('.')[0].lower(): logical_name
             for logical_name, info in DBF_TABLES.items()
         }
     
     def _get_rules_summary(self) -> Dict[str, Any]:
-        """Ritorna un riepilogo delle regole di automazione attive.
-        Al momento le regole sono legate al trigger 'prestazione' e non alla singola tabella,
-        quindi forniamo un sommario globale utile in UI.
-        """
         try:
             rules = self.automation_service.get_all_rules({'trigger_type': 'prestazione', 'attiva': True})
-            action_names: List[str] = []
-            for r in rules:
-                name = r.get('action_name')
-                if name and name not in action_names:
-                    action_names.append(name)
+            action_names: List[str] = [r.get('action_name') for r in rules if r.get('action_name')]
             return {
                 'active_rules': len(rules),
-                'example_actions': action_names[:3]
+                'example_actions': list(set(action_names))[:3]
             }
         except Exception as e:
             logger.warning(f"Failed to compute rules summary: {e}")
@@ -127,15 +119,14 @@ class MonitoringService:
                        monitor_type: MonitorType = MonitorType.PERIODIC_CHECK,
                        interval_seconds: int = 30,
                        auto_start: bool = False,
-                       metadata: Dict[str, Any] = None) -> str:
+                       metadata: Dict[str, Any] = None,
+                       trigger_filters: Optional[Dict[str, list]] = None) -> str:
         """Crea un nuovo monitor per una tabella."""
-        logger.info(f"create_monitor: Received request to create monitor for table {table_name} with type {monitor_type.value}")
+        logger.info(f"Richiesta creazione monitor per tabella {table_name} con filtri: {trigger_filters}")
         monitor_id = f"{table_name}_{monitor_type.value}_{int(time.time())}"
-        logger.info(f"create_monitor: Generated monitor_id: {monitor_id}")
         
         config_manager = get_config()
         file_path = config_manager.get_dbf_path(table_name)
-        logger.info(f"create_monitor: Resolved file_path for {table_name}: {file_path}")
         
         config = MonitorConfig(
             monitor_id=monitor_id,
@@ -144,190 +135,150 @@ class MonitoringService:
             monitor_type=monitor_type,
             interval_seconds=interval_seconds,
             auto_start=auto_start,
-            metadata=metadata or {}
+            metadata=metadata or {},
+            trigger_filters=trigger_filters or {}
         )
         
         with self.lock:
             self.saved_configs[monitor_id] = config
             self._save_config(config)
-            logger.info(f"create_monitor: Monitor config saved for {monitor_id}")
+            logger.info(f"Configurazione monitor salvata per {monitor_id}")
             
             if auto_start:
-                logger.info(f"create_monitor: Auto-starting monitor {monitor_id}")
                 self.start_monitor(monitor_id)
             
             return monitor_id
     
     def start_monitor(self, monitor_id: str) -> bool:
-        """Avvia un monitor esistente."""
         with self.lock:
             if monitor_id not in self.saved_configs:
-                logger.error(f"Monitor {monitor_id} not found")
+                logger.error(f"Monitor {monitor_id} non trovato")
                 return False
-            
             if monitor_id in self.active_monitors:
-                logger.warning(f"Monitor {monitor_id} already running")
+                logger.warning(f"Monitor {monitor_id} è già attivo")
                 return True
             
             config = self.saved_configs[monitor_id]
-            logger.debug(f"start_monitor: Monitor {monitor_id} configured with file_path: {config.file_path}") # Downgraded to DEBUG
-            
             try:
                 start_time = datetime.now()
-                logger.debug(f"Avviando servizio monitoraggio alle {start_time.strftime('%H:%M:%S')} - File: {config.file_path}") # Downgraded to DEBUG
-                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Avvio monitor {monitor_id}', 'type': 'info'})
+                self.logs.append({'timestamp': start_time.isoformat(), 'message': f'Avvio monitor {monitor_id}', 'type': 'info'})
                 
-                snapshot_success = self.snapshot_manager.start_monitoring(config.table_name, config.file_path)
-                if not snapshot_success:
-                    logger.error(f"Failed to create initial snapshot for {config.table_name}")
-                    self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Errore creazione snapshot iniziale per {config.table_name}', 'type': 'error'})
-                    return False
-                logger.info(f"Snapshot iniziale creato per {config.table_name}")
-                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Snapshot iniziale creato per {config.table_name}', 'type': 'info'})
+                if not self.snapshot_manager.start_monitoring(config.table_name, config.file_path):
+                    raise RuntimeError(f"Creazione snapshot iniziale fallita per {config.table_name}")
                 
-                instance = MonitorInstance(
-                    config=config,
-                    status=MonitorStatus.RUNNING,
-                    created_at=start_time.isoformat(),
-                    started_at=start_time.isoformat()
-                )
-                self.active_monitors[monitor_id] = instance # <--- MOVED UP
+                instance = MonitorInstance(config=config, status=MonitorStatus.RUNNING, created_at=start_time.isoformat(), started_at=start_time.isoformat())
+                self.active_monitors[monitor_id] = instance
 
                 if not self.file_watcher.is_running:
                     self.file_watcher.set_change_callback(self.handle_file_change)
                 
-                # Pass the specific file path to the FileWatcher
-                watcher_success = self.file_watcher.start(config.file_path)
-                if not watcher_success:
-                    logger.error("Failed to start file watcher")
-                    self.logs.append({'timestamp': datetime.now().isoformat(), 'message': 'Errore avvio file watcher', 'type': 'error'})
-                    del self.active_monitors[monitor_id] # <--- ROLLBACK
-                    return False
-                logger.info("File watcher avviato con successo")
-                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': 'File watcher avviato con successo', 'type': 'info'})
-                
-                # instance is already created and added to active_monitors
-                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Monitor {monitor_id} avviato', 'type': 'success'})
+                if not self.file_watcher.start(config.file_path):
+                    raise RuntimeError("Avvio file watcher fallito")
+
+                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Monitor {monitor_id} avviato con successo', 'type': 'success'})
                 return True
-                
             except Exception as e:
-                logger.error(f"Error starting monitor {monitor_id}: {e}", exc_info=True)
+                logger.error(f"Errore avvio monitor {monitor_id}: {e}", exc_info=True)
                 self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Errore avvio monitor {monitor_id}: {e}', 'type': 'error'})
+                if monitor_id in self.active_monitors:
+                    del self.active_monitors[monitor_id]
                 return False
     
     def stop_monitor(self, monitor_id: str) -> bool:
-        """Ferma un monitor attivo."""
         with self.lock:
-            if monitor_id not in self.saved_configs:
-                logger.warning(f"Monitor {monitor_id} not running")
+            if monitor_id not in self.active_monitors:
+                logger.warning(f"Monitor {monitor_id} non è attivo")
                 return False
-            
             try:
                 instance = self.active_monitors.pop(monitor_id)
                 instance.status = MonitorStatus.STOPPED
-                
                 if not self.active_monitors:
                     self.file_watcher.stop()
-                    self.logs.append({'timestamp': datetime.now().isoformat(), 'message': 'File watcher fermato', 'type': 'info'})
-                
-                logger.info(f"Servizio monitoraggio fermato per {monitor_id}")
                 self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Monitor {monitor_id} fermato', 'type': 'success'})
                 return True
-                
             except Exception as e:
-                logger.error(f"Error stopping monitor {monitor_id}: {e}")
-                self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f'Errore fermata monitor {monitor_id}: {e}', 'type': 'error'})
-                # Put it back if stopping failed unexpectedly
-                if 'instance' in locals():
-                    self.active_monitors[monitor_id] = instance
+                logger.error(f"Errore fermata monitor {monitor_id}: {e}")
                 return False
 
     def handle_file_change(self, table_name: str):
-        """
-        Callback eseguita da FileWatcher quando rileva una modifica.
-        Orchestra il rilevamento delle modifiche e l'innesco delle automazioni.
-        """
         with self.lock:
-            log_entry = {'timestamp': datetime.now().isoformat(), 'message': f'MODIFICA RILEVATA: File {table_name}.DBF. Processo in corso...', 'type': 'info'}
-            self.logs.append(log_entry)
-            logger.info(f"MODIFICA RILEVATA: File {table_name}.DBF. Processo in corso...")
+            logger.info(f"MODIFICA RILEVATA: File {table_name}.DBF. Avvio processo.")
             
             physical_table_base_name = table_name.lower()
             logical_table_name = self._dbf_filename_to_logical_name.get(physical_table_base_name, physical_table_base_name)
             
-            active_monitors_for_table = [
-                instance for instance in self.active_monitors.values()
-                if instance.config.table_name == logical_table_name and instance.status == MonitorStatus.RUNNING
-            ]
+            active_monitors_for_table = [inst for inst in self.active_monitors.values() if inst.config.table_name == logical_table_name and inst.status == MonitorStatus.RUNNING]
 
             if not active_monitors_for_table:
-                logger.warning(f"Nessun monitor attivo per processare la modifica per la tabella {logical_table_name}.")
+                logger.warning(f"Nessun monitor attivo per la tabella {logical_table_name}.")
                 return
 
             changes = self.snapshot_manager.get_changes(logical_table_name)
             if not changes:
-                logger.info(f"Nessun record nuovo o modificato trovato per {logical_table_name} dopo il controllo.")
+                logger.info(f"Nessuna modifica rilevante trovata per {logical_table_name}.")
                 self.snapshot_manager.update_snapshot(logical_table_name)
                 return
 
-            logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
+            logger.info(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
 
             for change in changes:
                 for instance in active_monitors_for_table:
+                    # Arricchimento (se definito)
                     if instance.config.metadata and instance.config.metadata.get('enrichment'):
                         self.dbf_data_service.enrich_record(change, instance.config.metadata['enrichment'])
 
-                # --- LOGICA TRIGGER DINAMICA CON FALLBACK ---
-                trigger_type = None
-                trigger_id_column = None
-                monitor_instance = active_monitors_for_table[0]
-
-                # 1. Prova a leggere dai metadati per la massima flessibilità
-                if monitor_instance.config.metadata:
-                    trigger_type = monitor_instance.config.metadata.get('trigger_type')
-                    trigger_id_column = monitor_instance.config.metadata.get('trigger_id_column')
-
-                # 2. Se non ci sono metadati, applica la logica pre-impostata (hardcoded)
-                if not (trigger_type and trigger_id_column):
-                    logger.debug(f"Metadati di trigger non trovati per {logical_table_name}, applico logica di fallback.")
-                    if logical_table_name == 'preventivi':
-                        trigger_type = 'prestazione'
-                        trigger_id_column = 'DB_PRONCOD'
-                    elif logical_table_name.lower() == 'appunta':
-                        trigger_type = 'appuntamento_tipo'
-                        trigger_id_column = 'DB_GUARDIA'
-                
-                # 3. Se ancora non c'è una configurazione valida, salta
-                if not (trigger_type and trigger_id_column):
-                    logger.warning(f"Nessuna configurazione trigger valida (né da metadati né da fallback) per la tabella {logical_table_name}. Salto automazione.")
-                    continue
-                
-                trigger_id = change.get(trigger_id_column)
-                if not trigger_id:
-                    logger.warning(f"Salto modifica perché colonna trigger '{trigger_id_column}' è mancante: {change}")
-                    continue
-
-                try:
-                    logger.info(f"AUTOMAZIONE: Esecuzione regole per trigger '{trigger_type}' con ID '{trigger_id}' (da colonna: {trigger_id_column}).")
-                    results = self.automation_service.execute_rules_for_trigger(
-                        trigger_type=trigger_type,
-                        trigger_id=str(trigger_id).strip(),
-                        context_data=change
-                    )
-                    
-                    executed_count = sum(1 for r in results if r.get('success'))
-                    if executed_count > 0:
-                        logger.info(f"AUTOMAZIONE: Eseguite {executed_count} regole con successo per trigger '{trigger_id}'.")
-
-                except Exception as e:
-                    logger.error(f"Errore esecuzione automazione per trigger {trigger_id}: {e}", exc_info=True)
+                    # Logica Trigger
+                    self._process_trigger_for_change(change, instance)
 
             self.snapshot_manager.update_snapshot(logical_table_name)
-
             current_time = datetime.now().isoformat()
             for instance in active_monitors_for_table:
                 instance.change_count += len(changes)
                 instance.last_change = current_time
+
+    def _process_trigger_for_change(self, change: Dict[str, Any], monitor_instance: MonitorInstance):
+        trigger_type, trigger_id_column = None, None
+        logical_table_name = monitor_instance.config.table_name
+
+        if monitor_instance.config.metadata:
+            trigger_type = monitor_instance.config.metadata.get('trigger_type')
+            trigger_id_column = monitor_instance.config.metadata.get('trigger_id_column')
+
+        if not (trigger_type and trigger_id_column):
+            if logical_table_name == 'preventivi':
+                trigger_type, trigger_id_column = 'prestazione', 'DB_PRONCOD'
+            elif logical_table_name.lower() == 'appunta':
+                trigger_type, trigger_id_column = 'appuntamento_tipo', 'DB_GUARDIA'
+        
+        if not (trigger_type and trigger_id_column):
+            return
+        
+        trigger_id = change.get(trigger_id_column)
+        if not trigger_id:
+            return
+
+        # CONTROLLO PREVENTIVO: Esegui solo se esistono regole attive per questo trigger
+        trigger_id_str = str(trigger_id).strip()
+        has_rules = self.automation_service.execute_query(
+            "SELECT 1 FROM automation_rules WHERE trigger_type = ? AND trigger_id = ? AND attiva = 1 LIMIT 1",
+            (trigger_type, trigger_id_str)
+        )
+
+        if not has_rules:
+            logger.debug(f"Nessuna regola attiva per trigger '{trigger_type}:{trigger_id_str}'. Salto.")
+            return
+
+        try:
+            logger.info(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}'. Esecuzione in corso...")
+            self.automation_service.execute_rules_for_trigger(
+                trigger_type=trigger_type,
+                trigger_id=trigger_id_str,
+                context_data=change
+            )
+        except Exception as e:
+            logger.error(f"Errore esecuzione automazione per trigger {trigger_id_str}: {e}", exc_info=True)
+
+    # ... il resto dei metodi (get_monitor_status, load/save, etc.) rimane invariato ...
 
     def get_monitor_status(self, monitor_id: str = None) -> Dict[str, Any]:
         """Recupera status di monitor specifico o tutti."""

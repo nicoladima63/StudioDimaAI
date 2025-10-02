@@ -372,11 +372,11 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
   const loadActions = async () => {
     try {
-      const responseBody = await automationApi.getActions();
-      if (responseBody && responseBody.success) {
-        setActions(responseBody.data || []);
+      const actionsArray = await automationApi.getActions();
+      if (Array.isArray(actionsArray)) {
+        setActions(actionsArray);
       } else {
-        console.error('Failed to load actions:', responseBody?.message);
+        console.error('Failed to load actions: response is not an array');
         setActions([]);
       }
     } catch (e) {

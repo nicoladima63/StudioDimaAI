@@ -6,7 +6,7 @@ Questo modulo contiene le implementazioni concrete per le azioni di automazione 
 Ogni azione è decorata con `@register_action` per essere automaticamente disponibile nel motore di automazione.
 
 Author: Gemini Code Architect
-Version: 1.1.0
+Version: 1.2.0
 """
 
 import logging
@@ -45,14 +45,17 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         phone_key = COLONNE.get('pazienti', {}).get('cellulare', 'DB_CELL')
         extracted_phone = enriched_context.get(phone_key)
         if extracted_phone:
-            enriched_context['telefono'] = extracted_phone
+            enriched_context['telefono'] = str(extracted_phone).strip()
         else:
-            # Fallback: cerca un numero di 10 cifre nelle note se presenti
+            # Fallback: cerca un numero di telefono nella prima riga delle note
             note_key = COLONNE.get('appuntamenti', {}).get('note', 'DB_NOTE')
             note_content = enriched_context.get(note_key, '')
-            phone_match = re.search(r'\d{10}', note_content)
-            if phone_match:
-                enriched_context['telefono'] = phone_match.group(0)
+            if note_content:
+                first_line = note_content.splitlines()[0]
+                cleaned_phone = ''.join(filter(str.isdigit, first_line))
+                if len(cleaned_phone) >= 9:
+                    enriched_context['telefono'] = cleaned_phone
+                    logger.info(f"Numero di telefono estratto e pulito dalle note: {cleaned_phone}")
 
     if 'nome_completo' not in enriched_context:
         nome_key = COLONNE.get('pazienti', {}).get('nome', 'DB_NOME')
@@ -84,7 +87,7 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
 )
 def impl_send_sms_link(context_data: Dict[str, Any], **params):
     """Implementazione REALE per inviare un SMS con link."""
-    logger.info("[AZIONE REALE] Esecuzione send_sms_link...")
+    logger.info(f"[AZIONE REALE] Esecuzione send_sms_link... Dati grezzi ricevuti: {context_data}")
     
     # 1. Arricchisci il contesto per ottenere i dati del paziente
     full_context = _enrich_context_with_patient_data(context_data)
@@ -157,7 +160,7 @@ def impl_send_appointment_sms(context_data: Dict[str, Any], **params):
 
     # 4. Invia SMS
     logger.info(f"Invio SMS appuntamento a {phone} con messaggio: '{message[:50]}...'")
-    result = sms_service.send_sms(phone, message, sender='StudioDima', tag='appuntamento_auto')
+    result = sms_service.send_sms(phone, message, tag='appuntamento_auto')
     
     return {**result, 'phone_sent': phone}
 

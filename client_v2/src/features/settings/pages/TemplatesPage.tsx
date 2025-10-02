@@ -25,6 +25,7 @@ import CIcon from '@coreui/icons-react';
 import { cilPlus, cilPencil, cilTrash, cilReload, cilWarning } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
 import apiClient from '@/services/api/client'; // Assuming apiClient is configured for /api/v2
+import SmsSettingsCard from '../components/SmsSettingsCard'; // <-- IMPORT NUOVO COMPONENTE
 
 interface SmsTemplate {
   id: number;
@@ -205,6 +206,9 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
       <PageLayout.ContentBody>
         {error && <CBadge color='danger' className='mb-3 p-2'>{error}</CBadge>}
         {success && <CBadge color='success' className='mb-3 p-2'>{success}</CBadge>}
+
+        {/* CARD IMPOSTAZIONI MITTENTE SMS */}
+        <SmsSettingsCard />
 
         <CCard className='mb-4'>
           <CCardHeader>

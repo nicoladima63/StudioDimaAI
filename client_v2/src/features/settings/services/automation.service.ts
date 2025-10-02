@@ -42,6 +42,7 @@ export interface CreateRulePayload {
   action_params?: any;
   attiva?: boolean;
   priorita?: number;
+  monitor_id: string; // Aggiunto monitor_id
 }
 
 export interface UpdateRulePayload {
@@ -58,12 +59,12 @@ export interface UpdateRulePayload {
 const automationApi = {
   async getActions(): Promise<Action[]> {
     const response = await apiClient.get('/automations/actions');
-    return response.data;
+    return response.data.data || [];
   },
 
   async getAvailableTriggers(): Promise<any> {
     const response = await apiClient.get('/automations/available-triggers');
-    return response.data;
+    return response.data.data || {};
   },
 
   async getRules(filters?: { attiva?: boolean; trigger_id?: string; monitor_id?: string }): Promise<AutomationRule[]> {
