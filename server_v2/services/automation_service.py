@@ -43,13 +43,22 @@ class AutomationService(BaseService):
                 'function': self._impl_send_sms_link,
                 'parameters': [
                     {'name': 'template_key', 'type': 'string', 'required': True, 'label': 'Chiave Template SMS'},
-                    {'name': 'page_slug', 'type': 'string', 'required': False, 'label': 'Slug Pagina Destinazione'}
+                    {'name': 'page_slug', 'type': 'string', 'required': False, 'label': 'Slug Pagina Destinazione'},
+                    {'name': 'url_params', 'type': 'json', 'required': False, 'label': 'Parametri URL (JSON)'}
                 ]
             },
             'send_appointment_sms': {
                 'function': self._impl_send_appointment_sms,
                 'parameters': [
-                    {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'}
+                    {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'},
+                    {'name': 'page_slug', 'type': 'string', 'required': False, 'label': 'Slug Pagina Destinazione'},
+                    {'name': 'url_params', 'type': 'json', 'required': False, 'label': 'Parametri URL (JSON)'}
+                ]
+            },
+            'log_prestazione_eseguita': { # Added action
+                'function': self._impl_log_prestazione_eseguita, # Placeholder function, will need to be implemented
+                'parameters': [
+                    {'name': 'message', 'type': 'string', 'required': True, 'label': 'Messaggio di Log'}
                 ]
             }
         }
@@ -353,40 +362,60 @@ class AutomationService(BaseService):
                 from services.dbf_data_service import get_dbf_data_service
                 dbf_data_service = get_dbf_data_service()
 
-                # NUOVA LOGICA: Usa l'id_paziente se già presente nel contesto (dal monitoring_service)
-                patient_id = context.get('id_paziente')
+                # LOGGING: Initial context data
+                logger.debug(f"[Rule {rule_id}] Initial context data: {initial_context_data}")
+
+                # Tenta di recuperare l'ID paziente dal contesto (DB_APPACOD)
+                patient_id_key = COLONNE['appuntamenti']['id_paziente']
+                patient_id = context.get(patient_id_key) # DB_APPACOD
+                logger.debug(f"[Rule {rule_id}] Valore di {patient_id_key} (DB_APPACOD): '{patient_id}'")
                 
-                # FALLBACK: Se id_paziente non è nel contesto, prova a recuperarlo alla vecchia maniera
+                # Se l'ID paziente non è disponibile, prova a estrarre nome e telefono dal contesto
                 if not patient_id:
-                    logger.warning(f"id_paziente non trovato nel contesto iniziale. Tento recupero da prestazione (trigger_id).")
-                    trigger_id = rule.get('trigger_id')
-                    prestazione_data = dbf_data_service.get_prestazione_by_id(trigger_id)
-                    if prestazione_data:
-                        context.update(prestazione_data)
-                        patient_id = prestazione_data.get(COLONNE['preventivi']['id_paziente'])
+                    logger.info(f"[Rule {rule_id}] ID paziente non trovato. Tentativo di estrazione nome e telefono da DB_APDESCR e DB_NOTE.")
+                    
+                    # Estrai nome da DB_APDESCR
+                    patient_name_key = COLONNE['appuntamenti']['descrizione']
+                    patient_name = context.get(patient_name_key, '').strip() # DB_APDESCR
+                    logger.debug(f"[Rule {rule_id}] Valore di {patient_name_key} (DB_APDESCR): '{patient_name}'")
 
-                if not patient_id:
-                    raise ValidationError(f"Azione '{action_name}' fallita: ID paziente non trovato né nel contesto né tramite trigger.")
+                    if not patient_name:
+                        raise ValidationError(f"Azione '{action_name}' fallita: Nome paziente non trovato in DB_APDESCR.")
+                    context['nome_completo'] = patient_name
 
-                # Ora che abbiamo il patient_id, recuperiamo i dati del paziente
-                patient_data = dbf_data_service.get_patient_by_id(patient_id)
-                if not patient_data:
-                    raise ValidationError(f"Azione '{action_name}' fallita: dati paziente non trovati per ID '{patient_id}'.")
-                
-                # DEBUG: Log dei dati grezzi del paziente per ispezionare il formato del telefono
-                logger.info(f"DEBUG PAZIENTE (Regola {rule_id}): {patient_data}")
+                    # Estrai telefono da DB_NOTE
+                    note_key = COLONNE['appuntamenti']['note']
+                    note_content = context.get(note_key, '') # DB_NOTE
+                    logger.debug(f"[Rule {rule_id}] Valore di {note_key} (DB_NOTE): '{note_content}'")
 
-                context.update(patient_data)
-                
-                # 4. Recupera il telefono (SOLO DB_PACELLU come da specifica)
-                extracted_phone = patient_data.get(COLONNE['pazienti']['cellulare'])
-                if not extracted_phone:
-                    raise ValidationError(f"Azione '{action_name}' fallita: numero di cellulare non trovato per il paziente con ID '{patient_id}'.")
-                
-                # Arricchisci il contesto finale con i dati necessari all'azione
-                context['nome_completo'] = patient_data.get(COLONNE['pazienti']['nome'], '')
-                context['telefono'] = extracted_phone
-                logger.info(f"Prerequisiti per azione '{action_name}' validati. Dati paziente e telefono aggiunti al contesto.")
+                    phone_match = re.search(r'\d{10}', note_content)
+                    if not phone_match:
+                        raise ValidationError(f"Azione '{action_name}' fallita: Numero di telefono di 10 cifre non trovato in DB_NOTE: '{note_content}'.")
+                    extracted_phone = phone_match.group(0)
+                    context['telefono'] = extracted_phone
+                    logger.info(f"[Rule {rule_id}] Dati paziente (nuovo) estratti: Nome='{patient_name}', Telefono='{extracted_phone}'.")
+
+                else:
+                    # Se l'ID paziente è disponibile, recupera i dati dal DB
+                    logger.info(f"[Rule {rule_id}] ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
+                    patient_data = dbf_data_service.get_patient_by_id(patient_id)
+                    if not patient_data:
+                        raise ValidationError(f"Azione '{action_name}' fallita: dati paziente non trovati per ID '{patient_id}'.")
+                    
+                    context.update(patient_data)
+                    logger.debug(f"[Rule {rule_id}] Dati paziente da DB: {patient_data}")
+                    
+                    extracted_phone = patient_data.get(COLONNE['pazienti']['cellulare'])
+                    if not extracted_phone:
+                        raise ValidationError(f"Azione '{action_name}' fallita: numero di cellulare non trovato per il paziente con ID '{patient_id}'.")
+                    
+                    context['nome_completo'] = patient_data.get(COLONNE['pazienti']['nome'], '')
+                    context['telefono'] = extracted_phone
+                    logger.info(f"[Rule {rule_id}] Dati paziente (esistente) recuperati: Nome='{context['nome_completo']}', Telefono='{extracted_phone}'.")
+
+                # Validazione finale per il telefono
+                if not context.get('telefono'):
+                    raise ValidationError(f"Azione '{action_name}' fallita: Numero telefono non disponibile nel contesto finale.")
 
             # Combina contesto arricchito e parametri specifici dell'azione
             full_context = {**context, **action_params}
@@ -428,12 +457,36 @@ class AutomationService(BaseService):
         query = urlencode(rendered_params) if rendered_params else ''
         final_url = f"{base_url}?{query}" if query else base_url
 
-        from core.template_manager import template_manager
+        from core.template_manager import get_template_manager # Import here
+
+        phone = context.get('phone') or context.get('telefono')
+        if not phone:
+            raise ValidationError('Numero telefono non disponibile nel contesto')
+
+        page_slug = context.get('page_slug', 'informazioni')
+        template_id = context.get('template_id') # Changed from template_key to template_id
+        if not template_id:
+            raise ValidationError("Il parametro 'template_id' è obbligatorio per l'azione 'send_sms_link'.")
+
+        url_params = context.get('url_params', {})
+        sender = context.get('sender')
+
+        def render_value(v: Any) -> Any:
+            if isinstance(v, str):
+                return v.format(**context)
+            return v
+
+        rendered_params = {k: render_value(v) for k, v in url_params.items()}
+        base_url = f'https://studiodimartino.eu/{page_slug.lstrip("/")}'
+        query = urlencode(rendered_params) if rendered_params else ''
+        final_url = f"{base_url}?{query}" if query else base_url
+
+        template_manager = get_template_manager()
         nome = context.get('nome_completo', 'Gentile paziente')
         template_data = {'nome_completo': nome, 'url': final_url, **context}
         
         try:
-            message = template_manager.render_template(template_key, template_data)
+            message = template_manager.render_template_by_id(template_id, template_data) # Changed to render_template_by_id
         except Exception:
             message = f"Ciao {nome}, informazioni utili: {final_url}"
 
@@ -467,7 +520,7 @@ class AutomationService(BaseService):
             raise ValidationError("Il parametro 'template_id' è obbligatorio per l'azione 'send_appointment_sms'.")
 
         template_data = {
-            'nome_paziente': patient_name,
+            'nome_completo': patient_name, # Changed from nome_paziente to nome_completo
             'data_appuntamento': context.get('DB_APDATA'),
             'ora_appuntamento': context.get('DB_APOREIN'),
             **context
@@ -484,6 +537,12 @@ class AutomationService(BaseService):
         result = sms_service.send_sms(phone, message, sender=sender, tag='appuntamento_v')
         
         return {**result, 'phone_extracted': phone}
+
+    def _impl_log_prestazione_eseguita(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Implementazione per l'azione 'log_prestazione_eseguita'."""
+        message = context.get('message', 'Nessun messaggio fornito.')
+        logger.info(f"ACTION: log_prestazione_eseguita - {message} - Context: {context}")
+        return {'success': True, 'log_message': message}
 
 import threading
 

@@ -15,7 +15,7 @@ import {
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilList, cilSettings } from '@coreui/icons';
-import { Action } from '@/features/settings/services/automation.service';
+import { Action, ActionParameter } from '@/features/settings/services/automation.service';
 import apiClient from '@/services/api/client';
 
 interface SmsTemplate {
@@ -74,7 +74,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
     setCurrentParams(prev => ({ ...prev, [field]: value }));
   };
 
-  const renderParamInput = (param: any) => {
+  const renderParamInput = (param: ActionParameter) => {
     const paramValue = currentParams[param.name];
 
     switch (param.name) {
@@ -101,8 +101,8 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
         return (
           <div className='mb-3' key={param.name}>
             <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
-            <CFormTextarea 
-              rows={3} 
+            <CFormTextarea
+              rows={3}
               id={param.name}
               value={paramValue ? JSON.stringify(paramValue, null, 2) : ''}
               onChange={(e) => {
@@ -149,17 +149,19 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
           {actions.length === 0 ? (
             <p className='text-muted'>Nessuna azione disponibile</p>
           ) : (
-            <div className='mb-3'>
-              <CFormLabel>Seleziona Azione</CFormLabel>
-              <CFormSelect
-                value={selectedActionId || ''}
-                onChange={(e) => onActionChange(e.target.value ? Number(e.target.value) : null)}
-              >
-                <option value=''>-- Seleziona azione --</option>
-                {actions.map(action => (
-                  <option key={action.id} value={action.id}>{action.name}</option>
-                ))}
-              </CFormSelect>
+            <>
+              <div className='mb-3'>
+                <CFormLabel>Seleziona Azione</CFormLabel>
+                <CFormSelect
+                  value={selectedActionId || ''}
+                  onChange={(e) => onActionChange(e.target.value ? Number(e.target.value) : null)}
+                >
+                  <option value=''>-- Seleziona azione --</option>
+                  {actions.map(action => (
+                    <option key={action.id} value={action.id}>{action.name}</option>
+                  ))}
+                </CFormSelect>
+              </div>
               {selectedActionId && requiresParams && (
                 <div className='mt-2'>
                   <CButton color='info' size='sm' variant='outline' onClick={handleOpenModal}>
@@ -168,7 +170,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
                   </CButton>
                 </div>
               )}
-            </div>
+            </>
           )}
         </CCardBody>
       </CCard>
@@ -183,8 +185,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
           <CButton color='primary' onClick={handleSave}>Salva Parametri</CButton>
         </CModalFooter>
       </CModal>
-    </>
-  );
-};
+    </>)
+  };
 
-export default CallbackCard;
+  export default CallbackCard;

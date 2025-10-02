@@ -1,10 +1,19 @@
 import apiClient from '@/services/api/client';
 
+export interface ActionParameter {
+  name: string;
+  label: string;
+  type: string; // e.g., 'text', 'number', 'template_id', 'url_params'
+  placeholder?: string;
+  required?: boolean;
+  options?: { value: string | number; label: string }[]; // For select types, if any
+}
+
 export interface Action {
   id: number;
   name: string;
   description: string;
-  parameters: string[]; // Array of parameter names
+  parameters: ActionParameter[]; // Array of detailed parameter objects
   is_system_action: boolean;
 }
 

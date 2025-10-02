@@ -15,6 +15,7 @@ class TemplateManager:
         self.db_manager = get_database_manager()
         # Non carichiamo più da JSON all'avvio, ma dal DB on-demand o in cache
         logger.info("TemplateManager inizializzato. I template verranno gestiti tramite DB.")
+        logger.debug("TemplateManager: __init__ called.")
 
     def _execute_query(self, query: str, params: tuple = ()) -> List[Dict[str, Any]]:
         """Esegue una query di selezione sul DB."""
@@ -36,11 +37,12 @@ class TemplateManager:
             from core.exceptions import DatabaseError # Importa qui per evitare cicli
             raise DatabaseError(f"Errore durante l'esecuzione del comando DB: {str(e)}")
 
-        def get_template_by_id(self, template_id: int) -> Optional[Dict[str, Any]]:
-            """Recupera un template dal DB tramite il suo ID."""
-            query = "SELECT id, name, content, description, created_at, updated_at FROM sms_templates WHERE id = ?"
-            result = self._execute_query(query, (template_id,))
-            return result[0] if result else None
+    def get_template_by_id(self, template_id: int) -> Optional[Dict[str, Any]]:
+        """Recupera un template dal DB tramite il suo ID."""
+        logger.debug(f"TemplateManager: get_template_by_id called with ID: {template_id}")
+        query = "SELECT id, name, content, description, created_at, updated_at FROM sms_templates WHERE id = ?"
+        result = self._execute_query(query, (template_id,))
+        return result[0] if result else None
 
     def get_template_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         """Recupera un template dal DB tramite il suo nome."""
@@ -126,6 +128,7 @@ class TemplateManager:
 
     def render_template_by_id(self, template_id: int, data: Dict[str, Any]) -> str:
         """Renderizza un template con i dati forniti, cercandolo per ID."""
+        logger.debug(f"TemplateManager: render_template_by_id called with ID: {template_id}")
         template = self.get_template_by_id(template_id)
         if not template:
             logger.warning(f"Template con ID '{template_id}' non trovato nel DB. Uso messaggio di fallback.")
