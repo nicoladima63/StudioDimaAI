@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from core.database_manager import get_database_manager # Assumendo che esista
+from core.exceptions import TemplateNotFoundError, TemplateRenderError, DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,6 @@ class TemplateManager:
                     return cursor.rowcount
         except Exception as e:
             logger.error(f"Errore durante l'esecuzione del comando DB: {query} con parametri {params}: {e}", exc_info=True)
-            from core.exceptions import DatabaseError # Importa qui per evitare cicli
             raise DatabaseError(f"Errore durante l'esecuzione del comando DB: {str(e)}")
 
     def get_template_by_id(self, template_id: int) -> Optional[Dict[str, Any]]:
@@ -115,30 +115,24 @@ class TemplateManager:
         """Renderizza un template con i dati forniti."""
         template = self.get_template_by_name(template_name)
         if not template:
-            # Fallback a un messaggio generico se il template non esiste nel DB
-            logger.warning(f"Template '{template_name}' non trovato nel DB. Uso messaggio di fallback.")
-            return f"Messaggio generico: {data.get('nome_completo', 'Gentile utente')}, informazioni: {data.get('url', '')}"
+            raise TemplateNotFoundError(f"Template '{template_name}' non trovato nel DB.")
         
         try:
             return template['content'].format(**data)
         except KeyError as e:
-            logger.error(f"Variabile mancante '{e}' per template '{template_name}'.")
-            # Fallback a un messaggio generico se mancano variabili
-            return f"Messaggio generico (errore variabili): {data.get('nome_completo', 'Gentile utente')}, informazioni: {data.get('url', '')}"
+            raise TemplateRenderError(f"Variabile mancante '{e}' per template '{template_name}'.") from e
 
     def render_template_by_id(self, template_id: int, data: Dict[str, Any]) -> str:
         """Renderizza un template con i dati forniti, cercandolo per ID."""
         logger.debug(f"TemplateManager: render_template_by_id called with ID: {template_id}")
         template = self.get_template_by_id(template_id)
         if not template:
-            logger.warning(f"Template con ID '{template_id}' non trovato nel DB. Uso messaggio di fallback.")
-            return f"Messaggio generico (ID {template_id}): {data.get('nome_completo', 'Gentile utente')}, informazioni: {data.get('url', '')}"
+            raise TemplateNotFoundError(f"Template con ID '{template_id}' non trovato nel DB.")
         
         try:
             return template['content'].format(**data)
         except KeyError as e:
-            logger.error(f"Variabile mancante '{e}' per template con ID '{template_id}'.")
-            return f"Messaggio generico (errore variabili, ID {template_id}): {data.get('nome_completo', 'Gentile utente')}, informazioni: {data.get('url', '')}"
+            raise TemplateRenderError(f"Variabile mancante '{e}' per template con ID '{template_id}'.") from e
 
     def preview_template(self, name: Optional[str] = None, id: Optional[int] = None, data: Dict[str, Any] = None, custom_content: Optional[str] = None) -> Dict[str, Any]:
         """Genera un'anteprima di un template."""

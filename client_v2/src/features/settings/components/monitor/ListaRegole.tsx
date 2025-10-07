@@ -1,7 +1,7 @@
 import React from 'react';
 import { CButton } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilTrash, cilMediaStop, cilMediaPlay } from '@coreui/icons';
+import { cilTrash, cilMediaStop, cilMediaPlay, cilPencil } from '@coreui/icons';
 import { AutomationRule } from '@/features/settings/services/automation.service';
 
 // Definiamo le props che il componente riceverà
@@ -9,10 +9,11 @@ interface ListaRegoleProps {
   rules: AutomationRule[];
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
+  onEdit: (rule: AutomationRule) => void;
   loading: boolean;
 }
 
-const ListaRegole: React.FC<ListaRegoleProps> = ({ rules, onToggle, onDelete, loading }) => {
+const ListaRegole: React.FC<ListaRegoleProps> = ({ rules, onToggle, onDelete, onEdit, loading }) => {
   if (rules.length === 0) {
     return <div className='text-muted'>Nessuna regola di automazione presente</div>;
   }
@@ -48,6 +49,16 @@ const ListaRegole: React.FC<ListaRegoleProps> = ({ rules, onToggle, onDelete, lo
                 </CButton>
               </td>
               <td>
+                <CButton
+                  size='sm'
+                  color='info'
+                  variant='outline'
+                  onClick={() => onEdit(r)}
+                  disabled={loading}
+                  className='me-1'
+                >
+                  <CIcon icon={cilPencil} />
+                </CButton>
                 <CButton
                   size='sm'
                   color='danger'

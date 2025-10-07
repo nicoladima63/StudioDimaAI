@@ -30,6 +30,8 @@ interface CallbackCardProps {
   onActionChange: (value: number | null) => void;
   onParamsChange: (params: any) => void;
   initialParams: any;
+  isModalOpen: boolean;
+  setIsModalOpen: (isOpen: boolean) => void;
 }
 
 const CallbackCard: React.FC<CallbackCardProps> = ({
@@ -38,8 +40,9 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
   onActionChange,
   onParamsChange,
   initialParams,
+  isModalOpen,
+  setIsModalOpen,
 }) => {
-  const [showActionParamsModal, setShowActionParamsModal] = useState(false);
   const [currentParams, setCurrentParams] = useState(initialParams || {});
   const [smsTemplates, setSmsTemplates] = useState<SmsTemplate[]>([]);
 
@@ -62,12 +65,12 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
 
   const handleOpenModal = () => {
     setCurrentParams(initialParams || {});
-    setShowActionParamsModal(true);
+    setIsModalOpen(true);
   };
 
   const handleSave = () => {
     onParamsChange(currentParams);
-    setShowActionParamsModal(false);
+    setIsModalOpen(false);
   };
 
   const handleParamChange = (field: string, value: any) => {
@@ -198,13 +201,13 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
         </CCardBody>
       </CCard>
 
-      <CModal visible={showActionParamsModal} onClose={() => setShowActionParamsModal(false)} backdrop='static'>
+      <CModal visible={isModalOpen} onClose={() => setIsModalOpen(false)} backdrop='static'>
         <CModalHeader>Configura Parametri Azione: {selectedAction?.name}</CModalHeader>
         <CModalBody>
           {selectedAction?.parameters?.map(param => renderParamInput(param))}
         </CModalBody>
         <CModalFooter>
-          <CButton color='secondary' variant='outline' onClick={() => setShowActionParamsModal(false)}>Annulla</CButton>
+          <CButton color='secondary' variant='outline' onClick={() => setIsModalOpen(false)}>Annulla</CButton>
           <CButton color='primary' onClick={handleSave}>Salva Parametri</CButton>
         </CModalFooter>
       </CModal>

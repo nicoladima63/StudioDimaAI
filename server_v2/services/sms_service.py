@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime
 from core.environment_manager import environment_manager, ServiceType, Environment
 from core.config import get_config_value
-from core.exceptions import ValidationError
+from core.exceptions import ValidationError, TemplateNotFoundError, TemplateRenderError
 from core.template_manager import get_template_manager
 
 logger = logging.getLogger(__name__)
@@ -524,11 +524,9 @@ class SMSService:
             # Usa template manager per generare messaggio
             return self.template_manager.render_template('recall_reminder', template_data) # Usa la key del template
             
-        except Exception as e:
+        except (TemplateNotFoundError, TemplateRenderError) as e:
             logger.error(f"Errore generazione messaggio richiamo con template: {e}")
-            # Fallback a messaggio di base
-            nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
-            return f"Gentile {nome}, è tempo per il suo controllo. Contatti lo studio per fissare un appuntamento. Studio Dima"
+            raise ValidationError(f"Errore template richiamo: {e}") from e
     
     def get_automation_settings(self) -> Dict[str, Any]:
         """Ottiene impostazioni automazione SMS"""
@@ -633,11 +631,9 @@ class SMSService:
             # Usa template manager per generare messaggio
             return self.template_manager.render_template('appointment_reminder', template_data) # Usa la key del template
             
-        except Exception as e:
+        except (TemplateNotFoundError, TemplateRenderError) as e:
             logger.error(f"Errore generazione messaggio promemoria con template: {e}")
-            # Fallback a messaggio di base
-            nome = appuntamento_data.get('nome_completo') or appuntamento_data.get('nome', 'Gentile paziente')
-            return f"Gentile {nome}, ricordiamo l'appuntamento di domani. Studio Dima"
+            raise ValidationError(f"Errore template promemoria: {e}") from e
 
 # Instance globale singleton
 sms_service = SMSService()

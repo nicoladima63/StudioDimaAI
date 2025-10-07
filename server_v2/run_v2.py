@@ -19,6 +19,7 @@ import sys
 import argparse
 import logging
 from typing import Optional
+from dotenv import load_dotenv
 
 # Add current directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -226,6 +227,9 @@ def run_with_flask_dev(app, args):
 def main():
     """Main entry point for the server."""
     try:
+        # Load environment variables from .env file
+        load_dotenv()
+        
         # Parse command line arguments
         args = parse_arguments()
         

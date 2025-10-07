@@ -28,6 +28,7 @@
         "dbfread",
         "diagnosi",
         "DMRNCL",
+        "dotenv",
         "executemany",
         "farmaci",
         "Fatture",

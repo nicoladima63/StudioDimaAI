@@ -430,3 +430,21 @@ class DBFReadError(StudioDimaError):
     used by the gestionale system.
     """
     pass
+
+class TemplateError(StudioDimaError):
+    """
+    Base exception for template-related errors.
+    """
+    pass
+
+class TemplateNotFoundError(TemplateError):
+    """
+    Exception raised when a template is not found in the database.
+    """
+    pass
+
+class TemplateRenderError(TemplateError):
+    """
+    Exception raised when a template fails to render, e.g., due to a missing variable.
+    """
+    pass

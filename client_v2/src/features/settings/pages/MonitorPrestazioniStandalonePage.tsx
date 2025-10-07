@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
+  CAlert,
   CButton,
   CModal,
   CModalHeader,
@@ -74,12 +75,16 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteMonitorId, setPendingDeleteMonitorId] = useState<string | null>(null);
   
-  // Stati per la creazione di regole
+  // Stati per la creazione/modifica di regole
   const [actions, setActions] = useState<Action[]>([]);
-  const [selectedActionId, setSelectedActionId] = useState<number | null>(null);
   const [rules, setRules] = useState<AutomationRule[]>([]);
+  const [editingRule, setEditingRule] = useState<AutomationRule | null>(null);
+  const [trigger, setTrigger] = useState<Trigger | null>(null);
+  const [selectedActionId, setSelectedActionId] = useState<number | null>(null);
   const [selectedActionParams, setSelectedActionParams] = useState<any | null>(null);
-  const [trigger, setTrigger] = useState<Trigger | null>(null); // Nuovo stato per il trigger
+
+  const selectedActionIdRef = useRef(selectedActionId);
+  selectedActionIdRef.current = selectedActionId;
 
   // Stati per creazione monitor
   const [monitorTableName, setMonitorTableName] = useState('preventivi');
@@ -441,16 +446,59 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
-      const handleAssocia = async (e: React.MouseEvent) => {
-      e.preventDefault();
+  const handleActionChange = (newActionId: number | null) => {
+    if (newActionId !== selectedActionIdRef.current) {
+      setSelectedActionParams(null);
+    }
+    setSelectedActionId(newActionId);
+  };
+
+  const handleEditRegola = (rule: AutomationRule) => {
+    alert(`Inizio modifica per la regola: ${rule.name} (ID: ${rule.id})`);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRule(null);
+    setTrigger(null);
+    setSelectedActionId(null);
+    setSelectedActionParams(null);
+  };
+
+  const handleAssocia = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    if (editingRule) {
+      // --- LOGICA DI AGGIORNAMENTO ---
+      if (!selectedActionId) {
+        setError("Seleziona un'azione.");
+        return;
+      }
+      try {
+        setLoading(true);
+        const payload = {
+          action_id: selectedActionId,
+          action_params: selectedActionParams || {},
+        };
+        await automationApi.updateRule(editingRule.id, payload);
+        setSuccess('Regola aggiornata con successo');
+        handleCancelEdit();
+        await loadRules(selectedMonitorId);
+      } catch (e: any) {
+        setError(e?.message || 'Errore durante l\'aggiornamento della regola.');
+      }
+      finally {
+        setLoading(false);
+      }
+    } else {
+      // --- LOGICA DI CREAZIONE ---
       if (!trigger || !selectedActionId || !selectedMonitorId) {
         setError("Seleziona un trigger, un'azione e un monitor prima di associare.");
         return;
       }
-  
+
       const selectedAction = actions.find(a => a.id === selectedActionId);
       if (!selectedAction) return;
-  
+
       try {
         setLoading(true);
         const payload = {
@@ -466,17 +514,16 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         };
         await automationApi.createRule(payload);
         setSuccess('Regola di automazione creata con successo');
-        // Reset form
-        setTrigger(null);
-        setSelectedActionId(null);
-        setSelectedActionParams(null);
-        await loadRules(selectedMonitorId); // Ricarica le regole per il monitor corrente
+        handleCancelEdit(); // Usa la stessa funzione per resettare il form
+        await loadRules(selectedMonitorId);
       } catch (e: any) {
         setError(e?.message || 'Errore creazione regola di automazione');
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
-    };
+    }
+  };
   const handleToggleRegola = async (id: number) => {
     try {
       await automationApi.toggleRule(id);
@@ -513,6 +560,11 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
           </div>
         }
       />
+
+      <div className="mt-2">
+        {error && <CAlert color="danger" dismissible onClose={() => setError(null)}>{error}</CAlert>}
+        {success && <CAlert color="success" dismissible onClose={() => setSuccess(null)}>{success}</CAlert>}
+      </div>
 
       {/* Area 1: Gestione Monitor */}
       <PageLayout.ContentHeader>
@@ -660,21 +712,32 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
             </CCardHeader>
             <CCardBody>
               <CRow>
-                {/* Colonna Sinistra: Creazione Regola */}
+                {/* Colonna Sinistra: Creazione/Modifica Regola */}
                 <CCol md={4}>
-                  <h6 className='mb-3'>Crea Nuova Regola</h6>
-                  <TriggerSourceSelector onChange={setTrigger} />
+                  <h6 className='mb-3'>{editingRule ? 'Modifica Regola' : 'Crea Nuova Regola'}</h6>
+                  <TriggerSourceSelector 
+                    onChange={setTrigger} 
+                    disabled={!!editingRule || loading} 
+                  />
                   <CallbackCard 
                     actions={actions}
                     selectedActionId={selectedActionId}
-                    onActionChange={setSelectedActionId}
+                    onActionChange={handleActionChange}
                     initialParams={selectedActionParams}
                     onParamsChange={setSelectedActionParams}
                   />
-                  <AssociaRegolaCard 
-                    onAssocia={handleAssocia}
-                    disabled={!trigger || !selectedActionId || loading}
-                  />
+                  <div className='d-flex align-items-center'>
+                    <AssociaRegolaCard 
+                      onAssocia={handleAssocia}
+                      disabled={(!trigger && !editingRule) || !selectedActionId || loading}
+                      isEditing={!!editingRule}
+                    />
+                    {editingRule && (
+                      <CButton color="secondary" variant="outline" onClick={handleCancelEdit} className="ms-3">
+                        Annulla
+                      </CButton>
+                    )}
+                  </div>
                 </CCol>
 
                 {/* Colonna Destra: Lista Regole */}
@@ -684,6 +747,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                     rules={rules} 
                     onToggle={handleToggleRegola}
                     onDelete={handleDeleteRegola}
+                    onEdit={handleEditRegola}
                     loading={loading}
                   />
                 </CCol>
