@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2023.
+  ~ All rights reserved.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:mov="https://api.rentri.gov.it/schemas/rentri-movimenti-1.0"
+           targetNamespace="https://api.rentri.gov.it/schemas/rentri-movimenti-1.0"
+           elementFormDefault="qualified"
+           version="1.0.0">
+
+    <xs:include schemaLocation="rentri-common-1.0.xsd"/>
+
+    <xs:element name="Movimenti" type="mov:MovimentiType"/>
+
+    <xs:complexType name="MovimentiType">
+        <xs:sequence>
+            <xs:element name="Movimento" type="mov:MovimentoType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="MovimentoType">
+        <xs:sequence>
+            <xs:element name="Identificativo" type="mov:IdentificativoMovimentoType"/>
+            <xs:element name="DataOraMovimento" type="xs:dateTime"/>
+            <xs:element name="TipoMovimento" type="mov:TipoMovimentoType"/>
+            <xs:element name="Quantita" type="mov:QuantitaType"/>
+            <xs:element name="UnitaMisura" type="mov:UnitaMisuraType"/>
+            <xs:element name="CodiceCER" type="mov:CodiceCERType"/>
+            <xs:element name="DescrizioneRifiuto" type="mov:DescrizioneRifiutoType" minOccurs="0"/>
+            <xs:element name="StatoFisico" type="mov:StatoFisicoType"/>
+            <xs:element name="CaratteristichePericolosita" type="mov:CaratteristichePericolositaType" minOccurs="0"/>
+            <xs:element name="Destinazione" type="mov:DestinazioneType"/>
+            <xs:element name="MezzoTrasporto" type="mov:MezzoTrasportoType"/>
+            <xs:element name="Note" type="mov:NoteType" minOccurs="0"/>
+            <xs:element name="RiferimentoRegistro" type="mov:RiferimentoRegistroType" minOccurs="0"/>
+            <xs:element name="RiferimentoFormulario" type="mov:RiferimentoFormularioType" minOccurs="0"/>
+            <xs:element name="RiferimentoDocumento" type="mov:RiferimentoDocumentoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoPrecedente" type="mov:RiferimentoMovimentoPrecedenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoSuccessivo" type="mov:RiferimentoMovimentoSuccessivoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoCorrelato" type="mov:RiferimentoMovimentoCorrelatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoAnnullato" type="mov:RiferimentoMovimentoAnnullatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoSostitutivo" type="mov:RiferimentoMovimentoSostitutivoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoIntegrativo" type="mov:RiferimentoMovimentoIntegrativoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRettificativo" type="mov:RiferimentoMovimentoRettificativoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoCancellato" type="mov:RiferimentoMovimentoCancellatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRipristinato" type="mov:RiferimentoMovimentoRipristinatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoSospeso" type="mov:RiferimentoMovimentoSospesoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRipreso" type="mov:RiferimentoMovimentoRipresoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoChiuso" type="mov:RiferimentoMovimentoChiusoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRiaperto" type="mov:RiferimentoMovimentoRiapertoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoConfermato" type="mov:RiferimentoMovimentoConfermatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoNonConfermato" type="mov:RiferimentoMovimentoNonConfermatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoAccettato" type="mov:RiferimentoMovimentoAccettatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoNonAccettato" type="mov:RiferimentoMovimentoNonAccettatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRifiutato" type="mov:RiferimentoMovimentoRifiutatoType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoAccettatoParzialmente" type="mov:RiferimentoMovimentoAccettatoParzialmenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRifiutatoParzialmente" type="mov:RiferimentoMovimentoRifiutatoParzialmenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoSospesoParzialmente" type="mov:RiferimentoMovimentoSospesoParzialmenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRipresoParzialmente" type="mov:RiferimentoMovimentoRipresoParzialmenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoChiusoParzialmente" type="mov:RiferimentoMovimentoChiusoParzialmenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoRiapertoParzialmente" type="mov:RiferimentoMovimentoRiapertoParzialmenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoConfermatoParzialmente" type="mov:RiferimentoMovimentoConfermatoParzialmenteType" minOccurs="0"/>
+            <xs:element name="RiferimentoMovimentoNonConfermatoParzialmente" type="mov:RiferimentoMovimentoNonConfermatoParzialmenteType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="IdentificativoMovimentoType">
+        <xs:sequence>
+            <xs:element name="Anno" type="xs:int"/>
+            <xs:element name="Progressivo" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="TipoMovimentoType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CARICO"/>
+            <xs:enumeration value="SCARICO"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="QuantitaType">
+        <xs:sequence>
+            <xs:element name="Valore" type="xs:decimal"/>
+            <xs:element name="UnitaMisura" type="mov:UnitaMisuraType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="UnitaMisuraType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="KG"/>
+            <xs:enumeration value="LITRI"/>
+            <xs:enumeration value="METRI_CUBI"/>
+            <xs:enumeration value="PEZZI"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="CodiceCERType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[0-9]{6}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="DescrizioneRifiutoType">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="250"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="StatoFisicoType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SOLIDO"/>
+            <xs:enumeration value="LIQUIDO"/>
+            <xs:enumeration value="FANGOSO"/>
+            <xs:enumeration value="GASSOSO"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="CaratteristichePericolositaType">
+        <xs:sequence>
+            <xs:element name="CaratteristicaPericolosita" type="mov:CaratteristicaPericolositaEnum" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="CaratteristicaPericolositaEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="HP1"/>
+            <xs:enumeration value="HP2"/>
+            <xs:enumeration value="HP3"/>
+            <xs:enumeration value="HP4"/>
+            <xs:enumeration value="HP5"/>
+            <xs:enumeration value="HP6"/>
+            <xs:enumeration value="HP7"/>
+            <xs:enumeration value="HP8"/>
+            <xs:enumeration value="HP9"/>
+            <xs:enumeration value="HP10"/>
+            <xs:enumeration value="HP11"/>
+            <xs:enumeration value="HP12"/>
+            <xs:enumeration value="HP13"/>
+            <xs:enumeration value="HP14"/>
+            <xs:enumeration value="HP15"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="DestinazioneType">
+        <xs:sequence>
+            <xs:element name="TipoDestinazione" type="mov:TipoDestinazioneType"/>
+            <xs:element name="CodiceDestinazione" type="xs:string" minOccurs="0"/>
+            <xs:element name="DenominazioneDestinazione" type="xs:string" minOccurs="0"/>
+            <xs:element name="IndirizzoDestinazione" type="xs:string" minOccurs="0"/>
+            <xs:element name="ComuneDestinazione" type="xs:string" minOccurs="0"/>
+            <xs:element name="ProvinciaDestinazione" type="xs:string" minOccurs="0"/>
+            <xs:element name="NazioneDestinazione" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="TipoDestinazioneType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="RECUPERO"/>
+            <xs:enumeration value="SMALTIMENTO"/>
+            <xs:enumeration value="DEPOSITO_TEMPORANEO"/>
+            <xs:enumeration value="INTERMEDIAZIONE"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="MezzoTrasportoType">
+        <xs:sequence>
+            <xs:element name="Targa" type="xs:string"/>
+            <xs:element name="CodiceFiscaleTrasportatore" type="mov:CodiceFiscaleType"/>
+            <xs:element name="DenominazioneTrasportatore" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="NoteType">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="500"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="RiferimentoRegistroType">
+        <xs:sequence>
+            <xs:element name="IdentificativoRegistro" type="mov:IdentificativoRegistro"/>
+            <xs:element name="DataOraRegistrazione" type="xs:dateTime"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoFormularioType">
+        <xs:sequence>
+            <xs:element name="NumeroFormulario" type="xs:string"/>
+            <xs:element name="DataEmissione" type="xs:date"/>
+            <xs:element name="CodiceFiscaleProduttore" type="mov:CodiceFiscaleType" minOccurs="0"/>
+            <xs:element name="DenominazioneProduttore" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoDocumentoType">
+        <xs:sequence>
+            <xs:element name="TipoDocumento" type="xs:string"/>
+            <xs:element name="IdentificativoDocumento" type="xs:string"/>
+            <xs:element name="DataEmissione" type="xs:date"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoPrecedenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoSuccessivoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoCorrelatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoAnnullatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoSostitutivoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoIntegrativoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRettificativoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoCancellatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRipristinatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoSospesoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRipresoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoChiusoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRiapertoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoConfermatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoNonConfermatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoAccettatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoNonAccettatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRifiutatoType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoAccettatoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRifiutatoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoSospesoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRipresoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoChiusoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoRiapertoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoConfermatoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoMovimentoNonConfermatoParzialmenteType">
+        <xs:sequence>
+            <xs:element name="IdentificativoMovimento" type="mov:IdentificativoMovimentoType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

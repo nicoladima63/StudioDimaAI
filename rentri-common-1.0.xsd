@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2023.
+  ~ All rights reserved.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://www.rentri.gov.it/schemas/common"
+           targetNamespace="http://www.rentri.gov.it/schemas/common"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified"
+           version="1.0">
+
+    <!-- Tipi semplici per identificativi -->
+    <xs:simpleType name="IdentificativoRegistro">
+        <xs:annotation>
+            <xs:documentation>Identificativo univoco di un registro (es. R1234567890).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:token">
+            <xs:pattern value="R[0-9A-Z]{10}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="NumIscrOperatore">
+        <xs:annotation>
+            <xs:documentation>Numero di iscrizione dell'operatore (es. OP1234567890123).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:token">
+            <xs:pattern value="OP[0-9A-Z]{13}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="NumIscrSito">
+        <xs:annotation>
+            <xs:documentation>Numero di iscrizione del sito (es. OP1234567890123-RM0001).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:token">
+            <xs:pattern value="OP[0-9A-Z]{13}-[A-Z]{2}[0-9]{4}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="CodiceFiscale">
+        <xs:annotation>
+            <xs:documentation>Codice fiscale (persona fisica o giuridica).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:minLength value="5"/>
+            <xs:maxLength value="20"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Tipi complessi comuni -->
+    <xs:complexType name="RiferimentoSoggetto">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per un riferimento generico a un soggetto.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="codiceFiscale" type="tns:CodiceFiscale">
+                <xs:annotation>
+                    <xs:documentation>Codice fiscale del soggetto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="denominazione" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Denominazione del soggetto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoImpianto">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per un riferimento generico a un impianto.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="codiceImpianto" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Codice identificativo dell'impianto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="denominazione" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Denominazione dell'impianto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

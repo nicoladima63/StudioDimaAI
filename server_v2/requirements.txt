@@ -8,3 +8,5 @@ dbfread
 unidecode
 requests
 watchdog
+lxml
+xmlsec

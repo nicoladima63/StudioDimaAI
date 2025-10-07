@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2023.
+  ~ All rights reserved.
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="http://www.rentri.gov.it/schemas/registri"
+           targetNamespace="http://www.rentri.gov.it/schemas/registri"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified"
+           version="1.0">
+
+    <xs:include schemaLocation="rentri-comuni-1.0.xsd"/>
+
+    <!-- Tipi complessi per i registri -->
+    <xs:complexType name="Registro">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per un registro generico.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="idRegistro" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Identificativo univoco del registro.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="tipoRegistro" type="tns:TipoRegistro">
+                <xs:annotation>
+                    <xs:documentation>Tipo di registro (es. carico/scarico, formulari).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="dataCreazione" type="xs:dateTime">
+                <xs:annotation>
+                    <xs:documentation>Data e ora di creazione del registro.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="stato" type="tns:StatoRegistro">
+                <xs:annotation>
+                    <xs:documentation>Stato attuale del registro (es. attivo, chiuso).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoOperatore" type="tns:RiferimentoOperatore">
+                <xs:annotation>
+                    <xs:documentation>Riferimento all'operatore che ha creato o gestisce il registro.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoImpianto" type="tns:RiferimentoImpianto" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Riferimento all'impianto a cui il registro è associato.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="note" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Note aggiuntive sul registro.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RegistroCaricoScarico">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per un registro di carico e scarico.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="tns:Registro">
+                <xs:sequence>
+                    <xs:element name="codiceRegistro" type="xs:string">
+                        <xs:annotation>
+                            <xs:documentation>Codice identificativo del registro di carico/scarico.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="annoRiferimento" type="xs:int">
+                        <xs:annotation>
+                            <xs:documentation>Anno di riferimento del registro.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="movimenti" type="tns:ListaMovimenti" minOccurs="0">
+                        <xs:annotation>
+                            <xs:documentation>Lista dei movimenti di carico e scarico.</xs:documentation>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Movimento">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per un singolo movimento di carico o scarico.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="idMovimento" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Identificativo univoco del movimento.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="tipoMovimento" type="tns:TipoMovimento">
+                <xs:annotation>
+                    <xs:documentation>Tipo di movimento (es. carico, scarico).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="dataMovimento" type="xs:dateTime">
+                <xs:annotation>
+                    <xs:documentation>Data e ora del movimento.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="rifiuto" type="tns:DatiRifiuto">
+                <xs:annotation>
+                    <xs:documentation>Dati relativi al rifiuto movimentato.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="quantita" type="tns:Quantita">
+                <xs:annotation>
+                    <xs:documentation>Quantità del rifiuto movimentato.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="destinazione" type="tns:DestinazioneMovimento" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Dettagli sulla destinazione del rifiuto (per scarico).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="provenienza" type="tns:ProvenienzaMovimento" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Dettagli sulla provenienza del rifiuto (per carico).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoFormulario" type="tns:RiferimentoFormulario" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Riferimento al formulario associato al movimento.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="note" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Note aggiuntive sul movimento.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ListaMovimenti">
+        <xs:annotation>
+            <xs:documentation>Lista di movimenti di carico e scarico.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="movimento" type="tns:Movimento" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DatiRifiuto">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per i dati di un rifiuto.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="codiceCER" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Codice CER del rifiuto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="descrizione" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Descrizione del rifiuto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="statoFisico" type="tns:StatoFisicoRifiuto">
+                <xs:annotation>
+                    <xs:documentation>Stato fisico del rifiuto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="caratteristichePericolose" type="tns:ListaCaratteristichePericolose" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Lista delle caratteristiche di pericolo del rifiuto.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ListaCaratteristichePericolose">
+        <xs:annotation>
+            <xs:documentation>Lista di caratteristiche di pericolo.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="caratteristicaPericolosa" type="tns:CaratteristicaPericolosa" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Quantita">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per la quantità di un rifiuto.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="valore" type="xs:decimal">
+                <xs:annotation>
+                    <xs:documentation>Valore numerico della quantità.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="unitaMisura" type="tns:UnitaMisura">
+                <xs:annotation>
+                    <xs:documentation>Unità di misura della quantità.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DestinazioneMovimento">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per la destinazione di un movimento di scarico.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="tipoDestinazione" type="tns:TipoDestinazione">
+                <xs:annotation>
+                    <xs:documentation>Tipo di destinazione (es. recupero, smaltimento).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoSoggetto" type="tns:RiferimentoSoggetto" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Riferimento al soggetto destinatario.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoImpianto" type="tns:RiferimentoImpianto" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Riferimento all'impianto di destinazione.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ProvenienzaMovimento">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per la provenienza di un movimento di carico.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="tipoProvenienza" type="tns:TipoProvenienza">
+                <xs:annotation>
+                    <xs:documentation>Tipo di provenienza (es. produzione, intermediazione).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoSoggetto" type="tns:RiferimentoSoggetto" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Riferimento al soggetto di provenienza.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoImpianto" type="tns:RiferimentoImpianto" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Riferimento all'impianto di provenienza.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RiferimentoFormulario">
+        <xs:annotation>
+            <xs:documentation>Tipo complesso per il riferimento a un formulario.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="numeroFormulario" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Numero identificativo del formulario.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="dataEmissione" type="xs:date">
+                <xs:annotation>
+                    <xs:documentation>Data di emissione del formulario.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="riferimentoSoggettoTrasportatore" type="tns:RiferimentoSoggetto" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Riferimento al soggetto trasportatore.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Tipi semplici per enumerazioni -->
+    <xs:simpleType name="TipoRegistro">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per i tipi di registro.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CARICO_SCARICO"/>
+            <xs:enumeration value="FORMULARI"/>
+            <xs:enumeration value="ALTRO"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="StatoRegistro">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per gli stati di un registro.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ATTIVO"/>
+            <xs:enumeration value="CHIUSO"/>
+            <xs:enumeration value="SOSPESO"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="TipoMovimento">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per i tipi di movimento.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CARICO"/>
+            <xs:enumeration value="SCARICO"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="StatoFisicoRifiuto">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per gli stati fisici di un rifiuto.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SOLIDO"/>
+            <xs:enumeration value="LIQUIDO"/>
+            <xs:enumeration value="FANGOSO"/>
+            <xs:enumeration value="GASSOSO"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="CaratteristicaPericolosa">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per le caratteristiche di pericolo di un rifiuto.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="HP1"/>
+            <xs:enumeration value="HP2"/>
+            <xs:enumeration value="HP3"/>
+            <xs:enumeration value="HP4"/>
+            <xs:enumeration value="HP5"/>
+            <xs:enumeration value="HP6"/>
+            <xs:enumeration value="HP7"/>
+            <xs:enumeration value="HP8"/>
+            <xs:enumeration value="HP9"/>
+            <xs:enumeration value="HP10"/>
+            <xs:enumeration value="HP11"/>
+            <xs:enumeration value="HP12"/>
+            <xs:enumeration value="HP13"/>
+            <xs:enumeration value="HP14"/>
+            <xs:enumeration value="HP15"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="UnitaMisura">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per le unità di misura.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="KG"/>
+            <xs:enumeration value="LITRI"/>
+            <xs:enumeration value="METRI_CUBI"/>
+            <xs:enumeration value="PEZZI"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="TipoDestinazione">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per i tipi di destinazione del rifiuto.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="RECUPERO"/>
+            <xs:enumeration value="SMALTIMENTO"/>
+            <xs:enumeration value="DEPOSITO_TEMPORANEO"/>
+            <xs:enumeration value="INTERMEDIAZIONE"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="TipoProvenienza">
+        <xs:annotation>
+            <xs:documentation>Enumerazione per i tipi di provenienza del rifiuto.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PRODUZIONE"/>
+            <xs:enumeration value="DEPOSITO_TEMPORANEO"/>
+            <xs:enumeration value="INTERMEDIAZIONE"/>
+            <xs:enumeration value="RECUPERO"/>
+            <xs:enumeration value="SMALTIMENTO"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Elementi radice -->
+    <xs:element name="RegistroCaricoScarico" type="tns:RegistroCaricoScarico">
+        <xs:annotation>
+            <xs:documentation>Elemento radice per un registro di carico e scarico.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+</xs:schema>
