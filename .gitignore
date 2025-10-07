@@ -3,6 +3,10 @@
 .env.*
 env/
 virtualenv/
+venv/
+/venv/
+/server/venv/
+/server_v2/venv/
 /server_v2/logs/
 # Python
 __pycache__/
