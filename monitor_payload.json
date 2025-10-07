@@ -1,0 +1,5 @@
+{
+  "table_name": "PREVENT",
+  "monitor_type": "file_watcher",
+  "auto_start": false
+}

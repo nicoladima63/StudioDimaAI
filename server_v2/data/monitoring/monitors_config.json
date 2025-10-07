@@ -1,23 +1,13 @@
 {
-  "appointments_periodic_check_1757580379": {
-    "monitor_id": "appointments_periodic_check_1757580379",
-    "table_name": "appointments",
-    "monitor_type": "periodic_check",
+  "APPUNTA_file_watcher_1759494668": {
+    "monitor_id": "APPUNTA_file_watcher_1759494668",
+    "table_name": "APPUNTA",
+    "file_path": "C:\\pixel\\windent\\USER\\APPUNTA.DBF",
+    "monitor_type": "file_watcher",
     "interval_seconds": 30,
     "enabled": true,
-    "auto_start": true,
-    "callback_functions": [],
-    "metadata": {}
-  },
-  "appointments_periodic_check_1757687098": {
-    "monitor_id": "appointments_periodic_check_1757687098",
-    "table_name": "appointments",
-    "file_path": "C:\\windent\\USER\\APPUNTA.DBF",
-    "monitor_type": "periodic_check",
-    "interval_seconds": 30,
-    "enabled": true,
-    "auto_start": true,
-    "callback_functions": [],
-    "metadata": {}
+    "auto_start": false,
+    "metadata": {},
+    "trigger_filters": {}
   }
 }

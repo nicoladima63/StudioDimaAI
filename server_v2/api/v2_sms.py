@@ -13,6 +13,7 @@ from services.sms_service import sms_service
 from services.richiami_service import RichiamiService
 from app_v2 import require_auth, format_response
 from core.exceptions import ValidationError
+from core.environment_manager import environment_manager, ServiceType, Environment
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,74 @@ sms_v2_bp = Blueprint('sms_v2', __name__)
 # Services
 richiami_service = RichiamiService()
 
+# --- SMS Settings Endpoints ---
+
+@sms_v2_bp.route('/sms/settings', methods=['GET'])
+@jwt_required()
+def get_sms_settings():
+    """Restituisce le impostazioni attuali del servizio SMS."""
+    try:
+        prod_config = environment_manager.get_service_config(ServiceType.SMS, Environment.PROD)
+        test_config = environment_manager.get_service_config(ServiceType.SMS, Environment.TEST)
+
+        settings = {
+            'sender_prod': prod_config.get('sender', 'StudioDima'),
+            'sender_test': test_config.get('sender', 'TestSMS'),
+            'current_env': environment_manager.get_environment(ServiceType.SMS).value,
+            'service_status': sms_service.get_service_status()
+        }
+        return format_response(success=True, data=settings, message="Impostazioni SMS recuperate.")
+
+    except Exception as e:
+        logger.error(f"Errore API get_sms_settings: {e}", exc_info=True)
+        return format_response(success=False, error=str(e), message="Errore nel recupero delle impostazioni SMS."), 500
+
+@sms_v2_bp.route('/sms/settings', methods=['PUT'])
+@jwt_required()
+def update_sms_settings():
+    """Aggiorna le impostazioni del mittente SMS."""
+    data = request.get_json()
+    if not data:
+        return format_response(success=False, error='Dati JSON richiesti'), 400
+
+    try:
+        # Questa è una implementazione semplificata. In un sistema reale,
+        # si dovrebbe modificare il file .env o un altro sistema di configurazione persistente.
+        # Dato che non posso farlo, simulo l'operazione e invalido la cache.
+        
+        from dotenv import set_key, find_dotenv
+        import os
+
+        dotenv_path = find_dotenv()
+        if not dotenv_path:
+            # Se non c'è un file .env, non possiamo salvare in modo persistente.
+            return format_response(success=False, error="File .env non trovato. Impossibile salvare le impostazioni in modo persistente."), 500
+
+        updated_values = {}
+        if 'sender_prod' in data:
+            set_key(dotenv_path, 'SMS_SENDER_PROD', data['sender_prod'])
+            updated_values['sender_prod'] = data['sender_prod']
+
+        if 'sender_test' in data:
+            set_key(dotenv_path, 'SMS_SENDER_TEST', data['sender_test'])
+            updated_values['sender_test'] = data['sender_test']
+
+        # Invalida la cache per forzare la rilettura alla prossima richiesta
+        environment_manager.clear_cache()
+        
+        logger.info(f"Impostazioni mittente SMS aggiornate: {updated_values}")
+        
+        return format_response(
+            success=True, 
+            message='Impostazioni aggiornate. Riavvia il server per rendere effettive le modifiche.',
+            data=updated_values
+        )
+
+    except Exception as e:
+        logger.error(f"Errore API update_sms_settings: {e}", exc_info=True)
+        return format_response(success=False, error=str(e), message="Errore durante l'aggiornamento delle impostazioni."), 500
+
+# --- Original SMS Endpoints ---
 
 @sms_v2_bp.route('/sms/send', methods=['POST'])
 @jwt_required()

@@ -36,10 +36,10 @@ class SyncStateManager:
             if self.sync_state_file.exists():
                 with open(self.sync_state_file, 'r', encoding='utf-8') as f:
                     self.sync_state = json.load(f)
-                logger.info(f"Caricato stato sincronizzazione: {len(self.sync_state)} eventi")
+                # logger.info(f"Caricato stato sincronizzazione: {len(self.sync_state)} eventi")
             else:
                 self.sync_state = {}
-                logger.info("Nessuno stato sincronizzazione esistente, inizializzazione vuota")
+                # logger.info("Nessuno stato sincronizzazione esistente, inizializzazione vuota")
         except Exception as e:
             logger.error(f"Errore caricamento stato sincronizzazione: {e}")
             self.sync_state = {}
@@ -52,7 +52,7 @@ class SyncStateManager:
             
             with open(self.sync_state_file, 'w', encoding='utf-8') as f:
                 json.dump(self.sync_state, f, ensure_ascii=False, indent=2)
-            logger.debug(f"Salvato stato sincronizzazione: {len(self.sync_state)} eventi")
+            # logger.debug(f"Salvato stato sincronizzazione: {len(self.sync_state)} eventi")
         except Exception as e:
             logger.error(f"Errore salvataggio stato sincronizzazione: {e}")
     
@@ -137,7 +137,7 @@ class SyncStateManager:
                 logger.warning(f"Errore parsing app_id {app_id}: {e}")
                 continue
         
-        logger.info(f"Filtrato stato sincronizzazione: {len(filtered_state)} eventi per studi {studio_ids}")
+        # logger.info(f"Filtrato stato sincronizzazione: {len(filtered_state)} eventi per studi {studio_ids}")
         return filtered_state
     
     def is_appointment_synced(self, appointment: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -162,11 +162,11 @@ class SyncStateManager:
                 return existing_data
             else:
                 # Appuntamento cambiato, va aggiornato
-                logger.info(f"Appuntamento {app_id} modificato, richiede aggiornamento")
+                # logger.info(f"Appuntamento {app_id} modificato, richiede aggiornamento")
                 return None
         else:
             # Nuovo appuntamento
-            logger.info(f"Nuovo appuntamento {app_id}")
+            # logger.info(f"Nuovo appuntamento {app_id}")
             return None
     
     def mark_appointment_synced(self, appointment: Dict[str, Any], 
@@ -194,7 +194,7 @@ class SyncStateManager:
             'synced_at': datetime.now().isoformat()
         }
         
-        logger.debug(f"Marcato appuntamento {app_id} come sincronizzato")
+        # logger.debug(f"Marcato appuntamento {app_id} come sincronizzato")
         self._save_sync_state()
     
     def remove_appointment_sync(self, appointment: Dict[str, Any]) -> None:
@@ -208,7 +208,7 @@ class SyncStateManager:
         
         if app_id in self.sync_state:
             del self.sync_state[app_id]
-            logger.debug(f"Rimosso appuntamento {app_id} dallo stato sincronizzazione")
+            # logger.debug(f"Rimosso appuntamento {app_id} dallo stato sincronizzazione")
             self._save_sync_state()
     
     def get_appointments_to_delete(self, current_appointment_ids: Set[str], 
@@ -235,7 +235,7 @@ class SyncStateManager:
                 if app_id not in current_appointment_ids:
                     to_delete.add(app_id)
         
-        logger.info(f"Identificati {len(to_delete)} appuntamenti da cancellare")
+        # logger.info(f"Identificati {len(to_delete)} appuntamenti da cancellare")
         return to_delete
     
     def get_sync_statistics(self) -> Dict[str, Any]:

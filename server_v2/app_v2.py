@@ -18,6 +18,9 @@ from core.database_manager import get_database_manager
 from core.exceptions import StudioDimaError
 from utils.dbf_utils import convert_bytes_to_string, clean_dbf_value
 
+# Importa i moduli delle azioni per attivare la registrazione
+from services.actions import system_actions
+
 logger = logging.getLogger(__name__)
 
 def create_app_v2(config_name: Optional[str] = None) -> Flask:
@@ -145,12 +148,16 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_conti import conti_v2_bp
     from api.v2_ricetta import ricetta_bp
     from api.v2_sms import sms_v2_bp
-    from api.v2_templates import templates_v2_bp
-    from api.v2_automation import automation_v2_bp
+
     from api.v2_calendar import calendar_v2_bp
     from api.v2_scheduler import scheduler_v2_bp
     from api.v2_environment import environment_bp
     from api.api_monitoring import monitoring_bp
+    from api.v2_monitoring_changes import monitoring_changes_bp
+    from api.v2_prestazioni import prestazioni_bp
+    from api.v2_automation_rules import automation_bp
+    from api.v2_templates import templates_v2_bp
+    from api.v2_tables import tables_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -164,11 +171,13 @@ def register_blueprints(app: Flask) -> None:
         conti_v2_bp,
         ricetta_bp,
         sms_v2_bp,
-        templates_v2_bp,
-        automation_v2_bp,
         scheduler_v2_bp,
         environment_bp,
-        monitoring_bp
+        monitoring_bp,
+        prestazioni_bp,
+        automation_bp,
+        tables_bp,
+        templates_v2_bp
     ]
     
     # Register standard blueprints with API prefix only
@@ -189,6 +198,15 @@ def register_blueprints(app: Flask) -> None:
     except Exception as e:
         logger = logging.getLogger(__name__)
         logger.error(f"Failed to register calendar blueprint: {e}")
+    
+    # Register monitoring changes blueprint with specific prefix
+    try:
+        app.register_blueprint(monitoring_changes_bp, url_prefix=app.config['API_PREFIX'] + '/monitoring/changes')
+        logger = logging.getLogger(__name__)
+        # Monitoring changes blueprint registered
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to register monitoring changes blueprint: {e}")
     
     logger = logging.getLogger(__name__)
     # All blueprints registered

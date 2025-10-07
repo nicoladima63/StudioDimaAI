@@ -2,7 +2,7 @@
 .env
 .env.*
 env/
-venv/
+virtualenv/
 /server_v2/logs/
 # Python
 __pycache__/
@@ -43,6 +43,7 @@ server/oldfile
 # Node
 node_modules/
 npm-debug.log*
+
 yarn-debug.log*
 yarn-error.log*
 /client/dist
@@ -83,5 +84,24 @@ app.log
 /zimage/
 /AGENTI/
 server_v2/docs/
-server_v2/logs/server_v2.log
-server_v2/logs/server_v2.log
+
+# Server V2 - Database e file runtime (specifici)
+server_v2/instance/
+
+# Server V2 - Log e file temporanei
+server_v2/logs/
+server_v2/*.log
+server_v2/automation_*.log
+server_v2/sync_state.json
+server_v2/token.json
+
+# Server V2 - File di configurazione sensibili
+server_v2/certs/
+server_v2/instance/certs/
+
+# Server V2 - File di snapshot e monitoraggio
+server_v2/data/snapshots/
+server_v2/data/monitoring/
+
+#Ignore cursor AI rules
+.cursor/rules/codacy.mdc

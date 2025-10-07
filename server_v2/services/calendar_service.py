@@ -173,7 +173,7 @@ class CalendarServiceV2:
                 if cal['id'] in configured_calendar_ids
             ]
             
-            logger.info(f"Found {len(relevant_calendars)} relevant calendars out of {len(all_calendars)} accessible")
+            # logger.info(f"Found {len(relevant_calendars)} relevant calendars out of {len(all_calendars)} accessible")
             return relevant_calendars
             
         except GoogleCredentialsNotFoundError:
@@ -209,7 +209,7 @@ class CalendarServiceV2:
             new_count = 0
             skipped_count = 0
             
-            logger.info(f"Starting intelligent sync of {total_count} appointments")
+            # logger.info(f"Starting intelligent sync of {total_count} appointments")
             
             if progress_callback:
                 progress_callback(0, total_count, "Starting synchronization...")
@@ -238,7 +238,7 @@ class CalendarServiceV2:
                     if existing_sync:
                         # Already synced and unchanged, skip
                         skipped_count += 1
-                        logger.debug(f"Skipping unchanged appointment {app_id}")
+                        # logger.debug(f"Skipping unchanged appointment {app_id}")
                     else:
                         # Need to sync (new or changed)
                         event = self._create_event_from_appointment(app)
@@ -252,7 +252,7 @@ class CalendarServiceV2:
                                     calendarId=sync_state[app_id]['calendar_id'], 
                                     eventId=old_event_id
                                 ).execute()
-                                logger.debug(f"Deleted old event {old_event_id}")
+                                # logger.debug(f"Deleted old event {old_event_id}")
                                 
                                 # Create new event
                                 created_event = service.events().insert(
@@ -267,7 +267,7 @@ class CalendarServiceV2:
                                 
                                 updated_count += 1
                                 success_count += 1
-                                logger.info(f"Updated appointment {app_id}")
+                                # logger.info(f"Updated appointment {app_id}")
                                 
                             except Exception as e:
                                 logger.error(f"Error updating appointment {app_id}: {e}")
@@ -287,7 +287,7 @@ class CalendarServiceV2:
                                 
                                 new_count += 1
                                 success_count += 1
-                                logger.info(f"Created new appointment {app_id}")
+                                # logger.info(f"Created new appointment {app_id}")
                                 
                             except Exception as e:
                                 logger.error(f"Error creating appointment {app_id}: {e}")
@@ -334,7 +334,7 @@ class CalendarServiceV2:
                     )
                     
                     deleted_count += 1
-                    logger.info(f"Deleted appointment {app_id}")
+                    # logger.info(f"Deleted appointment {app_id}")
                     
                 except Exception as e:
                     logger.error(f"Error deleting appointment {app_id}: {e}")
@@ -359,7 +359,7 @@ class CalendarServiceV2:
                 'message': f"Sync completed: {success_count} success, {error_count} errors"
             }
             
-            logger.info(f"Sync results: {result}")
+            # logger.info(f"Sync results: {result}")
             return result
             
         except GoogleCredentialsNotFoundError:
@@ -534,7 +534,7 @@ class CalendarServiceV2:
             total_events = 0
             
             # First pass: count total events
-            logger.info(f"Counting events in calendar {calendar_id}")
+            # logger.info(f"Counting events in calendar {calendar_id}")
             page_token = None
             while True:
                 events_result = service.events().list(
@@ -550,7 +550,7 @@ class CalendarServiceV2:
                 if not page_token:
                     break
             
-            logger.info(f"Found {total_events} events to delete")
+            # logger.info(f"Found {total_events} events to delete")
             
             # Second pass: delete events with progress tracking
             page_token = None
@@ -572,7 +572,7 @@ class CalendarServiceV2:
                             eventId=event['id']
                         ).execute()
                         deleted_count += 1
-                        logger.debug(f"Deleted event: {event['id']} - {event_summary}")
+                        # logger.debug(f"Deleted event: {event['id']} - {event_summary}")
                         
                         # Update progress
                         if progress_callback:
@@ -591,7 +591,7 @@ class CalendarServiceV2:
                     break
             
             final_message = f"Deleted {deleted_count} events from calendar"
-            logger.info(final_message)
+            # logger.info(final_message)
             
             return {
                 'deleted_count': deleted_count,
@@ -644,7 +644,7 @@ class CalendarServiceV2:
             with open('instance/oauth_state.json', 'w') as f:
                 json.dump(state_data, f)
             
-            logger.info(f"OAuth URL generated with state: {state[:10]}...")
+            # logger.info(f"OAuth URL generated with state: {state[:10]}...")
             return auth_url
             
         except Exception as e:
@@ -690,7 +690,7 @@ class CalendarServiceV2:
             if os.path.exists(state_file):
                 os.remove(state_file)
             
-            logger.info("Google authentication completed successfully")
+            # logger.info("Google authentication completed successfully")
             return {
                 'success': True,
                 'message': 'Google authentication completed successfully'

@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from .config import Config
 from .exceptions import DatabaseError, ConnectionPoolError, TransactionError
 
-
+# Configura logger per rispettare il livello globale
 logger = logging.getLogger(__name__)
 
 # Global database manager instance
@@ -392,8 +392,13 @@ class DatabaseManager:
                 result = None
                 if fetch_one:
                     result = cursor.fetchone()
+                    if result: # Convert single row
+                        result = dict(result)
                 elif fetch_all and query.strip().upper().startswith('SELECT'):
                     result = cursor.fetchall()
+                    # Convert sqlite3.Row objects to dictionaries for JSON serialization
+                    if result:
+                        result = [dict(row) for row in result]
                 elif not query.strip().upper().startswith('SELECT'):
                     result = cursor.rowcount
                 

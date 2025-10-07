@@ -26,8 +26,9 @@ const RicettaTestPage = React.lazy(() => import('@/features/ricetta-elettronica/
 
 //settings page
 const SettingCalendarPage=React.lazy(()=>import ('@/features/settings/pages/CalendarSettings'))
-const SEttingTemplatesPage=React.lazy(()=>import ('@/features/settings/pages/TemplatesPage'))
+const TemplatesPage=React.lazy(()=>import ('@/features/settings/pages/TemplatesPage'))
 const MonitoringSettingsPage=React.lazy(()=>import ('@/features/settings/pages/MonitoringSettings'))
+const MonitorPrestazioniStandalonePage=React.lazy(()=>import ('@/features/settings/pages/MonitorPrestazioniStandalonePage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -72,8 +73,9 @@ const AppRouter: React.FC = () => {
 
           {/* Pagine di settings */}
           <Route path='settings/calendar' element={<SettingCalendarPage />} />
-          <Route path='settings/template' element={<SEttingTemplatesPage />} />
+          <Route path='settings/template' element={<TemplatesPage />} />
           <Route path='settings/monitoring' element={<MonitoringSettingsPage />} />
+          <Route path='settings/monitor-prestazioni' element={<MonitorPrestazioniStandalonePage />} />
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
           {/* 

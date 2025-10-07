@@ -101,6 +101,12 @@ const _nav = [
     icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
   },
   {
+    component: CNavItem,
+    name: 'Monitor Prestazioni',
+    to: '/settings/monitor-prestazioni',
+    icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+  },
+  {
     component: CNavTitle,
     name: 'Analytics',
   },
@@ -119,6 +125,12 @@ const _nav = [
     name: 'Impostazioni',
     to: '/settings',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Gestione Template SMS',
+    to: '/settings/template', // La route che abbiamo configurato
+    icon: <CIcon icon={cilDescription} customClassName="nav-icon" />, // Un'icona appropriata
   },
   {
     component: CNavTitle,

@@ -106,6 +106,32 @@ class BaseService(ABC):
         results = self.execute_query(query, params)
         return results[0] if results else None
     
+    def execute_command(self, command: str, params: tuple = ()) -> int:
+        """
+        Execute a command (INSERT, UPDATE, DELETE) and return affected rows or last inserted ID.
+        
+        Args:
+            command: SQL command
+            params: Command parameters
+            
+        Returns:
+            Number of affected rows for UPDATE/DELETE, or last inserted ID for INSERT.
+        """
+        try:
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(command, params)
+                conn.commit()
+                
+                if command.strip().upper().startswith("INSERT"):
+                    return cursor.lastrowid
+                else:
+                    return cursor.rowcount
+                
+        except Exception as e:
+            self.logger.error(f"Command execution failed: {e}")
+            raise DatabaseError(f"Database command failed: {str(e)}")
+    
     def get_statistics(self) -> Dict[str, Any]:
         """
         Get basic statistics for this service.

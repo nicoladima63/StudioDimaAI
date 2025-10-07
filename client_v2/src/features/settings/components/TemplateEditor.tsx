@@ -158,11 +158,8 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
       const result = await templatesService.apiPreviewTemplate(tipo, content);
       
       if (result.success && result.data) {
-        const previewData = result.data as TemplatePreviewResult;
-        if (previewData.success) {
-          setPreview(previewData.preview || '');
-          setValidation(previewData.validation || null);
-        }
+        setPreview(result.data.preview || ''); // Accedi direttamente a preview
+        setValidation(result.data.validation || null); // Accedi direttamente a validation
       }
     } catch (error) {
       console.error('Errore generazione preview:', error);
@@ -331,6 +328,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
               </h6>
               <CCard color="light">
                 <CCardBody>
+                  <small>qui il messaggio</small>
                   {preview ? (
                     <div className="small">
                       <div className="mb-2">

@@ -18,6 +18,7 @@ import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
 
+# Configura logger per rispettare il livello globale
 logger = logging.getLogger(__name__)
 
 class ConfigManager:
@@ -189,15 +190,43 @@ class ConfigManager:
     def get_dbf_path(self, table_name: str) -> str:
         """
         Recupera path DBF basato su nome tabella.
-        Legge direttamente dal file database_mode.txt nella cartella instance.
+        Usa DBF_TABLES da constants_v2.py per il mapping e determina il percorso base dal mode.
         
         Args:
-            table_name: Nome tabella (es. 'appointments', 'patients', 'APPUNTA')
+            table_name: Nome tabella (es. 'appointments', 'patients', 'onorario')
             
         Returns:
             Path completo al file DBF
         """
-        # Leggi direttamente dal file database_mode.txt (sempre fresh, no cache)
+        # Importa DBF_TABLES da constants_v2
+        from core.constants_v2 import DBF_TABLES
+        
+        # Trova la tabella (case-insensitive)
+        table_info = None
+        for key, info in DBF_TABLES.items():
+            if key.lower() == table_name.lower():
+                table_info = info
+                break
+        
+        if not table_info:
+            raise ValueError(f"Unknown table name: {table_name}. Available tables: {list(DBF_TABLES.keys())}")
+        
+        # Determina il percorso base dal mode
+        mode = self._get_database_mode()
+        categoria = table_info['categoria']
+        filename = table_info['file']
+        
+        # Percorsi base per dev/prod
+        if mode == 'prod':
+            base_path = r'\\serverdima\pixel\windent'
+        else:
+            base_path = r'C:\pixel\windent'
+        
+        # Costruisci il path completo
+        return os.path.join(base_path, categoria, filename)
+    
+    def _get_database_mode(self) -> str:
+        """Recupera il mode del database (dev/prod) dal file database_mode.txt."""
         mode = 'dev'  # default
         try:
             from pathlib import Path
@@ -207,22 +236,7 @@ class ConfigManager:
                 mode = database_mode_file.read_text().strip().lower()
         except Exception:
             pass
-        
-        # Codifica il nome tabella
-        if table_name == 'appointments' or table_name == 'APPUNTA':
-            if mode == 'prod':
-                return r'\\serverdima\pixel\windent\USER\APPUNTA.DBF'
-            else:
-                return r'C:\windent\USER\APPUNTA.DBF'
-        
-        elif table_name == 'patients' or table_name == 'PAZIENTI':
-            if mode == 'prod':
-                return r'\\serverdima\pixel\windent\DATI\PAZIENTI.DBF'
-            else:
-                return r'C:\windent\DATI\PAZIENTI.DBF'
-        
-        else:
-            raise ValueError(f"Unknown table name: {table_name}")
+        return mode
     
     def get_google_config(self) -> Dict[str, Any]:
         """Recupera configurazione Google Calendar."""

@@ -10,6 +10,13 @@ from services.calendar_service import CalendarServiceV2
 from services.sms_service import SMSService
 from utils.dbf_utils import get_optimized_reader
 
+# Disabilita log inutili
+logging.getLogger('apscheduler').setLevel(logging.WARNING)
+logging.getLogger('apscheduler.scheduler').setLevel(logging.WARNING)
+logging.getLogger('apscheduler.executors').setLevel(logging.WARNING)
+logging.getLogger('apscheduler.jobstores').setLevel(logging.WARNING)
+logging.getLogger('tzlocal').setLevel(logging.WARNING)
+
 logger = logging.getLogger("scheduler_v2")
 
 class SchedulerService:
@@ -23,7 +30,7 @@ class SchedulerService:
         """Avvia lo scheduler e programma tutti i job"""
         if not self.scheduler.running:
             self.scheduler.start()
-            logger.info("Scheduler avviato")
+            # logger.info("Scheduler avviato")
             
         # Programma tutti i job all'avvio
         self.schedule_reminder_job()
@@ -34,7 +41,7 @@ class SchedulerService:
         """Ferma lo scheduler"""
         if self.scheduler.running:
             self.scheduler.shutdown()
-            logger.info("Scheduler fermato")
+            # logger.info("Scheduler fermato")
 
     def schedule_reminder_job(self):
         """Schedula job promemoria appuntamenti - logica esatta da V1"""
@@ -52,22 +59,23 @@ class SchedulerService:
             self._current_reminder_job = None
 
         if not enabled:
-            logger.info("Automazione promemoria appuntamenti disattivata.")
+            # logger.info("Automazione promemoria appuntamenti disattivata.")
             return
 
         def job():
-            logger.info(f"[AUTOMAZIONE] Invio promemoria appuntamenti: ora={hour:02d}:{minute:02d}")
+            # logger.info(f"[AUTOMAZIONE] Invio promemoria appuntamenti: ora={hour:02d}:{minute:02d}")
             # Usa DBF reader per ottenere appuntamenti domani
             dbf_reader = get_optimized_reader()
             log = dbf_reader.get_tomorrow_appointments_for_reminder()
             for line in log:
-                logger.info(f"[PROMEMORIA] {line}")
+                # logger.info(f"[PROMEMORIA] {line}")
+                pass
 
         trigger = CronTrigger(hour=hour, minute=minute)
         self._current_reminder_job = self.scheduler.add_job(
             job, trigger, id="reminder_job_v2", replace_existing=True
         )
-        logger.info(f"Automazione promemoria appuntamenti schedulata alle {hour:02d}:{minute:02d}.")
+        # logger.info(f"Automazione promemoria appuntamenti schedulata alle {hour:02d}:{minute:02d}.")
 
     def schedule_recall_job(self):
         """Schedula job richiami - logica esatta da V1"""
@@ -85,11 +93,11 @@ class SchedulerService:
             self._current_recall_job = None
 
         if not enabled:
-            logger.info("Automazione richiami disattivata.")
+            # logger.info("Automazione richiami disattivata.")
             return
 
         def job():
-            logger.info(f"[AUTOMAZIONE] Invio richiami: ora={hour}:{minute:02d}")
+            # logger.info(f"[AUTOMAZIONE] Invio richiami: ora={hour}:{minute:02d}")
             
             # Usa il richiami service V2 per ottenere i richiami
             from .richiami_service import RichiamiService
@@ -135,13 +143,13 @@ class SchedulerService:
                     f.write(json.dumps(log_entry, ensure_ascii=False) + '\n')
             except Exception as e:
                 logger.error(f"Errore scrittura log richiami: {e}")
-            logger.info(f"[RICHIMI] Inviati: {sent}, Errori: {len(errors)}")
+            # logger.info(f"[RICHIMI] Inviati: {sent}, Errori: {len(errors)}")
 
         trigger = CronTrigger(hour=hour, minute=minute)
         self._current_recall_job = self.scheduler.add_job(
             job, trigger, id="recall_job_v2", replace_existing=True
         )
-        logger.info(f"Automazione richiami schedulata alle {hour}:{minute:02d}.")
+        # logger.info(f"Automazione richiami schedulata alle {hour}:{minute:02d}.")
 
     def schedule_calendar_sync_job(self):
         """Schedula job sincronizzazione calendario - logica esatta da V1"""
@@ -159,7 +167,7 @@ class SchedulerService:
             self._current_calendar_sync_job = None
 
         if not enabled:
-            logger.info("Automazione sincronizzazione calendario disattivata.")
+            # logger.info("Automazione sincronizzazione calendario disattivata.")
             return
 
         def job():
@@ -168,10 +176,10 @@ class SchedulerService:
             
             # Controlla se è weekend (sabato=5, domenica=6)
             if now.weekday() >= 5:
-                logger.info(f"[CALENDAR SYNC] Saltato: è weekend ({now.strftime('%A')})")
+                # logger.info(f"[CALENDAR SYNC] Saltato: è weekend ({now.strftime('%A')})")
                 return
                 
-            logger.info(f"[CALENDAR SYNC] Avvio sincronizzazione automatica alle {now.strftime('%H:%M')}")
+            # logger.info(f"[CALENDAR SYNC] Avvio sincronizzazione automatica alle {now.strftime('%H:%M')}")
             
             # Ottieni ID calendari dalla configurazione
             studio_blu_calendar = settings.get("calendar_studio_blu_id")
@@ -197,17 +205,17 @@ class SchedulerService:
             calendar_service = CalendarServiceV2()
             
             for month, year in months_to_sync:
-                logger.info(f"[CALENDAR SYNC] Sincronizzazione {month:02d}/{year}")
+                # logger.info(f"[CALENDAR SYNC] Sincronizzazione {month:02d}/{year}")
                 
                 # Ottieni tutti gli appuntamenti del mese
                 all_appointments = calendar_service.get_db_appointments_for_month(month, year)
                 
                 # Sincronizza Studio Blu (studio_id=1)
                 try:
-                    logger.info(f"[CALENDAR SYNC] Studio Blu -> {studio_blu_calendar}")
+                    # logger.info(f"[CALENDAR SYNC] Studio Blu -> {studio_blu_calendar}")
                     # Filtra appuntamenti per Studio Blu
                     studio_blu_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 1]
-                    logger.info(f"[CALENDAR SYNC] Studio Blu: {len(studio_blu_appointments)} appuntamenti da sincronizzare")
+                    # logger.info(f"[CALENDAR SYNC] Studio Blu: {len(studio_blu_appointments)} appuntamenti da sincronizzare")
                     
                     result_blu = calendar_service.sync_appointments_for_month(
                         month, year, 
@@ -215,17 +223,17 @@ class SchedulerService:
                         studio_blu_appointments
                     )
                     total_synced += result_blu.get('success', 0)
-                    logger.info(f"[CALENDAR SYNC] Studio Blu: {result_blu.get('message', 'Completato')}")
+                    # logger.info(f"[CALENDAR SYNC] Studio Blu: {result_blu.get('message', 'Completato')}")
                 except Exception as e:
                     logger.error(f"[CALENDAR SYNC] Errore Studio Blu {month:02d}/{year}: {e}")
                     total_errors += 1
                     
                 # Sincronizza Studio Giallo (studio_id=2)  
                 try:
-                    logger.info(f"[CALENDAR SYNC] Studio Giallo -> {studio_giallo_calendar}")
+                    # logger.info(f"[CALENDAR SYNC] Studio Giallo -> {studio_giallo_calendar}")
                     # Filtra appuntamenti per Studio Giallo
                     studio_giallo_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 2]
-                    logger.info(f"[CALENDAR SYNC] Studio Giallo: {len(studio_giallo_appointments)} appuntamenti da sincronizzare")
+                    # logger.info(f"[CALENDAR SYNC] Studio Giallo: {len(studio_giallo_appointments)} appuntamenti da sincronizzare")
                     
                     result_giallo = calendar_service.sync_appointments_for_month(
                         month, year,
@@ -233,7 +241,7 @@ class SchedulerService:
                         studio_giallo_appointments
                     )
                     total_synced += result_giallo.get('success', 0)
-                    logger.info(f"[CALENDAR SYNC] Studio Giallo: {result_giallo.get('message', 'Completato')}")
+                    # logger.info(f"[CALENDAR SYNC] Studio Giallo: {result_giallo.get('message', 'Completato')}")
                 except Exception as e:
                     logger.error(f"[CALENDAR SYNC] Errore Studio Giallo {month:02d}/{year}: {e}")
                     total_errors += 1
@@ -252,14 +260,14 @@ class SchedulerService:
             except Exception as e:
                 logger.error(f"[CALENDAR SYNC] Errore scrittura log: {e}")
                 
-            logger.info(f"[CALENDAR SYNC] Completato: {total_synced} sincronizzati, {total_errors} errori")
+            # logger.info(f"[CALENDAR SYNC] Completato: {total_synced} sincronizzati, {total_errors} errori")
 
         # Programma il job
         trigger = CronTrigger(hour=hour, minute=minute)
         self._current_calendar_sync_job = self.scheduler.add_job(
             job, trigger, id="calendar_sync_job_v2", replace_existing=True
         )
-        logger.info(f"Automazione sincronizzazione calendario schedulata alle {hour}:{minute:02d}.")
+        # logger.info(f"Automazione sincronizzazione calendario schedulata alle {hour}:{minute:02d}.")
 
     def reschedule_recall_job(self):
         """Riprogramma job richiami quando cambia la configurazione"""

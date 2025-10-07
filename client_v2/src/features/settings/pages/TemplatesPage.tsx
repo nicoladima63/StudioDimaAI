@@ -1,238 +1,365 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  CContainer,
+  CButton,
+  CModal,
+  CModalHeader,
+  CModalBody,
+  CModalFooter,
+  CFormInput,
+  CFormTextarea,
+  CFormLabel,
   CRow,
   CCol,
   CCard,
-  CCardBody,
   CCardHeader,
-  CNav,
-  CNavItem,
-  CNavLink,
-  CTabContent,
-  CTabPane,
-  CButton,
-  CButtonGroup,
+  CCardBody,
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
   CBadge,
-  CSpinner,
-  CToast,
-  CToastBody,
-  CToaster
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilSettings, cilMobile, cilCloudDownload, cilCloudUpload } from '@coreui/icons';
-import TemplateEditor from '../components/TemplateEditor';
-import templatesService from '../services/templates.service';
+import { cilPlus, cilPencil, cilTrash, cilReload, cilWarning } from '@coreui/icons';
+import PageLayout from '@/components/layout/PageLayout';
+import apiClient from '@/services/api/client'; // Assuming apiClient is configured for /api/v2
+import SmsSettingsCard from '../components/SmsSettingsCard'; // <-- IMPORT NUOVO COMPONENTE
 
-const TemplatesPage: React.FC = () => {
-  const [activeKey, setActiveKey] = useState<string>('richiamo');
-  const [backupLoading, setBackupLoading] = useState(false);
-  const [restoreLoading, setRestoreLoading] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastColor, setToastColor] = useState<'success' | 'danger' | 'warning'>('success');
+interface SmsTemplate {
+  id: number;
+  name: string;
+  content: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
 
-  const showToastMessage = (message: string, color: 'success' | 'danger' | 'warning') => {
-    setToastMessage(message);
-    setToastColor(color);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+const PLACEHOLDERS = [
+  '{nome_completo}',
+  '{url}',
+  '{data_appuntamento}',
+  '{ora_appuntamento}',
+  '{tipo_richiamo}',
+  '{medico}',
+];
+
+const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
+  const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  // Stato per il modal di creazione/modifica
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState<Partial<SmsTemplate>>({});
+
+  // Stato per l'anteprima
+  const [previewData, setPreviewData] = useState<any>({
+    nome_completo: "Mario Rossi",
+    url: "https://link.it/esempio",
+    data_appuntamento: "10/10/2025",
+    ora_appuntamento: "15:00",
+    tipo_richiamo: "controllo",
+    medico: "Dr. Bianchi",
+    ora: "15:00" // Aggiunto per compatibilità con vecchi template
+  });
+  const [previewResult, setPreviewResult] = useState<any>(null);
+
+  const insertPlaceholder = (placeholder: string) => {
+    setCurrentTemplate(prev => ({
+      ...prev,
+      content: (prev.content || '') + placeholder
+    }));
   };
 
-  const handleBackup = async () => {
+  const handlePreviewTemplate = async () => {
+    setLoading(true);
+    setError(null);
+    setPreviewResult(null);
     try {
-      setBackupLoading(true);
-      const result = await templatesService.apiBackupTemplates();
-      
-      if (result.success && result.data) {
-        showToastMessage('Backup template creato con successo', 'success');
+      const payload = {
+        name: currentTemplate.name, // Se è un template esistente
+        custom_content: currentTemplate.content, // Contenuto attuale nella modal
+        preview_data: previewData, // Dati di esempio
+      };
+      const response = await apiClient.post(`${API_BASE_URL}/preview`, payload);
+      if (response.data.success) {
+        setPreviewResult(response.data);
       } else {
-        showToastMessage(result.error || 'Errore creazione backup', 'danger');
+        setError(response.data.message || 'Errore nella generazione dell\'anteprima.');
       }
-    } catch (error) {
-      console.error('Errore backup template:', error);
-      showToastMessage('Errore creazione backup', 'danger');
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Errore di rete nella generazione dell\'anteprima.');
     } finally {
-      setBackupLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleRestore = async () => {
-    if (!confirm('Sei sicuro di voler ripristinare i template da backup? Questa operazione sostituirà i template correnti.')) {
-      return;
-    }
 
+  // Stato per il modal di conferma eliminazione
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<SmsTemplate | null>(null);
+
+  const API_BASE_URL = '/sms-templates'; // Corrisponde a /api/v2/templates/sms
+
+  const loadTemplates = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setRestoreLoading(true);
-      // For now, we'll need to implement file selection logic
-      // This is a placeholder for the restore functionality
-      showToastMessage('Funzione di ripristino non ancora implementata', 'warning');
-    } catch (error) {
-      console.error('Errore ripristino template:', error);
-      showToastMessage('Errore ripristino template', 'danger');
+      const response = await apiClient.get(API_BASE_URL);
+      if (response.data.success) {
+        setTemplates(response.data.data);
+      } else {
+        setError(response.data.message || 'Errore nel caricamento dei template.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Errore di rete nel caricamento dei template.');
     } finally {
-      setRestoreLoading(false);
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+
+  const handleCreateEditClick = (template?: SmsTemplate) => {
+    setIsEditing(!!template);
+    setCurrentTemplate(template || {});
+    setShowModal(true);
+  };
+
+  const handleSaveTemplate = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      let response;
+      if (isEditing && currentTemplate.name) {
+        response = await apiClient.put(`${API_BASE_URL}/${currentTemplate.name}`, currentTemplate);
+      } else {
+        response = await apiClient.post(API_BASE_URL, currentTemplate);
+      }
+
+      if (response.data.success) {
+        setSuccess(response.data.message);
+        setShowModal(false);
+        loadTemplates();
+      } else {
+        setError(response.data.message || 'Errore nel salvataggio del template.');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Errore di rete nel salvataggio.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Default variables for each template type
-  const richiamoVariables = [
-    'nome_completo',
-    'tipo_richiamo', 
-    'data_richiamo'
-  ];
+  const handleDeleteClick = (template: SmsTemplate) => {
+    setTemplateToDelete(template);
+    setShowDeleteModal(true);
+  };
 
-  const promemoriVariables = [
-    'nome_completo',
-    'data_appuntamento',
-    'ora_appuntamento',
-    'tipo_appuntamento',
-    'medico'
-  ];
+  const confirmDeleteTemplate = async () => {
+    if (!templateToDelete?.name) return;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const response = await apiClient.delete(`${API_BASE_URL}/${templateToDelete.name}`);
+      if (response.data.success) {
+        setSuccess(response.data.message);
+        setShowDeleteModal(false);
+        setTemplateToDelete(null);
+        loadTemplates();
+      } else {
+        setError(response.data.message || 'Errore nell\'eliminazione del template.');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Errore di rete nell\'eliminazione.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <CContainer fluid>
-      <CRow>
-        <CCol>
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h2>
-                <CIcon icon={cilSettings} className="me-2" />
-                Gestione Template SMS
-              </h2>
-              <p className="text-muted mb-0">
-                Personalizza i template per SMS di richiamo e promemoria appuntamenti
-              </p>
-            </div>
-            
-            <CButtonGroup>
-              <CButton
-                color="outline-secondary"
-                size="sm"
-                disabled={backupLoading}
-                onClick={handleBackup}
-              >
-                {backupLoading ? <CSpinner size="sm" /> : <CIcon icon={cilCloudDownload} />}
-                <span className="ms-1">Backup</span>
-              </CButton>
-              <CButton
-                color="outline-secondary"
-                size="sm"
-                disabled={restoreLoading}
-                onClick={handleRestore}
-              >
-                {restoreLoading ? <CSpinner size="sm" /> : <CIcon icon={cilCloudUpload} />}
-                <span className="ms-1">Ripristina</span>
-              </CButton>
-            </CButtonGroup>
+    <PageLayout>
+      <PageLayout.Header
+        title='Gestione Template SMS'
+        headerAction={
+          <div className='d-flex gap-2'>
+            <CButton color='primary' onClick={() => handleCreateEditClick()} disabled={loading}>
+              <CIcon icon={cilPlus} className='me-1' />
+              Nuovo Template
+            </CButton>
+            <CButton color='info' onClick={loadTemplates} disabled={loading}>
+              <CIcon icon={cilReload} className='me-1' />
+              Aggiorna Lista
+            </CButton>
           </div>
+        }
+      />
 
-          <CCard>
-            <CCardHeader>
-              <CNav variant="tabs" role="tablist">
-                <CNavItem>
-                  <CNavLink
-                    href="#"
-                    active={activeKey === 'richiamo'}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setActiveKey('richiamo');
-                    }}
+      <PageLayout.ContentBody>
+        {error && <CBadge color='danger' className='mb-3 p-2'>{error}</CBadge>}
+        {success && <CBadge color='success' className='mb-3 p-2'>{success}</CBadge>}
+
+        {/* CARD IMPOSTAZIONI MITTENTE SMS */}
+        <SmsSettingsCard />
+
+        <CCard className='mb-4'>
+          <CCardHeader>
+            <h5 className='mb-0'>Lista Template SMS</h5>
+          </CCardHeader>
+          <CCardBody>
+            {loading && <p>Caricamento template...</p>}
+            {!loading && templates.length === 0 && <p>Nessun template SMS trovato.</p>}
+            {!loading && templates.length > 0 && (
+              <CTable hover responsive striped>
+                <CTableHead>
+                  <CTableRow>
+                    <CTableHeaderCell>Nome</CTableHeaderCell>
+                    <CTableHeaderCell>Contenuto</CTableHeaderCell>
+                    <CTableHeaderCell>Descrizione</CTableHeaderCell>
+                    <CTableHeaderCell>Azioni</CTableHeaderCell>
+                  </CTableRow>
+                </CTableHead>
+                <CTableBody>
+                  {templates.map((template) => (
+                    <CTableRow key={template.id}>
+                      <CTableDataCell>{template.name}</CTableDataCell>
+                      <CTableDataCell className='text-truncate' style={{ maxWidth: '300px' }}>{template.content}</CTableDataCell>
+                      <CTableDataCell>{template.description || '-'}</CTableDataCell>
+                      <CTableDataCell>
+                        <CButton color='info' size='sm' className='me-2' onClick={() => handleCreateEditClick(template)}>
+                          <CIcon icon={cilPencil} />
+                        </CButton>
+                        <CButton color='danger' size='sm' onClick={() => handleDeleteClick(template)}>
+                          <CIcon icon={cilTrash} />
+                        </CButton>
+                      </CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
+            )}
+          </CCardBody>
+        </CCard>
+      </PageLayout.ContentBody>
+
+      {/* Modal Creazione/Modifica Template */}
+      <CModal visible={showModal} onClose={() => setShowModal(false)} backdrop='static' size='xl'>
+        <CModalHeader>Modifica Template SMS</CModalHeader>
+        <CModalBody>
+          <CRow> {/* Contenitore principale a due colonne */}
+            <CCol md={6}> {/* Colonna sinistra: Campi di compilazione */}
+              <CRow className='mb-3'>
+                <CCol>
+                  <CFormLabel htmlFor='templateName'>Nome Template</CFormLabel>
+                  <CFormInput
+                    id='templateName'
+                    value={currentTemplate.name || ''}
+                    onChange={(e) => setCurrentTemplate({ ...currentTemplate, name: e.target.value })}
+                    disabled={isEditing} // Non si può modificare il nome di un template esistente
+                  />
+                </CCol>
+              </CRow>
+              <CRow className='mb-3'>
+                <CCol>
+                  <CFormLabel htmlFor='templateContent'>Contenuto Template</CFormLabel>
+                  <CFormTextarea
+                    id='templateContent'
+                    value={currentTemplate.content || ''}
+                    onChange={(e) => setCurrentTemplate({ ...currentTemplate, content: e.target.value })}
+                    rows={5}
+                  ></CFormTextarea>
+                </CCol>
+              </CRow>
+              <CRow className='mb-3'>
+                <CCol>
+                  <CFormLabel htmlFor='templateDescription'>Descrizione</CFormLabel>
+                  <CFormInput
+                    id='templateDescription'
+                    value={currentTemplate.description || ''}
+                    onChange={(e) => setCurrentTemplate({ ...currentTemplate, description: e.target.value })}
+                  />
+                </CCol>
+              </CRow>
+            </CCol> {/* Fine Colonna sinistra */}
+
+            <CCol md={6}> {/* Colonna destra: Anteprima e Placeholder */}
+              <h6>Anteprima Messaggio SMS</h6>
+              <CFormTextarea
+                id='previewData'
+                value={JSON.stringify(previewData, null, 2)}
+                onChange={(e) => {
+                  try {
+                    setPreviewData(JSON.parse(e.target.value));
+                  } catch {
+                    // Ignora errori di parsing JSON temporanei
+                  }
+                }}
+                rows={4}
+                placeholder={`Inserisci dati di esempio JSON per l'anteprima (es: {"nome_completo": "Mario Rossi", "url": "https://link.it"})`}
+              ></CFormTextarea>
+              <CButton color="info" size="sm" className="mt-2" onClick={handlePreviewTemplate} disabled={loading}>
+                <CIcon icon={cilReload} className='me-1' /> Genera Anteprima
+              </CButton>
+
+              {previewResult && (
+                <CCard className='mt-3'>
+                  <CCardBody>
+                    <p className='mb-1'><strong>Messaggio Renderizzato:</strong></p>
+                    <p className='border p-2 rounded bg-light'>{previewResult.message}</p>
+                    <p className='mb-1'><strong>Caratteri:</strong> {previewResult.length}</p>
+                    <p className='mb-0'><strong>Parti SMS stimate:</strong> {previewResult.estimated_sms_parts}</p>
+                  </CCardBody>
+                </CCard>
+              )}
+
+              <h6 className='mt-4'>Inserisci Segnaposto</h6>
+              <div className='d-flex flex-wrap gap-2'>
+                {PLACEHOLDERS.map((placeholder) => (
+                  <CButton
+                    key={placeholder}
+                    color='secondary'
+                    variant='outline'
+                    size='sm'
+                    onClick={() => insertPlaceholder(placeholder)}
                   >
-                    <CIcon icon={cilMobile} className="me-2" />
-                    SMS Richiami
-                    <CBadge color="primary" className="ms-2">
-                      Richiamo
-                    </CBadge>
-                  </CNavLink>
-                </CNavItem>
-                <CNavItem>
-                  <CNavLink
-                    href="#"
-                    active={activeKey === 'promemoria'}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setActiveKey('promemoria');
-                    }}
-                  >
-                    <CIcon icon={cilMobile} className="me-2" />
-                    SMS Promemoria
-                    <CBadge color="success" className="ms-2">
-                      Promemoria
-                    </CBadge>
-                  </CNavLink>
-                </CNavItem>
-              </CNav>
-            </CCardHeader>
+                    {placeholder}
+                  </CButton>
+                ))}
+              </div>
+            </CCol> {/* Fine Colonna destra */}
+          </CRow> {/* Fine Contenitore principale */}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color='secondary' onClick={() => setShowModal(false)} disabled={loading}>Annulla</CButton>
+          <CButton color='primary' onClick={handleSaveTemplate} disabled={loading}>
+            {isEditing ? 'Salva Modifiche' : 'Crea Template'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
 
-            <CCardBody className="p-0">
-              <CTabContent>
-                <CTabPane
-                  role="tabpanel"
-                  aria-labelledby="richiamo-tab"
-                  visible={activeKey === 'richiamo'}
-                >
-                  <div className="p-4">
-                    <TemplateEditor
-                      tipo="richiamo"
-                      title="Template SMS Richiami Pazienti"
-                      defaultVariables={richiamoVariables}
-                    />
-                  </div>
-                </CTabPane>
-
-                <CTabPane
-                  role="tabpanel"
-                  aria-labelledby="promemoria-tab"
-                  visible={activeKey === 'promemoria'}
-                >
-                  <div className="p-4">
-                    <TemplateEditor
-                      tipo="promemoria"
-                      title="Template SMS Promemoria Appuntamenti"
-                      defaultVariables={promemoriVariables}
-                    />
-                  </div>
-                </CTabPane>
-              </CTabContent>
-            </CCardBody>
-          </CCard>
-
-          {/* Help Card */}
-          <CCard className="mt-4">
-            <CCardBody>
-              <h6>💡 Suggerimenti per l'uso</h6>
-              <ul className="mb-0">
-                <li>
-                  <strong>Variabili:</strong> Usa le variabili tra parentesi graffe come <code>{'{{nome_completo}}'}</code> per personalizzare i messaggi
-                </li>
-                <li>
-                  <strong>Lunghezza SMS:</strong> I messaggi oltre 160 caratteri vengono divisi in più SMS
-                </li>
-                <li>
-                  <strong>Anteprima:</strong> L'anteprima mostra come apparirà il messaggio con dati di esempio
-                </li>
-                <li>
-                  <strong>Backup:</strong> Crea sempre un backup prima di modifiche importanti
-                </li>
-                <li>
-                  <strong>Reset:</strong> Puoi sempre ripristinare i template ai valori di default
-                </li>
-              </ul>
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-
-      {/* Toast Notifications */}
-      <CToaster placement="top-end">
-        {showToast && (
-          <CToast autohide visible color={toastColor}>
-            <CToastBody>{toastMessage}</CToastBody>
-          </CToast>
-        )}
-      </CToaster>
-    </CContainer>
+      {/* Modal Conferma Eliminazione */}
+      <CModal visible={showDeleteModal} onClose={() => setShowModal(false)} backdrop='static'>
+        <CModalHeader>Conferma Eliminazione</CModalHeader>
+        <CModalBody>
+          <p>Sei sicuro di voler eliminare il template SMS "{templateToDelete?.name}"?</p>
+          <p className='text-danger'><CIcon icon={cilWarning} className='me-1' /> Attenzione: Se il template è in uso da regole di automazione, l\'eliminazione verrà bloccata.</p>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color='secondary' onClick={() => setShowModal(false)} disabled={loading}>Annulla</CButton>
+          <CButton color='danger' onClick={confirmDeleteTemplate} disabled={loading}>
+            <CIcon icon={cilTrash} className='me-1' /> Elimina
+          </CButton>
+        </CModalFooter>
+      </CModal>
+    </PageLayout>
   );
 };
 

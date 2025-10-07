@@ -16,6 +16,12 @@ export interface ApiResponse<T = unknown> {
   message?: string
 }
 
+export interface ApiSuccessResponse<T> extends Omit<ApiResponse<T>, 'data' | 'success'> {
+  success: true
+  data: T
+}
+
+
 export interface ApiError {
   message: string
   status: number
