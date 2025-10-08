@@ -212,30 +212,45 @@ class SyncStateManager:
             self._save_sync_state()
     
     def get_appointments_to_delete(self, current_appointment_ids: Set[str], 
-                                  month: int, year: int) -> Set[str]:
+                                  month: int, year: int, studio_ids: Set[int]) -> Set[str]:
         """
-        Identifica appuntamenti da cancellare (non più presenti nel DBF).
+        Identifica appuntamenti da cancellare (non più presenti nel DBF) per gli studi specificati.
         
         Args:
             current_appointment_ids: Set di ID appuntamenti attualmente nel DBF
             month: Mese di riferimento
             year: Anno di riferimento
+            studio_ids: Set di ID degli studi per cui effettuare il controllo
             
         Returns:
             Set di app_id da cancellare dal calendario
         """
         to_delete = set()
         
-        for app_id, sync_data in self.sync_state.items():
+        # Itale su una copia per evitare problemi di concorrenza se lo stato cambia
+        state_snapshot = self.sync_state.copy()
+
+        for app_id, sync_data in state_snapshot.items():
+            try:
+                # Estrae lo studio dall'ID dell'appuntamento (es. DATA_ORA_STUDIO_PAZIENTE)
+                studio_from_id = int(app_id.split('_')[2])
+            except (IndexError, ValueError):
+                # Salta gli ID malformati
+                continue
+
+            # Controlla solo gli appuntamenti degli studi che stiamo sincronizzando
+            if studio_from_id not in studio_ids:
+                continue
+
             sync_month = sync_data.get('month')
             sync_year = sync_data.get('year')
             
-            # Solo appuntamenti del mese/anno corrente
+            # Controlla solo gli appuntamenti del mese/anno corrente
             if sync_month == month and sync_year == year:
                 if app_id not in current_appointment_ids:
                     to_delete.add(app_id)
         
-        # logger.info(f"Identificati {len(to_delete)} appuntamenti da cancellare")
+        # logger.info(f"Identificati {len(to_delete)} appuntamenti da cancellare per gli studi {studio_ids}")
         return to_delete
     
     def get_sync_statistics(self) -> Dict[str, Any]:

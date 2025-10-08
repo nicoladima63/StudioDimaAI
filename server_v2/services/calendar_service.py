@@ -309,7 +309,7 @@ class CalendarServiceV2:
             # Handle deletions (appointments in calendar but not in DBF)
             deleted_count = 0
             appointments_to_delete = sync_manager.get_appointments_to_delete(
-                current_appointment_ids, month, year
+                current_appointment_ids, month, year, studio_ids
             )
             
             if progress_callback:
