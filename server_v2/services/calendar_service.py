@@ -9,6 +9,7 @@ import os
 import json
 import logging
 import threading
+import time
 from datetime import datetime, date
 from typing import Dict, List, Any, Optional, Callable
 
@@ -22,7 +23,8 @@ from google.auth.transport.requests import Request
 # Core imports
 from core.exceptions import (
     GoogleCredentialsNotFoundError,
-    CalendarSyncError
+    CalendarSyncError,
+    GoogleQuotaError
 )
 from core.environment_manager import environment_manager
 from utils.dbf_utils import get_optimized_reader
@@ -269,8 +271,13 @@ class CalendarServiceV2:
                                 success_count += 1
                                 # logger.info(f"Updated appointment {app_id}")
                                 
-                            except Exception as e:
+                            except HttpError as e:
+                                if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                                    raise GoogleQuotaError(f"Google API quota exceeded during event update for {app_id}")
                                 logger.error(f"Error updating appointment {app_id}: {e}")
+                                error_count += 1
+                            except Exception as e:
+                                logger.error(f"Generic error updating appointment {app_id}: {e}")
                                 error_count += 1
                         else:
                             # Create new event
@@ -289,8 +296,13 @@ class CalendarServiceV2:
                                 success_count += 1
                                 # logger.info(f"Created new appointment {app_id}")
                                 
-                            except Exception as e:
+                            except HttpError as e:
+                                if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                                    raise GoogleQuotaError(f"Google API quota exceeded during event creation for {app_id}")
                                 logger.error(f"Error creating appointment {app_id}: {e}")
+                                error_count += 1
+                            except Exception as e:
+                                logger.error(f"Generic error creating appointment {app_id}: {e}")
                                 error_count += 1
                     
                     # Progress update
@@ -335,9 +347,20 @@ class CalendarServiceV2:
                     
                     deleted_count += 1
                     # logger.info(f"Deleted appointment {app_id}")
-                    
+                except HttpError as e:
+                    if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                        raise GoogleQuotaError(f"Google API quota exceeded during event deletion for {app_id}")
+                    elif e.status_code in [404, 410]:
+                        logger.warning(f"Event for appointment {app_id} not found in Google Calendar (already deleted). Removing from sync state.")
+                        sync_manager.remove_appointment_sync(
+                            {'DATA': app_id.split('_')[0], 'ORA_INIZIO': app_id.split('_')[1], 
+                             'STUDIO': app_id.split('_')[2]}
+                        )
+                    else:
+                        logger.error(f"HTTP error deleting appointment {app_id}: {e}")
+                        error_count += 1
                 except Exception as e:
-                    logger.error(f"Error deleting appointment {app_id}: {e}")
+                    logger.error(f"Generic error deleting appointment {app_id}: {e}")
                     error_count += 1
             
             # Final progress update
@@ -582,8 +605,15 @@ class CalendarServiceV2:
                                 f"Deleted {deleted_count} of {total_events} events"
                             )
                             
+                    except HttpError as e:
+                        if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                            raise GoogleQuotaError(f"Google API quota exceeded during calendar clear for event {event['id']}")
+                        elif e.status_code in [404, 410]:
+                            logger.warning(f"During clear, event {event['id']} not found. Already deleted.")
+                        else:
+                            logger.warning(f"Error deleting event {event['id']}: {e}")
                     except Exception as e:
-                        logger.warning(f"Error deleting event {event['id']}: {e}")
+                        logger.warning(f"Generic error deleting event {event['id']}: {e}")
                         continue
                 
                 page_token = events_result.get('nextPageToken')

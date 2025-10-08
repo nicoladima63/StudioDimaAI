@@ -16,7 +16,8 @@ from typing import Dict, Any, List, Optional
 from services.calendar_service import CalendarServiceV2
 from core.exceptions import (
     GoogleCredentialsNotFoundError,
-    CalendarSyncError
+    CalendarSyncError,
+    GoogleQuotaError
 )
 from app_v2 import format_response
 
@@ -279,7 +280,12 @@ def sync_calendar():
                 sync_jobs[job_id]["synced"] = result.get('success', 0)
                 sync_jobs[job_id]["total"] = result.get('total_processed', 0)
                 sync_jobs[job_id]["progress"] = 100
-                
+            
+            except GoogleQuotaError as e:
+                logger.error(f"Google Quota Error stopped the sync job: {e}")
+                sync_jobs[job_id]["status"] = "error"
+                sync_jobs[job_id]["error"] = "Google API quota exceeded. Please try again later."
+                sync_jobs[job_id]["message"] = "Errore: Quota API di Google superata."
             except Exception as e:
                 if "cancelled by user" in str(e):
                     #logger.info(f"Synchronization cancelled by user: {e}")
@@ -440,6 +446,11 @@ def clear_calendar(calendar_id: str):
                 clear_jobs[job_id]["total"] = result.get('deleted_count', 0)
                 clear_jobs[job_id]["progress"] = 100
                 
+            except GoogleQuotaError as e:
+                logger.error(f"Google Quota Error stopped the clear job: {e}")
+                clear_jobs[job_id]["status"] = "error"
+                clear_jobs[job_id]["error"] = "Google API quota exceeded. Please try again later."
+                clear_jobs[job_id]["message"] = "Errore: Quota API di Google superata."
             except Exception as e:
                 if "cancelled by user" in str(e):
                     logger.info(f"Clear operation cancelled by user: {e}")

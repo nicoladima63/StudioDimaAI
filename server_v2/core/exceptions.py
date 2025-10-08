@@ -443,8 +443,8 @@ class TemplateNotFoundError(TemplateError):
     """
     pass
 
-class TemplateRenderError(TemplateError):
+class GoogleQuotaError(CalendarSyncError):
     """
-    Exception raised when a template fails to render, e.g., due to a missing variable.
+    Exception raised when Google API quota is exceeded.
     """
     pass
