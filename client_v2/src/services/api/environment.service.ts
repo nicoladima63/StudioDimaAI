@@ -406,6 +406,30 @@ class EnvironmentApiService {
   }
 }
 
+
+/**
+ * Ottiene lo stato corrente del database
+ */
+export const getDatabaseStatus = async () => {
+  const res = await environmentApi.getEnvironmentStatus();
+  if (!res.success || !res.data) return { status: 'unknown' };
+  return res.data.services?.database || { status: 'unknown' };
+};
+
+/**
+ * Inverte l’ambiente del database (DEV <-> PROD o simile)
+ */
+export const toggleDatabaseMode = async () => {
+  const current = await environmentApi.getServiceEnvironment('database');
+  if (!current.success || !current.data) throw new Error('Ambiente database non disponibile');
+
+  const curr = current.data.current_environment?.toLowerCase();
+  const nextEnv = curr === 'dev' ? 'prod' : 'dev';
+
+  return environmentApi.switchServiceEnvironment('database', nextEnv as any);
+};
+
+
 // Instance singleton
 export const environmentApi = new EnvironmentApiService();
 

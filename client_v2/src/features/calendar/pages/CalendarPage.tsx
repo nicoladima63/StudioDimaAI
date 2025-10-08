@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CContainer,
   CCard,
   CCardBody,
   CCardHeader,
@@ -14,15 +13,15 @@ import {
   CModalBody,
   CModalFooter,
   CAlert,
-  CBadge,
   CToast,
   CToastBody,
   CToaster,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCalendar, cilSync, cilTrash, cilWarning } from '@coreui/icons';
-import calendarService, { type Calendar, type Appointment, type ClearJob } from '../services/calendar.service';
+import { cilCalendar, cilSync, cilTrash } from '@coreui/icons';
+import calendarService, { type Calendar, type Appointment } from '../services/calendar.service';
 import PageLayout from '@/components/layout/PageLayout';
+import DatabaseToggle from '@/components/toggle/databaseToggle';
 
 const MONTHS = [
   'Gennaio',
@@ -48,15 +47,15 @@ const CalendarPage: React.FC = () => {
   const [showCalendarWarning, setShowCalendarWarning] = useState(false);
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const currentYear = new Date().getFullYear();
-
+  // Database states
+  const [dbStatus, setDbStatus] = useState<'healthy' | 'unhealthy' | 'unknown'>('unknown');
   // Preview states
   const [isLoadingPreview, setIsLoadingPreview] = useState<boolean>(false);
   const [previewStats, setPreviewStats] = useState<{
     total: number;
     studioBlu: number;
     studioGiallo: number;
-    nonSincronizzabili: number;
-  } | null>(null);
+    nonSincronizzabili: number;} | null>(null);
   const [loadTrigger, setLoadTrigger] = useState(0);
 
   // Sync modal states
@@ -67,9 +66,7 @@ const CalendarPage: React.FC = () => {
   const [syncProgress, setSyncProgress] = useState(0);
   const [syncSynced, setSyncSynced] = useState(0);
   const [syncTotal, setSyncTotal] = useState(0);
-  const [syncStatus, setSyncStatus] = useState<
-    'idle' | 'in_progress' | 'completed' | 'error' | 'cancelled'
-  >('idle');
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'in_progress' | 'completed' | 'error' | 'cancelled'>('idle');
   const [syncJobId, setSyncJobId] = useState<string | null>(null);
   const [syncCancelling, setSyncCancelling] = useState(false);
   const syncPollingRef = React.useRef<number | null>(null);
@@ -474,6 +471,10 @@ const CalendarPage: React.FC = () => {
     <PageLayout>
       <PageLayout.Header title='Gestione Agenda su Calendar'>
         Sincronizza appuntamenti del gestionale con Google Calendar
+        <div>
+      <DatabaseToggle onStatusChange={setDbStatus} />
+      <p>Database: {dbStatus}</p>
+    </div>
       </PageLayout.Header>
 
       <PageLayout.ContentHeader>
