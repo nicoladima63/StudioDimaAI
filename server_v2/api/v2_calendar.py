@@ -216,10 +216,10 @@ def sync_calendar():
         def sync_job():
             try:
                 # Determine date range
-                if end_month and end_year:
-                    logger.info(f"Starting sync job for studio {studio_id}, range {month}/{year} to {end_month}/{end_year}")
-                else:
-                    logger.info(f"Starting sync job for studio {studio_id}, month {month}/{year}")
+                # if end_month and end_year:
+                #     logger.info(f"Starting sync job for studio {studio_id}, range {month}/{year} to {end_month}/{end_year}")
+                # else:
+                #     logger.info(f"Starting sync job for studio {studio_id}, month {month}/{year}")
                 
                 service = CalendarServiceV2()
                 
@@ -231,7 +231,7 @@ def sync_calendar():
                     while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
                         month_appointments = service.get_db_appointments_for_month(current_month, current_year)
                         all_appointments.extend(month_appointments)
-                        logger.info(f"Retrieved {len(month_appointments)} appointments for {current_month}/{current_year}")
+                        #logger.info(f"Retrieved {len(month_appointments)} appointments for {current_month}/{current_year}")
                         
                         # Move to next month
                         current_month += 1
@@ -241,11 +241,11 @@ def sync_calendar():
                 else:
                     # Single month sync (backward compatibility)
                     all_appointments = service.get_db_appointments_for_month(month, year)
-                    logger.info(f"Retrieved {len(all_appointments)} total appointments")
+                    #logger.info(f"Retrieved {len(all_appointments)} total appointments")
                 
                 # Filter by studio
                 filtered_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == int(studio_id)]
-                logger.info(f"Filtered {len(filtered_appointments)} appointments for studio {studio_id}")
+                #logger.info(f"Filtered {len(filtered_appointments)} appointments for studio {studio_id}")
                 
                 # Studio calendar mapping
                 studio_calendar_ids = {int(studio_id): calendar_id}
@@ -255,7 +255,7 @@ def sync_calendar():
                     if sync_jobs[job_id]["cancelled"]:
                         raise Exception("Synchronization cancelled by user")
                     
-                    logger.info(f"Sync progress: {synced}/{total} - {message}")
+                    #logger.info(f"Sync progress: {synced}/{total} - {message}")
                     sync_jobs[job_id]["progress"] = int(100 * synced / max(1, total)) if total > 0 else 0
                     sync_jobs[job_id]["synced"] = synced
                     sync_jobs[job_id]["total"] = total
@@ -271,7 +271,7 @@ def sync_calendar():
                     progress_callback=update_sync_progress
                 )
                 
-                logger.info(f"Synchronization completed: {result}")
+                #logger.info(f"Synchronization completed: {result}")
                 
                 # Update final status
                 sync_jobs[job_id]["status"] = "completed"
@@ -282,7 +282,7 @@ def sync_calendar():
                 
             except Exception as e:
                 if "cancelled by user" in str(e):
-                    logger.info(f"Synchronization cancelled by user: {e}")
+                    #logger.info(f"Synchronization cancelled by user: {e}")
                     sync_jobs[job_id]["status"] = "cancelled"
                     sync_jobs[job_id]["message"] = "Synchronization cancelled by user"
                 else:
@@ -312,7 +312,7 @@ def sync_calendar():
 def sync_status():
     """Check sync job status. V1 logic."""
     job_id = request.args.get("jobId")
-    logger.info(f"Status request for job: {job_id}")
+    #logger.info(f"Status request for job: {job_id}")
     
     if not job_id:
         return format_response(
@@ -332,7 +332,7 @@ def sync_status():
         ), 404
     
     status = sync_jobs[job_id]
-    logger.info(f"Status job {job_id}: {status}")
+    #logger.info(f"Status job {job_id}: {status}")
     
     return jsonify(status), 200
 
@@ -411,7 +411,7 @@ def clear_calendar(calendar_id: str):
         
         def clear_job():
             try:
-                logger.info(f"Starting clear job for calendar {calendar_id}")
+                #logger.info(f"Starting clear job for calendar {calendar_id}")
                 
                 service = CalendarServiceV2()
                 
@@ -420,7 +420,7 @@ def clear_calendar(calendar_id: str):
                     if clear_jobs[job_id]["cancelled"]:
                         raise Exception("Clear operation cancelled by user")
                     
-                    logger.info(f"Clear progress: {deleted}/{total} - {message}")
+                    #logger.info(f"Clear progress: {deleted}/{total} - {message}")
                     clear_jobs[job_id]["progress"] = int(100 * deleted / max(1, total)) if total > 0 else 0
                     clear_jobs[job_id]["deleted"] = deleted
                     clear_jobs[job_id]["total"] = total
