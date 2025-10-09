@@ -28,6 +28,7 @@ from core.exceptions import (
 )
 from core.environment_manager import environment_manager
 from utils.dbf_utils import get_optimized_reader
+from core.constants_v2 import get_campo_dbf
 from services.sync_state_manager import get_sync_state_manager
 
 logger = logging.getLogger(__name__)
@@ -59,18 +60,36 @@ class CalendarServiceV2:
     # SECTION 1: DBF APPOINTMENTS READING (from V1)
     # =========================================================================
     
-    def get_db_appointments_for_month(self, month: int, year: int) -> List[Dict[str, Any]]:
+    def get_db_appointments_for_month(self, month: int, year: int, start_date_str: Optional[str] = None, end_date_str: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get appointments from DBF for specific month/year.
-        Maintains V1 exact logic.
+        Can be filtered by a specific date range.
         """
         try:
             appointments = self.dbf_reader.get_appointments_optimized(month, year)
-            
+
+            # Se viene fornito un intervallo di date, filtra gli appuntamenti
+            if start_date_str and end_date_str:
+                try:
+                    start_date = datetime.fromisoformat(start_date_str).date()
+                    end_date = datetime.fromisoformat(end_date_str).date()
+                    
+                    appointments = [
+                        app for app in appointments
+                        if app.get('DATA') and start_date <= app['DATA'].date() <= end_date
+                    ]
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Formato data non valido per il filtro: {e}. Ignoro il filtro per data.")
+
             # Filter out cancelled appointments and apply transformations
             filtered_appointments = []
             for app in appointments:
                 # Skip cancelled appointments
+                # Aggiunto controllo per scartare righe vuote o invalide fin da subito (ora usa i nomi logici)
+                if not app.get('DATA') or not app.get('ORA_INIZIO'):
+                    logger.debug(f"Scartato appuntamento invalido o vuoto: {app}")
+                    continue
+
                 if self._is_appointment_cancelled(app):
                     continue
                     
@@ -187,7 +206,9 @@ class CalendarServiceV2:
     def sync_appointments_for_month(self, month: int, year: int, 
                                   studio_calendar_ids: Dict[int, str],
                                   appointments: List[Dict[str, Any]] = None,
-                                  progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
+                                  progress_callback: Optional[Callable] = None,
+                                  start_date_str: Optional[str] = None,
+                                  end_date_str: Optional[str] = None) -> Dict[str, Any]:
         """
         Sync appointments to Google Calendar for specific month.
         Includes duplicate detection and incremental updates (V1 logic).
@@ -198,7 +219,7 @@ class CalendarServiceV2:
             
             # Get appointments if not provided
             if appointments is None:
-                appointments = self.get_db_appointments_for_month(month, year)
+                appointments = self.get_db_appointments_for_month(month, year, start_date_str, end_date_str)
             
             # Filter sync state for current studios
             studio_ids = set(studio_calendar_ids.keys())
@@ -397,16 +418,18 @@ class CalendarServiceV2:
         Maintains V1 exact logic.
         """
         try:
-            # Basic event info
-            paziente = app.get('PAZIENTE', 'Appuntamento')
-            descrizione = app.get('DESCRIZIONE', '')
+            # Recupera i dati logici dall'appuntamento
+            descrizione = app.get('DESCRIZIONE', '').strip()
+            note = app.get('NOTE', '').strip()
             data_str = app.get('DATA', '')
             ora_inizio = app.get('ORA_INIZIO', 9)
             ora_fine = app.get('ORA_FINE', 10)
             
             # Parse date
-            if isinstance(data_str, str) and len(data_str) >= 10:
-                event_date = datetime.fromisoformat(data_str[:10])
+            if isinstance(data_str, str):
+                event_date = datetime.fromisoformat(data_str)
+            elif isinstance(data_str, date):
+                event_date = datetime.combine(data_str, datetime.min.time())
             else:
                 event_date = datetime.now()
             
@@ -452,10 +475,12 @@ class CalendarServiceV2:
             start_datetime = event_date.replace(hour=start_hour, minute=start_minute, second=0)
             end_datetime = event_date.replace(hour=end_hour, minute=end_minute, second=0)
             
-            # Build event
-            summary = paziente if paziente != "Appuntamento" else "Appuntamento"
-            if descrizione and descrizione != summary:
-                summary += f" - {descrizione}"
+            # --- LOGICA CORRETTA PER TITOLO E DESCRIZIONE ---
+            # Il titolo è la descrizione. Se manca (es. nota giornaliera), usa le note.
+            summary = descrizione or note or "Appuntamento"
+            
+            # La descrizione dell'evento è sempre il campo NOTE.
+            event_description = note
             
             # Use existing color system based on appointment type
             color_id = app.get('GOOGLE_COLOR_ID', '8')  # Default gray if not set
@@ -470,7 +495,7 @@ class CalendarServiceV2:
                     'dateTime': end_datetime.isoformat(),
                     'timeZone': 'Europe/Rome',
                 },
-                'description': f"Paziente: {paziente}\nDescrizione: {descrizione}",
+                'description': event_description,
                 'colorId': color_id,
                 'reminders': {
                     'useDefault': False,
@@ -495,7 +520,7 @@ class CalendarServiceV2:
         Check if an appointment is cancelled based on various indicators.
         """
         # Check for explicit cancellation indicators
-        paziente = (appointment.get('PAZIENTE') or '').lower()
+        paziente_id = (appointment.get('_PATIENT_ID') or '').strip()
         descrizione = (appointment.get('DESCRIZIONE') or '').lower()
         tipo = (appointment.get('TIPO') or '').lower()
         note = (appointment.get('NOTE') or '').lower()
@@ -511,16 +536,12 @@ class CalendarServiceV2:
         
         # Check if any field contains cancellation keywords
         for keyword in cancellation_keywords:
-            if (keyword in paziente or 
-                keyword in descrizione or 
-                keyword in tipo or 
-                keyword in note):
+            if keyword in descrizione or keyword in note:
                 return True
         
-        # Check for empty or invalid appointments
-        if (not paziente or paziente.strip() == '' or 
-            paziente == 'appuntamento' or paziente == 'cancellato'):
-            return True
+        # Check for empty or invalid appointments (solo se non è un appuntamento di servizio)
+        if not paziente_id and not descrizione and tipo not in ['F', 'A', 'M']:
+             return True
             
         # Check for zero duration appointments (might indicate cancellation)
         ora_inizio = appointment.get('ORA_INIZIO', 0)

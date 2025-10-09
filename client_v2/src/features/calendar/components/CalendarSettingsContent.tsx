@@ -17,7 +17,7 @@ import {
   CModalFooter,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCalendar, cilSettings, cilSync, cilTrash } from '@coreui/icons';
+import { cilCalendar, cilSettings, cilSync, cilTrash, cilWarning } from '@coreui/icons';
 import { environmentApi } from '@/services/api/environment.service';
 import { schedulerService, type SchedulerSettings } from '@/features/scheduler/services/schedulerService';
 import { apiGetCalendars, apiStartSync, apiClearCalendar, apiGetClearStatus, apiGetSyncStatus } from '@/features/calendar/services/calendar.service';
@@ -45,6 +45,7 @@ const CalendarSettings: React.FC = () => {
   // Stati per azioni rapide
   const [clearingAll, setClearingAll] = useState(false);
   const [syncingAll, setSyncingAll] = useState(false);
+  const [forceSyncing, setForceSyncing] = useState(false);
   
   // Stati per monitoraggio progresso
   const [clearJobs, setClearJobs] = useState<Map<string, any>>(new Map());
@@ -58,6 +59,7 @@ const CalendarSettings: React.FC = () => {
   // Stati per le modal di conferma
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showSyncConfirm, setShowSyncConfirm] = useState(false);
+  const [showForceSyncConfirm, setShowForceSyncConfirm] = useState(false);
 
   const addLog = (
     message: string,
@@ -390,11 +392,16 @@ const CalendarSettings: React.FC = () => {
           console.log(`Starting sync for ${calendar.name} (studio ${studioId})`);
           const syncResponse = await apiStartSync(
             calendar.id,
-            startOfWeek.getMonth() + 1,
-            startOfWeek.getFullYear(),
+            // Invia il mese/anno di inizio per la logica di lettura del DBF
+            startOfWeek.getMonth() + 1, 
+            startOfWeek.getFullYear(), 
             studioId,
-            endDate.getMonth() + 1,
-            endDate.getFullYear()
+            // Invia il mese/anno di fine per la logica di iterazione sui mesi
+            endDate.getMonth() + 1, 
+            endDate.getFullYear(),
+            // Invia le date esatte per il filtro granulare
+            startOfWeek.toISOString().split('T')[0], // 'YYYY-MM-DD'
+            endDate.toISOString().split('T')[0]      // 'YYYY-MM-DD'
           );
           console.log(`Sync response for ${calendar.name}:`, syncResponse);
           
@@ -431,6 +438,71 @@ const CalendarSettings: React.FC = () => {
       setSyncingAll(false);
     }
   };
+
+  const handleForceResync = async () => {
+    setShowForceSyncConfirm(false);
+    setForceSyncing(true);
+    addLog('Avvio risincronizzazione forzata...', 'info');
+    try {
+      // Ottieni la lista dei calendari
+      const calendarsResponse = await apiGetCalendars();
+      if (!calendarsResponse.success || !calendarsResponse.data) {
+        throw new Error('Impossibile recuperare la lista dei calendari');
+      }
+      
+      const calendars = calendarsResponse.data.calendars;
+      
+      // Calcola il range di settimane
+      const currentDate = new Date();
+      const startOfWeek = new Date(currentDate);
+      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+      
+      const endDate = new Date(startOfWeek);
+      endDate.setDate(startOfWeek.getDate() + (weeksToSync * 7) - 1);
+      
+      addLog(`Periodo di risincronizzazione: ${startOfWeek.toLocaleDateString()} - ${endDate.toLocaleDateString()}`, 'info');
+      
+      // Prepara i dati per il backend
+      const studioCalendarIds: { [key: number]: string } = {};
+      calendars.forEach(cal => {
+        if (cal.name.toLowerCase().includes('giallo')) {
+          studioCalendarIds[2] = cal.id;
+        } else if (cal.name.toLowerCase().includes('blu')) {
+          studioCalendarIds[1] = cal.id;
+        }
+      });
+
+      // Chiamata al nuovo endpoint del servizio
+      // Assumendo che esista un `apiStartForceResync` nel service
+      const forceSyncResponse = await calendarService.apiStartForceResync(
+        studioCalendarIds,
+        startOfWeek.toISOString().split('T')[0],
+        endDate.toISOString().split('T')[0]
+      );
+
+      if (forceSyncResponse && forceSyncResponse.job_id) {
+        const jobId = forceSyncResponse.job_id;
+        
+        // Usa lo stesso meccanismo di polling della sincronizzazione normale
+        syncJobsRef.current.set(jobId, { calendarName: "Risincronizzazione Forzata" });
+        setSyncJobs(prev => new Map(prev).set(jobId, { calendarName: "Risincronizzazione Forzata" }));
+        
+        const successMsg = `Risincronizzazione forzata avviata.`;
+        addLog(successMsg, 'success');
+        setSuccess(successMsg);
+      } else {
+        throw new Error(forceSyncResponse?.error || 'Risposta non valida dal server');
+      }
+
+    } catch (err: any) {
+      const errorMsg = `Errore nella risincronizzazione forzata: ${err.message}`;
+      setError(errorMsg);
+      addLog(errorMsg, 'error');
+    } finally {
+      setForceSyncing(false);
+    }
+  };
+
 
   return (
     <PageLayout>
@@ -579,7 +651,7 @@ const CalendarSettings: React.FC = () => {
                     <CButton
                       color="success"
                       size="lg"
-                      onClick={() => setShowSyncConfirm(true)}
+                      onClick={() => setShowSyncConfirm(true)} // Manteniamo la sync normale
                       disabled={syncingAll || clearingAll || syncJobs.size > 0 || clearJobs.size > 0}
                       className="w-100 mb-2"
                     >
@@ -601,12 +673,12 @@ const CalendarSettings: React.FC = () => {
                       )}
                     </CButton>
                   </CCol>
-                  <CCol md={6}>
+                  <CCol md={4}>
                     <CButton
                       color="danger"
                       size="lg"
                       onClick={() => setShowClearConfirm(true)}
-                      disabled={syncingAll || clearingAll || syncJobs.size > 0 || clearJobs.size > 0}
+                      disabled={syncingAll || clearingAll || forceSyncing || syncJobs.size > 0 || clearJobs.size > 0}
                       className="w-100 mb-2"
                     >
                       {clearingAll ? (
@@ -623,6 +695,32 @@ const CalendarSettings: React.FC = () => {
                         <>
                           <CIcon icon={cilTrash} className="me-2" />
                           Cancella Tutti i Calendari
+                        </>
+                      )}
+                    </CButton>
+                  </CCol>
+                  <CCol md={2}>
+                    <CButton
+                      color="warning"
+                      size="lg"
+                      onClick={() => setShowForceSyncConfirm(true)}
+                      disabled={syncingAll || clearingAll || forceSyncing || syncJobs.size > 0 || clearJobs.size > 0}
+                      className="w-100 mb-2 text-white"
+                    >
+                      {forceSyncing ? (
+                        <>
+                          <CSpinner size="sm" className="me-2" />
+                          ...
+                        </>
+                      ) : syncJobs.size > 0 ? (
+                        <>
+                          <CSpinner size="sm" className="me-2" />
+                          ...
+                        </>
+                      ) : (
+                        <>
+                          <CIcon icon={cilWarning} className="me-2" />
+                          Pulisci e Sincronizza
                         </>
                       )}
                     </CButton>

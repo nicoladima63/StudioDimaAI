@@ -71,11 +71,13 @@ class SyncStateManager:
             ora_inizio = appointment.get('ORA_INIZIO', '')
             studio = appointment.get('STUDIO', '')
             paziente = appointment.get('PAZIENTE', '') or appointment.get('DESCRIZIONE', '') or ''
+            note = appointment.get('NOTE', '') or ''
             
-            # Pulisce il paziente per evitare caratteri problematici
+            # Pulisce i campi per evitare caratteri problematici e crea un ID più robusto
             paziente_clean = str(paziente).replace(' ', '').replace('\n', '').replace('\r', '')
+            note_hash = hashlib.sha1(str(note).encode('utf-8')).hexdigest()[:8] # Un piccolo hash delle note
             
-            return f"{data}_{ora_inizio}_{studio}_{paziente_clean}"
+            return f"{data}_{ora_inizio}_{studio}_{paziente_clean}_{note_hash}"
         except Exception as e:
             logger.error(f"Errore generazione ID appuntamento: {e}")
             # Fallback con timestamp
@@ -252,6 +254,18 @@ class SyncStateManager:
         
         # logger.info(f"Identificati {len(to_delete)} appuntamenti da cancellare per gli studi {studio_ids}")
         return to_delete
+    
+    def reset_sync_state(self) -> bool:
+        """Elimina il file di stato per forzare una risincronizzazione completa."""
+        try:
+            if self.sync_state_file.exists():
+                self.sync_state_file.unlink()
+                logger.info(f"File di stato sincronizzazione '{self.sync_state_file}' eliminato.")
+            self.sync_state = {}
+            return True
+        except Exception as e:
+            logger.error(f"Errore durante l'eliminazione del file di stato: {e}")
+            return False
     
     def get_sync_statistics(self) -> Dict[str, Any]:
         """
