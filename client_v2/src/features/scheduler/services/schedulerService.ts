@@ -24,6 +24,7 @@ export interface SchedulerSettings {
     calendar_sync_minute: number;
     calendar_studio_blu_id: string;
     calendar_studio_giallo_id: string;
+    calendar_weeks_to_sync?: number; 
 }
 
 export interface LogEntry {
