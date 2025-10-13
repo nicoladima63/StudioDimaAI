@@ -111,22 +111,23 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
     query = urlencode(rendered_params) if rendered_params else ''
     original_url = f"{base_url}?{query}" if query else base_url
 
-    # 2. Crea il link tracciato invece del link diretto
-    tracked_link = link_tracker_service.create_tracked_link(
-        original_url=original_url,
-        context_data={'trigger_context': context_data, 'action_params': params}
-    )
+    # 2. Crea il link tracciato invece del link diretto (FUNZIONALITÀ DISATTIVATA)
+    # tracked_link = link_tracker_service.create_tracked_link(
+    #     original_url=original_url,
+    #     context_data={'trigger_context': context_data, 'action_params': params}
+    # )
+    tracked_link = original_url # Segnaposto per riattivazione
 
     # 4. Renderizza il messaggio del template (senza fallback: se fallisce, segnala errore)
     template_manager = get_template_manager()
-    template_data = {'url': tracked_link, **full_context}
+    template_data = {'url': original_url, **full_context} # Usa original_url
     message = template_manager.render_template_by_id(template_id, template_data)
 
     # 5. Invia l'SMS
     logger.info(f"Invio SMS a {phone} con messaggio: '{message[:50]}...'")
     result = sms_service.send_sms(phone, message, tag='auto_link')
     
-    return {**result, 'final_url': tracked_link, 'original_url': original_url}
+    return {**result, 'final_url': original_url, 'original_url': original_url} # Usa original_url
 
 @register_action(
     name='send_appointment_sms',
