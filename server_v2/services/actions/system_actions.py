@@ -19,6 +19,7 @@ from core.exceptions import ValidationError
 from services.sms_service import sms_service
 from core.template_manager import get_template_manager
 from services.dbf_data_service import get_dbf_data_service
+from services.link_tracker_service import link_tracker_service # 1. Importa il servizio di tracking
 from core.constants_v2 import COLONNE
 
 logger = logging.getLogger(__name__)
@@ -82,7 +83,8 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
     parameters=[
         {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'},
         {'name': 'page_slug', 'type': 'string', 'required': False, 'label': 'Slug Pagina Destinazione'},
-        {'name': 'url_params', 'type': 'json', 'required': False, 'label': 'Parametri URL (JSON)'}
+        {'name': 'url_params', 'type': 'json', 'required': False, 'label': 'Parametri URL (JSON)'},
+        {'name': 'tempo_richiamo', 'type': 'string', 'required': False, 'label': 'Tempo richiamo (es. 6 mesi)'}
     ]
 )
 def impl_send_sms_link(context_data: Dict[str, Any], **params):
@@ -105,31 +107,33 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
 
     # 3. Costruisci l'URL finale
     rendered_params = {k: str(v).format(**full_context) for k, v in url_params.items()}
-    base_url = f'https://studiodimartino.eu/{page_slug.lstrip("/")}'
+    base_url = f'https://studiodimartino.eu/#/{page_slug.lstrip("/")}'
     query = urlencode(rendered_params) if rendered_params else ''
-    final_url = f"{base_url}?{query}" if query else base_url
+    original_url = f"{base_url}?{query}" if query else base_url
 
-    # 4. Renderizza il messaggio del template
+    # 2. Crea il link tracciato invece del link diretto
+    tracked_link = link_tracker_service.create_tracked_link(
+        original_url=original_url,
+        context_data={'trigger_context': context_data, 'action_params': params}
+    )
+
+    # 4. Renderizza il messaggio del template (senza fallback: se fallisce, segnala errore)
     template_manager = get_template_manager()
-    template_data = {'url': final_url, **full_context}
-    
-    try:
-        message = template_manager.render_template_by_id(template_id, template_data)
-    except Exception as e:
-        logger.error(f"Errore rendering template ID {template_id}: {e}. Uso messaggio di fallback.")
-        message = f"Ciao {nome}, ecco le informazioni richieste: {final_url}"
+    template_data = {'url': tracked_link, **full_context}
+    message = template_manager.render_template_by_id(template_id, template_data)
 
     # 5. Invia l'SMS
     logger.info(f"Invio SMS a {phone} con messaggio: '{message[:50]}...'")
     result = sms_service.send_sms(phone, message, tag='auto_link')
     
-    return {**result, 'final_url': final_url}
+    return {**result, 'final_url': tracked_link, 'original_url': original_url}
 
 @register_action(
     name='send_appointment_sms',
     description="Invia un SMS di promemoria per un appuntamento.",
     parameters=[
-        {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'}
+        {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'},
+        {'name': 'tempo_richiamo', 'type': 'string', 'required': False, 'label': 'Tempo richiamo (es. 6 mesi)'}
     ]
 )
 def impl_send_appointment_sms(context_data: Dict[str, Any], **params):
@@ -148,15 +152,9 @@ def impl_send_appointment_sms(context_data: Dict[str, Any], **params):
     if not template_id:
         raise ValidationError("Il parametro 'template_id' è obbligatorio.")
 
-    # 3. Renderizza il template
+    # 3. Renderizza il template (senza fallback: se fallisce, segnala errore)
     template_manager = get_template_manager()
-    try:
-        message = template_manager.render_template_by_id(template_id, full_context)
-    except Exception as e:
-        logger.error(f"Errore rendering template ID {template_id}: {e}. Uso messaggio di fallback.")
-        data_app = full_context.get(COLONNE.get('appuntamenti', {}).get('data', 'DB_APDATA'), 'N/D')
-        ora_app = full_context.get(COLONNE.get('appuntamenti', {}).get('ora_inizio', 'DB_APOREIN'), 'N/D')
-        message = f"Ciao {nome}, ti confermiamo il tuo appuntamento per il giorno {data_app} alle ore {ora_app}."
+    message = template_manager.render_template_by_id(template_id, full_context)
 
     # 4. Invia SMS
     logger.info(f"Invio SMS appuntamento a {phone} con messaggio: '{message[:50]}...'")
@@ -177,4 +175,3 @@ def impl_log_prestazione_eseguita(context_data: Dict[str, Any], **params):
     log_message = f"[LOG AZIONE] {message} | Contesto: {context_data}"
     logger.info(log_message)
     return {'status': 'success', 'message': 'Log registrato.'}
-

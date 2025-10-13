@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   CButton,
   CModal,
@@ -43,6 +43,7 @@ const PLACEHOLDERS = [
   '{ora_appuntamento}',
   '{tipo_richiamo}',
   '{medico}',
+  '{tempo_richiamo}',
 ];
 
 const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
@@ -59,20 +60,47 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
   // Stato per l'anteprima
   const [previewData, setPreviewData] = useState<any>({
     nome_completo: "Mario Rossi",
-    url: "https://link.it/esempio",
+    url: "https://studiodimartino.eu",
     data_appuntamento: "10/10/2025",
     ora_appuntamento: "15:00",
     tipo_richiamo: "controllo",
     medico: "Dr. Bianchi",
-    ora: "15:00" // Aggiunto per compatibilità con vecchi template
+    ora: "15:00", // Aggiunto per compatibilità con vecchi template
+    tempo_richiamo: "6 mesi"
   });
   const [previewResult, setPreviewResult] = useState<any>(null);
 
+  // Ref al textarea del contenuto per inserire il segnaposto alla posizione del cursore
+  const templateContentRef = useRef<HTMLTextAreaElement | null>(null);
+
   const insertPlaceholder = (placeholder: string) => {
-    setCurrentTemplate(prev => ({
-      ...prev,
-      content: (prev.content || '') + placeholder
-    }));
+    const textarea = templateContentRef.current;
+    const content = currentTemplate.content || '';
+
+    if (!textarea || textarea.selectionStart === null || textarea.selectionEnd === null) {
+      // Fallback: aggiungi in coda
+      setCurrentTemplate(prev => ({ ...prev, content: (prev.content || '') + placeholder }));
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    const next = before + placeholder + after;
+
+    setCurrentTemplate(prev => ({ ...prev, content: next }));
+
+    // Riposiziona il cursore subito dopo il segnaposto inserito
+    requestAnimationFrame(() => {
+      try {
+        const pos = start + placeholder.length;
+        textarea.focus();
+        textarea.setSelectionRange(pos, pos);
+      } catch {
+        // ignora eventuali errori di timing del ref
+      }
+    });
   };
 
   const handlePreviewTemplate = async () => {
@@ -273,6 +301,7 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
                   <CFormTextarea
                     id='templateContent'
                     value={currentTemplate.content || ''}
+                    ref={templateContentRef}
                     onChange={(e) => setCurrentTemplate({ ...currentTemplate, content: e.target.value })}
                     rows={5}
                   ></CFormTextarea>
@@ -313,8 +342,10 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
                 <CCard className='mt-3'>
                   <CCardBody>
                     <p className='mb-1'><strong>Messaggio Renderizzato:</strong></p>
-                    <p className='border p-2 rounded bg-light'>{previewResult.message}</p>
-                    <p className='mb-1'><strong>Caratteri:</strong> {previewResult.length}</p>
+                    <pre className='border p-2 rounded bg-light' style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+                      {previewResult.message}
+                    </pre>
+                    <p className='mb-1 mt-2'><strong>Caratteri:</strong> {previewResult.length}</p>
                     <p className='mb-0'><strong>Parti SMS stimate:</strong> {previewResult.estimated_sms_parts}</p>
                   </CCardBody>
                 </CCard>

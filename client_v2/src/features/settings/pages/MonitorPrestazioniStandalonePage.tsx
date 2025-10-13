@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   CAlert,
   CButton,
@@ -6,12 +6,10 @@ import {
   CModalHeader,
   CModalBody,
   CModalFooter,
-  CFormTextarea ,
   CRow,
   CCol,
   CFormSelect,
   CFormLabel,
-  CFormInput,
   CCard,
   CCardHeader,
   CCardBody,
@@ -29,11 +27,10 @@ import {
 } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
 
-import apiClient from '@/services/api/client';
-import { Prestazione } from '@/store/prestazioni.store'
+ 
 import automationApi, { type Action, type AutomationRule } from '@/features/settings/services/automation.service';
 import ListaRegole from '@/features/settings/components/monitor/ListaRegole';
-import StatoMonitorCard from '@/features/settings/components/monitor/StatoMonitorCard';
+ 
 import LogMonitorCard from '@/features/settings/components/monitor/LogMonitorCard';
 import CallbackCard from '@/features/settings/components/monitor/CallbackCard';
 import AssociaRegolaCard from '@/features/settings/components/monitor/AssociaRegolaCard';
@@ -42,11 +39,6 @@ import TriggerSourceSelector, { Trigger } from '@/features/settings/components/m
 import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary } from '@/services/api/monitorPrestazioni';
 
 interface MonitorLog extends BackendMonitorLog {}
-
-interface MonitorableTable {
-  name: string;
-  description: string;
-}
 
 const getBadgeColor = (status: string) => {
   switch (status) {
@@ -82,6 +74,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [trigger, setTrigger] = useState<Trigger | null>(null);
   const [selectedActionId, setSelectedActionId] = useState<number | null>(null);
   const [selectedActionParams, setSelectedActionParams] = useState<any | null>(null);
+  const [isParamsModalOpen, setIsParamsModalOpen] = useState(false);
 
   const selectedActionIdRef = useRef(selectedActionId);
   selectedActionIdRef.current = selectedActionId;
@@ -164,92 +157,6 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
       }
     } catch (error) {
       console.error('Errore nel caricamento dei log:', error);
-    }
-  };
-
-  const handleStartMonitor = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log("handleStartMonitor: Current selectedMonitorId:", selectedMonitorId);
-
-      if (!selectedMonitorId) {
-        setError("Monitor ID non disponibile. Seleziona un monitor dalla lista.");
-        setLoading(false);
-        return;
-      }
-
-      const response = await MonitorPrestazioniService.startMonitor(selectedMonitorId);
-      console.log("handleStartMonitor: Response from startMonitor API:", response);
-
-      if (response.success) {
-        setSuccess('Monitor avviato con successo');
-        await loadStatus(); // Reload status to pick up the new monitor state
-        await loadLogs();
-        console.log("handleStartMonitor: Status after loadStatus (successful start):");
-      } else {
-        setError(response.message || "Errore nell'avvio del monitor");
-        console.log("handleStartMonitor: Error response from startMonitor API:", response);
-      }
-    } catch (error) {
-      setError("Errore nell'avvio del monitor");
-      console.error('handleStartMonitor: Caught exception:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStopMonitor = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      console.log("handleStopMonitor: Current selectedMonitorId:", selectedMonitorId);
-
-      if (!selectedMonitorId) {
-        setError("Monitor ID non disponibile. Seleziona un monitor dalla lista.");
-        setLoading(false);
-        return;
-      }
-      
-      const response = await MonitorPrestazioniService.stopMonitor(selectedMonitorId);
-      console.log("handleStopMonitor: Response from stopMonitor API:", response);
-
-      if (response.success) {
-        setSuccess('Monitor fermato con successo');
-        await loadStatus();
-        await loadLogs();
-        console.log("handleStopMonitor: Status after loadStatus (successful stop):");
-      } else {
-        setError(response.message || 'Errore nella fermata del monitor');
-        console.log("handleStopMonitor: Error response from stopMonitor API:", response);
-      }
-    } catch (error) {
-      setError('Errore nella fermata del monitor');
-      console.error('handleStopMonitor: Caught exception:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTestMonitor = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await MonitorPrestazioniService.testMonitor();
-      if (response.success) {
-        setSuccess('Test monitor completato');
-        await loadLogs();
-      } else {
-        setError(response.message || 'Errore nel test del monitor');
-      }
-    } catch (error) {
-      setError('Errore nel test del monitor');
-      console.error('Errore:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -454,7 +361,16 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   };
 
   const handleEditRegola = (rule: AutomationRule) => {
-    alert(`Inizio modifica per la regola: ${rule.name} (ID: ${rule.id})`);
+    // Pre-compila gli stati per l'edit
+    setEditingRule(rule);
+    setSelectedActionId(rule.action_id);
+    setSelectedActionParams(rule.action_params || {});
+    // Imposta il trigger se disponibile nella regola
+    if (rule.trigger_type && rule.trigger_id) {
+      setTrigger({ type: rule.trigger_type, id: String(rule.trigger_id), name: rule.trigger_id });
+    }
+    // Apri il modale dei parametri
+    setIsParamsModalOpen(true);
   };
 
   const handleCancelEdit = () => {
@@ -714,10 +630,9 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
               <CRow>
                 {/* Colonna Sinistra: Creazione/Modifica Regola */}
                 <CCol md={4}>
-                  <h6 className='mb-3'>{editingRule ? 'Modifica Regola' : 'Crea Nuova Regola'}</h6>
+                  <h6 className='mb-3'>Crea Nuova Regola</h6>
                   <TriggerSourceSelector 
-                    onChange={setTrigger} 
-                    disabled={!!editingRule || loading} 
+                    onChange={setTrigger}
                   />
                   <CallbackCard 
                     actions={actions}
@@ -725,12 +640,13 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                     onActionChange={handleActionChange}
                     initialParams={selectedActionParams}
                     onParamsChange={setSelectedActionParams}
+                    isModalOpen={isParamsModalOpen}
+                    setIsModalOpen={setIsParamsModalOpen}
                   />
                   <div className='d-flex align-items-center'>
                     <AssociaRegolaCard 
                       onAssocia={handleAssocia}
                       disabled={(!trigger && !editingRule) || !selectedActionId || loading}
-                      isEditing={!!editingRule}
                     />
                     {editingRule && (
                       <CButton color="secondary" variant="outline" onClick={handleCancelEdit} className="ms-3">

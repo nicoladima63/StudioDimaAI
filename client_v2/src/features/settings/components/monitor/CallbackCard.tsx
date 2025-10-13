@@ -16,14 +16,7 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilList, cilSettings } from '@coreui/icons';
 import { Action, ActionParameter } from '@/features/settings/services/automation.service';
-import apiClient from '@/services/api/client';
-
-interface SmsTemplate {
-  id: number;
-  name: string;
-  description: string;
-}
-
+import templatesService, { SmsTemplate } from '@/features/settings/services/templates.service';
 interface CallbackCardProps {
   actions: Action[];
   selectedActionId: number | null;
@@ -43,16 +36,14 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
   isModalOpen,
   setIsModalOpen,
 }) => {
-  const [currentParams, setCurrentParams] = useState(initialParams || {});
+  const [currentParams, setCurrentParams] = useState<Record<string, any>>(initialParams || {});
   const [smsTemplates, setSmsTemplates] = useState<SmsTemplate[]>([]);
 
   useEffect(() => {
     const fetchSmsTemplates = async () => {
       try {
-        const response = await apiClient.get('/sms-templates');
-        if (response.data.success) {
-          setSmsTemplates(response.data.data);
-        }
+        const templates = await templatesService.getSmsTemplates();
+        setSmsTemplates(templates);
       } catch (error) {
         console.error("Failed to fetch SMS templates", error);
       }
@@ -60,8 +51,15 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
     fetchSmsTemplates();
   }, []);
 
+  // Sincronizza i parametri quando si apre il modale o cambiano gli input dal parent
+  useEffect(() => {
+    if (isModalOpen) {
+      setCurrentParams(initialParams || {});
+    }
+  }, [isModalOpen, initialParams, selectedActionId]);
+
   const selectedAction = actions.find(action => action.id === selectedActionId);
-  const requiresParams = selectedAction && selectedAction.parameters && selectedAction.parameters.length > 0;
+  const requiresParams = !!(selectedAction?.parameters?.length);
 
   const handleOpenModal = () => {
     setCurrentParams(initialParams || {});
@@ -88,8 +86,8 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
           <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
           <CFormSelect
             id={param.name}
-            value={paramValue || ''}
-            onChange={(e) => handleParamChange(param.name, e.target.value ? Number(e.target.value) : null)}
+            value={paramValue ?? ''}
+            onChange={(e) => handleParamChange(param.name, e.target.value === '' ? null : Number(e.target.value))}
             required={param.required}
           >
             <option value=''>-- Seleziona template --</option>
@@ -123,7 +121,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
               }}
               placeholder={param.placeholder || 'Inserisci un oggetto JSON valido'}
             />
-            {param.description && <small className='text-muted'>{param.description}</small>}
+            {/* description non presente nel tipo ActionParameter */}
           </div>
         );
 
@@ -134,12 +132,12 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
             <CFormInput
               type='number'
               id={param.name}
-              value={paramValue || ''}
-              onChange={(e) => handleParamChange(param.name, e.target.value ? Number(e.target.value) : null)}
+              value={paramValue ?? ''}
+              onChange={(e) => handleParamChange(param.name, e.target.value === '' ? null : Number(e.target.value))}
               placeholder={param.placeholder}
               required={param.required}
             />
-            {param.description && <small className='text-muted'>{param.description}</small>}
+            {/* description non presente nel tipo ActionParameter */}
           </div>
         );
 
@@ -156,7 +154,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
               placeholder={param.placeholder}
               required={param.required}
             />
-            {param.description && <small className='text-muted'>{param.description}</small>}
+            {/* description non presente nel tipo ActionParameter */}
           </div>
         );
     }
