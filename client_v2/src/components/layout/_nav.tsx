@@ -133,6 +133,12 @@ const _nav = [
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />, // Un'icona appropriata
   },
   {
+    component: CNavItem,
+    name: 'Automazioni',
+    to: '/settings/automazioni',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  },
+  {
     component: CNavTitle,
     name: 'Materiali',
   },
