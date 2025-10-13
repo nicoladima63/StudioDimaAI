@@ -139,6 +139,12 @@ const _nav = [
     icon: <CIcon icon={cilList} customClassName="nav-icon" />,
   },
   {
+    component: CNavItem,
+    name: 'Scheduler',
+    to: '/settings/scheduler',
+    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+  },
+  {
     component: CNavTitle,
     name: 'Materiali',
   },

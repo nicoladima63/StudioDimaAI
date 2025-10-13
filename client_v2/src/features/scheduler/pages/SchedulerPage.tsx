@@ -24,16 +24,16 @@ import {
     CFormInput,
     CFormLabel,
     CFormSelect,
-    CInputGroup,
+    
     CNav,
     CNavItem,
     CNavLink,
     CTabContent,
     CTabPane
 } from '@coreui/react';
-import { cilClock, cilPlay, cilStop, cilSettings, cilReload } from '@coreui/icons';
+import { cilClock, cilMediaPlay, cilMediaStop, cilSettings, cilReload } from '@coreui/icons';
 import CIcon from '@coreui/icons-react';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { schedulerService } from '../services/schedulerService';
 
 interface SchedulerJob {
@@ -126,7 +126,7 @@ const SchedulerPage: React.FC = () => {
                 toast.success('Scheduler avviato');
             } else {
                 await schedulerService.apiStop();
-                toast.warning('Scheduler fermato');
+                toast('Scheduler fermato');
             }
             await loadSchedulerData();
         } catch (error) {
@@ -241,7 +241,7 @@ const SchedulerPage: React.FC = () => {
                                         onClick={() => handleStartStop('stop')}
                                         disabled={loading}
                                     >
-                                        <CIcon icon={cilStop} className="me-1" />
+                                        <CIcon icon={cilMediaStop} className="me-1" />
                                         Ferma Scheduler
                                     </CButton>
                                 ) : (
@@ -251,7 +251,7 @@ const SchedulerPage: React.FC = () => {
                                         onClick={() => handleStartStop('start')}
                                         disabled={loading}
                                     >
-                                        <CIcon icon={cilPlay} className="me-1" />
+                                        <CIcon icon={cilMediaPlay} className="me-1" />
                                         Avvia Scheduler
                                     </CButton>
                                 )}
@@ -392,7 +392,7 @@ const SchedulerPage: React.FC = () => {
                                             <CCol md={6}>
                                                 <h6>Log Richiami (Ultimi 10)</h6>
                                                 {recallLogs.length > 0 ? (
-                                                    <CTable size="sm">
+                                                    <CTable>
                                                         <CTableHead>
                                                             <CTableRow>
                                                                 <CTableHeaderCell>Data/Ora</CTableHeaderCell>
@@ -424,7 +424,7 @@ const SchedulerPage: React.FC = () => {
                                             <CCol md={6}>
                                                 <h6>Log Sincronizzazione Calendario (Ultimi 10)</h6>
                                                 {calendarLogs.length > 0 ? (
-                                                    <CTable size="sm">
+                                                    <CTable>
                                                         <CTableHead>
                                                             <CTableRow>
                                                                 <CTableHeaderCell>Data/Ora</CTableHeaderCell>
@@ -473,8 +473,8 @@ const SchedulerPage: React.FC = () => {
                     <CForm>
                         <div className="mb-3">
                             <CFormLabel>Stato</CFormLabel>
-                            <CFormSelect
-                                value={tempSettings[`${editingService}_enabled` as keyof SchedulerSettings] ? 'true' : 'false'}
+                                <CFormSelect
+                                value={(tempSettings[`${editingService}_enabled` as keyof SchedulerSettings] ? 'true' : 'false') as string}
                                 onChange={(e) => setTempSettings(prev => ({
                                     ...prev,
                                     [`${editingService}_enabled`]: e.target.value === 'true'
@@ -493,7 +493,7 @@ const SchedulerPage: React.FC = () => {
                                         type="number"
                                         min="0"
                                         max="23"
-                                        value={tempSettings[`${editingService}_hour` as keyof SchedulerSettings] || 0}
+                                    value={(tempSettings[`${editingService}_hour` as keyof SchedulerSettings] as number) || 0}
                                         onChange={(e) => setTempSettings(prev => ({
                                             ...prev,
                                             [`${editingService}_hour`]: parseInt(e.target.value)
@@ -508,7 +508,7 @@ const SchedulerPage: React.FC = () => {
                                         type="number"
                                         min="0"
                                         max="59"
-                                        value={tempSettings[`${editingService}_minute` as keyof SchedulerSettings] || 0}
+                                    value={(tempSettings[`${editingService}_minute` as keyof SchedulerSettings] as number) || 0}
                                         onChange={(e) => setTempSettings(prev => ({
                                             ...prev,
                                             [`${editingService}_minute`]: parseInt(e.target.value)

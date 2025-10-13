@@ -30,6 +30,7 @@ const TemplatesPage=React.lazy(()=>import ('@/features/settings/pages/TemplatesP
 const MonitoringSettingsPage=React.lazy(()=>import ('@/features/settings/pages/MonitoringSettings'))
 const MonitorPrestazioniStandalonePage=React.lazy(()=>import ('@/features/settings/pages/MonitorPrestazioniStandalonePage'))
 const AutomationPage=React.lazy(()=>import ('@/features/settings/pages/AutomationPage'))
+const SchedulerPage=React.lazy(()=>import('@/features/scheduler/pages/SchedulerPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -78,6 +79,7 @@ const AppRouter: React.FC = () => {
           <Route path='settings/monitoring' element={<MonitoringSettingsPage />} />
           <Route path='settings/monitor-prestazioni' element={<MonitorPrestazioniStandalonePage />} />
           <Route path='settings/automazioni' element={<AutomationPage />} />
+          <Route path='settings/scheduler' element={<SchedulerPage />} />
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
           {/* 

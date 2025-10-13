@@ -12,7 +12,8 @@ import logging
 import uuid
 from typing import Dict, Any, Optional
 
-from flask import current_app
+from core.config import get_config_value
+from urllib.parse import urlparse
 
 from core.database_manager import get_database_manager
 from core.exceptions import DatabaseError
@@ -49,8 +50,19 @@ class LinkTrackerService:
             logger.error(f"Errore DB durante la creazione del link tracciato: {e}", exc_info=True)
             raise DatabaseError("Impossibile creare il link tracciato nel database.")
 
-        base_url = current_app.config.get("SERVER_BASE_URL", "http://localhost:5000")
-        api_prefix = current_app.config.get("API_PREFIX", "/api/v2")
+        api_prefix = get_config_value("API_PREFIX", "/api/v2")
+
+        # Se l'original_url è assoluto, usa il suo origin per generare il link tracciato
+        try:
+            parsed = urlparse(original_url)
+            if parsed.scheme and parsed.netloc:
+                origin = f"{parsed.scheme}://{parsed.netloc}"
+                return f"{origin}{api_prefix}/track/{tracking_id}"
+        except Exception:
+            pass
+
+        # Fallback alla config di server base URL
+        base_url = get_config_value("SERVER_BASE_URL", "http://localhost:5000")
         return f"{base_url}{api_prefix}/track/{tracking_id}"
 
     def get_original_url_and_log_click(self, tracking_id: str, ip_address: str, user_agent: str) -> Optional[str]:
