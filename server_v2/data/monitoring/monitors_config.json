@@ -1,8 +1,8 @@
 {
-  "APPUNTA_file_watcher_1760359253": {
-    "monitor_id": "APPUNTA_file_watcher_1760359253",
+  "APPUNTA_file_watcher_1760365287": {
+    "monitor_id": "APPUNTA_file_watcher_1760365287",
     "table_name": "APPUNTA",
-    "file_path": "C:\\pixel\\windent\\USER\\APPUNTA.DBF",
+    "file_path": "\\\\serverdima\\pixel\\windent\\USER\\APPUNTA.DBF",
     "monitor_type": "file_watcher",
     "interval_seconds": 30,
     "enabled": true,

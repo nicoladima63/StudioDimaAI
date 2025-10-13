@@ -361,11 +361,11 @@ class SnapshotManager:
             return status
     
     def _read_appunta_only(self, table_name: str, file_path: str = None) -> List[Dict[str, Any]]:
-        """Legge solo il file DBF specificato senza join con pazienti."""
+        """Legge solo il file DBF specificato, filtrando per data recente."""
         try:
             from dbfread import DBF
-            
-            # Usa percorso fornito (obbligatorio)
+            from datetime import datetime, timedelta
+
             if file_path is None:
                 raise ValueError(f"file_path is required for table {table_name}")
             
@@ -373,26 +373,35 @@ class SnapshotManager:
                 logger.error(f"DBF file not found: {file_path}")
                 return []
             
-            # Leggi direttamente con dbfread
             dbf = DBF(file_path, encoding='latin-1')
             records = []
             
+            # Filtra per appuntamenti a partire da 7 giorni fa
+            seven_days_ago = datetime.now().date() - timedelta(days=7)
+
             for record in dbf:
-                # Converti in dict semplice con conversione date
-                record_dict = {}
-                for field, value in record.items():
-                    # Converti date in stringhe per JSON serialization
-                    if hasattr(value, 'isoformat'):  # datetime/date objects
-                        record_dict[field] = value.isoformat()
-                    else:
-                        record_dict[field] = value
-                records.append(record_dict)
+                try:
+                    app_date = record.get('DB_APDATA')
+
+                    # Salta i record senza data o troppo vecchi
+                    if not app_date or app_date < seven_days_ago:
+                        continue
+
+                    record_dict = {}
+                    for field, value in record.items():
+                        if hasattr(value, 'isoformat'):
+                            record_dict[field] = value.isoformat()
+                        else:
+                            record_dict[field] = value
+                    records.append(record_dict)
+                except Exception as e:
+                    logger.warning(f"Skipping record due to processing error: {e} - Record: {record}")
             
-            # logger.debug(f"Read {len(records)} records from APPUNTA.DBF")
+            # logger.debug(f"Read and filtered {len(records)} recent records from {os.path.basename(file_path)}.")
             return records
             
         except Exception as e:
-            logger.error(f"Error reading APPUNTA.DBF: {e}")
+            logger.error(f"Error reading {os.path.basename(file_path)}: {e}")
             return []
     
     def _create_table_snapshot(self, table_name: str, file_path: str = None) -> bool:
