@@ -132,7 +132,7 @@ DBF_TABLES = {
     'APPUNTA': {
         'file': 'APPUNTA.DBF',
         'categoria': 'USER',
-        'descrizione': 'Appuntamenti calendario'
+        'descrizione': 'Appuntamenti agenda'
     },
     'pazienti': {
         'file': 'PAZIENTI.DBF',
