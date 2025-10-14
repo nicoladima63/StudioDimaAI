@@ -33,13 +33,13 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
     patient_id = enriched_context.get(patient_id_key)
 
     if patient_id:
-        logger.info(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
+        logger.debug(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
         patient_data = dbf_data_service.get_patient_by_id(patient_id)
         if not patient_data:
             raise ValidationError(f"Dati paziente non trovati per ID '{patient_id}'.")
         enriched_context.update(patient_data)
     else:
-        logger.info("Arricchimento: ID paziente non trovato. Tentativo di estrazione da altri campi.")
+        logger.debug("Arricchimento: ID paziente non trovato. Tentativo di estrazione da altri campi.")
 
     # Assicura che 'telefono' e 'nome_completo' siano presenti
     if 'telefono' not in enriched_context:
@@ -56,7 +56,7 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
                 cleaned_phone = ''.join(filter(str.isdigit, first_line))
                 if len(cleaned_phone) >= 9:
                     enriched_context['telefono'] = cleaned_phone
-                    logger.info(f"Numero di telefono estratto e pulito dalle note: {cleaned_phone}")
+                    logger.debug(f"Numero di telefono estratto e pulito dalle note: {cleaned_phone}")
 
     if 'nome_completo' not in enriched_context:
         nome_key = COLONNE.get('pazienti', {}).get('nome', 'DB_NOME')
@@ -73,7 +73,7 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
     if not enriched_context.get('telefono'):
         raise ValidationError("Arricchimento fallito: Numero di telefono non trovato nel contesto.")
 
-    logger.info(f"Contesto arricchito: Nome='{enriched_context.get('nome_completo')}', Telefono='{enriched_context.get('telefono')}'")
+    #logger.debug(f"Contesto arricchito: Nome='{enriched_context.get('nome_completo')}', Telefono='{enriched_context.get('telefono')}'")
     return enriched_context
 
 
@@ -89,7 +89,7 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
 )
 def impl_send_sms_link(context_data: Dict[str, Any], **params):
     """Implementazione REALE per inviare un SMS con link."""
-    logger.info(f"[AZIONE REALE] Esecuzione send_sms_link... Dati grezzi ricevuti: {context_data}")
+    #logger.debug(f"[AZIONE REALE] Esecuzione send_sms_link... Dati grezzi ricevuti: {context_data}")
     
     # 1. Arricchisci il contesto per ottenere i dati del paziente
     full_context = _enrich_context_with_patient_data(context_data)
@@ -139,7 +139,7 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
 )
 def impl_send_appointment_sms(context_data: Dict[str, Any], **params):
     """Implementazione REALE per inviare un SMS di appuntamento."""
-    logger.info("[AZIONE REALE] Esecuzione send_appointment_sms...")
+    #logger.debug("[AZIONE REALE] Esecuzione send_appointment_sms...")
 
     # 1. Arricchisci il contesto
     full_context = _enrich_context_with_patient_data(context_data)

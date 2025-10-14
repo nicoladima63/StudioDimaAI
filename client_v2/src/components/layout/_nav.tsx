@@ -80,7 +80,7 @@ const _nav = [
   },
   {
     component: CNavTitle,
-    name: 'Appuntamenti',
+    name: 'Agenda',
   },
   {
     component: CNavItem,
@@ -90,19 +90,23 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Impostazioni Calendario',
+    name: 'Calendar Settings',
     to: '/settings/calendar',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {
-    component: CNavItem,
-    name: 'Monitoraggio DBF',
-    to: '/settings/monitoring',
-    icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
+    component: CNavTitle,
+    name: 'Monitoraggi',
   },
+  // {
+  //   component: CNavItem,
+  //   name: 'Monitor Quaderno',
+  //   to: '/settings/monitoring',
+  //   icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
+  // },
   {
     component: CNavItem,
-    name: 'Monitor Prestazioni',
+    name: 'Monitor Quaderno',
     to: '/settings/monitor-prestazioni',
     icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
   },

@@ -202,7 +202,7 @@ class MonitoringService:
 
     def handle_file_change(self, table_name: str):
         with self.lock:
-            logger.info(f"MODIFICA RILEVATA: File {table_name}.DBF. Avvio processo.")
+            logger.debug(f"MODIFICA RILEVATA: File {table_name}.DBF. Avvio processo.")
             
             physical_table_base_name = table_name.lower()
             logical_table_name = self._dbf_filename_to_logical_name.get(physical_table_base_name, physical_table_base_name)
@@ -215,11 +215,11 @@ class MonitoringService:
 
             changes = self.snapshot_manager.get_changes(logical_table_name)
             if not changes:
-                logger.info(f"Nessuna modifica rilevante trovata per {logical_table_name}.")
+                logger.debug(f"Nessuna modifica rilevante trovata per {logical_table_name}.")
                 self.snapshot_manager.update_snapshot(logical_table_name)
                 return
 
-            logger.info(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
+            logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
 
             for change in changes:
                 for instance in active_monitors_for_table:
@@ -269,7 +269,7 @@ class MonitoringService:
             return
 
         try:
-            logger.info(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}'. Esecuzione in corso...")
+            logger.debug(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}'. Esecuzione in corso...")
             self.automation_service.execute_rules_for_trigger(
                 trigger_type=trigger_type,
                 trigger_id=trigger_id_str,
