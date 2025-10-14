@@ -25,45 +25,40 @@ from core.constants_v2 import COLONNE
 logger = logging.getLogger(__name__)
 
 def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]:
-    """Arricchisce il contesto con i dati del paziente, incluso il telefono."""
+    """Arricchisce il contesto con i dati del paziente, richiedendo obbligatoriamente il cellulare."""
     dbf_data_service = get_dbf_data_service()
     enriched_context = context.copy()
 
-    # Prioritize the generic 'id_paziente' key if it exists from previous enrichment
+    # 1. Find patient_id
     patient_id = enriched_context.get('id_paziente')
-
     if not patient_id:
-        # Fallback to table-specific key if generic one is not found
         logger.debug("Arricchimento: 'id_paziente' generico non trovato, tento fallback su chiave specifica.")
         patient_id_key = COLONNE.get('appuntamenti', {}).get('id_paziente', 'DB_APPACOD')
         patient_id = enriched_context.get(patient_id_key)
 
-    if patient_id:
-        logger.debug(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
-        patient_data = dbf_data_service.get_patient_by_id(patient_id)
-        if not patient_data:
-            raise ValidationError(f"Dati paziente non trovati per ID '{patient_id}'.")
-        enriched_context.update(patient_data)
+    if not patient_id:
+        raise ValidationError("Arricchimento fallito: Impossibile determinare l'ID del paziente.")
+
+    # 2. Get patient data
+    logger.debug(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
+    patient_data = dbf_data_service.get_patient_by_id(patient_id)
+    if not patient_data:
+        raise ValidationError(f"Dati paziente non trovati per ID '{patient_id}'.")
+    
+    enriched_context.update(patient_data)
+
+    # 3. Strictly find and set the mobile phone number
+    mobile_key = COLONNE.get('pazienti', {}).get('cellulare', 'DB_PACELLU')
+    mobile_phone = enriched_context.get(mobile_key)
+
+    if mobile_phone and str(mobile_phone).strip():
+        enriched_context['telefono'] = str(mobile_phone).strip()
+        logger.debug(f"Arricchimento: Trovato e impostato numero cellulare: {enriched_context['telefono']}")
     else:
-        logger.debug("Arricchimento: ID paziente non trovato. Tentativo di estrazione da altri campi.")
+        # No mobile phone found, raise error
+        raise ValidationError(f"Arricchimento fallito: Numero di cellulare (DB_PACELLU) non trovato per il paziente ID '{patient_id}'.")
 
-    # Assicura che 'telefono' e 'nome_completo' siano presenti
-    if 'telefono' not in enriched_context:
-        phone_key = COLONNE.get('pazienti', {}).get('cellulare', 'DB_CELL')
-        extracted_phone = enriched_context.get(phone_key)
-        if extracted_phone:
-            enriched_context['telefono'] = str(extracted_phone).strip()
-        else:
-            # Fallback: cerca un numero di telefono nella prima riga delle note
-            note_key = COLONNE.get('appuntamenti', {}).get('note', 'DB_NOTE')
-            note_content = enriched_context.get(note_key, '')
-            if note_content:
-                first_line = note_content.splitlines()[0]
-                cleaned_phone = ''.join(filter(str.isdigit, first_line))
-                if len(cleaned_phone) >= 9:
-                    enriched_context['telefono'] = cleaned_phone
-                    logger.debug(f"Numero di telefono estratto e pulito dalle note: {cleaned_phone}")
-
+    # 4. Enrich name (can stay the same)
     if 'nome_completo' not in enriched_context:
         nome_key = COLONNE.get('pazienti', {}).get('nome', 'DB_NOME')
         cognome_key = COLONNE.get('pazienti', {}).get('cognome', 'DB_COGNOME')
@@ -72,14 +67,9 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         if nome or cognome:
             enriched_context['nome_completo'] = f"{cognome} {nome}".strip()
         else:
-            # Fallback dalla descrizione appuntamento
             desc_key = COLONNE.get('appuntamenti', {}).get('descrizione', 'DB_APDESCR')
             enriched_context['nome_completo'] = enriched_context.get(desc_key, 'Gentile Paziente').strip()
 
-    if not enriched_context.get('telefono'):
-        raise ValidationError("Arricchimento fallito: Numero di telefono non trovato nel contesto.")
-
-    #logger.debug(f"Contesto arricchito: Nome='{enriched_context.get('nome_completo')}', Telefono='{enriched_context.get('telefono')}'")
     return enriched_context
 
 
