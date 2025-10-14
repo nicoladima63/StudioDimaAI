@@ -298,7 +298,7 @@ class SnapshotManager:
                 return []
 
             try:
-                current_records_data = self._read_appunta_only(table_name, old_snapshot.file_path)
+                current_records_data = self._read_dbf_records(table_name, old_snapshot.file_path)
                 if not current_records_data:
                     return []
 
@@ -360,11 +360,10 @@ class SnapshotManager:
             
             return status
     
-    def _read_appunta_only(self, table_name: str, file_path: str = None) -> List[Dict[str, Any]]:
-        """Legge solo il file DBF specificato, filtrando per data recente."""
+    def _read_dbf_records(self, table_name: str, file_path: str = None) -> List[Dict[str, Any]]:
+        """Legge tutti i record da un file DBF generico."""
         try:
             from dbfread import DBF
-            from datetime import datetime, timedelta
 
             if file_path is None:
                 raise ValueError(f"file_path is required for table {table_name}")
@@ -375,18 +374,9 @@ class SnapshotManager:
             
             dbf = DBF(file_path, encoding='latin-1')
             records = []
-            
-            # Filtra per appuntamenti a partire da 7 giorni fa
-            seven_days_ago = datetime.now().date() - timedelta(days=7)
 
             for record in dbf:
                 try:
-                    app_date = record.get('DB_APDATA')
-
-                    # Salta i record senza data o troppo vecchi
-                    if not app_date or app_date < seven_days_ago:
-                        continue
-
                     record_dict = {}
                     for field, value in record.items():
                         if hasattr(value, 'isoformat'):
@@ -395,13 +385,13 @@ class SnapshotManager:
                             record_dict[field] = value
                     records.append(record_dict)
                 except Exception as e:
-                    logger.warning(f"Skipping record due to processing error: {e} - Record: {record}")
-            
-            # logger.debug(f"Read and filtered {len(records)} recent records from {os.path.basename(file_path)}.")
+                    logger.warning(f"Skipping record in {table_name} due to processing error: {e} - Record: {record}")
+
+            logger.debug(f"Read {len(records)} records from {os.path.basename(file_path)}.")
             return records
             
         except Exception as e:
-            logger.error(f"Error reading {os.path.basename(file_path)}: {e}")
+            logger.error(f"Error reading generic DBF {os.path.basename(file_path)}: {e}", exc_info=True)
             return []
     
     def _create_table_snapshot(self, table_name: str, file_path: str = None) -> bool:
@@ -427,7 +417,7 @@ class SnapshotManager:
             file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path)).isoformat()
             
             # Leggi i record dal file DBF
-            records_data = self._read_appunta_only(table_name, file_path)
+            records_data = self._read_dbf_records(table_name, file_path)
             #logger.debug(f"SNAPSHOT: Letti {len(records_data)} record da {file_path}") # Downgraded to DEBUG
             
             # Crea snapshot records

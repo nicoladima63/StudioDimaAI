@@ -29,8 +29,14 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
     dbf_data_service = get_dbf_data_service()
     enriched_context = context.copy()
 
-    patient_id_key = COLONNE.get('appuntamenti', {}).get('id_paziente', 'DB_APPACOD')
-    patient_id = enriched_context.get(patient_id_key)
+    # Prioritize the generic 'id_paziente' key if it exists from previous enrichment
+    patient_id = enriched_context.get('id_paziente')
+
+    if not patient_id:
+        # Fallback to table-specific key if generic one is not found
+        logger.debug("Arricchimento: 'id_paziente' generico non trovato, tento fallback su chiave specifica.")
+        patient_id_key = COLONNE.get('appuntamenti', {}).get('id_paziente', 'DB_APPACOD')
+        patient_id = enriched_context.get(patient_id_key)
 
     if patient_id:
         logger.debug(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
