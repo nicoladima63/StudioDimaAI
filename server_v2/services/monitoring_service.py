@@ -221,14 +221,18 @@ class MonitoringService:
 
             logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
 
-            for change in changes:
+            for change_obj in changes:
+                record_data = change_obj.get('new_data')
+                if not record_data:
+                    continue
+
                 for instance in active_monitors_for_table:
                     # Arricchimento (se definito)
                     if instance.config.metadata and instance.config.metadata.get('enrichment'):
-                        self.dbf_data_service.enrich_record(change, instance.config.metadata['enrichment'])
+                        self.dbf_data_service.enrich_record(record_data, instance.config.metadata['enrichment'])
 
                     # Logica Trigger
-                    self._process_trigger_for_change(change, instance)
+                    self._process_trigger_for_change(change_obj, instance)
 
             self.snapshot_manager.update_snapshot(logical_table_name)
             current_time = datetime.now().isoformat()
@@ -236,47 +240,76 @@ class MonitoringService:
                 instance.change_count += len(changes)
                 instance.last_change = current_time
 
-    def _process_trigger_for_change(self, change: Dict[str, Any], monitor_instance: MonitorInstance):
-        trigger_type, trigger_id_column = None, None
+    def _process_trigger_for_change(self, change_obj: Dict[str, Any], monitor_instance: MonitorInstance):
         logical_table_name = monitor_instance.config.table_name
+        new_data = change_obj.get('new_data', {})
+        old_data = change_obj.get('old_data', {})
 
-        if monitor_instance.config.metadata:
-            trigger_type = monitor_instance.config.metadata.get('trigger_type')
-            trigger_id_column = monitor_instance.config.metadata.get('trigger_id_column')
-
-        if not (trigger_type and trigger_id_column):
-            if logical_table_name == 'preventivi':
-                trigger_type, trigger_id_column = 'prestazione', 'DB_PRONCOD'
-            elif logical_table_name.lower() == 'appunta':
-                trigger_type, trigger_id_column = 'appuntamento_tipo', 'DB_GUARDIA'
-        
-        if not (trigger_type and trigger_id_column):
-            return
-        
-        trigger_id = change.get(trigger_id_column)
-        if not trigger_id:
+        if not new_data:
             return
 
-        # CONTROLLO PREVENTIVO: Esegui solo se esistono regole attive per questo trigger
-        trigger_id_str = str(trigger_id).strip()
-        has_rules = self.automation_service.execute_query(
-            "SELECT 1 FROM automation_rules WHERE trigger_type = ? AND trigger_id = ? AND attiva = 1 LIMIT 1",
-            (trigger_type, trigger_id_str)
-        )
+        # Logica specifica per la tabella 'preventivi'
+        if logical_table_name == 'preventivi':
+            new_status = str(new_data.get('DB_GUARDIA', ''))
+            old_status = str(old_data.get('DB_GUARDIA', ''))
 
-        if not has_rules:
-            logger.debug(f"Nessuna regola attiva per trigger '{trigger_type}:{trigger_id_str}'. Salto.")
-            return
+            # Applica la logica di transizione: trigger solo quando si passa a '3'
+            if new_status == '3' and old_status != '3':
+                trigger_type = 'prestazione'
+                trigger_id_column = 'DB_PRONCOD'
+                trigger_id = new_data.get(trigger_id_column)
 
-        try:
-            logger.debug(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}'. Esecuzione in corso...")
-            self.automation_service.execute_rules_for_trigger(
-                trigger_type=trigger_type,
-                trigger_id=trigger_id_str,
-                context_data=change
+                if not trigger_id:
+                    return
+
+                trigger_id_str = str(trigger_id).strip()
+                
+                has_rules = self.automation_service.execute_query(
+                    "SELECT 1 FROM automation_rules WHERE trigger_type = ? AND trigger_id = ? AND attiva = 1 LIMIT 1",
+                    (trigger_type, trigger_id_str)
+                )
+
+                if not has_rules:
+                    logger.debug(f"Nessuna regola attiva per trigger '{trigger_type}:{trigger_id_str}'. Salto.")
+                    return
+
+                try:
+                    logger.debug(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}' su transizione a stato 3. Esecuzione in corso...")
+                    self.automation_service.execute_rules_for_trigger(
+                        trigger_type=trigger_type,
+                        trigger_id=trigger_id_str,
+                        context_data=new_data
+                    )
+                except Exception as e:
+                    logger.error(f"Errore esecuzione automazione per trigger {trigger_id_str}: {e}", exc_info=True)
+
+        # Logica per altre tabelle (es. 'appunta') rimane invariata
+        elif logical_table_name.lower() == 'appunta':
+            trigger_type, trigger_id_column = 'appuntamento_tipo', 'DB_GUARDIA'
+            trigger_id = new_data.get(trigger_id_column)
+
+            if not trigger_id:
+                return
+
+            trigger_id_str = str(trigger_id).strip()
+            has_rules = self.automation_service.execute_query(
+                "SELECT 1 FROM automation_rules WHERE trigger_type = ? AND trigger_id = ? AND attiva = 1 LIMIT 1",
+                (trigger_type, trigger_id_str)
             )
-        except Exception as e:
-            logger.error(f"Errore esecuzione automazione per trigger {trigger_id_str}: {e}", exc_info=True)
+
+            if not has_rules:
+                logger.debug(f"Nessuna regola attiva per trigger '{trigger_type}:{trigger_id_str}'. Salto.")
+                return
+
+            try:
+                logger.debug(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}'. Esecuzione in corso...")
+                self.automation_service.execute_rules_for_trigger(
+                    trigger_type=trigger_type,
+                    trigger_id=trigger_id_str,
+                    context_data=new_data
+                )
+            except Exception as e:
+                logger.error(f"Errore esecuzione automazione per trigger {trigger_id_str}: {e}", exc_info=True)
 
     # ... il resto dei metodi (get_monitor_status, load/save, etc.) rimane invariato ...
 

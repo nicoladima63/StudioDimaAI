@@ -288,7 +288,9 @@ class SnapshotManager:
             table_name: The name of the table to check.
 
         Returns:
-            A list of dictionaries, where each dictionary is a new or modified record.
+            A list of dictionaries, each representing a change.
+            For new records: {'type': 'new', 'new_data': <record_data>}
+            For modified records: {'type': 'modified', 'old_data': <old_record_data>, 'new_data': <new_record_data>}
         """
         #logger.info(f"SNAPSHOT_MANAGER.get_changes: Richiesta per tabella: {table_name}") # NEW LOG
         with self.lock:
@@ -313,10 +315,14 @@ class SnapshotManager:
 
                     if not old_record:
                         # New record
-                        changes.append(record_data)
+                        changes.append({'type': 'new', 'new_data': record_data})
                     elif old_record.hash != record_hash:
                         # Modified record
-                        changes.append(record_data)
+                        changes.append({
+                            'type': 'modified',
+                            'old_data': old_record.data,
+                            'new_data': record_data
+                        })
                 
                 if changes:
                     logger.info(f"Detected {len(changes)} changes for table {table_name}.")
