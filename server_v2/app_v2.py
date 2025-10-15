@@ -8,7 +8,7 @@ StudioDimaAI server with improved architecture, performance, and maintainability
 import os
 import logging
 from datetime import datetime
-from flask import Flask, jsonify, request, g
+from flask import Flask, jsonify, request, g, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
 from typing import Optional
@@ -33,7 +33,7 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     Returns:
         Configured Flask application
     """
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', static_url_path='/')
     
     # Load configuration
     config_class = get_config(config_name)
@@ -61,7 +61,16 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     
     # Health check endpoint
     register_health_check(app)
-    
+
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def catch_all(path):
+        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+            return send_from_directory(app.static_folder, path)
+        if os.path.exists(os.path.join(app.static_folder, path + '.html')):
+            return send_from_directory(app.static_folder, path + '.html')
+        return send_from_directory(app.static_folder, 'index.html')
+
     # Server ready
     return app
 
