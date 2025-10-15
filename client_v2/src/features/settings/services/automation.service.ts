@@ -56,56 +56,57 @@ export interface UpdateRulePayload {
   priorita?: number;
 }
 
-const automationApi = {
+export const automationService = {
   async getActions(): Promise<Action[]> {
-    const response = await apiClient.get('/automations/actions');
+    const response = await apiClient.get('automations/actions');
     return response.data.data || [];
   },
 
   async getAvailableTriggers(): Promise<any> {
-    const response = await apiClient.get('/automations/available-triggers');
+    const response = await apiClient.get('automations/available-triggers');
     return response.data.data || {};
   },
 
   async getRules(filters?: { attiva?: boolean; trigger_id?: string; monitor_id?: string }): Promise<AutomationRule[]> {
     const queryParams = new URLSearchParams();
-    if (filters?.attiva !== undefined) {
+    if (filters?.attiva !== undefined) { 
       queryParams.append('attiva', String(filters.attiva));
     }
     if (filters?.trigger_id) {
       queryParams.append('trigger_id', filters.trigger_id);
-    }
+    } 
     if (filters?.monitor_id) {
       queryParams.append('monitor_id', filters.monitor_id);
     }
-    const response = await apiClient.get(`/automations/rules?${queryParams.toString()}`);
+    const response = await apiClient.get(`automations/rules?${queryParams.toString()}`);
     return response.data.data || [];
   },
 
   async getRuleById(ruleId: number): Promise<AutomationRule | null> {
-    const response = await apiClient.get(`/automations/rules/${ruleId}`);
+    const response = await apiClient.get(`automations/rules/${ruleId}`);
     return response.data.data || null;
   },
 
   async createRule(payload: CreateRulePayload): Promise<AutomationRule> {
-    const response = await apiClient.post('/automations/rules', payload);
+    const response = await apiClient.post('automations/rules', payload);
     return response.data.data;
   },
 
   async updateRule(ruleId: number, payload: UpdateRulePayload): Promise<AutomationRule> {
-    const response = await apiClient.put(`/automations/rules/${ruleId}`, payload);
+    const response = await apiClient.put(`automations/rules/${ruleId}`, payload);
     return response.data.data;
   },
 
   async deleteRule(ruleId: number): Promise<boolean> {
-    const response = await apiClient.delete(`/automations/rules/${ruleId}`);
+    const response = await apiClient.delete(`automations/rules/${ruleId}`);
     return response.data.success;
   },
 
   async toggleRule(ruleId: number): Promise<AutomationRule> {
-    const response = await apiClient.post(`/automations/rules/${ruleId}/toggle`);
+    const response = await apiClient.post(`automations/rules/${ruleId}/toggle`);
     return response.data.data;
   },
 };
 
-export default automationApi;
+// Esporta sia come nominato (per coerenza) sia come default (per retrocompatibilità)
+export default automationService;

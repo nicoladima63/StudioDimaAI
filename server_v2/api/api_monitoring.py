@@ -90,7 +90,7 @@ def create_monitor():
     """Crea un nuovo monitor."""
     try:
         data = request.get_json()
-        logger.info(f"create_monitor: Received payload: {data}")
+        #logger.info(f"create_monitor: Received payload: {data}")
         
         # Validazione dati
         required_fields = ['table_name', 'monitor_type']

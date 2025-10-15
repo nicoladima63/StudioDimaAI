@@ -288,7 +288,9 @@ class SnapshotManager:
             table_name: The name of the table to check.
 
         Returns:
-            A list of dictionaries, where each dictionary is a new or modified record.
+            A list of dictionaries, each representing a change.
+            For new records: {'type': 'new', 'new_data': <record_data>}
+            For modified records: {'type': 'modified', 'old_data': <old_record_data>, 'new_data': <new_record_data>}
         """
         #logger.info(f"SNAPSHOT_MANAGER.get_changes: Richiesta per tabella: {table_name}") # NEW LOG
         with self.lock:
@@ -298,7 +300,7 @@ class SnapshotManager:
                 return []
 
             try:
-                current_records_data = self._read_appunta_only(table_name, old_snapshot.file_path)
+                current_records_data = self._read_dbf_records(table_name, old_snapshot.file_path)
                 if not current_records_data:
                     return []
 
@@ -313,10 +315,14 @@ class SnapshotManager:
 
                     if not old_record:
                         # New record
-                        changes.append(record_data)
+                        changes.append({'type': 'new', 'new_data': record_data})
                     elif old_record.hash != record_hash:
                         # Modified record
-                        changes.append(record_data)
+                        changes.append({
+                            'type': 'modified',
+                            'old_data': old_record.data,
+                            'new_data': record_data
+                        })
                 
                 if changes:
                     logger.info(f"Detected {len(changes)} changes for table {table_name}.")
@@ -360,12 +366,11 @@ class SnapshotManager:
             
             return status
     
-    def _read_appunta_only(self, table_name: str, file_path: str = None) -> List[Dict[str, Any]]:
-        """Legge solo il file DBF specificato senza join con pazienti."""
+    def _read_dbf_records(self, table_name: str, file_path: str = None) -> List[Dict[str, Any]]:
+        """Legge tutti i record da un file DBF generico."""
         try:
             from dbfread import DBF
-            
-            # Usa percorso fornito (obbligatorio)
+
             if file_path is None:
                 raise ValueError(f"file_path is required for table {table_name}")
             
@@ -373,26 +378,26 @@ class SnapshotManager:
                 logger.error(f"DBF file not found: {file_path}")
                 return []
             
-            # Leggi direttamente con dbfread
             dbf = DBF(file_path, encoding='latin-1')
             records = []
-            
+
             for record in dbf:
-                # Converti in dict semplice con conversione date
-                record_dict = {}
-                for field, value in record.items():
-                    # Converti date in stringhe per JSON serialization
-                    if hasattr(value, 'isoformat'):  # datetime/date objects
-                        record_dict[field] = value.isoformat()
-                    else:
-                        record_dict[field] = value
-                records.append(record_dict)
-            
-            # logger.debug(f"Read {len(records)} records from APPUNTA.DBF")
+                try:
+                    record_dict = {}
+                    for field, value in record.items():
+                        if hasattr(value, 'isoformat'):
+                            record_dict[field] = value.isoformat()
+                        else:
+                            record_dict[field] = value
+                    records.append(record_dict)
+                except Exception as e:
+                    logger.warning(f"Skipping record in {table_name} due to processing error: {e} - Record: {record}")
+
+            logger.debug(f"Read {len(records)} records from {os.path.basename(file_path)}.")
             return records
             
         except Exception as e:
-            logger.error(f"Error reading APPUNTA.DBF: {e}")
+            logger.error(f"Error reading generic DBF {os.path.basename(file_path)}: {e}", exc_info=True)
             return []
     
     def _create_table_snapshot(self, table_name: str, file_path: str = None) -> bool:
@@ -418,7 +423,7 @@ class SnapshotManager:
             file_mtime = datetime.fromtimestamp(os.path.getmtime(file_path)).isoformat()
             
             # Leggi i record dal file DBF
-            records_data = self._read_appunta_only(table_name, file_path)
+            records_data = self._read_dbf_records(table_name, file_path)
             #logger.debug(f"SNAPSHOT: Letti {len(records_data)} record da {file_path}") # Downgraded to DEBUG
             
             # Crea snapshot records

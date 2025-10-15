@@ -16,12 +16,14 @@ import {
   CCardBody,
   CRow,
   CCol,
-  CFormLabel
+  CFormLabel,
+  CFormSelect
 } from '@coreui/react';
 import { smsService, type SMSResponse } from '@/api/services/sms.service';
 import { useSMSStore } from '@/store/smsStore';
 import apiClient from '@/api/client';
 import type { PazienteCompleto } from '@/lib/types';
+import { createTrackedLink, getTipiMessaggi } from '@/api/services/smsTracking.service';
 
 interface SMSPreviewModalProps {
   visible: boolean;
@@ -49,17 +51,20 @@ const SMSPreviewModal: React.FC<SMSPreviewModalProps> = ({
     estimated_sms_parts: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tipiMessaggio, setTipiMessaggio] = useState<any[]>([]);
+  const [selectedTipoMessaggioId, setSelectedTipoMessaggioId] = useState<number | null>(null);
+  const [trackedLink, setTrackedLink] = useState<string | null>(null);
 
   // Load message when modal opens
   useEffect(() => {
     if (visible && paziente) {
-      loadMessagePreview();
+      loadInitialData();
     } else {
       resetModal();
     }
   }, [visible, paziente]);
 
-  // Update stats when message changes
+  // Effetti a catena: selezione tipo -> generazione link -> preview messaggio
   useEffect(() => {
     if (message) {
       setPreviewStats({
@@ -68,20 +73,60 @@ const SMSPreviewModal: React.FC<SMSPreviewModalProps> = ({
       });
     }
   }, [message]);
+  
+  useEffect(() => {
+    if (selectedTipoMessaggioId && paziente) {
+      generateTrackedLink(paziente.DB_CODE, selectedTipoMessaggioId);
+    }
+  }, [selectedTipoMessaggioId, paziente]);
 
-  const loadMessagePreview = async () => {
+  useEffect(() => {
+    if (trackedLink) {
+      loadMessagePreview(trackedLink);
+    }
+  }, [trackedLink]);
+
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+      const tipi = await getTipiMessaggi();
+      setTipiMessaggio(tipi);
+      // Pre-seleziona il promemoria richiamo se esiste
+      const defaultTipo = tipi.find(t => t.codice === 'PROMEMORIA_RICHIAMO');
+      if (defaultTipo) {
+        setSelectedTipoMessaggioId(defaultTipo.id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore caricamento tipi messaggio');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateTrackedLink = async (pazienteId: string, tipoMessaggioId: number) => {
+    try {
+      setLoading(true);
+      const linkData = await createTrackedLink(pazienteId, tipoMessaggioId);
+      setTrackedLink(linkData.full_link);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Errore generazione link');
+      setLoading(false);
+    }
+  };
+
+  const loadMessagePreview = async (link: string) => {
     if (!paziente) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      // Prepare richiamo data
       const richiamo_data = {
         nome_completo: paziente.nome_completo,
         telefono: paziente.numero_contatto || '',
         tipo_richiamo: paziente.tipo_richiamo_desc || 'Controllo',
-        data_richiamo: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('it-IT') // +7 giorni
+        data_richiamo: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('it-IT'), // +7 giorni
+        tracked_link: link // <-- Inseriamo il link tracciabile!
       };
 
       // Generate preview using backend with apiClient
@@ -223,6 +268,22 @@ const SMSPreviewModal: React.FC<SMSPreviewModalProps> = ({
         )}
 
         {/* Message Editor */}
+        <div className="mb-3">
+          <CFormLabel htmlFor="tipo-messaggio-select">Tipo di Messaggio</CFormLabel>
+          <CFormSelect
+            id="tipo-messaggio-select"
+            value={selectedTipoMessaggioId ?? ''}
+            onChange={(e) => setSelectedTipoMessaggioId(Number(e.target.value))}
+            disabled={loading}
+          >
+            <option value="">Seleziona un tipo...</option>
+            {tipiMessaggio.map((tipo) => (
+              <option key={tipo.id} value={tipo.id}>
+                {tipo.nome}
+              </option>
+            ))}
+          </CFormSelect>
+        </div>
         <div className="mb-3">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <CFormLabel>Messaggio SMS</CFormLabel>

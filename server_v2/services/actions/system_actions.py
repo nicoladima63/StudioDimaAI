@@ -19,44 +19,46 @@ from core.exceptions import ValidationError
 from services.sms_service import sms_service
 from core.template_manager import get_template_manager
 from services.dbf_data_service import get_dbf_data_service
+from services.link_tracker_service import link_tracker_service # 1. Importa il servizio di tracking
 from core.constants_v2 import COLONNE
 
 logger = logging.getLogger(__name__)
 
 def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]:
-    """Arricchisce il contesto con i dati del paziente, incluso il telefono."""
+    """Arricchisce il contesto con i dati del paziente, richiedendo obbligatoriamente il cellulare."""
     dbf_data_service = get_dbf_data_service()
     enriched_context = context.copy()
 
-    patient_id_key = COLONNE.get('appuntamenti', {}).get('id_paziente', 'DB_APPACOD')
-    patient_id = enriched_context.get(patient_id_key)
+    # 1. Find patient_id
+    patient_id = enriched_context.get('id_paziente')
+    if not patient_id:
+        logger.debug("Arricchimento: 'id_paziente' generico non trovato, tento fallback su chiave specifica.")
+        patient_id_key = COLONNE.get('appuntamenti', {}).get('id_paziente', 'DB_APPACOD')
+        patient_id = enriched_context.get(patient_id_key)
 
-    if patient_id:
-        logger.info(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
-        patient_data = dbf_data_service.get_patient_by_id(patient_id)
-        if not patient_data:
-            raise ValidationError(f"Dati paziente non trovati per ID '{patient_id}'.")
-        enriched_context.update(patient_data)
+    if not patient_id:
+        raise ValidationError("Arricchimento fallito: Impossibile determinare l'ID del paziente.")
+
+    # 2. Get patient data
+    logger.debug(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
+    patient_data = dbf_data_service.get_patient_by_id(patient_id)
+    if not patient_data:
+        raise ValidationError(f"Dati paziente non trovati per ID '{patient_id}'.")
+    
+    enriched_context.update(patient_data)
+
+    # 3. Strictly find and set the mobile phone number
+    mobile_key = COLONNE.get('pazienti', {}).get('cellulare', 'DB_PACELLU')
+    mobile_phone = enriched_context.get(mobile_key)
+
+    if mobile_phone and str(mobile_phone).strip():
+        enriched_context['telefono'] = str(mobile_phone).strip()
+        logger.debug(f"Arricchimento: Trovato e impostato numero cellulare: {enriched_context['telefono']}")
     else:
-        logger.info("Arricchimento: ID paziente non trovato. Tentativo di estrazione da altri campi.")
+        # No mobile phone found, raise error
+        raise ValidationError(f"Arricchimento fallito: Numero di cellulare (DB_PACELLU) non trovato per il paziente ID '{patient_id}'.")
 
-    # Assicura che 'telefono' e 'nome_completo' siano presenti
-    if 'telefono' not in enriched_context:
-        phone_key = COLONNE.get('pazienti', {}).get('cellulare', 'DB_CELL')
-        extracted_phone = enriched_context.get(phone_key)
-        if extracted_phone:
-            enriched_context['telefono'] = str(extracted_phone).strip()
-        else:
-            # Fallback: cerca un numero di telefono nella prima riga delle note
-            note_key = COLONNE.get('appuntamenti', {}).get('note', 'DB_NOTE')
-            note_content = enriched_context.get(note_key, '')
-            if note_content:
-                first_line = note_content.splitlines()[0]
-                cleaned_phone = ''.join(filter(str.isdigit, first_line))
-                if len(cleaned_phone) >= 9:
-                    enriched_context['telefono'] = cleaned_phone
-                    logger.info(f"Numero di telefono estratto e pulito dalle note: {cleaned_phone}")
-
+    # 4. Enrich name (can stay the same)
     if 'nome_completo' not in enriched_context:
         nome_key = COLONNE.get('pazienti', {}).get('nome', 'DB_NOME')
         cognome_key = COLONNE.get('pazienti', {}).get('cognome', 'DB_COGNOME')
@@ -65,14 +67,9 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         if nome or cognome:
             enriched_context['nome_completo'] = f"{cognome} {nome}".strip()
         else:
-            # Fallback dalla descrizione appuntamento
             desc_key = COLONNE.get('appuntamenti', {}).get('descrizione', 'DB_APDESCR')
             enriched_context['nome_completo'] = enriched_context.get(desc_key, 'Gentile Paziente').strip()
 
-    if not enriched_context.get('telefono'):
-        raise ValidationError("Arricchimento fallito: Numero di telefono non trovato nel contesto.")
-
-    logger.info(f"Contesto arricchito: Nome='{enriched_context.get('nome_completo')}', Telefono='{enriched_context.get('telefono')}'")
     return enriched_context
 
 
@@ -82,12 +79,13 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
     parameters=[
         {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'},
         {'name': 'page_slug', 'type': 'string', 'required': False, 'label': 'Slug Pagina Destinazione'},
-        {'name': 'url_params', 'type': 'json', 'required': False, 'label': 'Parametri URL (JSON)'}
+        {'name': 'url_params', 'type': 'json', 'required': False, 'label': 'Parametri URL (JSON)'},
+        {'name': 'tempo_richiamo', 'type': 'string', 'required': False, 'label': 'Tempo richiamo (es. 6 mesi)'}
     ]
 )
 def impl_send_sms_link(context_data: Dict[str, Any], **params):
     """Implementazione REALE per inviare un SMS con link."""
-    logger.info(f"[AZIONE REALE] Esecuzione send_sms_link... Dati grezzi ricevuti: {context_data}")
+    #logger.debug(f"[AZIONE REALE] Esecuzione send_sms_link... Dati grezzi ricevuti: {context_data}")
     
     # 1. Arricchisci il contesto per ottenere i dati del paziente
     full_context = _enrich_context_with_patient_data(context_data)
@@ -105,36 +103,39 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
 
     # 3. Costruisci l'URL finale
     rendered_params = {k: str(v).format(**full_context) for k, v in url_params.items()}
-    base_url = f'https://studiodimartino.eu/{page_slug.lstrip("/")}'
+    base_url = f'https://studiodimartino.eu/#/{page_slug.lstrip("/")}'
     query = urlencode(rendered_params) if rendered_params else ''
-    final_url = f"{base_url}?{query}" if query else base_url
+    original_url = f"{base_url}?{query}" if query else base_url
 
-    # 4. Renderizza il messaggio del template
+    # 2. Crea il link tracciato invece del link diretto (FUNZIONALITÀ DISATTIVATA)
+    # tracked_link = link_tracker_service.create_tracked_link(
+    #     original_url=original_url,
+    #     context_data={'trigger_context': context_data, 'action_params': params}
+    # )
+    tracked_link = original_url # Segnaposto per riattivazione
+
+    # 4. Renderizza il messaggio del template (senza fallback: se fallisce, segnala errore)
     template_manager = get_template_manager()
-    template_data = {'url': final_url, **full_context}
-    
-    try:
-        message = template_manager.render_template_by_id(template_id, template_data)
-    except Exception as e:
-        logger.error(f"Errore rendering template ID {template_id}: {e}. Uso messaggio di fallback.")
-        message = f"Ciao {nome}, ecco le informazioni richieste: {final_url}"
+    template_data = {'url': original_url, **full_context} # Usa original_url
+    message = template_manager.render_template_by_id(template_id, template_data)
 
     # 5. Invia l'SMS
     logger.info(f"Invio SMS a {phone} con messaggio: '{message[:50]}...'")
     result = sms_service.send_sms(phone, message, tag='auto_link')
     
-    return {**result, 'final_url': final_url}
+    return {**result, 'final_url': original_url, 'original_url': original_url} # Usa original_url
 
 @register_action(
     name='send_appointment_sms',
     description="Invia un SMS di promemoria per un appuntamento.",
     parameters=[
-        {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'}
+        {'name': 'template_id', 'type': 'number', 'required': True, 'label': 'ID Template SMS'},
+        {'name': 'tempo_richiamo', 'type': 'string', 'required': False, 'label': 'Tempo richiamo (es. 6 mesi)'}
     ]
 )
 def impl_send_appointment_sms(context_data: Dict[str, Any], **params):
     """Implementazione REALE per inviare un SMS di appuntamento."""
-    logger.info("[AZIONE REALE] Esecuzione send_appointment_sms...")
+    #logger.debug("[AZIONE REALE] Esecuzione send_appointment_sms...")
 
     # 1. Arricchisci il contesto
     full_context = _enrich_context_with_patient_data(context_data)
@@ -148,15 +149,9 @@ def impl_send_appointment_sms(context_data: Dict[str, Any], **params):
     if not template_id:
         raise ValidationError("Il parametro 'template_id' è obbligatorio.")
 
-    # 3. Renderizza il template
+    # 3. Renderizza il template (senza fallback: se fallisce, segnala errore)
     template_manager = get_template_manager()
-    try:
-        message = template_manager.render_template_by_id(template_id, full_context)
-    except Exception as e:
-        logger.error(f"Errore rendering template ID {template_id}: {e}. Uso messaggio di fallback.")
-        data_app = full_context.get(COLONNE.get('appuntamenti', {}).get('data', 'DB_APDATA'), 'N/D')
-        ora_app = full_context.get(COLONNE.get('appuntamenti', {}).get('ora_inizio', 'DB_APOREIN'), 'N/D')
-        message = f"Ciao {nome}, ti confermiamo il tuo appuntamento per il giorno {data_app} alle ore {ora_app}."
+    message = template_manager.render_template_by_id(template_id, full_context)
 
     # 4. Invia SMS
     logger.info(f"Invio SMS appuntamento a {phone} con messaggio: '{message[:50]}...'")
@@ -177,4 +172,3 @@ def impl_log_prestazione_eseguita(context_data: Dict[str, Any], **params):
     log_message = f"[LOG AZIONE] {message} | Contesto: {context_data}"
     logger.info(log_message)
     return {'status': 'success', 'message': 'Log registrato.'}
-

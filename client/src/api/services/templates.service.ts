@@ -132,6 +132,7 @@ class TemplatesService {
     
     return response.data.validation;
   }
+
 }
 
 // Istanza singleton del servizio

@@ -1,13 +1,32 @@
 {
-  "APPUNTA_file_watcher_1759494668": {
-    "monitor_id": "APPUNTA_file_watcher_1759494668",
+  "APPUNTA_file_watcher_1760365287": {
+    "monitor_id": "APPUNTA_file_watcher_1760365287",
     "table_name": "APPUNTA",
-    "file_path": "C:\\pixel\\windent\\USER\\APPUNTA.DBF",
+    "file_path": "\\\\serverdima\\pixel\\windent\\USER\\APPUNTA.DBF",
     "monitor_type": "file_watcher",
     "interval_seconds": 30,
     "enabled": true,
     "auto_start": false,
     "metadata": {},
+    "trigger_filters": {}
+  },
+  "preventivi_file_watcher_1760437084": {
+    "monitor_id": "preventivi_file_watcher_1760437084",
+    "table_name": "preventivi",
+    "file_path": "\\\\serverdima\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "monitor_type": "file_watcher",
+    "interval_seconds": 30,
+    "enabled": true,
+    "auto_start": false,
+    "metadata": {
+      "enrichment": {
+        "source_field": "DB_PRELCOD",
+        "target_table": "ELENCO.DBF",
+        "target_key_field": "DB_CODE",
+        "target_value_field": "DB_ELPACOD",
+        "new_field_name": "id_paziente"
+      }
+    },
     "trigger_filters": {}
   }
 }

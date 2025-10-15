@@ -57,6 +57,9 @@ class FlaskConfig(Config):
     # API Configuration
     API_VERSION = 'v2'
     API_PREFIX = f'/api/{API_VERSION}'
+
+    # Tracked Link URL
+    TRACKED_LINK_BASE_URL = os.environ.get('TRACKED_LINK_BASE_URL')
     
     # Performance Settings
     JSON_SORT_KEYS = False
@@ -92,6 +95,8 @@ class DevelopmentConfig(FlaskConfig):
     """Development configuration with debug enabled."""
     DEBUG = True
     LOG_LEVEL = 'DEBUG'
+    # In sviluppo, possiamo usare un URL di ngrok o un altro tunnel
+    TRACKED_LINK_BASE_URL = os.environ.get('TRACKED_LINK_BASE_URL_DEV') or 'http://localhost:3001/r'
 
 
 class ProductionConfig(FlaskConfig):
@@ -110,6 +115,8 @@ class ProductionConfig(FlaskConfig):
             raise ValueError("SECRET_KEY must be set in production")
         if not self.JWT_SECRET_KEY:
             raise ValueError("JWT_SECRET_KEY must be set in production")
+        if not self.TRACKED_LINK_BASE_URL:
+            raise ValueError("TRACKED_LINK_BASE_URL must be set in production")
 
 
 class TestingConfig(FlaskConfig):

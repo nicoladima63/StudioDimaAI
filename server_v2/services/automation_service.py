@@ -45,7 +45,7 @@ class AutomationService(BaseService):
     
     def _sync_registry_with_db(self):
         """Assicura che tutte le azioni registrate nel codice esistano nel DB (logica upsert)."""
-        logger.info("Sincronizzazione azioni (upsert) dal registro al database...")
+        logger.debug("Sincronizzazione azioni (upsert) dal registro al database...")
         try:
             db_actions_rows = self.execute_query("SELECT name, parameters_json, description FROM actions")
             db_actions = {row['name']: row for row in db_actions_rows}
@@ -57,22 +57,22 @@ class AutomationService(BaseService):
                 description_from_code = definition.get('description', '')
 
                 if action_name not in db_actions:
-                    logger.info(f"Azione '{action_name}' non trovata nel DB. Aggiungo...")
+                    logger.debug(f"Azione '{action_name}' non trovata nel DB. Aggiungo...")
                     query = "INSERT INTO actions (name, description, parameters_json, is_system_action) VALUES (?, ?, ?, ?)"
                     params = (action_name, description_from_code, params_json_from_code, 1)
                     self.execute_command(query, params)
-                    logger.info(f"Azione '{action_name}' aggiunta con successo.")
+                    logger.debug(f"Azione '{action_name}' aggiunta con successo.")
                 else:
                     db_action = db_actions[action_name]
                     if (db_action.get('parameters_json') != params_json_from_code or 
                         db_action.get('description') != description_from_code):
-                        logger.info(f"Dati per l'azione '{action_name}' non sono sincronizzati. Aggiorno...")
+                        logger.debug(f"Dati per l'azione '{action_name}' non sono sincronizzati. Aggiorno...")
                         query = "UPDATE actions SET parameters_json = ?, description = ? WHERE name = ?"
                         params = (params_json_from_code, description_from_code, action_name)
                         self.execute_command(query, params)
-                        logger.info(f"Dati per '{action_name}' aggiornati con successo.")
+                        logger.debug(f"Dati per '{action_name}' aggiornati con successo.")
             
-            logger.info("Sincronizzazione azioni completata.")
+            logger.debug("Sincronizzazione azioni completata.")
 
         except Exception as e:
             logger.error(f"Errore durante la sincronizzazione delle azioni con il DB: {e}", exc_info=True)
@@ -97,7 +97,7 @@ class AutomationService(BaseService):
             result = implementation_func(initial_context_data, **action_params)
             
             execution_time = (datetime.now() - start_time).total_seconds()
-            logger.info(f"Regola {rule['id']} ('{rule['name']}'): Azione '{action_name}' eseguita in {execution_time:.2f}s.")
+            logger.debug(f"Regola {rule['id']} ('{rule['name']}'): Azione '{action_name}' eseguita in {execution_time:.2f}s.")
             
             return {
                 'status': 'success',

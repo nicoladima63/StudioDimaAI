@@ -80,7 +80,7 @@ const _nav = [
   },
   {
     component: CNavTitle,
-    name: 'Appuntamenti',
+    name: 'Agenda',
   },
   {
     component: CNavItem,
@@ -90,19 +90,23 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Impostazioni Calendario',
+    name: 'Calendar Settings',
     to: '/settings/calendar',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {
-    component: CNavItem,
-    name: 'Monitoraggio DBF',
-    to: '/settings/monitoring',
-    icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
+    component: CNavTitle,
+    name: 'Monitoraggi',
   },
+  // {
+  //   component: CNavItem,
+  //   name: 'Monitor Quaderno',
+  //   to: '/settings/monitoring',
+  //   icon: <CIcon icon={cilMonitor} customClassName="nav-icon" />,
+  // },
   {
     component: CNavItem,
-    name: 'Monitor Prestazioni',
+    name: 'Monitor Quaderno',
     to: '/settings/monitor-prestazioni',
     icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
   },
@@ -131,6 +135,18 @@ const _nav = [
     name: 'Gestione Template SMS',
     to: '/settings/template', // La route che abbiamo configurato
     icon: <CIcon icon={cilDescription} customClassName="nav-icon" />, // Un'icona appropriata
+  },
+  {
+    component: CNavItem,
+    name: 'Automazioni',
+    to: '/settings/automazioni',
+    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Scheduler',
+    to: '/settings/scheduler',
+    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,

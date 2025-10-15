@@ -182,10 +182,13 @@ class FileWatcher:
 
 # Singleton instance
 _file_watcher = None
+_file_watcher_lock = threading.Lock()
 
 def get_file_watcher() -> FileWatcher:
     """Ottieni istanza singleton del FileWatcher."""
     global _file_watcher
     if _file_watcher is None:
-        _file_watcher = FileWatcher()
+        with _file_watcher_lock:
+            if _file_watcher is None:
+                _file_watcher = FileWatcher()
     return _file_watcher
