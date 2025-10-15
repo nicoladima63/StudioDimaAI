@@ -2,7 +2,7 @@
 .env
 .env.*
 env/
-venv/
+virtualenv/
 
 # Python
 __pycache__/
@@ -43,6 +43,7 @@ server/oldfile
 # Node
 node_modules/
 npm-debug.log*
+
 yarn-debug.log*
 yarn-error.log*
 /client/dist
@@ -104,3 +105,7 @@ server_v2/data/monitoring/
 
 #Ignore cursor AI rules
 .cursor\rules\codacy.mdc
+
+# File di conflitto merge
+server_v2/automation_calendar_sync.log
+server_v2/instance/automation_settings.json
