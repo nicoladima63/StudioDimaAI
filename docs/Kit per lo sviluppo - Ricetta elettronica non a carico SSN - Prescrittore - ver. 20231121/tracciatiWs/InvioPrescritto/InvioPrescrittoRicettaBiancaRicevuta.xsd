@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipodatiinvioprescrittoricettabianca.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiInvioPrescrittoRicettaBianca.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.2</xs:documentation>
+	</xs:annotation>
+	<xs:element name="InvioPrescrittoRicettaBiancaRicevuta">
+		<xs:annotation>
+			<xs:documentation>Elemento base della ricevuta dell'invio al SAC della ricetta prescritta dal medico</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="protocolloTransazione" type="td:stringType" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Identificativo univoco della transazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>	
+				<xs:element name="nrbe" type="td:nrbeType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero Ricetta Bianca Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="pinNrbe" type="td:pinNrbeType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero breve Ricetta Bianca Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="dataInserimento" type="td:dataOraType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Data inserimento negli archivi del SAC</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codEsitoInserimento" type="td:codEsitoType">
+					<xs:annotation>
+						<xs:documentation>Codice dell'esito dell'inserimento</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="nomeMedico" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Nome del medico prescrittore</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="cognomeMedico" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Cognome del medico prescrittore</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="opzioniResponse" type="td:opzioniType" maxOccurs="10" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Elenco campi opzionali</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="erroreRicetta" type="td:erroreRicettaType" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di ErroreRicetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="comunicazione" type="td:comunicazioneType" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di Comunicazioni di servizio</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="flagPromemoria" type="td:string1Type" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Flg restituzione promemoria</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="pdfPromemoria" type="xs:base64Binary" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Promemoria in pdf</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

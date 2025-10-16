@@ -1,0 +1,9 @@
+VERSIONAMENTO DEL KIT:
+----------------------------------------------------------------------------------------------------
+Kit per lo sviluppo - Ricetta elettronica non a carico SSN - Prescrittore - ver. 20211020 -> prima versione del KIT
+
+Kit per lo sviluppo - Ricetta elettronica non a carico SSN - Prescrittore - ver. 20230213 -> fix campo statoRicetta in response visualizza prescritto e visualizza erogato
+
+Kit per lo sviluppo - Ricetta elettronica non a carico SSN - Prescrittore - ver. 20231121 -> aggiunto file TokenA2F.txt, aggiornato il progetto SOAPUI
+
+Kit per lo sviluppo - Ricetta elettronica non a carico SSN - Prescrittore - ver. 20240219 -> aggiornati file ../certificati/SanitelCF.cer

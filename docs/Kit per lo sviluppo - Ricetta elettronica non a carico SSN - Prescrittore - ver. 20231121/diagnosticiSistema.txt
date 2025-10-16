@@ -1,0 +1,17 @@
+Errore qualsiasi diverso dagli altri qui sotto:
+<faultstring>Rejected by policy. (from client)</faultstring>
+
+Credenziali non valide (utente errato, password errata, utente inesistente):
+<faultstring>Credenziali invalide (from client)</faultstring>
+
+Password scaduta:
+<faultstring>Password scaduta (from client)</faultstring>
+
+Utente disabilitato:
+<faultstring>Utente disabilitato (from client)</faultstring>
+
+Non è stato impostato l’header della basic authentication né viene inviato un certificato client:
+<faultstring>Credenziali non presenti (from client)</faultstring>
+
+Errore formale sulla request (schema validation):
+<faultstring>Errore non gestito</faultstring>

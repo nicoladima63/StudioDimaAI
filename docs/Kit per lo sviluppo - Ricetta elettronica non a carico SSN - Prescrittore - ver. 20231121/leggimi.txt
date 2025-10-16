@@ -1,0 +1,20 @@
+CONTENUTO DEL KIT:
+-------------------------------------------------------------------------------------------------------------------
+certificati/SanitelCF.cer_ -> e' il certificato per cifrare il pincode dell'utente e 
+							 il cf dell'assistito, da rinominare .cer
+
+progettoSoapUi/RicettaBiancaPrescrittore-soapui-project.xml -> e' il progetto SoapUi di prova
+
+tracciatiWs -> contiene i tracciati wsdl e xsd dei Web Services
+
+assistitoTest.txt -> contiene il cf dell'assistito di test
+
+diagnosticiSistema.txt -> contiene i diagnostici di sistema
+
+endpoint.txt -> contiene gli endpoint dei servizi
+
+utenze.txt -> contiene le utenze di test
+
+changeLog.txt -> contiene il versionamento del KIT
+
+TokenA2F.txt -> procedura per la composizione del token 2FA di test

@@ -107,12 +107,13 @@ echo.
 :: Copia requirements.txt
 copy "server_v2\requirements.txt" "%DEPLOY_PATH%\requirements.txt" >nul
 
-:: Copia .env
-if exist ".env" (
-    copy ".env" "%DEPLOY_PATH%\.env" >nul
-    echo .env copiato.
+:: Copia .env di produzione
+echo Copia file .env.production...
+if exist ".env.production" (
+    copy ".env.production" "%DEPLOY_PATH%\.env" >nul
+    echo File .env.production copiato e rinominato in .env nella destinazione
 ) else (
-    echo ERRORE: File .env non trovato!
+    echo ERRORE: File .env.production non trovato nella root del progetto. Crealo con le configurazioni di produzione.
     pause
     exit /b 1
 )

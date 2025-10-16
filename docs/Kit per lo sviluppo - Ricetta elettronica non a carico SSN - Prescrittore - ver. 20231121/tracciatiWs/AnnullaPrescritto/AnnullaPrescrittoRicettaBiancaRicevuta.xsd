@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://annullaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipodatiannullaprescrittoricettabianca.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://annullaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipodatiannullaprescrittoricettabianca.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiAnnullaPrescrittoRicettaBianca.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.2</xs:documentation>
+	</xs:annotation>
+	<xs:element name="AnnullaPrescrittoRicettaBiancaRicevuta">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="protocolloTransazione" type="td:stringType" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Identificativo univoco della transazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>	
+				<xs:element name="dataRicezione" type="td:dataOraType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Data ricezione della transazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="nrbe" type="td:nrbeType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero Ricetta Bianca Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="pinNrbe" type="td:pinNrbeType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero breve Ricetta Bianca Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>			
+				<xs:element name="codEsitoAnnullamento" type="td:codEsitoType">
+					<xs:annotation>
+						<xs:documentation>Codice dell'esito dell'annullamento</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="opzioniResponse" type="td:opzioniType" maxOccurs="10" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Elenco campi opzionali</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="erroreRicetta" type="td:erroreRicettaType" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di ErroreRicetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="comunicazione" type="td:comunicazioneType" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di Comunicazioni di servizio</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

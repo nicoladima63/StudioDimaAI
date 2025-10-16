@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://visualizzaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://visualizzaprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipodativisualizzaprescrittoricettabianca.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiVisualizzaPrescrittoRicettaBianca.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.2</xs:documentation>
+	</xs:annotation>
+	<xs:element name="VisualizzaPrescrittoRicettaBiancaRicevuta">
+		<xs:annotation>
+			<xs:documentation>Elemento base della ricevuta per la richiesta di visualizzazione della ricetta prescritta dal medico</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="protocolloTransazione" type="td:stringType" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Identificativo univoco della transazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>	
+				<xs:element name="dataRicezione" type="td:dataOraType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Data ricezione della transazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>	
+				<xs:element name="cfMedico" type="td:cfMedicoType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Codice fiscale del medico</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="nomeMedico" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Nome del medico prescrittore</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="cognomeMedico" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Cognome del medico prescrittore</xs:documentation>
+					</xs:annotation>
+				</xs:element>	
+				<xs:element name="codRegione" type="td:string3Type" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Codice Regione / Provincia Autonoma del medico</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codASLAo" type="td:string3Type" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Codice ASL del medico</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codStruttura" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Codice struttura del medico</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codSpecializzazione" type="td:codSpecializzazioneType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Specializzazione del medico</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="specialClinica" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Specializzazione clinica del medico in testo libero</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="numIscrizAlbo" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero di iscrizione all'Albo professionale del medico</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="indirMedico" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Indirizzo del medico prescrittore, vedere specifica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="telefMedico" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Telefono del medico prescrittore</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="testata1" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo destinato a informazioni aggiuntive</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="testata2" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo destinato a informazioni aggiuntive</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codicePaziente" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Codice Fiscale/STP/ENI che rappresenta l'assistito per cui viene compilata la ricetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="cognNome" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Cognome e nome dell'assistito </xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="indirizzo" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Indirizzo dell'assistito</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="tipoPrescrizione" type="td:tipoPrescType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>F - Farmaceutica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codDiagnosi" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Codice diagnosi o del sospetto diagnostico</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="descrDiagnosi" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Descrizione della diagnosi o del sospetto diagnostico in testo libero</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="dataCompilazione" type="td:dataOraType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Data compilazione della ricetta, formato aaaa-mm-gg hh24:mm:ss</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="dettaglioPrescrizioneRicettaBianca" type="td:dettaglioPrescrizioneRicettaBiancaType" maxOccurs="99" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Elenco singole prescrizioni</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="nrbe" type="td:nrbeType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero Ricetta Bianca Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="pinNrbe" type="td:pinNrbeType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero breve Ricetta Bianca Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="statoProcesso" type="td:statoProcessoType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Stato della ricetta bianca</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codCatRicetta" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Sigla breve Categoria Ricetta Bianca Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>	
+				<xs:element name="dataInserimento" type="td:dataOraType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Data inserimento negli archivi del SAC</xs:documentation>
+					</xs:annotation>
+				</xs:element>			
+				<xs:element name="codEsitoVisualizzazione" type="td:codEsitoType" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Codice dell'esito della Visualizzazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="opzioniResponse" type="td:opzioniType" maxOccurs="10" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Elenco campi opzionali</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="erroreRicetta" type="td:erroreRicettaType" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di ErroreRicetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="comunicazione" type="td:comunicazioneType" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di Comunicazioni di servizio</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+				<xs:element name="flagPromemoria" type="td:string1Type" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Flg restituzione promemoria</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="pdfPromemoria" type="xs:base64Binary" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Promemoria in pdf</xs:documentation>
+					</xs:annotation>
+				</xs:element>				
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

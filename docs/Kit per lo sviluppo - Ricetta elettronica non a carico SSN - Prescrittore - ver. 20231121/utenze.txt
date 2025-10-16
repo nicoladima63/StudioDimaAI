@@ -1,0 +1,94 @@
+cfMedico: PROVAX00X00X000Y
+password: Salve123
+pincode cifrato: LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=
+pincode chiaro: 1234567890
+
+PROVAX00X00X000Y	
+Reg: 020
+Asl: 101
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y	
+Reg: 020
+Asl: 101
+Specializzazione: H
+CodStruttura: vuoto
+
+PROVAX00X00X000Y	
+Reg: 070
+Asl: 101
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y	
+Reg: 090
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 100
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 110
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 120
+Asl: 101
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 120
+Asl: 109
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 130
+Asl: 204
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 140
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 150
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 170
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 180
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 190
+Asl: 201
+Specializzazione: F
+CodStruttura: vuoto
+
+PROVAX00X00X000Y
+Reg: 200
+Asl: 101
+Specializzazione: F
+CodStruttura: vuoto

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:ricevutans="http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" xmlns:richiestans="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it">
+	<wsdl:documentation>Versione 1.2</wsdl:documentation>
+	<wsdl:types>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it" schemaLocation="InvioPrescrittoRicettaBiancaRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://invioprescrittoricettabiancaricevuta.xsd.dem.sanita.finanze.it" schemaLocation="InvioPrescrittoRicettaBiancaRicevuta.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="ricevuta">
+		<wsdl:part name="InvioPrescrittoRicettaBiancaRicevuta" element="ricevutans:InvioPrescrittoRicettaBiancaRicevuta"/>
+	</wsdl:message>
+	<wsdl:message name="richiesta">
+		<wsdl:part name="InvioPrescrittoRicettaBiancaRichiesta" element="richiestans:InvioPrescrittoRicettaBiancaRichiesta"/>
+	</wsdl:message>
+	<wsdl:portType name="invioPrescrittoRicettaBiancaPT">
+		<wsdl:operation name="invioPrescrittoRicettaBianca">
+			<wsdl:input message="tns:richiesta"/>
+			<wsdl:output message="tns:ricevuta"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="invioPrescrittoRicettaBiancaBinding" type="tns:invioPrescrittoRicettaBiancaPT">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="invioPrescrittoRicettaBianca">
+			<soap:operation soapAction="http://invioprescrittoricettabianca.wsdl.dem.sanita.finanze.it/InvioPrescrittoRicettaBianca"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="demInvioPrescrittoRicettaBianca">
+		<wsdl:port name="demInvioPrescrittoRicettaBianca" binding="tns:invioPrescrittoRicettaBiancaBinding">
+			<soap:address location="http://localhost:9080/DemRicettaBiancaPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

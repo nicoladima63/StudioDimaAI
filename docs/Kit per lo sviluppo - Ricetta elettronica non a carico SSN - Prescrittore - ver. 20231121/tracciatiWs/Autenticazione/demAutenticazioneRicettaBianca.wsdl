@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+                  xmlns:tns="http://autenticazionericettabianca.wsdl.dem.sanita.finanze.it" 
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                  targetNamespace="http://autenticazionericettabianca.wsdl.dem.sanita.finanze.it">
+    <wsdl:documentation>Versione 1.0 - WSDL inventato per gestione ID-SESSIONE</wsdl:documentation>
+    
+    <wsdl:types>
+        <xsd:schema elementFormDefault="qualified" targetNamespace="http://autenticazionericettabianca.wsdl.dem.sanita.finanze.it">
+            <!-- Richiesta checkToken -->
+            <xsd:element name="checkToken">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="pinCode" type="xsd:string"/>
+                        <xsd:element name="cfUtente" type="xsd:string"/>
+                        <xsd:element name="codRegione" type="xsd:string"/>
+                        <xsd:element name="codAslAo" type="xsd:string"/>
+                        <xsd:element name="codiceStruttura" type="xsd:string"/>
+                        <xsd:element name="token" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- Risposta checkToken -->
+            <xsd:element name="checkTokenResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="valid" type="xsd:boolean"/>
+                        <xsd:element name="message" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- Richiesta create -->
+            <xsd:element name="create">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="pinCode" type="xsd:string"/>
+                        <xsd:element name="cfUtente" type="xsd:string"/>
+                        <xsd:element name="codRegione" type="xsd:string"/>
+                        <xsd:element name="codAslAo" type="xsd:string"/>
+                        <xsd:element name="codiceStruttura" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <!-- Risposta create -->
+            <xsd:element name="createResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="success" type="xsd:boolean"/>
+                        <xsd:element name="message" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    
+    <!-- Messaggi per checkToken -->
+    <wsdl:message name="checkTokenRequest">
+        <wsdl:part name="checkToken" element="tns:checkToken"/>
+    </wsdl:message>
+    <wsdl:message name="checkTokenResponse">
+        <wsdl:part name="checkTokenResponse" element="tns:checkTokenResponse"/>
+    </wsdl:message>
+    
+    <!-- Messaggi per create -->
+    <wsdl:message name="createRequest">
+        <wsdl:part name="create" element="tns:create"/>
+    </wsdl:message>
+    <wsdl:message name="createResponse">
+        <wsdl:part name="createResponse" element="tns:createResponse"/>
+    </wsdl:message>
+    
+    <!-- PortType -->
+    <wsdl:portType name="autenticazioneRicettaBiancaPT">
+        <wsdl:operation name="checkToken">
+            <wsdl:input message="tns:checkTokenRequest"/>
+            <wsdl:output message="tns:checkTokenResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="create">
+            <wsdl:input message="tns:createRequest"/>
+            <wsdl:output message="tns:createResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    
+    <!-- Binding -->
+    <wsdl:binding name="autenticazioneRicettaBiancaBinding" type="tns:autenticazioneRicettaBiancaPT">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        
+        <wsdl:operation name="checkToken">
+            <soap:operation soapAction="http://autenticazionericettabianca.wsdl.dem.sanita.finanze.it/checkToken"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        
+        <wsdl:operation name="create">
+            <soap:operation soapAction="http://autenticazionericettabianca.wsdl.dem.sanita.finanze.it/create"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    
+    <!-- Service -->
+    <wsdl:service name="demAutenticazioneRicettaBianca">
+        <wsdl:port name="demAutenticazioneRicettaBianca" binding="tns:autenticazioneRicettaBiancaBinding">
+            <soap:address location="https://ricettabiancaservice.sanita.finanze.it/sts-a2f-auth-ws/soap/v1/authentication-service"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

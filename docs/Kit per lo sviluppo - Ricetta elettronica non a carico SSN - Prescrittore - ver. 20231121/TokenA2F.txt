@@ -1,0 +1,12 @@
+##La seguente gestione del token è attiva solo in ambiente di test##
+Il token ottenuto dalla verifica a 2 fattori tramite il webservice dedicato è componibile secondo il seguente schema:
+-Header http : Authorization2F
+-Value : Bearer userID-yyyy-MM
+
+L'userID corrisponde all'utenza basic in uso
+yyyy è l'anno corrente es. 2023
+MM è il mese corrente es.11
+esempio di token completo [Authorization2F : Bearer PROVAX00X00X000Y-2023-11]
+
+All'inizio di ogni mese avviene la rotazione dei token, invalidando quello precedentemente attivo.
+
