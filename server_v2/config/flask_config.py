@@ -37,7 +37,7 @@ class FlaskConfig(Config):
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
     # CORS Configuration
-    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3001,http://localhost:5173').split(',')
+    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:3001,http://localhost:5173,http://serverdima:5001').split(',')
     CORS_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
     CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization']
     
