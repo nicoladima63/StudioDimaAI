@@ -540,7 +540,7 @@ class CalendarServiceV2:
                 return True
         
         # Check for empty or invalid appointments (solo se non è un appuntamento di servizio)
-        if not paziente_id and not descrizione and tipo not in ['F', 'A', 'M']:
+        if not paziente_id and not descrizione and not note and tipo not in ['F', 'A', 'M']:
              return True
             
         # Check for zero duration appointments (might indicate cancellation)
