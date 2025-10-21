@@ -1,4 +1,4 @@
-# StudioDimaAI
+# StudioDimaAI bellissimo
 
 Sistema modulare per l’analisi economica, operativa e clinica di uno studio dentistico.
 
