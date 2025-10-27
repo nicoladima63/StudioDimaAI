@@ -18,7 +18,6 @@ import {
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilCalendar, cilSettings, cilSync, cilTrash } from '@coreui/icons';
-import { environmentApi } from '@/services/api/environment.service';
 import { schedulerService, type SchedulerSettings } from '@/features/scheduler/services/schedulerService';
 import { apiGetCalendars, apiStartSync, apiClearCalendar, apiGetClearStatus, apiGetSyncStatus } from '@/features/calendar/services/calendar.service';
 import { environmentService } from '@/features/settings/services/environment.service';
