@@ -121,6 +121,52 @@ COLONNE = {
         'nome_prestazione': 'DB_ONDESCR',   # Nome prestazione (es: Visita di controllo)
         'costo': 'DB_ONCOSTO',             # Costo (es: 30,00)
         'codice_breve': 'DB_ONCODIC'        # Codice breve (es: cont, bott, nylo)
+    },
+    'spese': {
+        'id_spesa': 'DB_CODE',
+        'id_fornitore': 'DB_SPFOCOD',
+        'descrizione': 'DB_SPDESCR',
+        'costo': 'DB_SPCOSTO',
+        'iva': 'DB_SPCOIVA',
+        'numero_fattura': 'DB_SPNUMER',
+        'data_fattura': 'DB_SPDATA',
+        'data_registrazione':'DB_SPDATAR',
+        'note':'DB_NOTE',
+    },
+    'voci_spese':{
+        'id_spesa':'DB_VOSPCOD',
+        'id_codice_non_so':'DB_VOSOCOD',
+        'descrizione':'DB_VODESCR',
+        'quantita':'DB_VOQUANT',
+        'prezzo':'DB_VOPREZZ',
+        'iva':'DB_VOIVA',
+        'codice_iva':'DB_VOIVCOD',
+        '':'',
+
+    },
+    'fatture': {
+        'id_fatture': 'DB_CODE',
+        'id_paziente': 'DB_FAPACOD',
+        'numero': 'DB_FANUMER',
+        'data': 'DB_FADATA',
+        'tipo_movimento': 'DB_FABANCA',
+        'tipo_pagamento':'DB_FAPAGAM',
+        'esente_iva':'DB_FAESIVA',
+        'imponibile':'DB_FAIMPON',
+        'iva':'DB_FAIVA',
+        'paziente_nome': 'DB_FANOME',
+        'paziente_codice_fiscale': 'DB_FACODFI',
+        'paziente_indirizzo': 'DB_FAINDIR',
+        'paziente_comune': 'DB_FACITTA',
+        'paziente_cap': 'DB_FACAP',
+        'paziente_provincia': 'DB_FAPROVI'
+    },
+    'voci_fatture': {
+        'id_fatture': 'DB_VOFACOD',
+        'id_prestazione':'DB_VOONCOD',
+        'descrizione':'DB_VODESCR',
+        'quantita':'DB_VOQUANT',
+        'prezzo':'DB_VOPREZZ'
     }
 }
 
@@ -134,6 +180,11 @@ DBF_TABLES = {
         'categoria': 'USER',
         'descrizione': 'Appuntamenti agenda'
     },
+    'appuntamenti': {
+        'file': 'APPUNTA.DBF',
+        'categoria': 'USER',
+        'descrizione': 'Appuntamenti agenda'
+    },    
     'pazienti': {
         'file': 'PAZIENTI.DBF',
         'categoria': 'DATI',
@@ -153,6 +204,26 @@ DBF_TABLES = {
         'file': 'ONORARIO.DBF',
         'categoria': 'DATI',
         'descrizione': 'Tariffario prestazioni'
+    },
+    'spese':{
+        'file': 'SPESAFOR.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Spese fornitori'
+    },
+    'voci_spese':{
+        'file': 'VOCISPES.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Dettagli Spese fornitori'
+    },
+    'fatture':{
+        'file': 'FATTURE.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Fatture emesse Pazienti'
+    },
+    'voci_fatture':{
+        'file': 'VOCIFA.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Dettagli Fatture emesse Pazienti'
     }
 }
 

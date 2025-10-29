@@ -1,0 +1,2627 @@
+[
+  {
+    "id_prestazione": "ZZZZZZ",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. I O",
+    "costo": 100.0,
+    "codice_breve": "rc1"
+  },
+  {
+    "id_prestazione": "ZZZZZY",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. II MO o OD",
+    "costo": 120.0,
+    "codice_breve": "rc2"
+  },
+  {
+    "id_prestazione": "ZZZZZX",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. II MOD",
+    "costo": 160.0,
+    "codice_breve": "rc2"
+  },
+  {
+    "id_prestazione": "ZZZZZW",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. III M o D",
+    "costo": 110.0,
+    "codice_breve": "rc3"
+  },
+  {
+    "id_prestazione": "ZZZZZV",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. III M e D",
+    "costo": 140.0,
+    "codice_breve": "rc3"
+  },
+  {
+    "id_prestazione": "ZZZZZU",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. IV M o D",
+    "costo": 140.0,
+    "codice_breve": "rc4"
+  },
+  {
+    "id_prestazione": "ZZZZZT",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. V",
+    "costo": 100.0,
+    "codice_breve": "rc5"
+  },
+  {
+    "id_prestazione": "ZZZZZS",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. II MODC",
+    "costo": 170.0,
+    "codice_breve": "rc2"
+  },
+  {
+    "id_prestazione": "ZZZZZR",
+    "categoria": 1,
+    "nome_prestazione": "Status Paradontale Rx Endorale",
+    "costo": 207.0,
+    "codice_breve": "stpa"
+  },
+  {
+    "id_prestazione": "ZZZZZQ",
+    "categoria": 1,
+    "nome_prestazione": "Visita specialistica",
+    "costo": 60.0,
+    "codice_breve": "vspe"
+  },
+  {
+    "id_prestazione": "ZZZZZP",
+    "categoria": 1,
+    "nome_prestazione": "Fluoro Profilassi per arcata",
+    "costo": 30.0,
+    "codice_breve": "fp"
+  },
+  {
+    "id_prestazione": "ZZZZZO",
+    "categoria": 6,
+    "nome_prestazione": "Uni Abutment",
+    "costo": 200.0,
+    "codice_breve": "ua"
+  },
+  {
+    "id_prestazione": "ZZZZZN",
+    "categoria": 6,
+    "nome_prestazione": "Ball Abutment",
+    "costo": 130.0,
+    "codice_breve": "ba"
+  },
+  {
+    "id_prestazione": "ZZZZZM",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione",
+    "costo": 80.0,
+    "codice_breve": "ex"
+  },
+  {
+    "id_prestazione": "ZZZZZL",
+    "categoria": 5,
+    "nome_prestazione": "Estrz. Con riemp.osseo",
+    "costo": 250.0,
+    "codice_breve": "exri"
+  },
+  {
+    "id_prestazione": "ZZZZZK",
+    "categoria": 4,
+    "nome_prestazione": "Scaling quadrante 4",
+    "costo": 85.0,
+    "codice_breve": "sca4"
+  },
+  {
+    "id_prestazione": "ZZZZZJ",
+    "categoria": 4,
+    "nome_prestazione": "Intervento chirurg.paradontale",
+    "costo": 620.0,
+    "codice_breve": "chip"
+  },
+  {
+    "id_prestazione": "ZZZZZI",
+    "categoria": 4,
+    "nome_prestazione": "Ablazione tartaro",
+    "costo": 80.0,
+    "codice_breve": "ig"
+  },
+  {
+    "id_prestazione": "ZZZZZH",
+    "categoria": 8,
+    "nome_prestazione": "Dente su scheletro",
+    "costo": 90.0,
+    "codice_breve": "dsch"
+  },
+  {
+    "id_prestazione": "ZZZZZG",
+    "categoria": 8,
+    "nome_prestazione": "Attacchi scheletrato mini SG",
+    "costo": 300.0,
+    "codice_breve": "atts"
+  },
+  {
+    "id_prestazione": "ZZZZZF",
+    "categoria": 8,
+    "nome_prestazione": "Scheletrato semplice",
+    "costo": 1100.0,
+    "codice_breve": "sche"
+  },
+  {
+    "id_prestazione": "ZZZZZE",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione ottavo  sup.",
+    "costo": 150.0,
+    "codice_breve": "ex8s"
+  },
+  {
+    "id_prestazione": "ZZZZZD",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione ottavo incluso",
+    "costo": 250.0,
+    "codice_breve": "ex8i"
+  },
+  {
+    "id_prestazione": "ZZZZZC",
+    "categoria": 2,
+    "nome_prestazione": "Perno-moncone prefabbricato",
+    "costo": 150.0,
+    "codice_breve": "pmp"
+  },
+  {
+    "id_prestazione": "ZZZZZB",
+    "categoria": 2,
+    "nome_prestazione": "Perno-moncone chiavistello",
+    "costo": 300.0,
+    "codice_breve": "pmc"
+  },
+  {
+    "id_prestazione": "ZZZZZA",
+    "categoria": 7,
+    "nome_prestazione": "Provvisorio resina acrilica",
+    "costo": 100.0,
+    "codice_breve": "prov"
+  },
+  {
+    "id_prestazione": "ZZZZZ9",
+    "categoria": 7,
+    "nome_prestazione": "Provvisorio armato",
+    "costo": 320.0,
+    "codice_breve": "prov"
+  },
+  {
+    "id_prestazione": "ZZZZZ8",
+    "categoria": 7,
+    "nome_prestazione": "Corona su impianto",
+    "costo": 950.0,
+    "codice_breve": "mcim"
+  },
+  {
+    "id_prestazione": "ZZZZZ7",
+    "categoria": 2,
+    "nome_prestazione": "Onlay composito",
+    "costo": 360.0,
+    "codice_breve": "onco"
+  },
+  {
+    "id_prestazione": "ZZZZZ6",
+    "categoria": 6,
+    "nome_prestazione": "Impianto Sweden & Martina - Premium",
+    "costo": 1000.0,
+    "codice_breve": "impl"
+  },
+  {
+    "id_prestazione": "ZZZZZ5",
+    "categoria": 1,
+    "nome_prestazione": "Endorale endodonzia",
+    "costo": 25.0,
+    "codice_breve": "rxen"
+  },
+  {
+    "id_prestazione": "ZZZZZ4",
+    "categoria": 3,
+    "nome_prestazione": "Endodonzia 1 canale",
+    "costo": 120.0,
+    "codice_breve": "en1"
+  },
+  {
+    "id_prestazione": "ZZZZZ3",
+    "categoria": 3,
+    "nome_prestazione": "Endodonzia 2 canali",
+    "costo": 200.0,
+    "codice_breve": "en2"
+  },
+  {
+    "id_prestazione": "ZZZZZ2",
+    "categoria": 3,
+    "nome_prestazione": "Endodonzia 3 canali",
+    "costo": 280.0,
+    "codice_breve": "en3"
+  },
+  {
+    "id_prestazione": "ZZZZZ1",
+    "categoria": 2,
+    "nome_prestazione": "Sigillatura",
+    "costo": 50.0,
+    "codice_breve": "sig"
+  },
+  {
+    "id_prestazione": "ZZZZZ0",
+    "categoria": 4,
+    "nome_prestazione": "Splintaggio",
+    "costo": 25.0,
+    "codice_breve": "spl"
+  },
+  {
+    "id_prestazione": "ZZZZYZ",
+    "categoria": 8,
+    "nome_prestazione": "OTK attacco radicolare (perno+cappetta)",
+    "costo": 150.0,
+    "codice_breve": "otk"
+  },
+  {
+    "id_prestazione": "ZZZZYY",
+    "categoria": 4,
+    "nome_prestazione": "Trattamento Paradont.di base",
+    "costo": 775.0,
+    "codice_breve": "tpb"
+  },
+  {
+    "id_prestazione": "ZZZZYX",
+    "categoria": 4,
+    "nome_prestazione": "Scaling quadrante 1",
+    "costo": 85.0,
+    "codice_breve": "sca1"
+  },
+  {
+    "id_prestazione": "ZZZZYW",
+    "categoria": 4,
+    "nome_prestazione": "Scaling quadrante 2",
+    "costo": 85.0,
+    "codice_breve": "sca2"
+  },
+  {
+    "id_prestazione": "ZZZZYV",
+    "categoria": 4,
+    "nome_prestazione": "Scaling quadrante 3",
+    "costo": 85.0,
+    "codice_breve": "sca3"
+  },
+  {
+    "id_prestazione": "ZZZZYU",
+    "categoria": 3,
+    "nome_prestazione": "Pulpotomia d'urgenza",
+    "costo": 50.0,
+    "codice_breve": "pulp"
+  },
+  {
+    "id_prestazione": "ZZZZYT",
+    "categoria": 3,
+    "nome_prestazione": "Ritrattamento Endo 1",
+    "costo": 150.0,
+    "codice_breve": "ren1"
+  },
+  {
+    "id_prestazione": "ZZZZYS",
+    "categoria": 3,
+    "nome_prestazione": "Ritrattamento Endo 2",
+    "costo": 280.0,
+    "codice_breve": "ren2"
+  },
+  {
+    "id_prestazione": "ZZZZYR",
+    "categoria": 3,
+    "nome_prestazione": "Ritrattamento Endo 3",
+    "costo": 400.0,
+    "codice_breve": "ren3"
+  },
+  {
+    "id_prestazione": "ZZZZYQ",
+    "categoria": 1,
+    "nome_prestazione": "Bite Wing 1-4 quadrante",
+    "costo": 30.0,
+    "codice_breve": "bw"
+  },
+  {
+    "id_prestazione": "ZZZZYP",
+    "categoria": 9,
+    "nome_prestazione": "Modelli studio",
+    "costo": 50.0,
+    "codice_breve": "mods"
+  },
+  {
+    "id_prestazione": "ZZZZYO",
+    "categoria": 8,
+    "nome_prestazione": "Protesi totale",
+    "costo": 1200.0,
+    "codice_breve": "ptot"
+  },
+  {
+    "id_prestazione": "ZZZZYN",
+    "categoria": 8,
+    "nome_prestazione": "Protesi totale provvisoria",
+    "costo": 500.0,
+    "codice_breve": "ptot"
+  },
+  {
+    "id_prestazione": "ZZZZYM",
+    "categoria": 8,
+    "nome_prestazione": "Scheletrato semplice provvisorio",
+    "costo": 500.0,
+    "codice_breve": "sche"
+  },
+  {
+    "id_prestazione": "ZZZZYL",
+    "categoria": 2,
+    "nome_prestazione": "Intarsio resina",
+    "costo": 340.0,
+    "codice_breve": "intr"
+  },
+  {
+    "id_prestazione": "ZZZZYK",
+    "categoria": 2,
+    "nome_prestazione": "Intarsio oro",
+    "costo": 340.0,
+    "codice_breve": "into"
+  },
+  {
+    "id_prestazione": "ZZZZYJ",
+    "categoria": 9,
+    "nome_prestazione": "Cefalometria",
+    "costo": 150.0,
+    "codice_breve": "cefa"
+  },
+  {
+    "id_prestazione": "ZZZZYI",
+    "categoria": 9,
+    "nome_prestazione": "Terapia mobile mono arcata   NON USARE",
+    "costo": 1300.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZYH",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa 12 mesi",
+    "costo": 2000.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZYG",
+    "categoria": 7,
+    "nome_prestazione": "Corona in metal-ceramica",
+    "costo": 700.0,
+    "codice_breve": "mc"
+  },
+  {
+    "id_prestazione": "ZZZZYF",
+    "categoria": 7,
+    "nome_prestazione": "Corona in oro-resina",
+    "costo": 600.0,
+    "codice_breve": "or"
+  },
+  {
+    "id_prestazione": "ZZZZYE",
+    "categoria": 7,
+    "nome_prestazione": "Corona in Cesead",
+    "costo": 600.0,
+    "codice_breve": "cc"
+  },
+  {
+    "id_prestazione": "ZZZZYD",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione ottavo inf.",
+    "costo": 200.0,
+    "codice_breve": "ex8i"
+  },
+  {
+    "id_prestazione": "ZZZZYC",
+    "categoria": 1,
+    "nome_prestazione": "Mancato appuntamento senza preavviso",
+    "costo": 50.0,
+    "codice_breve": "masp"
+  },
+  {
+    "id_prestazione": "ZZZZYB",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura Protesi Totale",
+    "costo": 300.0,
+    "codice_breve": "riba"
+  },
+  {
+    "id_prestazione": "ZZZZYA",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura sella scheletrato",
+    "costo": 140.0,
+    "codice_breve": "riba"
+  },
+  {
+    "id_prestazione": "ZZZZY9",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa estetica",
+    "costo": 2100.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZY8",
+    "categoria": 5,
+    "nome_prestazione": "Lembo riposizionamento apicale/coronale",
+    "costo": 200.0,
+    "codice_breve": "lra-"
+  },
+  {
+    "id_prestazione": "ZZZZY7",
+    "categoria": 8,
+    "nome_prestazione": "Gancio a filo",
+    "costo": 85.0,
+    "codice_breve": "gf"
+  },
+  {
+    "id_prestazione": "ZZZZY6",
+    "categoria": 8,
+    "nome_prestazione": "OTK Sostituzione cappetta",
+    "costo": 60.0,
+    "codice_breve": "sotk"
+  },
+  {
+    "id_prestazione": "ZZZZY5",
+    "categoria": 8,
+    "nome_prestazione": "Riparazione semplice protesi rotta",
+    "costo": 90.0,
+    "codice_breve": "rip"
+  },
+  {
+    "id_prestazione": "ZZZZY4",
+    "categoria": 8,
+    "nome_prestazione": "Protesi parziale resina",
+    "costo": 240.0,
+    "codice_breve": "ppr"
+  },
+  {
+    "id_prestazione": "ZZZZY3",
+    "categoria": 8,
+    "nome_prestazione": "Dente su parziale",
+    "costo": 90.0,
+    "codice_breve": "dpr"
+  },
+  {
+    "id_prestazione": "ZZZZY2",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con Harvard",
+    "costo": 40.0,
+    "codice_breve": "cemh"
+  },
+  {
+    "id_prestazione": "ZZZZY1",
+    "categoria": 2,
+    "nome_prestazione": "Incappucciamento",
+    "costo": 70.0,
+    "codice_breve": "inc"
+  },
+  {
+    "id_prestazione": "ZZZZY0",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con  AllStone",
+    "costo": 40.0,
+    "codice_breve": "cema"
+  },
+  {
+    "id_prestazione": "ZZZZXZ",
+    "categoria": 1,
+    "nome_prestazione": "Endorale",
+    "costo": 25.0,
+    "codice_breve": "rx51"
+  },
+  {
+    "id_prestazione": "ZZZZXY",
+    "categoria": 3,
+    "nome_prestazione": "Medicazione con idrossido",
+    "costo": 25.0,
+    "codice_breve": "mid"
+  },
+  {
+    "id_prestazione": "ZZZZXX",
+    "categoria": 5,
+    "nome_prestazione": "Frenulectomia labbro",
+    "costo": 120.0,
+    "codice_breve": "fren"
+  },
+  {
+    "id_prestazione": "ZZZZXW",
+    "categoria": 1,
+    "nome_prestazione": "Bite Wing 2-3 quadrante",
+    "costo": 30.0,
+    "codice_breve": "bw"
+  },
+  {
+    "id_prestazione": "ZZZZXV",
+    "categoria": 8,
+    "nome_prestazione": "Gangio fuso",
+    "costo": 180.0,
+    "codice_breve": "gfus"
+  },
+  {
+    "id_prestazione": "ZZZZXU",
+    "categoria": 8,
+    "nome_prestazione": "Riparazione scheletro (saldatura)",
+    "costo": 150.0,
+    "codice_breve": "sald"
+  },
+  {
+    "id_prestazione": "ZZZZXT",
+    "categoria": 7,
+    "nome_prestazione": "Saldatura ponte",
+    "costo": 100.0,
+    "codice_breve": "sald"
+  },
+  {
+    "id_prestazione": "ZZZZXS",
+    "categoria": 7,
+    "nome_prestazione": "Faccetta resina su elemento fisso (Cesead)",
+    "costo": 130.0,
+    "codice_breve": "facc"
+  },
+  {
+    "id_prestazione": "ZZZZXR",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione complicata",
+    "costo": 110.0,
+    "codice_breve": "exco"
+  },
+  {
+    "id_prestazione": "ZZZZXQ",
+    "categoria": 8,
+    "nome_prestazione": "saldatura laser",
+    "costo": 150.0,
+    "codice_breve": "sald"
+  },
+  {
+    "id_prestazione": "ZZZZXP",
+    "categoria": 9,
+    "nome_prestazione": "Terapia mobile 1 anno",
+    "costo": 1800.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZXO",
+    "categoria": 2,
+    "nome_prestazione": "Ulteriore perno endocanalare",
+    "costo": 50.0,
+    "codice_breve": "upmp"
+  },
+  {
+    "id_prestazione": "ZZZZXN",
+    "categoria": 4,
+    "nome_prestazione": "Splintaggio con fibra  ( a dente )",
+    "costo": 40.0,
+    "codice_breve": "splf"
+  },
+  {
+    "id_prestazione": "ZZZZXM",
+    "categoria": 8,
+    "nome_prestazione": "OTK Sostituzione perno",
+    "costo": 60.0,
+    "codice_breve": "spot"
+  },
+  {
+    "id_prestazione": "ZZZZXL",
+    "categoria": 7,
+    "nome_prestazione": "Rimozione corona",
+    "costo": 20.0,
+    "codice_breve": "rimc"
+  },
+  {
+    "id_prestazione": "ZZZZXK",
+    "categoria": 7,
+    "nome_prestazione": "Rimozione ponte    ( se da tagliare ) + ribasatura",
+    "costo": 50.0,
+    "codice_breve": "rim"
+  },
+  {
+    "id_prestazione": "ZZZZXJ",
+    "categoria": 7,
+    "nome_prestazione": "Rivestimento Cesead su metallo",
+    "costo": 200.0,
+    "codice_breve": "riv"
+  },
+  {
+    "id_prestazione": "ZZZZXI",
+    "categoria": 9,
+    "nome_prestazione": "Placca di contenzione",
+    "costo": 250.0,
+    "codice_breve": "plco"
+  },
+  {
+    "id_prestazione": "ZZZZXH",
+    "categoria": 9,
+    "nome_prestazione": "Retainer",
+    "costo": 150.0,
+    "codice_breve": "ret"
+  },
+  {
+    "id_prestazione": "ZZZZXG",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione radice",
+    "costo": 80.0,
+    "codice_breve": "ex r"
+  },
+  {
+    "id_prestazione": "ZZZZXF",
+    "categoria": 8,
+    "nome_prestazione": "Riparazione con rinforzo protesi (rete metallica)",
+    "costo": 160.0,
+    "codice_breve": "rinf"
+  },
+  {
+    "id_prestazione": "ZZZZXE",
+    "categoria": 3,
+    "nome_prestazione": "Endodonzia 4 canali",
+    "costo": 360.0,
+    "codice_breve": "en4"
+  },
+  {
+    "id_prestazione": "ZZZZXD",
+    "categoria": 4,
+    "nome_prestazione": "Scovolini Krugg ( bustina da 10 pz )",
+    "costo": 10.0,
+    "codice_breve": "scov"
+  },
+  {
+    "id_prestazione": "ZZZZXC",
+    "categoria": 4,
+    "nome_prestazione": "Scovolini Butler ( bustina da 2 pz )",
+    "costo": 2.0,
+    "codice_breve": "scov"
+  },
+  {
+    "id_prestazione": "ZZZZXB",
+    "categoria": 7,
+    "nome_prestazione": "Corona ceramica su galvano",
+    "costo": 900.0,
+    "codice_breve": "mcg"
+  },
+  {
+    "id_prestazione": "ZZZZXA",
+    "categoria": 1,
+    "nome_prestazione": "Trattamento sbiancante con white strips",
+    "costo": 100.0,
+    "codice_breve": "sb"
+  },
+  {
+    "id_prestazione": "ZZZZX9",
+    "categoria": 4,
+    "nome_prestazione": "Scovolini completi con manico (cabon )",
+    "costo": 10.0,
+    "codice_breve": "scov"
+  },
+  {
+    "id_prestazione": "ZZZZX8",
+    "categoria": 7,
+    "nome_prestazione": "Perno-moncone fuso",
+    "costo": 150.0,
+    "codice_breve": "pmf"
+  },
+  {
+    "id_prestazione": "ZZZZX7",
+    "categoria": 4,
+    "nome_prestazione": "Gengivectomia (a dente)",
+    "costo": 85.0,
+    "codice_breve": "gvct"
+  },
+  {
+    "id_prestazione": "ZZZZX6",
+    "categoria": 1,
+    "nome_prestazione": "OTK Ricementazione perno radicolare",
+    "costo": 15.0,
+    "codice_breve": "cpot"
+  },
+  {
+    "id_prestazione": "ZZZZX5",
+    "categoria": 7,
+    "nome_prestazione": "Corona ceramica integrale",
+    "costo": 800.0,
+    "codice_breve": "cint"
+  },
+  {
+    "id_prestazione": "ZZZZX4",
+    "categoria": 1,
+    "nome_prestazione": "Visita ortodontica",
+    "costo": 50.0,
+    "codice_breve": "vort"
+  },
+  {
+    "id_prestazione": "ZZZZX3",
+    "categoria": 1,
+    "nome_prestazione": "Visita urgenza",
+    "costo": 40.0,
+    "codice_breve": "vurg"
+  },
+  {
+    "id_prestazione": "ZZZZX2",
+    "categoria": 8,
+    "nome_prestazione": "saldatura laser scheletrato (con impronta )",
+    "costo": 150.0,
+    "codice_breve": "sald"
+  },
+  {
+    "id_prestazione": "ZZZZX1",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione deciduo",
+    "costo": 40.0,
+    "codice_breve": "exde"
+  },
+  {
+    "id_prestazione": "ZZZZX0",
+    "categoria": 6,
+    "nome_prestazione": "Impianto mini per protesi totale",
+    "costo": 400.0,
+    "codice_breve": "impl"
+  },
+  {
+    "id_prestazione": "ZZZZWZ",
+    "categoria": 1,
+    "nome_prestazione": "Prima visita e preventivo",
+    "costo": 50.0,
+    "codice_breve": "vpre"
+  },
+  {
+    "id_prestazione": "ZZZZWY",
+    "categoria": 5,
+    "nome_prestazione": "Rimozione punti di sutura",
+    "costo": 10.0,
+    "codice_breve": "rims"
+  },
+  {
+    "id_prestazione": "ZZZZWX",
+    "categoria": 4,
+    "nome_prestazione": "Nozioni igiene orale",
+    "costo": 30.0,
+    "codice_breve": "nozi"
+  },
+  {
+    "id_prestazione": "ZZZZWW",
+    "categoria": 1,
+    "nome_prestazione": "Bite sec. Planas",
+    "costo": 1000.0,
+    "codice_breve": "bite"
+  },
+  {
+    "id_prestazione": "ZZZZWV",
+    "categoria": 8,
+    "nome_prestazione": "Dente rimesso su protesi",
+    "costo": 90.0,
+    "codice_breve": "dagg"
+  },
+  {
+    "id_prestazione": "ZZZZWU",
+    "categoria": 1,
+    "nome_prestazione": "Prima visita",
+    "costo": 0.0,
+    "codice_breve": "pv"
+  },
+  {
+    "id_prestazione": "ZZZZWT",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. IV M e D",
+    "costo": 160.0,
+    "codice_breve": "rc4"
+  },
+  {
+    "id_prestazione": "ZZZZWS",
+    "categoria": 7,
+    "nome_prestazione": "Preparazione pilastro e applicazione provvisorio r",
+    "costo": 100.0,
+    "codice_breve": "prov"
+  },
+  {
+    "id_prestazione": "ZZZZWR",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento (3 applicazioni)  trattamento complet",
+    "costo": 300.0,
+    "codice_breve": "sbi3"
+  },
+  {
+    "id_prestazione": "ZZZZWQ",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento (2 applicazioni)",
+    "costo": 200.0,
+    "codice_breve": "sbi2"
+  },
+  {
+    "id_prestazione": "ZZZZWP",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento (1 applicazione)",
+    "costo": 100.0,
+    "codice_breve": "sbi1"
+  },
+  {
+    "id_prestazione": "ZZZZWO",
+    "categoria": 5,
+    "nome_prestazione": "Apicectomia",
+    "costo": 150.0,
+    "codice_breve": "apc"
+  },
+  {
+    "id_prestazione": "ZZZZWN",
+    "categoria": 1,
+    "nome_prestazione": "impronta di studio",
+    "costo": 20.0,
+    "codice_breve": "imps"
+  },
+  {
+    "id_prestazione": "ZZZZWM",
+    "categoria": 7,
+    "nome_prestazione": "Aletta Maryland",
+    "costo": 100.0,
+    "codice_breve": "alma"
+  },
+  {
+    "id_prestazione": "ZZZZWL",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione comp. Estetica",
+    "costo": 200.0,
+    "codice_breve": "rces"
+  },
+  {
+    "id_prestazione": "ZZZZWK",
+    "categoria": 5,
+    "nome_prestazione": "Sutura",
+    "costo": 10.0,
+    "codice_breve": "sut"
+  },
+  {
+    "id_prestazione": "ZZZZWJ",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione provvisoria con temp bond",
+    "costo": 10.0,
+    "codice_breve": "cemp"
+  },
+  {
+    "id_prestazione": "ZZZZWI",
+    "categoria": 5,
+    "nome_prestazione": "Rizectomia distale",
+    "costo": 60.0,
+    "codice_breve": "rizd"
+  },
+  {
+    "id_prestazione": "ZZZZWH",
+    "categoria": 5,
+    "nome_prestazione": "Rizectomia mesiale",
+    "costo": 60.0,
+    "codice_breve": "rizm"
+  },
+  {
+    "id_prestazione": "ZZZZWG",
+    "categoria": 7,
+    "nome_prestazione": "Corona ceramica integrale zirconio",
+    "costo": 1000.0,
+    "codice_breve": "cint"
+  },
+  {
+    "id_prestazione": "ZZZZWF",
+    "categoria": 7,
+    "nome_prestazione": "Corona ceramica integrale empress",
+    "costo": 900.0,
+    "codice_breve": "cint"
+  },
+  {
+    "id_prestazione": "ZZZZWE",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con Fuji Plus",
+    "costo": 40.0,
+    "codice_breve": "cemf"
+  },
+  {
+    "id_prestazione": "ZZZZWD",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con Composito",
+    "costo": 40.0,
+    "codice_breve": "cemc"
+  },
+  {
+    "id_prestazione": "ZZZZWC",
+    "categoria": 4,
+    "nome_prestazione": "Cartella parodontale",
+    "costo": 50.0,
+    "codice_breve": "carp"
+  },
+  {
+    "id_prestazione": "ZZZZWB",
+    "categoria": 2,
+    "nome_prestazione": "Overlay composito",
+    "costo": 360.0,
+    "codice_breve": "ovl"
+  },
+  {
+    "id_prestazione": "ZZZZWA",
+    "categoria": 2,
+    "nome_prestazione": "Incappucciamento con MTA",
+    "costo": 120.0,
+    "codice_breve": "inc"
+  },
+  {
+    "id_prestazione": "ZZZZW9",
+    "categoria": 8,
+    "nome_prestazione": "Riparazione protesi rotta con impronta",
+    "costo": 100.0,
+    "codice_breve": "rip"
+  },
+  {
+    "id_prestazione": "ZZZZW8",
+    "categoria": 8,
+    "nome_prestazione": "Scheletrato",
+    "costo": 950.0,
+    "codice_breve": "sche"
+  },
+  {
+    "id_prestazione": "ZZZZW7",
+    "categoria": 8,
+    "nome_prestazione": "Dente su scheletro con saldatura appoggio",
+    "costo": 220.0,
+    "codice_breve": "dsch"
+  },
+  {
+    "id_prestazione": "ZZZZW6",
+    "categoria": 7,
+    "nome_prestazione": "Provvisorio Richmond resina acrilica",
+    "costo": 180.0,
+    "codice_breve": "prov"
+  },
+  {
+    "id_prestazione": "ZZZZW5",
+    "categoria": 1,
+    "nome_prestazione": "Controllo \"Planas\" con molaggio selettivo",
+    "costo": 60.0,
+    "codice_breve": "cpla"
+  },
+  {
+    "id_prestazione": "ZZZZW4",
+    "categoria": 8,
+    "nome_prestazione": "Scheletrato monolaterale",
+    "costo": 480.0,
+    "codice_breve": "sche"
+  },
+  {
+    "id_prestazione": "ZZZZW3",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con EnaCem",
+    "costo": 40.0,
+    "codice_breve": "ceme"
+  },
+  {
+    "id_prestazione": "ZZZZW2",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con UniCem",
+    "costo": 40.0,
+    "codice_breve": "cemu"
+  },
+  {
+    "id_prestazione": "ZZZZW1",
+    "categoria": 1,
+    "nome_prestazione": "Ortopantomografia",
+    "costo": 60.0,
+    "codice_breve": "opt"
+  },
+  {
+    "id_prestazione": "ZZZZW0",
+    "categoria": 7,
+    "nome_prestazione": "Faccetta resina su elemento fisso (Composito)",
+    "costo": 100.0,
+    "codice_breve": "facc"
+  },
+  {
+    "id_prestazione": "ZZZZVZ",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione moncone con composito",
+    "costo": 50.0,
+    "codice_breve": "ricm"
+  },
+  {
+    "id_prestazione": "ZZZZVY",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione moncone con Unicem",
+    "costo": 50.0,
+    "codice_breve": "ricm"
+  },
+  {
+    "id_prestazione": "ZZZZVX",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione moncone con Fuji 2",
+    "costo": 50.0,
+    "codice_breve": "ricm"
+  },
+  {
+    "id_prestazione": "ZZZZVW",
+    "categoria": 1,
+    "nome_prestazione": "Brillantino (applicazione)",
+    "costo": 35.0,
+    "codice_breve": "bri"
+  },
+  {
+    "id_prestazione": "ZZZZVV",
+    "categoria": 5,
+    "nome_prestazione": "Esposizione chirurgica dente incluso",
+    "costo": 200.0,
+    "codice_breve": "expc"
+  },
+  {
+    "id_prestazione": "ZZZZVU",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione fuji occlusale",
+    "costo": 50.0,
+    "codice_breve": "rf1"
+  },
+  {
+    "id_prestazione": "ZZZZVT",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione fuji OD, MO",
+    "costo": 50.0,
+    "codice_breve": "rf2"
+  },
+  {
+    "id_prestazione": "ZZZZVS",
+    "categoria": 7,
+    "nome_prestazione": "Corona in resina",
+    "costo": 220.0,
+    "codice_breve": "cr"
+  },
+  {
+    "id_prestazione": "ZZZZVR",
+    "categoria": 7,
+    "nome_prestazione": "Allungamento bordo corona (resina)",
+    "costo": 40.0,
+    "codice_breve": "albc"
+  },
+  {
+    "id_prestazione": "ZZZZVQ",
+    "categoria": 2,
+    "nome_prestazione": "rpe - Ricostruzione dente pre-endo",
+    "costo": 30.0,
+    "codice_breve": "rpe"
+  },
+  {
+    "id_prestazione": "ZZZZVP",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione pre-endo",
+    "costo": 50.0,
+    "codice_breve": "rcp"
+  },
+  {
+    "id_prestazione": "ZZZZVO",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento domiciliare 8 siringhe",
+    "costo": 200.0,
+    "codice_breve": "sbi8"
+  },
+  {
+    "id_prestazione": "ZZZZVN",
+    "categoria": 1,
+    "nome_prestazione": "Mascherina per sbiancamento",
+    "costo": 35.0,
+    "codice_breve": "msb"
+  },
+  {
+    "id_prestazione": "ZZZZVM",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione con pasta pasta ( Virage )",
+    "costo": 150.0,
+    "codice_breve": "rcpp"
+  },
+  {
+    "id_prestazione": "ZZZZVL",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione con pasta pasta ( Luxacore )",
+    "costo": 150.0,
+    "codice_breve": "rcpp"
+  },
+  {
+    "id_prestazione": "ZZZZVK",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione con pasta pasta ( XXXX )",
+    "costo": 150.0,
+    "codice_breve": "rcpp"
+  },
+  {
+    "id_prestazione": "ZZZZVJ",
+    "categoria": 2,
+    "nome_prestazione": "Sigillatura in composito",
+    "costo": 60.0,
+    "codice_breve": "sigc"
+  },
+  {
+    "id_prestazione": "ZZZZVI",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione fuji cervicale",
+    "costo": 50.0,
+    "codice_breve": "rf5"
+  },
+  {
+    "id_prestazione": "ZZZZVH",
+    "categoria": 8,
+    "nome_prestazione": "Artiglio (attacco completo)",
+    "costo": 100.0,
+    "codice_breve": "aac"
+  },
+  {
+    "id_prestazione": "ZZZZVG",
+    "categoria": 8,
+    "nome_prestazione": "Artiglio (sostituzione interno)",
+    "costo": 50.0,
+    "codice_breve": "asi"
+  },
+  {
+    "id_prestazione": "ZZZZVF",
+    "categoria": 6,
+    "nome_prestazione": "nl Neoss Locator",
+    "costo": 250.0,
+    "codice_breve": "nloc"
+  },
+  {
+    "id_prestazione": "ZZZZVE",
+    "categoria": 6,
+    "nome_prestazione": "Neoss Impianto",
+    "costo": 850.0,
+    "codice_breve": "nimp"
+  },
+  {
+    "id_prestazione": "ZZZZVD",
+    "categoria": 3,
+    "nome_prestazione": "Medicazione intermedia idrossido di calcio",
+    "costo": 25.0,
+    "codice_breve": "mie"
+  },
+  {
+    "id_prestazione": "ZZZZVC",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione fuji OD, MO con idrossido",
+    "costo": 60.0,
+    "codice_breve": "rfi"
+  },
+  {
+    "id_prestazione": "ZZZZVB",
+    "categoria": 8,
+    "nome_prestazione": "Valplast monolaterale",
+    "costo": 500.0,
+    "codice_breve": "valm"
+  },
+  {
+    "id_prestazione": "ZZZZVA",
+    "categoria": 8,
+    "nome_prestazione": "Valplast bilaterale",
+    "costo": 1200.0,
+    "codice_breve": "valb"
+  },
+  {
+    "id_prestazione": "ZZZZV9",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con Gradia",
+    "costo": 40.0,
+    "codice_breve": "cemg"
+  },
+  {
+    "id_prestazione": "ZZZZV8",
+    "categoria": 6,
+    "nome_prestazione": "Miss Impianto",
+    "costo": 850.0,
+    "codice_breve": "mimp"
+  },
+  {
+    "id_prestazione": "ZZZZV7",
+    "categoria": 7,
+    "nome_prestazione": "Corona Cerec ceramica integrale",
+    "costo": 600.0,
+    "codice_breve": "ccc"
+  },
+  {
+    "id_prestazione": "ZZZZV6",
+    "categoria": 2,
+    "nome_prestazione": "Rialzo composito diretto 1",
+    "costo": 100.0,
+    "codice_breve": "rcd1"
+  },
+  {
+    "id_prestazione": "ZZZZV5",
+    "categoria": 2,
+    "nome_prestazione": "Rialzo composito diretto 2",
+    "costo": 150.0,
+    "codice_breve": "rcd2"
+  },
+  {
+    "id_prestazione": "ZZZZV4",
+    "categoria": 6,
+    "nome_prestazione": "Locator",
+    "costo": 300.0,
+    "codice_breve": "loc"
+  },
+  {
+    "id_prestazione": "ZZZZV3",
+    "categoria": 7,
+    "nome_prestazione": "Corona Cerec su impianto",
+    "costo": 600.0,
+    "codice_breve": "mcci"
+  },
+  {
+    "id_prestazione": "ZZZZV2",
+    "categoria": 8,
+    "nome_prestazione": "Scheletrato misto con ganci estetici",
+    "costo": 1600.0,
+    "codice_breve": "schm"
+  },
+  {
+    "id_prestazione": "ZZZZV1",
+    "categoria": 8,
+    "nome_prestazione": "Protesi in nylon monolaterale base",
+    "costo": 600.0,
+    "codice_breve": "pnmb"
+  },
+  {
+    "id_prestazione": "ZZZZV0",
+    "categoria": 8,
+    "nome_prestazione": "Protesi in nylon bilaterale base",
+    "costo": 900.0,
+    "codice_breve": "pnbb"
+  },
+  {
+    "id_prestazione": "ZZZZUZ",
+    "categoria": 9,
+    "nome_prestazione": "Terapia espansore rapido",
+    "costo": 1800.0,
+    "codice_breve": "orte"
+  },
+  {
+    "id_prestazione": "ZZZZUY",
+    "categoria": 2,
+    "nome_prestazione": "Overlay Cerec composito",
+    "costo": 300.0,
+    "codice_breve": "ovl"
+  },
+  {
+    "id_prestazione": "ZZZZUX",
+    "categoria": 6,
+    "nome_prestazione": "Futur Implant Impianto",
+    "costo": 850.0,
+    "codice_breve": "mimp"
+  },
+  {
+    "id_prestazione": "ZZZZUW",
+    "categoria": 6,
+    "nome_prestazione": "Futur Implant Locator",
+    "costo": 300.0,
+    "codice_breve": "fil"
+  },
+  {
+    "id_prestazione": "ZZZZUV",
+    "categoria": 8,
+    "nome_prestazione": "Attacchi scheletrato Artiglio",
+    "costo": 40.0,
+    "codice_breve": "atts"
+  },
+  {
+    "id_prestazione": "ZZZZUU",
+    "categoria": 2,
+    "nome_prestazione": "Ricostruzione calcimol occlusale",
+    "costo": 50.0,
+    "codice_breve": "rf1c"
+  },
+  {
+    "id_prestazione": "ZZZZUT",
+    "categoria": 6,
+    "nome_prestazione": "Locator Sostituzione cappetta",
+    "costo": 60.0,
+    "codice_breve": "sclo"
+  },
+  {
+    "id_prestazione": "ZZZZUS",
+    "categoria": 6,
+    "nome_prestazione": "OT Equator",
+    "costo": 300.0,
+    "codice_breve": "oteq"
+  },
+  {
+    "id_prestazione": "ZZZZUR",
+    "categoria": 1,
+    "nome_prestazione": "Visita di controllo bite",
+    "costo": 50.0,
+    "codice_breve": "vcon"
+  },
+  {
+    "id_prestazione": "ZZZZUQ",
+    "categoria": 3,
+    "nome_prestazione": "Medicazione con iodoformica",
+    "costo": 25.0,
+    "codice_breve": "mio"
+  },
+  {
+    "id_prestazione": "ZZZZUP",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori Nuvola caso A",
+    "costo": 1500.0,
+    "codice_breve": "nuvA"
+  },
+  {
+    "id_prestazione": "ZZZZUO",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori Nuvola caso B",
+    "costo": 2600.0,
+    "codice_breve": "nuvB"
+  },
+  {
+    "id_prestazione": "ZZZZUN",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori Nuvola caso C",
+    "costo": 3600.0,
+    "codice_breve": "nuvC"
+  },
+  {
+    "id_prestazione": "ZZZZUM",
+    "categoria": 6,
+    "nome_prestazione": "Impianto endoosseo",
+    "costo": 850.0,
+    "codice_breve": "impl"
+  },
+  {
+    "id_prestazione": "ZZZZUL",
+    "categoria": 1,
+    "nome_prestazione": "_Prestazione no listino",
+    "costo": null,
+    "codice_breve": "NOLI"
+  },
+  {
+    "id_prestazione": "ZZZZUK",
+    "categoria": 1,
+    "nome_prestazione": "endodonzia 4 canali + rc",
+    "costo": null,
+    "codice_breve": "en4"
+  },
+  {
+    "id_prestazione": "ZZZZUF",
+    "categoria": 1,
+    "nome_prestazione": "ott con fuji2",
+    "costo": null,
+    "codice_breve": "rc"
+  },
+  {
+    "id_prestazione": "ZZZZUD",
+    "categoria": 1,
+    "nome_prestazione": "Overlay Cerec",
+    "costo": null,
+    "codice_breve": "ovlc"
+  },
+  {
+    "id_prestazione": "ZZZZU9",
+    "categoria": 1,
+    "nome_prestazione": "Ablazione tartaro",
+    "costo": null,
+    "codice_breve": "D07"
+  },
+  {
+    "id_prestazione": "ZZZZU8",
+    "categoria": 1,
+    "nome_prestazione": "Bite Wing 1-4 quadrante",
+    "costo": null,
+    "codice_breve": "D08"
+  },
+  {
+    "id_prestazione": "ZZZZU7",
+    "categoria": 1,
+    "nome_prestazione": "Medicazione",
+    "costo": null,
+    "codice_breve": "med"
+  },
+  {
+    "id_prestazione": "ZZZZU4",
+    "categoria": 1,
+    "nome_prestazione": "Estrazione radice inclusa",
+    "costo": null,
+    "codice_breve": "exra"
+  },
+  {
+    "id_prestazione": "ZZZZU3",
+    "categoria": 1,
+    "nome_prestazione": "Trattamento desensibilizzante",
+    "costo": null,
+    "codice_breve": "tds"
+  },
+  {
+    "id_prestazione": "ZZZZU2",
+    "categoria": 1,
+    "nome_prestazione": "Ponte su intarsi",
+    "costo": null,
+    "codice_breve": "pint"
+  },
+  {
+    "id_prestazione": "ZZZZU1",
+    "categoria": 8,
+    "nome_prestazione": "consegnato scheletro",
+    "costo": 0.0,
+    "codice_breve": "sche"
+  },
+  {
+    "id_prestazione": "ZZZZTZ",
+    "categoria": 1,
+    "nome_prestazione": "Ponte oro-resina",
+    "costo": null,
+    "codice_breve": "por"
+  },
+  {
+    "id_prestazione": "ZZZZTY",
+    "categoria": 1,
+    "nome_prestazione": "rcv",
+    "costo": null,
+    "codice_breve": "rcv"
+  },
+  {
+    "id_prestazione": "ZZZZTX",
+    "categoria": 1,
+    "nome_prestazione": "rialzo occlusale in composito",
+    "costo": null,
+    "codice_breve": "rioc"
+  },
+  {
+    "id_prestazione": "ZZZZTW",
+    "categoria": 1,
+    "nome_prestazione": "rcpre endo mesiale",
+    "costo": null,
+    "codice_breve": "rcpe"
+  },
+  {
+    "id_prestazione": "ZZZZTV",
+    "categoria": 1,
+    "nome_prestazione": "Visita mentadent",
+    "costo": null,
+    "codice_breve": "vme"
+  },
+  {
+    "id_prestazione": "ZZZZTU",
+    "categoria": 1,
+    "nome_prestazione": "Estrazione complicata",
+    "costo": 0.0,
+    "codice_breve": "extc"
+  },
+  {
+    "id_prestazione": "ZZZZTS",
+    "categoria": 1,
+    "nome_prestazione": "sms di compleanno",
+    "costo": null,
+    "codice_breve": "sms"
+  },
+  {
+    "id_prestazione": "ZZZZTR",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione temporanea con temp bond",
+    "costo": 0.0,
+    "codice_breve": "cemt"
+  },
+  {
+    "id_prestazione": "ZZZZTQ",
+    "categoria": 1,
+    "nome_prestazione": "Ablazione tartaro  (dott.ssa gori)",
+    "costo": null,
+    "codice_breve": "appr"
+  },
+  {
+    "id_prestazione": "ZZZZTP",
+    "categoria": 1,
+    "nome_prestazione": "curettage radicolare",
+    "costo": 0.0,
+    "codice_breve": "cur"
+  },
+  {
+    "id_prestazione": "ZZZZTO",
+    "categoria": 1,
+    "nome_prestazione": "Ablazione tartaro  (dott.ssa gori)",
+    "costo": null,
+    "codice_breve": "i"
+  },
+  {
+    "id_prestazione": "ZZZZTN",
+    "categoria": 1,
+    "nome_prestazione": "Endorale controllo impianto",
+    "costo": 0.0,
+    "codice_breve": "eci"
+  },
+  {
+    "id_prestazione": "ZZZZTL",
+    "categoria": 1,
+    "nome_prestazione": "ponte ceramica integrale zirconio",
+    "costo": null,
+    "codice_breve": "pint"
+  },
+  {
+    "id_prestazione": "ZZZZTJ",
+    "categoria": 1,
+    "nome_prestazione": "rcvi",
+    "costo": null,
+    "codice_breve": "rcvi"
+  },
+  {
+    "id_prestazione": "ZZZZTI",
+    "categoria": 1,
+    "nome_prestazione": "perno titanio",
+    "costo": null,
+    "codice_breve": "pmt"
+  },
+  {
+    "id_prestazione": "ZZZZTH",
+    "categoria": 1,
+    "nome_prestazione": "Prima visita",
+    "costo": null,
+    "codice_breve": "50"
+  },
+  {
+    "id_prestazione": "ZZZZTG",
+    "categoria": 2,
+    "nome_prestazione": "Inlay Cerec",
+    "costo": 0.0,
+    "codice_breve": "ince"
+  },
+  {
+    "id_prestazione": "ZZZZTF",
+    "categoria": 1,
+    "nome_prestazione": "sphero-block Rhein",
+    "costo": null,
+    "codice_breve": "spb"
+  },
+  {
+    "id_prestazione": "ZZZZTE",
+    "categoria": 1,
+    "nome_prestazione": "postdam",
+    "costo": null,
+    "codice_breve": "post"
+  },
+  {
+    "id_prestazione": "ZZZZTC",
+    "categoria": 1,
+    "nome_prestazione": "Ot Equator Rhein",
+    "costo": null,
+    "codice_breve": "oteq"
+  },
+  {
+    "id_prestazione": "ZZZZTB",
+    "categoria": 1,
+    "nome_prestazione": "Ponte resina composita",
+    "costo": null,
+    "codice_breve": "pres"
+  },
+  {
+    "id_prestazione": "ZZZZST",
+    "categoria": 1,
+    "nome_prestazione": "Impronta alginato",
+    "costo": 0.0,
+    "codice_breve": "impa"
+  },
+  {
+    "id_prestazione": "ZZZZSL",
+    "categoria": 1,
+    "nome_prestazione": "Impronta impregum",
+    "costo": 0.0,
+    "codice_breve": "impi"
+  },
+  {
+    "id_prestazione": "ZZZZSK",
+    "categoria": 9,
+    "nome_prestazione": "Terapia barra espansore",
+    "costo": 250.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZSJ",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa 18 mesi",
+    "costo": 3000.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZSI",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa 24 mesi",
+    "costo": 4200.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZSH",
+    "categoria": 9,
+    "nome_prestazione": "Supplemento estetica terapia fissa",
+    "costo": 350.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZSG",
+    "categoria": 9,
+    "nome_prestazione": "Terapia mobile 18 mesi",
+    "costo": 2700.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZSF",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Mobile 3 anni",
+    "costo": 3000.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZSE",
+    "categoria": 7,
+    "nome_prestazione": "Corona in metal-ceramica",
+    "costo": 700.0,
+    "codice_breve": "cmc"
+  },
+  {
+    "id_prestazione": "ZZZZSD",
+    "categoria": 1,
+    "nome_prestazione": "Bite termostampato placca",
+    "costo": 400.0,
+    "codice_breve": "btp"
+  },
+  {
+    "id_prestazione": "ZZZZSC",
+    "categoria": 1,
+    "nome_prestazione": "Controllo bite termostampato placca",
+    "costo": 40.0,
+    "codice_breve": "cbt"
+  },
+  {
+    "id_prestazione": "ZZZZSB",
+    "categoria": 6,
+    "nome_prestazione": "Riempitivo",
+    "costo": 200.0,
+    "codice_breve": "RIEM"
+  },
+  {
+    "id_prestazione": "ZZZZRQ",
+    "categoria": 9,
+    "nome_prestazione": "Scannerizzazione arcate per valutazione caso",
+    "costo": 0.0,
+    "codice_breve": "scan"
+  },
+  {
+    "id_prestazione": "ZZZZRJ",
+    "categoria": 3,
+    "nome_prestazione": "Sbiancamento interno",
+    "costo": 150.0,
+    "codice_breve": "sbii"
+  },
+  {
+    "id_prestazione": "ZZZZRI",
+    "categoria": 1,
+    "nome_prestazione": "febbre",
+    "costo": 0.0,
+    "codice_breve": "febb"
+  },
+  {
+    "id_prestazione": "ZZZZRH",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa estetica 18 mesi con contenzioni",
+    "costo": 4000.0,
+    "codice_breve": "tfe"
+  },
+  {
+    "id_prestazione": "ZZZZRG",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Nuvola Axel Freedom",
+    "costo": 300.0,
+    "codice_breve": "AXEL"
+  },
+  {
+    "id_prestazione": "ZZZZRF",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori Nuvola caso C Plus",
+    "costo": 4100.0,
+    "codice_breve": "nuvP"
+  },
+  {
+    "id_prestazione": "ZZZZRE",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Nuvola Axel",
+    "costo": 300.0,
+    "codice_breve": "axel"
+  },
+  {
+    "id_prestazione": "ZZZZRD",
+    "categoria": 1,
+    "nome_prestazione": "Bite Planas",
+    "costo": 500.0,
+    "codice_breve": "Byte"
+  },
+  {
+    "id_prestazione": "ZZZZRC",
+    "categoria": 1,
+    "nome_prestazione": "Bite-wing 1-4",
+    "costo": 30.0,
+    "codice_breve": "bw14"
+  },
+  {
+    "id_prestazione": "ZZZZRB",
+    "categoria": 1,
+    "nome_prestazione": "Bite wing 2-3",
+    "costo": 0.0,
+    "codice_breve": "bw23"
+  },
+  {
+    "id_prestazione": "ZZZZQV",
+    "categoria": 8,
+    "nome_prestazione": "Riparazione con barra di rinforzo",
+    "costo": 160.0,
+    "codice_breve": "ripb"
+  },
+  {
+    "id_prestazione": "ZZZZQG",
+    "categoria": 5,
+    "nome_prestazione": "Estrazione frammento dente",
+    "costo": 80.0,
+    "codice_breve": "exf"
+  },
+  {
+    "id_prestazione": "ZZZZQF",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura Protesi Totale Superiore",
+    "costo": 300.0,
+    "codice_breve": "ribs"
+  },
+  {
+    "id_prestazione": "ZZZZQE",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura Protesi Totale Inferiore",
+    "costo": 300.0,
+    "codice_breve": "ribi"
+  },
+  {
+    "id_prestazione": "ZZZZQD",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura Selle Scheletrato Superiore",
+    "costo": 300.0,
+    "codice_breve": "riss"
+  },
+  {
+    "id_prestazione": "ZZZZQC",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura Selle Scheletrato Inferiore",
+    "costo": 300.0,
+    "codice_breve": "risi"
+  },
+  {
+    "id_prestazione": "ZZZZQB",
+    "categoria": 8,
+    "nome_prestazione": "Protesi Totale Superiore",
+    "costo": 1200.0,
+    "codice_breve": "pros"
+  },
+  {
+    "id_prestazione": "ZZZZPO",
+    "categoria": 8,
+    "nome_prestazione": "Protesi Totale Inferiore",
+    "costo": 1200.0,
+    "codice_breve": "proi"
+  },
+  {
+    "id_prestazione": "ZZZZPM",
+    "categoria": 4,
+    "nome_prestazione": "Levigatura per elemento",
+    "costo": 40.0,
+    "codice_breve": "LEV"
+  },
+  {
+    "id_prestazione": "ZZZZPH",
+    "categoria": 2,
+    "nome_prestazione": "Rialzo composito diretto",
+    "costo": 120.0,
+    "codice_breve": "rcd"
+  },
+  {
+    "id_prestazione": "ZZZZPG",
+    "categoria": 8,
+    "nome_prestazione": "Scheletrato semplice superiore",
+    "costo": 1100.0,
+    "codice_breve": "schs"
+  },
+  {
+    "id_prestazione": "ZZZZPF",
+    "categoria": 8,
+    "nome_prestazione": "Scheletrato semplice inferiore",
+    "costo": 1100.0,
+    "codice_breve": "schi"
+  },
+  {
+    "id_prestazione": "ZZZZPE",
+    "categoria": 1,
+    "nome_prestazione": "Endorale",
+    "costo": 25.0,
+    "codice_breve": "rx44"
+  },
+  {
+    "id_prestazione": "ZZZZPD",
+    "categoria": 1,
+    "nome_prestazione": "Endorale",
+    "costo": 25.0,
+    "codice_breve": "rx59"
+  },
+  {
+    "id_prestazione": "ZZZZPC",
+    "categoria": 1,
+    "nome_prestazione": "Endorale",
+    "costo": 25.0,
+    "codice_breve": "rx88"
+  },
+  {
+    "id_prestazione": "ZZZZPB",
+    "categoria": 1,
+    "nome_prestazione": "Bite Wing 23",
+    "costo": 30.0,
+    "codice_breve": "bw23"
+  },
+  {
+    "id_prestazione": "ZZZZOO",
+    "categoria": 1,
+    "nome_prestazione": "Bite Wing 14",
+    "costo": 30.0,
+    "codice_breve": "bw14"
+  },
+  {
+    "id_prestazione": "ZZZZOK",
+    "categoria": 7,
+    "nome_prestazione": "Faccetta in disilicato",
+    "costo": 700.0,
+    "codice_breve": "facd"
+  },
+  {
+    "id_prestazione": "ZZZZOI",
+    "categoria": 9,
+    "nome_prestazione": "Terapia espansore rapido + maschera",
+    "costo": 2500.0,
+    "codice_breve": "term"
+  },
+  {
+    "id_prestazione": "ZZZZOH",
+    "categoria": 6,
+    "nome_prestazione": "MUA",
+    "costo": 200.0,
+    "codice_breve": "mua"
+  },
+  {
+    "id_prestazione": "ZZZZOG",
+    "categoria": 8,
+    "nome_prestazione": "Toronto Protesi Provvisoria",
+    "costo": 2000.0,
+    "codice_breve": "torp"
+  },
+  {
+    "id_prestazione": "ZZZZOF",
+    "categoria": 8,
+    "nome_prestazione": "Toronto Protesi Definitiva",
+    "costo": 4500.0,
+    "codice_breve": "tord"
+  },
+  {
+    "id_prestazione": "ZZZZOE",
+    "categoria": 9,
+    "nome_prestazione": "Pista indiretta Planas",
+    "costo": 100.0,
+    "codice_breve": "PIP"
+  },
+  {
+    "id_prestazione": "ZZZZOD",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento Click Blancone",
+    "costo": 50.0,
+    "codice_breve": "clik"
+  },
+  {
+    "id_prestazione": "ZZZZOC",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Invisalign",
+    "costo": 3300.0,
+    "codice_breve": "invi"
+  },
+  {
+    "id_prestazione": "ZZZZOB",
+    "categoria": 1,
+    "nome_prestazione": "Bite Placca di protezione",
+    "costo": 250.0,
+    "codice_breve": "bpp"
+  },
+  {
+    "id_prestazione": "ZZZZNV",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura a freddo in studio",
+    "costo": 80.0,
+    "codice_breve": "ribf"
+  },
+  {
+    "id_prestazione": "ZZZZNO",
+    "categoria": 6,
+    "nome_prestazione": "Rialzo transalveolare",
+    "costo": 340.0,
+    "codice_breve": "rta"
+  },
+  {
+    "id_prestazione": "ZZZZNK",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento interno",
+    "costo": 150.0,
+    "codice_breve": "sbii"
+  },
+  {
+    "id_prestazione": "ZZZZNJ",
+    "categoria": 4,
+    "nome_prestazione": "Collagene",
+    "costo": 50.0,
+    "codice_breve": "coll"
+  },
+  {
+    "id_prestazione": "ZZZZNI",
+    "categoria": 8,
+    "nome_prestazione": "Protesi Parziale Provv Sup con 6 denti",
+    "costo": 500.0,
+    "codice_breve": "ppp6"
+  },
+  {
+    "id_prestazione": "ZZZZNH",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento Blancone Touch 3 applicazioni",
+    "costo": 150.0,
+    "codice_breve": "tou3"
+  },
+  {
+    "id_prestazione": "ZZZZNG",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Invisalign Adulto",
+    "costo": 2000.0,
+    "codice_breve": "INVA"
+  },
+  {
+    "id_prestazione": "ZZZZNF",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Invisalign Bambino",
+    "costo": 0.0,
+    "codice_breve": "INVB"
+  },
+  {
+    "id_prestazione": "ZZZZNE",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa",
+    "costo": 600.0,
+    "codice_breve": "FISS"
+  },
+  {
+    "id_prestazione": "ZZZZND",
+    "categoria": 8,
+    "nome_prestazione": "Gancio Estetico in resina",
+    "costo": 200.0,
+    "codice_breve": "Gae"
+  },
+  {
+    "id_prestazione": "ZZZZNC",
+    "categoria": 8,
+    "nome_prestazione": "Riparazione Toronto con modifica",
+    "costo": 250.0,
+    "codice_breve": "rito"
+  },
+  {
+    "id_prestazione": "ZZZZNB",
+    "categoria": 1,
+    "nome_prestazione": "Richiamo per igiene",
+    "costo": 0.0,
+    "codice_breve": "rici"
+  },
+  {
+    "id_prestazione": "ZZZZMQ",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa",
+    "costo": 500.0,
+    "codice_breve": "orto"
+  },
+  {
+    "id_prestazione": "ZZZZMI",
+    "categoria": 6,
+    "nome_prestazione": "Guida chirurgica fino a 2 denti",
+    "costo": 250.0,
+    "codice_breve": "gc2d"
+  },
+  {
+    "id_prestazione": "ZZZZMH",
+    "categoria": 6,
+    "nome_prestazione": "Impianto C1 V3",
+    "costo": 850.0,
+    "codice_breve": "c1v3"
+  },
+  {
+    "id_prestazione": "ZZZZMG",
+    "categoria": 6,
+    "nome_prestazione": "Moncone Connect",
+    "costo": 200.0,
+    "codice_breve": "uaco"
+  },
+  {
+    "id_prestazione": "ZZZZMF",
+    "categoria": 8,
+    "nome_prestazione": "Ritocco Protesi",
+    "costo": 30.0,
+    "codice_breve": "RITO"
+  },
+  {
+    "id_prestazione": "ZZZZME",
+    "categoria": 6,
+    "nome_prestazione": "Smart Box",
+    "costo": 70.0,
+    "codice_breve": "Smab"
+  },
+  {
+    "id_prestazione": "ZZZZMD",
+    "categoria": 7,
+    "nome_prestazione": "Riparazione corona ceramica con composito",
+    "costo": 100.0,
+    "codice_breve": "rccc"
+  },
+  {
+    "id_prestazione": "ZZZZMC",
+    "categoria": 7,
+    "nome_prestazione": "Corona integrale in disilicato",
+    "costo": 700.0,
+    "codice_breve": "disi"
+  },
+  {
+    "id_prestazione": "ZZZZMB",
+    "categoria": 8,
+    "nome_prestazione": "Barra fresata su impianti",
+    "costo": 2500.0,
+    "codice_breve": "bfsi"
+  },
+  {
+    "id_prestazione": "ZZZZLP",
+    "categoria": 8,
+    "nome_prestazione": "Torretta per Toronto",
+    "costo": 100.0,
+    "codice_breve": "torr"
+  },
+  {
+    "id_prestazione": "ZZZZLI",
+    "categoria": 6,
+    "nome_prestazione": "Chirurgia guidata",
+    "costo": 1800.0,
+    "codice_breve": "guid"
+  },
+  {
+    "id_prestazione": "ZZZZLH",
+    "categoria": 1,
+    "nome_prestazione": "Controllo \"Planas\"  per tre mesi ogni 10 giorni",
+    "costo": 360.0,
+    "codice_breve": "cplt"
+  },
+  {
+    "id_prestazione": "ZZZZLG",
+    "categoria": 8,
+    "nome_prestazione": "Protesi Parziale resina 8 denti",
+    "costo": 1000.0,
+    "codice_breve": "ppr8"
+  },
+  {
+    "id_prestazione": "ZZZZLF",
+    "categoria": 1,
+    "nome_prestazione": "Endorale",
+    "costo": 25.0,
+    "codice_breve": "rx35"
+  },
+  {
+    "id_prestazione": "ZZZZLE",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Espansore Rapido",
+    "costo": 1800.0,
+    "codice_breve": "esp"
+  },
+  {
+    "id_prestazione": "ZZZZLD",
+    "categoria": 9,
+    "nome_prestazione": "Terapia mobile",
+    "costo": 500.0,
+    "codice_breve": "mob"
+  },
+  {
+    "id_prestazione": "ZZZZLC",
+    "categoria": 9,
+    "nome_prestazione": "Terapia espansore rapido con attacchi bianchi",
+    "costo": 2000.0,
+    "codice_breve": "espb"
+  },
+  {
+    "id_prestazione": "ZZZZLB",
+    "categoria": 8,
+    "nome_prestazione": "Protesi parziale resina fino a 3 denti",
+    "costo": 300.0,
+    "codice_breve": "ppr3"
+  },
+  {
+    "id_prestazione": "ZZZZKO",
+    "categoria": 6,
+    "nome_prestazione": "Vite per Toronto",
+    "costo": 10.0,
+    "codice_breve": "vitt"
+  },
+  {
+    "id_prestazione": "ZZZZKN",
+    "categoria": 1,
+    "nome_prestazione": "Scansione arcate",
+    "costo": 100.0,
+    "codice_breve": "scan"
+  },
+  {
+    "id_prestazione": "ZZZZKK",
+    "categoria": 6,
+    "nome_prestazione": "Sostituzione porta cappetta per Locator",
+    "costo": 40.0,
+    "codice_breve": "spcl"
+  },
+  {
+    "id_prestazione": "ZZZZKJ",
+    "categoria": 9,
+    "nome_prestazione": "Attivatore Vitruvia",
+    "costo": 250.0,
+    "codice_breve": "vitr"
+  },
+  {
+    "id_prestazione": "ZZZZKI",
+    "categoria": 9,
+    "nome_prestazione": "Rialzi composito 5 denti",
+    "costo": 250.0,
+    "codice_breve": "ria5"
+  },
+  {
+    "id_prestazione": "ZZZZKH",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento Blancone Ultra",
+    "costo": 180.0,
+    "codice_breve": "ultr"
+  },
+  {
+    "id_prestazione": "ZZZZKG",
+    "categoria": 1,
+    "nome_prestazione": "Dispositivo avanzamento mandibolare",
+    "costo": 600.0,
+    "codice_breve": "mad"
+  },
+  {
+    "id_prestazione": "ZZZZKF",
+    "categoria": 4,
+    "nome_prestazione": "Ablazione tartaro 1 arcata",
+    "costo": 45.0,
+    "codice_breve": "abl1"
+  },
+  {
+    "id_prestazione": "ZZZZKE",
+    "categoria": 8,
+    "nome_prestazione": "Rinforzo metallico a barra",
+    "costo": 220.0,
+    "codice_breve": "rmb"
+  },
+  {
+    "id_prestazione": "ZZZZKD",
+    "categoria": 9,
+    "nome_prestazione": "Placca di contenzione Stampata superiore",
+    "costo": 180.0,
+    "codice_breve": "plss"
+  },
+  {
+    "id_prestazione": "ZZZZKC",
+    "categoria": 9,
+    "nome_prestazione": "Placca di contenzione Stampata inferiore",
+    "costo": 180.0,
+    "codice_breve": "plsi"
+  },
+  {
+    "id_prestazione": "ZZZZKB",
+    "categoria": 9,
+    "nome_prestazione": "Froggy",
+    "costo": 250.0,
+    "codice_breve": "Frog"
+  },
+  {
+    "id_prestazione": "ZZZZJS",
+    "categoria": 9,
+    "nome_prestazione": "Ciuccio Vitruvia",
+    "costo": 150.0,
+    "codice_breve": "Ciuc"
+  },
+  {
+    "id_prestazione": "ZZZZJK",
+    "categoria": 9,
+    "nome_prestazione": "Set-tp foto + scansione",
+    "costo": 0.0,
+    "codice_breve": "set"
+  },
+  {
+    "id_prestazione": "ZZZZJJ",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione Definitiva (a elemento) con Panavia",
+    "costo": 40.0,
+    "codice_breve": "cemp"
+  },
+  {
+    "id_prestazione": "ZZZZJI",
+    "categoria": 6,
+    "nome_prestazione": "Rimozione Impianto",
+    "costo": 250.0,
+    "codice_breve": "rimi"
+  },
+  {
+    "id_prestazione": "ZZZZJH",
+    "categoria": 8,
+    "nome_prestazione": "Pulizia profonda protesi totale superiore",
+    "costo": 80.0,
+    "codice_breve": "puls"
+  },
+  {
+    "id_prestazione": "ZZZZJG",
+    "categoria": 8,
+    "nome_prestazione": "Pulizia profonda protesi totale inferiore",
+    "costo": 80.0,
+    "codice_breve": "puli"
+  },
+  {
+    "id_prestazione": "ZZZZJF",
+    "categoria": 1,
+    "nome_prestazione": "Studio del caso",
+    "costo": 100.0,
+    "codice_breve": "sdc"
+  },
+  {
+    "id_prestazione": "ZZZZJE",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori caso A",
+    "costo": 750.0,
+    "codice_breve": "aorA"
+  },
+  {
+    "id_prestazione": "ZZZZJD",
+    "categoria": 1,
+    "nome_prestazione": "Controllo protesico",
+    "costo": 30.0,
+    "codice_breve": "ctrp"
+  },
+  {
+    "id_prestazione": "ZZZZJC",
+    "categoria": 9,
+    "nome_prestazione": "Rialzi composito 6 denti",
+    "costo": 300.0,
+    "codice_breve": "ria6"
+  },
+  {
+    "id_prestazione": "ZZZZJB",
+    "categoria": 7,
+    "nome_prestazione": "Corona in composito",
+    "costo": 500.0,
+    "codice_breve": "corc"
+  },
+  {
+    "id_prestazione": "ZZZZIP",
+    "categoria": 1,
+    "nome_prestazione": "Riparazione Mad",
+    "costo": 150.0,
+    "codice_breve": "ripm"
+  },
+  {
+    "id_prestazione": "ZZZZIO",
+    "categoria": 8,
+    "nome_prestazione": "Protesi Parziale un dente",
+    "costo": 160.0,
+    "codice_breve": "ppa1"
+  },
+  {
+    "id_prestazione": "ZZZZIH",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Mobile Norm",
+    "costo": 1000.0,
+    "codice_breve": "Norm"
+  },
+  {
+    "id_prestazione": "ZZZZIG",
+    "categoria": 8,
+    "nome_prestazione": "Protesi Parziale resina da 3 a 6 denti",
+    "costo": 900.0,
+    "codice_breve": "ppr6"
+  },
+  {
+    "id_prestazione": "ZZZZIF",
+    "categoria": 1,
+    "nome_prestazione": "Controllo gnatologico 1 ora",
+    "costo": 50.0,
+    "codice_breve": "gnat"
+  },
+  {
+    "id_prestazione": "ZZZZIE",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con Kromoglas",
+    "costo": 40.0,
+    "codice_breve": "cemk"
+  },
+  {
+    "id_prestazione": "ZZZZID",
+    "categoria": 5,
+    "nome_prestazione": "Membrana riassorbibile",
+    "costo": 200.0,
+    "codice_breve": "mer"
+  },
+  {
+    "id_prestazione": "ZZZZIC",
+    "categoria": 9,
+    "nome_prestazione": "Supplemento estetica 2 arcate",
+    "costo": 500.0,
+    "codice_breve": "est2"
+  },
+  {
+    "id_prestazione": "ZZZZIB",
+    "categoria": 6,
+    "nome_prestazione": "Aggiustamento Ot-Equator",
+    "costo": 100.0,
+    "codice_breve": "ripo"
+  },
+  {
+    "id_prestazione": "ZZZZHR",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori Am Or",
+    "costo": 600.0,
+    "codice_breve": "alor"
+  },
+  {
+    "id_prestazione": "ZZZZHG",
+    "categoria": 1,
+    "nome_prestazione": "Placca di rialzo",
+    "costo": 300.0,
+    "codice_breve": "plri"
+  },
+  {
+    "id_prestazione": "ZZZZHF",
+    "categoria": 1,
+    "nome_prestazione": "Controllo gnatologico",
+    "costo": 30.0,
+    "codice_breve": "gnat"
+  },
+  {
+    "id_prestazione": "ZZZZHE",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Norm superiore e inferiore",
+    "costo": 1800.0,
+    "codice_breve": "norm"
+  },
+  {
+    "id_prestazione": "ZZZZHD",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento Touch 2 applicazioni",
+    "costo": 100.0,
+    "codice_breve": "tou2"
+  },
+  {
+    "id_prestazione": "ZZZZHC",
+    "categoria": 3,
+    "nome_prestazione": "Applicazione cresatina pre endo",
+    "costo": 25.0,
+    "codice_breve": "acp"
+  },
+  {
+    "id_prestazione": "ZZZZHB",
+    "categoria": 4,
+    "nome_prestazione": "Rimozione macchie superficiali",
+    "costo": 40.0,
+    "codice_breve": "rms"
+  },
+  {
+    "id_prestazione": "ZZZZGO",
+    "categoria": 6,
+    "nome_prestazione": "Membrana",
+    "costo": 200.0,
+    "codice_breve": "memb"
+  },
+  {
+    "id_prestazione": "ZZZZGL",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento domiciliare Home Fast Blancone",
+    "costo": 100.0,
+    "codice_breve": "shom"
+  },
+  {
+    "id_prestazione": "ZZZZGK",
+    "categoria": 6,
+    "nome_prestazione": "Moncone provvisorio",
+    "costo": 100.0,
+    "codice_breve": "mpc"
+  },
+  {
+    "id_prestazione": "ZZZZGJ",
+    "categoria": 7,
+    "nome_prestazione": "Provvisorio su impianto con moncone provvisorio",
+    "costo": 150.0,
+    "codice_breve": "prou"
+  },
+  {
+    "id_prestazione": "ZZZZGI",
+    "categoria": 4,
+    "nome_prestazione": "Ablazione parziale piccola",
+    "costo": 30.0,
+    "codice_breve": "abpi"
+  },
+  {
+    "id_prestazione": "ZZZZGG",
+    "categoria": 9,
+    "nome_prestazione": "Terapia fissa metallico 20 mesi",
+    "costo": 4000.0,
+    "codice_breve": "fiss"
+  },
+  {
+    "id_prestazione": "ZZZZGF",
+    "categoria": 2,
+    "nome_prestazione": "Ritocco occlusale",
+    "costo": 30.0,
+    "codice_breve": "rito"
+  },
+  {
+    "id_prestazione": "ZZZZGE",
+    "categoria": 4,
+    "nome_prestazione": "Ablazione tartaro bambino",
+    "costo": 40.0,
+    "codice_breve": "ablb"
+  },
+  {
+    "id_prestazione": "ZZZZGD",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento Ultra una applicazione",
+    "costo": 80.0,
+    "codice_breve": "ult1"
+  },
+  {
+    "id_prestazione": "ZZZZGC",
+    "categoria": 1,
+    "nome_prestazione": "rx28",
+    "costo": 25.0,
+    "codice_breve": "rx28"
+  },
+  {
+    "id_prestazione": "ZZZZGB",
+    "categoria": 8,
+    "nome_prestazione": "Ribasatura Selle Scheletrato superiore",
+    "costo": 300.0,
+    "codice_breve": "riss"
+  },
+  {
+    "id_prestazione": "ZZZZFO",
+    "categoria": 9,
+    "nome_prestazione": "Riparazione Retainer",
+    "costo": 50.0,
+    "codice_breve": "RRET"
+  },
+  {
+    "id_prestazione": "ZZZZFI",
+    "categoria": 7,
+    "nome_prestazione": "Preparazione dente",
+    "costo": 30.0,
+    "codice_breve": "prep"
+  },
+  {
+    "id_prestazione": "ZZZZFH",
+    "categoria": 2,
+    "nome_prestazione": "Calcimol",
+    "costo": 30.0,
+    "codice_breve": "calc"
+  },
+  {
+    "id_prestazione": "ZZZZFG",
+    "categoria": 6,
+    "nome_prestazione": "Uni Abutment Strauman",
+    "costo": 300.0,
+    "codice_breve": "unis"
+  },
+  {
+    "id_prestazione": "ZZZZFF",
+    "categoria": 7,
+    "nome_prestazione": "Corona Richmond Ceramica",
+    "costo": 700.0,
+    "codice_breve": "cric"
+  },
+  {
+    "id_prestazione": "ZZZZFE",
+    "categoria": 8,
+    "nome_prestazione": "Valplast un dente",
+    "costo": 350.0,
+    "codice_breve": "val1"
+  },
+  {
+    "id_prestazione": "ZZZZFD",
+    "categoria": 8,
+    "nome_prestazione": "Riattaccare dente su protesi",
+    "costo": 60.0,
+    "codice_breve": "riat"
+  },
+  {
+    "id_prestazione": "ZZZZFC",
+    "categoria": 4,
+    "nome_prestazione": "Ablazione tartaro ragazzo",
+    "costo": 50.0,
+    "codice_breve": "ablr"
+  },
+  {
+    "id_prestazione": "ZZZZFB",
+    "categoria": 8,
+    "nome_prestazione": "Trasformazione in protesi totale",
+    "costo": 200.0,
+    "codice_breve": "tras"
+  },
+  {
+    "id_prestazione": "ZZZZES",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Mobile Norm Fubicon",
+    "costo": 1200.0,
+    "codice_breve": "onfc"
+  },
+  {
+    "id_prestazione": "ZZZZEP",
+    "categoria": 7,
+    "nome_prestazione": "Cementazione definitiva (a elemento) con Cem DC",
+    "costo": 40.0,
+    "codice_breve": "cemd"
+  },
+  {
+    "id_prestazione": "ZZZZEO",
+    "categoria": 2,
+    "nome_prestazione": "Condizionamento gengiva IRM",
+    "costo": 40.0,
+    "codice_breve": "IRM"
+  },
+  {
+    "id_prestazione": "ZZZZEI",
+    "categoria": 2,
+    "nome_prestazione": "Rialzo PdP",
+    "costo": 30.0,
+    "codice_breve": "rcdp"
+  },
+  {
+    "id_prestazione": "ZZZZEH",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori AM OR 24",
+    "costo": 2600.0,
+    "codice_breve": "aaor"
+  },
+  {
+    "id_prestazione": "ZZZZEG",
+    "categoria": 1,
+    "nome_prestazione": "Sbiancamento Ultra due applicazioni",
+    "costo": 140.0,
+    "codice_breve": "ULTR"
+  },
+  {
+    "id_prestazione": "ZZZZEF",
+    "categoria": 9,
+    "nome_prestazione": "Terapia Allineatori AM OR 10",
+    "costo": 1300.0,
+    "codice_breve": "AO10"
+  },
+  {
+    "id_prestazione": "ZZZZEE",
+    "categoria": 8,
+    "nome_prestazione": "Protesi in nylon bilaterale",
+    "costo": 1500.0,
+    "codice_breve": "nylo"
+  },
+  {
+    "id_prestazione": "ZZZZED",
+    "categoria": 9,
+    "nome_prestazione": "Attacco ortodontico singolo",
+    "costo": 25.0,
+    "codice_breve": "bott"
+  },
+  {
+    "id_prestazione": "ZZZZEC",
+    "categoria": 1,
+    "nome_prestazione": "Visita di controllo",
+    "costo": 30.0,
+    "codice_breve": "cont"
+  },
+  {
+    "id_prestazione": "ZZZZEB",
+    "categoria": 1,
+    "nome_prestazione": "info orto",
+    "costo": 0.0,
+    "codice_breve": "info"
+  },
+  {
+    "id_prestazione": "ZZZZDP",
+    "categoria": 1,
+    "nome_prestazione": "info impla",
+    "costo": 0.0,
+    "codice_breve": "infi"
+  }
+]

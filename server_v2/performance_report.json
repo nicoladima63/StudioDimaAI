@@ -1,0 +1,148 @@
+{
+  "tot_prestazioni": 375,
+  "tot_incasso": 145599.0,
+  "top_volume": [
+    [
+      "Endorale",
+      {
+        "count": 5,
+        "totale": 125.0
+      }
+    ],
+    [
+      "Ablazione tartaro",
+      {
+        "count": 2,
+        "totale": 80.0
+      }
+    ],
+    [
+      "Bite Wing 1-4 quadrante",
+      {
+        "count": 2,
+        "totale": 30.0
+      }
+    ],
+    [
+      "Corona in metal-ceramica",
+      {
+        "count": 2,
+        "totale": 1400.0
+      }
+    ],
+    [
+      "Estrazione complicata",
+      {
+        "count": 2,
+        "totale": 110.0
+      }
+    ],
+    [
+      "Prima visita",
+      {
+        "count": 2,
+        "totale": 0.0
+      }
+    ],
+    [
+      "Ablazione tartaro  (dott.ssa gori)",
+      {
+        "count": 2,
+        "totale": 0.0
+      }
+    ],
+    [
+      "Sbiancamento interno",
+      {
+        "count": 2,
+        "totale": 300.0
+      }
+    ],
+    [
+      "Terapia fissa",
+      {
+        "count": 2,
+        "totale": 1100.0
+      }
+    ],
+    [
+      "Ricostruzione comp. I O",
+      {
+        "count": 1,
+        "totale": 100.0
+      }
+    ]
+  ],
+  "top_valore": [
+    [
+      "Toronto Protesi Definitiva",
+      {
+        "count": 1,
+        "totale": 4500.0
+      }
+    ],
+    [
+      "Terapia fissa 24 mesi",
+      {
+        "count": 1,
+        "totale": 4200.0
+      }
+    ],
+    [
+      "Terapia Allineatori Nuvola caso C Plus",
+      {
+        "count": 1,
+        "totale": 4100.0
+      }
+    ],
+    [
+      "Terapia fissa estetica 18 mesi con contenzioni",
+      {
+        "count": 1,
+        "totale": 4000.0
+      }
+    ],
+    [
+      "Terapia fissa metallico 20 mesi",
+      {
+        "count": 1,
+        "totale": 4000.0
+      }
+    ],
+    [
+      "Terapia Allineatori Nuvola caso C",
+      {
+        "count": 1,
+        "totale": 3600.0
+      }
+    ],
+    [
+      "Terapia Invisalign",
+      {
+        "count": 1,
+        "totale": 3300.0
+      }
+    ],
+    [
+      "Terapia fissa 18 mesi",
+      {
+        "count": 1,
+        "totale": 3000.0
+      }
+    ],
+    [
+      "Terapia Mobile 3 anni",
+      {
+        "count": 1,
+        "totale": 3000.0
+      }
+    ],
+    [
+      "Terapia mobile 18 mesi",
+      {
+        "count": 1,
+        "totale": 2700.0
+      }
+    ]
+  ]
+}
