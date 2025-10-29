@@ -1,8 +1,0 @@
-studio-code-auditor, analizza completamente questo progetto di gestionale per studio professionale. 
-
-Il setup è:
-- Gestionale legacy: VFoxPro 
-- Backend server: Python
-- Frontend: React + Vite + CoreUI
-
-Procedi autonomamente con l'analisi completa e genera il report dettagliato con tutte le raccomandazioni e priorità.
