@@ -30,6 +30,7 @@ def get_scheduler_status():
                     'calendar_sync_enabled': settings.get('calendar_sync_enabled', True),
                     'calendar_sync_hour': settings.get('calendar_sync_hour', 21),
                     'calendar_sync_minute': settings.get('calendar_sync_minute', 0),
+                    'calendar_sync_weeks_to_sync': settings.get('calendar_sync_weeks_to_sync', 3),
                     'calendar_studio_blu_id': settings.get('calendar_studio_blu_id'),
                     'calendar_studio_giallo_id': settings.get('calendar_studio_giallo_id')
                 }
@@ -137,6 +138,8 @@ def update_calendar_sync_settings():
             settings['calendar_sync_hour'] = int(data['hour'])
         if 'minute' in data:
             settings['calendar_sync_minute'] = int(data['minute'])
+        if 'weeks_to_sync' in data:
+            settings['calendar_sync_weeks_to_sync'] = int(data['weeks_to_sync'])
         if 'calendar_studio_blu_id' in data:
             settings['calendar_studio_blu_id'] = data['calendar_studio_blu_id']
         if 'calendar_studio_giallo_id' in data:

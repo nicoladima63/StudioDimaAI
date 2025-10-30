@@ -39,7 +39,7 @@
 - Test: `npm test` (se configurato)
 - Lint: `npm run lint` (se configurato)
 - Build: `npm run build`
-- Server: `python -m server.app.run` (dalla directory root del progetto)
+- Server: `python -m run_v2.py` (dalla directory server_v2 del progetto)
 - Controllo processi server: `wmic process where "name='python.exe'" get ProcessId,CommandLine`
 - Kill processi Python: `taskkill /F /IM python.exe` (se necessario)
 

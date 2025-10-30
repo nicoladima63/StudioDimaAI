@@ -419,8 +419,8 @@ class CalendarServiceV2:
         """
         try:
             # Recupera i dati logici dall'appuntamento
-            descrizione = app.get('DESCRIZIONE', '').strip()
-            note = app.get('NOTE', '').strip()
+            descrizione = (app.get('DESCRIZIONE') or '').strip()
+            note = (app.get('NOTE') or '').strip()
             data_str = app.get('DATA', '')
             ora_inizio = app.get('ORA_INIZIO', 9)
             ora_fine = app.get('ORA_FINE', 10)

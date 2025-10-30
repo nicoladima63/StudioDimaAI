@@ -79,7 +79,8 @@ class SyncStateManager:
             
             return f"{data}_{ora_inizio}_{studio}_{paziente_clean}_{note_hash}"
         except Exception as e:
-            logger.error(f"Errore generazione ID appuntamento: {e}")
+            logger.error(f"ERRORE CRITICO in generazione ID appuntamento: {e}")
+            logger.error(f"DATI APPUNTAMENTO PROBLEMATICO: {appointment}")
             # Fallback con timestamp
             return f"fallback_{datetime.now().timestamp()}"
     
@@ -112,7 +113,8 @@ class SyncStateManager:
             # Genera hash SHA256
             return hashlib.sha256(content.encode('utf-8')).hexdigest()
         except Exception as e:
-            logger.error(f"Errore generazione hash appuntamento: {e}")
+            logger.error(f"ERRORE CRITICO in generazione hash appuntamento: {e}")
+            logger.error(f"DATI APPUNTAMENTO PROBLEMATICO: {appointment}")
             return hashlib.sha256(str(datetime.now().timestamp()).encode()).hexdigest()
     
     def get_sync_state_for_studios(self, studio_ids: Set[int]) -> Dict[str, Dict[str, Any]]:

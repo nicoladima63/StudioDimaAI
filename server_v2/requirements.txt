@@ -9,7 +9,7 @@ cffi==1.17.1
 charset-normalizer==3.4.2
 click==8.2.1
 colorama==0.4.6
-cryptography==45.0.5
+cryptography==46.0.0
 dbf==0.99.0
 dbfread==2.0.7
 Flask==2.3.3
@@ -40,7 +40,7 @@ passlib==1.7.4
 pdf2image==1.17.0
 pdfminer.six==20221105
 pdfplumber==0.10.3
-pillow==10.0.1
+pillow==12.0.0
 platformdirs==4.3.8
 proto-plus==1.26.1
 protobuf==6.31.1
