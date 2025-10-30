@@ -109,3 +109,7 @@ server_v2/data/monitoring/
 # File di conflitto merge
 server_v2/automation_calendar_sync.log
 server_v2/instance/automation_settings.json
+
+# Python Virtual Environments
+/venv/
+/server_v2/venv/
