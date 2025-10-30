@@ -204,6 +204,7 @@ const CalendarSettings: React.FC = () => {
       setEnabled(settings.calendar_sync_enabled);
       setHour(settings.calendar_sync_hour);
       setMinute(settings.calendar_sync_minute);
+      setWeeksToSync(settings.calendar_sync_weeks_to_sync);
       
       // Carica database mode
       const dbResponse = await environmentService.getServiceEnvironment('database');
@@ -234,7 +235,8 @@ const CalendarSettings: React.FC = () => {
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: newEnabled,
         calendar_sync_hour: hour,
-        calendar_sync_minute: minute
+        calendar_sync_minute: minute,
+        weeks_to_sync: weeksToSync
       });
       addLog(
         `Automazione calendario ${
@@ -260,7 +262,8 @@ const CalendarSettings: React.FC = () => {
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: enabled,
         calendar_sync_hour: hour,
-        calendar_sync_minute: minute
+        calendar_sync_minute: minute,
+        weeks_to_sync: weeksToSync
       });
       setSuccess('Orario sincronizzazione salvato con successo!');
       addLog('Orario sincronizzazione salvato con successo', 'success');
