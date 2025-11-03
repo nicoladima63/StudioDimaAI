@@ -89,7 +89,7 @@ const CalendarAutomation: React.FC = () => {
   }
 
   return (
-    <CCard>
+    <CCard className='mb-3'>
       <CCardBody className='d-flex flex-column'>
         <CRow className='align-items-center mb-3'>
         <CCol md={2}>

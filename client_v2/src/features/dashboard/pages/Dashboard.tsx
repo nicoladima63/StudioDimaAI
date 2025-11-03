@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { CCard, CCardBody, CCardHeader, CCol, CRow, CButton, CBadge } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilList, cilMediaPlay, cilMediaStop,cilSettings } from '@coreui/icons';
+import { cilList, cilMediaPlay, cilMediaStop, cilSettings } from '@coreui/icons';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
-import ServicesStatusSection from '../components/ServicesStatusSection';
-import MonitorPrestazioniService, {
-  MonitorLog as BackendMonitorLog,
-  MonitorSummary,
-} from '@/services/api/monitorPrestazioni';
 import CalendarAutomation from '../components/CalendarAutomation';
-
+import DatabaseStatusCard from '../components/DatabaseStatusCard';
+import RecallAutomationCard from '../components/RecallAutomationCard';
+import ReminderAutomationCard from '../components/ReminderAutomationCard';
+import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary, } from '@/services/api/monitorPrestazioni';
+import MonitorRules from '../components/MonitorRules';
 
 const getBadgeColor = (status: string) => {
   switch (status) {
@@ -160,7 +159,13 @@ const Dashboard: React.FC = () => {
                     </h5>
                   </CCol>
                   <CCol md={6} className='flex-end text-end'>
-                    <NavLink to='/settings/monitor-prestazioni' className='btn btn-sm btn-secondary'> <CIcon icon={cilSettings} className='me-0' /></NavLink>
+                    <NavLink
+                      to='/settings/monitor-prestazioni'
+                      className='btn btn-sm btn-secondary'
+                    >
+                      {' '}
+                      <CIcon icon={cilSettings} className='me-0' />
+                    </NavLink>
                   </CCol>
                 </CRow>
               </CCardHeader>
@@ -168,46 +173,45 @@ const Dashboard: React.FC = () => {
                 {Object.keys(monitorSummary.monitors).length > 0 ? (
                   <CRow>
                     {Object.entries(monitorSummary.monitors).map(([monitorId, monitor]) => (
-                      <CCol md={6} lg={6} key={monitorId} className='mb-3'>
+                      <CCol md={12} lg={12} key={monitorId} className='mb-3'>
                         <CCard>
-                          <CCardBody className='d-flex flex-column'>
-                            <div className='d-flex justify-content-between align-items-start mb-2'>
-                              <h6 className='mb-0'>{monitor.table_name}</h6>
-                            </div>
-                            <p className='small text-muted mb-1'>ID: {monitorId}</p>
-                            <div className='mt-auto'>
-                              <div className='d-flex justify-content-between align-items-center mt-3'>
-                                <div className='d-flex gap-3'>
-                                  <CBadge color={getBadgeColor(monitor.status)}>
-                                    {monitor.status}
-                                  </CBadge>
-
-                                  {monitor.status === 'running' ? (
-                                    <CButton
-                                      color='warning'
-                                      size='sm'
-                                      variant='outline'
-                                      onClick={() => handleStopMonitorById(monitorId)}
-                                      disabled={loading}
-                                      title='Ferma monitor'
-                                    >
-                                      <CIcon icon={cilMediaStop} />
-                                    </CButton>
-                                  ) : (
-                                    <CButton
-                                      color='success'
-                                      size='sm'
-                                      variant='outline'
-                                      onClick={() => handleStartMonitorById(monitorId)}
-                                      disabled={loading}
-                                      title='Avvia monitor'
-                                    >
-                                      <CIcon icon={cilMediaPlay} />
-                                    </CButton>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                          <CCardBody>
+                            <CRow className="align-items-center">
+                              <CCol xs="12">
+                                <h6 className='mb-0'>{monitor.table_name} 
+                                <span className='small text-muted mb-1'> - {monitorId}</span></h6>
+                              </CCol>
+                              <CCol xs="12" className="text-end">
+                                {monitor.status === 'running' ? (
+                                  <CButton
+                                    color='warning'
+                                    size='sm'
+                                    variant='outline'
+                                    onClick={() => handleStopMonitorById(monitorId)}
+                                    disabled={loading}
+                                    title='Ferma monitor'
+                                  >
+                                    <CIcon icon={cilMediaStop} />
+                                  </CButton>
+                                ) : (
+                                  <CButton
+                                    color='success'
+                                    size='sm'
+                                    variant='outline'
+                                    onClick={() => handleStartMonitorById(monitorId)}
+                                    disabled={loading}
+                                    title='Avvia monitor'
+                                  >
+                                    <CIcon icon={cilMediaPlay} />
+                                  </CButton>
+                                )}
+                              </CCol>
+                            </CRow>
+                            <CRow className="mt-2">
+                              <CCol>
+                                <MonitorRules monitorId={monitorId} />
+                              </CCol>
+                            </CRow>
                           </CCardBody>
                         </CCard>
                       </CCol>
@@ -220,7 +224,7 @@ const Dashboard: React.FC = () => {
             </CCard>
           )}
         </CCol>
-
+        {/* Monitor configurati */}
         <CCol lg={4}>
           <CCard className='mb-4'>
             <CCardHeader>
@@ -234,24 +238,28 @@ const Dashboard: React.FC = () => {
               </CRow>
             </CCardHeader>
             <CCardBody>
-              <CalendarAutomation/>
+              <CalendarAutomation />
+              <RecallAutomationCard />
+              <ReminderAutomationCard />
             </CCardBody>
           </CCard>
         </CCol>
+        {/* Ambienti dev-prod */}
         <CCol lg={4}>
           <CCard className='mb-4'>
             <CCardHeader>
-              <h6 className='mb-0'>Prossimi sviluppi</h6>
+              <h6 className='mb-0'>Ambienti dev-prod</h6>
             </CCardHeader>
-            <CCardBody></CCardBody>
+            <CCardBody>
+              <DatabaseStatusCard />
+            </CCardBody>
           </CCard>
         </CCol>
       </CRow>
 
-      {/* Services Status Section */}
-      <ServicesStatusSection />
     </div>
   );
 };
 
 export default Dashboard;
+

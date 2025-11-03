@@ -27,6 +27,7 @@ export interface MonitorStatus {
   rules_summary?: {
     active_rules: number;
     example_actions: string[];
+    rule_names: string[];
   };
 }
 
