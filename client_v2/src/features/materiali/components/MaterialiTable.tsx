@@ -126,8 +126,9 @@ const MaterialiTable: React.FC<MaterialiTableProps> = ({
               variant="outline"
               size="sm"
               onClick={() => onView(item)}
-              title="Visualizza dettagli"
+              title={item.fattura_id ? "Visualizza fattura" : "Fattura non disponibile"}
               className="action-btn"
+              disabled={!item.fattura_id}
             >
               <CIcon icon={cilList} size="sm" />
             </CButton>

@@ -66,6 +66,8 @@ interface MaterialiState {
   
   // Utilità
   invalidateCache: () => void;
+  deleteMateriale: (id: number) => Promise<void>;
+  updateMateriale: (id: number, data: Partial<Materiale>) => Promise<void>;
 }
 
 export const useMaterialiStore = create<MaterialiState>()(
@@ -78,6 +80,56 @@ export const useMaterialiStore = create<MaterialiState>()(
       isLoading: false,
       error: null,
       lastUpdated: null,
+
+      // Azione per aggiornare un materiale
+      updateMateriale: async (id: number, data: Partial<Materiale>) => {
+        try {
+          console.log(`🔄 Aggiornamento materiale con ID: ${id}...`, data);
+          const response = await apiClient.patch(`/materiali/${id}`, data);
+
+          if (!response.data.success) {
+            throw new Error(response.data.error || 'Errore durante l\'aggiornamento del materiale');
+          }
+
+          const updatedMateriale = response.data.data;
+          console.log(`✅ Materiale con ID: ${id} aggiornato con successo.`);
+
+          // Aggiorna il materiale nello stato
+          set(state => ({
+            materiali: state.materiali.map(m => m.id === id ? { ...m, ...updatedMateriale } : m),
+            materialiFiltered: state.materialiFiltered.map(m => m.id === id ? { ...m, ...updatedMateriale } : m),
+          }));
+
+        } catch (err: any) {
+          console.error(`❌ Errore durante l'aggiornamento del materiale con ID: ${id}`, err);
+          throw err;
+        }
+      },
+
+      // Azione per eliminare un materiale
+      deleteMateriale: async (id: number) => {
+        try {
+          console.log(`🔄 Eliminazione materiale con ID: ${id}...`);
+          const response = await apiClient.delete(`/materiali/${id}`);
+
+          if (!response.data.success) {
+            throw new Error(response.data.error || 'Errore durante l\'eliminazione del materiale');
+          }
+
+          console.log(`✅ Materiale con ID: ${id} eliminato con successo.`);
+
+          // Rimuovi il materiale dallo stato
+          set(state => ({
+            materiali: state.materiali.filter(m => m.id !== id),
+            materialiFiltered: state.materialiFiltered.filter(m => m.id !== id),
+          }));
+
+        } catch (err: any) {
+          console.error(`❌ Errore durante l'eliminazione del materiale con ID: ${id}`, err);
+          // Mostra l'errore all'utente tramite toast (già gestito dall'interceptor di axios)
+          throw err; // Rilancia l'errore per poterlo gestire nel componente se necessario
+        }
+      },
 
       // Carica tutti i materiali dalla tabella materiali
       loadMateriali: async (force = false) => {
@@ -254,7 +306,9 @@ export const useMateriali = () => {
     filtriAttivi: store.filtriAttivi,
     load: store.loadMateriali,
     applyFiltri: store.applyFiltri,
-    clearFiltri: store.clearFiltri
+    clearFiltri: store.clearFiltri,
+    deleteMateriale: store.deleteMateriale,
+    updateMateriale: store.updateMateriale
   };
 };
 

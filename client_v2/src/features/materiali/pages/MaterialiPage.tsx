@@ -1,19 +1,25 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CButton, CForm, CFormInput } from '@coreui/react';
+import toast from 'react-hot-toast';
 
 import PageLayout from '@/components/layout/PageLayout';
 import MaterialiTable from '@/features/materiali/components/MaterialiTable';
-//import MaterialiAccordion from '@/features/materiali/components/MaterialiAccordion';
 import FornitoriSelect from '@/components/selects/FornitoriSelect';
 import { useMateriali, type Materiale } from '@/store/materiali.store';
 import type { Fornitore } from '@/store/fornitori.store';
+import ClassificazioneMaterialeModal, { type ClassificazioneData } from '@/features/materiali/components/ClassificazioneMaterialeModal';
 
 const MaterialiPage: React.FC = () => {
-  const { materiali, isLoading, error, load } = useMateriali();
-  const [selectedFornitore, setSelectedFornitore] = React.useState<Fornitore | null>(null);
-  const [searchTerm, setSearchTerm] = React.useState<string>('');
-  const [showResults, setShowResults] = React.useState<boolean>(false);
-  const [searchSuggestions, setSearchSuggestions] = React.useState<Materiale[]>([]);
+  const { materiali, isLoading, error, load, deleteMateriale, updateMateriale } = useMateriali();
+  const [selectedFornitore, setSelectedFornitore] = useState<Fornitore | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showResults, setShowResults] = useState<boolean>(false);
+  const [searchSuggestions, setSearchSuggestions] = useState<Materiale[]>([]);
+
+  // State per il modale di modifica
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingMateriale, setEditingMateriale] = useState<Materiale | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Carica materiali all'avvio - SEMPRE tutti i materiali per ricerca globale
   React.useEffect(() => {
@@ -35,7 +41,11 @@ const MaterialiPage: React.FC = () => {
   // Genera suggerimenti di ricerca mentre l'utente digita
   React.useEffect(() => {
     if (searchTerm.length >= 2) {
-      const suggestions = materiali
+      const baseMateriali = selectedFornitore
+        ? materiali.filter(m => m.fornitoreid === selectedFornitore.id)
+        : materiali;
+
+      const suggestions = baseMateriali
         .filter(materiale => {
           const searchLower = searchTerm.toLowerCase();
           return materiale.nome.toLowerCase().includes(searchLower) ||
@@ -47,7 +57,7 @@ const MaterialiPage: React.FC = () => {
     } else {
       setSearchSuggestions([]);
     }
-  }, [searchTerm, materiali]);
+  }, [searchTerm, materiali, selectedFornitore]);
 
   // Filtra materiali in base al fornitore selezionato e ricerca
   const filteredMateriali = useMemo(() => {
@@ -119,18 +129,48 @@ const MaterialiPage: React.FC = () => {
 
   // Gestori azioni tabella
   const handleEdit = (materiale: Materiale) => {
-    console.log('Edit materiale:', materiale);
-    // TODO: Aprire modal di modifica
+    setEditingMateriale(materiale);
+    setIsEditModalVisible(true);
   };
 
-  const handleDelete = (materiale: Materiale) => {
-    console.log('Delete materiale:', materiale);
-    // TODO: Conferma eliminazione
+  const handleDelete = async (materiale: Materiale) => {
+    if (window.confirm(`Sei sicuro di voler eliminare il materiale "${materiale.nome}"? L'azione è irreversibile.`)) {
+      try {
+        await deleteMateriale(materiale.id);
+        toast.success(`Materiale "${materiale.nome}" eliminato con successo.`);
+      } catch (error) {
+        // L'errore è già gestito a livello di store/api client, ma logghiamo per sicurezza
+        console.error("Fallimento eliminazione dal componente:", error);
+      }
+    }
   };
 
   const handleView = (materiale: Materiale) => {
-    console.log('View materiale:', materiale);
-    // TODO: Aprire modal dettagli
+    if (materiale.fattura_id) {
+      // L'URL è costruito assumendo che il backend servirà la fattura a questo endpoint.
+      // Sarà necessario implementare questo endpoint nel backend.
+      const fatturaUrl = `/api/v2/fatture/${materiale.fattura_id}`;
+      window.open(fatturaUrl, '_blank');
+      toast.success(`Richiesta per la fattura ${materiale.fattura_id} inviata...`);
+    } else {
+      toast.error('Nessuna fattura associata a questo materiale.');
+    }
+  };
+
+  const handleSaveClassification = async (data: ClassificazioneData) => {
+    if (!editingMateriale) return;
+
+    setIsSaving(true);
+    try {
+      await updateMateriale(editingMateriale.id, data);
+      toast.success(`Classificazione di "${editingMateriale.nome}" aggiornata.`);
+      setIsEditModalVisible(false);
+      setEditingMateriale(null);
+    } catch (error) {
+      toast.error("Errore durante l'aggiornamento della classificazione.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -164,14 +204,38 @@ const MaterialiPage: React.FC = () => {
               <div className='col-md-6'>
                 <label className='form-label fw-bold'>Ricerca Materiali</label>
                 <CForm onSubmit={handleSearchSubmit} className='position-relative'>
-                  <CFormInput
-                    type='text'
-                    placeholder='Digita nome, codice o fornitore...'
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onBlur={handleSearchBlur}
-                    className='mb-2'
-                  />
+                  <div className='position-relative'>
+                    <CFormInput
+                      type='text'
+                      placeholder='Digita nome, codice o fornitore...'
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onBlur={handleSearchBlur}
+                      className='mb-2'
+                    />
+                    {searchTerm && (
+                        <button
+                          type='button'
+                          onClick={handleSearchClear}
+                          aria-label='Pulisci ricerca'
+                          className='btn position-absolute'
+                          style={{
+                            top: '50%',
+                            right: '5px',
+                            transform: 'translateY(-50%)',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#6c757d',
+                            fontSize: '1.2rem',
+                            lineHeight: 1,
+                            padding: '0 .75rem',
+                            zIndex: 5,
+                          }}
+                        >
+                          &times;
+                        </button>
+                    )}
+                  </div>
                   {searchSuggestions.length > 0 && !showResults && (
                     <div className='position-absolute w-100 bg-white border rounded shadow-lg' style={{zIndex: 1000, top: '100%'}}>
                       {searchSuggestions.map((materiale, index) => (
@@ -194,11 +258,6 @@ const MaterialiPage: React.FC = () => {
                     <CButton type='submit' color='primary' size='sm'>
                       Cerca
                     </CButton>
-                    {searchTerm && (
-                      <CButton type='button' color='secondary' size='sm' onClick={handleSearchClear}>
-                        Pulisci
-                      </CButton>
-                    )}
                   </div>
                 </CForm>
                 <div className='text-muted small mt-1'>
@@ -269,14 +328,18 @@ const MaterialiPage: React.FC = () => {
             searchable={!selectedFornitore} // Disabilita ricerca interna quando c'è fornitore selezionato
           />
         )}
-        {/* <MaterialiAccordion
-          materiali={filteredMateriali}
-          loading={isLoading}
-          error={error}
-        /> */}
       </PageLayout.ContentBody>
 
       <PageLayout.Footer text='Gestione completa dei materiali del magazzino' />
+
+      {/* Modale per la modifica della classificazione */}
+      <ClassificazioneMaterialeModal
+        visible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+        materiale={editingMateriale}
+        onSave={handleSaveClassification}
+        loading={isSaving}
+      />
     </PageLayout>
   );
 };
