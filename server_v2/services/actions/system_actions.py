@@ -25,21 +25,63 @@ from core.constants_v2 import COLONNE
 logger = logging.getLogger(__name__)
 
 def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]:
-    """Arricchisce il contesto con i dati del paziente, richiedendo obbligatoriamente il cellulare."""
-    dbf_data_service = get_dbf_data_service()
+    """
+    Arricchisce il contesto con i dati del paziente in modo dinamico.
+    Se 'telefono' è già presente, lo usa. Altrimenti, cerca un ID paziente
+    attraverso tutte le tabelle definite in COLONNE. Gestisce anche il caso
+    di nuovi pazienti dove l'ID è vuoto ma nome e telefono sono in DB_APDESCR e DB_NOTE.
+    """
     enriched_context = context.copy()
 
-    # 1. Find patient_id
-    patient_id = enriched_context.get('id_paziente')
-    if not patient_id:
-        logger.debug("Arricchimento: 'id_paziente' generico non trovato, tento fallback su chiave specifica.")
-        patient_id_key = COLONNE.get('appuntamenti', {}).get('id_paziente', 'DB_APPACOD')
-        patient_id = enriched_context.get(patient_id_key)
+    # Caso 1: Telefono già presente nel contesto (prioritario)
+    if 'telefono' in enriched_context and enriched_context['telefono']:
+        logger.debug("Arricchimento: 'telefono' già presente. Salto la ricerca.")
+        if 'nome_completo' not in enriched_context:
+            enriched_context['nome_completo'] = enriched_context.get('nome', 'Gentile Paziente')
+        return enriched_context
 
-    if not patient_id:
-        raise ValidationError("Arricchimento fallito: Impossibile determinare l'ID del paziente.")
+    dbf_data_service = get_dbf_data_service()
+    patient_id = None
 
-    # 2. Get patient data
+    # Cerca dinamicamente la chiave dell'ID paziente nel contesto
+    for table, columns in COLONNE.items():
+        id_key = columns.get('id_paziente')
+        if id_key and id_key in enriched_context:
+            patient_id = enriched_context[id_key]
+            if patient_id:
+                logger.debug(f"Trovato ID paziente '{patient_id}' usando la chiave '{id_key}' dalla tabella '{table}'.")
+                break
+
+    # Caso 2: ID paziente vuoto (nuovo paziente) - cerca nome in DB_APDESCR e telefono in DB_NOTE
+    if not patient_id:
+        logger.debug("ID paziente non trovato. Tentativo di estrarre nome e telefono da DB_APDESCR e DB_NOTE.")
+        
+        # Estrai nome da DB_APDESCR
+        desc_key = COLONNE.get('appuntamenti', {}).get('descrizione', 'DB_APDESCR')
+        if desc_key in enriched_context and enriched_context[desc_key]:
+            enriched_context['nome_completo'] = str(enriched_context[desc_key]).strip()
+            logger.debug(f"Nome paziente estratto da DB_APDESCR: {enriched_context['nome_completo']}")
+        else:
+            enriched_context['nome_completo'] = 'Gentile Paziente'
+
+        # Estrai telefono dalla prima riga di DB_NOTE
+        note_key = COLONNE.get('appuntamenti', {}).get('note', 'DB_NOTE')
+        if note_key in enriched_context and enriched_context[note_key]:
+            notes_content = str(enriched_context[note_key]).strip()
+            first_line = notes_content.split('\n')[0].strip()
+            # Semplice regex per trovare un numero che assomigli a un telefono
+            phone_match = re.search(r'\+?\d[\d\s-]{7,}\d', first_line)
+            if phone_match:
+                enriched_context['telefono'] = phone_match.group(0).strip()
+                logger.debug(f"Telefono estratto da DB_NOTE: {enriched_context['telefono']}")
+        
+        # Se dopo questi tentativi non abbiamo un telefono, solleva errore
+        if 'telefono' not in enriched_context or not enriched_context['telefono']:
+            raise ValidationError("Arricchimento fallito: Impossibile determinare un numero di telefono valido per il nuovo paziente.")
+        
+        return enriched_context # Abbiamo nome e telefono, possiamo procedere
+
+    # Caso 3: ID paziente trovato - recupera dati dal DB
     logger.debug(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
     patient_data = dbf_data_service.get_patient_by_id(patient_id)
     if not patient_data:
@@ -47,7 +89,6 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
     
     enriched_context.update(patient_data)
 
-    # 3. Strictly find and set the mobile phone number
     mobile_key = COLONNE.get('pazienti', {}).get('cellulare', 'DB_PACELLU')
     mobile_phone = enriched_context.get(mobile_key)
 
@@ -55,17 +96,13 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         enriched_context['telefono'] = str(mobile_phone).strip()
         logger.debug(f"Arricchimento: Trovato e impostato numero cellulare: {enriched_context['telefono']}")
     else:
-        # No mobile phone found, raise error
         raise ValidationError(f"Arricchimento fallito: Numero di cellulare (DB_PACELLU) non trovato per il paziente ID '{patient_id}'.")
 
-    # 4. Enrich name (can stay the same)
     if 'nome_completo' not in enriched_context:
-        nome_key = COLONNE.get('pazienti', {}).get('nome', 'DB_NOME')
-        cognome_key = COLONNE.get('pazienti', {}).get('cognome', 'DB_COGNOME')
+        nome_key = COLONNE.get('pazienti', {}).get('nome', 'DB_PANOME')
         nome = enriched_context.get(nome_key, '')
-        cognome = enriched_context.get(cognome_key, '')
-        if nome or cognome:
-            enriched_context['nome_completo'] = f"{cognome} {nome}".strip()
+        if nome:
+            enriched_context['nome_completo'] = nome.strip()
         else:
             desc_key = COLONNE.get('appuntamenti', {}).get('descrizione', 'DB_APDESCR')
             enriched_context['nome_completo'] = enriched_context.get(desc_key, 'Gentile Paziente').strip()
