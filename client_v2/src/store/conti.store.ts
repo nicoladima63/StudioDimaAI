@@ -6,6 +6,13 @@ import apiClient from "@/services/api/client";
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minuti
 const MAX_RETRIES = 3;
 
+export interface SearchResult {
+  id: number;
+  type: 'conto' | 'branca' | 'sottoconto';
+  nome: string;
+  path: string;
+}
+
 export interface Conto { id: number; nome: string; }
 export interface Branca { id: number; nome: string; contoId: number; }
 export interface Sottoconto { id: number; nome: string; brancaId: number; contoId: number; }
@@ -68,6 +75,7 @@ interface ContiState {
   getContoById: (id: number) => Conto | undefined;
   getBrancaById: (id: number) => Branca | undefined;
   getSottocontoById: (id: number) => Sottoconto | undefined;
+  getFlatData: () => SearchResult[];
 }
 
 export const useContiStore = create<ContiState>()(
@@ -695,6 +703,29 @@ export const useContiStore = create<ContiState>()(
           .flat()
           .find(s => s.id === id);
         return sottoconto;
+      },
+
+      getFlatData: () => {
+        const { conti, brancheByConto, sottocontiByBranca } = get();
+        const data: SearchResult[] = [];
+
+        conti.forEach(conto => {
+          data.push({ id: conto.id, type: 'conto', nome: conto.nome, path: conto.nome });
+
+          const branche = brancheByConto[conto.id] || [];
+          branche.forEach(branca => {
+            const path = `${conto.nome} > ${branca.nome}`;
+            data.push({ id: branca.id, type: 'branca', nome: branca.nome, path });
+
+            const sottoconti = sottocontiByBranca[branca.id] || [];
+            sottoconti.forEach(sottoconto => {
+              const subPath = `${path} > ${sottoconto.nome}`;
+              data.push({ id: sottoconto.id, type: 'sottoconto', nome: sottoconto.nome, path: subPath });
+            });
+          });
+        });
+
+        return data;
       }
     }),
     {

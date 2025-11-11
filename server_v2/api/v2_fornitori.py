@@ -502,3 +502,13 @@ def get_dettagli_fattura(fattura_id):
             success=False,
             error="An unexpected error occurred"
         ), 500
+
+
+@fornitori_v2_bp.route('/fornitori/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for spese fornitori"""
+    return jsonify({
+        'status': 'ok',
+        'service': 'fornitori',
+        'message': 'Service is running'
+    }), 200

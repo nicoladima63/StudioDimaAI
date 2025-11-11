@@ -10,7 +10,7 @@ from server.app.services.xml_parser_service import xml_parser_service
 
 logger = logging.getLogger(__name__)
 
-spese_fornitori_bp = Blueprint('spese_fornitori', __name__, url_prefix='/api/spese-fornitori')
+spese_fornitori_bp = Blueprint('spese_fornitori', __name__, url_prefix='/spese-fornitori')
 
 @spese_fornitori_bp.route('/', methods=['GET'])
 @jwt_required()

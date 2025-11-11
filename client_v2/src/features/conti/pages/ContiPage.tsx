@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { CAlert, CSpinner } from '@coreui/react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { CAlert, CSpinner, CFormInput, CCard, CCardBody, CCardHeader } from '@coreui/react';
 import PageLayout from '@/components/layout/PageLayout';
 import ContiTable from '../components/ContiTable';
 import { 
   useContiStore, 
-  useBranche, 
-  useSottoconti,
   type Conto, 
   type Branca, 
-  type Sottoconto 
+  type Sottoconto, 
+  type SearchResult
 } from '@/store/conti.store';
 
 const ContiPage: React.FC = () => {
@@ -16,18 +15,63 @@ const ContiPage: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   
+  // State per la ricerca
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Utilizzo degli hook dello store
-const { 
-  conti, 
-  isLoading, 
-  errors: { conti: storeError }, 
-  createConto, 
-  updateConto, 
-  deleteConto,
-  operations: { creating: isCreating, updating: isUpdating, deleting: isDeleting }
-} = useContiStore();  
-  // Nota: Branche e Sottoconti vengono gestiti internamente da ContiTable
-  // attraverso le props che passiamo
+  const { 
+    conti, 
+    isLoading, 
+    errors: { conti: storeError }, 
+    loadConti,
+    loadBranche,
+    loadSottoconti,
+    getFlatData,
+    createConto, 
+    updateConto, 
+    deleteConto,
+    operations: { creating: isCreating, updating: isUpdating, deleting: isDeleting }
+  } = useContiStore();
+
+  // Caricamento iniziale di tutti i dati per la ricerca
+  useEffect(() => {
+    const fetchAllData = async () => {
+      await loadConti({ force: false });
+    };
+    fetchAllData();
+  }, [loadConti]);
+
+  useEffect(() => {
+    if (conti.length > 0) {
+      conti.forEach(conto => {
+        loadBranche(conto.id, { force: false });
+      });
+    }
+  }, [conti, loadBranche]);
+
+  useEffect(() => {
+    const allBranche = Object.values(useContiStore.getState().brancheByConto).flat();
+    if (allBranche.length > 0) {
+      allBranche.forEach(branca => {
+        loadSottoconti(branca.id, { force: false });
+      });
+    }
+  }, [conti, loadSottoconti]); // Depend on conti to re-trigger when conti are loaded
+
+
+  // Logica di ricerca
+  const searchResults = useMemo(() => {
+    if (searchTerm.trim() === '') {
+      return [];
+    }
+    const flatData = getFlatData();
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return flatData.filter(item => 
+      item.nome.toLowerCase().includes(lowerCaseSearchTerm) ||
+      item.path.toLowerCase().includes(lowerCaseSearchTerm)
+    );
+  }, [searchTerm, getFlatData]);
+
 
   useEffect(() => {
     if (storeError) {
@@ -158,6 +202,38 @@ const {
             <CSpinner color='primary' />
           </div>
         )}
+
+        <CCard className="mb-4">
+          <CCardHeader>
+            <strong>Ricerca Globale</strong>
+          </CCardHeader>
+          <CCardBody>
+            <CFormInput
+              type="text"
+              placeholder="Cerca per nome o percorso..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && searchResults.length > 0 && (
+              <div className="mt-3">
+                <h5>Risultati della ricerca:</h5>
+                <ul className="list-group">
+                  {searchResults.map(item => (
+                    <li key={`${item.type}-${item.id}`} className="list-group-item">
+                      <strong>{item.nome}</strong>
+                      <div className="text-muted small">{item.path}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {searchTerm && searchResults.length === 0 && (
+              <div className="mt-3 text-muted">
+                Nessun risultato trovato.
+              </div>
+            )}
+          </CCardBody>
+        </CCard>
 
         <div className='p-3'>
           <ContiTable

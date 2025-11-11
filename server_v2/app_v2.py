@@ -226,7 +226,6 @@ def register_blueprints(app: Flask) -> None:
     logger = logging.getLogger(__name__)
     # All blueprints registered
 
-
 def register_error_handlers(app: Flask) -> None:
     """Register global error handlers."""
     

@@ -25,7 +25,7 @@ class MaterialiService(BaseService):
         try:
             # Build base query
             query = """
-                SELECT * FROM materiali """
+                SELECT * FROM materiali ORDER BY data_fattura DESC"""
             
             
             with self.db_manager.get_connection() as conn:
@@ -188,8 +188,67 @@ class MaterialiService(BaseService):
             Updated material dictionary or None
         """
         # Simplified implementation for demo
-        return self.get_materiale_by_id(materiale_id)
+        #return self.get_materiale_by_id(materiale_id)
+        try:
+            query="""
+                UPDATE materiali
+                SET nome = ?, codicearticolo = ?, fornitoreid = ?, fornitorenome = ?, categoria_contabile = ?, costo_unitario = ?
+                WHERE id = ?
+            """
+            params = (
+                data['nome'],
+                data['codicearticolo'],
+                data['fornitoreid'],
+                data['fornitorenome'],
+                data['categoria_contabile'],
+                data['costo_unitario'],
+                materiale_id
+            )
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                conn.commit()
+                return self.get_materiale_by_id(materiale_id)
+        except Exception as e:
+            self.logger.error(f"Error in update_materiale: {e}")
+            raise DatabaseError(f"Failed to update material: {str(e)}")
     
+    def update_materiale_conti(self, materiale_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Aggiorna solo contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome
+        lasciando invariati gli altri campi del materiale.
+        """
+        try:
+            allowed_fields = {
+                'contoid', 'contonome',
+                'brancaid', 'brancanome',
+                'sottocontoid', 'sottocontonome'
+            }
+
+            set_clauses = []
+            params = {'id': materiale_id}
+
+            for key, value in data.items():
+                if key in allowed_fields:
+                    set_clauses.append(f"{key} = :{key}")
+                    params[key] = value
+
+            if not set_clauses:
+                return self.get_materiale_by_id(materiale_id)
+
+            query = f"UPDATE materiali SET {', '.join(set_clauses)} WHERE id = :id"
+
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                conn.commit()
+
+            return self.get_materiale_by_id(materiale_id)
+
+        except Exception as e:
+            self.logger.error(f"Error in update_materiale_conti: {e}")
+            raise DatabaseError(f"Failed to update conti fields: {str(e)}")
+
     def delete_materiale(self, materiale_id: int, deleted_by: str) -> bool:
         """
         Delete material (hard delete).

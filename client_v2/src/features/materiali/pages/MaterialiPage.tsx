@@ -9,10 +9,11 @@ import { useMateriali, type Materiale } from '@/store/materiali.store';
 import type { Fornitore } from '@/store/fornitori.store';
 import ClassificazioneMaterialeModal, { type ClassificazioneData } from '@/features/materiali/components/ClassificazioneMaterialeModal';
 import ModalFatturaDetail from '@/components/modals/ModalFatturaDetail';
+import ConfirmDeleteModal from '@/components/modals/ConfirmDeleteModal';
 import { fatturaService } from '@/services/api/fattura.service';
 
 const MaterialiPage: React.FC = () => {
-  const { materiali, isLoading, error, load, deleteMateriale, updateMateriale } = useMateriali();
+  const { materiali, isLoading, error, load, deleteMateriale, updateMateriale, updateMaterialeConti } = useMateriali();
   const [selectedFornitore, setSelectedFornitore] = useState<Fornitore | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showResults, setShowResults] = useState<boolean>(false);
@@ -26,12 +27,15 @@ const MaterialiPage: React.FC = () => {
   // State per il modale dettagli fattura
   const [isFatturaModalVisible, setIsFatturaModalVisible] = useState(false);
   const [selectedFatturaId, setSelectedFatturaId] = useState<string | null>(null);
+  const [selectedMaterialeId, setSelectedMaterialeId] = useState<number | null>(null);
 
+  //state per il modale delete materiale
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [materialeToDelete, setMaterialeToDelete] = useState<Materiale | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Carica materiali all'avvio - SEMPRE tutti i materiali per ricerca globale
   React.useEffect(() => {
-    console.log('🚀 MaterialiPage: useEffect caricamento materiali attivato');
-    console.log('🚀 MaterialiPage: load function:', typeof load);
     load(); // Carica sempre tutti i materiali
   }, [load]);
 
@@ -140,21 +144,31 @@ const MaterialiPage: React.FC = () => {
     setIsEditModalVisible(true);
   };
 
-  const handleDelete = async (materiale: Materiale) => {
-    if (window.confirm(`Sei sicuro di voler eliminare il materiale "${materiale.nome}"? L'azione è irreversibile.`)) {
-      try {
-        await deleteMateriale(materiale.id);
-        toast.success(`Materiale "${materiale.nome}" eliminato con successo.`);
-      } catch (error) {
-        // L'errore è già gestito a livello di store/api client, ma logghiamo per sicurezza
-        console.error("Fallimento eliminazione dal componente:", error);
-      }
+  const handleDelete = (materiale: Materiale) => {
+    setMaterialeToDelete(materiale);
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!materialeToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteMateriale(materialeToDelete.id);
+      toast.success(`Materiale "${materialeToDelete.nome}" eliminato con successo.`);
+      setIsDeleteModalVisible(false);
+      setMaterialeToDelete(null);
+    } catch (error) {
+      toast.error("Errore durante l'eliminazione del materiale.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const handleViewFattura = (materiale: Materiale) => {
     if (materiale.fattura_id) {
       setSelectedFatturaId(materiale.fattura_id);
+      setSelectedMaterialeId(materiale.id);
       setIsFatturaModalVisible(true);
     } else {
       toast.error('Nessuna fattura associata a questo materiale.');
@@ -166,7 +180,7 @@ const MaterialiPage: React.FC = () => {
 
     setIsSaving(true);
     try {
-      await updateMateriale(editingMateriale.id, data);
+      await updateMaterialeConti(editingMateriale.id, data);
       toast.success(`Classificazione di "${editingMateriale.nome}" aggiornata.`);
       setIsEditModalVisible(false);
       setEditingMateriale(null);
@@ -348,11 +362,26 @@ const MaterialiPage: React.FC = () => {
       {/* Modale per i dettagli della fattura */}
       <ModalFatturaDetail
         visible={isFatturaModalVisible}
-        onClose={() => setIsFatturaModalVisible(false)}
+        onClose={() => {
+          setIsFatturaModalVisible(false);
+          setSelectedMaterialeId(null);
+        }}
         fatturaId={selectedFatturaId}
-        entitaType="fornitore"
-        onFetchFatturaDetail={(id) => fatturaService.getFatturaById(id)}
-        onFetchDettagliRighe={(id) => fatturaService.getDettagliFattura(id)}
+        materialeId={selectedMaterialeId}
+        onFetchFatturaCompleta={(id) => fatturaService.getFatturaCompleta(id)}
+      />
+      {/* Modale per la delete materiale */}
+      <ConfirmDeleteModal
+        visible={isDeleteModalVisible}
+        onClose={() => setIsDeleteModalVisible(false)}
+        onConfirm={handleConfirmDelete}
+        title='Conferma Cancellazione'
+        itemName={materialeToDelete?.nome || ''}
+        itemType='il materiale selezionato?'
+        warning='Questa azione è irreversibile.'
+        details={[{ label: 'ID', value: materialeToDelete?.id.toString() || '' }]}
+        loading={isDeleting}
+        error={error}
       />
     </PageLayout>
   );

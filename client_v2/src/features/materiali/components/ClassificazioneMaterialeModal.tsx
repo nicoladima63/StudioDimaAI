@@ -89,8 +89,7 @@ const ClassificazioneMaterialeModal: React.FC<ClassificazioneMaterialeModalProps
                         <label className="form-label fw-bold">Conto</label>
                         <ContiSelect
                           value={contoId}
-                          onChange={(conto) => {
-                            const newContoId = conto ? conto.id : null;
+                          onChange={(newContoId) => {
                             setContoId(newContoId);
                             // Resetta i figli quando il genitore cambia
                             setBrancaId(null);
@@ -104,8 +103,7 @@ const ClassificazioneMaterialeModal: React.FC<ClassificazioneMaterialeModalProps
                         <BrancheSelect
                           contoId={contoId} // Passa il filtro
                           value={brancaId}
-                          onChange={(branca) => {
-                            const newBrancaId = branca ? branca.id : null;
+                          onChange={(newBrancaId) => {
                             setBrancaId(newBrancaId);
                             // Resetta il figlio quando il genitore cambia
                             setSottocontoId(null);
@@ -118,7 +116,7 @@ const ClassificazioneMaterialeModal: React.FC<ClassificazioneMaterialeModalProps
                         <SottocontiSelect
                           brancaId={brancaId} // Passa il filtro
                           value={sottocontoId}
-                          onChange={(sottoconto) => setSottocontoId(sottoconto ? sottoconto.id : null)}
+                          onChange={(newSottocontoId) => setSottocontoId(newSottocontoId)}
                           clearable
                         />            </CCol>
           </CRow>

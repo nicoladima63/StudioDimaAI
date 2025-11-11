@@ -68,6 +68,7 @@ interface MaterialiState {
   invalidateCache: () => void;
   deleteMateriale: (id: number) => Promise<void>;
   updateMateriale: (id: number, data: Partial<Materiale>) => Promise<void>;
+  updateMaterialeConti: (id: number, data: Partial<Materiale>) => Promise<void>;
 }
 
 export const useMaterialiStore = create<MaterialiState>()(
@@ -81,12 +82,32 @@ export const useMaterialiStore = create<MaterialiState>()(
       error: null,
       lastUpdated: null,
 
+
+      // Azione per aggiornare i conti di un materiale
+      updateMaterialeConti: async (id: number, data: Partial<Materiale>) => {
+        try {
+          const response = await apiClient.put(`/materiali-update/conti/${id}`, data);
+          if (!response.data.success) {
+            throw new Error(response.data.error || 'Errore durante l\'aggiornamento dei conti del materiale');
+          }
+          const updatedMateriale = response.data.data;
+          console.log(`✅ Materiale con ID: ${id} aggiornato con successo.`);
+          set(state => ({
+            materiali: state.materiali.map(m => m.id === id ? { ...m, ...updatedMateriale } : m),
+            materialiFiltered: state.materialiFiltered.map(m => m.id === id ? { ...m, ...updatedMateriale } : m),
+          }));
+        } catch (err: any) {
+          console.error(`❌ Errore durante l'aggiornamento dei conti del materiale con ID: ${id}`, err);
+          throw err;
+        }
+      },
+
       // Azione per aggiornare un materiale
       updateMateriale: async (id: number, data: Partial<Materiale>) => {
         try {
-          console.log(`🔄 Aggiornamento materiale con ID: ${id}...`, data);
-          const response = await apiClient.patch(`/materiali/${id}`, data);
-
+          //console.log(`🔄 Aggiornamento materiale con ID: ${id}...`, data);
+          const response = await apiClient.put(`/materiali/${id}`, data);
+          
           if (!response.data.success) {
             throw new Error(response.data.error || 'Errore durante l\'aggiornamento del materiale');
           }
@@ -308,7 +329,8 @@ export const useMateriali = () => {
     applyFiltri: store.applyFiltri,
     clearFiltri: store.clearFiltri,
     deleteMateriale: store.deleteMateriale,
-    updateMateriale: store.updateMateriale
+    updateMateriale: store.updateMateriale,
+    updateMaterialeConti: store.updateMaterialeConti
   };
 };
 
