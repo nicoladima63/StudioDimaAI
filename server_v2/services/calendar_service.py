@@ -74,10 +74,32 @@ class CalendarServiceV2:
                     start_date = datetime.fromisoformat(start_date_str).date()
                     end_date = datetime.fromisoformat(end_date_str).date()
                     
-                    appointments = [
-                        app for app in appointments
-                        if app.get('DATA') and start_date <= app['DATA'].date() <= end_date
-                    ]
+                    filtered_appointments_by_date = []
+                    for app in appointments:
+                        app_date_val = app.get('DATA')
+                        if not app_date_val:
+                            continue
+                        
+                        app_date = None
+                        if isinstance(app_date_val, str):
+                            try:
+                                app_date = datetime.fromisoformat(app_date_val).date()
+                            except ValueError:
+                                logger.warning(f"Could not parse date string: {app_date_val}")
+                                continue
+                        elif hasattr(app_date_val, 'date'):  # Handles datetime.datetime
+                            app_date = app_date_val.date()
+                        elif isinstance(app_date_val, date): # Handles datetime.date
+                            app_date = app_date_val
+                        else:
+                            logger.warning(f"Unknown date type for filtering: {type(app_date_val)}")
+                            continue
+
+                        if start_date <= app_date <= end_date:
+                            filtered_appointments_by_date.append(app)
+                    
+                    appointments = filtered_appointments_by_date
+
                 except (ValueError, TypeError) as e:
                     logger.error(f"Formato data non valido per il filtro: {e}. Ignoro il filtro per data.")
 

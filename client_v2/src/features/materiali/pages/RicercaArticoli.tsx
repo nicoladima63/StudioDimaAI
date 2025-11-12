@@ -23,6 +23,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import ContiSelect from '@/components/selects/ContiSelect';
 import BrancheSelect from '@/components/selects/BrancheSelect';
 import SottocontiSelect from '@/components/selects/SottocontiSelect';
+import SlimSelectComponent from '@/components/selects/SlimSelect';
 import { materialiClassificationService } from '../services/materiali-classification.service';
 import { useContiStore } from '@/store/conti.store';
 
@@ -87,6 +88,9 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
   const [errori, setErrori] = useState<Record<string, string>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [materialeToDelete, setMaterialeToDelete] = useState<string | null>(null);
+  const [fornitori, setFornitori] = useState<{ value: string; text: string }[]>([]);
+  const [selectedFornitore, setSelectedFornitore] = useState<string | string[]>('');
+  const [risultatiFiltrati, setRisultatiFiltrati] = useState<RisultatoRicercaArticolo[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Accesso al contistore per i nomi
@@ -101,6 +105,33 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
     }
   }, [autoFocus]);
 
+  // Estrai fornitori unici dai risultati
+  useEffect(() => {
+    const fornitoriUnici = risultati.reduce((acc, risultato) => {
+      if (risultato.fattura?.codice_fornitore && risultato.fattura?.nome_fornitore) {
+        acc[risultato.fattura.codice_fornitore] = risultato.fattura.nome_fornitore;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+
+    const fornitoriOptions = Object.entries(fornitoriUnici).map(([value, text]) => ({
+      value,
+      text,
+    }));
+
+    setFornitori(fornitoriOptions);
+  }, [risultati]);
+
+  // Filtra i risultati quando cambia il fornitore selezionato
+  useEffect(() => {
+    if (selectedFornitore && selectedFornitore.length > 0) {
+      const fornitoreSelezionato = Array.isArray(selectedFornitore) ? selectedFornitore[0] : selectedFornitore;
+      setRisultatiFiltrati(risultati.filter(r => r.fattura?.codice_fornitore === fornitoreSelezionato));
+    } else {
+      setRisultatiFiltrati(risultati);
+    }
+  }, [selectedFornitore, risultati]);
+
   const cercaArticoli = async (searchQuery: string = query) => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
       setError('Inserire almeno 2 caratteri per la ricerca');
@@ -110,6 +141,7 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
     setLoading(true);
     setError(null);
     setCercatoQuery(searchQuery);
+    setSelectedFornitore(''); // Reset filtro fornitore
 
     try {
       // RICERCA UNIFICATA: Cerca prima in materiali, poi in DBF
@@ -507,6 +539,13 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
                 Inserisci il nome del prodotto da ricercare
               </label>
               <CForm onSubmit={handleSubmit} className='mb-4'>
+              <SlimSelectComponent
+                options={[]}
+                placeholder='Cerca articolo per descrizione...'
+                onChange={e => setQuery(e.target.value)}
+                selected={query}
+                disabled={loading}
+              />
                 <CInputGroup>
                   <CFormInput
                     ref={inputRef}
