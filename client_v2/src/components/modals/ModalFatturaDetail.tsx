@@ -20,40 +20,14 @@ import CIcon from '@coreui/icons-react';
 import { cilX, cilDescription, cilInfo } from '@coreui/icons';
 import './modals.css';
 
-export interface FatturaDetail {
-  id: string;
-  data_spesa?: string; // Per fornitori
-  data_fattura?: string; // Per pazienti
-  numero_documento?: string;
-  costo_netto?: number;
-  costo_iva?: number;
-  totale?: number;
-  descrizione?: string;
-  note?: string;
-  codice_fornitore?: string; // Per fatture acquisto
-  codice_paziente?: string; // Per fatture vendita
-  nome_fornitore?: string;
-  nome_paziente?: string;
-}
-
-export interface DettaglioRigaFattura {
-  id?: string;
-  codice_articolo?: string;
-  descrizione?: string;
-  quantita?: number;
-  prezzo_unitario?: number;
-  sconto?: number;
-  aliquota_iva?: number;
-  totale_riga?: number;
-}
+import type { FatturaCompleta, FatturaIntestazione, DettaglioRigaFattura } from '@/types/fatture';
 
 export interface ModalFatturaDetailProps {
   visible: boolean;
   onClose: () => void;
   fatturaId: string | null;
-  entitaType: 'fornitore' | 'paziente';
-  onFetchFatturaDetail: (fatturaId: string) => Promise<FatturaDetail>;
-  onFetchDettagliRighe: (fatturaId: string) => Promise<DettaglioRigaFattura[]>;
+  materialeId?: number | null;
+  onFetchFatturaCompleta: (fatturaId: string) => Promise<FatturaCompleta>;
   size?: 'sm' | 'lg' | 'xl';
 }
 
@@ -61,12 +35,11 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
   visible,
   onClose,
   fatturaId,
-  entitaType,
-  onFetchFatturaDetail,
-  onFetchDettagliRighe,
+  materialeId,
+  onFetchFatturaCompleta,
   size = 'xl'
 }) => {
-  const [fattura, setFattura] = useState<FatturaDetail | null>(null);
+  const [fattura, setFattura] = useState<FatturaIntestazione | null>(null);
   const [righe, setRighe] = useState<DettaglioRigaFattura[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,14 +67,10 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
       setLoading(true);
       setError(null);
       
-      // Carica in parallelo fattura e dettagli righe
-      const [fatturaData, righeData] = await Promise.all([
-        onFetchFatturaDetail(fatturaId),
-        onFetchDettagliRighe(fatturaId)
-      ]);
+      const fatturaCompleta = await onFetchFatturaCompleta(fatturaId);
       
-      setFattura(fatturaData);
-      setRighe(righeData);
+      setFattura(fatturaCompleta.intestazione);
+      setRighe(fatturaCompleta.dettagli);
     } catch (err: any) {
       setError(err.message || 'Errore nel caricamento del dettaglio fattura');
     } finally {
@@ -124,31 +93,6 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
       return date.toLocaleDateString('it-IT');
     } catch {
       return dateString;
-    }
-  };
-
-  const getDataLabel = () => {
-    return entitaType === 'fornitore' ? 'Data Spesa' : 'Data Fattura';
-  };
-
-  const getDataValue = () => {
-    if (!fattura) return '-';
-    return entitaType === 'fornitore' ? fattura.data_spesa : fattura.data_fattura;
-  };
-
-  const getEntitaInfo = () => {
-    if (!fattura) return { label: '', value: '' };
-    
-    if (entitaType === 'fornitore') {
-      return {
-        label: 'Fornitore',
-        value: fattura.nome_fornitore || fattura.codice_fornitore || '-'
-      };
-    } else {
-      return {
-        label: 'Paziente', 
-        value: fattura.nome_paziente || fattura.codice_paziente || '-'
-      };
     }
   };
 
@@ -178,7 +122,7 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
           Dettagli Fattura {fatturaId}
           {fattura && (
             <span className="text-muted ms-2">
-              - {getEntitaInfo().value}
+              - {fattura.fornitorenome}
             </span>
           )}
         </CModalTitle>
@@ -219,8 +163,8 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
               </div>
               <div className="col-md-3">
                 <div className="info-box">
-                  <label className="text-muted small fw-bold">{getDataLabel()}:</label>
-                  <div className="fw-bold">{formatDate(getDataValue())}</div>
+                  <label className="text-muted small fw-bold">Data Spesa:</label>
+                  <div className="fw-bold">{formatDate(fattura.data_spesa)}</div>
                 </div>
               </div>
               <div className="col-md-3">
@@ -233,7 +177,7 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
                 <div className="info-box">
                   <label className="text-muted small fw-bold">Totale Fattura:</label>
                   <div className="fw-bold text-primary fs-5">
-                    {formatCurrency((fattura.costo_netto || 0) + (fattura.costo_iva || 0))}
+                    {formatCurrency(fattura.costo_totale)}
                   </div>
                 </div>
               </div>
@@ -244,43 +188,22 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
               <div className="col-md-3">
                 <div className="info-box">
                   <label className="text-muted small fw-bold">Costo Netto:</label>
-                  <div>{formatCurrency(fattura.costo_netto || 0)}</div>
+                  <div>{formatCurrency(fattura.costo_netto_totale)}</div>
                 </div>
               </div>
               <div className="col-md-3">
                 <div className="info-box">
                   <label className="text-muted small fw-bold">Costo IVA:</label>
-                  <div>{formatCurrency(fattura.costo_iva || 0)}</div>
+                  <div>{formatCurrency(fattura.costo_iva_totale)}</div>
                 </div>
               </div>
               <div className="col-md-6">
                 <div className="info-box">
-                  <label className="text-muted small fw-bold">{getEntitaInfo().label}:</label>
-                  <div>{getEntitaInfo().value}</div>
+                  <label className="text-muted small fw-bold">Fornitore:</label>
+                  <div>{fattura.fornitorenome}</div>
                 </div>
               </div>
             </div>
-
-            {(fattura.descrizione || fattura.note) && (
-              <div className="row mb-4">
-                {fattura.descrizione && (
-                  <div className="col-12 mb-2">
-                    <div className="info-box">
-                      <label className="text-muted small fw-bold">Descrizione:</label>
-                      <div>{fattura.descrizione}</div>
-                    </div>
-                  </div>
-                )}
-                {fattura.note && (
-                  <div className="col-12">
-                    <div className="info-box">
-                      <label className="text-muted small fw-bold">Note:</label>
-                      <div>{fattura.note}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
             <hr className="my-4" />
 
@@ -312,7 +235,10 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
                 </CTableHead>
                 <CTableBody>
                   {getRigheFiltrate().map((riga, index) => (
-                    <CTableRow key={index}>
+                    <CTableRow 
+                      key={index}
+                      className={riga.id === materialeId ? 'table-row-highlight' : ''}
+                    >
                       <CTableDataCell>
                         <code className="text-muted small">
                           {riga.codice_articolo || '-'}

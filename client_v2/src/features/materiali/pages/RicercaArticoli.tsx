@@ -84,7 +84,7 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
   >({});
   const [salvando, setSalvando] = useState<Record<string, boolean>>({});
   const [cancellando, setCancellando] = useState<Record<string, boolean>>({});
-  const [modificando, setModificando] = useState<Record<string, boolean>>({});
+  const [editingKey, setEditingKey] = useState<string | null>(null);
   const [errori, setErrori] = useState<Record<string, string>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [materialeToDelete, setMaterialeToDelete] = useState<string | null>(null);
@@ -324,20 +324,45 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
 
       if (response.success) {
         console.log(`✅ Classificazione salvata per ${risultato.articolo.codice_articolo}:`, response.data);
-        
-        // Aggiorna il risultato con il materiale_id restituito dal backend
+
+        const newMaterialeId = response.data?.id || response.data?.materiale_id;
+
+        // Since we checked for classificazione.contoid, it's a number here.
+        const contoid = classificazione.contoid!;
+
+        const updatedClassification: ClassificazioneEsistente = {
+          contoid: contoid,
+          brancaid: classificazione.brancaid || null,
+          sottocontoid: classificazione.sottocontoid || null,
+          contonome: classificazione.contonome || contiMap[contoid] || '',
+          brancanome: classificazione.brancaid ? (classificazione.brancanome || brancheMap[classificazione.brancaid] || '') : null,
+          sottocontonome: classificazione.sottocontoid ? (classificazione.sottocontonome || sottocontiMap[classificazione.sottocontoid] || '') : null,
+        };
+
+        // Aggiorna lo stato dei risultati (requires `null` for names)
         setRisultati(prev => prev.map(r => {
           if (getArticoloKey(r) === articoloKey) {
             return {
               ...r,
-              materiale_id: response.data?.id || response.data?.materiale_id
+              materiale_id: newMaterialeId,
+              classificazioneEsistente: updatedClassification,
             };
           }
           return r;
         }));
-        
+
+        // Aggiorna lo stato delle classificazioni (requires `undefined` for names)
+        setClassificazioni(prev => ({
+          ...prev,
+          [articoloKey]: {
+            ...updatedClassification,
+            brancanome: updatedClassification.brancanome ?? undefined,
+            sottocontonome: updatedClassification.sottocontonome ?? undefined,
+          },
+        }));
+
         // Esci dalla modalità modifica
-        setModificando(prev => ({ ...prev, [articoloKey]: false }));
+        setEditingKey(null);
       } else {
         throw new Error(response.error || 'Errore nel salvataggio');
       }
@@ -422,11 +447,11 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
   };
 
   const handleIniziaModifica = (articoloKey: string) => {
-    setModificando(prev => ({ ...prev, [articoloKey]: true }));
+    setEditingKey(articoloKey);
   };
 
   const handleAnnullaModifica = (articoloKey: string) => {
-    setModificando(prev => ({ ...prev, [articoloKey]: false }));
+    setEditingKey(null);
     // Ripristina la classificazione originale
     const risultato = risultati.find(r => getArticoloKey(r) === articoloKey);
     if (risultato?.classificazioneEsistente) {
@@ -619,7 +644,7 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
                   const isCancellando = cancellando[articoloKey];
 
                   return (
-                    <CTableRow key={index}>
+                    <CTableRow key={articoloKey}>
                       <CTableDataCell>
                         <div className='fw-semibold'>{risultato.articolo.descrizione}</div>
                       </CTableDataCell>
@@ -663,151 +688,8 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
                             </div>
                           ) : (
                             <div className='d-flex flex-column gap-2'>
-                              {classificazione?.contoid && risultato.materiale_id ? (
-                                // Materiale già salvato in database
-                                <>
-                                  {modificando[articoloKey] ? (
-                                    // Modalità modifica
-                                    <>
-                                      {/* Conto */}
-                                      <div className='d-flex gap-2 align-items-center'>
-                                        <div style={{ flex: 1 }}>
-                                          <ContiSelect 
-                                            value={classificazione?.contoid || null}
-                                            onChange={(contoid) => handleContoChange(articoloKey, contoid)}
-                                            autoSelectIfSingle
-                                          />
-                                        </div>
-                                        <CButton
-                                          color='success'
-                                          size='sm'
-                                          onClick={() => handleSalvaClassificazione(articoloKey)}
-                                          disabled={!classificazione.contoid}
-                                        >
-                                          Salva
-                                        </CButton>
-                                        <CButton
-                                          color='secondary'
-                                          size='sm'
-                                          onClick={() => handleAnnullaModifica(articoloKey)}
-                                        >
-                                          Annulla
-                                        </CButton>
-                                      </div>
-                                      
-                                      {/* Branca - appare solo dopo selezione conto */}
-                                      {classificazione?.contoid && (
-                                        <div>
-                                          <BrancheSelect
-                                            contoId={classificazione.contoid}
-                                            value={classificazione.brancaid || null}
-                                            onChange={(brancaid) => handleBrancaChange(articoloKey, brancaid)}
-                                            autoSelectIfSingle
-                                          />
-                                        </div>
-                                      )}
-                                      
-                                      {/* Sottoconto - appare solo dopo selezione branca */}
-                                      {classificazione?.brancaid && (
-                                        <div>
-                                          <SottocontiSelect
-                                            brancaId={classificazione.brancaid}
-                                            value={classificazione.sottocontoid || null}
-                                            onChange={(sottocontoid) => handleSottocontoChange(articoloKey, sottocontoid)}
-                                            autoSelectIfSingle
-                                          />
-                                        </div>
-                                      )}
-                                    </>
-                                  ) : (
-                                    // Vista normale - mostra classificazione e pulsanti
-                                    <div
-                                      className='d-flex align-items-center justify-content-between'
-                                      style={{ width: '100%' }}
-                                    >
-                                      {/* Badge container - float left */}
-                                      <div className='d-flex align-items-center gap-2'>
-                                        {/* Badge conto */}
-                                        <CBadge color='primary' className='text-nowrap' style={{
-                                          padding: '0.575rem 0.75rem',
-                                          fontSize: '0.875rem',
-                                          fontWeight: '400',
-                                          borderRadius: '0.25rem',
-                                          display: 'inline-flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          minWidth: '80px',
-                                        }}>
-                                          {classificazione.contonome || contiMap[classificazione.contoid]}
-                                        </CBadge>
-
-                                        {/* Badge branca con freccia condizionale */}
-                                        {classificazione.brancaid && (
-                                          <>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>→</span>
-                                            <CBadge color='info' className='text-nowrap' style={{
-                                              padding: '0.575rem 0.75rem',
-                                              fontSize: '0.875rem',
-                                              fontWeight: '400',
-                                              borderRadius: '0.25rem',
-                                              display: 'inline-flex',
-                                              alignItems: 'center',
-                                              justifyContent: 'center',
-                                              minWidth: '80px',
-                                            }}>
-                                              {classificazione.brancanome || brancheMap[classificazione.brancaid]}
-                                            </CBadge>
-                                          </>
-                                        )}
-
-                                        {/* Badge sottoconto con freccia condizionale */}
-                                        {classificazione.sottocontoid && (
-                                          <>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>→</span>
-                                            <CBadge color='success' className='text-nowrap' style={{
-                                              padding: '0.575rem 0.75rem',
-                                              fontSize: '0.875rem',
-                                              fontWeight: '400',
-                                              borderRadius: '0.25rem',
-                                              display: 'inline-flex',
-                                              alignItems: 'center',
-                                              justifyContent: 'center',
-                                              minWidth: '80px',
-                                            }}>
-                                              {classificazione.sottocontonome || sottocontiMap[classificazione.sottocontoid]}
-                                            </CBadge>
-                                          </>
-                                        )}
-                                      </div>
-
-                                      {/* Action buttons - float right */}
-                                      <div className='d-flex align-items-center gap-1'>
-                                        <CButton
-                                          color='secondary'
-                                          size='sm'
-                                          variant='outline'
-                                          onClick={() => handleIniziaModifica(articoloKey)}
-                                          title='Modifica classificazione'
-                                        >
-                                          <i className='cil-pencil'></i>
-                                        </CButton>
-                                        {risultato.materiale_id && (
-                                          <CButton
-                                            color='danger'
-                                            size='sm'
-                                            variant='outline'
-                                            onClick={() => handleCancellaMateriale(articoloKey)}
-                                            title='Cancella materiale'
-                                          >
-                                            <i className='cil-trash'></i>
-                                          </CButton>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
-                              ) : (
-                                // Materiale non classificato - mostra select per classificare
+                              {editingKey === articoloKey ? (
+                                // Modalità modifica UNIFICATA
                                 <>
                                   {/* Conto */}
                                   <div className='d-flex gap-2 align-items-center'>
@@ -818,16 +700,21 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
                                         autoSelectIfSingle
                                       />
                                     </div>
-                                    {classificazione?.contoid && (
-                                      <CButton
-                                        color='primary'
+                                    <CButton
+                                        color='success'
                                         size='sm'
                                         onClick={() => handleSalvaClassificazione(articoloKey)}
-                                        disabled={!classificazione.contoid}
-                                      >
+                                        disabled={!classificazione?.contoid}
+                                    >
                                         Salva
-                                      </CButton>
-                                    )}
+                                    </CButton>
+                                    <CButton
+                                        color='secondary'
+                                        size='sm'
+                                        onClick={() => handleAnnullaModifica(articoloKey)}
+                                    >
+                                        Annulla
+                                    </CButton>
                                   </div>
                                   
                                   {/* Branca - appare solo dopo selezione conto */}
@@ -854,7 +741,96 @@ const RicercaArticoli: React.FC<RicercaArticoliProps> = ({ autoFocus = false }) 
                                     </div>
                                   )}
                                 </>
-                              )}
+                                ) : (
+                                // Vista normale UNIFICATA - mostra classificazione e pulsanti
+                                <div
+                                    className='d-flex align-items-center justify-content-between'
+                                    style={{ width: '100%' }}
+                                >
+                                    {/* Badge container - o placeholder se non c'è classificazione */}
+                                    {classificazione?.contoid ? (
+                                        <div className='d-flex align-items-center gap-2'>
+                                        {/* Badge conto */}
+                                        <CBadge color='primary' className='text-nowrap' style={{
+                                            padding: '0.575rem 0.75rem',
+                                            fontSize: '0.875rem',
+                                            fontWeight: '400',
+                                            borderRadius: '0.25rem',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            minWidth: '80px',
+                                        }}>
+                                            {classificazione.contonome || contiMap[classificazione.contoid]}
+                                        </CBadge>
+
+                                        {/* Badge branca con freccia condizionale */}
+                                        {classificazione.brancaid && (
+                                            <>
+                                            <span style={{ color: '#666', fontSize: '14px' }}>→</span>
+                                            <CBadge color='info' className='text-nowrap' style={{
+                                                padding: '0.575rem 0.75rem',
+                                                fontSize: '0.875rem',
+                                                fontWeight: '400',
+                                                borderRadius: '0.25rem',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                minWidth: '80px',
+                                            }}>
+                                                {classificazione.brancanome || brancheMap[classificazione.brancaid]}
+                                            </CBadge>
+                                            </>
+                                        )}
+
+                                        {/* Badge sottoconto con freccia condizionale */}
+                                        {classificazione.sottocontoid && (
+                                            <>
+                                            <span style={{ color: '#666', fontSize: '14px' }}>→</span>
+                                            <CBadge color='success' className='text-nowrap' style={{
+                                                padding: '0.575rem 0.75rem',
+                                                fontSize: '0.875rem',
+                                                fontWeight: '400',
+                                                borderRadius: '0.25rem',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                minWidth: '80px',
+                                            }}>
+                                                {classificazione.sottocontonome || sottocontiMap[classificazione.sottocontoid]}
+                                            </CBadge>
+                                            </>
+                                        )}
+                                        </div>
+                                    ) : (
+                                        <div className='text-muted fst-italic'>Non classificato</div>
+                                    )}
+
+                                    {/* Action buttons - float right */}
+                                    <div className='d-flex align-items-center gap-1'>
+                                    <CButton
+                                        color='secondary'
+                                        size='sm'
+                                        variant='outline'
+                                        onClick={() => handleIniziaModifica(articoloKey)}
+                                        title='Modifica classificazione'
+                                    >
+                                        <i className='cil-pencil'></i>
+                                    </CButton>
+                                    {risultato.materiale_id && (
+                                        <CButton
+                                        color='danger'
+                                        size='sm'
+                                        variant='outline'
+                                        onClick={() => handleCancellaMateriale(articoloKey)}
+                                        title='Cancella materiale'
+                                        >
+                                        <i className='cil-trash'></i>
+                                        </CButton>
+                                    )}
+                                    </div>
+                                </div>
+                            )}
                               
                               {/* Messaggio di errore */}
                               {errori[articoloKey] && (

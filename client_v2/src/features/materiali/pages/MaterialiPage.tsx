@@ -1,24 +1,41 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CButton, CForm, CFormInput } from '@coreui/react';
+import toast from 'react-hot-toast';
 
 import PageLayout from '@/components/layout/PageLayout';
 import MaterialiTable from '@/features/materiali/components/MaterialiTable';
-//import MaterialiAccordion from '@/features/materiali/components/MaterialiAccordion';
 import FornitoriSelect from '@/components/selects/FornitoriSelect';
 import { useMateriali, type Materiale } from '@/store/materiali.store';
 import type { Fornitore } from '@/store/fornitori.store';
+import ClassificazioneMaterialeModal, { type ClassificazioneData } from '@/features/materiali/components/ClassificazioneMaterialeModal';
+import ModalFatturaDetail from '@/components/modals/ModalFatturaDetail';
+import ConfirmDeleteModal from '@/components/modals/ConfirmDeleteModal';
+import { fatturaService } from '@/services/api/fattura.service';
 
 const MaterialiPage: React.FC = () => {
-  const { materiali, isLoading, error, load } = useMateriali();
-  const [selectedFornitore, setSelectedFornitore] = React.useState<Fornitore | null>(null);
-  const [searchTerm, setSearchTerm] = React.useState<string>('');
-  const [showResults, setShowResults] = React.useState<boolean>(false);
-  const [searchSuggestions, setSearchSuggestions] = React.useState<Materiale[]>([]);
+  const { materiali, isLoading, error, load, deleteMateriale, updateMateriale, updateMaterialeConti } = useMateriali();
+  const [selectedFornitore, setSelectedFornitore] = useState<Fornitore | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showResults, setShowResults] = useState<boolean>(false);
+  const [searchSuggestions, setSearchSuggestions] = useState<Materiale[]>([]);
+
+  // State per il modale di modifica
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingMateriale, setEditingMateriale] = useState<Materiale | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // State per il modale dettagli fattura
+  const [isFatturaModalVisible, setIsFatturaModalVisible] = useState(false);
+  const [selectedFatturaId, setSelectedFatturaId] = useState<string | null>(null);
+  const [selectedMaterialeId, setSelectedMaterialeId] = useState<number | null>(null);
+
+  //state per il modale delete materiale
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [materialeToDelete, setMaterialeToDelete] = useState<Materiale | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Carica materiali all'avvio - SEMPRE tutti i materiali per ricerca globale
   React.useEffect(() => {
-    console.log('🚀 MaterialiPage: useEffect caricamento materiali attivato');
-    console.log('🚀 MaterialiPage: load function:', typeof load);
     load(); // Carica sempre tutti i materiali
   }, [load]);
 
@@ -35,7 +52,11 @@ const MaterialiPage: React.FC = () => {
   // Genera suggerimenti di ricerca mentre l'utente digita
   React.useEffect(() => {
     if (searchTerm.length >= 2) {
-      const suggestions = materiali
+      const baseMateriali = selectedFornitore
+        ? materiali.filter(m => m.fornitoreid === selectedFornitore.id)
+        : materiali;
+
+      const suggestions = baseMateriali
         .filter(materiale => {
           const searchLower = searchTerm.toLowerCase();
           return materiale.nome.toLowerCase().includes(searchLower) ||
@@ -47,7 +68,7 @@ const MaterialiPage: React.FC = () => {
     } else {
       setSearchSuggestions([]);
     }
-  }, [searchTerm, materiali]);
+  }, [searchTerm, materiali, selectedFornitore]);
 
   // Filtra materiali in base al fornitore selezionato e ricerca
   const filteredMateriali = useMemo(() => {
@@ -119,18 +140,55 @@ const MaterialiPage: React.FC = () => {
 
   // Gestori azioni tabella
   const handleEdit = (materiale: Materiale) => {
-    console.log('Edit materiale:', materiale);
-    // TODO: Aprire modal di modifica
+    setEditingMateriale(materiale);
+    setIsEditModalVisible(true);
   };
 
   const handleDelete = (materiale: Materiale) => {
-    console.log('Delete materiale:', materiale);
-    // TODO: Conferma eliminazione
+    setMaterialeToDelete(materiale);
+    setIsDeleteModalVisible(true);
   };
 
-  const handleView = (materiale: Materiale) => {
-    console.log('View materiale:', materiale);
-    // TODO: Aprire modal dettagli
+  const handleConfirmDelete = async () => {
+    if (!materialeToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteMateriale(materialeToDelete.id);
+      toast.success(`Materiale "${materialeToDelete.nome}" eliminato con successo.`);
+      setIsDeleteModalVisible(false);
+      setMaterialeToDelete(null);
+    } catch (error) {
+      toast.error("Errore durante l'eliminazione del materiale.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleViewFattura = (materiale: Materiale) => {
+    if (materiale.fattura_id) {
+      setSelectedFatturaId(materiale.fattura_id);
+      setSelectedMaterialeId(materiale.id);
+      setIsFatturaModalVisible(true);
+    } else {
+      toast.error('Nessuna fattura associata a questo materiale.');
+    }
+  };
+
+  const handleSaveClassification = async (data: ClassificazioneData) => {
+    if (!editingMateriale) return;
+
+    setIsSaving(true);
+    try {
+      await updateMaterialeConti(editingMateriale.id, data);
+      toast.success(`Classificazione di "${editingMateriale.nome}" aggiornata.`);
+      setIsEditModalVisible(false);
+      setEditingMateriale(null);
+    } catch (error) {
+      toast.error("Errore durante l'aggiornamento della classificazione.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -164,14 +222,38 @@ const MaterialiPage: React.FC = () => {
               <div className='col-md-6'>
                 <label className='form-label fw-bold'>Ricerca Materiali</label>
                 <CForm onSubmit={handleSearchSubmit} className='position-relative'>
-                  <CFormInput
-                    type='text'
-                    placeholder='Digita nome, codice o fornitore...'
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onBlur={handleSearchBlur}
-                    className='mb-2'
-                  />
+                  <div className='position-relative'>
+                    <CFormInput
+                      type='text'
+                      placeholder='Digita nome, codice o fornitore...'
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onBlur={handleSearchBlur}
+                      className='mb-2'
+                    />
+                    {searchTerm && (
+                        <button
+                          type='button'
+                          onClick={handleSearchClear}
+                          aria-label='Pulisci ricerca'
+                          className='btn position-absolute'
+                          style={{
+                            top: '50%',
+                            right: '5px',
+                            transform: 'translateY(-50%)',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#6c757d',
+                            fontSize: '1.2rem',
+                            lineHeight: 1,
+                            padding: '0 .75rem',
+                            zIndex: 5,
+                          }}
+                        >
+                          &times;
+                        </button>
+                    )}
+                  </div>
                   {searchSuggestions.length > 0 && !showResults && (
                     <div className='position-absolute w-100 bg-white border rounded shadow-lg' style={{zIndex: 1000, top: '100%'}}>
                       {searchSuggestions.map((materiale, index) => (
@@ -194,11 +276,6 @@ const MaterialiPage: React.FC = () => {
                     <CButton type='submit' color='primary' size='sm'>
                       Cerca
                     </CButton>
-                    {searchTerm && (
-                      <CButton type='button' color='secondary' size='sm' onClick={handleSearchClear}>
-                        Pulisci
-                      </CButton>
-                    )}
                   </div>
                 </CForm>
                 <div className='text-muted small mt-1'>
@@ -265,18 +342,47 @@ const MaterialiPage: React.FC = () => {
             error={error}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            onView={handleView}
+            onView={handleViewFattura}
             searchable={!selectedFornitore} // Disabilita ricerca interna quando c'è fornitore selezionato
           />
         )}
-        {/* <MaterialiAccordion
-          materiali={filteredMateriali}
-          loading={isLoading}
-          error={error}
-        /> */}
       </PageLayout.ContentBody>
 
       <PageLayout.Footer text='Gestione completa dei materiali del magazzino' />
+
+      {/* Modale per la modifica della classificazione */}
+      <ClassificazioneMaterialeModal
+        visible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+        materiale={editingMateriale}
+        onSave={handleSaveClassification}
+        loading={isSaving}
+      />
+
+      {/* Modale per i dettagli della fattura */}
+      <ModalFatturaDetail
+        visible={isFatturaModalVisible}
+        onClose={() => {
+          setIsFatturaModalVisible(false);
+          setSelectedMaterialeId(null);
+        }}
+        fatturaId={selectedFatturaId}
+        materialeId={selectedMaterialeId}
+        onFetchFatturaCompleta={(id) => fatturaService.getFatturaCompleta(id)}
+      />
+      {/* Modale per la delete materiale */}
+      <ConfirmDeleteModal
+        visible={isDeleteModalVisible}
+        onClose={() => setIsDeleteModalVisible(false)}
+        onConfirm={handleConfirmDelete}
+        title='Conferma Cancellazione'
+        itemName={materialeToDelete?.nome || ''}
+        itemType='il materiale selezionato?'
+        warning='Questa azione è irreversibile.'
+        details={[{ label: 'ID', value: materialeToDelete?.id.toString() || '' }]}
+        loading={isDeleting}
+        error={error}
+      />
     </PageLayout>
   );
 };

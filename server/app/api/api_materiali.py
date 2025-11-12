@@ -1027,7 +1027,7 @@ def update_materiale(materiale_id):
         if not data:
             return jsonify({'success': False, 'error': 'Dati obbligatori'}), 400
         
-        conn = sqlite3.connect('server/instance/studio_dima.db')
+        conn = sqlite3.connect('server_v2/instance/studio_dima.db')
         cursor = conn.cursor()
         
         # Ottieni materiale esistente

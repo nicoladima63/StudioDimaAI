@@ -351,6 +351,65 @@ def update_materiale(materiale_id):
             error="An unexpected error occurred"
         ), 500
 
+@materiali_v2_bp.route('/materiali-update/conti/<int:materiale_id>', methods=['PUT'])
+@jwt_required()
+def update_materiale_conti(materiale_id):
+    """
+    Update existing material classification.
+    
+    Args:
+        materiale_id (int): Material ID
+    """
+    try:
+        user_id = require_auth()
+        
+        # Validate request data
+        if not request.is_json:
+            return format_response(
+                success=False,
+                error="Content-Type must be application/json"
+            ), 400
+        
+        data = request.get_json()
+        
+        # Update material classification using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        materiale = materiali_service.update_materiale_conti(materiale_id, data)
+        
+        if not materiale:
+            return format_response(
+                success=False,
+                error="Material not found"
+            ), 404
+        
+        # Clean DBF data
+        clean_data = handle_dbf_data(materiale)
+        
+        return format_response(
+            data=clean_data,
+            message="Material classification updated successfully"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in update_materiale_conti: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in update_materiale_conti: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in update_materiale_conti: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
 
 @materiali_v2_bp.route('/materiali/<int:materiale_id>', methods=['DELETE'])
 @jwt_required()
@@ -693,13 +752,13 @@ def salva_classificazione_materiale():
     """
     try:
         data = request.get_json()
-        logger.info(f"MATERIALI: Ricevuta richiesta salvataggio classificazione: {data}")
+        #logger.info(f"MATERIALI: Ricevuta richiesta salvataggio classificazione: {data}")
         
         # Debug dettagliato del payload
-        logger.info(f"MATERIALI: Payload ricevuto - contoid: {data.get('contoid')}, contonome: '{data.get('contonome')}', brancaid: {data.get('brancaid')}, brancanome: '{data.get('brancanome')}', sottocontoid: {data.get('sottocontoid')}, sottocontonome: '{data.get('sottocontonome')}'")
+        #logger.info(f"MATERIALI: Payload ricevuto - contoid: {data.get('contoid')}, contonome: '{data.get('contonome')}', brancaid: {data.get('brancaid')}, brancanome: '{data.get('brancanome')}', sottocontoid: {data.get('sottocontoid')}, sottocontonome: '{data.get('sottocontonome')}'")
         
         # Debug completo del payload
-        logger.info(f"MATERIALI: Payload completo: {data}")
+        #logger.info(f"MATERIALI: Payload completo: {data}")
         
         # Validazione campi obbligatori
         required_fields = ['descrizione', 'fornitore_id', 'nome_fornitore', 'contoid']

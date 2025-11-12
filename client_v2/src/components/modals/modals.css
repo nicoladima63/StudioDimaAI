@@ -100,6 +100,11 @@
   font-size: 0.8125rem;
 }
 
+.table-row-highlight {
+  background-color: #fff3cd !important; /* Un giallo paglierino di Bootstrap */
+  transition: background-color 0.3s ease-in-out;
+}
+
 .modal-fattura-detail .table code {
   background-color: #e9ecef;
   color: #495057;
