@@ -34,6 +34,8 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
         Configured Flask application
     """
     app = Flask(__name__, static_folder='static', static_url_path='/')
+    #app = Flask(__name__, static_folder=r'C:\StudioDimaAi\static', static_url_path='/')
+
     
     # Load configuration
     config_class = get_config(config_name)
@@ -62,16 +64,28 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     # Health check endpoint
     register_health_check(app)
 
+ # Serve React frontend for all non-API routes
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
-    def catch_all(path):
-        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-            return send_from_directory(app.static_folder, path)
-        if os.path.exists(os.path.join(app.static_folder, path + '.html')):
-            return send_from_directory(app.static_folder, path + '.html')
-        return send_from_directory(app.static_folder, 'index.html')
+    def serve_react_app(path):
+        # Evita di interferire con le API
+        if path.startswith(app.config.get('API_PREFIX', '/api').lstrip('/')):
+            return jsonify({
+                'success': False,
+                'error': 'Endpoint not found',
+                'message': f'The requested endpoint {request.path} was not found'
+            }), 404
 
-    # Server ready
+        # Percorso assoluto del file statico
+        static_path = os.path.join(app.static_folder, path)
+        
+        # Se esiste un file statico, lo serve normalmente (es. asset o favicon)
+        if os.path.exists(static_path):
+            return send_from_directory(app.static_folder, path)
+
+        # Altrimenti React gestisce la route → restituisce index.html
+        return send_from_directory(app.static_folder, 'index.html')
+    
     return app
 
 
