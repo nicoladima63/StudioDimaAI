@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import React, {useState}from 'react'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -150,18 +150,18 @@ const LoginPage: React.FC = () => {
 
               {/* Info card */}
               <CCard className='text-white bg-primary py-5' style={{ width: '44%' }}>
-                <CCardBody className='text-center'>
+                <CCardBody className='text-center d-flex flex-column justify-content-center'>
                   <div>
-                    <h2>Studio Dima V2</h2>
+                    <h2>Registrati</h2>
                     <p>
-                      Sistema di gestione modernizzato per lo studio dentistico.
-                      Interfaccia rinnovata, performance migliorate e nuove funzionalità.
+                      Non hai un account? Registrati per accedere alle funzionalità
+                      dell'applicazione.
                     </p>
-                    <div className='mt-4'>
-                      <small className='text-white-75'>
-                        Versione 2.0.0 - Powered by React 18 & TypeScript
-                      </small>
-                    </div>
+                    <Link to='/register'>
+                      <CButton color='primary' className='mt-3' active tabIndex={-1}>
+                        Registrati ora!
+                      </CButton>
+                    </Link>
                   </div>
                 </CCardBody>
               </CCard>

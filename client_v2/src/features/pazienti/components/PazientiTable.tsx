@@ -4,7 +4,6 @@ import CIcon from '@coreui/icons-react';
 import { cilList } from '@coreui/icons';
 
 import DataTable, { DataTableColumn } from '@/components/tables/DataTable';
-import DataTable2 from '@/components/tables/DataTable2';
 import type { Paziente } from '@/store/pazienti.store';
 import RichiamoStatus from './RichiamoStatus';
 
@@ -33,20 +32,12 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       order: 1,
     },
     {
-      key: 'cognome',
-      label: 'Cognome',
-      sortable: true,
-      width: '15%',
-      defaultVisible: true,
-      order: 2,
-    },
-    {
       key: 'codice_fiscale',
       label: 'Codice Fiscale',
       sortable: true,
       width: '18%',
       defaultVisible: true,
-      order: 3,
+      order: 2,
     },
     {
       key: 'data_nascita',
@@ -54,7 +45,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: true,
       width: '12%',
       defaultVisible: true,
-      order: 4,
+      order: 3,
       render: (value) => value ? new Date(value).toLocaleDateString('it-IT') : '-'
     },
     {
@@ -63,7 +54,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: true,
       width: '12%',
       defaultVisible: true,
-      order: 5,
+      order: 4,
     },
     {
       key: 'telefono',
@@ -71,7 +62,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: false,
       width: '12%',
       defaultVisible: true,
-      order: 6,
+      order: 5,
     },
     {
       key: 'email',
@@ -79,7 +70,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: false,
       width: '18%',
       defaultVisible: true,
-      order: 7,
+      order: 6,
     },
     {
       key: 'stato_richiamo',
@@ -87,7 +78,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: false,
       width: '200px',
       defaultVisible: true,
-      order: 8,
+      order: 7,
       render: (value, item) => (
         <div onClick={(e) => e.stopPropagation()}>
           <RichiamoStatus
@@ -108,7 +99,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: false,
       width: '80px',
       defaultVisible: true,
-      order: 9,
+      order: 8,
       render: (value, item) => (
         <div className="d-flex gap-1 justify-content-end">
           {onView && (
@@ -133,7 +124,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: true,
       width: '8%',
       defaultVisible: false,
-      order: 10,
+      order: 9,
     },
     {
       key: 'indirizzo',
@@ -141,7 +132,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: false,
       width: '20%',
       defaultVisible: false,
-      order: 11,
+      order: 10,
     },
     {
       key: 'citta',
@@ -149,7 +140,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: true,
       width: '12%',
       defaultVisible: false,
-      order: 12,
+      order: 11,
     },
     {
       key: 'cap',
@@ -157,7 +148,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: false,
       width: '8%',
       defaultVisible: false,
-      order: 13,
+      order: 12,
     },
     {
       key: 'provincia',
@@ -165,15 +156,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: true,
       width: '8%',
       defaultVisible: false,
-      order: 14,
-    },
-    {
-      key: 'tessera_sanitaria',
-      label: 'Tessera Sanitaria',
-      sortable: false,
-      width: '15%',
-      defaultVisible: false,
-      order: 15,
+      order: 13,
     },
     {
       key: 'note',
@@ -181,7 +164,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       sortable: false,
       width: '20%',
       defaultVisible: false,
-      order: 16,
+      order: 14,
       render: (value) => value ? (
         <span title={value}>
           {value.length > 50 ? `${value.substring(0, 50)}...` : value}

@@ -143,7 +143,7 @@ def list_calendars():
         # Try to generate OAuth URL for re-authentication (like V1)
         try:
             service = CalendarServiceV2()
-            auth_url = service.get_google_oauth_url()
+            auth_url = service.get_google_oauth_url(request.url_root)
             
             return format_response(
                 success=False,
@@ -616,7 +616,7 @@ def get_google_oauth_url():
     """Get Google OAuth URL. V1 logic."""
     try:
         service = CalendarServiceV2()
-        auth_url = service.get_google_oauth_url()
+        auth_url = service.get_google_oauth_url(request.url_root)
         
         return format_response(
             success=True,

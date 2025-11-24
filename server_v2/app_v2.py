@@ -171,6 +171,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_conti import conti_v2_bp
     from api.v2_ricetta import ricetta_bp
     from api.v2_sms import sms_v2_bp
+    from api.v2_users import users_v2_bp
 
     from api.v2_calendar import calendar_v2_bp
     from api.v2_scheduler import scheduler_v2_bp
@@ -208,7 +209,8 @@ def register_blueprints(app: Flask) -> None:
         tipi_messaggi_bp,
         sms_tracking_bp,
         tracker_bp,
-        automation_settings_bp
+        automation_settings_bp,
+        users_v2_bp
     ]
     
     # Register standard blueprints with API prefix only

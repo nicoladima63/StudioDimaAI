@@ -14,6 +14,11 @@ interface RefreshTokenResponse {
   expires_in: number
 }
 
+export interface RegisterCredentials {
+  username: string
+  password: string
+}
+
 /**
  * Auth Service per gestione autenticazione
  */
@@ -27,6 +32,13 @@ class AuthService extends BaseService {
    */
   async apiLogin(credentials: LoginCredentials): Promise<ApiResponse<LoginResponse>> {
     return this.apiPost<LoginResponse, LoginCredentials>('/auth/login', credentials)
+  }
+
+  /**
+   * Registra un nuovo utente
+   */
+  async apiRegister(credentials: RegisterCredentials): Promise<ApiResponse<null>> {
+    return this.apiPost<null, RegisterCredentials>('/auth/register', credentials)
   }
 
   /**

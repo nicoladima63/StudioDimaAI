@@ -9,6 +9,7 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute'
 // Lazy load components per performance
 const Dashboard = React.lazy(() => import('@/features/dashboard/pages/Dashboard'))
 const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
+const RegisterPage = React.lazy(() => import('@/features/auth/pages/RegisterPage'))
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
 const MaterialiMigrazione = React.lazy(() => import('@/features/materiali/pages/MaterialiMigrazione'))
 const RicercaArticoli = React.lazy(() => import('@/features/materiali/pages/RicercaArticoli'))
@@ -32,6 +33,10 @@ const MonitorPrestazioniStandalonePage=React.lazy(()=>import ('@/features/settin
 const AutomationPage=React.lazy(()=>import ('@/features/settings/pages/AutomationPage'))
 const SchedulerPage=React.lazy(()=>import('@/features/scheduler/pages/SchedulerPage'))
 
+// User Management
+const UserListPage = React.lazy(() => import('@/features/users/UserListPage'))
+const UserForm = React.lazy(() => import('@/features/users/UserForm'))
+
 // Loading fallback component
 const LoadingFallback = () => (
   <div className='d-flex justify-content-center align-items-center' style={{ height: '200px' }}>
@@ -45,6 +50,7 @@ const AppRouter: React.FC = () => {
       <Routes>
         {/* Public routes */}
         <Route path='/login' element={<LoginPage />} />
+        <Route path='/register' element={<RegisterPage />} />
         
         {/* Protected routes with layout */}
         <Route
@@ -80,6 +86,12 @@ const AppRouter: React.FC = () => {
           <Route path='settings/monitor-prestazioni' element={<MonitorPrestazioniStandalonePage />} />
           <Route path='settings/automazioni' element={<AutomationPage />} />
           <Route path='settings/scheduler' element={<SchedulerPage />} />
+
+          {/* User Management Routes */}
+          <Route path='users' element={<UserListPage />} />
+          <Route path='users/new' element={<UserForm />} />
+          <Route path='users/edit/:userId' element={<UserForm />} />
+
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
           {/* 

@@ -6,11 +6,13 @@ Simple authentication system for testing V2 APIs with JWT tokens.
 
 import logging
 from datetime import datetime, timedelta
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from werkzeug.security import check_password_hash
 
 from app_v2 import format_response
 from core.exceptions import ValidationError
+from repositories.user_repository import UserRepository
 
 
 logger = logging.getLogger(__name__)
@@ -18,43 +20,58 @@ logger = logging.getLogger(__name__)
 # Create blueprint (url_prefix will be added at registration)
 auth_v2_bp = Blueprint('auth_v2', __name__)
 
-# Test users for demo (in production this would be from database)
-TEST_USERS = {
-    'admin': {
-        'password': 'password',
-        'role': 'admin',
-        'name': 'Administrator',
-        'id': 1
-    },
-    'user': {
-        'password': 'test123',
-        'role': 'user', 
-        'name': 'Test User',
-        'id': 2
-    },
-    'demo': {
-        'password': 'demo',
-        'role': 'user',
-        'name': 'Demo User',
-        'id': 3
-    }
-}
-
-
-@auth_v2_bp.route('/auth/login', methods=['POST'])
-def login():
+@auth_v2_bp.route('/auth/register', methods=['POST'])
+def register():
     """
-    Login endpoint to generate JWT tokens.
+    Register a new user.
     
     Request Body:
         username (str): Username (required)
         password (str): Password (required)
         
     Returns:
-        JSON response with access and refresh tokens
+        JSON response confirming registration
     """
     try:
-        # Validate request data
+        if not request.is_json:
+            return format_response(success=False, error="Content-Type must be application/json"), 400
+        
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+
+        if not username or not password:
+            return format_response(success=False, error="Username and password are required"), 400
+        
+        if len(password) < 6:
+            return format_response(success=False, error="Password must be at least 6 characters long"), 400
+
+        user_repo = UserRepository()
+
+        # Check if user already exists
+        if user_repo.find_by_username(username):
+            return format_response(success=False, error="Username already exists"), 409
+
+        # Create new user with 'user' role by default
+        new_user = user_repo.create(username, password, 'user')
+
+        if not new_user:
+            return format_response(success=False, error="Failed to create user due to a server error"), 500
+
+        logger.info(f"New user registered: {username}")
+        return format_response(message="User registered successfully. You can now log in."), 201
+
+    except Exception as e:
+        logger.error(f"Registration error: {e}", exc_info=True)
+        return format_response(success=False, error="Registration failed due to a server error"), 500
+
+
+@auth_v2_bp.route('/auth/login', methods=['POST'])
+def login():
+    """
+    Login endpoint to generate JWT tokens.
+    """
+    try:
         if not request.is_json:
             return format_response(
                 success=False,
@@ -63,7 +80,6 @@ def login():
         
         data = request.get_json()
         
-        # Required fields validation
         username = data.get('username', '').strip()
         password = data.get('password', '').strip()
         
@@ -73,9 +89,21 @@ def login():
                 error="Username and password are required"
             ), 400
         
-        # Authenticate user
-        user = TEST_USERS.get(username)
-        if not user or user['password'] != password:
+        # Authenticate user against the database
+        user_repo = UserRepository()
+        user = user_repo.find_by_username(username)
+        
+        # --- DETAILED DEBUG LOGGING ---
+        if user:
+            logger.info(f"DEBUG: Password ricevuta: '{password}'")
+            logger.info(f"DEBUG: Hash dal DB: '{user['password_hash']}'")
+            is_password_correct = check_password_hash(user['password_hash'], password)
+            logger.info(f"DEBUG: check_password_hash ha restituito: {is_password_correct}")
+        else:
+            logger.warning(f"DEBUG: Utente '{username}' non trovato nel database.")
+        # --- END DETAILED DEBUG LOGGING ---
+
+        if not user or not check_password_hash(user['password_hash'], password):
             logger.warning(f"Failed login attempt for username: {username}")
             return format_response(
                 success=False,
@@ -85,9 +113,8 @@ def login():
         # Create JWT tokens
         user_identity = {
             'id': user['id'],
-            'username': username,
-            'role': user['role'],
-            'name': user['name']
+            'username': user['username'],
+            'role': user['role']
         }
         
         access_token = create_access_token(
@@ -110,8 +137,7 @@ def login():
                 'expires_in': 24 * 3600,  # 24 hours in seconds
                 'user': {
                     'id': user['id'],
-                    'username': username,
-                    'name': user['name'],
+                    'username': user['username'],
                     'role': user['role']
                 }
             },
@@ -215,38 +241,4 @@ def logout():
         return format_response(
             success=False,
             error="Logout failed"
-        ), 500
-
-
-@auth_v2_bp.route('/auth/test-users', methods=['GET'])
-def get_test_users():
-    """
-    Get list of test users for development/testing.
-    
-    Returns:
-        JSON response with available test users
-    """
-    try:
-        test_users_info = []
-        for username, user_data in TEST_USERS.items():
-            test_users_info.append({
-                'username': username,
-                'password': user_data['password'],
-                'role': user_data['role'],
-                'name': user_data['name']
-            })
-        
-        return format_response(
-            data={
-                'test_users': test_users_info,
-                'note': 'These are test credentials for V2 API development'
-            },
-            message="Test users information retrieved"
-        ), 200
-        
-    except Exception as e:
-        logger.error(f"Get test users error: {e}")
-        return format_response(
-            success=False,
-            error="Failed to get test users"
         ), 500

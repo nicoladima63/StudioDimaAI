@@ -681,45 +681,47 @@ class CalendarServiceV2:
     # SECTION 3: OAUTH AUTHENTICATION (from V1)
     # =========================================================================
     
-    def get_google_oauth_url(self) -> str:
+    def get_google_oauth_url(self, base_url: str) -> str:
         """Generate OAuth URL for Google authentication. V1 logic with state saving."""
         try:
             if not os.path.exists(self.credentials_file):
                 raise GoogleCredentialsNotFoundError("credentials.json not found")
-            
+
             flow = Flow.from_client_secrets_file(
                 self.credentials_file,
                 scopes=['https://www.googleapis.com/auth/calendar']
             )
-            
-            # Use localhost for development - must match authorized redirect URI
-            flow.redirect_uri = 'http://localhost:5001/oauth/callback'
-            
+
+            # Dynamically build redirect_uri from the provided base_url
+            redirect_uri = base_url.rstrip('/') + '/oauth/callback'
+            flow.redirect_uri = redirect_uri
+
             auth_url, state = flow.authorization_url(
                 access_type='offline',
                 prompt='consent',
                 login_hint='studiodrnicoladimartino@gmail.com'
             )
-            
+
             # Save state and flow data for callback (V1 logic)
             import json
-            
+
             # Read the full credentials file to preserve structure
             with open(self.credentials_file, 'r') as f:
                 full_credentials = json.load(f)
-            
+
             state_data = {
                 'state': state,
-                'flow_data': full_credentials  # Save full credentials instead of client_config
+                'flow_data': full_credentials,  # Save full credentials instead of client_config
+                'redirect_uri': redirect_uri  # Save redirect_uri for the callback
             }
-            
+
             os.makedirs('instance', exist_ok=True)
             with open('instance/oauth_state.json', 'w') as f:
                 json.dump(state_data, f)
-            
-            # logger.info(f"OAuth URL generated with state: {state[:10]}...")
+
+            logger.info(f"OAuth URL generated with redirect_uri: {redirect_uri}")
             return auth_url
-            
+
         except Exception as e:
             logger.error(f"Error generating OAuth URL: {e}")
             raise GoogleCredentialsNotFoundError(f"Cannot generate OAuth URL: {str(e)}")
@@ -739,6 +741,8 @@ class CalendarServiceV2:
             
             saved_state = state_data['state']
             flow_data = state_data['flow_data']
+            # Load the saved redirect_uri with a fallback for backward compatibility
+            redirect_uri = state_data.get('redirect_uri', 'http://localhost:5001/oauth/callback') 
             
             # Verify state for security
             if state != saved_state:
@@ -749,7 +753,7 @@ class CalendarServiceV2:
                 flow_data,
                 scopes=['https://www.googleapis.com/auth/calendar']
             )
-            flow.redirect_uri = 'http://localhost:5001/oauth/callback'
+            flow.redirect_uri = redirect_uri # Use the dynamic redirect_uri
             
             # Exchange code for token
             flow.fetch_token(code=code)
