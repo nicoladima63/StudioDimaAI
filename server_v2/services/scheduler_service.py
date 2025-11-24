@@ -25,7 +25,7 @@ class SchedulerService:
         self.scheduler = BackgroundScheduler()
         self._current_reminder_job = None
         self._current_recall_job = None
-        self._current_calendar_sync_job = None
+        self._current_calendar_sync_jobs: List[Any] = []
         
     def start(self):
         """Avvia lo scheduler e programma tutti i job"""
@@ -153,51 +153,44 @@ class SchedulerService:
         # logger.info(f"Automazione richiami schedulata alle {hour}:{minute:02d}.")
 
     def schedule_calendar_sync_job(self):
-        """Schedula job sincronizzazione calendario"""
+        """Schedula job sincronizzazione calendario per orari multipli."""
         settings = get_automation_settings()
-        hour = int(settings.get("calendar_sync_hour", 21))
-        minute = int(settings.get("calendar_sync_minute", 0))
+        sync_times = settings.get("calendar_sync_times", ["21:00"])
         weeks_to_sync = int(settings.get("calendar_sync_weeks_to_sync", 3))
         enabled = settings.get("calendar_sync_enabled", True)
-        
-        # Rimuovi job precedente se esiste
-        if self._current_calendar_sync_job:
+
+        # Rimuovi job precedenti se esistono
+        for job in self._current_calendar_sync_jobs:
             try:
-                self.scheduler.remove_job(self._current_calendar_sync_job.id)
+                self.scheduler.remove_job(job.id)
             except Exception:
                 pass
-            self._current_calendar_sync_job = None
+        self._current_calendar_sync_jobs = []
 
         if not enabled:
-            # logger.info("Automazione sincronizzazione calendario disattivata.")
             return
 
-        def job():
+        def create_job_func():
             """Job di sincronizzazione automatica calendario"""
             now = datetime.now()
             
-            # Controlla se è weekend (sabato=5, domenica=6)
-            if now.weekday() >= 5:
-                # logger.info(f"[CALENDAR SYNC] Saltato: è weekend ({now.strftime('%A')})")
+            if now.weekday() >= 5:  # Salta weekend
                 return
                 
-            logger.info(f"[CALENDAR SYNC] Avvio sincronizzazione automatica per {weeks_to_sync} settimane.")
+            logger.info(f"[CALENDAR SYNC] Avvio sincronizzazione per {weeks_to_sync} settimane.")
             
-            # Ottieni ID calendari dalla configurazione
             studio_blu_calendar = settings.get("calendar_studio_blu_id")
             studio_giallo_calendar = settings.get("calendar_studio_giallo_id")
             
             if not studio_blu_calendar or not studio_giallo_calendar:
-                logger.error("[CALENDAR SYNC] ID calendari non configurati in automation_settings.json")
+                logger.error("[CALENDAR SYNC] ID calendari non configurati.")
                 return
                 
-            # Calcola l'intervallo di date esatto
             start_date = now.date()
             end_date = start_date + timedelta(days=(weeks_to_sync * 7))
             start_date_str = start_date.isoformat()
             end_date_str = end_date.isoformat()
 
-            # Determina i mesi coinvolti per l'iterazione
             months_to_sync_set = set()
             current_date = start_date
             while current_date < end_date:
@@ -206,53 +199,41 @@ class SchedulerService:
             
             months_to_sync = sorted(list(months_to_sync_set))
             
-            total_synced = 0
-            total_errors = 0
+            total_synced, total_errors = 0, 0
             calendar_service = CalendarServiceV2()
             
             for month, year in months_to_sync:
-                logger.info(f"[CALENDAR SYNC] Sincronizzazione mese {month:02d}/{year} (filtrando da {start_date_str} a {end_date_str})")
-                
-                # Ottieni appuntamenti GIA' FILTRATI per l'intervallo di date corretto
                 all_appointments = calendar_service.get_db_appointments_for_month(
                     month, year, start_date_str=start_date_str, end_date_str=end_date_str
                 )
                 
-                # Sincronizza Studio Blu (studio_id=1)
+                # Sincronizza Studio Blu
                 try:
                     studio_blu_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 1]
                     result_blu = calendar_service.sync_appointments_for_month(
-                        month, year, 
-                        {1: studio_blu_calendar},
-                        studio_blu_appointments,
-                        start_date_str=start_date_str,
-                        end_date_str=end_date_str
+                        month, year, {1: studio_blu_calendar}, studio_blu_appointments,
+                        start_date_str=start_date_str, end_date_str=end_date_str
                     )
                     total_synced += result_blu.get('success', 0)
                 except Exception as e:
                     logger.error(f"[CALENDAR SYNC] Errore Studio Blu {month:02d}/{year}: {e}")
                     total_errors += 1
                     
-                # Sincronizza Studio Giallo (studio_id=2)  
+                # Sincronizza Studio Giallo
                 try:
                     studio_giallo_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 2]
                     result_giallo = calendar_service.sync_appointments_for_month(
-                        month, year,
-                        {2: studio_giallo_calendar},
-                        studio_giallo_appointments,
-                        start_date_str=start_date_str,
-                        end_date_str=end_date_str
+                        month, year, {2: studio_giallo_calendar}, studio_giallo_appointments,
+                        start_date_str=start_date_str, end_date_str=end_date_str
                     )
                     total_synced += result_giallo.get('success', 0)
                 except Exception as e:
                     logger.error(f"[CALENDAR SYNC] Errore Studio Giallo {month:02d}/{year}: {e}")
                     total_errors += 1
                     
-            # Log finale
             log_entry = {
                 'timestamp': now.strftime('%Y-%m-%dT%H:%M:%S'),
-                'total_synced': total_synced,
-                'total_errors': total_errors,
+                'total_synced': total_synced, 'total_errors': total_errors,
                 'months_processed': len(months_to_sync)
             }
             
@@ -262,11 +243,17 @@ class SchedulerService:
             except Exception as e:
                 logger.error(f"[CALENDAR SYNC] Errore scrittura log: {e}")
 
-        # Programma il job
-        trigger = CronTrigger(hour=hour, minute=minute)
-        self._current_calendar_sync_job = self.scheduler.add_job(
-            job, trigger, id="calendar_sync_job_v2", replace_existing=True
-        )
+        # Programma un job per ogni orario specificato
+        for i, time_str in enumerate(sync_times):
+            try:
+                hour, minute = map(int, time_str.split(':'))
+                trigger = CronTrigger(hour=hour, minute=minute)
+                job = self.scheduler.add_job(
+                    create_job_func, trigger, id=f"calendar_sync_job_v2_{i}", replace_existing=True
+                )
+                self._current_calendar_sync_jobs.append(job)
+            except ValueError:
+                logger.error(f"Formato ora non valido '{time_str}' in calendar_sync_times. Ignorato.")
 
     def reschedule_recall_job(self):
         """Riprogramma job richiami quando cambia la configurazione"""
