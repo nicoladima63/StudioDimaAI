@@ -16,6 +16,10 @@ def get_scheduler_status():
         status = scheduler_service.get_scheduler_status()
         settings = get_automation_settings()
         
+        # Rimuovi le vecchie chiavi se esistono per pulizia
+        settings.pop('calendar_sync_hour', None)
+        settings.pop('calendar_sync_minute', None)
+
         return jsonify({
             'state': 'success',
             'data': {
@@ -28,8 +32,7 @@ def get_scheduler_status():
                     'recall_hour': settings.get('recall_hour', 16),
                     'recall_minute': settings.get('recall_minute', 0),
                     'calendar_sync_enabled': settings.get('calendar_sync_enabled', True),
-                    'calendar_sync_hour': settings.get('calendar_sync_hour', 21),
-                    'calendar_sync_minute': settings.get('calendar_sync_minute', 0),
+                    'calendar_sync_times': settings.get('calendar_sync_times', ["21:00"]),
                     'calendar_sync_weeks_to_sync': settings.get('calendar_sync_weeks_to_sync', 3),
                     'calendar_studio_blu_id': settings.get('calendar_studio_blu_id'),
                     'calendar_studio_giallo_id': settings.get('calendar_studio_giallo_id')
@@ -134,10 +137,8 @@ def update_calendar_sync_settings():
         # Aggiorna settings calendario sync
         if 'enabled' in data:
             settings['calendar_sync_enabled'] = bool(data['enabled'])
-        if 'hour' in data:
-            settings['calendar_sync_hour'] = int(data['hour'])
-        if 'minute' in data:
-            settings['calendar_sync_minute'] = int(data['minute'])
+        if 'sync_times' in data and isinstance(data['sync_times'], list):
+            settings['calendar_sync_times'] = data['sync_times']
         if 'weeks_to_sync' in data:
             settings['calendar_sync_weeks_to_sync'] = int(data['weeks_to_sync'])
         if 'calendar_studio_blu_id' in data:
@@ -145,6 +146,10 @@ def update_calendar_sync_settings():
         if 'calendar_studio_giallo_id' in data:
             settings['calendar_studio_giallo_id'] = data['calendar_studio_giallo_id']
             
+        # Rimuovi le vecchie chiavi per pulizia
+        settings.pop('calendar_sync_hour', None)
+        settings.pop('calendar_sync_minute', None)
+
         # Salva settings
         save_automation_settings(settings)
         
@@ -157,8 +162,7 @@ def update_calendar_sync_settings():
                 'message': 'Impostazioni sincronizzazione calendario aggiornate',
                 'settings': {
                     'calendar_sync_enabled': settings['calendar_sync_enabled'],
-                    'calendar_sync_hour': settings['calendar_sync_hour'],
-                    'calendar_sync_minute': settings['calendar_sync_minute'],
+                    'calendar_sync_times': settings['calendar_sync_times'],
                     'calendar_studio_blu_id': settings.get('calendar_studio_blu_id'),
                     'calendar_studio_giallo_id': settings.get('calendar_studio_giallo_id')
                 }
