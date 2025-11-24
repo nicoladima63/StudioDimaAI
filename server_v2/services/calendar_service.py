@@ -692,8 +692,11 @@ class CalendarServiceV2:
                 scopes=['https://www.googleapis.com/auth/calendar']
             )
 
-            # Dynamically build redirect_uri from the provided base_url
-            redirect_uri = base_url.rstrip('/') + '/oauth/callback'
+            # Use a configurable redirect_uri from env var, or build it dynamically
+            redirect_uri = os.getenv('GOOGLE_REDIRECT_URI')
+            if not redirect_uri:
+                redirect_uri = base_url.rstrip('/') + '/oauth/callback'
+            
             flow.redirect_uri = redirect_uri
 
             auth_url, state = flow.authorization_url(
