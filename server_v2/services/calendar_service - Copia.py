@@ -3,11 +3,6 @@ Calendar Service V2 - Simplified version based on V1 logic
 
 Migrated from V1 maintaining functionality with V2 architecture patterns.
 Follows V1 working logic exactly but with V2 structure and conventions.
-
-IMPROVEMENTS:
-- Added rate limiting to prevent Google API quota errors
-- Added exponential backoff retry mechanism
-- Thread-safe API call tracking
 """
 
 import os
@@ -15,10 +10,8 @@ import json
 import logging
 import threading
 import time
-import random
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 from typing import Dict, List, Any, Optional, Callable
-from collections import deque
 
 # Google Calendar API
 from google.oauth2.credentials import Credentials
@@ -50,7 +43,6 @@ class CalendarServiceV2:
     - Google Calendar synchronization  
     - Statistics and analytics
     - OAuth authentication
-    - Rate limiting and retry logic
     
     DEVELOPMENT RULES:
     - I colori sono basati sul TIPO appuntamento (V, I, C, H, P), NON sullo studio
@@ -64,239 +56,8 @@ class CalendarServiceV2:
         self.token_file = 'instance/token.json'
         self.dbf_reader = get_optimized_reader()
         
-        # Rate limiter per prevenire quota errors
-        self.api_calls = deque()
-        self.max_calls_per_100s = 95  # Margine di sicurezza (limite Google: 100)
-        self.rate_limit_lock = threading.Lock()
-    
     # =========================================================================
-    # SECTION 0: RATE LIMITING AND RETRY LOGIC
-    # =========================================================================
-    
-    def _wait_for_rate_limit(self):
-        """Attende se necessario per rispettare il rate limit di Google (100 calls/100s)."""
-        with self.rate_limit_lock:
-            now = time.time()
-            
-            # Rimuovi chiamate più vecchie di 100 secondi
-            while self.api_calls and self.api_calls[0] < now - 100:
-                self.api_calls.popleft()
-            
-            # Se abbiamo raggiunto il limite, aspetta
-            if len(self.api_calls) >= self.max_calls_per_100s:
-                sleep_time = 100 - (now - self.api_calls[0]) + 1
-                if sleep_time > 0:
-                    logger.warning(f"Rate limit preventivo: aspetto {sleep_time:.1f}s prima di continuare")
-                    time.sleep(sleep_time)
-                    # Pulisci dopo l'attesa
-                    self.api_calls.clear()
-            
-            # Registra questa chiamata
-            self.api_calls.append(now)
-    
-    def _execute_with_retry(self, request, operation_name="API call", max_retries=5):
-        """
-        Esegue una richiesta API con exponential backoff in caso di rate limit.
-        
-        Args:
-            request: Google API request object
-            operation_name: Nome dell'operazione per logging
-            max_retries: Numero massimo di tentativi
-            
-        Returns:
-            Response from Google API or None if resource not found (404/410)
-            
-        Raises:
-            GoogleQuotaError: Se il rate limit viene superato dopo tutti i retry
-            HttpError: Per altri errori HTTP
-        """
-        for attempt in range(max_retries):
-            try:
-                # Attendi preventivamente se necessario
-                self._wait_for_rate_limit()
-                
-                # Esegui la richiesta
-                return request.execute()
-                
-            except HttpError as e:
-                # Rate limit: retry con backoff
-                if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
-                    if attempt < max_retries - 1:
-                        # Exponential backoff: 2s, 4s, 8s, 16s, 32s + jitter
-                        sleep_time = (2 ** (attempt + 1)) + random.uniform(0, 1)
-                        logger.warning(f"Rate limit hit durante {operation_name}, retry {attempt + 1}/{max_retries} in {sleep_time:.1f}s")
-                        time.sleep(sleep_time)
-                        # Pulisci il rate limiter dopo l'errore
-                        with self.rate_limit_lock:
-                            self.api_calls.clear()
-                    else:
-                        # Ultimo tentativo fallito
-                        logger.error(f"Rate limit persistente dopo {max_retries} tentativi per {operation_name}")
-                        raise GoogleQuotaError(f"Google API quota exceeded during {operation_name} after {max_retries} retries")
-                
-                # 404/410: risorsa non trovata (già cancellata)
-                elif e.status_code in [404, 410]:
-                    logger.info(f"Risorsa non trovata durante {operation_name} (già cancellata o non esistente)")
-                    return None  # Non è un errore critico
-                
-                # Altri errori HTTP: solleva immediatamente
-                else:
-                    logger.error(f"HTTP error {e.status_code} durante {operation_name}: {e}")
-                    raise
-                    
-            except Exception as e:
-                # Errori non-HTTP: solleva immediatamente
-                logger.error(f"Errore non-HTTP durante {operation_name}: {e}")
-                raise
-        
-        # Non dovrebbe mai arrivare qui
-        raise GoogleQuotaError(f"Max retries exceeded for {operation_name}")
-    
-    def _batch_delete_events(self, service, calendar_id: str, event_ids: List[str], 
-                        operation_context: str = "batch delete") -> Dict[str, int]:
-        """
-        Cancella eventi in batch (max 50 per batch).
-        Returns: {'success': count, 'errors': count, 'not_found': count}
-        """
-        if not event_ids:
-            return {'success': 0, 'errors': 0, 'not_found': 0}
-        
-        from googleapiclient.http import BatchHttpRequest
-        
-        results = {'success': 0, 'errors': 0, 'not_found': 0}
-        
-        def callback(request_id, response, exception):
-            if exception is None:
-                results['success'] += 1
-            elif isinstance(exception, HttpError):
-                if exception.status_code in [404, 410]:
-                    results['not_found'] += 1
-                    logger.debug(f"Event {request_id} già cancellato")
-                else:
-                    results['errors'] += 1
-                    logger.warning(f"Errore cancellazione {request_id}: {exception}")
-            else:
-                results['errors'] += 1
-                logger.error(f"Errore generico cancellazione {request_id}: {exception}")
-        
-        # Processa in batch di 50 (limite Google)
-        batch_size = 50
-        for i in range(0, len(event_ids), batch_size):
-            batch_ids = event_ids[i:i+batch_size]
-            
-            try:
-                # Attendi rate limit prima del batch
-                self._wait_for_rate_limit()
-                
-                batch = service.new_batch_http_request(callback=callback)
-                for event_id in batch_ids:
-                    batch.add(
-                        service.events().delete(
-                            calendarId=calendar_id,
-                            eventId=event_id
-                        ),
-                        request_id=event_id
-                    )
-                
-                batch.execute()
-                logger.debug(f"Batch delete: {len(batch_ids)} eventi processati")
-                
-                # Piccola pausa tra batch
-                if i + batch_size < len(event_ids):
-                    time.sleep(0.1)
-                    
-            except HttpError as e:
-                if e.status_code == 403 and 'rateLimitExceeded' in str(e.content):
-                    logger.warning(f"Rate limit su batch, attendo 5s...")
-                    time.sleep(5)
-                    # Riprova questo batch
-                    try:
-                        batch.execute()
-                    except Exception as retry_error:
-                        logger.error(f"Retry batch fallito: {retry_error}")
-                        results['errors'] += len(batch_ids)
-                else:
-                    logger.error(f"Errore HTTP durante batch delete: {e}")
-                    results['errors'] += len(batch_ids)
-            except Exception as e:
-                logger.error(f"Errore generico durante batch delete: {e}")
-                results['errors'] += len(batch_ids)
-        
-        logger.info(f"Batch delete {operation_context}: {results['success']} success, "
-                    f"{results['not_found']} già cancellati, {results['errors']} errori")
-        return results
-
-    def _batch_create_events(self, service, calendar_id: str, events: List[Dict[str, Any]], 
-                            operation_context: str = "batch create") -> Dict[str, Any]:
-        """
-        Crea eventi in batch (max 50 per batch).
-        Returns: {'created': [(event_data, event_id)], 'errors': count}
-        """
-        if not events:
-            return {'created': [], 'errors': 0}
-        
-        from googleapiclient.http import BatchHttpRequest
-        
-        created_events = []
-        error_count = 0
-        
-        def callback(request_id, response, exception):
-            nonlocal error_count
-            if exception is None:
-                # response contiene l'evento creato
-                created_events.append((events[int(request_id)], response['id']))
-            else:
-                error_count += 1
-                logger.error(f"Errore creazione evento {request_id}: {exception}")
-        
-        # Processa in batch di 50
-        batch_size = 50
-        for i in range(0, len(events), batch_size):
-            batch_events = events[i:i+batch_size]
-            
-            try:
-                # Attendi rate limit prima del batch
-                self._wait_for_rate_limit()
-                
-                batch = service.new_batch_http_request(callback=callback)
-                for idx, event in enumerate(batch_events):
-                    batch.add(
-                        service.events().insert(
-                            calendarId=calendar_id,
-                            body=event
-                        ),
-                        request_id=str(i + idx)  # Indice nell'array originale
-                    )
-                
-                batch.execute()
-                logger.debug(f"Batch create: {len(batch_events)} eventi processati")
-                
-                # Piccola pausa tra batch
-                if i + batch_size < len(events):
-                    time.sleep(0.1)
-                    
-            except HttpError as e:
-                if e.status_code == 403 and 'rateLimitExceeded' in str(e.content):
-                    logger.warning(f"Rate limit su batch, attendo 5s...")
-                    time.sleep(5)
-                    # Riprova questo batch
-                    try:
-                        batch.execute()
-                    except Exception as retry_error:
-                        logger.error(f"Retry batch fallito: {retry_error}")
-                        error_count += len(batch_events)
-                else:
-                    logger.error(f"Errore HTTP durante batch create: {e}")
-                    error_count += len(batch_events)
-            except Exception as e:
-                logger.error(f"Errore generico durante batch create: {e}")
-                error_count += len(batch_events)
-        
-        logger.info(f"Batch create {operation_context}: {len(created_events)} creati, {error_count} errori")
-        return {'created': created_events, 'errors': error_count}
-
-    # =========================================================================
-    # SECTION 1: DBF APPOINTMENTS READING
+    # SECTION 1: DBF APPOINTMENTS READING (from V1)
     # =========================================================================
     
     def get_db_appointments_for_month(self, month: int, year: int, start_date_str: Optional[str] = None, end_date_str: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -386,7 +147,7 @@ class CalendarServiceV2:
             raise
     
     # =========================================================================
-    # SECTION 2: GOOGLE CALENDAR INTEGRATION
+    # SECTION 2: GOOGLE CALENDAR INTEGRATION (from V1) 
     # =========================================================================
     
     def _get_calendar_service(self):
@@ -441,10 +202,7 @@ class CalendarServiceV2:
             configured_calendar_ids = {id.strip() for id in configured_ids_str.split(',') if id.strip()}
             
             # Get all calendars from Google
-            calendars_result = self._execute_with_retry(
-                service.calendarList().list(),
-                operation_name="list calendars"
-            )
+            calendars_result = service.calendarList().list().execute()
             all_calendars = calendars_result.get('items', [])
             
             # Filter to show only configured calendars (V1 logic)
@@ -458,24 +216,24 @@ class CalendarServiceV2:
                 if cal['id'] in configured_calendar_ids
             ]
             
+            # logger.info(f"Found {len(relevant_calendars)} relevant calendars out of {len(all_calendars)} accessible")
             return relevant_calendars
             
         except GoogleCredentialsNotFoundError:
             raise
-        except GoogleQuotaError:
-            raise
         except Exception as e:
             logger.error(f"Error listing calendars: {e}")
             raise CalendarSyncError(f"Failed to list calendars: {str(e)}")
- 
+    
     def sync_appointments_for_month(self, month: int, year: int, 
-                                studio_calendar_ids: Dict[int, str],
-                                appointments: List[Dict[str, Any]] = None,
-                                progress_callback: Optional[Callable] = None,
-                                start_date_str: Optional[str] = None,
-                                end_date_str: Optional[str] = None) -> Dict[str, Any]:
+                                  studio_calendar_ids: Dict[int, str],
+                                  appointments: List[Dict[str, Any]] = None,
+                                  progress_callback: Optional[Callable] = None,
+                                  start_date_str: Optional[str] = None,
+                                  end_date_str: Optional[str] = None) -> Dict[str, Any]:
         """
-        Sync appointments usando BATCH OPERATIONS per efficienza.
+        Sync appointments to Google Calendar for specific month.
+        Includes duplicate detection and incremental updates (V1 logic).
         """
         try:
             service = self._get_calendar_service()
@@ -496,163 +254,164 @@ class CalendarServiceV2:
             new_count = 0
             skipped_count = 0
             
+            # logger.info(f"Starting intelligent sync of {total_count} appointments")
+            
             if progress_callback:
-                progress_callback(0, total_count, "Analyzing appointments...")
+                progress_callback(0, total_count, "Starting synchronization...")
             
             # Track current appointment IDs for deletion detection
             current_appointment_ids = set()
             
-            # Raggruppa operazioni per calendar_id
-            events_to_update = {}  # {calendar_id: [(app, old_event_id, new_event)]}
-            events_to_create = {}  # {calendar_id: [(app, event)]}
-            
-            # FASE 1: Analisi e raggruppamento
             for i, app in enumerate(appointments):
                 try:
+                    # Get studio and calendar ID
                     studio_id = int(app.get('STUDIO', 0))
                     calendar_id = studio_calendar_ids.get(studio_id)
                     
                     if not calendar_id:
-                        logger.warning(f"No calendar ID for studio {studio_id}, skipping")
+                        logger.warning(f"No calendar ID for studio {studio_id}, skipping appointment")
                         continue
                     
+                    # Generate appointment ID and hash
                     app_id = sync_manager.generate_appointment_id(app)
+                    app_hash = sync_manager.generate_appointment_hash(app)
                     current_appointment_ids.add(app_id)
                     
-                    # Check if needs sync
-                    if sync_manager.is_appointment_synced(app):
+                    # Check if appointment needs sync
+                    existing_sync = sync_manager.is_appointment_synced(app)
+                    
+                    if existing_sync:
+                        # Already synced and unchanged, skip
                         skipped_count += 1
+                        # logger.debug(f"Skipping unchanged appointment {app_id}")
                     else:
+                        # Need to sync (new or changed)
                         event = self._create_event_from_appointment(app)
                         
                         if app_id in sync_state:
-                            # Da aggiornare
-                            if calendar_id not in events_to_update:
-                                events_to_update[calendar_id] = []
-                            events_to_update[calendar_id].append((app, sync_state[app_id], event))
+                            # Update existing event
+                            try:
+                                # Delete old event
+                                old_event_id = sync_state[app_id]['event_id']
+                                service.events().delete(
+                                    calendarId=sync_state[app_id]['calendar_id'], 
+                                    eventId=old_event_id
+                                ).execute()
+                                # logger.debug(f"Deleted old event {old_event_id}")
+                                
+                                # Create new event
+                                created_event = service.events().insert(
+                                    calendarId=calendar_id, 
+                                    body=event
+                                ).execute()
+                                
+                                # Update sync state
+                                sync_manager.mark_appointment_synced(
+                                    app, calendar_id, created_event['id'], month, year
+                                )
+                                
+                                updated_count += 1
+                                success_count += 1
+                                # logger.info(f"Updated appointment {app_id}")
+                                
+                            except HttpError as e:
+                                if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                                    raise GoogleQuotaError(f"Google API quota exceeded during event update for {app_id}")
+                                logger.error(f"Error updating appointment {app_id}: {e}")
+                                error_count += 1
+                            except Exception as e:
+                                logger.error(f"Generic error updating appointment {app_id}: {e}")
+                                error_count += 1
                         else:
-                            # Da creare
-                            if calendar_id not in events_to_create:
-                                events_to_create[calendar_id] = []
-                            events_to_create[calendar_id].append((app, event))
+                            # Create new event
+                            try:
+                                created_event = service.events().insert(
+                                    calendarId=calendar_id, 
+                                    body=event
+                                ).execute()
+                                
+                                # Mark as synced
+                                sync_manager.mark_appointment_synced(
+                                    app, calendar_id, created_event['id'], month, year
+                                )
+                                
+                                new_count += 1
+                                success_count += 1
+                                # logger.info(f"Created new appointment {app_id}")
+                                
+                            except HttpError as e:
+                                if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                                    raise GoogleQuotaError(f"Google API quota exceeded during event creation for {app_id}")
+                                logger.error(f"Error creating appointment {app_id}: {e}")
+                                error_count += 1
+                            except Exception as e:
+                                logger.error(f"Generic error creating appointment {app_id}: {e}")
+                                error_count += 1
                     
-                    if progress_callback and i % 10 == 0:
-                        progress_callback(i, total_count, f"Analyzing {i}/{total_count}...")
-                        
+                    # Progress update
+                    if progress_callback and i % 5 == 0:
+                        progress_callback(
+                            success_count + error_count, 
+                            total_count, 
+                            f"Processed {i+1}/{total_count} appointments"
+                        )
+                    
                 except Exception as e:
-                    logger.error(f"Error analyzing appointment {i}: {e}")
+                    logger.error(f"Error processing appointment {i}: {e}")
                     error_count += 1
-            
-            # FASE 2: Batch updates (delete vecchi + create nuovi)
-            if progress_callback:
-                progress_callback(
-                    skipped_count, 
-                    total_count, 
-                    f"Updating {sum(len(v) for v in events_to_update.values())} appointments..."
-                )
-            
-            for calendar_id, updates in events_to_update.items():
-                if not updates:
                     continue
-                    
-                # Prima cancella i vecchi eventi in batch
-                old_event_ids = [sync_data['event_id'] for _, sync_data, _ in updates]
-                delete_results = self._batch_delete_events(
-                    service, calendar_id, old_event_ids, 
-                    operation_context=f"update {len(updates)} events"
-                )
-                
-                # Poi crea i nuovi in batch
-                new_events = [event for _, _, event in updates]
-                create_results = self._batch_create_events(
-                    service, calendar_id, new_events,
-                    operation_context=f"create {len(new_events)} updated events"
-                )
-                
-                # Aggiorna sync state
-                for (app, _, _), (_, new_event_id) in zip(updates, create_results['created']):
-                    sync_manager.mark_appointment_synced(app, calendar_id, new_event_id, month, year)
-                    updated_count += 1
-                    success_count += 1
-                
-                error_count += create_results['errors']
             
-            # FASE 3: Batch create nuovi eventi
-            if progress_callback:
-                progress_callback(
-                    skipped_count + updated_count,
-                    total_count,
-                    f"Creating {sum(len(v) for v in events_to_create.values())} new appointments..."
-                )
-            
-            for calendar_id, creates in events_to_create.items():
-                if not creates:
-                    continue
-                
-                apps = [app for app, _ in creates]
-                events = [event for _, event in creates]
-                
-                create_results = self._batch_create_events(
-                    service, calendar_id, events,
-                    operation_context=f"create {len(events)} new events"
-                )
-                
-                # Aggiorna sync state
-                for app, (_, new_event_id) in zip(apps, create_results['created']):
-                    sync_manager.mark_appointment_synced(app, calendar_id, new_event_id, month, year)
-                    new_count += 1
-                    success_count += 1
-                
-                error_count += create_results['errors']
-            
-            # FASE 4: Batch delete appuntamenti rimossi
+            # Handle deletions (appointments in calendar but not in DBF)
             deleted_count = 0
             appointments_to_delete = sync_manager.get_appointments_to_delete(
                 current_appointment_ids, month, year, studio_ids
             )
             
-            if appointments_to_delete:
-                if progress_callback:
-                    progress_callback(
-                        success_count + error_count,
-                        total_count,
-                        f"Deleting {len(appointments_to_delete)} removed appointments..."
-                    )
-                
-                # Raggruppa per calendar
-                deletes_by_calendar = {}
-                for app_id in appointments_to_delete:
-                    sync_data = sync_state[app_id]
-                    cal_id = sync_data['calendar_id']
-                    if cal_id not in deletes_by_calendar:
-                        deletes_by_calendar[cal_id] = []
-                    deletes_by_calendar[cal_id].append((app_id, sync_data['event_id']))
-                
-                # Batch delete per calendar
-                for cal_id, deletes in deletes_by_calendar.items():
-                    event_ids = [event_id for _, event_id in deletes]
-                    delete_results = self._batch_delete_events(
-                        service, cal_id, event_ids,
-                        operation_context=f"cleanup {len(event_ids)} events"
-                    )
-                    
-                    # Rimuovi da sync state
-                    for app_id, _ in deletes:
-                        parts = app_id.split('_')
-                        sync_manager.remove_appointment_sync({
-                            'DATA': parts[0], 
-                            'ORA_INIZIO': parts[1], 
-                            'STUDIO': parts[2]
-                        })
-                    
-                    deleted_count += delete_results['success'] + delete_results['not_found']
-            
-            # Final progress
             if progress_callback:
                 progress_callback(
-                    total_count,
-                    total_count,
-                    f"Sync completed!"
+                    success_count + error_count, 
+                    total_count, 
+                    f"Cleaning up deleted appointments... ({deleted_count}/{len(appointments_to_delete)})"
+                )
+            
+            for app_id in appointments_to_delete:
+                try:
+                    sync_data = sync_state[app_id]
+                    service.events().delete(
+                        calendarId=sync_data['calendar_id'], 
+                        eventId=sync_data['event_id']
+                    ).execute()
+                    
+                    # Remove from sync state
+                    sync_manager.remove_appointment_sync(
+                        {'DATA': app_id.split('_')[0], 'ORA_INIZIO': app_id.split('_')[1], 
+                         'STUDIO': app_id.split('_')[2]}
+                    )
+                    
+                    deleted_count += 1
+                    # logger.info(f"Deleted appointment {app_id}")
+                except HttpError as e:
+                    if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                        raise GoogleQuotaError(f"Google API quota exceeded during event deletion for {app_id}")
+                    elif e.status_code in [404, 410]:
+                        logger.warning(f"Event for appointment {app_id} not found in Google Calendar (already deleted). Removing from sync state.")
+                        sync_manager.remove_appointment_sync(
+                            {'DATA': app_id.split('_')[0], 'ORA_INIZIO': app_id.split('_')[1], 
+                             'STUDIO': app_id.split('_')[2]}
+                        )
+                    else:
+                        logger.error(f"HTTP error deleting appointment {app_id}: {e}")
+                        error_count += 1
+                except Exception as e:
+                    logger.error(f"Generic error deleting appointment {app_id}: {e}")
+                    error_count += 1
+            
+            # Final progress update
+            if progress_callback:
+                progress_callback(
+                    total_count, 
+                    total_count, 
+                    f"Sync completed: {success_count} success, {error_count} errors"
                 )
             
             result = {
@@ -666,17 +425,15 @@ class CalendarServiceV2:
                 'message': f"Sync completed: {success_count} success, {error_count} errors"
             }
             
-            logger.info(f"Batch sync results: {result}")
+            # logger.info(f"Sync results: {result}")
             return result
             
         except GoogleCredentialsNotFoundError:
             raise
-        except GoogleQuotaError:
-            raise
         except Exception as e:
-            logger.error(f"Error in batch sync: {e}")
+            logger.error(f"Error syncing appointments: {e}")
             raise CalendarSyncError(f"Sync failed: {str(e)}")
-
+    
     def _create_event_from_appointment(self, app: Dict[str, Any]) -> Dict[str, Any]:
         """
         Create Google Calendar event from appointment data.
@@ -832,70 +589,82 @@ class CalendarServiceV2:
         """
         return self.google_clear_calendar_with_progress(calendar_id, None)
     
-    def google_clear_calendar_with_progress(self, calendar_id: str, 
-                                       progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
+    def google_clear_calendar_with_progress(self, calendar_id: str, progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
         """
-        Clear calendar usando BATCH DELETE.
+        Clear all events from Google Calendar with progress tracking.
+        Maintains V1 logic.
         """
         try:
             service = self._get_calendar_service()
+            deleted_count = 0
+            total_events = 0
             
-            # Ottieni tutti gli event IDs
-            logger.info(f"Listing all events in calendar {calendar_id}")
-            all_event_ids = []
+            # First pass: count total events
+            # logger.info(f"Counting events in calendar {calendar_id}")
             page_token = None
-            
             while True:
-                events_result = self._execute_with_retry(
-                    service.events().list(
-                        calendarId=calendar_id,
-                        pageToken=page_token,
-                        maxResults=2500,
-                        fields="items(id),nextPageToken"  # Solo IDs per velocità
-                    ),
-                    operation_name="list events for clearing"
-                )
+                events_result = service.events().list(
+                    calendarId=calendar_id,
+                    pageToken=page_token,
+                    maxResults=2500  # Max allowed by Google
+                ).execute()
                 
-                if events_result:
-                    events = events_result.get('items', [])
-                    all_event_ids.extend([e['id'] for e in events])
-                    page_token = events_result.get('nextPageToken')
-                    
-                    if progress_callback:
-                        progress_callback(
-                            len(all_event_ids), 
-                            len(all_event_ids),
-                            f"Found {len(all_event_ids)} events..."
-                        )
-                    
-                    if not page_token:
-                        break
-                else:
+                events = events_result.get('items', [])
+                total_events += len(events)
+                
+                page_token = events_result.get('nextPageToken')
+                if not page_token:
                     break
             
-            total_events = len(all_event_ids)
-            logger.info(f"Deleting {total_events} events in batches...")
+            # logger.info(f"Found {total_events} events to delete")
             
-            if total_events == 0:
-                return {'deleted_count': 0, 'message': 'Calendar already empty'}
-            
-            # Batch delete
-            delete_results = self._batch_delete_events(
-                service, calendar_id, all_event_ids,
-                operation_context="clear calendar"
-            )
-            
-            deleted_count = delete_results['success'] + delete_results['not_found']
-            
-            if progress_callback:
-                progress_callback(
-                    deleted_count,
-                    total_events,
-                    f"Deleted {deleted_count}/{total_events} events"
-                )
+            # Second pass: delete events with progress tracking
+            page_token = None
+            while True:
+                events_result = service.events().list(
+                    calendarId=calendar_id,
+                    pageToken=page_token,
+                    maxResults=2500  # Max allowed by Google
+                ).execute()
+                
+                events = events_result.get('items', [])
+                
+                # Delete events in batch
+                for event in events:
+                    try:
+                        event_summary = event.get('summary', '')
+                        service.events().delete(
+                            calendarId=calendar_id, 
+                            eventId=event['id']
+                        ).execute()
+                        deleted_count += 1
+                        # logger.debug(f"Deleted event: {event['id']} - {event_summary}")
+                        
+                        # Update progress
+                        if progress_callback:
+                            progress_callback(
+                                deleted_count, 
+                                total_events, 
+                                f"Deleted {deleted_count} of {total_events} events"
+                            )
+                            
+                    except HttpError as e:
+                        if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                            raise GoogleQuotaError(f"Google API quota exceeded during calendar clear for event {event['id']}")
+                        elif e.status_code in [404, 410]:
+                            logger.warning(f"During clear, event {event['id']} not found. Already deleted.")
+                        else:
+                            logger.warning(f"Error deleting event {event['id']}: {e}")
+                    except Exception as e:
+                        logger.warning(f"Generic error deleting event {event['id']}: {e}")
+                        continue
+                
+                page_token = events_result.get('nextPageToken')
+                if not page_token:
+                    break
             
             final_message = f"Deleted {deleted_count} events from calendar"
-            logger.info(final_message)
+            # logger.info(final_message)
             
             return {
                 'deleted_count': deleted_count,
@@ -904,14 +673,12 @@ class CalendarServiceV2:
             
         except GoogleCredentialsNotFoundError:
             raise
-        except GoogleQuotaError:
-            raise
         except Exception as e:
             logger.error(f"Error clearing calendar {calendar_id}: {e}")
             raise CalendarSyncError(f"Failed to clear calendar: {str(e)}")
-        
+    
     # =========================================================================
-    # SECTION 3: OAUTH AUTHENTICATION
+    # SECTION 3: OAUTH AUTHENTICATION (from V1)
     # =========================================================================
     
     def get_google_oauth_url(self, base_url: str) -> str:
@@ -925,8 +692,11 @@ class CalendarServiceV2:
                 scopes=['https://www.googleapis.com/auth/calendar']
             )
 
-            # Dynamically build redirect_uri from the provided base_url
-            redirect_uri = base_url.rstrip('/') + '/oauth/callback'
+            # Use a configurable redirect_uri from env var, or build it dynamically
+            redirect_uri = os.getenv('GOOGLE_REDIRECT_URI')
+            if not redirect_uri:
+                redirect_uri = base_url.rstrip('/') + '/oauth/callback'
+            
             flow.redirect_uri = redirect_uri
 
             auth_url, state = flow.authorization_url(
@@ -936,6 +706,8 @@ class CalendarServiceV2:
             )
 
             # Save state and flow data for callback (V1 logic)
+            import json
+
             # Read the full credentials file to preserve structure
             with open(self.credentials_file, 'r') as f:
                 full_credentials = json.load(f)
@@ -960,6 +732,8 @@ class CalendarServiceV2:
     def handle_oauth_callback(self, code: str, state: str) -> Dict[str, Any]:
         """Handle OAuth callback from Google. V1 logic."""
         try:
+            import json
+            
             # Load saved state
             state_file = 'instance/oauth_state.json'
             if not os.path.exists(state_file):
@@ -996,7 +770,7 @@ class CalendarServiceV2:
             if os.path.exists(state_file):
                 os.remove(state_file)
             
-            logger.info("Google authentication completed successfully")
+            # logger.info("Google authentication completed successfully")
             return {
                 'success': True,
                 'message': 'Google authentication completed successfully'
@@ -1011,7 +785,7 @@ class CalendarServiceV2:
             raise Exception(f"OAuth callback failed: {str(e)}")
     
     # =========================================================================
-    # SECTION 4: STATISTICS AND UTILITIES
+    # SECTION 4: STATISTICS AND UTILITIES (from V1)
     # =========================================================================
     
     def get_appointments_overview(self, year: int = None, studio_id: int = None) -> Dict[str, Any]:
