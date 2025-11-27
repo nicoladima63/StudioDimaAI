@@ -153,10 +153,8 @@ class SchedulerService:
         # logger.info(f"Automazione richiami schedulata alle {hour}:{minute:02d}.")
 
     def schedule_calendar_sync_job(self):
-        """Schedula job sincronizzazione calendario per orari multipli."""
+        """Schedula job sincronizzazione calendario per orari multipli con fallback."""
         settings = get_automation_settings()
-        sync_times = settings.get("calendar_sync_times", ["21:00"])
-        weeks_to_sync = int(settings.get("calendar_sync_weeks_to_sync", 3))
         enabled = settings.get("calendar_sync_enabled", True)
 
         # Rimuovi job precedenti se esistono
@@ -168,7 +166,24 @@ class SchedulerService:
         self._current_calendar_sync_jobs = []
 
         if not enabled:
+            logger.info("Automazione sincronizzazione calendario disattivata.")
             return
+
+        sync_times = settings['calendar_sync_times']
+        multi_time_enabled = settings['calendar_sync_multi_time_enabled']
+        fallback_time = settings['calendar_sync_fallback_time']
+        weeks_to_sync = int(settings.get("calendar_sync_weeks_to_sync", 3))
+
+        times_to_schedule = []
+        if multi_time_enabled:
+            times_to_schedule = sync_times
+        else:
+            if sync_times:
+                times_to_schedule = [sync_times[0]]
+        
+        if not times_to_schedule:
+            logger.warning(f"Nessun orario di sincronizzazione valido trovato, utilizzo il fallback: {fallback_time}")
+            times_to_schedule = [fallback_time]
 
         def create_job_func():
             """Job di sincronizzazione automatica calendario"""
@@ -243,8 +258,11 @@ class SchedulerService:
             except Exception as e:
                 logger.error(f"[CALENDAR SYNC] Errore scrittura log: {e}")
 
-        # Programma un job per ogni orario specificato
-        for i, time_str in enumerate(sync_times):
+        # Programma i job usando un set per evitare duplicati
+        final_times_to_schedule = set(times_to_schedule)
+        logger.info(f"Orari di sincronizzazione calendario programmati: {list(final_times_to_schedule)}")
+
+        for i, time_str in enumerate(final_times_to_schedule):
             try:
                 hour, minute = map(int, time_str.split(':'))
                 trigger = CronTrigger(hour=hour, minute=minute)
@@ -252,7 +270,7 @@ class SchedulerService:
                     create_job_func, trigger, id=f"calendar_sync_job_v2_{i}", replace_existing=True
                 )
                 self._current_calendar_sync_jobs.append(job)
-            except ValueError:
+            except (ValueError, TypeError):
                 logger.error(f"Formato ora non valido '{time_str}' in calendar_sync_times. Ignorato.")
 
     def reschedule_recall_job(self):

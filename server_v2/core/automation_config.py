@@ -15,6 +15,8 @@ DEFAULT_AUTOMATION_SETTINGS = {
     'recall_hour': 16,
     'recall_minute': 0,
     'calendar_sync_enabled': True,
+    'calendar_sync_multi_time_enabled': False,
+    'calendar_sync_fallback_time': "21:00",
     'calendar_sync_times': ["21:00"],
     'calendar_sync_weeks_to_sync': 3,
     'calendar_studio_blu_id': 'a60fdd2c5ea45c5575bea897a32d25a0309e8d61db566353aa8b95b2111d4a4e@group.calendar.google.com',

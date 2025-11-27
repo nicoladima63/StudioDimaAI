@@ -25,17 +25,19 @@ def get_scheduler_status():
             'data': {
                 'scheduler': status,
                 'settings': {
-                    'reminder_enabled': settings.get('reminder_enabled', True),
-                    'reminder_hour': settings.get('reminder_hour', 15),
-                    'reminder_minute': settings.get('reminder_minute', 0),
-                    'recall_enabled': settings.get('recall_enabled', True),
-                    'recall_hour': settings.get('recall_hour', 16),
-                    'recall_minute': settings.get('recall_minute', 0),
-                    'calendar_sync_enabled': settings.get('calendar_sync_enabled', True),
-                    'calendar_sync_times': settings.get('calendar_sync_times', ["21:00"]),
-                    'calendar_sync_weeks_to_sync': settings.get('calendar_sync_weeks_to_sync', 3),
-                    'calendar_studio_blu_id': settings.get('calendar_studio_blu_id'),
-                    'calendar_studio_giallo_id': settings.get('calendar_studio_giallo_id')
+                    'reminder_enabled': settings['reminder_enabled'],
+                    'reminder_hour': settings['reminder_hour'],
+                    'reminder_minute': settings['reminder_minute'],
+                    'recall_enabled': settings['recall_enabled'],
+                    'recall_hour': settings['recall_hour'],
+                    'recall_minute': settings['recall_minute'],
+                    'calendar_sync_enabled': settings['calendar_sync_enabled'],
+                    'calendar_sync_multi_time_enabled': settings['calendar_sync_multi_time_enabled'],
+                    'calendar_sync_fallback_time': settings['calendar_sync_fallback_time'],
+                    'calendar_sync_times': settings['calendar_sync_times'],
+                    'calendar_sync_weeks_to_sync': settings['calendar_sync_weeks_to_sync'],
+                    'calendar_studio_blu_id': settings['calendar_studio_blu_id'],
+                    'calendar_studio_giallo_id': settings['calendar_studio_giallo_id']
                 }
             }
         })
@@ -137,6 +139,10 @@ def update_calendar_sync_settings():
         # Aggiorna settings calendario sync
         if 'enabled' in data:
             settings['calendar_sync_enabled'] = bool(data['enabled'])
+        if 'multi_time_enabled' in data:
+            settings['calendar_sync_multi_time_enabled'] = bool(data['multi_time_enabled'])
+        if 'fallback_time' in data:
+            settings['calendar_sync_fallback_time'] = data['fallback_time']
         if 'sync_times' in data and isinstance(data['sync_times'], list):
             settings['calendar_sync_times'] = data['sync_times']
         if 'weeks_to_sync' in data:
@@ -162,6 +168,8 @@ def update_calendar_sync_settings():
                 'message': 'Impostazioni sincronizzazione calendario aggiornate',
                 'settings': {
                     'calendar_sync_enabled': settings['calendar_sync_enabled'],
+                    'calendar_sync_multi_time_enabled': settings['calendar_sync_multi_time_enabled'],
+                    'calendar_sync_fallback_time': settings['calendar_sync_fallback_time'],
                     'calendar_sync_times': settings['calendar_sync_times'],
                     'calendar_studio_blu_id': settings.get('calendar_studio_blu_id'),
                     'calendar_studio_giallo_id': settings.get('calendar_studio_giallo_id')
