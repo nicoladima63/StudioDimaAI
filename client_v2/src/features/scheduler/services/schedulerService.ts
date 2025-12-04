@@ -20,8 +20,9 @@ export interface SchedulerSettings {
     recall_hour: number;
     recall_minute: number;
     calendar_sync_enabled: boolean;
-    calendar_sync_hour: number;
-    calendar_sync_minute: number;
+    calendar_sync_multi_time_enabled: boolean;
+    calendar_sync_fallback_time: string;
+    calendar_sync_times: string[];
     calendar_studio_blu_id: string;
     calendar_studio_giallo_id: string;
     calendar_weeks_to_sync?: number; 
@@ -88,8 +89,10 @@ const schedulerService = {
             endpoint = '/scheduler/calendar/settings';
             payload = {
                 enabled: settings.calendar_sync_enabled,
-                hour: settings.calendar_sync_hour,
-                minute: settings.calendar_sync_minute,
+                multi_time_enabled: settings.calendar_sync_multi_time_enabled,
+                fallback_time: settings.calendar_sync_fallback_time,
+                sync_times: settings.calendar_sync_times,
+                weeks_to_sync: settings.calendar_weeks_to_sync,
                 calendar_studio_blu_id: settings.calendar_studio_blu_id,
                 calendar_studio_giallo_id: settings.calendar_studio_giallo_id
             };

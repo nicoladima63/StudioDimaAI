@@ -17,7 +17,7 @@ import {
   CModalFooter,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCalendar, cilSettings, cilSync, cilTrash } from '@coreui/icons';
+import { cilCalendar, cilSettings, cilSync, cilTrash, cilPlus, cilX } from '@coreui/icons';
 import { schedulerService, type SchedulerSettings } from '@/features/scheduler/services/schedulerService';
 import { apiGetCalendars, apiStartSync, apiClearCalendar, apiGetClearStatus, apiGetSyncStatus } from '@/features/calendar/services/calendar.service';
 import { environmentService } from '@/features/settings/services/environment.service';
@@ -30,6 +30,8 @@ const CalendarSettings: React.FC = () => {
   const [enabled, setEnabled] = useState(true);
   const [hour, setHour] = useState(21);
   const [minute, setMinute] = useState(0);
+  const [multiTimeEnabled, setMultiTimeEnabled] = useState(false);
+  const [syncTimes, setSyncTimes] = useState<string[]>([]);
   const [weeksToSync, setWeeksToSync] = useState(3);
   const [databaseMode, setDatabaseMode] = useState<'dev' | 'prod'>('prod');
   const [switchingMode, setSwitchingMode] = useState(false);
@@ -201,9 +203,15 @@ const CalendarSettings: React.FC = () => {
       const settings = response.settings;
       
       setEnabled(settings.calendar_sync_enabled);
-      setHour(settings.calendar_sync_hour);
-      setMinute(settings.calendar_sync_minute);
-      setWeeksToSync(settings.calendar_sync_weeks_to_sync);
+      setMultiTimeEnabled(settings.calendar_sync_multi_time_enabled ?? false);
+      setSyncTimes(settings.calendar_sync_times || []);
+
+      if (settings.calendar_sync_fallback_time) {
+        const [h, m] = settings.calendar_sync_fallback_time.split(':');
+        setHour(parseInt(h, 10));
+        setMinute(parseInt(m, 10));
+      }
+      setWeeksToSync(settings.calendar_weeks_to_sync ?? 3);
       
       // Carica database mode
       const dbResponse = await environmentService.getServiceEnvironment('database');
@@ -231,11 +239,13 @@ const CalendarSettings: React.FC = () => {
       'info'
     );
     try {
+      const fallbackTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: newEnabled,
-        calendar_sync_hour: hour,
-        calendar_sync_minute: minute,
-        weeks_to_sync: weeksToSync
+        calendar_sync_multi_time_enabled: multiTimeEnabled,
+        calendar_sync_fallback_time: fallbackTime,
+        calendar_sync_times: syncTimes,
+        calendar_weeks_to_sync: weeksToSync,
       });
       addLog(
         `Automazione calendario ${
@@ -258,11 +268,13 @@ const CalendarSettings: React.FC = () => {
     setSuccess(null);
     addLog('Salvataggio orario sincronizzazione...', 'info');
     try {
+      const fallbackTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: enabled,
-        calendar_sync_hour: hour,
-        calendar_sync_minute: minute,
-        weeks_to_sync: weeksToSync
+        calendar_sync_multi_time_enabled: multiTimeEnabled,
+        calendar_sync_fallback_time: fallbackTime,
+        calendar_sync_times: syncTimes,
+        calendar_weeks_to_sync: weeksToSync
       });
       setSuccess('Orario sincronizzazione salvato con successo!');
       addLog('Orario sincronizzazione salvato con successo', 'success');
@@ -297,6 +309,28 @@ const CalendarSettings: React.FC = () => {
     } finally {
       setSwitchingMode(false);
     }
+  };
+
+  const handleSyncTimeChange = (index: number, part: 'hour' | 'minute', value: number) => {
+    const updatedTimes = [...syncTimes];
+    const [h, m] = updatedTimes[index].split(':');
+    let newTime: string;
+    if (part === 'hour') {
+      newTime = `${String(value).padStart(2, '0')}:${m}`;
+    } else {
+      newTime = `${h}:${String(value).padStart(2, '0')}`;
+    }
+    updatedTimes[index] = newTime;
+    setSyncTimes(updatedTimes);
+  };
+
+  const handleAddSyncTime = () => {
+    setSyncTimes([...syncTimes, '09:00']);
+  };
+
+  const handleRemoveSyncTime = (index: number) => {
+    const updatedTimes = syncTimes.filter((_, i) => i !== index);
+    setSyncTimes(updatedTimes);
   };
 
   const handleClearAll = async () => {
@@ -482,35 +516,87 @@ const CalendarSettings: React.FC = () => {
                       className={enabled ? 'toggle-success' : 'toggle-secondary'}
                     />
                   </CCol>
-                  <CCol md={4} className="mb-2 mb-md-0">
-                    <CFormLabel>Orario sincronizzazione</CFormLabel>
-                    <div className="d-flex gap-2 align-items-center">
-                      <CFormSelect
-                        value={hour}
-                        onChange={(e) => setHour(Number(e.target.value))}
-                        style={{ width: 80 }}
-                        disabled={!enabled}
-                      >
-                        {HOURS.map((h) => (
-                          <option key={h} value={h}>
-                            {h.toString().padStart(2, '0')}
-                          </option>
-                        ))}
-                      </CFormSelect>
-                      <span>:</span>
-                      <CFormSelect
-                        value={minute}
-                        onChange={(e) => setMinute(Number(e.target.value))}
-                        style={{ width: 80 }}
-                        disabled={!enabled}
-                      >
-                        {MINUTES.map((m) => (
-                          <option key={m} value={m}>
-                            {m.toString().padStart(2, '0')}
-                          </option>
-                        ))}
-                      </CFormSelect>
-                    </div>
+                  <CCol md={8} className="mb-2 mb-md-0">
+                    <CFormSwitch
+                        id="multi-time-switch"
+                        label="Abilita orari multipli"
+                        checked={multiTimeEnabled}
+                        onChange={(e) => setMultiTimeEnabled(e.target.checked)}
+                        className="mb-2"
+                    />
+                    {multiTimeEnabled ? (
+                        <div>
+                            {syncTimes.map((time, index) => {
+                                const [h, m] = time.split(':');
+                                return (
+                                    <div key={index} className="d-flex align-items-center mb-2">
+                                        <CFormSelect
+                                            value={parseInt(h,10)}
+                                            onChange={(e) => handleSyncTimeChange(index, 'hour', Number(e.target.value))}
+                                            style={{ width: 80 }}
+                                            disabled={!enabled}
+                                        >
+                                            {HOURS.map((h) => (
+                                                <option key={h} value={h}>
+                                                    {h.toString().padStart(2, '0')}
+                                                </option>
+                                            ))}
+                                        </CFormSelect>
+                                        <span className="mx-2">:</span>
+                                        <CFormSelect
+                                            value={parseInt(m,10)}
+                                            onChange={(e) => handleSyncTimeChange(index, 'minute', Number(e.target.value))}
+                                            style={{ width: 80 }}
+                                            disabled={!enabled}
+                                        >
+                                            {MINUTES.map((m) => (
+                                                <option key={m} value={m}>
+                                                    {m.toString().padStart(2, '0')}
+                                                </option>
+                                            ))}
+                                        </CFormSelect>
+                                        <CButton color="danger" size="sm" onClick={() => handleRemoveSyncTime(index)} className="ms-2">
+                                            <CIcon icon={cilX} />
+                                        </CButton>
+                                    </div>
+                                );
+                            })}
+                            <CButton color="success" size="sm" onClick={handleAddSyncTime}>
+                                <CIcon icon={cilPlus} className="me-1" /> Aggiungi orario
+                            </CButton>
+                        </div>
+                    ) : (
+                        <div>
+                            <CFormLabel>Orario di fallback</CFormLabel>
+                            <div className="d-flex gap-2 align-items-center">
+                                <CFormSelect
+                                    value={hour}
+                                    onChange={(e) => setHour(Number(e.target.value))}
+                                    style={{ width: 80 }}
+                                    disabled={!enabled}
+                                >
+                                    {HOURS.map((h) => (
+                                        <option key={h} value={h}>
+                                            {h.toString().padStart(2, '0')}
+                                        </option>
+                                    ))}
+                                </CFormSelect>
+                                <span>:</span>
+                                <CFormSelect
+                                    value={minute}
+                                    onChange={(e) => setMinute(Number(e.target.value))}
+                                    style={{ width: 80 }}
+                                    disabled={!enabled}
+                                >
+                                    {MINUTES.map((m) => (
+                                        <option key={m} value={m}>
+                                            {m.toString().padStart(2, '0')}
+                                        </option>
+                                    ))}
+                                </CFormSelect>
+                            </div>
+                        </div>
+                    )}
                   </CCol>
                   <CCol
                     md={4}
@@ -561,11 +647,14 @@ const CalendarSettings: React.FC = () => {
                 </CRow>
 
                 <div className="text-muted small mt-3">
-                  L'automazione sincronizza ogni giorno alle{' '}
-                  {hour.toString().padStart(2, '0')}:
-                  {minute.toString().padStart(2, '0')} gli appuntamenti di entrambi
+                  L'automazione sincronizza ogni giorno gli appuntamenti di entrambi
                   gli studi sui rispettivi calendari Google (esclusi sabato e
-                  domenica). Sincronizza le prossime {weeksToSync} settimane a partire dal lunedì della settimana corrente.
+                  domenica).
+                  {multiTimeEnabled 
+                    ? ` Orari di sincronizzazione: ${syncTimes.join(', ')}.`
+                    : ` Orario di sincronizzazione: ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}.`
+                  }
+                  {' '}Sincronizza le prossime {weeksToSync} settimane a partire dal lunedì della settimana corrente.
                 </div>
               </CCardBody>
             </CCard>

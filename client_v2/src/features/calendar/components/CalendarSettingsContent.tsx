@@ -204,8 +204,14 @@ const CalendarSettings: React.FC = () => {
       const settings = response.settings;
       
       setEnabled(settings.calendar_sync_enabled);
-      setHour(settings.calendar_sync_hour);
-      setMinute(settings.calendar_sync_minute);
+      
+      if (settings.calendar_sync_fallback_time) {
+        const [h, m] = settings.calendar_sync_fallback_time.split(':');
+        setHour(parseInt(h, 10));
+        setMinute(parseInt(m, 10));
+      }
+      
+      setWeeksToSync(settings.calendar_weeks_to_sync ?? 3);
       
       // Carica database mode
       const dbResponse = await environmentService.getServiceEnvironment('database');
@@ -233,11 +239,14 @@ const CalendarSettings: React.FC = () => {
       'info'
     );
     try {
+      const fallbackTime = `${String(hour).padStart(2, '0')}:${String(
+        minute
+      ).padStart(2, '0')}`;
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: newEnabled,
-        calendar_sync_hour: hour,
-        calendar_sync_minute: minute,
-        calendar_weeks_to_sync: weeksToSync // Aggiungiamo il salvataggio delle settimane
+        calendar_sync_fallback_time: fallbackTime,
+        calendar_sync_times: [fallbackTime],
+        calendar_weeks_to_sync: weeksToSync,
       });
       addLog(
         `Automazione calendario ${
@@ -260,16 +269,17 @@ const CalendarSettings: React.FC = () => {
     setSuccess(null);
     addLog('Salvataggio orario sincronizzazione...', 'info');
     try {
+      const fallbackTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: enabled,
-        calendar_sync_hour: hour,
-        calendar_sync_minute: minute,
-        calendar_weeks_to_sync: weeksToSync // Aggiungiamo il salvataggio delle settimane
+        calendar_sync_fallback_time: fallbackTime,
+        calendar_sync_times: [fallbackTime],
+        calendar_weeks_to_sync: weeksToSync,
       });
       setSuccess('Orario sincronizzazione salvato con successo!');
       addLog('Orario sincronizzazione salvato con successo', 'success');
     } catch (err: any) {
-      const errorMsg = 'Errore nel salvataggio dell\'orario';
+      const errorMsg = "Errore nel salvataggio dell'orario";
       setError(errorMsg);
       addLog(errorMsg, 'error');
     } finally {
