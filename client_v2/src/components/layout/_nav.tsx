@@ -11,7 +11,7 @@ import {
   cilUser,
   cilCalendar,
   cilSearch,
-  cilMonitor
+  cilTask
 } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
 
@@ -21,6 +21,12 @@ const _nav = [
     name: 'Dashboard',
     to: '/dashboard',
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Matrice di Eisenhower',
+    to: '/eisenhower',
+    icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
   },
   {
     component: CNavTitle,
