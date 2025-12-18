@@ -10,6 +10,7 @@ import json
 import logging
 import threading
 import time
+import random
 from datetime import datetime, date
 from typing import Dict, List, Any, Optional, Callable
 
@@ -55,6 +56,48 @@ class CalendarServiceV2:
         self.credentials_file = 'instance/credentials.json'
         self.token_file = 'instance/token.json'
         self.dbf_reader = get_optimized_reader()
+        
+    def _execute_with_retry(self, api_call: Callable, max_retries: int = 5, initial_delay: float = 1.0):
+        """
+        Executes a Google API call with retry logic and exponential backoff.
+
+        Args:
+            api_call (Callable): The Google API method to execute (e.g., service.events().insert(...)).
+            max_retries (int): Maximum number of retries.
+            initial_delay (float): Initial delay in seconds before the first retry.
+
+        Returns:
+            The result of the API call.
+
+        Raises:
+            GoogleQuotaError: If Google API quota is exceeded after all retries.
+            HttpError: For other HTTP errors not handled by retry logic.
+            Exception: For other unexpected errors.
+        """
+        for i in range(max_retries):
+            try:
+                return api_call.execute()
+            except HttpError as e:
+                if e.status_code == 403 and ('rateLimitExceeded' in str(e.content) or 'userRateLimitExceeded' in str(e.content)):
+                    # Exponential backoff with jitter for rate limit errors
+                    delay = initial_delay * (2 ** i) + random.uniform(0, 1)
+                    logger.warning(f"Google API rate limit exceeded (403). Retrying in {delay:.2f} seconds... (Attempt {i + 1}/{max_retries})")
+                    time.sleep(delay)
+                elif e.status_code in [404, 410]:
+                    # Resource not found or gone - log and return None or re-raise based on context
+                    logger.warning(f"Google API resource not found/gone (404/410). Skipping retry for this specific call. Error: {e}")
+                    return None  # Or re-raise e if the caller needs to handle it
+                else:
+                    # Re-raise for other HttpErrors
+                    logger.error(f"Google API HttpError (Status: {e.status_code}). No retry for this error type. Error: {e}")
+                    raise
+            except Exception as e:
+                logger.error(f"Unexpected error during Google API call: {e}")
+                raise
+        
+        # If all retries are exhausted for 403 errors
+        raise GoogleQuotaError("Google API quota exceeded after multiple retries. Operation failed.")
+
         
     # =========================================================================
     # SECTION 1: DBF APPOINTMENTS READING (from V1)
@@ -180,7 +223,11 @@ class CalendarServiceV2:
             configured_calendar_ids = {id.strip() for id in configured_ids_str.split(',') if id.strip()}
             
             # Get all calendars from Google
-            calendars_result = service.calendarList().list().execute()
+            calendars_result = self._execute_with_retry(service.calendarList().list())
+            
+            if calendars_result is None: # Handle case where retry returned None (e.g., resource not found, though unlikely here)
+                return [] 
+            
             all_calendars = calendars_result.get('items', [])
             
             # Filter to show only configured calendars (V1 logic)
@@ -271,22 +318,27 @@ class CalendarServiceV2:
                             try:
                                 # Delete old event
                                 old_event_id = sync_state[app_id]['event_id']
-                                service.events().delete(
-                                    calendarId=sync_state[app_id]['calendar_id'], 
-                                    eventId=old_event_id
-                                ).execute()
+                                self._execute_with_retry(
+                                    service.events().delete(
+                                        calendarId=sync_state[app_id]['calendar_id'], 
+                                        eventId=old_event_id
+                                    )
+                                )
                                 # logger.debug(f"Deleted old event {old_event_id}")
                                 
                                 # Create new event
-                                created_event = service.events().insert(
-                                    calendarId=calendar_id, 
-                                    body=event
-                                ).execute()
+                                created_event = self._execute_with_retry(
+                                    service.events().insert(
+                                        calendarId=calendar_id, 
+                                        body=event
+                                    )
+                                )
                                 
                                 # Update sync state
-                                sync_manager.mark_appointment_synced(
-                                    app, calendar_id, created_event['id'], month, year
-                                )
+                                if created_event: # Only update if event was actually created and not skipped due to 404/410
+                                    sync_manager.mark_appointment_synced(
+                                        app, calendar_id, created_event['id'], month, year
+                                    )
                                 
                                 updated_count += 1
                                 success_count += 1
@@ -303,10 +355,12 @@ class CalendarServiceV2:
                         else:
                             # Create new event
                             try:
-                                created_event = service.events().insert(
-                                    calendarId=calendar_id, 
-                                    body=event
-                                ).execute()
+                                created_event = self._execute_with_retry(
+                                    service.events().insert(
+                                        calendarId=calendar_id, 
+                                        body=event
+                                    )
+                                )
                                 
                                 # Mark as synced
                                 sync_manager.mark_appointment_synced(
@@ -355,10 +409,12 @@ class CalendarServiceV2:
             for app_id in appointments_to_delete:
                 try:
                     sync_data = sync_state[app_id]
-                    service.events().delete(
-                        calendarId=sync_data['calendar_id'], 
-                        eventId=sync_data['event_id']
-                    ).execute()
+                    self._execute_with_retry(
+                        service.events().delete(
+                            calendarId=sync_data['calendar_id'], 
+                            eventId=sync_data['event_id']
+                        )
+                    )
                     
                     # Remove from sync state
                     sync_manager.remove_appointment_sync(
@@ -581,11 +637,11 @@ class CalendarServiceV2:
             # logger.info(f"Counting events in calendar {calendar_id}")
             page_token = None
             while True:
-                events_result = service.events().list(
+                events_result = self._execute_with_retry(service.events().list(
                     calendarId=calendar_id,
                     pageToken=page_token,
                     maxResults=2500  # Max allowed by Google
-                ).execute()
+                ))
                 
                 events = events_result.get('items', [])
                 total_events += len(events)
@@ -599,11 +655,14 @@ class CalendarServiceV2:
             # Second pass: delete events with progress tracking
             page_token = None
             while True:
-                events_result = service.events().list(
+                events_result = self._execute_with_retry(service.events().list(
                     calendarId=calendar_id,
                     pageToken=page_token,
                     maxResults=2500  # Max allowed by Google
-                ).execute()
+                ))
+
+                if events_result is None: # _execute_with_retry returns None for 404/410
+                    break
                 
                 events = events_result.get('items', [])
                 
@@ -611,11 +670,14 @@ class CalendarServiceV2:
                 for event in events:
                     try:
                         event_summary = event.get('summary', '')
-                        service.events().delete(
-                            calendarId=calendar_id, 
-                            eventId=event['id']
-                        ).execute()
-                        deleted_count += 1
+                        delete_result = self._execute_with_retry(
+                            service.events().delete(
+                                calendarId=calendar_id, 
+                                eventId=event['id']
+                            )
+                        )
+                        if delete_result is not None: # Only increment if deletion was attempted and not skipped
+                            deleted_count += 1
                         # logger.debug(f"Deleted event: {event['id']} - {event_summary}")
                         
                         # Update progress
@@ -811,8 +873,7 @@ class CalendarServiceV2:
         try:
             service = self._get_calendar_service()
             # Simple test call
-            service.calendarList().list(maxResults=1).execute()
-            
+            self._execute_with_retry(service.calendarList().list(maxResults=1))
             return {
                 'success': True,
                 'message': 'Google Calendar connection successful'
@@ -822,6 +883,12 @@ class CalendarServiceV2:
             return {
                 'success': False,
                 'error': 'CREDENTIALS_NOT_FOUND',
+                'message': str(e)
+            }
+        except GoogleQuotaError as e: # Catch GoogleQuotaError specifically
+            return {
+                'success': False,
+                'error': 'GOOGLE_QUOTA_EXCEEDED',
                 'message': str(e)
             }
         except Exception as e:

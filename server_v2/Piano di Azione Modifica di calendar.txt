@@ -1,0 +1,48 @@
+Piano di Azione: Modifica di `calendar_service.py`
+
+  Fase 1: Preparazione e Aggiunta dei Componenti Base
+
+   1. Aggiunta Import Necessari: All'inizio del file, aggiungeremo time, random e HttpError per gestire le pause,
+      la casualità nei ritardi e gli errori specifici di Google.
+
+   2. Definizione di un'Eccezione Personalizzata: Creeremo una nuova classe di eccezione chiamata GoogleQuotaError.
+      Questo ci servirà per gestire in modo specifico il caso in cui i limiti di Google vengano superati
+      ripetutamente, anche dopo i nostri tentativi di attesa.
+
+  Fase 2: Implementazione della Logica di Retry
+
+   3. Creazione della Funzione `_execute_with_retry`:
+       * Questo sarà il cuore della modifica. Creeremo un nuovo metodo privato all'interno della classe
+         CalendarServiceV2.
+       * Questa funzione fungerà da "involucro" (wrapper) per ogni singola chiamata alle API di Google.
+       * Conterrà un ciclo che tenterà di eseguire una richiesta fino a un massimo di 5 volte.
+       * Se Google risponde con un errore di tipo "rate limit" (403), la funzione non andrà in crash. Invece,
+         metterà in pausa l'esecuzione per un tempo crescente (tecnica chiamata "exponential backoff") e poi
+         riproverà.
+       * Se, dopo tutti i tentativi, l'errore persiste, lancerà la nostra nuova eccezione GoogleQuotaError.
+       * Gestirà anche elegantemente gli errori "risorsa non trovata" (404 o 410), che possono capitare se si tenta
+         di cancellare un evento già cancellato.
+
+  Fase 3: Integrazione della Nuova Logica
+
+   4. Sostituzione delle Chiamate Dirette:
+       * Analizzerò l'intero file e identificherò ogni punto in cui viene eseguita una chiamata diretta a Google
+         (ogni .execute()).
+       * Sostituirò ciascuna di queste chiamate con una chiamata al nostro nuovo wrapper _execute_with_retry.
+
+      Le modifiche principali avverranno in queste funzioni:
+       * sync_appointments_for_month: Tutte le operazioni di insert e delete degli eventi.
+       * google_clear_calendar_with_progress: Le operazioni di list e delete usate per svuotare il calendario.     
+       * _get_calendar_service: L'operazione che recupera la lista dei calendari.
+
+  Fase 4: Aggiornamento della Gestione Errori
+
+   5. Adattamento dei Blocchi `try...except`:
+       * I blocchi di codice che attualmente gestiscono gli errori verranno aggiornati per "catturare" la nostra
+         nuova eccezione GoogleQuotaError, garantendo che il programma reagisca correttamente quando i limiti API
+         sono un problema persistente.
+
+  ---
+
+  Questo piano ci permette di risolvere in modo mirato e sicuro il problema dei timeout e dei rate limit, senza
+  reintrodurre la complessità che causava le duplicazioni.
