@@ -14,7 +14,7 @@ import {
   CTableDataCell,
   CAlert,
   CSpinner,
-  CBadge
+  CBadge,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilX, cilDescription, cilInfo } from '@coreui/icons';
@@ -37,7 +37,7 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
   fatturaId,
   materialeId,
   onFetchFatturaCompleta,
-  size = 'xl'
+  size = 'xl',
 }) => {
   const [fattura, setFattura] = useState<FatturaIntestazione | null>(null);
   const [righe, setRighe] = useState<DettaglioRigaFattura[]>([]);
@@ -66,9 +66,9 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       const fatturaCompleta = await onFetchFatturaCompleta(fatturaId);
-      
+
       setFattura(fatturaCompleta.intestazione);
       setRighe(fatturaCompleta.dettagli);
     } catch (err: any) {
@@ -82,7 +82,7 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
     if (!value && value !== 0) return '0,00 €';
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'EUR',
     }).format(value);
   };
 
@@ -115,35 +115,37 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
   if (!fatturaId) return null;
 
   return (
-    <CModal visible={visible} onClose={onClose} size={size} scrollable className="modal-fattura-detail">
+    <CModal
+      visible={visible}
+      onClose={onClose}
+      size={size}
+      scrollable
+      className='modal-fattura-detail'
+    >
       <CModalHeader>
         <CModalTitle>
-          <CIcon icon={cilDescription} className="me-2" />
+          <CIcon icon={cilDescription} className='me-2' />
           Dettagli Fattura {fatturaId}
-          {fattura && (
-            <span className="text-muted ms-2">
-              - {fattura.fornitorenome}
-            </span>
-          )}
+          {fattura && <span className='text-muted ms-2'>- {fattura.fornitorenome}</span>}
         </CModalTitle>
       </CModalHeader>
-      
+
       <CModalBody>
         {loading && (
-          <div className="text-center p-4">
-            <CSpinner color="primary" />
-            <p className="mt-2 mb-0">Caricamento dettagli fattura...</p>
+          <div className='text-center p-4'>
+            <CSpinner color='primary' />
+            <p className='mt-2 mb-0'>Caricamento dettagli fattura...</p>
           </div>
         )}
 
         {error && (
-          <CAlert color="danger" dismissible>
+          <CAlert color='danger' dismissible>
             {error}
-            <CButton 
-              color="danger" 
-              variant="outline" 
-              size="sm" 
-              className="ms-2" 
+            <CButton
+              color='danger'
+              variant='outline'
+              size='sm'
+              className='ms-2'
               onClick={fetchFatturaDetail}
             >
               Riprova
@@ -154,68 +156,63 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
         {!loading && !error && fattura && (
           <>
             {/* Header informazioni fattura - Layout come step-3 */}
-            <div className="row mb-4">
-              <div className="col-md-3">
-                <div className="info-box">
-                  <label className="text-muted small fw-bold">ID Fattura:</label>
-                  <div className="fw-bold">{fattura.id}</div>
+            <div className='row mb-4'>
+              <div className='col-md-4'>
+                <div className='info-box d-flex justify-content-between align-items-center'>
+                  <label className='text-muted small fw-bold'>ID:</label>
+                  <div className='fw-bold'>{fattura.id}</div>
                 </div>
               </div>
-              <div className="col-md-3">
-                <div className="info-box">
-                  <label className="text-muted small fw-bold">Data Spesa:</label>
-                  <div className="fw-bold">{formatDate(fattura.data_spesa)}</div>
+              <div className='col-md-4'>
+                <div className='info-box d-flex justify-content-between align-items-center'>
+                  <label className='text-muted small fw-bold'>Data:</label>
+                  <div className='fw-bold'>{formatDate(fattura.data_spesa)}</div>
                 </div>
               </div>
-              <div className="col-md-3">
-                <div className="info-box">
-                  <label className="text-muted small fw-bold">Numero Documento:</label>
-                  <div className="fw-bold">{fattura.numero_documento || '-'}</div>
+              <div className='col-md-4'>
+                <div className='info-box d-flex justify-content-between align-items-center'>
+                  <label className='text-muted small fw-bold'>Numero:</label>
+                  <div className='fw-bold'>{fattura.numero_documento || '-'}</div>
                 </div>
               </div>
-              <div className="col-md-3">
-                <div className="info-box">
-                  <label className="text-muted small fw-bold">Totale Fattura:</label>
-                  <div className="fw-bold text-primary fs-5">
+            </div>
+
+            {/* Sezione informazioni aggiuntive */}
+            <div className='row mb-4'>
+              <div className='col-md-4'>
+                <div className='info-box d-flex justify-content-between align-items-center'>
+                  <label className='text-muted small fw-bold'>Costo:</label>
+                  <div>{formatCurrency(fattura.costo_netto_totale)}</div>
+                </div>
+              </div>
+              <div className='col-md-4'>
+                <div className='info-box d-flex justify-content-between align-items-center'>
+                  <label className='text-muted small fw-bold'>IVA:</label>
+                  <div>{formatCurrency(fattura.costo_iva_totale)}</div>
+                </div>
+              </div>
+              <div className='col-md-4'>
+                <div className='info-box d-flex justify-content-between align-items-center'>
+                  <label className='text-muted small fw-bold'>Totale:</label>
+                  <div className='fw-bold text-primary fs-5'>
                     {formatCurrency(fattura.costo_totale)}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Sezione informazioni aggiuntive */}
-            <div className="row mb-4">
-              <div className="col-md-3">
-                <div className="info-box">
-                  <label className="text-muted small fw-bold">Costo Netto:</label>
-                  <div>{formatCurrency(fattura.costo_netto_totale)}</div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="info-box">
-                  <label className="text-muted small fw-bold">Costo IVA:</label>
-                  <div>{formatCurrency(fattura.costo_iva_totale)}</div>
-                </div>
-              </div>
-              <div className="col-md-6">
-                <div className="info-box">
-                  <label className="text-muted small fw-bold">Fornitore:</label>
-                  <div>{fattura.fornitorenome}</div>
-                </div>
-              </div>
-            </div>
-
-            <hr className="my-4" />
+            <hr className='my-4' />
 
             {/* Tabella dettagli righe fattura */}
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h6 className="mb-0">
-                <CIcon icon={cilInfo} className="me-2" />
+            <div className='d-flex justify-content-between align-items-center mb-3'>
+              <h6 className='mb-0'>
+                <CIcon icon={cilInfo} className='me-2' />
                 Dettagli Fattura {fatturaId}
               </h6>
               {righe.length > 0 && (
-                <CBadge color="primary">
-                  {getRigheFiltrate().length} righe (da {righe.length} totali) - Totale: {formatCurrency(getTotaleRighe())}
+                <CBadge color='primary'>
+                  {getRigheFiltrate().length} righe (da {righe.length} totali) - Totale:{' '}
+                  {formatCurrency(getTotaleRighe())}
                 </CBadge>
               )}
             </div>
@@ -226,42 +223,34 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
                   <CTableRow>
                     <CTableHeaderCell>Cod. Art.</CTableHeaderCell>
                     <CTableHeaderCell>Descrizione</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Qtà</CTableHeaderCell>
-                    <CTableHeaderCell className="text-end">Prezzo Unit.</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Sconto %</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">IVA %</CTableHeaderCell>
-                    <CTableHeaderCell className="text-end">Totale Riga</CTableHeaderCell>
+                    <CTableHeaderCell className='text-center'>Qtà</CTableHeaderCell>
+                    <CTableHeaderCell className='text-end'>Prezzo Unit.</CTableHeaderCell>
+                    <CTableHeaderCell className='text-center'>Sconto %</CTableHeaderCell>
+                    <CTableHeaderCell className='text-center'>IVA %</CTableHeaderCell>
+                    <CTableHeaderCell className='text-end'>Totale Riga</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
                   {getRigheFiltrate().map((riga, index) => (
-                    <CTableRow 
+                    <CTableRow
                       key={index}
                       className={riga.id === materialeId ? 'table-row-highlight' : ''}
                     >
                       <CTableDataCell>
-                        <code className="text-muted small">
-                          {riga.codice_articolo || '-'}
-                        </code>
+                        <code className='text-muted small'>{riga.codice_articolo || '-'}</code>
                       </CTableDataCell>
                       <CTableDataCell>
-                        <div className="text-wrap">
-                          {riga.descrizione || '-'}
-                        </div>
+                        <div className='text-wrap'>{riga.descrizione || '-'}</div>
                       </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        {riga.quantita || 0}
-                      </CTableDataCell>
-                      <CTableDataCell className="text-end">
+                      <CTableDataCell className='text-center'>{riga.quantita || 0}</CTableDataCell>
+                      <CTableDataCell className='text-end'>
                         {formatCurrency(riga.prezzo_unitario)}
                       </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        {riga.sconto || 0}%
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
+                      <CTableDataCell className='text-center'>{riga.sconto || 0}%</CTableDataCell>
+                      <CTableDataCell className='text-center'>
                         {riga.aliquota_iva || 0}%
                       </CTableDataCell>
-                      <CTableDataCell className="text-end">
+                      <CTableDataCell className='text-end'>
                         <strong>{formatCurrency(riga.totale_riga)}</strong>
                       </CTableDataCell>
                     </CTableRow>
@@ -269,18 +258,18 @@ const ModalFatturaDetail: React.FC<ModalFatturaDetailProps> = ({
                 </CTableBody>
               </CTable>
             ) : (
-              <div className="text-center text-muted py-4">
-                <CIcon icon={cilInfo} size="2xl" className="mb-3" />
-                <p className="mb-0">Nessun dettaglio disponibile per questa fattura</p>
+              <div className='text-center text-muted py-4'>
+                <CIcon icon={cilInfo} size='2xl' className='mb-3' />
+                <p className='mb-0'>Nessun dettaglio disponibile per questa fattura</p>
               </div>
             )}
           </>
         )}
       </CModalBody>
-      
+
       <CModalFooter>
-        <CButton color="secondary" onClick={onClose}>
-          <CIcon icon={cilX} size="sm" className="me-1" />
+        <CButton color='secondary' onClick={onClose}>
+          <CIcon icon={cilX} size='sm' className='me-1' />
           Chiudi
         </CButton>
       </CModalFooter>

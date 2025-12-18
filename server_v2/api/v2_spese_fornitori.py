@@ -8,6 +8,7 @@ import os
 from dbfread import DBF
 from app_v2 import require_auth, format_response, handle_dbf_data
 from core.exceptions import ValidationError, DatabaseError
+from services.fornitori_service import FornitoriService
 from services.materiali_migration_service import MaterialiMigrationService
 import logging
 
@@ -185,11 +186,24 @@ def get_fattura_completa(fattura_id):
 
         # Aggregate header data from found records
         first_record = found_header_records[0]
+        
+        # Correctly fetch fornitore nome using FornitoriService
+        fornitore_id = _safe_dbf_value(first_record.get('DB_SPFOCOD'))
+        fornitore_nome = 'N/A'
+        if fornitore_id:
+            try:
+                fornitori_service = FornitoriService(g.database_manager)
+                fornitore_data = fornitori_service.get_fornitore_by_id(fornitore_id)
+                if fornitore_data and 'nome' in fornitore_data:
+                    fornitore_nome = fornitore_data['nome']
+            except Exception as e:
+                logger.error(f"Could not fetch fornitore name for id {fornitore_id}: {e}")
+
         invoice_header = {
             'id': fattura_id,
             'numero_documento': _safe_dbf_value(first_record.get('DB_SPNUMER')),
-            'fornitoreid': _safe_dbf_value(first_record.get('DB_SPFOCOD')),
-            'fornitorenome': _safe_dbf_value(first_record.get('DB_SPDESCR')),
+            'fornitoreid': fornitore_id,
+            'fornitorenome': fornitore_nome,
             'data_spesa': _safe_dbf_value(first_record.get('DB_SPDATA')),
             'costo_netto_totale': 0.0,
             'costo_iva_totale': 0.0,
