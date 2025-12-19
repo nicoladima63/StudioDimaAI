@@ -119,7 +119,7 @@ class CalendarServiceV2:
                     
                     appointments = [
                         app for app in appointments
-                        if app.get('DATA') and start_date <= app['DATA'].date() <= end_date
+                        if app.get('DATA') and start_date <= date.fromisoformat(app['DATA']) <= end_date
                     ]
                 except (ValueError, TypeError) as e:
                     logger.error(f"Formato data non valido per il filtro: {e}. Ignoro il filtro per data.")
