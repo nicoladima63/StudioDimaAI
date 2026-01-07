@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dateutil.relativedelta import relativedelta
 from core.automation_config import get_automation_settings
-from services.calendar_service import CalendarServiceV2
+import services.calendar_service as calendar_service_module
 from services.sms_service import SMSService
 from utils.dbf_utils import get_optimized_reader
 
@@ -169,7 +169,7 @@ class SchedulerService:
             self._current_calendar_sync_job = None
 
         if not enabled:
-            # logger.info("Automazione sincronizzazione calendario disattivata.")
+            logger.info("Automazione sincronizzazione calendario disattivata.")
             return
 
         def job():
@@ -178,12 +178,14 @@ class SchedulerService:
             
             # Controlla se è weekend (sabato=5, domenica=6)
             if now.weekday() >= 5:
-                # logger.info(f"[CALENDAR SYNC] Saltato: è weekend ({now.strftime('%A')})")
+                logger.info(f"[CALENDAR SYNC] Saltato: è weekend ({now.strftime('%A')})")
                 return
                 
             logger.info(f"[CALENDAR SYNC] Avvio sincronizzazione automatica per {weeks_to_sync} settimane.")
             
             # Ottieni ID calendari dalla configurazione
+            # The calendar_ids are now configured in calendar_service.py itself and are not passed.
+            # We still check for their existence as a guard clause for overall config validity.
             studio_blu_calendar = settings.get("calendar_studio_blu_id")
             studio_giallo_calendar = settings.get("calendar_studio_giallo_id")
             
@@ -194,58 +196,64 @@ class SchedulerService:
             # Calcola l'intervallo di date esatto
             start_date = now.date()
             end_date = start_date + timedelta(days=(weeks_to_sync * 7))
-            start_date_str = start_date.isoformat()
-            end_date_str = end_date.isoformat()
-
+            
             # Determina i mesi coinvolti per l'iterazione
             months_to_sync_set = set()
-            current_date = start_date
-            while current_date < end_date:
-                months_to_sync_set.add((current_date.month, current_date.year))
-                current_date += timedelta(days=1)
+            current_date_iter = start_date # Use a separate iterator for clarity
+            while current_date_iter < end_date:
+                months_to_sync_set.add((current_date_iter.month, current_date_iter.year))
+                current_date_iter += timedelta(days=1)
             
-            months_to_sync = sorted(list(months_to_sync_set))
+            months_to_sync = sorted(list(months_to_sync_set)) # Sorted list of (month, year) tuples
             
             total_synced = 0
             total_errors = 0
-            calendar_service = CalendarServiceV2()
+
+            # Instantiate DBF reader
+            dbf_reader = get_optimized_reader()
             
             for month, year in months_to_sync:
-                logger.info(f"[CALENDAR SYNC] Sincronizzazione mese {month:02d}/{year} (filtrando da {start_date_str} a {end_date_str})")
+                logger.info(f"[CALENDAR SYNC] Sincronizzazione mese {month:02d}/{year} (intervallo dal {start_date} al {end_date})")
                 
-                # Ottieni appuntamenti GIA' FILTRATI per l'intervallo di date corretto
-                all_appointments = calendar_service.get_db_appointments_for_month(
-                    month, year, start_date_str=start_date_str, end_date_str=end_date_str
-                )
+                # Get all appointments for the month/year range from DBF
+                all_appointments_raw_for_month = dbf_reader.get_appointments_optimized(month, year)
+
+                # Filter by exact date range (start_date to end_date)
+                filtered_by_date_range = []
+                for app in all_appointments_raw_for_month:
+                    app_date_str = app.get('DATA') # 'DATA' field is expected to be ISO format string
+                    if app_date_str:
+                        try:
+                            app_date = datetime.fromisoformat(app_date_str).date()
+                            if start_date <= app_date < end_date: 
+                                filtered_by_date_range.append(app)
+                        except ValueError:
+                            logger.warning(f"Invalid date format in appointment record: {app_date_str}")
                 
                 # Sincronizza Studio Blu (studio_id=1)
                 try:
-                    studio_blu_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 1]
-                    result_blu = calendar_service.sync_appointments_for_month(
-                        month, year, 
-                        {1: studio_blu_calendar},
-                        studio_blu_appointments,
-                        start_date_str=start_date_str,
-                        end_date_str=end_date_str
+                    studio_blu_appointments = [app for app in filtered_by_date_range if int(app.get('STUDIO', 0)) == 1]
+                    # The sync_calendar_from_records takes a list of raw appointments.
+                    # It will internally handle normalization, Google Client setup, and actual sync.
+                    result_blu = calendar_service_module.sync_calendar_from_records(
+                        records=studio_blu_appointments
                     )
-                    total_synced += result_blu.get('success', 0)
+                    total_synced += result_blu['sync'].get('inserted', 0) + result_blu['sync'].get('updated', 0)
+                    total_errors += result_blu['sync'].get('errors', 0)
                 except Exception as e:
-                    logger.error(f"[CALENDAR SYNC] Errore Studio Blu {month:02d}/{year}: {e}")
+                    logger.error(f"[CALENDAR SYNC] Errore Studio Blu {month:02d}/{year}: {e}", exc_info=True)
                     total_errors += 1
                     
                 # Sincronizza Studio Giallo (studio_id=2)  
                 try:
-                    studio_giallo_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == 2]
-                    result_giallo = calendar_service.sync_appointments_for_month(
-                        month, year,
-                        {2: studio_giallo_calendar},
-                        studio_giallo_appointments,
-                        start_date_str=start_date_str,
-                        end_date_str=end_date_str
+                    studio_giallo_appointments = [app for app in filtered_by_date_range if int(app.get('STUDIO', 0)) == 2]
+                    result_giallo = calendar_service_module.sync_calendar_from_records(
+                        records=studio_giallo_appointments
                     )
-                    total_synced += result_giallo.get('success', 0)
+                    total_synced += result_giallo['sync'].get('inserted', 0) + result_giallo['sync'].get('updated', 0)
+                    total_errors += result_giallo['sync'].get('errors', 0)
                 except Exception as e:
-                    logger.error(f"[CALENDAR SYNC] Errore Studio Giallo {month:02d}/{year}: {e}")
+                    logger.error(f"[CALENDAR SYNC] Errore Studio Giallo {month:02d}/{year}: {e}", exc_info=True)
                     total_errors += 1
                     
             # Log finale

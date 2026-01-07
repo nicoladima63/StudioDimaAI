@@ -12,6 +12,8 @@ from flask import Flask, jsonify, request, g, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
 from typing import Optional
+from pathlib import Path
+from core.google_calendar_client import GoogleCalendarClient
 
 from config.flask_config import get_config
 from core.database_manager import get_database_manager
@@ -346,39 +348,42 @@ def register_health_check(app: Flask) -> None:
         """Handle OAuth callback from Google Calendar."""
         try:
             from flask import request, redirect
-            from services.calendar_service import CalendarServiceV2
             
-            # Get authorization code and state
+            # Get authorization code and state from callback URL
             code = request.args.get('code')
             state = request.args.get('state') 
             error = request.args.get('error')
-            
+
             if error:
                 logger.error(f"OAuth error from Google: {error}")
                 return redirect(f"/oauth-result?success=false&error={error}")
             
-            if not code:
-                logger.error("Missing authorization code")
-                return redirect("/oauth-result?success=false&error=missing_code")
+            if not code or not state:
+                logger.error("Missing authorization code or state in OAuth callback.")
+                return redirect("/oauth-result?success=false&error=missing_code_or_state")
             
-            if not state:
-                logger.error("Missing state parameter")  
-                return redirect("/oauth-result?success=false&error=missing_state")
+            # Instantiate client
+            client = GoogleCalendarClient(
+                credentials_path=Path("credentials.json"),
+                token_path=Path("tokens/google_calendar.json"),
+            )
             
-            # Handle callback using service
-            service = CalendarServiceV2()
-            result = service.handle_oauth_callback(code, state)
+            # Define the redirect URI used to generate the auth URL
+            redirect_uri = 'http://localhost:5001/oauth/callback'
+
+            # Handle the callback
+            client.handle_web_auth_callback(
+                code=code, 
+                state=state, 
+                redirect_uri=redirect_uri
+            )
             
-            if result['success']:
-                logger.info("OAuth callback completed successfully")
-                return redirect("/oauth-result?success=true")
-            else:
-                logger.error(f"OAuth callback failed: {result.get('message', 'Unknown error')}")
-                return redirect("/oauth-result?success=false&error=callback_failed")
+            logger.info("OAuth callback completed successfully")
+            return redirect("/oauth-result?success=true")
                 
         except Exception as e:
             logger.error(f"Error in OAuth callback: {e}", exc_info=True)
-            return redirect("/oauth-result?success=false&error=callback_error")
+            return redirect(f"/oauth-result?success=false&error=callback_error&details={str(e)}")
 
     @app.route("/oauth-result")
     def oauth_result():

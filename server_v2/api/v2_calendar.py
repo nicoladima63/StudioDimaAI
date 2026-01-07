@@ -12,8 +12,11 @@ import logging
 import uuid
 import threading
 from typing import Dict, Any, List, Optional
+from pathlib import Path
+from core.google_calendar_client import GoogleCalendarClient
+from utils.dbf_utils import get_optimized_reader # New import
 
-from services.calendar_service import CalendarServiceV2
+import services.calendar_service as calendar_service_module
 from core.exceptions import (
     GoogleCredentialsNotFoundError,
     CalendarSyncError,
@@ -39,15 +42,14 @@ clear_jobs: Dict[str, Dict[str, Any]] = {}
 def get_appointments_stats_for_year():
     """Get appointments statistics by year/month. V1 logic with V2 response."""
     try:
-        service = CalendarServiceV2()
-        stats = service.get_db_appointments_stats_for_year()
-        
+        # TODO: Funzionalità non disponibile nel nuovo calendar_service.
+        # La logica di lettura dal DBF deve essere spostata qui o in un nuovo servizio.
         return format_response(
-            success=True,
-            data=stats,
-            message='Year statistics retrieved successfully',
-            state='success'
-        ), 200
+            success=False,
+            error='NOT_IMPLEMENTED',
+            message='This feature is temporarily unavailable due to service refactoring.',
+            state='error'
+        ), 501
         
     except Exception as e:
         logger.error(f"Error in get_appointments_stats_for_year: {e}", exc_info=True)
@@ -64,22 +66,14 @@ def get_appointments_stats_for_year():
 def get_appointments_stats():
     """Get appointments summary for current/prev/next month. V1 logic."""
     try:
-        service = CalendarServiceV2()
-        overview = service.get_appointments_overview()
-        
-        # Format as V1 expected
-        summary_data = {
-            'mese_corrente': overview['current_month']['count'],
-            'mese_precedente': overview['previous_month']['count'],
-            'mese_prossimo': overview['next_month']['count']
-        }
-        
+        # TODO: Funzionalità non disponibile nel nuovo calendar_service.
+        # La logica di lettura dal DBF deve essere spostata qui o in un nuovo servizio.
         return format_response(
-            success=True,
-            data=summary_data,
-            message='Statistics summary retrieved successfully',
-            state='success'
-        ), 200
+            success=False,
+            error='NOT_IMPLEMENTED',
+            message='This feature is temporarily unavailable due to service refactoring.',
+            state='error'
+        ), 501
         
     except Exception as e:
         logger.error(f"Error in get_appointments_stats: {e}", exc_info=True)
@@ -96,19 +90,14 @@ def get_appointments_stats():
 def get_first_visits_stats():
     """Get first visits statistics. V1 placeholder logic."""
     try:
-        service = CalendarServiceV2()
-        today = date.today()
-        appointments_current_month = service.get_db_appointments_for_month(today.month, today.year)
-        
-        # TODO: Implement actual first visits logic from V1
-        count_nuove_visite = len(appointments_current_month)
-        
+        # TODO: Funzionalità non disponibile nel nuovo calendar_service.
+        # La logica di lettura dal DBF deve essere spostata qui o in un nuovo servizio.
         return format_response(
-            success=True,
-            data={'nuove_visite': count_nuove_visite},
-            message='First visits statistics retrieved successfully',
-            state='success'
-        ), 200
+            success=False,
+            error='NOT_IMPLEMENTED',
+            message='This feature is temporarily unavailable due to service refactoring.',
+            state='error'
+        ), 501
         
     except Exception as e:
         logger.error(f"Error in get_first_visits_stats: {e}", exc_info=True)
@@ -129,8 +118,7 @@ def get_first_visits_stats():
 def list_calendars():
     """List Google calendars. V1 logic with V2 error handling."""
     try:
-        service = CalendarServiceV2()
-        calendars = service.google_list_calendars()
+        calendars = calendar_service_module.list_google_calendars()
         
         return format_response(
             success=True,
@@ -140,34 +128,13 @@ def list_calendars():
         ), 200
         
     except GoogleCredentialsNotFoundError as e:
-        # Try to generate OAuth URL for re-authentication (like V1)
-        try:
-            service = CalendarServiceV2()
-            auth_url = service.get_google_oauth_url()
-            
-            return format_response(
-                success=False,
-                error='GLOBAL_GOOGLE_AUTH_REQUIRED',
-                message='Autenticazione Google richiesta. Completa il processo di autenticazione.',
-                data={
-                    'action_required': 'Complete Google authentication using the provided OAuth URL',
-                    'auth_url': auth_url,
-                    'error_code': 'GLOBAL_GOOGLE_AUTH_REQUIRED'
-                },
-                state='error'
-            ), 200
-            
-        except Exception as oauth_error:
-            logger.error(f"Error generating OAuth URL: {oauth_error}")
-            return format_response(
-                success=False,
-                error='GOOGLE_AUTH_REQUIRED',
-                message='Google authentication required but cannot generate OAuth URL',
-                data={
-                    'action_required': 'Check Google credentials configuration'
-                },
-                state='error'
-            ), 200
+        return format_response(
+            success=False,
+            error='GOOGLE_AUTH_REQUIRED',
+            message='Google authentication required. Use the reauth-url endpoint to get a new authentication URL.',
+            data={'action_required': 're-authenticate'},
+            state='error'
+        ), 401
         
     except Exception as e:
         logger.error(f"Error in list_calendars: {e}", exc_info=True)
@@ -182,21 +149,21 @@ def list_calendars():
 @calendar_v2_bp.route('/sync', methods=['POST'])
 @jwt_required()
 def sync_calendar():
-    """Sync appointments to Google Calendar. V1 logic with job tracking."""
+    """Sync appointments to Google Calendar. Uses new functional service."""
     try:
         data = request.get_json()
-        calendar_id = data.get("calendar_id")
+        # calendar_id is now less relevant for sync_calendar_from_records as it's configured in calendar_service.py itself
         month = data.get("month")
         year = data.get("year")
-        studio_id = data.get("studio_id")
+        studio_id = data.get("studio_id") # Will be used for filtering
         end_month = data.get("end_month")
         end_year = data.get("end_year")
         
-        if not (calendar_id and month and year and studio_id):
+        if not (month and year and studio_id): # calendar_id is not directly used by sync_calendar_from_records
             return format_response(
                 success=False,
                 error='MISSING_PARAMETERS',
-                message='calendar_id, month, year and studio_id are required',
+                message='month, year and studio_id are required',
                 state='error'
             ), 400
         
@@ -216,69 +183,52 @@ def sync_calendar():
         
         def sync_job():
             try:
-                # Determine date range
-                # if end_month and end_year:
-                #     logger.info(f"Starting sync job for studio {studio_id}, range {month}/{year} to {end_month}/{end_year}")
-                # else:
-                #     logger.info(f"Starting sync job for studio {studio_id}, month {month}/{year}")
-                
-                service = CalendarServiceV2()
-                
-                # Get appointments for date range
-                all_appointments = []
+                # Instantiate DBF reader
+                dbf_reader = get_optimized_reader()
+
+                all_appointments_raw = []
+                # Determine date range and read appointments
                 if end_month and end_year:
-                    # Range sync: iterate through months
                     current_month, current_year = month, year
                     while (current_year < end_year) or (current_year == end_year and current_month <= end_month):
-                        month_appointments = service.get_db_appointments_for_month(current_month, current_year)
-                        all_appointments.extend(month_appointments)
-                        #logger.info(f"Retrieved {len(month_appointments)} appointments for {current_month}/{current_year}")
+                        month_appointments = dbf_reader.get_appointments_optimized(current_month, current_year)
+                        all_appointments_raw.extend(month_appointments)
                         
-                        # Move to next month
                         current_month += 1
                         if current_month > 12:
                             current_month = 1
                             current_year += 1
                 else:
-                    # Single month sync (backward compatibility)
-                    all_appointments = service.get_db_appointments_for_month(month, year)
-                    #logger.info(f"Retrieved {len(all_appointments)} total appointments")
+                    all_appointments_raw = dbf_reader.get_appointments_optimized(month, year)
                 
-                # Filter by studio
-                filtered_appointments = [app for app in all_appointments if int(app.get('STUDIO', 0)) == int(studio_id)]
-                #logger.info(f"Filtered {len(filtered_appointments)} appointments for studio {studio_id}")
+                # Filter by studio (keeping this logic here)
+                filtered_appointments_for_sync = [
+                    app for app in all_appointments_raw 
+                    if int(app.get('STUDIO', 0)) == int(studio_id)
+                ]
                 
-                # Studio calendar mapping
-                studio_calendar_ids = {int(studio_id): calendar_id}
-                
-                # Progress callback
-                def update_sync_progress(synced, total, message=""):
+                # Progress callback (simplified, as sync_calendar_from_records doesn't expose granular progress)
+                def update_sync_progress_placeholder(synced_count, total_count, message=""):
                     if sync_jobs[job_id]["cancelled"]:
                         raise Exception("Synchronization cancelled by user")
                     
-                    #logger.info(f"Sync progress: {synced}/{total} - {message}")
-                    sync_jobs[job_id]["progress"] = int(100 * synced / max(1, total)) if total > 0 else 0
-                    sync_jobs[job_id]["synced"] = synced
-                    sync_jobs[job_id]["total"] = total
+                    # This progress will be coarse-grained for now
+                    sync_jobs[job_id]["progress"] = int(100 * synced_count / max(1, total_count)) if total_count > 0 else 0
+                    sync_jobs[job_id]["synced"] = synced_count
+                    sync_jobs[job_id]["total"] = total_count
                     if message:
                         sync_jobs[job_id]["message"] = message
-                
-                # Execute synchronization
-                result = service.sync_appointments_for_month(
-                    month,
-                    year,
-                    studio_calendar_ids,
-                    filtered_appointments,
-                    progress_callback=update_sync_progress
-                )
-                
-                #logger.info(f"Synchronization completed: {result}")
+
+                # Call the new functional service
+                # The calendar_id from the request is configured in calendar_service.py itself (CALENDAR_ID_STUDIO_X)
+                # and doesn't need to be passed to sync_calendar_from_records.
+                sync_result = calendar_service_module.sync_calendar_from_records(filtered_appointments_for_sync)
                 
                 # Update final status
                 sync_jobs[job_id]["status"] = "completed"
-                sync_jobs[job_id]["message"] = result.get('message', 'Synchronization completed')
-                sync_jobs[job_id]["synced"] = result.get('success', 0)
-                sync_jobs[job_id]["total"] = result.get('total_processed', 0)
+                sync_jobs[job_id]["message"] = "Synchronization completed."
+                sync_jobs[job_id]["synced"] = sync_result['sync'].get('inserted', 0) + sync_result['sync'].get('updated', 0)
+                sync_jobs[job_id]["total"] = len(filtered_appointments_for_sync) # Total processed appointments
                 sync_jobs[job_id]["progress"] = 100
             
             except GoogleQuotaError as e:
@@ -288,7 +238,6 @@ def sync_calendar():
                 sync_jobs[job_id]["message"] = "Errore: Quota API di Google superata."
             except Exception as e:
                 if "cancelled by user" in str(e):
-                    #logger.info(f"Synchronization cancelled by user: {e}")
                     sync_jobs[job_id]["status"] = "cancelled"
                     sync_jobs[job_id]["message"] = "Synchronization cancelled by user"
                 else:
@@ -398,7 +347,7 @@ def cancel_sync_job():
 @calendar_v2_bp.route('/clear/<path:calendar_id>', methods=['DELETE'])
 @jwt_required()
 def clear_calendar(calendar_id: str):
-    """Clear all events from Google Calendar using async job. V1 logic."""
+    """Clear all events from Google Calendar using async job. Uses new functional service."""
     try:
         # Generate unique job ID
         job_id = str(uuid.uuid4())
@@ -408,7 +357,7 @@ def clear_calendar(calendar_id: str):
             "status": "in_progress",
             "progress": 0,
             "deleted": 0,
-            "total": 0,
+            "total": 0, # Cannot know total events beforehand with new blocking function
             "message": "Starting calendar clearing...",
             "error": None,
             "cancelled": False,
@@ -417,33 +366,15 @@ def clear_calendar(calendar_id: str):
         
         def clear_job():
             try:
-                #logger.info(f"Starting clear job for calendar {calendar_id}")
-                
-                service = CalendarServiceV2()
-                
-                # Progress callback function
-                def update_clear_progress(deleted: int, total: int, message: str = None):
-                    if clear_jobs[job_id]["cancelled"]:
-                        raise Exception("Clear operation cancelled by user")
-                    
-                    #logger.info(f"Clear progress: {deleted}/{total} - {message}")
-                    clear_jobs[job_id]["progress"] = int(100 * deleted / max(1, total)) if total > 0 else 0
-                    clear_jobs[job_id]["deleted"] = deleted
-                    clear_jobs[job_id]["total"] = total
-                    if message:
-                        clear_jobs[job_id]["message"] = message
-                
-                # Execute clearing with progress tracking
-                result = service.google_clear_calendar_with_progress(
-                    calendar_id, 
-                    progress_callback=update_clear_progress
-                )
+                # The new function is blocking and does not offer a progress callback.
+                # So we simply call it and update status after completion.
+                deleted_count = calendar_service_module.clear_calendar(calendar_id)
                 
                 # Mark as completed
                 clear_jobs[job_id]["status"] = "completed"
-                clear_jobs[job_id]["message"] = result.get('message', 'Calendar cleared successfully')
-                clear_jobs[job_id]["deleted"] = result.get('deleted_count', 0)
-                clear_jobs[job_id]["total"] = result.get('deleted_count', 0)
+                clear_jobs[job_id]["message"] = f"Calendar cleared successfully. Deleted {deleted_count} events."
+                clear_jobs[job_id]["deleted"] = deleted_count
+                clear_jobs[job_id]["total"] = deleted_count # Total is now deleted count
                 clear_jobs[job_id]["progress"] = 100
                 
             except GoogleQuotaError as e:
@@ -567,11 +498,11 @@ def cancel_clear_job():
 @calendar_v2_bp.route('/appointments', methods=['GET'])
 @jwt_required()
 def get_appointments_for_month():
-    """Get appointments for specific month/year. V1 logic."""
+    """Get appointments for specific month/year using the optimized DBF reader."""
     try:
         month = request.args.get('month', type=int)
         year = request.args.get('year', type=int)
-        studio = request.args.get('studio', type=int)
+        studio = request.args.get('studio', type=int) # This is the studio_id for filtering
         
         logger.info(f"Request appointments for month={month}, year={year}, studio={studio}")
         
@@ -584,13 +515,11 @@ def get_appointments_for_month():
                 state='error'
             ), 400
         
-        service = CalendarServiceV2()
-        appointments = service.get_db_appointments_for_month(month, year)
+        # Get the optimized DBF reader
+        dbf_reader = get_optimized_reader()
         
-        # Filter by studio if specified
-        if studio is not None:
-            appointments = [app for app in appointments if int(app.get('STUDIO', 0)) == studio]
-            logger.info(f"Filtered {len(appointments)} appointments for studio {studio}")
+        # Get appointments. The reader handles studio filtering.
+        appointments = dbf_reader.get_appointments_optimized(month, year, studio_id=studio)
         
         logger.info(f"Returning {len(appointments)} appointments")
         
@@ -613,10 +542,17 @@ def get_appointments_for_month():
 @calendar_v2_bp.route('/reauth-url', methods=['GET'])
 @jwt_required()
 def get_google_oauth_url():
-    """Get Google OAuth URL. V1 logic."""
+    """Get Google OAuth URL for web flow."""
     try:
-        service = CalendarServiceV2()
-        auth_url = service.get_google_oauth_url()
+        client = GoogleCalendarClient(
+            credentials_path=Path("credentials.json"),
+            token_path=Path("tokens/google_calendar.json"),
+        )
+        # The redirect URI must match exactly what's in Google Cloud Console
+        # This was the value used in the old service code.
+        redirect_uri = 'http://localhost:5001/oauth/callback'
+
+        auth_url = client.generate_web_auth_url(redirect_uri=redirect_uri)
         
         return format_response(
             success=True,
@@ -626,7 +562,7 @@ def get_google_oauth_url():
         ), 200
         
     except Exception as e:
-        logger.error(f"Error generating OAuth URL: {e}")
+        logger.error(f"Error generating OAuth URL: {e}", exc_info=True)
         return format_response(
             success=False,
             error='OAUTH_URL_ERROR',
@@ -678,36 +614,7 @@ def oauth_status():
 # SECTION 6: UTILITIES AND TESTING
 # =============================================================================
 
-@calendar_v2_bp.route('/test-connection', methods=['GET'])
-@jwt_required()
-def test_connection():
-    """Test Google Calendar connection."""
-    try:
-        service = CalendarServiceV2()
-        result = service.test_connection()
-        
-        if result['success']:
-            return format_response(
-                success=True,
-                message=result['message'],
-                state='success'
-            ), 200
-        else:
-            return format_response(
-                success=False,
-                error=result.get('error', 'CONNECTION_ERROR'),
-                message=result['message'],
-                state='error'
-            ), 400
-            
-    except Exception as e:
-        logger.error(f"Error testing connection: {e}")
-        return format_response(
-            success=False,
-            error='TEST_ERROR',
-            message=f'Error testing connection: {str(e)}',
-            state='error'
-        ), 500
+
 
 
 # Error handlers
