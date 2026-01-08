@@ -16,6 +16,12 @@ from pathlib import Path
 from core.google_calendar_client import GoogleCalendarClient
 
 from config.flask_config import get_config
+
+# Determine base path for Google Calendar credentials
+# app_v2.py is in server_v2/ root
+_BASE_DIR = Path(__file__).parent  # server_v2/
+_CREDENTIALS_PATH = _BASE_DIR / "credentials.json"
+_TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
 from core.database_manager import get_database_manager
 from core.exceptions import StudioDimaError
 from utils.dbf_utils import convert_bytes_to_string, clean_dbf_value
@@ -144,14 +150,17 @@ def init_extensions(app: Flask) -> None:
     # JWT Error Handlers
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
+        logger.warning(f"JWT token expired: {jwt_payload}")
         return jsonify({'error': 'Token expired', 'message': 'Please login again'}), 401
     
     @jwt.invalid_token_loader
     def invalid_token_callback(error):
+        logger.warning(f"JWT invalid token: {error}")
         return jsonify({'error': 'Invalid token', 'message': 'Please provide a valid token'}), 422
     
     @jwt.unauthorized_loader
     def missing_token_callback(error):
+        logger.warning(f"JWT missing token: {error}")
         return jsonify({'error': 'Token required', 'message': 'Authorization token is required'}), 401
 
 
@@ -298,6 +307,15 @@ def register_request_handlers(app: Flask) -> None:
         """Initialize request context."""
         g.start_time = datetime.utcnow()
         g.database_manager = get_database_manager()
+        
+        # Log JWT token presence for debugging
+        if request.path.startswith(app.config['API_PREFIX']):
+            auth_header = request.headers.get('Authorization', '')
+            logger = logging.getLogger(__name__)
+            if auth_header:
+                logger.debug(f"Request to {request.path} - Authorization header present: {auth_header[:20]}...")
+            else:
+                logger.debug(f"Request to {request.path} - No Authorization header")
     
     @app.after_request
     def after_request(response):
@@ -364,8 +382,8 @@ def register_health_check(app: Flask) -> None:
             
             # Instantiate client
             client = GoogleCalendarClient(
-                credentials_path=Path("credentials.json"),
-                token_path=Path("tokens/google_calendar.json"),
+                credentials_path=_CREDENTIALS_PATH,
+                token_path=_TOKEN_PATH,
             )
             
             # Define the redirect URI used to generate the auth URL

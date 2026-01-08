@@ -123,7 +123,10 @@ def _is_modified(appt: NormalizedAppointment, google_event: Dict) -> bool:
     if google_event["end"]["dateTime"][-5:] != appt.end_time:
         return True
 
-    if google_event.get("colorId") != google_event.get("colorId"):
+    # Get colorId from appointment metadata
+    from core.constants_v2 import GOOGLE_COLOR_MAP
+    appt_color_id = GOOGLE_COLOR_MAP.get(appt.metadata.get("tipo"))
+    if google_event.get("colorId") != appt_color_id:
         return True
 
     return False

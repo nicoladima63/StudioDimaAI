@@ -53,6 +53,12 @@ class GoogleCalendarClient:
 
     def generate_web_auth_url(self, redirect_uri: str) -> str:
         """Generates a web-based OAuth URL and saves the state."""
+        if not self.credentials_path.exists():
+            raise GoogleCredentialsNotFoundError(
+                f"Google credentials file not found at: {self.credentials_path}. "
+                "Please ensure credentials.json is in the server_v2 directory."
+            )
+        
         flow = Flow.from_client_secrets_file(
             self.credentials_path,
             scopes=SCOPES,

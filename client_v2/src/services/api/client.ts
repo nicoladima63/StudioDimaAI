@@ -67,10 +67,10 @@ export const clearTokens = (): void => {
 }
 
 export const getTokens = (): { accessToken: string | null; refreshToken: string | null } => {
-  if (!accessToken) {
-    accessToken = localStorage.getItem('access_token')
-    refreshToken = localStorage.getItem('refresh_token')
-  }
+  // Always reload from localStorage to ensure we have the latest tokens
+  // This is important because tokens can be updated from multiple places
+  accessToken = localStorage.getItem('access_token')
+  refreshToken = localStorage.getItem('refresh_token')
   return { accessToken, refreshToken }
 }
 

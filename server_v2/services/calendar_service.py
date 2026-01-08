@@ -5,9 +5,16 @@ from typing import List, Dict, Any
 
 from core.appointment_normalizer import normalize_batch
 from core.google_calendar_client import GoogleCalendarClient
+from core.exceptions import CalendarSyncError
 from services.calendar_sync_engine import sync_appointments
 
 logger = logging.getLogger(__name__)
+
+# Determine base path for Google Calendar credentials
+# If running from server_v2 directory, use current dir, otherwise use server_v2 subdirectory
+_BASE_DIR = Path(__file__).parent.parent  # Go up from services/ to server_v2/
+_CREDENTIALS_PATH = _BASE_DIR / "credentials.json"
+_TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
 
 
 # ============================================================
@@ -44,8 +51,8 @@ def sync_calendar_from_records(records: List[Dict[str, Any]]) -> Dict[str, Any]:
     # 2. OAuth / Google Service
     # --------------------------------------------------------
     client = GoogleCalendarClient(
-        credentials_path=Path("credentials.json"),
-        token_path=Path("tokens/google_calendar.json"),
+        credentials_path=_CREDENTIALS_PATH,
+        token_path=_TOKEN_PATH,
     )
     service = client.get_service()
 
@@ -137,28 +144,72 @@ def list_google_calendars() -> List[Dict[str, Any]]:
     """
     Usata da UI / debug.
     NON coinvolta nella sync.
+    Restituisce calendari filtrati e formattati come nel vecchio servizio.
     """
-    client = GoogleCalendarClient(
-        credentials_path=Path("credentials.json"),
-        token_path=Path("tokens/google_calendar.json"),
-    )
-    service = client.get_service()
+    from core.environment_manager import environment_manager
+    from core.exceptions import GoogleCredentialsNotFoundError, CalendarSyncError
+    
+    try:
+        client = GoogleCalendarClient(
+            credentials_path=_CREDENTIALS_PATH,
+            token_path=_TOKEN_PATH,
+        )
+        service = client.get_service()
+    except GoogleCredentialsNotFoundError:
+        logger.warning("Google credentials not found in list_google_calendars")
+        raise
+    except Exception as e:
+        logger.error(f"Error creating Google Calendar client: {e}", exc_info=True)
+        raise GoogleCredentialsNotFoundError(f"Failed to create Google Calendar client: {str(e)}")
 
-    calendars = []
-    page_token = None
-
-    while True:
-        result = service.calendarList().list(
-            pageToken=page_token
-        ).execute()
-
-        calendars.extend(result.get("items", []))
-        page_token = result.get("nextPageToken")
-
-        if not page_token:
-            break
-
-    return calendars
+    # Get configured calendar IDs from environment (V1 logic)
+    try:
+        automation_settings = environment_manager.get_automation_settings()
+        configured_ids_str = os.environ.get("CONFIGURED_CALENDAR_IDS", "")
+        
+        # Fallback: get IDs from automation settings if env var not available
+        if not configured_ids_str:
+            studio_blu_id = automation_settings.get('calendar_studio_blu_id', '')
+            studio_giallo_id = automation_settings.get('calendar_studio_giallo_id', '')
+            if studio_blu_id and studio_giallo_id:
+                configured_ids_str = f"{studio_blu_id},{studio_giallo_id}"
+        
+        configured_calendar_ids = {id.strip() for id in configured_ids_str.split(',') if id.strip()}
+    except Exception as e:
+        logger.warning(f"Error getting configured calendar IDs: {e}, using empty set")
+        configured_calendar_ids = set()
+    
+    # Get all calendars from Google
+    try:
+        all_calendars = []
+        page_token = None
+        
+        while True:
+            result = service.calendarList().list(
+                pageToken=page_token
+            ).execute()
+            
+            all_calendars.extend(result.get("items", []))
+            page_token = result.get("nextPageToken")
+            
+            if not page_token:
+                break
+    except Exception as e:
+        logger.error(f"Error listing calendars from Google: {e}", exc_info=True)
+        raise CalendarSyncError(f"Failed to list calendars from Google: {str(e)}")
+    
+    # Filter to show only configured calendars (V1 logic)
+    relevant_calendars = [
+        {
+            'id': cal['id'],
+            'name': cal.get('summary', cal['id']),
+            'primary': cal.get('primary', False)
+        }
+        for cal in all_calendars
+        if cal['id'] in configured_calendar_ids
+    ]
+    
+    return relevant_calendars
 
 
 def clear_calendar(calendar_id: str) -> int:
@@ -167,8 +218,8 @@ def clear_calendar(calendar_id: str) -> int:
     La teniamo perché esiste già nel vecchio servizio.
     """
     client = GoogleCalendarClient(
-        credentials_path=Path("credentials.json"),
-        token_path=Path("tokens/google_calendar.json"),
+        credentials_path=_CREDENTIALS_PATH,
+        token_path=_TOKEN_PATH,
     )
     service = client.get_service()
 
@@ -203,8 +254,8 @@ def test_google_connection() -> bool:
     """
     try:
         client = GoogleCalendarClient(
-            credentials_path=Path("credentials.json"),
-            token_path=Path("tokens/google_calendar.json"),
+            credentials_path=_CREDENTIALS_PATH,
+            token_path=_TOKEN_PATH,
         )
         service = client.get_service()
         service.calendarList().list(maxResults=1).execute()

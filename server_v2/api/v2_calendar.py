@@ -17,6 +17,12 @@ from core.google_calendar_client import GoogleCalendarClient
 from utils.dbf_utils import get_optimized_reader # New import
 
 import services.calendar_service as calendar_service_module
+
+# Determine base path for Google Calendar credentials
+# Go up from api/ to server_v2/
+_BASE_DIR = Path(__file__).parent.parent  # api/ -> server_v2/
+_CREDENTIALS_PATH = _BASE_DIR / "credentials.json"
+_TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
 from core.exceptions import (
     GoogleCredentialsNotFoundError,
     CalendarSyncError,
@@ -117,9 +123,16 @@ def get_first_visits_stats():
 @jwt_required()
 def list_calendars():
     """List Google calendars. V1 logic with V2 error handling."""
+    from flask_jwt_extended import get_jwt_identity
+    
     try:
+        # Verify JWT is working
+        current_user = get_jwt_identity()
+        logger.info(f"list_calendars called by user: {current_user} - attempting to retrieve calendars")
+        
         calendars = calendar_service_module.list_google_calendars()
         
+        logger.info(f"Successfully retrieved {len(calendars)} calendars")
         return format_response(
             success=True,
             data={'calendars': calendars},
@@ -128,13 +141,18 @@ def list_calendars():
         ), 200
         
     except GoogleCredentialsNotFoundError as e:
+        logger.warning(f"Google credentials not found in list_calendars: {e}")
         return format_response(
             success=False,
             error='GOOGLE_AUTH_REQUIRED',
-            message='Google authentication required. Use the reauth-url endpoint to get a new authentication URL.',
-            data={'action_required': 're-authenticate'},
+            message='Google Calendar authentication required. Use the /api/v2/calendar/reauth-url endpoint to get a new authentication URL.',
+            data={
+                'action_required': 're-authenticate',
+                'auth_type': 'google_calendar',
+                'reauth_endpoint': '/api/v2/calendar/reauth-url'
+            },
             state='error'
-        ), 401
+        ), 200  # Changed to 200 to avoid confusion with JWT 401
         
     except Exception as e:
         logger.error(f"Error in list_calendars: {e}", exc_info=True)
@@ -543,10 +561,26 @@ def get_appointments_for_month():
 @jwt_required()
 def get_google_oauth_url():
     """Get Google OAuth URL for web flow."""
+    from flask_jwt_extended import get_jwt_identity
+    
     try:
+        # Verify JWT is working
+        current_user = get_jwt_identity()
+        logger.info(f"get_google_oauth_url called by user: {current_user}")
+        
+        # Check if credentials file exists
+        if not _CREDENTIALS_PATH.exists():
+            logger.error(f"Google credentials file not found at: {_CREDENTIALS_PATH}")
+            return format_response(
+                success=False,
+                error='CREDENTIALS_FILE_NOT_FOUND',
+                message=f'Google credentials file not found at: {_CREDENTIALS_PATH}. Please ensure credentials.json is in the server_v2 directory.',
+                state='error'
+            ), 404
+        
         client = GoogleCalendarClient(
-            credentials_path=Path("credentials.json"),
-            token_path=Path("tokens/google_calendar.json"),
+            credentials_path=_CREDENTIALS_PATH,
+            token_path=_TOKEN_PATH,
         )
         # The redirect URI must match exactly what's in Google Cloud Console
         # This was the value used in the old service code.
@@ -554,6 +588,7 @@ def get_google_oauth_url():
 
         auth_url = client.generate_web_auth_url(redirect_uri=redirect_uri)
         
+        logger.info(f"OAuth URL generated successfully for user: {current_user}")
         return format_response(
             success=True,
             data={'auth_url': auth_url},
@@ -561,6 +596,14 @@ def get_google_oauth_url():
             state='success'
         ), 200
         
+    except GoogleCredentialsNotFoundError as e:
+        logger.error(f"Google credentials not found: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='GOOGLE_CREDENTIALS_NOT_FOUND',
+            message=f'Google credentials not found: {str(e)}',
+            state='error'
+        ), 404
     except Exception as e:
         logger.error(f"Error generating OAuth URL: {e}", exc_info=True)
         return format_response(
@@ -613,6 +656,35 @@ def oauth_status():
 # =============================================================================
 # SECTION 6: UTILITIES AND TESTING
 # =============================================================================
+
+@calendar_v2_bp.route('/test-jwt', methods=['GET'])
+@jwt_required()
+def test_jwt():
+    """Test endpoint to verify JWT authentication is working."""
+    from flask_jwt_extended import get_jwt_identity
+    
+    try:
+        current_user = get_jwt_identity()
+        logger.info(f"JWT test successful for user: {current_user}")
+        
+        return format_response(
+            success=True,
+            data={
+                'authenticated': True,
+                'user': current_user,
+                'message': 'JWT authentication is working correctly'
+            },
+            message='JWT test successful',
+            state='success'
+        ), 200
+    except Exception as e:
+        logger.error(f"JWT test error: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='JWT_TEST_ERROR',
+            message=f'JWT test failed: {str(e)}',
+            state='error'
+        ), 500
 
 
 
