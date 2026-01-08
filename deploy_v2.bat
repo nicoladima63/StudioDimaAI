@@ -31,7 +31,7 @@ echo .pytest_cache >> exclude_v2.txt
 echo logs >> exclude_v2.txt
 echo *.log >> exclude_v2.txt
 
-xcopy "server_v2" "%DEPLOY_PATH%" /E /I /Q /Y /EXCLUDE:exclude_v2.txt
+xcopy "server_v2" "%DEPLOY_PATH%\" /E /I /Q /Y /EXCLUDE:exclude_v2.txt
 if errorlevel 1 (
     echo ERRORE: Copia server_v2 fallita.
     del exclude_v2.txt 2>nul
@@ -64,7 +64,7 @@ echo Frontend buildato.
 
 :: [4/5] Copia build frontend sul server
 echo [4/5] Copia build frontend nella cartella static...
-xcopy "client_v2\dist" "%DEPLOY_PATH%\static" /E /I /Q /Y
+xcopy "client_v2\dist" "%DEPLOY_PATH%\static\" /E /I /Q /Y
 echo Frontend copiato.
 
 :: [5/5] Copia BAT di avvio sul server
@@ -77,8 +77,8 @@ echo     python -m venv venv
 echo )
 echo call venv\Scripts\activate.bat
 echo pip install -r requirements.txt
-echo start python run_v2.py --config production --port 5001
-) > "%DEPLOY_PATH%\setup_server_env.bat"
+echo start "StudioDimaAI V2 Server" cmd /k python run_v2.py --config production --port 5001
+) > "%DEPLOY_PATH%\start_server_v2.bat"
 
 echo.
 echo ========================================
