@@ -224,6 +224,32 @@ def run_with_flask_dev(app, args):
         sys.exit(1)
 
 
+def startup_health_check():
+    """Health check all'avvio del server."""
+    logger = logging.getLogger(__name__)
+    
+    logger.info("=" * 50)
+    logger.info("STARTUP HEALTH CHECK")
+    logger.info("=" * 50)
+    
+    try:
+        from services.calendar_service import calendar_service
+        result = calendar_service.test_google_connection()
+        
+        if result['success']:
+            logger.info("✅ Google Calendar: CONNECTED")
+        else:
+            logger.error("❌ Google Calendar: DISCONNECTED")
+            logger.error(f"   Motivo: {result.get('message')}")
+            logger.warning("⚠️  Sincronizzazione calendario NON disponibile")
+            logger.warning("   Ri-autenticare tramite interfaccia web: http://localhost:5001/settings/calendar")
+            
+    except Exception as e:
+        logger.error(f"❌ Health check fallito: {e}")
+    
+    logger.info("=" * 50)
+
+
 def main():
     """Main entry point for the server."""
     try:
@@ -251,6 +277,9 @@ def main():
         
         # Create Flask application
         app = create_app_v2(args.config)
+        
+        # 🆕 HEALTH CHECK - Aggiungi qui!
+        startup_health_check()
         
         # Initialize scheduler service
         from services.scheduler_service import scheduler_service

@@ -11,6 +11,7 @@ from datetime import date, datetime
 import logging
 import uuid
 import threading
+import os
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from core.google_calendar_client import GoogleCalendarClient
@@ -686,7 +687,62 @@ def test_jwt():
             state='error'
         ), 500
 
+@calendar_v2_bp.route('/sync/reset', methods=['POST'])
+def reset_sync_state():
+    """
+    Resetta completamente lo stato di sincronizzazione.
+    Da usare quando tutto è corrotto.
+    """
+    try:
+        from services.sync_state_manager import get_sync_state_manager
+        
+        sync_manager = get_sync_state_manager()
+        
+        # Backup vecchio state
+        import shutil
+        import datetime
+        backup_name = f"instance/sync_state.backup.{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        shutil.copy('instance/sync_state.json', backup_name)
+        
+        # Reset state
+        sync_manager.save_sync_state({})
+        
+        return jsonify({
+            'success': True,
+            'message': 'Sync state resettato con successo',
+            'backup': backup_name
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore reset sync state: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
+
+@calendar_v2_bp.route('/health', methods=['GET'])
+def calendar_health_check():
+    """Health check per debug."""
+    #from services.calendar_service import calendar_service as calendar_service_module
+    import services.calendar_service as calendar_service_module
+
+    from services.sync_state_manager import get_sync_state_manager
+    
+    # Test connessione
+    connection_test = calendar_service_module.test_google_connection()
+    
+    # Conta sync state
+    sync_manager = get_sync_state_manager()
+    sync_manager._load_sync_state()
+    
+    return jsonify({
+        'google_calendar_connected': connection_test,
+        'google_error': connection_test.get('message') if not connection_test else None,
+        'sync_state_entries': len(sync_manager.sync_state),
+        'token_exists': os.path.exists('instance/token.json'),
+        'credentials_exists': os.path.exists('instance/credentials.json')
+    })
 
 
 # Error handlers

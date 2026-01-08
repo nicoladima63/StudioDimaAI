@@ -6,6 +6,7 @@ import {
 import PageLayout from '@/components/layout/PageLayout';
 import CalendarMainContent from '../components/CalendarMainContent';
 import CalendarSettingsContent from '../components/CalendarSettingsContent';
+import { CalendarHealthCheck } from '../components/CalendarHealthCheck';
 
 const CalendarPage: React.FC = () => {
   const [dbStatus, setDbStatus] = useState<'healthy' | 'unhealthy' | 'unknown'>('unknown');   
@@ -16,6 +17,11 @@ const CalendarPage: React.FC = () => {
         Sincronizza appuntamenti del gestionale con Google Calendar
       </PageLayout.Header>
       <PageLayout.Content>
+        <CRow>
+          <CCol md={12}>
+            <CalendarHealthCheck />
+          </CCol>
+        </CRow>
         <CRow>
           <CCol md={6}>
             <CalendarMainContent setDbStatus={setDbStatus} /> 

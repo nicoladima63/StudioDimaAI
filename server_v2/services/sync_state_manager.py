@@ -36,10 +36,10 @@ class SyncStateManager:
             if self.sync_state_file.exists():
                 with open(self.sync_state_file, 'r', encoding='utf-8') as f:
                     self.sync_state = json.load(f)
-                # logger.info(f"Caricato stato sincronizzazione: {len(self.sync_state)} eventi")
+                logger.debug(f"Caricato stato sincronizzazione: {len(self.sync_state)} eventi")
             else:
                 self.sync_state = {}
-                # logger.info("Nessuno stato sincronizzazione esistente, inizializzazione vuota")
+                logger.debug("Nessuno stato sincronizzazione esistente, inizializzazione vuota")
         except Exception as e:
             logger.error(f"Errore caricamento stato sincronizzazione: {e}")
             self.sync_state = {}
@@ -292,6 +292,52 @@ class SyncStateManager:
             'last_updated': datetime.now().isoformat()
         }
 
+    def validate_and_clean_sync_state(self) -> int:
+        """
+        Valida il sync state e rimuove eventi che non esistono più su Google Calendar.
+        Returns: numero di eventi rimossi
+        """
+        from services.calendar_service import calendar_service
+        
+        try:
+            service = calendar_service._get_calendar_service()
+            sync_state = self.load_sync_state()
+            
+            invalid_appointments = []
+            
+            for app_id, sync_data in sync_state.items():
+                calendar_id = sync_data.get('calendar_id')
+                event_id = sync_data.get('event_id')
+                
+                if not calendar_id or not event_id:
+                    invalid_appointments.append(app_id)
+                    continue
+                
+                # Verifica se l'evento esiste ancora
+                try:
+                    service.events().get(
+                        calendarId=calendar_id,
+                        eventId=event_id
+                    ).execute()
+                    # Evento esiste, tutto ok
+                except Exception as e:
+                    # Evento non esiste più
+                    logger.debug(f"Evento {event_id} non esiste più, rimuovo da sync state")
+                    invalid_appointments.append(app_id)
+            
+            # Rimuovi eventi invalidi
+            for app_id in invalid_appointments:
+                del sync_state[app_id]
+            
+            if invalid_appointments:
+                self.save_sync_state(sync_state)
+                logger.info(f"Rimossi {len(invalid_appointments)} eventi invalidi")
+            
+            return len(invalid_appointments)
+            
+        except Exception as e:
+            logger.error(f"Errore durante validazione sync state: {e}")
+            return 0
 
 # Singleton per accesso globale
 _sync_state_manager: Optional[SyncStateManager] = None
