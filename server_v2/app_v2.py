@@ -51,9 +51,14 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     
     # Configure logging
     setup_logging(app)
-    logger = logging.getLogger(__name__)
-    # Server V2 initialization
     
+    # Disabilita tutti i logger
+    logging.disable(logging.CRITICAL)
+    # Oppure disabilita solo i logger più rumorosi:
+    # logging.getLogger('werkzeug').setLevel(logging.ERROR)
+    # app.logger.setLevel(logging.ERROR)
+
+    # Server V2 initialization
     # Initialize extensions
     init_extensions(app)
     
