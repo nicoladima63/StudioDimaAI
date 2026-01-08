@@ -30,8 +30,10 @@ echo venv >> exclude_v2.txt
 echo .pytest_cache >> exclude_v2.txt
 echo logs >> exclude_v2.txt
 echo *.log >> exclude_v2.txt
+echo legacy_ricetta >> exclude_v2.txt
+echo *.legacy_ricetta >> exclude_v2.txt
 
-xcopy "server_v2" "%DEPLOY_PATH%\" /E /I /Q /Y /EXCLUDE:exclude_v2.txt
+xcopy "server_v2" "%DEPLOY_PATH%" /E /I /Q /Y /EXCLUDE:exclude_v2.txt
 if errorlevel 1 (
     echo ERRORE: Copia server_v2 fallita.
     del exclude_v2.txt 2>nul
@@ -40,6 +42,16 @@ if errorlevel 1 (
 )
 del exclude_v2.txt 2>nul
 echo Server V2 copiato.
+
+:: Copia il file .env dalla root del progetto alla root di deploy sul server
+echo Copia file .env...
+copy ".env" "%DEPLOY_PATH%" /Y
+if errorlevel 1 (
+    echo ERRORE: Copia .env fallita.
+    pause
+    exit /b 1
+)
+echo File .env copiato.
 
 :: [3/5] Build frontend React V2
 echo [3/5] Build frontend React V2...
