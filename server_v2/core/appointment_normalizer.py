@@ -80,6 +80,7 @@ def normalize_time(
     start, start_err = _parse_time(raw_start)
     end, end_err = _parse_time(raw_end)
 
+
     if start_err:
         return TimeNormalizationResult(None, None, True, f"ORA_INIZIO non valida: {start_err}")
 
@@ -97,16 +98,15 @@ def normalize_time(
 
 def _parse_time(value: Any) -> Tuple[Optional[str], Optional[str]]:
     try:
-        if isinstance(value, str) and ":" in value:
-            h, m = value.split(":")
-            return _fmt_time(int(h), int(m)), None
-
         if isinstance(value, (int, float, str)):
             s = str(value)
             if "." in s:
                 h, m = s.split(".")
                 hours = int(h)
-                minutes = int(m) if m else 0
+                if len(m) == 1:
+                    minutes = int(m) * 10
+                else:
+                    minutes = int(m)
             else:
                 hours = int(s)
                 minutes = 0
@@ -120,7 +120,6 @@ def _parse_time(value: Any) -> Tuple[Optional[str], Optional[str]]:
         return None, str(e)
 
     return None, "formato sconosciuto"
-
 
 def _fmt_time(h: int, m: int) -> str:
     return f"{h:02d}:{m:02d}"
