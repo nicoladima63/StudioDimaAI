@@ -164,7 +164,7 @@ def run_with_waitress(app, args):
         
         from waitress import serve
         
-        print(f"🚀 Server avviato su http://{args.host}:{args.port}")
+        print(f"Server avviato su http://{args.host}:{args.port}")
         print("Press Ctrl+C to stop the server")
         print()
         
@@ -179,21 +179,21 @@ def run_with_waitress(app, args):
         )
         
     except ImportError:
-        print("❌ Waitress not installed. Install with: pip install waitress")
-        # print("🔄 Falling back to Flask development server...")
+        print("Waitress not installed. Install with: pip install waitress")
+        # print("Falling back to Flask development server...")
         run_with_flask_dev(app, args)
     except KeyboardInterrupt:
         print("\nServer stopped by user")
         # Shutdown scheduler
         try:
             from services.scheduler_service import scheduler_service
-            print("🛑 Stopping scheduler service...")
+            print("topping scheduler service...")
             scheduler_service.shutdown()
-            # print("✅ Scheduler service stopped")
+            # print("Scheduler service stopped")
         except Exception as e:
-            print(f"⚠️ Error stopping scheduler: {e}")
+            print(f"Error stopping scheduler: {e}")
     except Exception as e:
-        print(f"❌ Server error: {e}")
+        print(f"Server error: {e}")
         # Shutdown scheduler on error
         try:
             from services.scheduler_service import scheduler_service
@@ -205,7 +205,7 @@ def run_with_waitress(app, args):
 
 def run_with_flask_dev(app, args):
     """Run server using Flask development server."""
-    print(f"🚀 Server Flask avviato su http://{args.host}:{args.port}")
+    print(f"Server Flask avviato su http://{args.host}:{args.port}")
     print("Press Ctrl+C to stop the server")
     print()
     
@@ -220,7 +220,7 @@ def run_with_flask_dev(app, args):
     except KeyboardInterrupt:
         print("\nServer stopped by user")
     except Exception as e:
-        print(f"❌ Server error: {e}")
+        print(f"Server error: {e}")
         sys.exit(1)
 
 
@@ -233,19 +233,19 @@ def startup_health_check():
     logger.info("=" * 50)
     
     try:
-        from services.calendar_service import calendar_service
-        result = calendar_service.test_google_connection()
+        #from services.calendar_service import calendar_service
+        import services.calendar_service as calendar_service_module
+        result = calendar_service_module.test_google_connection()
         
-        if result['success']:
-            logger.info("✅ Google Calendar: CONNECTED")
+        if result:
+            logger.info("Google Calendar: CONNECTED")
         else:
-            logger.error("❌ Google Calendar: DISCONNECTED")
-            logger.error(f"   Motivo: {result.get('message')}")
-            logger.warning("⚠️  Sincronizzazione calendario NON disponibile")
-            logger.warning("   Ri-autenticare tramite interfaccia web: http://localhost:5001/settings/calendar")
+            logger.error("Google Calendar: DISCONNECTED")
+            logger.warning("Sincronizzazione calendario NON disponibile")
+            logger.warning("  Ri-autenticare tramite interfaccia web: http://localhost:5001/settings/calendar")
             
     except Exception as e:
-        logger.error(f"❌ Health check fallito: {e}")
+        logger.error(f"Health check fallito: {e}")
     
     logger.info("=" * 50)
 
@@ -278,20 +278,20 @@ def main():
         # Create Flask application
         app = create_app_v2(args.config)
         
-        # 🆕 HEALTH CHECK - Aggiungi qui!
+        # HEALTH CHECK - Aggiungi qui!
         startup_health_check()
         
         # Initialize scheduler service
         from services.scheduler_service import scheduler_service
-        print("🔄 Avvio scheduler...")
+        print("Avvio scheduler...")
         scheduler_service.start()
-        print("✅ Scheduler avviato")
+        print("Scheduler avviato")
         
         # Initialize monitoring service
         from services.monitoring_service import get_monitoring_service
-        print("🔄 Inizializzazione servizio di monitoraggio...")
+        print("Inizializzazione servizio di monitoraggio...")
         monitoring_service = get_monitoring_service()
-        print("✅ Servizio di monitoraggio pronto (avvio manuale via API).")
+        print("Servizio di monitoraggio pronto (avvio manuale via API).")
                 
         # Start server
         if args.use_flask_dev:
@@ -300,7 +300,7 @@ def main():
             run_with_waitress(app, args)
             
     except KeyboardInterrupt:
-        print("\n👋 Startup interrupted by user")
+        print("\n Startup interrupted by user")
         sys.exit(0)
     except Exception as e:
         logging.error(f"Failed to start server: {e}", exc_info=True)

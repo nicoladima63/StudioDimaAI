@@ -115,7 +115,6 @@ def load_existing_google_events(service) -> Dict[str, Dict]:
                 maxResults=2500,
                 pageToken=page_token,
                 singleEvents=True,
-                privateExtendedProperty="uid",
             ).execute()
 
             for event in result.get("items", []):

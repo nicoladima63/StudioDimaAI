@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 from typing import Dict, List, Tuple
@@ -76,6 +77,21 @@ def sync_appointments(
 
 def _insert_event(service, appointment: NormalizedAppointment):
     event, calendar_id = build_google_event(appointment)
+
+    if not calendar_id:
+        studio = appointment.metadata.get("studio")
+
+        try:
+            studio = int(studio)
+        except (TypeError, ValueError):
+            studio = None
+
+        if studio == 1:
+            calendar_id = os.getenv("CALENDAR_ID_STUDIO_1")
+        elif studio == 2:
+            calendar_id = os.getenv("CALENDAR_ID_STUDIO_2")
+        else:
+            raise ValueError(f"Studio non valido uid={appointment.uid}")
 
     _execute_with_retry(
         lambda: service.events().insert(

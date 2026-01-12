@@ -1,5 +1,6 @@
 import hashlib
 import re
+import logging
 from typing import Dict, Any, Optional, Tuple
 from datetime import datetime
 
@@ -11,6 +12,7 @@ from .schemas import (
     NormalizationResult,
 )
 
+logger = logging.getLogger(__name__)
 
 # ============================================================
 # UTIL
@@ -30,9 +32,9 @@ def _hash_uid(parts: Tuple[str, ...]) -> str:
 # ============================================================
 
 def classify_appointment(record: Dict[str, Any]) -> AppointmentKind:
-    id_paziente = record.get("id_paziente")
-    tipo = record.get("tipo")
-    ora_inizio = record.get("ora_inizio")
+    id_paziente = record.get("_PATIENT_ID") or record.get("id_paziente")
+    tipo = record.get("TIPO") or record.get("tipo")
+    ora_inizio = record.get("ORA_INIZIO") or record.get("ora_inizio")
 
     if id_paziente:
         return AppointmentKind.PATIENT_EXISTING
@@ -83,6 +85,9 @@ def normalize_time(
 
     if end_err:
         return TimeNormalizationResult(start, None, True, f"ORA_FINE non valida: {end_err}")
+
+    if end == start:
+        return TimeNormalizationResult(start, end, False, None)  # ← valido, non anomalo
 
     if end < start:
         return TimeNormalizationResult(start, end, True, "ORA_FINE < ORA_INIZIO")
@@ -151,28 +156,30 @@ def build_uid(
 # ============================================================
 
 def normalize_appointment(record: Dict[str, Any]) -> Tuple[Optional[NormalizedAppointment], Optional[AppointmentAnomaly]]:
+    logger.debug("Normalizing record: %s", record)  # ⭐ AGGIUNGI QUESTO
 
     kind = classify_appointment(record)
 
-    date_raw = record.get("data")
+    date_raw = record.get("DATA") or record.get("data")
     date = date_raw.strftime("%Y-%m-%d") if hasattr(date_raw, "strftime") else str(date_raw)
 
     time_result = normalize_time(
-        record.get("ora_inizio"),
-        record.get("ora_fine"),
+        record.get("ORA_INIZIO") or record.get("ora_inizio"),
+        record.get("ORA_FINE") or record.get("ora_fine"),
         kind
     )
 
-    title = record.get("descrizione", "").strip()
-    description = record.get("note", "") or ""
+    title = (record.get("DESCRIZIONE") or record.get("descrizione") or "").strip()
+    description = record.get("NOTE") or record.get("note") or ""
+    patient_id = record.get("_PATIENT_ID") or record.get("id_paziente")
 
     uid = build_uid(
         date=date,
         start=time_result.start_time or "00:00",
         end=time_result.end_time or "00:00",
         kind=kind,
-        studio=record.get("studio"),
-        patient_id=record.get("id_paziente"),
+        studio=record.get("STUDIO") or record.get("studio"),
+        patient_id=patient_id,
         title=title,
     )
 
@@ -195,12 +202,12 @@ def normalize_appointment(record: Dict[str, Any]) -> Tuple[Optional[NormalizedAp
         end_time=time_result.end_time,
         title=title,
         description=description,
-        patient_id=record.get("id_paziente"),
+        patient_id=record.get("id_paziente") or record.get("_PATIENT_ID"),
         is_new_patient=(kind == AppointmentKind.PATIENT_NEW),
         metadata={
-            "tipo": record.get("tipo"),
-            "studio": record.get("studio"),
-            "medico": record.get("medico"),
+            "tipo": record.get("tipo") or record.get("TIPO"),
+            "studio": record.get("STUDIO") or record.get("studio"),
+            "medico": record.get("MEDICO_NOME") or record.get("_MEDICO_ID"),
         },
         raw=record,
     )
