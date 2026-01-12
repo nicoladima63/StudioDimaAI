@@ -557,7 +557,7 @@ const CalendarSettings: React.FC = () => {
                       id="calendar-sync-switch"
                       checked={enabled}
                       onChange={(e) => handleEnabledChange(e.target.checked)}
-                      label={enabled ? 'Attiva' : 'Disattiva'}
+                      label={enabled ? 'Attiva' : 'Disattivata'}
                       className={enabled ? 'toggle-success' : 'toggle-secondary'}
                     />
                   </CCol>

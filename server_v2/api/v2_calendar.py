@@ -227,16 +227,17 @@ def sync_calendar():
                 ]
                 
                 # Progress callback (simplified, as sync_calendar_from_records doesn't expose granular progress)
-                def update_sync_progress_placeholder(synced_count, total_count, message=""):
+                def update_sync_progress(synced, total, message=""):
                     if sync_jobs[job_id]["cancelled"]:
-                        raise Exception("Synchronization cancelled by user")
+                        raise Exception("Sincronizzazione interrotta dall'utente")
                     
-                    # This progress will be coarse-grained for now
-                    sync_jobs[job_id]["progress"] = int(100 * synced_count / max(1, total_count)) if total_count > 0 else 0
-                    sync_jobs[job_id]["synced"] = synced_count
-                    sync_jobs[job_id]["total"] = total_count
-                    if message:
-                        sync_jobs[job_id]["message"] = message
+                    # Usa 'processed' invece di 'synced' per coerenza
+                    sync_jobs[job_id].update({
+                        "progress": int(100 * synced / max(1, total)) if total > 0 else 0,
+                        "processed": synced,  # <-- CHIAVE STANDARD
+                        "total": total,
+                        "message": message
+                    })
 
                 # Call the new functional service
                 # The calendar_id from the request is configured in calendar_service.py itself (CALENDAR_ID_STUDIO_X)
@@ -246,7 +247,7 @@ def sync_calendar():
                 # Update final status
                 sync_jobs[job_id]["status"] = "completed"
                 sync_jobs[job_id]["message"] = "Synchronization completed."
-                sync_jobs[job_id]["synced"] = sync_result['sync'].get('inserted', 0) + sync_result['sync'].get('updated', 0)
+                sync_jobs[job_id]["processed"] = sync_result['sync'].get('inserted', 0) + sync_result['sync'].get('updated', 0)
                 sync_jobs[job_id]["total"] = len(filtered_appointments_for_sync) # Total processed appointments
                 sync_jobs[job_id]["progress"] = 100
             

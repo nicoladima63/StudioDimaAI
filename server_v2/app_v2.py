@@ -314,13 +314,13 @@ def register_request_handlers(app: Flask) -> None:
         g.database_manager = get_database_manager()
         
         # Log JWT token presence for debugging
-        if request.path.startswith(app.config['API_PREFIX']):
-            auth_header = request.headers.get('Authorization', '')
-            logger = logging.getLogger(__name__)
-            if auth_header:
-                logger.debug(f"Request to {request.path} - Authorization header present: {auth_header[:20]}...")
-            else:
-                logger.debug(f"Request to {request.path} - No Authorization header")
+        #if request.path.startswith(app.config['API_PREFIX']):
+        #    auth_header = request.headers.get('Authorization', '')
+        #    logger = logging.getLogger(__name__)
+        #    if auth_header:
+        #        logger.debug(f"Request to {request.path} - Authorization header present: {auth_header[:20]}...")
+        #    else:
+        #        logger.debug(f"Request to {request.path} - No Authorization header")
     
     @app.after_request
     def after_request(response):
