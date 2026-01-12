@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 from core.appointment_normalizer import normalize_batch
 from core.google_calendar_client import GoogleCalendarClient
 from core.exceptions import CalendarSyncError
-from services.calendar_sync_engine import sync_appointments
+from services.calendar_sync_engine import sync_appointments, execute_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ _TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
 # PUBLIC – ENTRY POINT PRINCIPALE (SYNC)
 # ============================================================
 
-def sync_calendar_from_records(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+def sync_calendar_from_records(records: List[Dict[str, Any]], on_progress=None) -> Dict[str, Any]:
     """
     Entry point unico per la sincronizzazione.
     records: lista di dict già prodotti dal loader DBF esistente
@@ -70,6 +70,7 @@ def sync_calendar_from_records(records: List[Dict[str, Any]]) -> Dict[str, Any]:
         service=service,
         appointments=normalization.valid,
         existing_events=existing_events,
+        on_progress=on_progress,
     )
 
     logger.info(
@@ -110,12 +111,15 @@ def load_existing_google_events(service) -> Dict[str, Dict]:
 
         page_token = None
         while True:
-            result = service.events().list(
-                calendarId=calendar_id,
-                maxResults=2500,
-                pageToken=page_token,
-                singleEvents=True,
-            ).execute()
+            result = execute_with_retry(
+                lambda: service.events().list(
+                    calendarId=calendar_id,
+                    maxResults=2500,
+                    pageToken=page_token,
+                    singleEvents=True,
+                ).execute(),
+                context=f"LIST_EXISTING calendar={calendar_id}"
+            )
 
             for event in result.get("items", []):
                 uid = (
@@ -184,9 +188,12 @@ def list_google_calendars() -> List[Dict[str, Any]]:
         page_token = None
         
         while True:
-            result = service.calendarList().list(
-                pageToken=page_token
-            ).execute()
+            result = execute_with_retry(
+                lambda: service.calendarList().list(
+                    pageToken=page_token
+                ).execute(),
+                context="LIST_CALENDARS"
+            )
             
             all_calendars.extend(result.get("items", []))
             page_token = result.get("nextPageToken")
@@ -226,17 +233,23 @@ def clear_calendar(calendar_id: str) -> int:
     page_token = None
 
     while True:
-        events = service.events().list(
-            calendarId=calendar_id,
-            pageToken=page_token,
-            singleEvents=True,
-        ).execute()
+        events = execute_with_retry(
+            lambda: service.events().list(
+                calendarId=calendar_id,
+                pageToken=page_token,
+                singleEvents=True,
+            ).execute(),
+            context=f"CLEAR_LIST calendar={calendar_id}"
+        )
 
         for event in events.get("items", []):
-            service.events().delete(
-                calendarId=calendar_id,
-                eventId=event["id"],
-            ).execute()
+            execute_with_retry(
+                lambda: service.events().delete(
+                    calendarId=calendar_id,
+                    eventId=event["id"],
+                ).execute(),
+                context=f"CLEAR_DELETE eventId={event['id']}"
+            )
             deleted += 1
 
         page_token = events.get("nextPageToken")

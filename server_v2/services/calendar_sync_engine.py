@@ -29,6 +29,7 @@ def sync_appointments(
     service,   # google calendar service autenticato
     appointments: List[NormalizedAppointment],
     existing_events: Dict[str, Dict],  # uid -> event (da Google)
+    on_progress=None,  # callback(synced, total)
 ) -> Dict[str, int]:
     """
     existing_events: mappa uid -> evento google esistente
@@ -40,6 +41,9 @@ def sync_appointments(
         "skipped": 0,
         "errors": 0,
     }
+
+    total = len(appointments)
+    processed = 0
 
     for appt in appointments:
         uid = appt.uid
@@ -58,6 +62,10 @@ def sync_appointments(
                     stats["skipped"] += 1
 
             time.sleep(SYNC_SLEEP_SECONDS)
+
+            processed += 1
+            if on_progress:
+                on_progress(processed, total)
 
         except Exception as e:
             stats["errors"] += 1
@@ -93,7 +101,7 @@ def _insert_event(service, appointment: NormalizedAppointment):
         else:
             raise ValueError(f"Studio non valido uid={appointment.uid}")
 
-    _execute_with_retry(
+    execute_with_retry(
         lambda: service.events().insert(
             calendarId=calendar_id,
             body=event
@@ -106,7 +114,7 @@ def _delete_event(service, google_event: Dict):
     calendar_id = google_event["calendarId"]
     event_id = google_event["id"]
 
-    _execute_with_retry(
+    execute_with_retry(
         lambda: service.events().delete(
             calendarId=calendar_id,
             eventId=event_id
@@ -152,7 +160,7 @@ def _is_modified(appt: NormalizedAppointment, google_event: Dict) -> bool:
 # ERROR HANDLING / QUOTA
 # ============================================================
 
-def _execute_with_retry(fn, context: str):
+def execute_with_retry(fn, context: str):
     attempt = 0
 
     while True:

@@ -242,7 +242,11 @@ def sync_calendar():
                 # Call the new functional service
                 # The calendar_id from the request is configured in calendar_service.py itself (CALENDAR_ID_STUDIO_X)
                 # and doesn't need to be passed to sync_calendar_from_records.
-                sync_result = calendar_service_module.sync_calendar_from_records(filtered_appointments_for_sync)
+                # Pass the callback to the service
+                sync_result = calendar_service_module.sync_calendar_from_records(
+                    filtered_appointments_for_sync,
+                    on_progress=lambda synced, total: update_sync_progress(synced, total, f"Sincronizzati {synced}/{total} eventi...")
+                )
                 
                 # Update final status
                 sync_jobs[job_id]["status"] = "completed"

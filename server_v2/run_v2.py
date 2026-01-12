@@ -256,6 +256,11 @@ def main():
         # Load environment variables from .env file
         load_dotenv()
         
+        # FIX: Remove SSLKEYLOGFILE if present to avoid PermissionError on some Windows systems
+        if 'SSLKEYLOGFILE' in os.environ:
+            print(f"Removing SSLKEYLOGFILE from environment: {os.environ['SSLKEYLOGFILE']}")
+            del os.environ['SSLKEYLOGFILE']
+        
         # Parse command line arguments
         args = parse_arguments()
         

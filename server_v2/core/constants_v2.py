@@ -216,6 +216,14 @@ GUARDIA_MAP = {
     3: 'Eseguito',
     }
 
+# =============================================================================
+# REGOLE DI VALIDAZIONE
+# =============================================================================
+
+# Tipi di appuntamento che sono validi anche senza ID paziente (Prima Visita, ecc.)
+# Inizialmente includiamo tutti i tipi conosciuti
+VALID_NO_PATIENT_TYPES = list(TIPI_APPUNTAMENTO.keys())
+
 
 # =============================================================================
 # MEDICI - Essenziale per identificazione dottori
@@ -366,5 +374,6 @@ __all__ = [
     'get_medico_name', 'get_campo_dbf', 'get_dbf_table_info',
     'is_valid_appointment_type', 'is_valid_medico_id',
     'get_all_appointment_types', 'get_all_medici',
-    'get_guardia_type_name', 'get_all_guardia_types'
+    'get_guardia_type_name', 'get_all_guardia_types',
+    'VALID_NO_PATIENT_TYPES'
 ]

@@ -11,6 +11,8 @@ from .schemas import (
     AppointmentAnomaly,
     NormalizationResult,
 )
+from .constants_v2 import VALID_NO_PATIENT_TYPES
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +41,7 @@ def classify_appointment(record: Dict[str, Any]) -> AppointmentKind:
     if id_paziente:
         return AppointmentKind.PATIENT_EXISTING
 
-    if tipo == "V":
+    if tipo in VALID_NO_PATIENT_TYPES:
         return AppointmentKind.PATIENT_NEW
 
     if _is_midnight(ora_inizio):
@@ -171,6 +173,19 @@ def normalize_appointment(record: Dict[str, Any]) -> Tuple[Optional[NormalizedAp
     title = (record.get("DESCRIZIONE") or record.get("descrizione") or "").strip()
     description = record.get("NOTE") or record.get("note") or ""
     patient_id = record.get("_PATIENT_ID") or record.get("id_paziente")
+
+    # Nuova logica: scarta SOLO se paziente, titolo e descrizione sono tutti vuoti
+    # (indipendentemente dal fatto che l'orario sia valido o meno)
+    if not patient_id and not title and not description:
+        return None, AppointmentAnomaly(
+            uid="skipped-empty",
+            date=date,
+            title="EMPTY",
+            raw_start=record.get("ora_inizio"),
+            raw_end=record.get("ora_fine"),
+            reason="Record vuoto (no paziente, no descrizione, no note)",
+            raw=record,
+        )
 
     uid = build_uid(
         date=date,
