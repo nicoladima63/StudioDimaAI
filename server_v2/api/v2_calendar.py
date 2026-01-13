@@ -44,76 +44,8 @@ clear_jobs: Dict[str, Dict[str, Any]] = {}
 # SECTION 1: STATISTICHE E ANALYTICS (from V1)
 # =============================================================================
 
-@calendar_v2_bp.route('/stats/year', methods=['GET'])
-@jwt_required()
-def get_appointments_stats_for_year():
-    """Get appointments statistics by year/month. V1 logic with V2 response."""
-    try:
-        # TODO: Funzionalità non disponibile nel nuovo calendar_service.
-        # La logica di lettura dal DBF deve essere spostata qui o in un nuovo servizio.
-        return format_response(
-            success=False,
-            error='NOT_IMPLEMENTED',
-            message='This feature is temporarily unavailable due to service refactoring.',
-            state='error'
-        ), 501
-        
-    except Exception as e:
-        logger.error(f"Error in get_appointments_stats_for_year: {e}", exc_info=True)
-        return format_response(
-            success=False,
-            error='STATS_ERROR',
-            message=f'Error retrieving year stats: {str(e)}',
-            state='error'
-        ), 500
-
-
-@calendar_v2_bp.route('/stats/summary', methods=['GET'])
-@jwt_required()
-def get_appointments_stats():
-    """Get appointments summary for current/prev/next month. V1 logic."""
-    try:
-        # TODO: Funzionalità non disponibile nel nuovo calendar_service.
-        # La logica di lettura dal DBF deve essere spostata qui o in un nuovo servizio.
-        return format_response(
-            success=False,
-            error='NOT_IMPLEMENTED',
-            message='This feature is temporarily unavailable due to service refactoring.',
-            state='error'
-        ), 501
-        
-    except Exception as e:
-        logger.error(f"Error in get_appointments_stats: {e}", exc_info=True)
-        return format_response(
-            success=False,
-            error='STATS_ERROR',
-            message=f'Error retrieving statistics: {str(e)}',
-            state='error'
-        ), 500
-
-
-@calendar_v2_bp.route('/stats/first-visits', methods=['GET'])
-@jwt_required()
-def get_first_visits_stats():
-    """Get first visits statistics. V1 placeholder logic."""
-    try:
-        # TODO: Funzionalità non disponibile nel nuovo calendar_service.
-        # La logica di lettura dal DBF deve essere spostata qui o in un nuovo servizio.
-        return format_response(
-            success=False,
-            error='NOT_IMPLEMENTED',
-            message='This feature is temporarily unavailable due to service refactoring.',
-            state='error'
-        ), 501
-        
-    except Exception as e:
-        logger.error(f"Error in get_first_visits_stats: {e}", exc_info=True)
-        return format_response(
-            success=False,
-            error='STATS_ERROR',
-            message=f'Error retrieving first visits stats: {str(e)}',
-            state='error'
-        ), 500
+# Endpoints migrated to SECTION 3.1: STATISTICS (Optimized)
+# See below for implementation.
 
 
 # =============================================================================
@@ -560,6 +492,140 @@ def get_appointments_for_month():
 
 
 # =============================================================================
+# SECTION 3.1: STATISTICS (Optimized)
+# =============================================================================
+
+@calendar_v2_bp.route('/stats/year', methods=['GET'])
+@jwt_required()
+def get_appointments_stats_for_year():
+    """
+    Get aggregated appointment statistics for current, next and prev year.
+    Used for charts.
+    """
+    try:
+        from datetime import datetime
+        current_year = datetime.now().year
+        years_to_fetch = [current_year - 1, current_year, current_year + 1]
+        
+        dbf_reader = get_optimized_reader()
+        stats = dbf_reader.get_stats_aggregates(years_to_fetch)
+        
+        return format_response(
+            success=True,
+            data=stats,
+            message='Yearly stats retrieved successfully'
+        )
+    except Exception as e:
+        logger.error(f"Error getting yearly stats: {e}", exc_info=True)
+        return format_response(success=False, error=str(e), state='error'), 500
+
+@calendar_v2_bp.route('/stats/first-visits', methods=['GET'])
+@jwt_required()
+def get_first_visits_stats():
+    """
+    Get first visits statistics:
+    - Current Year Total
+    - Previous Year Total
+    - Current Year YTD (01/01 -> Today)
+    - Previous Year YTD (01/01 -> Same date last year)
+    """
+    try:
+        from datetime import datetime
+        now = datetime.now()
+        current_year = now.year
+        prev_year = current_year - 1
+        
+        # YTD Limit: today's month and day
+        ytd_limit = (now.month, now.day)
+        
+        dbf_reader = get_optimized_reader()
+        # Fetch stats for both years with YTD calculation
+        stats = dbf_reader.get_stats_aggregates([prev_year, current_year], ytd_limit=ytd_limit)
+        
+        # Calculate totals
+        def calculate_metrics(year_str):
+            months_data = stats.get(year_str, [])
+            total = sum(m.get('first_visits', 0) for m in months_data)
+            ytd = sum(m.get('first_visits_ytd', 0) for m in months_data)
+            return total, ytd
+
+        curr_total, curr_ytd = calculate_metrics(str(current_year))
+        prev_total, prev_ytd = calculate_metrics(str(prev_year))
+        
+        return format_response(
+            success=True,
+            data={
+                'current_year': {
+                    'year': current_year,
+                    'total': curr_total,
+                    'ytd': curr_ytd
+                },
+                'prev_year': {
+                    'year': prev_year,
+                    'total': prev_total,
+                    'ytd': prev_ytd
+                }
+            },
+            message='First visits stats retrieved successfully'
+        )
+    except Exception as e:
+        logger.error(f"Error getting first visits stats: {e}", exc_info=True)
+        return format_response(success=False, error=str(e), state='error'), 500
+
+@calendar_v2_bp.route('/stats/summary', methods=['GET'])
+@jwt_required()
+def get_appointments_stats_summary():
+    """
+    Get summary stats for dashboard cards (curr, prev, next month counts).
+    """
+    try:
+        from datetime import datetime, date
+        today = date.today()
+        current_month = today.month
+        current_year = today.year
+        
+        # Calculate prev and next params
+        prev_month = current_month - 1 if current_month > 1 else 12
+        prev_year = current_year if current_month > 1 else current_year - 1
+        
+        next_month = current_month + 1 if current_month < 12 else 1
+        next_year = current_year if current_month < 12 else current_year + 1
+        
+        # Fetch needed years
+        years_needed = {current_year, prev_year, next_year}
+        
+        dbf_reader = get_optimized_reader()
+        stats = dbf_reader.get_stats_aggregates(list(years_needed))
+        
+        # Helper to get count
+        def get_count(y, m):
+            year_data = stats.get(str(y), [])
+            # year_data is a list of dicts, assuming they are ordered 1-12 OR we find by month
+            # The get_stats_aggregates returns a list indexed 0..11 for months 1..12
+            # Let's double check implementation: "for month in range(1, 13)... year_list.append"
+            # So month M is at index M-1.
+            if 0 < m <= 12 and len(year_data) >= m:
+                 # Verification: list created with range(1,13), so length is 12.
+                 return year_data[m-1]['count']
+            return 0
+
+        data = {
+            'mese_corrente': get_count(current_year, current_month),
+            'mese_precedente': get_count(prev_year, prev_month),
+            'mese_prossimo': get_count(next_year, next_month)
+        }
+        
+        return format_response(
+            success=True,
+            data=data,
+            message='Stats summary retrieved successfully'
+        )
+    except Exception as e:
+        logger.error(f"Error getting stats summary: {e}", exc_info=True)
+        return format_response(success=False, error=str(e), state='error'), 500
+
+
+# =============================================================================
 # SECTION 4: OAUTH AUTHENTICATION (from V1)
 # =============================================================================
 
@@ -728,26 +794,43 @@ def reset_sync_state():
 
 @calendar_v2_bp.route('/health', methods=['GET'])
 def calendar_health_check():
-    """Health check per debug."""
-    #from services.calendar_service import calendar_service as calendar_service_module
-    import services.calendar_service as calendar_service_module
+    try:
+        #from services.calendar_service import calendar_service as calendar_service_module
+        import services.calendar_service as calendar_service_module
 
-    from services.sync_state_manager import get_sync_state_manager
-    
-    # Test connessione
-    connection_test = calendar_service_module.test_google_connection()
-    
-    # Conta sync state
-    sync_manager = get_sync_state_manager()
-    sync_manager._load_sync_state()
-    
-    return jsonify({
-        'google_calendar_connected': connection_test,
-        'google_error': connection_test.get('message') if not connection_test else None,
-        'sync_state_entries': len(sync_manager.sync_state),
-        'token_exists': os.path.exists('instance/token.json'),
-        'credentials_exists': os.path.exists('instance/credentials.json')
-    })
+        from services.sync_state_manager import get_sync_state_manager
+        
+        # Test connessione
+        connection_test = calendar_service_module.test_google_connection()
+        
+        # Conta sync state
+        sync_manager = get_sync_state_manager()
+        try:
+            sync_manager._load_sync_state()
+        except Exception:
+            # Non-blocking error for sync state
+            pass
+        
+        return format_response(
+            success=True,
+            data={
+                'google_calendar_connected': connection_test,
+                'google_error': None if connection_test else "Impossibile connettersi a Google Calendar",
+                'sync_state_entries': len(sync_manager.sync_state) if hasattr(sync_manager, 'sync_state') else 0,
+                'token_exists': os.path.exists('instance/token.json') or os.path.exists(_TOKEN_PATH),
+                'credentials_exists': os.path.exists('instance/credentials.json') or os.path.exists(_CREDENTIALS_PATH)
+            },
+            message='Health check passed',
+            state='success'
+        )
+    except Exception as e:
+        logger.error(f"Error in calendar_health_check: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='HEALTH_CHECK_ERROR',
+            message=str(e),
+            state='error'
+        ), 500
 
 
 # Error handlers

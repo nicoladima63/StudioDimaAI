@@ -26,6 +26,9 @@ class CalendarHealthService {
    */
   async checkHealth(): Promise<CalendarHealthStatus> {
     const response = await apiClient.get<CalendarHealthResponse>('/calendar/health')
+    if (!response.data || !response.data.data) {
+      throw new Error('Risposta del server non valida (dati salute mancanti)')
+    }
     return response.data.data
   }
 

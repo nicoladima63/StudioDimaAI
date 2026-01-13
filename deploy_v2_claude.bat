@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 echo ==========================================
 echo    STUDIO DIMA AI V2 - DEPLOYMENT SCRIPT
-echo    [Enhanced with Google Auth Protection]
+echo    [Optimized with Robocopy & Safety Checks]
 echo ==========================================
 echo.
 
@@ -13,320 +13,198 @@ set "DEPLOY_PATH=%SERVER%\StudioDimaAI"
 set "TIMESTAMP=%date:~-4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%%time:~6,2%"
 set "TIMESTAMP=%TIMESTAMP: =0%"
 
-echo ATTENZIONE: Questo script sovrascrivera' l'installazione esistente in:
+echo ATTENZIONE: Questo script aggiornera' l'installazione in:
 echo %DEPLOY_PATH%
 echo.
-echo Verranno preservati:
-echo   - instance/token.json (Google OAuth)
-echo   - instance/credentials.json (Google Credentials)
-echo   - instance/sync_state.json (Stato sincronizzazione)
+echo NOTA: Verranno preservati i dati sensibili in instance/
 echo.
 pause
 
 :: ============================================================================
 :: [0/7] BACKUP FILE SENSIBILI
 :: ============================================================================
-echo [0/7] Backup file sensibili Google...
+echo [0/7] Backup file sensibili...
 
 set "BACKUP_DIR=%DEPLOY_PATH%\instance\.backup_%TIMESTAMP%"
 mkdir "%BACKUP_DIR%" 2>nul
 
-:: Backup token.json
-if exist "%DEPLOY_PATH%\instance\token.json" (
-    copy "%DEPLOY_PATH%\instance\token.json" "%BACKUP_DIR%\token.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ATTENZIONE: Impossibile fare backup di token.json
-    ) else (
-        echo   [OK] token.json salvato
-    )
-) else (
-    echo   [SKIP] token.json non presente
-)
+set "SENSITIVE_FILES=token.json credentials.json sync_state.json feature_flags.json"
 
-:: Backup credentials.json
-if exist "%DEPLOY_PATH%\instance\credentials.json" (
-    copy "%DEPLOY_PATH%\instance\credentials.json" "%BACKUP_DIR%\credentials.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ATTENZIONE: Impossibile fare backup di credentials.json
+for %%F in (%SENSITIVE_FILES%) do (
+    if exist "%DEPLOY_PATH%\instance\%%F" (
+        copy "%DEPLOY_PATH%\instance\%%F" "%BACKUP_DIR%\%%F" /Y >nul 2>&1
+        if !errorlevel! neq 0 (
+            echo   [WARN] Impossibile fare backup di %%F
+        ) else (
+            echo   [OK] %%F salvato
+        )
     ) else (
-        echo   [OK] credentials.json salvato
+        echo   [SKIP] %%F non presente
     )
-) else (
-    echo   [SKIP] credentials.json non presente
-)
-
-:: Backup sync_state.json
-if exist "%DEPLOY_PATH%\instance\sync_state.json" (
-    copy "%DEPLOY_PATH%\instance\sync_state.json" "%BACKUP_DIR%\sync_state.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ATTENZIONE: Impossibile fare backup di sync_state.json
-    ) else (
-        echo   [OK] sync_state.json salvato
-    )
-) else (
-    echo   [SKIP] sync_state.json non presente
-)
-
-:: Backup feature_flags.json
-if exist "%DEPLOY_PATH%\instance\feature_flags.json" (
-    copy "%DEPLOY_PATH%\instance\feature_flags.json" "%BACKUP_DIR%\feature_flags.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ATTENZIONE: Impossibile fare backup di feature_flags.json
-    ) else (
-        echo   [OK] feature_flags.json salvato
-    )
-) else (
-    echo   [SKIP] feature_flags.json non presente
 )
 
 echo Backup completato in: %BACKUP_DIR%
 
 :: ============================================================================
-:: [1/7] Creazione cartelle sul server
+:: [1/7] Preparazione cartelle server
 :: ============================================================================
-echo [1/7] Creazione cartelle sul server...
-mkdir "%DEPLOY_PATH%" 2>nul
-mkdir "%DEPLOY_PATH%\static" 2>nul
-mkdir "%DEPLOY_PATH%\instance" 2>nul
-mkdir "%DEPLOY_PATH%\logs" 2>nul
-echo Cartelle create.
+echo [1/7] Verifica cartelle server...
+if not exist "%DEPLOY_PATH%" mkdir "%DEPLOY_PATH%"
+if not exist "%DEPLOY_PATH%\static" mkdir "%DEPLOY_PATH%\static"
+if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
+if not exist "%DEPLOY_PATH%\logs" mkdir "%DEPLOY_PATH%\logs"
 
 :: ============================================================================
-:: [2/7] Copia file server V2
+:: [2/7] Sincronizzazione Server V2 (ROBOCOPY)
 :: ============================================================================
-echo [2/7] Copia server V2...
-echo __pycache__ > exclude_v2.txt
-echo *.pyc >> exclude_v2.txt
-echo venv >> exclude_v2.txt
-echo .pytest_cache >> exclude_v2.txt
-echo logs >> exclude_v2.txt
-echo *.log >> exclude_v2.txt
-echo legacy_ricetta >> exclude_v2.txt
-echo *.legacy_ricetta >> exclude_v2.txt
-echo instance\token.json >> exclude_v2.txt
-echo instance\credentials.json >> exclude_v2.txt
-echo instance\sync_state.json >> exclude_v2.txt
-echo instance\feature_flags.json >> exclude_v2.txt
-echo instance\.backup_* >> exclude_v2.txt
+echo [2/7] Sincronizzazione Server V2...
 
-xcopy "server_v2" "%DEPLOY_PATH%" /E /I /Q /Y /EXCLUDE:exclude_v2.txt
-if errorlevel 1 (
-    echo ERRORE: Copia server_v2 fallita.
-    del exclude_v2.txt 2>nul
+:: Robocopy Exit Codes:
+:: 0 = No files copied
+:: 1 = Files copied successfully
+:: 2 = Extra files detected (not copied)
+:: 4 = Mismatched files detected
+:: 8 = Failure
+:: >=8 is generally an error for us.
+
+robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
+    /XD "venv" "__pycache__" ".pytest_cache" ".git" "instance" "logs" "legacy_ricetta" ^
+    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" ^
+    /R:2 /W:2 /NP /NJH /NJS
+
+set "ROBO_EXIT=%ERRORLEVEL%"
+if %ROBO_EXIT% geq 8 (
+    echo ERRORE CRITICO: Robocopy ha fallito con codice %ROBO_EXIT%
     pause
     exit /b 1
 )
-del exclude_v2.txt 2>nul
-echo Server V2 copiato.
+echo   [OK] Sync Server V2 completata.
 
 :: ============================================================================
-:: [2.5/7] RIPRISTINO FILE SENSIBILI
+:: [2.5/7] Ripristino file sensibili
 :: ============================================================================
 echo [2.5/7] Ripristino file sensibili...
 
-:: Ripristina token.json
-if exist "%BACKUP_DIR%\token.json" (
-    copy "%BACKUP_DIR%\token.json" "%DEPLOY_PATH%\instance\token.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ERRORE: Impossibile ripristinare token.json!
-        echo   Dovrai ri-autenticare Google Calendar!
-    ) else (
-        echo   [OK] token.json ripristinato
+for %%F in (%SENSITIVE_FILES%) do (
+    if exist "%BACKUP_DIR%\%%F" (
+        copy "%BACKUP_DIR%\%%F" "%DEPLOY_PATH%\instance\%%F" /Y >nul 2>&1
+        if !errorlevel! neq 0 (
+            echo   [ERR] Impossibile ripristinare %%F!
+        ) else (
+            echo   [OK] %%F ripristinato
+        )
     )
 )
-
-:: Ripristina credentials.json
-if exist "%BACKUP_DIR%\credentials.json" (
-    copy "%BACKUP_DIR%\credentials.json" "%DEPLOY_PATH%\instance\credentials.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ERRORE: Impossibile ripristinare credentials.json!
-    ) else (
-        echo   [OK] credentials.json ripristinato
-    )
-)
-
-:: Ripristina sync_state.json
-if exist "%BACKUP_DIR%\sync_state.json" (
-    copy "%BACKUP_DIR%\sync_state.json" "%DEPLOY_PATH%\instance\sync_state.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ATTENZIONE: Impossibile ripristinare sync_state.json
-    ) else (
-        echo   [OK] sync_state.json ripristinato
-    )
-)
-
-:: Ripristina feature_flags.json
-if exist "%BACKUP_DIR%\feature_flags.json" (
-    copy "%BACKUP_DIR%\feature_flags.json" "%DEPLOY_PATH%\instance\feature_flags.json" /Y >nul 2>&1
-    if errorlevel 1 (
-        echo ATTENZIONE: Impossibile ripristinare feature_flags.json
-    ) else (
-        echo   [OK] feature_flags.json ripristinato
-    )
-)
-
-echo Ripristino completato.
 
 :: ============================================================================
-:: [3/7] Copia file .env
+:: [3/7] Aggiornamento .env
 :: ============================================================================
 echo [3/7] Copia file .env...
-copy ".env" "%DEPLOY_PATH%" /Y
+copy ".env" "%DEPLOY_PATH%" /Y >nul
 if errorlevel 1 (
     echo ERRORE: Copia .env fallita.
     pause
     exit /b 1
 )
-echo File .env copiato.
+echo   [OK] .env aggiornato.
 
 :: ============================================================================
-:: [4/7] Build frontend React V2
+:: [4/7] Build Frontend React V2
 :: ============================================================================
 echo [4/7] Build frontend React V2...
 cd client_v2
+
+:: Verifica pulizia node_modules se necessario
 if not exist "node_modules" (
-    echo Installazione dipendenze npm...
-    call npm install
-    if errorlevel 1 (
-        echo ERRORE: npm install fallito.
-        pause
-        exit /b 1
-    )
+    echo   [INFO] Installazione dipendenze (npm ci)...
+    call npm ci
 )
+
+echo   [INFO] Esecuzione build...
 call npm run build
 if errorlevel 1 (
     echo ERRORE: Build React V2 fallito.
+    cd ..
     pause
     exit /b 1
 )
 cd ..
-echo Frontend buildato.
+echo   [OK] Build completata.
 
 :: ============================================================================
-:: [5/7] Copia build frontend sul server
+:: [5/7] Deploy Frontend (ROBOCOPY)
 :: ============================================================================
-echo [5/7] Copia build frontend nella cartella static...
-xcopy "client_v2\dist" "%DEPLOY_PATH%\static\" /E /I /Q /Y
-echo Frontend copiato.
+echo [5/7] Deploy frontend in static...
+
+robocopy "client_v2\dist" "%DEPLOY_PATH%\static" /MIR ^
+    /R:2 /W:2 /NP /NJH /NJS
+
+if %ERRORLEVEL% geq 8 (
+    echo ERRORE: Deploy frontend fallito.
+    pause
+    exit /b 1
+)
+echo   [OK] Frontend deployato.
 
 :: ============================================================================
-:: [6/7] Creazione script di avvio con health check
+:: [6/7] Generazione script avvio
 :: ============================================================================
-echo [6/7] Creazione script di avvio sul server...
+echo [6/7] Generazione start script...
 (
 echo @echo off
-echo cd /d "%DEPLOY_PATH%"
+echo cd /d "%%~dp0"
 echo.
 echo echo ==========================================
 echo echo    STUDIO DIMA AI V2 - STARTING SERVER
 echo echo ==========================================
-echo echo.
 echo.
-echo :: Creazione/attivazione venv
+echo :: VENV Check
 echo if not exist venv ^(
 echo     echo Creazione virtual environment...
 echo     python -m venv venv
-echo     if errorlevel 1 ^(
-echo         echo ERRORE: Impossibile creare venv
-echo         pause
-echo         exit /b 1
-echo     ^)
 echo ^)
 echo.
 echo call venv\Scripts\activate.bat
 echo.
-echo :: Installazione dipendenze
-echo echo Installazione/aggiornamento dipendenze...
+echo :: Dependencies Check
+echo echo Verifica dipendenze...
 echo pip install -r requirements.txt --quiet
-echo if errorlevel 1 ^(
-echo     echo ERRORE: Installazione dipendenze fallita
-echo     pause
-echo     exit /b 1
-echo ^)
 echo.
-echo :: Health check Google Calendar
-echo echo Verifica connessione Google Calendar...
-echo python -c "from services.calendar_service import calendar_service; result = calendar_service.test_google_connection(); print('✅ Google Calendar OK' if result['success'] else '❌ Google Calendar ERROR: ' + result.get('message', 'Unknown'))"
+echo :: Health Checks
+echo echo Verifica connessioni...
+echo python -c "from services.calendar_service import calendar_service; r = calendar_service.test_google_connection(); print(' Google: ' + ('OK' if r['success'] else '! ERR: '+r.get('message','?')))"
 echo.
-echo echo.
 echo echo Server in avvio su porta 5001...
-echo echo Apri http://localhost:5001 nel browser
-echo echo.
 echo start "StudioDimaAI V2 Server" cmd /k python run_v2.py --config production --port 5001
 ) > "%DEPLOY_PATH%\start_server_v2.bat"
 
-echo Script di avvio creato.
+echo   [OK] start_server_v2.bat creato.
 
 :: ============================================================================
-:: [7/7] Creazione script di pulizia sync state
+:: [7/7] Utility Script
 :: ============================================================================
-echo [7/7] Creazione script di utility...
+echo [7/7] Generazione utility reset...
 (
 echo @echo off
-echo cd /d "%DEPLOY_PATH%"
-echo call venv\Scripts\activate.bat
-echo.
-echo echo ==========================================
-echo echo    RESET SYNC STATE
-echo echo ==========================================
-echo echo.
-echo echo ATTENZIONE: Questo cancellerà lo stato di sincronizzazione.
-echo echo La prossima sync ricreerà tutti gli eventi.
-echo echo.
-echo pause
-echo.
-echo :: Backup attuale
-echo if exist instance\sync_state.json ^(
-echo     copy instance\sync_state.json instance\sync_state.backup.json
-echo     echo Backup salvato in: instance\sync_state.backup.json
-echo ^)
-echo.
-echo :: Reset
-echo echo ^{^} ^> instance\sync_state.json
-echo echo.
-echo echo Sync state resettato!
+echo cd /d "%%~dp0"
+echo echo RESETTING SYNC STATE...
+echo if exist instance\sync_state.json copy instance\sync_state.json instance\sync_state.bak /Y
+echo echo {} ^> instance\sync_state.json
+echo echo Fatto.
 echo pause
 ) > "%DEPLOY_PATH%\reset_sync_state.bat"
 
-echo Script di utility creati:
-echo   - start_server_v2.bat (avvio server con health check)
-echo   - reset_sync_state.bat (reset stato sincronizzazione)
+echo   [OK] reset_sync_state.bat creato.
 
 :: ============================================================================
-:: RIEPILOGO FINALE
+:: COMPLETATO
 :: ============================================================================
 echo.
 echo ========================================
-echo DEPLOYMENT COMPLETATO! 🎉
+echo DEPLOYMENT COMPLETATO CON SUCCESSO!
 echo ========================================
 echo.
-echo File sensibili preservati:
-if exist "%DEPLOY_PATH%\instance\token.json" (
-    echo   [✓] token.json
-) else (
-    echo   [X] token.json - MANCANTE! Ri-autentica Google!
-)
-if exist "%DEPLOY_PATH%\instance\credentials.json" (
-    echo   [✓] credentials.json
-) else (
-    echo   [X] credentials.json - MANCANTE!
-)
-if exist "%DEPLOY_PATH%\instance\sync_state.json" (
-    echo   [✓] sync_state.json
-) else (
-    echo   [~] sync_state.json - Verra' ricreato
-)
+echo Server: %DEPLOY_PATH%
+echo Backup: %BACKUP_DIR%
 echo.
-echo Backup salvato in:
-echo   %BACKUP_DIR%
-echo.
-echo Per avviare il server:
-echo   1. Vai su %DEPLOY_PATH%
-echo   2. Esegui start_server_v2.bat
-echo.
-echo In caso di problemi di sync:
-echo   - Esegui reset_sync_state.bat
-echo   - Oppure usa l'interfaccia web (Settings ^> Calendar ^> Fix Sync)
-echo.
-echo ========================================
 pause

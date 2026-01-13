@@ -10,6 +10,7 @@ import RecallAutomationCard from '../components/RecallAutomationCard';
 import ReminderAutomationCard from '../components/ReminderAutomationCard';
 import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary, } from '@/services/api/monitorPrestazioni';
 import MonitorRules from '../components/MonitorRules';
+import DashboardStats from '../components/DashboardStats';
 
 const getBadgeColor = (status: string) => {
   switch (status) {
@@ -144,6 +145,9 @@ const Dashboard: React.FC = () => {
           </p>
         </CCol>
       </CRow>
+
+      {/* Stats Section */}
+      <DashboardStats />
 
       {/* Info sections */}
       <CRow>

@@ -1369,6 +1369,94 @@ class DBFOptimizedReader:
         
         logger.info("🧹 DBF Optimized Reader cleanup completed")
 
+    def get_stats_aggregates(self, years: List[int], ytd_limit: Optional[tuple] = None) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        📊 Calcola statistiche aggregate per gli anni richiesti direttamente dal DBF.
+        Ottimizzato per leggere solo campi DATA e TIPO.
+        
+        Args:
+            years: Lista di anni da analizzare
+            ytd_limit: Tuple (mese, giorno) opzionale per calcolare YTD. 
+                       Se presente, aggiunge 'first_visits_ytd' al risultato.
+        """
+        stats = {str(year): {} for year in years}
+        
+        # Parse ytd_limit
+        limit_month, limit_day = ytd_limit if ytd_limit else (13, 32)
+        
+        try:
+            appointments_path = self._get_dbf_path('APPUNTA.DBF')
+            deleted_records = self._get_deleted_records_binary(appointments_path)
+            
+            # Mapping campi
+            col_app = COLONNE['appuntamenti']
+            data_field = col_app['data'].lower()
+            tipo_field = col_app['tipo'].lower()
+            
+            with dbf.Table(appointments_path, codepage='cp1252') as table:
+                record_index = 0
+                for record in table:
+                    if record_index in deleted_records:
+                        record_index += 1
+                        continue
+                        
+                    try:
+                        # Extract data - fast path
+                        app_date = getattr(record, data_field)
+                        if not app_date:
+                            record_index += 1
+                            continue
+                            
+                        # Check year match
+                        year = app_date.year
+                        if year not in years:
+                            record_index += 1
+                            continue
+                            
+                        # Extract type
+                        tipo = clean_dbf_value(getattr(record, tipo_field))
+                        
+                        # Init month entry if needed
+                        if app_date.month not in stats[str(year)]:
+                            stats[str(year)][app_date.month] = {'count': 0, 'first_visits': 0, 'first_visits_ytd': 0}
+                        
+                        entry = stats[str(year)][app_date.month]
+                        entry['count'] += 1
+                        
+                        if tipo == 'V':
+                            entry['first_visits'] += 1
+                            # YTD Check: Same year logic handled by caller aggregating the result, 
+                            # here we just flag if this specific record is within the calendar period defined by ytd_limit
+                            # irrelevant of the year of the record.
+                            # e.g. if limit is (3, 15), we count it if date.month < 3 or (date.month == 3 and date.day <= 15)
+                            if app_date.month < limit_month or (app_date.month == limit_month and app_date.day <= limit_day):
+                                entry['first_visits_ytd'] += 1
+                            
+                    except Exception:
+                        pass
+                        
+                    record_index += 1
+                    
+            # Format output as list per year
+            result = {}
+            for year_str, months_data in stats.items():
+                year_list = []
+                for month in range(1, 13):
+                    data = months_data.get(month, {'count': 0, 'first_visits': 0, 'first_visits_ytd': 0})
+                    year_list.append({
+                        'month': month,
+                        'count': data['count'],
+                        'first_visits': data['first_visits'],
+                        'first_visits_ytd': data.get('first_visits_ytd', 0)
+                    })
+                result[year_str] = year_list
+                
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error computing stats aggregates: {e}")
+            return {}
+
     def get_tomorrow_appointments_for_reminder(self):
         """
         Estrae gli appuntamenti di domani e restituisce un log per i promemoria.

@@ -52,6 +52,19 @@ export interface ApiResponse<T> {
   state?: 'success' | 'warning' | 'error';
 }
 
+export interface FirstVisitsStats {
+  current_year: {
+    year: number;
+    total: number;
+    ytd: number;
+  };
+  prev_year: {
+    year: number;
+    total: number;
+    ytd: number;
+  };
+}
+
 const calendar = {
   // Get all calendars
   apiGetCalendars: async (): Promise<ApiResponse<{ calendars: Calendar[]; auth_url?: string }>> => {
@@ -246,12 +259,13 @@ const calendar = {
     }
   },
 
-  apiGetPrimeVisiteStats: async () => {
+  apiGetPrimeVisiteStats: async (): Promise<FirstVisitsStats | null> => {
     try {
       const response = await apiClient.get('/calendar/stats/first-visits');
-      return response.data.data?.nuove_visite || 0;
+      return response.data.data;
     } catch (error: any) {
-      return 0;
+      console.error("Error fetching first visits:", error);
+      return null;
     }
   },
 
