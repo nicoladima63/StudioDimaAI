@@ -121,6 +121,19 @@ export class MonitorPrestazioniService {
     const response = await apiClient.get('/monitorable-tables');
     return response.data;
   }
+
+  /**
+   * Recupera dettagli completi di un monitor (status + regole + azioni) in una sola chiamata
+   * Ottimizzazione per ridurre le chiamate API
+   */
+  static async getMonitorDetails(monitorId: string): Promise<ApiResponse<{
+    monitor: MonitorStatus;
+    rules: any[];
+    actions: any[];
+  }>> {
+    const response = await apiClient.get(`/monitor/monitors/${monitorId}/details`);
+    return response.data;
+  }
 }
 
 export default MonitorPrestazioniService

@@ -166,7 +166,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
         <CCardHeader>
           <h5 className='mb-0'>
             <CIcon icon={cilList} className='me-2' />
-            Azione da associare
+            Azione da associare callbackcard
           </h5>
         </CCardHeader>
         <CCardBody>
@@ -210,6 +210,6 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
         </CModalFooter>
       </CModal>
     </>)
-  };
+};
 
-  export default CallbackCard;
+export default CallbackCard;

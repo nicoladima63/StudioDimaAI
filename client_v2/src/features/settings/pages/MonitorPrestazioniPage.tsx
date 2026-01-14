@@ -28,11 +28,6 @@ const MonitorPrestazioniPage: React.FC = () => {
   const [selectedPrestazione, setSelectedPrestazione] = useState<Prestazione | null>(null)
   const logsEndRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll dei log
-  const scrollToBottom = () => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
   // Auto-scroll rimosso per evitare re-render continui
 
   // Carica stato iniziale
@@ -72,7 +67,7 @@ const MonitorPrestazioniPage: React.FC = () => {
       const response = await MonitorPrestazioniService.startMonitor({
         prevent_path: preventPath
       })
-      
+
       if (response.success) {
         toast.success('Monitor avviato con successo')
         await loadStatus()
@@ -92,7 +87,7 @@ const MonitorPrestazioniPage: React.FC = () => {
     setLoading(true)
     try {
       const response = await MonitorPrestazioniService.stopMonitor()
-      
+
       if (response.success) {
         toast.success('Monitor fermato con successo')
         await loadStatus()
@@ -112,7 +107,7 @@ const MonitorPrestazioniPage: React.FC = () => {
     setLoading(true)
     try {
       const response = await MonitorPrestazioniService.testMonitor()
-      
+
       if (response.success) {
         toast.success('Test completato')
         // I log vengono gestiti dal server, non aggiungiamo log locali
@@ -313,10 +308,10 @@ const MonitorPrestazioniPage: React.FC = () => {
                 </div>
               </CCardHeader>
               <CCardBody>
-                <div 
-                  style={{ 
-                    height: '400px', 
-                    overflowY: 'auto', 
+                <div
+                  style={{
+                    height: '400px',
+                    overflowY: 'auto',
                     backgroundColor: '#f8f9fa',
                     border: '1px solid #dee2e6',
                     borderRadius: '0.375rem',
@@ -333,7 +328,7 @@ const MonitorPrestazioniPage: React.FC = () => {
                       {logs.map((log, index) => (
                         <CListGroupItem key={index} className="border-0 px-0 py-0">
                           <div className="d-flex align-items-start">
-                              {formatTimestamp(log.timestamp)} {log.message}
+                            {formatTimestamp(log.timestamp)} {log.message}
                           </div>
                         </CListGroupItem>
                       ))}

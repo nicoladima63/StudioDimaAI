@@ -92,6 +92,10 @@ class MonitoringService:
         self.dbf_reader = get_optimized_reader()
         self.dbf_data_service = get_dbf_data_service()
         
+        # Inizializza il sistema di configurazione trigger
+        from services.trigger_config import TriggerConfigManager
+        self.trigger_config_manager = TriggerConfigManager()
+        
         self.saved_configs: Dict[str, MonitorConfig] = {}
         self.logs: List[Dict[str, Any]] = []
         self.settings = self._load_settings()

@@ -81,7 +81,6 @@ export const usePrestazioniStore = create<PrestazioniState>()(
 
         try {
           const response = await apiClient.get('/prestazioni');
-          
           if (response.data.success) {
             const { data: categorieData } = response.data;
             
@@ -98,7 +97,7 @@ export const usePrestazioniStore = create<PrestazioniState>()(
               error: null
             });
 
-            console.log(`✅ Prestazioni caricate: ${categorieList.length} categorie`);
+            //console.log(`✅ Prestazioni caricate: ${categorieList.length} categorie`);
           } else {
             throw new Error(response.data.error || 'Errore caricamento prestazioni');
           }

@@ -27,10 +27,10 @@ import {
 } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
 
- 
+
 import automationApi, { type Action, type AutomationRule } from '@/features/settings/services/automation.service';
 import ListaRegole from '@/features/settings/components/monitor/ListaRegole';
- 
+
 import LogMonitorCard from '@/features/settings/components/monitor/LogMonitorCard';
 import CallbackCard from '@/features/settings/components/monitor/CallbackCard';
 import AssociaRegolaCard from '@/features/settings/components/monitor/AssociaRegolaCard';
@@ -38,7 +38,7 @@ import TriggerSourceSelector, { Trigger } from '@/features/settings/components/m
 
 import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary } from '@/services/api/monitorPrestazioni';
 
-interface MonitorLog extends BackendMonitorLog {}
+interface MonitorLog extends BackendMonitorLog { }
 
 const getBadgeColor = (status: string) => {
   switch (status) {
@@ -59,14 +59,14 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   // Stato per il monitor selezionato (master-detail)
   const [selectedMonitorId, setSelectedMonitorId] = useState<string | null>(null);
 
   // Conferma eliminazione
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteMonitorId, setPendingDeleteMonitorId] = useState<string | null>(null);
-  
+
   // Stati per la creazione/modifica di regole
   const [actions, setActions] = useState<Action[]>([]);
   const [rules, setRules] = useState<AutomationRule[]>([]);
@@ -82,25 +82,23 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Stati per creazione monitor
   const [monitorTableName, setMonitorTableName] = useState('preventivi');
   const [monitorType, setMonitorType] = useState('file_watcher');
-  const [monitorableTables, setMonitorableTables] = useState<{name: string, description: string}[]>([]);
+  const [monitorableTables, setMonitorableTables] = useState<{ name: string, description: string }[]>([]);
 
   // Carica stato iniziale
   useEffect(() => {
     loadStatus();
     loadLogs();
-    loadActions();
-    // loadRules(); // Le regole ora vengono caricate quando si seleziona un monitor
+    // loadActions() rimosso - viene caricato da loadMonitorDetails quando si seleziona un monitor
     loadMonitorableTables();
   }, []);
 
-  // Carica le regole solo per il monitor selezionato
+  // Carica le regole e azioni per il monitor selezionato (API unificata)
   useEffect(() => {
-    setRules([]); // Pulisci subito le regole precedenti
     if (selectedMonitorId) {
-      loadRules(selectedMonitorId);
+      setRules([]); // Pulisci le regole precedenti
+      loadMonitorDetails(selectedMonitorId);
     } else {
-      // Assicura che le regole siano vuote se nessun monitor è selezionato
-      setRules([]); 
+      setRules([]); // Nessun monitor selezionato
     }
   }, [selectedMonitorId]);
 
@@ -131,7 +129,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
       if (response.success && response.data) {
         console.log("loadStatus: Setting monitor summary to:", response.data);
         setMonitorSummary(response.data);
-        
+
         // Se non c'è un monitor selezionato, seleziona il primo disponibile
         if (!selectedMonitorId && response.data.monitors) {
           const monitorIds = Object.keys(response.data.monitors);
@@ -160,23 +158,6 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
-  const clearLogs = async () => {
-    try {
-      setError(null);
-      
-      const response = await MonitorPrestazioniService.clearLogs();
-      if (response.success) {
-        setSuccess('Log puliti con successo');
-        await loadLogs();
-      } else {
-        setError(response.message || 'Errore nella pulizia dei log');
-      }
-    } catch (error) {
-      setError('Errore nella pulizia dei log');
-      console.error('Errore:', error);
-    }
-  };
-
   const handleStartMonitorById = async (monitorId: string) => {
     const originalSummary = monitorSummary;
 
@@ -192,7 +173,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await MonitorPrestazioniService.startMonitor(monitorId);
       if (response.success) {
         setSuccess('Monitor avviato con successo');
@@ -225,7 +206,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await MonitorPrestazioniService.stopMonitor(monitorId);
       if (response.success) {
         setSuccess('Monitor fermato con successo');
@@ -278,33 +259,22 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     setPendingDeleteMonitorId(null);
   };
 
-  const refreshLogs = () => {
-    loadLogs();
-  };
 
-  const loadActions = async () => {
+  /**
+   * Carica dettagli completi del monitor (status + regole + azioni) in una sola chiamata API
+   * Ottimizzazione per ridurre le chiamate di rete
+   */
+  const loadMonitorDetails = async (monitorId: string) => {
     try {
-      const actionsArray = await automationApi.getActions();
-      if (Array.isArray(actionsArray)) {
-        setActions(actionsArray);
-      } else {
-        console.error('Failed to load actions: response is not an array');
-        setActions([]);
+      const response = await MonitorPrestazioniService.getMonitorDetails(monitorId);
+      if (response.success && response.data) {
+        setRules(response.data.rules);
+        setActions(response.data.actions);
+        // Il monitor status viene già gestito da loadStatus
       }
     } catch (e) {
-      console.error('Errore caricamento azioni', e);
-      setActions([]);
-    }
-  };
-
-  const loadRules = async (monitorId: string | null) => {
-    try {
-      const filters = monitorId ? { monitor_id: monitorId } : {};
-      const data = await automationApi.getRules(filters);
-      setRules(data);
-    } catch (e) {
-      console.error('Errore caricamento regole di automazione', e);
-      setError('Impossibile caricare le regole per il monitor selezionato.');
+      console.error('Errore caricamento dettagli monitor', e);
+      setError('Impossibile caricare i dettagli del monitor.');
     }
   };
 
@@ -398,7 +368,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         await automationApi.updateRule(editingRule.id, payload);
         setSuccess('Regola aggiornata con successo');
         handleCancelEdit();
-        await loadRules(selectedMonitorId);
+        if (selectedMonitorId) await loadMonitorDetails(selectedMonitorId);
       } catch (e: any) {
         setError(e?.message || 'Errore durante l\'aggiornamento della regola.');
       }
@@ -431,7 +401,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         await automationApi.createRule(payload);
         setSuccess('Regola di automazione creata con successo');
         handleCancelEdit(); // Usa la stessa funzione per resettare il form
-        await loadRules(selectedMonitorId);
+        await loadMonitorDetails(selectedMonitorId);
       } catch (e: any) {
         setError(e?.message || 'Errore creazione regola di automazione');
       }
@@ -443,7 +413,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   const handleToggleRegola = async (id: number) => {
     try {
       await automationApi.toggleRule(id);
-      await loadRules(selectedMonitorId);
+      if (selectedMonitorId) await loadMonitorDetails(selectedMonitorId);
     } catch (e) {
       console.error('Errore toggle regola', e);
     }
@@ -453,7 +423,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     if (!confirm('Sei sicuro di voler eliminare questa regola di automazione?')) return;
     try {
       await automationApi.deleteRule(id);
-      await loadRules(selectedMonitorId);
+      if (selectedMonitorId) await loadMonitorDetails(selectedMonitorId);
     } catch (e) {
       console.error('Errore eliminazione regola', e);
     }
@@ -461,20 +431,8 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageLayout.Header 
+      <PageLayout.Header
         title='Monitoraggio e Automazioni DBF'
-        headerAction={
-          <div className='d-flex gap-2'>
-            <CButton color='info' onClick={refreshLogs} disabled={loading} size='sm'>
-              <CIcon icon={cilReload} className='me-1' />
-              Aggiorna Log
-            </CButton>
-            <CButton color='danger' onClick={clearLogs} disabled={loading} size='sm'>
-              <CIcon icon={cilTrash} className='me-1' />
-              Pulisci Log
-            </CButton>
-          </div>
-        }
       />
 
       <div className="mt-2">
@@ -522,9 +480,9 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 </CFormSelect>
               </CCol>
               <CCol md={4}>
-                <CButton 
-                  color='primary' 
-                  onClick={handleCreateMonitor} 
+                <CButton
+                  color='primary'
+                  onClick={handleCreateMonitor}
                   disabled={loading || !monitorTableName || !monitorType}>
                   <CIcon icon={cilPlus} className='me-1' />
                   Crea Monitor
@@ -546,7 +504,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
               {Object.keys(monitorSummary.monitors).length > 0 ? (
                 <CRow>
                   {Object.entries(monitorSummary.monitors).map(([monitorId, monitor]) => (
-                    <CCol md={6} lg={4} key={monitorId} className='mb-3'>
+                    <CCol md={4} lg={3} key={monitorId} className='mb-3'>
                       <CCard className={`h-100 ${selectedMonitorId === monitorId ? 'border-primary border-2' : ''}`}>
                         <CCardBody className='d-flex flex-column'>
                           <div className='d-flex justify-content-between align-items-start mb-2'>
@@ -558,7 +516,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                           <p className='small text-muted mb-1'>ID: {monitorId}</p>
                           <div className='mt-auto'>
                             <div className='d-flex justify-content-between align-items-center mt-3'>
-                              <CButton 
+                              <CButton
                                 color='primary'
                                 variant='outline'
                                 size='sm'
@@ -588,7 +546,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                                     <CIcon icon={cilMediaPlay} />
                                   </CButton>
                                 )}
-                                <CButton 
+                                <CButton
                                   color='danger'
                                   size='sm'
                                   variant='outline'
@@ -631,36 +589,42 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                 {/* Colonna Sinistra: Creazione/Modifica Regola */}
                 <CCol md={4}>
                   <h6 className='mb-3'>Crea Nuova Regola</h6>
-                  <TriggerSourceSelector 
+                  <TriggerSourceSelector
                     onChange={setTrigger}
                   />
-                  <CallbackCard 
-                    actions={actions}
-                    selectedActionId={selectedActionId}
-                    onActionChange={handleActionChange}
-                    initialParams={selectedActionParams}
-                    onParamsChange={setSelectedActionParams}
-                    isModalOpen={isParamsModalOpen}
-                    setIsModalOpen={setIsParamsModalOpen}
-                  />
-                  <div className='d-flex align-items-center'>
-                    <AssociaRegolaCard 
-                      onAssocia={handleAssocia}
-                      disabled={(!trigger && !editingRule) || !selectedActionId || loading}
-                    />
-                    {editingRule && (
-                      <CButton color="secondary" variant="outline" onClick={handleCancelEdit} className="ms-3">
-                        Annulla
-                      </CButton>
-                    )}
-                  </div>
+                  <CRow>
+                    <CCol md={8}>
+                      <CallbackCard
+                        actions={actions}
+                        selectedActionId={selectedActionId}
+                        onActionChange={handleActionChange}
+                        initialParams={selectedActionParams}
+                        onParamsChange={setSelectedActionParams}
+                        isModalOpen={isParamsModalOpen}
+                        setIsModalOpen={setIsParamsModalOpen}
+                      />
+                    </CCol>
+                    <CCol md={4}>
+                      <div className='d-flex align-items-center'>
+                        <AssociaRegolaCard
+                          onAssocia={handleAssocia}
+                          disabled={(!trigger && !editingRule) || !selectedActionId || loading}
+                        />
+                        {editingRule && (
+                          <CButton color="secondary" variant="outline" onClick={handleCancelEdit} className="ms-3">
+                            Annulla
+                          </CButton>
+                        )}
+                      </div>
+                    </CCol>
+                  </CRow>
                 </CCol>
 
                 {/* Colonna Destra: Lista Regole */}
                 <CCol md={8}>
-                  <h6 className='mb-3'>Regole per questo Monitor</h6>
-                  <ListaRegole 
-                    rules={rules} 
+                  <h6 className='mb-3 fw-bold'>Regole associate per questo Monitor</h6>
+                  <ListaRegole
+                    rules={rules}
                     onToggle={handleToggleRegola}
                     onDelete={handleDeleteRegola}
                     onEdit={handleEditRegola}

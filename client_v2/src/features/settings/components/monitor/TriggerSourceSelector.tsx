@@ -60,7 +60,7 @@ const TriggerSourceSelector: React.FC<TriggerSourceSelectorProps> = ({ onChange,
           disabled={disabled}
         >
           <option value="prestazione">Prestazione</option>
-          <option value="appuntamento_tipo">Tipo Appuntamento</option>
+          <option value="appuntamento_tipo">Appuntamento</option>
         </CFormSelect>
       </div>
 

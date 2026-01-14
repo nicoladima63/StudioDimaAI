@@ -16,9 +16,9 @@ const AssociaRegolaCard: React.FC<AssociaRegolaCardProps> = ({ onAssocia, disabl
       </CCardHeader>
       <CCardBody>
         <div className='mb-3 text-center'>
-          <CButton 
-            color='primary' 
-            disabled={disabled} 
+          <CButton
+            color='primary'
+            disabled={disabled}
             onClick={onAssocia}
           >
             <CIcon icon={cilCalculator} />

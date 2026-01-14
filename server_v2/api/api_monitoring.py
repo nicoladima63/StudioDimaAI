@@ -278,6 +278,43 @@ def delete_monitor(monitor_id: str):
             'message': f'Errore nell\'eliminazione del monitor: {str(e)}'
         }), 500
 
+@monitoring_bp.route('/monitor/monitors/<monitor_id>/details', methods=['GET'])
+def get_monitor_details(monitor_id: str):
+    """
+    Endpoint unificato che ritorna monitor status, regole e azioni in una sola chiamata.
+    Ottimizzazione per ridurre le chiamate API dal frontend.
+    """
+    try:
+        from services.automation_service import AutomationService
+        
+        monitoring_service = get_monitoring_service()
+        automation_service = AutomationService()
+        
+        # Recupera status del monitor
+        monitor_status = monitoring_service.get_monitor_status(monitor_id)
+        
+        # Recupera regole associate al monitor
+        rules = automation_service.get_all_rules({'monitor_id': monitor_id})
+        
+        # Recupera tutte le azioni disponibili
+        actions = automation_service.list_actions()
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'monitor': monitor_status,
+                'rules': rules,
+                'actions': actions
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting monitor details: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Errore nel recupero dei dettagli del monitor: {str(e)}'
+        }), 500
+
 @monitoring_bp.route('/monitor/monitors/<monitor_id>', methods=['PUT'])
 def update_monitor(monitor_id: str):
     """Aggiorna la configurazione di un monitor."""

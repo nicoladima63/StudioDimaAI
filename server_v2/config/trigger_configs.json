@@ -1,0 +1,37 @@
+{
+    "preventivi": {
+        "enabled": true,
+        "description": "Trigger per prestazioni eseguite - scatta quando lo stato passa a 'eseguita'",
+        "trigger_condition": {
+            "type": "transition",
+            "watch_field": "DB_GUARDIA",
+            "from_value": "!= 3",
+            "to_value": "== 3"
+        },
+        "trigger_type": "prestazione",
+        "trigger_id_field": "DB_PRONCOD",
+        "metadata": {
+            "enrichment": {
+                "source_field": "DB_PRELCOD",
+                "target_table": "ELENCO.DBF",
+                "target_key_field": "DB_CODE",
+                "target_value_field": "DB_ELPACOD",
+                "new_field_name": "id_paziente"
+            }
+        }
+    },
+    "appunta": {
+        "enabled": true,
+        "description": "Trigger per tipi specifici di appuntamento (V=prima visita, C=conservativa, ecc.)",
+        "trigger_condition": {
+            "type": "value_in_list",
+            "watch_field": "DB_GUARDIA",
+            "allowed_values": [
+                "V",
+                "C"
+            ]
+        },
+        "trigger_type": "appuntamento_tipo",
+        "trigger_id_field": "DB_GUARDIA"
+    }
+}
