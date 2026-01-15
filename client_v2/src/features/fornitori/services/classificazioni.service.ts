@@ -53,13 +53,29 @@ const classificazioniService = {
       const response = await apiClient.delete(`/classificazioni/fornitore/${fornitoreId}`);
       return response.data;
     } catch (error: any) {
-      // Se l'errore è del service worker ma la risposta è 200, ignora l'errore
       if (error.response && error.response.status === 200) {
         return error.response.data;
       }
-      
       throw error;
     }
+  },
+
+  // READ - Lista conti
+  getConti: async (): Promise<any> => {
+    const response = await apiClient.get('/classificazioni/conti');
+    return response.data;
+  },
+
+  // READ - Lista branche per conto
+  getBranche: async (contoId: number | string): Promise<any> => {
+    const response = await apiClient.get(`/classificazioni/branche?conto_id=${contoId}`);
+    return response.data;
+  },
+
+  // READ - Lista sottoconti per branca
+  getSottoconti: async (brancaId: number | string): Promise<any> => {
+    const response = await apiClient.get(`/classificazioni/sottoconti?branca_id=${brancaId}`);
+    return response.data;
   }
 };
 

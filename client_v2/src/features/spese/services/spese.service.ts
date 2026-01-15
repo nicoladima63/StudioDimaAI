@@ -6,7 +6,8 @@ import type {
   RicercaArticoliResponse,
   FiltriSpese,
   RiepilogoSpeseFornitoriAnnoResponse,
-  AnalisiProduzioneResponse
+  AnalisiProduzioneResponse,
+  ActiveSuppliersResponse
 } from "../types";
 
 // === NUOVE API PER CATEGORIZZAZIONE GESTIONALE ===
@@ -58,6 +59,10 @@ export const speseFornitioriService = {
     if (filtri.fattura_id) {
       params.append('fattura_id', filtri.fattura_id);
     }
+
+    if (filtri.conto_id) {
+      params.append('conto_id', filtri.conto_id.toString());
+    }
     
     if (filtri.page) {
       params.append('page', filtri.page.toString());
@@ -74,8 +79,14 @@ export const speseFornitioriService = {
   /**
    * Ottieni riepilogo spese per analisi
    */
-  async getRiepilogoSpese(anno: number): Promise<RiepilogoSpeseFornitoriAnnoResponse> {
-    const response = await apiClient.get(`/spese-fornitori/riepilogo?anno=${anno}`);
+  async getRiepilogoSpese(filtri: FiltriSpese): Promise<RiepilogoSpeseFornitoriAnnoResponse> {
+    const params = new URLSearchParams();
+    if (filtri.anno) params.append('anno', filtri.anno.toString());
+    if (filtri.conto_id) params.append('conto_id', filtri.conto_id.toString());
+    if (filtri.branca_id) params.append('branca_id', filtri.branca_id.toString());
+    if (filtri.sottoconto_id) params.append('sottoconto_id', filtri.sottoconto_id.toString());
+
+    const response = await apiClient.get(`/spese-fornitori/riepilogo?${params.toString()}`);
     return response.data;
   },
 
@@ -190,6 +201,33 @@ export const speseFornitioriService = {
    */
   async integrateXmlPatterns() {
     const response = await apiClient.post('/spese-fornitori/integrate-xml-patterns');
+    return response.data;
+  },
+
+  async getStats(filtri: FiltriSpese): Promise<{ success: boolean; data: any }> {
+    const params = new URLSearchParams();
+    if (filtri.anno) params.append('anno', filtri.anno.toString());
+    if (filtri.codice_fornitore) params.append('codice_fornitore', filtri.codice_fornitore);
+    if (filtri.conto_id) params.append('conto_id', filtri.conto_id.toString());
+    if (filtri.branca_id) params.append('branca_id', filtri.branca_id.toString());
+    if (filtri.sottoconto_id) params.append('sottoconto_id', filtri.sottoconto_id.toString());
+    if (filtri.mese) params.append('mese', filtri.mese.toString());
+    
+    // Support generic search or specific fields if backend supports them
+    if (filtri.numero_documento) params.append('q', filtri.numero_documento);
+
+    const response = await apiClient.get(`/spese-fornitori/stats?${params.toString()}`);
+    return response.data;
+  },
+
+  async getActiveSuppliers(filtri: FiltriSpese): Promise<ActiveSuppliersResponse> {
+    const params = new URLSearchParams();
+    if (filtri.anno) params.append('anno', filtri.anno.toString());
+    if (filtri.conto_id) params.append('conto_id', filtri.conto_id.toString());
+    if (filtri.branca_id) params.append('branca_id', filtri.branca_id.toString());
+    if (filtri.sottoconto_id) params.append('sottoconto_id', filtri.sottoconto_id.toString());
+    
+    const response = await apiClient.get(`/spese-fornitori/active-suppliers?${params.toString()}`);
     return response.data;
   }
 };

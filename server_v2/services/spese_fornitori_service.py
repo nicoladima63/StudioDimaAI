@@ -9,6 +9,7 @@ from core.exceptions import DatabaseError, ValidationError
 from utils.dbf_utils import clean_dbf_value, safe_get_dbf_field
 from core.config_manager import get_config
 from datetime import datetime
+from .classificazioni_service import ClassificazioniService
 
 # Constants for spese DBF fields (from server v1 constants)
 SPESE_FIELDS = {
@@ -61,7 +62,39 @@ class SpeseFornitoriService(BaseService):
             # Extract filters
             fornitore_id = filters.get('codice_fornitore') if filters else None
             anno = filters.get('anno') if filters else None
+            conto_id = filters.get('conto_id') if filters else None
+            branca_id = filters.get('branca_id') if filters else None
+            sottoconto_id = filters.get('sottoconto_id') if filters else None
             
+            # Pre-fetch suppliers for category/branch/subaccount filter if needed
+            allowed_suppliers = None
+            if conto_id or branca_id or sottoconto_id:
+                try:
+                    class_service = ClassificazioniService()
+                    allowed_suppliers = set(class_service.get_supplier_ids_by_classification(
+                        contoid=conto_id, 
+                        brancaid=branca_id, 
+                        sottocontoid=sottoconto_id
+                    ))
+                    self.logger.info(f"Filtering by Classification: {len(allowed_suppliers)} suppliers found.")
+                except Exception as e:
+                    self.logger.error(f"Error fetching suppliers for classification: {e}")
+                    allowed_suppliers = set()
+
+            # Load Suppliers Mapping from FORNITOR.DBF
+            supplier_names = {}
+            try:
+                fornitori_path = self._get_fornitori_dbf_path()
+                if os.path.exists(fornitori_path):
+                     with dbf.Table(fornitori_path, codepage='cp1252') as table_forn:
+                        for record in table_forn:
+                            f_code = str(clean_dbf_value(getattr(record, 'db_code', ''))).strip()
+                            f_name = clean_dbf_value(getattr(record, 'db_fonome', ''))
+                            if f_code:
+                                supplier_names[f_code] = f_name
+            except Exception as e:
+                self.logger.error(f"Error loading suppliers mapping: {e}")
+
             # Read DBF file
             spese_raw = []
             with dbf.Table(spese_path, codepage='cp1252') as table:
@@ -71,9 +104,18 @@ class SpeseFornitoriService(BaseService):
                         continue
                     
                     # Filter by Supplier if provided
+                    supplier_code = clean_dbf_value(getattr(record, 'db_spfocod', None))
+                    supplier_code_str = str(supplier_code).strip()
+                    
                     if fornitore_id:
-                        supplier_code = clean_dbf_value(getattr(record, 'db_spfocod', None))
-                        if str(supplier_code).strip() != str(fornitore_id).strip():
+                        # Handle multi-id selection (comma separated)
+                        target_ids = [t.strip() for t in str(fornitore_id).split(',')]
+                        if supplier_code_str not in target_ids:
+                            continue
+                    
+                    # Filter by Classification (Conto/Branca/Sottoconto) if provided
+                    if allowed_suppliers is not None:
+                        if supplier_code_str not in allowed_suppliers:
                             continue
 
                     # Filter by Year if provided (optimize early filtering)
@@ -94,9 +136,12 @@ class SpeseFornitoriService(BaseService):
                             continue
 
                     # Build spesa record using correct field names
+                    supplier_name = supplier_names.get(supplier_code_str, supplier_code_str) # Default to code if name not found
+                    
                     spesa = {
                         'id': clean_dbf_value(getattr(record, 'db_code', None)),
-                        'codice_fornitore': clean_dbf_value(getattr(record, 'db_spfocod', None)),
+                        'codice_fornitore': supplier_code_str,
+                        'nome_fornitore': supplier_name,
                         'data_spesa': clean_dbf_value(getattr(record, 'db_spdata', None)),
                         'numero_documento': clean_dbf_value(getattr(record, 'db_spnumer', None)),
                         'descrizione': clean_dbf_value(getattr(record, 'db_spdescr', None)),
@@ -114,7 +159,8 @@ class SpeseFornitoriService(BaseService):
             if filters:
                 spese_raw = self._apply_filters(spese_raw, filters)
             
-            # Sort by date descending
+            # Sort: Name ASC first, then Date DESC
+            spese_raw.sort(key=lambda x: (x.get('nome_fornitore') or '').lower())
             spese_raw.sort(key=lambda x: x.get('data_spesa') or '', reverse=True)
             
             # Calculate pagination
@@ -142,6 +188,104 @@ class SpeseFornitoriService(BaseService):
             self.logger.error(f"Error getting spese list: {e}")
             raise DatabaseError(f"Failed to retrieve expenses: {str(e)}")
 
+    def get_active_suppliers(self, anno: int, conto_id: int = None, branca_id: int = None, sottoconto_id: int = None) -> List[Dict[str, Any]]:
+        """
+        Get list of active suppliers for the given filters.
+        Active means they have at least one expense record in the selected year.
+        The list is filtered by classification if parameters are provided.
+        """
+        try:
+            # 1. Get filtered supplier IDs from Classification
+            allowed_suppliers = None
+            if conto_id or branca_id or sottoconto_id:
+                try:
+                    class_service = ClassificazioniService()
+                    allowed_suppliers = set(class_service.get_supplier_ids_by_classification(
+                        contoid=conto_id, 
+                        brancaid=branca_id, 
+                        sottocontoid=sottoconto_id
+                    ))
+                except Exception as e:
+                    self.logger.error(f"Error fetching suppliers for classification: {e}")
+                    allowed_suppliers = set()
+            
+            # 2. Load Supplier Names map
+            supplier_names = {}
+            try:
+                fornitori_path = self._get_fornitori_dbf_path()
+                if os.path.exists(fornitori_path):
+                     with dbf.Table(fornitori_path, codepage='cp1252') as table_forn:
+                        for record in table_forn:
+                            f_code = str(clean_dbf_value(getattr(record, 'db_code', ''))).strip()
+                            f_name = clean_dbf_value(getattr(record, 'db_fonome', ''))
+                            if f_code:
+                                supplier_names[f_code] = f_name
+            except Exception as e:
+                self.logger.error(f"Error loading suppliers mapping: {e}")
+
+            # 3. Read Spese DBF and collect unique supplier IDs for the year
+            active_supplier_ids = set()
+            spese_path = self._get_spese_dbf_path()
+            
+            if not os.path.exists(spese_path):
+                 return []
+                 
+            with dbf.Table(spese_path, codepage='cp1252') as table:
+                for record in table:
+                    # Filter by Year first
+                    if anno:
+                        data_spesa = getattr(record, 'db_spdata', None)
+                        if not data_spesa:
+                            continue
+                        try:
+                             if isinstance(data_spesa, datetime):
+                                spesa_year = data_spesa.year
+                             else:
+                                spesa_year = pd.to_datetime(data_spesa).year
+                             if spesa_year != int(anno):
+                                continue
+                        except:
+                            continue
+                            
+                    # Get Supplier Code
+                    supplier_code = clean_dbf_value(getattr(record, 'db_spfocod', None))
+                    supplier_code_str = str(supplier_code).strip()
+                    
+                    if not supplier_code_str:
+                        continue
+                        
+                    # Filter by Classification
+                    if allowed_suppliers is not None:
+                        if supplier_code_str not in allowed_suppliers:
+                            continue
+                            
+                    active_supplier_ids.add(supplier_code_str)
+
+            # 4. Build Result List
+            # 4. Build Result List (Deduplicate by Name)
+            suppliers_by_name = {}
+            for supp_id in active_supplier_ids:
+                name = supplier_names.get(supp_id, f"Fornitore {supp_id}")
+                if name not in suppliers_by_name:
+                    suppliers_by_name[name] = []
+                suppliers_by_name[name].append(supp_id)
+            
+            active_suppliers = []
+            for name, ids in suppliers_by_name.items():
+                active_suppliers.append({
+                    'id': ",".join(ids),
+                    'nome': name
+                })
+            
+            # Sort by name
+            active_suppliers.sort(key=lambda x: (x['nome'] or '').lower())
+            
+            return active_suppliers
+
+        except Exception as e:
+            self.logger.error(f"Error getting active suppliers: {e}")
+            raise DatabaseError(f"Failed to retrieve active suppliers: {str(e)}")
+
     def get_spese_by_fornitore(self, fornitore_id: str, page: int = 1, per_page: int = 10, filters: Dict = None) -> Dict[str, Any]:
         """Wrapper for backward compatibility."""
         if filters is None:
@@ -149,10 +293,10 @@ class SpeseFornitoriService(BaseService):
         filters['codice_fornitore'] = fornitore_id
         return self.get_spese(page, per_page, filters)
 
-    def get_riepilogo_spese(self, anno: int) -> Dict[str, Any]:
+    def get_riepilogo_spese(self, anno: int, conto_id: int = None, branca_id: int = None, sottoconto_id: int = None) -> Dict[str, Any]:
         """
-        Get aggregated expenses by supplier for a specific year.
-        Returns total cost, iva, and count of invoices per supplier.
+        Get aggregated expenses by supplier for a specific year and classification filters.
+        Returns total cost, iva, and count of invoices per supplier name (merging duplicates).
         """
         try:
             spese_path = self._get_spese_dbf_path()
@@ -160,25 +304,56 @@ class SpeseFornitoriService(BaseService):
             if not os.path.exists(spese_path):
                 return {'success': False, 'error': f"Spese DBF not found: {spese_path}"}
             
-            stats = {} # { 'codice_fornitore': { 'nome': ..., 'netto': 0, 'iva': 0, 'totale': 0, 'count': 0 } }
+            # 1. Pre-fetch suppliers for category/branch/subaccount filter if needed
+            allowed_suppliers = None
+            if conto_id or branca_id or sottoconto_id:
+                try:
+                    class_service = ClassificazioniService()
+                    allowed_suppliers = set(class_service.get_supplier_ids_by_classification(
+                        contoid=conto_id, 
+                        brancaid=branca_id, 
+                        sottocontoid=sottoconto_id
+                    ))
+                except Exception as e:
+                    self.logger.error(f"Error fetching suppliers for classification: {e}")
+                    allowed_suppliers = set()
+
+            # 2. Load Supplier Names map (Code -> Name)
+            supplier_names = {}
+            try:
+                fornitori_path = self._get_fornitori_dbf_path()
+                if os.path.exists(fornitori_path):
+                     with dbf.Table(fornitori_path, codepage='cp1252') as table_forn:
+                        for record in table_forn:
+                            f_code = str(clean_dbf_value(getattr(record, 'db_code', ''))).strip()
+                            f_name = clean_dbf_value(getattr(record, 'db_fonome', ''))
+                            if f_code:
+                                supplier_names[f_code] = f_name
+            except Exception as e:
+                self.logger.error(f"Error loading suppliers mapping: {e}")
+
+            stats = {} # { 'Nome Fornitore': { 'ids': set(), 'netto': 0, 'iva': 0, 'totale': 0, 'count': 0 } }
             
             with dbf.Table(spese_path, codepage='cp1252') as table:
                 for record in table:
+                    # Skip invalid records
+                    if not getattr(record, 'db_code', None):
+                        continue
+
                     # Filter by year
                     data_spesa = getattr(record, 'db_spdata', None)
                     if not data_spesa:
                         continue
                         
-                    if isinstance(data_spesa, datetime):
-                        spesa_year = data_spesa.year
-                    else:
-                        try:
-                            # Handle potential string dates if dbf lib returns them
+                    try:
+                        if isinstance(data_spesa, datetime):
+                            spesa_year = data_spesa.year
+                        else:
                             spesa_year = pd.to_datetime(data_spesa).year
-                        except:
-                            continue
                             
-                    if spesa_year != anno:
+                        if spesa_year != int(anno):
+                            continue
+                    except:
                         continue
                         
                     # Get Supplier Code
@@ -187,37 +362,43 @@ class SpeseFornitoriService(BaseService):
                         continue
                     
                     forn_code = str(forn_code).strip()
+
+                    # Filter by Classification
+                    if allowed_suppliers is not None:
+                        if forn_code not in allowed_suppliers:
+                            continue
                     
-                    # Initialize stats for supplier if new
-                    if forn_code not in stats:
-                        # Note: We don't have Supplier Name in SPESAFOR, usually it's in FORNITOR.DBF
-                        # We will return the code, frontend or another call can map names if needed, 
-                        # or we could try to look it up if we had FornitoriService access.
-                        # For now provided code seems to rely on SPESAFOR having description sometimes or just code.
-                        # But wait, SPESAFOR usually doesn't have the name. 
-                        # Let's see if we can get it from the record if present (unlikely) or just use Code.
-                        stats[forn_code] = {
-                            'codice': forn_code,
+                    # Get Supplier Name
+                    forn_name = supplier_names.get(forn_code, f"Fornitore {forn_code}")
+                    
+                    # Initialize stats for supplier name if new
+                    if forn_name not in stats:
+                        stats[forn_name] = {
+                            'nome': forn_name,
+                            'ids': set(),
                             'netto': 0.0,
                             'iva': 0.0,
                             'totale': 0.0,
                             'num_fatture': 0
                         }
                     
+                    stats[forn_name]['ids'].add(forn_code)
+                    
                     # Aggregate values
                     netto = self._safe_float(getattr(record, 'db_spcosto', 0)) or 0
                     iva = self._safe_float(getattr(record, 'db_spcoiva', 0)) or 0
                     
-                    stats[forn_code]['netto'] += netto
-                    stats[forn_code]['iva'] += iva
-                    stats[forn_code]['totale'] += (netto + iva)
-                    stats[forn_code]['num_fatture'] += 1
+                    stats[forn_name]['netto'] += netto
+                    stats[forn_name]['iva'] += iva
+                    stats[forn_name]['totale'] += (netto + iva)
+                    stats[forn_name]['num_fatture'] += 1
             
             # Format results
             results = []
-            for code, data in stats.items():
+            for name, data in stats.items():
                 results.append({
-                    'codice_fornitore': code,
+                    'id': ",".join(data['ids']), # Comma separated IDs
+                    'nome': name,
                     'importo_netto': round(data['netto'], 2),
                     'importo_iva': round(data['iva'], 2),
                     'importo_totale': round(data['totale'], 2),
@@ -226,6 +407,8 @@ class SpeseFornitoriService(BaseService):
                 
             # Sort by total amount descending
             results.sort(key=lambda x: x['importo_totale'], reverse=True)
+            
+            self.logger.info(f"Riepilogo Spese: found {len(results)} suppliers out of {len(table)} records.")
             
             return {
                 'success': True, 
@@ -469,6 +652,84 @@ class SpeseFornitoriService(BaseService):
             self.logger.error(f"Error extracting production years: {e}")
             return {'success': False, 'error': str(e)}
 
+    def get_stats(self, filters: Dict = None) -> Dict[str, Any]:
+        """
+        Get statistics for expenses based on filters.
+        """
+        try:
+            spese_path = self._get_spese_dbf_path()
+            if not os.path.exists(spese_path):
+                return {'success': False, 'error': 'File DBF spese non trovato'}
+            
+            # Extract filters
+            fornitore_id = filters.get('codice_fornitore') if filters else None
+            anno = filters.get('anno') if filters else None
+            conto_id = filters.get('conto_id') if filters else None
+            
+            allowed_suppliers = None
+            if conto_id:
+                try:
+                    class_service = ClassificazioniService()
+                    allowed_suppliers = set(class_service.get_fornitori_by_conto(conto_id))
+                except:
+                    allowed_suppliers = set()
+
+            total_costo = 0.0
+            total_iva = 0.0
+            count = 0
+            
+            with dbf.Table(spese_path, codepage='cp1252') as table:
+                for record in table:
+                     # Skip invalid records
+                    if not getattr(record, 'db_code', None):
+                        continue
+                    
+                    supplier_code = clean_dbf_value(getattr(record, 'db_spfocod', None))
+                    supplier_code_str = str(supplier_code).strip()
+                    
+                    if fornitore_id:
+                        if supplier_code_str != str(fornitore_id).strip():
+                            continue
+
+                    if allowed_suppliers is not None:
+                        if supplier_code_str not in allowed_suppliers:
+                            continue
+
+                    if anno:
+                        data_spesa = getattr(record, 'db_spdata', None)
+                        if not data_spesa:
+                            continue
+                        try:
+                            if isinstance(data_spesa, datetime):
+                                spesa_year = data_spesa.year
+                            else:
+                                spesa_year = pd.to_datetime(data_spesa).year
+                            if spesa_year != int(anno):
+                                continue
+                        except:
+                            continue
+                    
+                    costo = self._safe_float(getattr(record, 'db_spcosto', None)) or 0
+                    iva = self._safe_float(getattr(record, 'db_spcoiva', None)) or 0
+                    
+                    total_costo += costo
+                    total_iva += iva
+                    count += 1
+            
+            return {
+                'success': True,
+                'data': {
+                    'total_costo': total_costo,
+                    'total_iva': total_iva,
+                    'total_grand': total_costo + total_iva,
+                    'count': count
+                }
+            }
+
+        except Exception as e:
+            self.logger.error(f"Error getting stats: {e}")
+            return {'success': False, 'error': str(e)}
+
     def _safe_float(self, value) -> Optional[float]:
         """Safely convert value to float."""
         if pd.isna(value) or value is None:
@@ -546,6 +807,17 @@ class SpeseFornitoriService(BaseService):
             
         except Exception as e:
             raise DatabaseError(f"Could not locate dettagli spese DBF file: {str(e)}")
+
+    def _get_fornitori_dbf_path(self) -> str:
+        """Get path to fornitori DBF file."""
+        try:
+            config = get_config()
+            return config.get_dbf_path('fornitori')
+        except Exception:
+            # Fallback
+            mode = config.get_mode() if 'config' in locals() else 'dev'
+            base_path = get_config().get(f"{mode.upper()}_DB_BASE_PATH")
+            return os.path.join(base_path, 'DATI', 'FORNITOR.DBF')
 
 # Istanza singleton
 spese_fornitori_service = SpeseFornitoriService(None) # Pass None as db_manager is initialized in BaseService via get_database_manager if None

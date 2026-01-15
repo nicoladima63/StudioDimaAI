@@ -7,21 +7,23 @@ import {
   CNavLink,
   CTabContent,
   CTabPane,
-  CButton,
   CRow,
   CCard,
   CCardHeader,
   CCardBody,
+  CPagination,
+  CPaginationItem,
+  CButton,
 } from "@coreui/react";
-// import FiltriSpeseComponent from "../components/FiltriSpese";
-// import RicercaArticoli from "../components/RicercaArticoli";
+import SpeseFilters from "../components/SpeseFilters";
+import SpeseStats from "../components/SpeseStats";
+import SpeseTable from "../components/SpeseTable";
+import SpeseAggregatedTable from "../components/SpeseAggregatedTable";
 import RiepilogoSpeseTab from "../components/RiepilogoSpeseTab";
-// import ContiSottocontiTab from "../components/ContiSottocontiTab";
 import { speseFornitioriService } from "../services/spese.service";
 import type {
   FiltriSpese,
   SpesaFornitore,
-  DettaglioSpesaFornitore,
 } from "../types";
 
 const SpesePage: React.FC = () => {
@@ -32,91 +34,97 @@ const SpesePage: React.FC = () => {
     page: 1,
   });
 
-  const [spese, setSpese] = useState<SpesaFornitore[]>([]);
+  // State for Data
+  const [aggregatedData, setAggregatedData] = useState<any[]>([]);
+  const [invoicesData, setInvoicesData] = useState<SpesaFornitore[]>([]);
+
+  // State for Navigation/Drill-down
+  const [selectedSupplier, setSelectedSupplier] = useState<{ ids: string, name: string } | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
-  const [totalBeforeLimit, setTotalBeforeLimit] = useState(0);
+  const [totalInvoices, setTotalInvoices] = useState(0);
 
-  const caricaSpese = async (filtriSpecifici?: FiltriSpese) => {
+  // Load Aggregated Data (Main View)
+  const loadAggregatedData = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const filtriDaUsare = filtriSpecifici || filtri;
-      const response = await speseFornitioriService.getSpeseFornitori(
-        filtriDaUsare
-      );
-
+      const response = await speseFornitioriService.getRiepilogoSpese(filtri);
       if (response.success) {
-        setSpese(response.data);
-        setTotal(response.total);
-        setTotalBeforeLimit(response.total_before_limit);
+        setAggregatedData(response.data);
       } else {
-        setError("Errore nel caricamento delle spese");
+        setError("Errore nel caricamento del riepilogo fornitori");
       }
     } catch (err: any) {
-      console.error("Errore caricamento spese:", err);
+      console.error("Errore caricamento riepilogo:", err);
       setError(err.message || "Errore di connessione");
     } finally {
       setLoading(false);
     }
   };
 
-  // Carica spese al primo render e quando cambiano i filtri
+  // Load Invoices Data (Drill-down View)
+  const loadInvoices = async () => {
+    if (!selectedSupplier) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      // Merge current filters with selected supplier
+      const invoiceFilters: FiltriSpese = {
+        ...filtri,
+        codice_fornitore: selectedSupplier.ids, // Pass comma-separated IDs
+        page: filtri.page,
+        limit: filtri.limit || 50
+      };
+
+      const response = await speseFornitioriService.getSpeseFornitori(invoiceFilters);
+
+      if (response.success) {
+        setInvoicesData(response.data);
+        setTotalInvoices(response.total);
+      }
+    } catch (err: any) {
+      console.error("Errore caricamento fatture:", err);
+      setError(err.message || "Errore di connessione");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Effect: Reload Aggregated Data when filters change (and we are NOT in drill-down)
   useEffect(() => {
-    caricaSpese();
-  }, []);
+    setSelectedSupplier(null); // Reset drill-down on filter change
+    loadAggregatedData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtri.anno, filtri.conto_id, filtri.branca_id, filtri.sottoconto_id]); // Only major filters reset view
+
+  // Effect: Load invoices when supplier is selected or page changes
+  useEffect(() => {
+    if (selectedSupplier) {
+      loadInvoices();
+    }
+  }, [selectedSupplier, filtri.page, filtri.limit]);
 
   const handleFiltriChange = (nuoviFiltri: FiltriSpese) => {
     setFiltri(nuoviFiltri);
   };
 
-  const handleApplicaFiltri = () => {
-    caricaSpese();
+  const handleSelectSupplier = (ids: string, name: string) => {
+    setSelectedSupplier({ ids, name });
+    setFiltri(prev => ({ ...prev, page: 1 })); // Reset to page 1 for details
   };
 
-  const handleTabellaFiltriChange = (nuoviFiltri: FiltriSpese) => {
-    setFiltri(nuoviFiltri);
-    // Auto-carica quando cambiano i filtri della tabella (paginazione)
-    setTimeout(() => {
-      caricaSpese();
-    }, 50);
-  };
-
-  const calcolaTotale = () => {
-    return spese.reduce((acc, spesa) => acc + spesa.costo_iva, 0);
-  };
-
-  const handleSelezionaFattura = (fatturaId: string) => {
-    // Passa alla tab fatture
-    setActiveTab("fatture");
-
-    // Applica filtro ESCLUSIVO per quella fattura (rimuove altri filtri)
-    const nuoviFiltri: FiltriSpese = {
-      anno: new Date().getFullYear(),
-      fattura_id: fatturaId,
-      page: 1,
-      limit: 50,
-    };
-    setFiltri(nuoviFiltri);
-
-    // Ricarica i dati con i nuovi filtri direttamente
-    caricaSpese(nuoviFiltri);
-  };
-
-  const handleCaricaMagazzino = (dettaglio: DettaglioSpesaFornitore) => {
-    // TODO: Implementare logica caricamento magazzino
-    console.log("Caricamento magazzino:", dettaglio);
-    alert(
-      `Caricamento magazzino non ancora implementato.\nArticolo: ${dettaglio.descrizione}`
-    );
+  const handleBackToAggregated = () => {
+    setSelectedSupplier(null);
+    setFiltri(prev => ({ ...prev, page: 1 }));
   };
 
   return (
     <CCard>
       <CCardHeader>
-        <h5>Spese Fornitori</h5>
+        <h5>Spese Fornitori {selectedSupplier ? `- Dettaglio: ${selectedSupplier.name}` : '- Riepilogo per Fornitore'}</h5>
       </CCardHeader>
       <CCardBody>
         {/* Navigation Tabs */}
@@ -127,45 +135,18 @@ const SpesePage: React.FC = () => {
               onClick={() => setActiveTab("fatture")}
               style={{ cursor: "pointer" }}
             >
-              📋 Fatture Fornitori
+              📋 {selectedSupplier ? 'Dettaglio Fornitore' : 'Riepilogo Fornitori'}
             </CNavLink>
           </CNavItem>
-          {/* <CNavItem>
-            <CNavLink
-              active={activeTab === "ricerca"}
-              onClick={() => setActiveTab("ricerca")}
-              style={{ cursor: "pointer" }}
-            >
-              🔍 Ricerca Articoli
-            </CNavLink>
-          </CNavItem> */}
           <CNavItem>
             <CNavLink
               active={activeTab === "statistiche"}
               onClick={() => setActiveTab("statistiche")}
               style={{ cursor: "pointer" }}
             >
-              📊 Analisi & Riepilogo
+              📊 Analisi Avanzata
             </CNavLink>
           </CNavItem>
-          {/* <CNavItem>
-            <CNavLink
-              active={activeTab === "gestionale"}
-              onClick={() => setActiveTab("gestionale")}
-              style={{ cursor: "pointer" }}
-            >
-              🎯 Test Gestionale v2
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink
-              active={activeTab === "conti-sottoconti"}
-              onClick={() => setActiveTab("conti-sottoconti")}
-              style={{ cursor: "pointer" }}
-            >
-              🧾 Conti-Sottoconti
-            </CNavLink>
-          </CNavItem> */}
         </CNav>
 
         {error && (
@@ -173,90 +154,77 @@ const SpesePage: React.FC = () => {
             {error}
           </CAlert>
         )}
-        {/* Tab Content */}
+
         <CTabContent>
-          {/* Fatture Tab */}
           <CTabPane visible={activeTab === "fatture"} role="tabpanel">
+
+            {/* Filters always visible */}
             <CRow className="mt-4">
-              <CCol md={2}>
-                {/* <FiltriSpeseComponent
+              <CCol md={12}>
+                <SpeseFilters
                   filtri={filtri}
                   onFiltriChange={handleFiltriChange}
-                  onApplicaFiltri={handleApplicaFiltri}
                   loading={loading}
-                /> */}
-              </CCol>
-              <CCol md={10}>
-
-
+                />
               </CCol>
             </CRow>
 
-            {/* Indicatore filtro specifico */}
-            {filtri.fattura_id && (
-              <CAlert color="warning" className="mb-3">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    🔍 <strong>Filtro attivo:</strong> Visualizzazione fattura
-                    specifica ID: {filtri.fattura_id}
-                  </div>
-                  <CButton
-                    color="warning"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setFiltri({
-                        anno: new Date().getFullYear(),
-                        limit: 50,
-                        page: 1,
-                      });
-                      setTimeout(() => caricaSpese(), 50);
-                    }}
-                  >
-                    ✕ Rimuovi Filtro
-                  </CButton>
-                </div>
-              </CAlert>
-            )}
+            <SpeseStats filtri={filtri} />
 
-            {/* Riepilogo rapido */}
-            {spese.length > 0 && (
-              <CAlert color="info" className="mb-4">
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>Riepilogo:</strong> {spese.length} spese trovate
-                  </div>
-                  <div>
-                    <strong>Totale con IVA:</strong>{" "}
-                    {new Intl.NumberFormat("it-IT", {
-                      style: "currency",
-                      currency: "EUR",
-                    }).format(calcolaTotale())}
-                  </div>
-                </div>
-              </CAlert>
-            )}
+            <CRow className="mt-3">
+              <CCol md={12}>
+                {selectedSupplier ? (
+                  <>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <h5>Fatture: {selectedSupplier.name}</h5>
+                      <CButton color="secondary" onClick={handleBackToAggregated}>
+                        ← Torna al Riepilogo
+                      </CButton>
+                    </div>
+                    <SpeseTable spese={invoicesData} loading={loading} />
+
+                    {/* Pagination for Invoices */}
+                    {totalInvoices > 0 && (
+                      <CRow className="mt-3">
+                        <CCol className="d-flex justify-content-center">
+                          <CPagination>
+                            <CPaginationItem
+                              disabled={filtri.page === 1 || loading}
+                              onClick={() => handleFiltriChange({ ...filtri, page: (filtri.page || 1) - 1 })}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              Precedente
+                            </CPaginationItem>
+                            <CPaginationItem active>
+                              Pagina {filtri.page || 1}
+                            </CPaginationItem>
+                            <CPaginationItem
+                              disabled={invoicesData.length < (filtri.limit || 50) || loading}
+                              onClick={() => handleFiltriChange({ ...filtri, page: (filtri.page || 1) + 1 })}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              Successiva
+                            </CPaginationItem>
+                          </CPagination>
+                        </CCol>
+                      </CRow>
+                    )}
+                  </>
+                ) : (
+                  <SpeseAggregatedTable
+                    data={aggregatedData}
+                    loading={loading}
+                    onSelectSupplier={handleSelectSupplier}
+                  />
+                )}
+              </CCol>
+            </CRow>
 
           </CTabPane>
 
-          {/* Ricerca Articoli Tab */}
-          {/* <CTabPane visible={activeTab === "ricerca"} role="tabpanel">
-            <RicercaArticoli
-              onSelezionaFattura={handleSelezionaFattura}
-              onCaricaMagazzino={handleCaricaMagazzino}
-              autoFocus={activeTab === "ricerca"}
-            />
-          </CTabPane> */}
-
-          {/* Statistiche Categorizzazione Tab */}
           <CTabPane visible={activeTab === "statistiche"} role="tabpanel">
             <RiepilogoSpeseTab />
           </CTabPane>
-
-          {/* Conti-Sottoconti Tab */}
-          {/* <CTabPane visible={activeTab === "conti-sottoconti"} role="tabpanel">
-            <ContiSottocontiTab />
-          </CTabPane> */}
 
         </CTabContent>
       </CCardBody>

@@ -27,6 +27,9 @@ export interface FiltriSpese {
   codice_fornitore?: string;
   numero_documento?: string;
   fattura_id?: string;
+  conto_id?: string | number;
+  branca_id?: string | number;
+  sottoconto_id?: string | number;
   limit?: number;
   page?: number;
 }
@@ -121,7 +124,9 @@ export interface RicercaArticoliResponse {
 }
 
 export interface RiepilogoFornitore {
-  codice_fornitore: string;
+  id: string;
+  nome: string;
+  codice_fornitore?: string;
   importo_netto: number;
   importo_iva: number;
   importo_totale: number;
@@ -155,4 +160,15 @@ export interface RiepilogoSpeseFornitoriAnnoResponse {
     count: number;
   };
   message?: string;
+}
+
+export interface FornitoreAttivo {
+  id: string;
+  nome: string;
+}
+
+export interface ActiveSuppliersResponse {
+  success: boolean;
+  data: FornitoreAttivo[];
+  message: string;
 }

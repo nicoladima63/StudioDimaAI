@@ -57,6 +57,9 @@ def get_spese_list():
             'data_fine': request.args.get('data_fine'),
             'numero_documento': request.args.get('numero_documento'),
             'fattura_id': request.args.get('fattura_id'),
+            'conto_id': request.args.get('conto_id'),
+            'branca_id': request.args.get('branca_id'),
+            'sottoconto_id': request.args.get('sottoconto_id'),
             'search': request.args.get('q') or request.args.get('search')
         }
         
@@ -78,6 +81,43 @@ def get_spese_list():
             
     except Exception as e:
         logger.error(f"Error in get_spese_list: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
+
+@spese_fornitori_v2_bp.route('/spese-fornitori/active-suppliers', methods=['GET'])
+@jwt_required()
+def get_active_suppliers_list():
+    """
+    Get list of active suppliers for the given filters.
+    """
+    try:
+        anno = request.args.get('anno', type=int)
+        conto_id = request.args.get('conto_id')
+        branca_id = request.args.get('branca_id')
+        sottoconto_id = request.args.get('sottoconto_id')
+        
+        if not anno:
+            return format_response(
+                success=False,
+                error="Year 'anno' is required"
+            ), 400
+            
+        suppliers = spese_fornitori_service.get_active_suppliers(
+            anno=anno,
+            conto_id=conto_id,
+            branca_id=branca_id,
+            sottoconto_id=sottoconto_id
+        )
+        
+        return format_response(
+            data=suppliers,
+            message=f"Retrieved {len(suppliers)} active suppliers"
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in get_active_suppliers_list: {e}")
         return format_response(
             success=False,
             error=str(e)
@@ -212,7 +252,16 @@ def get_riepilogo_spese():
         current_year = datetime.now().year
         anno = request.args.get('anno', current_year, type=int)
         
-        result = spese_fornitori_service.get_riepilogo_spese(anno)
+        conto_id = request.args.get('conto_id', type=int)
+        branca_id = request.args.get('branca_id', type=int)
+        sottoconto_id = request.args.get('sottoconto_id', type=int)
+
+        result = spese_fornitori_service.get_riepilogo_spese(
+            anno=anno,
+            conto_id=conto_id,
+            branca_id=branca_id,
+            sottoconto_id=sottoconto_id
+        )
         
         if result.get('success'):
             return format_response(
@@ -259,6 +308,45 @@ def get_production_years():
             
     except Exception as e:
         logger.error(f"Error in get_production_years: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
+
+@spese_fornitori_v2_bp.route('/spese-fornitori/stats', methods=['GET'])
+@jwt_required()
+def get_spese_stats():
+    """
+    Get expense statistics based on filters.
+    """
+    try:
+        filters = {
+            'codice_fornitore': request.args.get('codice_fornitore'),
+            'anno': request.args.get('anno'),
+            'mese': request.args.get('mese'),
+            'data_inizio': request.args.get('data_inizio'),
+            'data_fine': request.args.get('data_fine'),
+            'fattura_id': request.args.get('fattura_id'),
+            'conto_id': request.args.get('conto_id'),
+            'search': request.args.get('q') or request.args.get('search')
+        }
+        filters = {k: v for k, v in filters.items() if v is not None}
+        
+        result = spese_fornitori_service.get_stats(filters=filters)
+        
+        if result.get('success'):
+            return format_response(
+                data=result.get('data'),
+                message="Stats retrieved successfully"
+            )
+        else:
+            return format_response(
+                success=False,
+                error=result.get('error', 'Error retrieving stats')
+            ), 500
+            
+    except Exception as e:
+        logger.error(f"Error in get_spese_stats: {e}")
         return format_response(
             success=False,
             error=str(e)

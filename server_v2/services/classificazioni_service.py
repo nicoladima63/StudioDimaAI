@@ -154,3 +154,36 @@ class ClassificazioniService(BaseService):
         except Exception as e:
             print(f"Errore nella rimozione classificazione fornitore: {e}")
             return False
+
+    def get_fornitori_by_conto(self, contoid: int) -> List[str]:
+        """
+        Wrapper to maintain backward compatibility.
+        """
+        return self.get_supplier_ids_by_classification(contoid)
+
+    def get_supplier_ids_by_classification(self, contoid: int = None, brancaid: int = None, sottocontoid: int = None) -> List[str]:
+        """
+        Ottiene la lista dei codici fornitore filtrati per classificazione gerarchica.
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                query = "SELECT codice_riferimento FROM classificazioni_costi WHERE tipo_entita = 'fornitore'"
+                params = []
+                
+                if contoid:
+                    query += " AND contoid = ?"
+                    params.append(contoid)
+                
+                if brancaid:
+                    query += " AND brancaid = ?"
+                    params.append(brancaid)
+                    
+                if sottocontoid:
+                    query += " AND sottocontoid = ?"
+                    params.append(sottocontoid)
+                
+                cursor = conn.execute(query, tuple(params))
+                return [str(row[0]).strip() for row in cursor.fetchall()]
+        except Exception as e:
+            print(f"Errore nel recupero fornitori per classificazione: {e}")
+            return []

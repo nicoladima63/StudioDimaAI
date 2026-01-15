@@ -195,16 +195,14 @@ def get_conti():
     try:
         user_id = require_auth()
         
-        # Get accounts using service layer
-        classificazioni_service = ClassificazioniService(g.database_manager)
-        conti = classificazioni_service.get_conti()
-        
-        # Clean DBF data for JSON response
-        clean_data = handle_dbf_data(conti)
+        # Get accounts using ContiService
+        from services.conti_service import ContiService
+        conti_service = ContiService(g.database_manager)
+        conti = conti_service.get_all_conti()
         
         return format_response(
-            data=clean_data,
-            message=f"Retrieved {len(clean_data)} accounts"
+            data=conti,
+            message=f"Retrieved {len(conti)} accounts"
         )
         
     except DatabaseError as e:
@@ -221,31 +219,30 @@ def get_conti():
             error="An unexpected error occurred"
         ), 500
 
-@classificazioni_v2_bp.route('/classificazioni/branche/<int:conto_id>', methods=['GET'])
+@classificazioni_v2_bp.route('/classificazioni/branche', methods=['GET'])
 @jwt_required()
-def get_branche(conto_id):
+def get_branche():
     """
     Get branches for specific account.
-    
-    Args:
-        conto_id (int): Account ID
-        
-    Returns:
-        JSON response with branches list
     """
     try:
         user_id = require_auth()
+        conto_id = request.args.get('conto_id', type=int)
         
-        # Get branches using service layer
-        classificazioni_service = ClassificazioniService(g.database_manager)
-        branche = classificazioni_service.get_branche(conto_id)
+        if not conto_id:
+            return format_response(
+                success=False,
+                error="Parameter 'conto_id' is required"
+            ), 400
         
-        # Clean DBF data for JSON response
-        clean_data = handle_dbf_data(branche)
+        # Get branches using ContiService
+        from services.conti_service import ContiService
+        conti_service = ContiService(g.database_manager)
+        branche = conti_service.get_branche(conto_id)
         
         return format_response(
-            data=clean_data,
-            message=f"Retrieved {len(clean_data)} branches for account {conto_id}"
+            data=branche,
+            message=f"Retrieved {len(branche)} branches for account {conto_id}"
         )
         
     except ValidationError as e:
@@ -269,31 +266,30 @@ def get_branche(conto_id):
             error="An unexpected error occurred"
         ), 500
 
-@classificazioni_v2_bp.route('/classificazioni/sottoconti/<int:branca_id>', methods=['GET'])
+@classificazioni_v2_bp.route('/classificazioni/sottoconti', methods=['GET'])
 @jwt_required()
-def get_sottoconti(branca_id):
+def get_sottoconti():
     """
     Get sub-accounts for specific branch.
-    
-    Args:
-        branca_id (int): Branch ID
-        
-    Returns:
-        JSON response with sub-accounts list
     """
     try:
         user_id = require_auth()
+        branca_id = request.args.get('branca_id', type=int)
         
-        # Get sub-accounts using service layer
-        classificazioni_service = ClassificazioniService(g.database_manager)
-        sottoconti = classificazioni_service.get_sottoconti(branca_id)
+        if not branca_id:
+            return format_response(
+                success=False,
+                error="Parameter 'branca_id' is required"
+            ), 400
         
-        # Clean DBF data for JSON response
-        clean_data = handle_dbf_data(sottoconti)
+        # Get sub-accounts using ContiService
+        from services.conti_service import ContiService
+        conti_service = ContiService(g.database_manager)
+        sottoconti = conti_service.get_sottoconti(branca_id)
         
         return format_response(
-            data=clean_data,
-            message=f"Retrieved {len(clean_data)} sub-accounts for branch {branca_id}"
+            data=sottoconti,
+            message=f"Retrieved {len(sottoconti)} sub-accounts for branch {branca_id}"
         )
         
     except ValidationError as e:
