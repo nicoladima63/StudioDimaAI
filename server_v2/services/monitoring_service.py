@@ -79,6 +79,7 @@ class MonitoringService:
     """
     
     def __init__(self, config_dir: str = "data/monitoring"):
+        print("DEBUG: MonitoringService.__init__ started")
         self.config = get_config()
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(parents=True, exist_ok=True)
@@ -86,20 +87,29 @@ class MonitoringService:
         self.lock = threading.RLock()
         self.active_monitors: Dict[str, MonitorInstance] = {}
         
+        print("DEBUG: Initializing AutomationService...")
         self.automation_service = AutomationService()
+        print("DEBUG: Initializing SnapshotManager...")
         self.snapshot_manager = get_snapshot_manager()
+        print("DEBUG: Initializing FileWatcher...")
         self.file_watcher = get_file_watcher()
+        print("DEBUG: Initializing DbfReader...")
         self.dbf_reader = get_optimized_reader()
+        print("DEBUG: Initializing DbfDataService...")
         self.dbf_data_service = get_dbf_data_service()
         
         # Inizializza il sistema di configurazione trigger
         from services.trigger_config import TriggerConfigManager
+        print("DEBUG: Initializing TriggerConfigManager...")
         self.trigger_config_manager = TriggerConfigManager()
         
         self.saved_configs: Dict[str, MonitorConfig] = {}
         self.logs: List[Dict[str, Any]] = []
+        print("DEBUG: Loading settings...")
         self.settings = self._load_settings()
+        print("DEBUG: Loading saved configs...")
         self._load_saved_configs()
+        print("DEBUG: MonitoringService.__init__ finished")
 
         self._dbf_filename_to_logical_name = {
             info['file'].split('.')[0].lower(): logical_name

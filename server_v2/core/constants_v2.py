@@ -121,6 +121,42 @@ COLONNE = {
         'nome_prestazione': 'DB_ONDESCR',   # Nome prestazione (es: Visita di controllo)
         'costo': 'DB_ONCOSTO',             # Costo (es: 30,00)
         'codice_breve': 'DB_ONCODIC'        # Codice breve (es: cont, bott, nylo)
+    },
+    'fornitori': {
+        'id': 'DB_CODE',
+        'nome': 'DB_FONOME',
+        'codice_fiscale': 'DB_FOCODFI',
+        'partita_iva': 'DB_FOPAIVA',
+        'indirizzo': 'DB_FOINDIR',
+        'comune': 'DB_FORCITTA',
+        'cap': 'DB_FOCAP',
+        'provincia': 'DB_FOPROVI',
+        'telefono': 'DB_FOTELEF',
+        'cellulare': 'DB_FOCELLU',
+        'email': 'DB_FOEMAIL',
+        'note': 'DB_NOTE'
+    },
+    'spese_fornitori': {
+        'id': 'DB_CODE',
+        'codice_fornitore': 'DB_SPFOCOD',
+        'descrizione': 'DB_SPDESCR',
+        'costo_netto': 'DB_SPCOSTO',
+        'costo_iva': 'DB_SPCOIVA',
+        'data_spesa': 'DB_SPDATA',
+        'data_registrazione': 'DB_SPDATAR',
+        'numero_documento': 'DB_SPNUMER',
+        'note': 'DB_NOTE'
+    },
+    'dettagli_spese_fornitori': {
+        'id_fattura': 'DB_VOSPCOD',
+        'codice_articolo': 'DB_VOSOCOD',    #da verificare non è sicuro
+        'descrizione': 'DB_VODESCR',
+        'quantita': 'DB_VOQUANT',
+        'prezzo_unitario': 'DB_VOPREZZ',
+        'sconto': 'DB_VOSCONT',
+        'ritenuta': 'DB_VORITEN',
+        'aliquota_iva': 'DB_VOIVA',
+        'codice_iva': 'DB_VOIVCOD'
     }
 }
 
@@ -153,7 +189,27 @@ DBF_TABLES = {
         'file': 'ONORARIO.DBF',
         'categoria': 'DATI',
         'descrizione': 'Tariffario prestazioni'
-    }
+    },
+    'fornitori': {
+        'file': 'FORNITOR.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Anagrafica fornitori'
+    },
+    'spese': {
+        'file': 'SPESAFOR.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Spese fornitori'
+    },
+    'voci_spese': {
+        'file': 'VOCISPES.DBF',
+        'categoria': 'DATI',
+    },
+    'fatture': {
+        'file': 'FATTURE.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Fatture clienti'
+    },
+
 }
 
 # =============================================================================
@@ -230,12 +286,12 @@ VALID_NO_PATIENT_TYPES = list(TIPI_APPUNTAMENTO.keys())
 # =============================================================================
 
 MEDICI = {
-    1: 'Dr. Nicola',
-    2: 'Dr.ssa Lara', 
-    3: 'Dr. Giacomo',
-    4: 'Dr. Roberto',
-    5: 'Dr.ssa Anet',
-    6: 'Dr.ssa Rossella'
+    1: 'Dr. Nicola Di Martino',
+    2: 'Dr.ssa Lara ', 
+    4: 'Dr. Giacomo D Orlandi',
+    3: 'Dr. Roberto Calvisi',
+    5: 'Dr.ssa Anet Jablonvsky',
+    6: 'Dr.ssa Rossella Pisante'
 }
 
 # =============================================================================

@@ -8,8 +8,10 @@ import os
 from dbfread import DBF
 from app_v2 import require_auth, format_response, handle_dbf_data
 from core.exceptions import ValidationError, DatabaseError
-from services.fornitori_service import FornitoriService
 from services.materiali_migration_service import MaterialiMigrationService
+from services.spese_fornitori_service import spese_fornitori_service
+from services.fornitori_service import FornitoriService
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -35,6 +37,51 @@ def _safe_float(value, default_val=0.0):
         return default_val
 
 
+
+@spese_fornitori_v2_bp.route('/spese-fornitori/', methods=['GET'])
+@jwt_required()
+def get_spese_list():
+    """
+    Get paginated list of expenses with optional filtering.
+    """
+    try:
+        # Parse query parameters
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 50, type=int)
+        
+        filters = {
+            'codice_fornitore': request.args.get('codice_fornitore'),
+            'anno': request.args.get('anno'),
+            'mese': request.args.get('mese'),
+            'data_inizio': request.args.get('data_inizio'),
+            'data_fine': request.args.get('data_fine'),
+            'numero_documento': request.args.get('numero_documento'),
+            'fattura_id': request.args.get('fattura_id'),
+            'search': request.args.get('q') or request.args.get('search')
+        }
+        
+        # Remove None values
+        filters = {k: v for k, v in filters.items() if v is not None}
+        
+        result = spese_fornitori_service.get_spese(page=page, per_page=limit, filters=filters)
+        
+        return format_response(
+            data=result['spese'],
+            meta={
+                'page': result['page'],
+                'per_page': result['per_page'],
+                'total': result['total'],
+                'pages': result['pages']
+            },
+            message=f"Retrieved {len(result['spese'])} expenses"
+        )
+            
+    except Exception as e:
+        logger.error(f"Error in get_spese_list: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
 
 @spese_fornitori_v2_bp.route('/spese-fornitori/health', methods=['GET'])
 def health_check():
@@ -143,8 +190,127 @@ def ricerca_articoli():
             success=False,
             error="An unexpected error occurred"
         ), 500
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
 
-@spese_fornitori_v2_bp.route('/spese-fornitori/<fattura_id>/all', methods=['GET'])
+@spese_fornitori_v2_bp.route('/spese-fornitori/riepilogo', methods=['GET'])
+@jwt_required()
+def get_riepilogo_spese():
+    """
+    Get aggregated expenses by supplier for a specific year.
+    
+    Query Parameters:
+        anno (int): Year to filter (required)
+        
+    Returns:
+        JSON response with aggregated data
+    """
+    try:
+        # Parse query parameters
+        current_year = datetime.now().year
+        anno = request.args.get('anno', current_year, type=int)
+        
+        result = spese_fornitori_service.get_riepilogo_spese(anno)
+        
+        if result.get('success'):
+            return format_response(
+                data=result.get('data'),
+                message=f"Riepilogo spese for year {anno} retrieved successfully",
+                meta={
+                    'year': anno,
+                    'grand_total': result.get('grand_total', 0),
+                    'count': result.get('total_suppliers', 0)
+                }
+            )
+        else:
+            return format_response(
+                success=False,
+                error=result.get('error', 'Unknown error during aggregation')
+            ), 500
+            
+    except Exception as e:
+        logger.error(f"Error in get_riepilogo_spese: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
+
+@spese_fornitori_v2_bp.route('/production/years', methods=['GET'])
+@jwt_required()
+def get_production_years():
+    """
+    Get distinct years available in production data.
+    """
+    try:
+        result = spese_fornitori_service.get_available_production_years()
+        
+        if result.get('success'):
+            return format_response(
+                data=result.get('data'),
+                message="Production years retrieved successfully"
+            )
+        else:
+            return format_response(
+                success=False,
+                error=result.get('error', 'Error retrieving years')
+            ), 500
+            
+    except Exception as e:
+        logger.error(f"Error in get_production_years: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
+
+@spese_fornitori_v2_bp.route('/production/analyze-operator', methods=['GET'])
+@jwt_required()
+def analyze_production():
+    """
+    Analyze production/turnover by operator.
+    
+    Query Parameters:
+        start_date (str): YYYY-MM-DD
+        end_date (str): YYYY-MM-DD
+        operator_name (str): Optional filter
+        
+    Returns:
+        JSON response with production stats
+    """
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        operator_name = request.args.get('operator_name')
+        
+        if not start_date or not end_date:
+            return format_response(
+                success=False,
+                error="start_date and end_date are required"
+            ), 400
+            
+        result = spese_fornitori_service.get_analisi_produzione_operatore(
+            start_date, end_date, operator_name
+        )
+        
+        if result.get('success'):
+            return format_response(
+                data=result.get('data'),
+                message="Production analysis completed successfully"
+            )
+        else:
+            return format_response(
+                success=False,
+                error=result.get('error', 'Error analyzing production')
+            ), 500
+            
+    except Exception as e:
+        logger.error(f"Error in analyze_production: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
+@spese_fornitori_v2_bp.route('/spese-fornitori/<fattura_id>', methods=['GET'])
 @jwt_required()
 def get_fattura_completa(fattura_id):
     """

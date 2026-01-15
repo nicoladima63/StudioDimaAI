@@ -16,9 +16,11 @@ const RicercaArticoli = React.lazy(() => import('@/features/materiali/pages/Rice
 const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
 const PazientiPage = React.lazy(() => import('@/features/pazienti/pages/PazientiPage'))
 const RicettaElettronicaPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RicettaElettronicaPage'))
-const CalendarPage=React.lazy(()=>import('@/features/calendar/pages/CalendarPage'))
-const ContiPage=React.lazy(()=>import('@/features/conti/pages/ContiPage'))
-const EisenhowerMatrixPage=React.lazy(()=>import('@/features/tempo/pages/TempoPage'))
+const CalendarPage = React.lazy(() => import('@/features/calendar/pages/CalendarPage'))
+const ContiPage = React.lazy(() => import('@/features/conti/pages/ContiPage'))
+const SpesePage = React.lazy(() => import('@/features/spese/pages/SpesePage'))
+const CollaboratoriPage = React.lazy(() => import('@/features/collaboratori/pages/CollaboratoriPage'))
+const EisenhowerMatrixPage = React.lazy(() => import('@/features/tempo/pages/TempoPage'))
 const NotFoundPage = React.lazy(() => import('@/components/ui/NotFoundPage'))
 
 //test page
@@ -26,12 +28,12 @@ const TestSelectPage = React.lazy(() => import('@/features/test/TestSelectPage')
 const RicettaTestPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RNETestPage'))
 
 //settings page
-const SettingCalendarPage=React.lazy(()=>import ('@/features/settings/pages/CalendarSettings'))
-const TemplatesPage=React.lazy(()=>import ('@/features/settings/pages/TemplatesPage'))
-const MonitoringSettingsPage=React.lazy(()=>import ('@/features/settings/pages/MonitoringSettings'))
-const MonitorPrestazioniStandalonePage=React.lazy(()=>import ('@/features/settings/pages/MonitorPrestazioniStandalonePage'))
-const AutomationPage=React.lazy(()=>import ('@/features/settings/pages/AutomationPage'))
-const SchedulerPage=React.lazy(()=>import('@/features/scheduler/pages/SchedulerPage'))
+const SettingCalendarPage = React.lazy(() => import('@/features/settings/pages/CalendarSettings'))
+const TemplatesPage = React.lazy(() => import('@/features/settings/pages/TemplatesPage'))
+const MonitoringSettingsPage = React.lazy(() => import('@/features/settings/pages/MonitoringSettings'))
+const MonitorPrestazioniStandalonePage = React.lazy(() => import('@/features/settings/pages/MonitorPrestazioniStandalonePage'))
+const AutomationPage = React.lazy(() => import('@/features/settings/pages/AutomationPage'))
+const SchedulerPage = React.lazy(() => import('@/features/scheduler/pages/SchedulerPage'))
 
 // User Management
 const UserListPage = React.lazy(() => import('@/features/users/UserListPage'))
@@ -51,7 +53,7 @@ const AppRouter: React.FC = () => {
         {/* Public routes */}
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
-        
+
         {/* Protected routes with layout */}
         <Route
           path='/'
@@ -64,18 +66,20 @@ const AppRouter: React.FC = () => {
           {/* Dashboard */}
           <Route index element={<Navigate to='/dashboard' replace />} />
           <Route path='dashboard' element={<Dashboard />} />
-          
+
           {/* Feature routes */}
           <Route path='eisenhower' element={<EisenhowerMatrixPage />} />
           <Route path='materiali' element={<MaterialiPage />} />
           <Route path='materiali/migrazione' element={<MaterialiMigrazione />} />
           <Route path='materiali/ricerca' element={<RicercaArticoli />} />
-          
+
           <Route path='fornitori' element={<FornitoriPage />} />
           <Route path='pazienti' element={<PazientiPage />} />
-          <Route path='conti' element={<ContiPage/>} />
+          <Route path='conti' element={<ContiPage />} />
           <Route path='ricetta' element={<RicettaElettronicaPage />} />
           <Route path='calendar' element={<CalendarPage />} />
+          <Route path='spese' element={<SpesePage />} />
+          <Route path='collaboratori' element={<CollaboratoriPage />} />
           {/* Pagina di test per le select */}
           <Route path='test' element={<TestSelectPage />} />
           <Route path='ricetta/test' element={<RicettaTestPage />} />
@@ -101,7 +105,7 @@ const AppRouter: React.FC = () => {
           <Route path='statistiche/*' element={<StatisticheRoutes />} />
           */}
         </Route>
-        
+
         {/* 404 route */}
         <Route path='*' element={<NotFoundPage />} />
       </Routes>

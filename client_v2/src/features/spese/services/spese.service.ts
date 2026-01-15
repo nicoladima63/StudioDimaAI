@@ -1,4 +1,4 @@
-import apiClient from "@/api/client";
+import apiClient from "@/services/api/client";
 import type { 
   SpeseFornitioriResponse,
   RiepilogoSpeseFornitioriResponse, 
@@ -67,7 +67,7 @@ export const speseFornitioriService = {
       params.append('limit', filtri.limit.toString());
     }
     
-    const response = await apiClient.get(`/api/spese-fornitori/?${params.toString()}`);
+    const response = await apiClient.get(`/spese-fornitori/?${params.toString()}`);
     return response.data;
   },
 
@@ -75,7 +75,7 @@ export const speseFornitioriService = {
    * Ottieni riepilogo spese per analisi
    */
   async getRiepilogoSpese(anno: number): Promise<RiepilogoSpeseFornitoriAnnoResponse> {
-    const response = await apiClient.get(`/api/spese-fornitori/riepilogo?anno=${anno}`);
+    const response = await apiClient.get(`/spese-fornitori/riepilogo?anno=${anno}`);
     return response.data;
   },
 
@@ -83,7 +83,7 @@ export const speseFornitioriService = {
    * Ottieni dettagli di una specifica fattura fornitore
    */
   async getDettagliFattura(fatturaId: string): Promise<DettagliSpesaResponse> {
-    const response = await apiClient.get(`/api/spese-fornitori/${fatturaId}/dettagli`);
+    const response = await apiClient.get(`/spese-fornitori/${fatturaId}/dettagli`);
     return response.data;
   },
 
@@ -98,7 +98,7 @@ export const speseFornitioriService = {
       params.append('limit', limit.toString());
     }
     
-    const response = await apiClient.get(`/api/spese-fornitori/ricerca-articoli?${params.toString()}`);
+    const response = await apiClient.get(`/spese-fornitori/ricerca-articoli?${params.toString()}`);
     return response.data;
   },
 
@@ -116,7 +116,7 @@ export const speseFornitioriService = {
    * Ottieni categorie di spesa dal piano dei conti del gestionale
    */
   async getCategorieGestionale(): Promise<{ success: boolean; data: CategoriaGestionale[]; total: number }> {
-    const response = await apiClient.get('/api/spese-fornitori/categorie-gestionale');
+    const response = await apiClient.get('/spese-fornitori/categorie-gestionale');
     return response.data;
   },
 
@@ -124,7 +124,7 @@ export const speseFornitioriService = {
    * Categorizza automaticamente una spesa
    */
   async categorizzaSpesa(descrizione: string, fornitore?: string): Promise<{ success: boolean; data: RisultatoCategorizzazione }> {
-    const response = await apiClient.post('/api/spese-fornitori/categorizza-spesa', {
+    const response = await apiClient.post('/spese-fornitori/categorizza-spesa', {
       descrizione,
       fornitore: fornitore || ''
     });
@@ -144,7 +144,12 @@ export const speseFornitioriService = {
     params.append('end_date', endDate);
     if (operatorName) params.append('operator_name', operatorName);
 
-    const response = await apiClient.get(`/api/production/analyze-operator?${params.toString()}`);
+    const response = await apiClient.get(`/production/analyze-operator?${params.toString()}`);
+    return response.data;
+  },
+
+  async getProductionYears(): Promise<{ success: boolean; data: number[] }> {
+    const response = await apiClient.get('/production/years');
     return response.data;
   },
 
@@ -152,7 +157,7 @@ export const speseFornitioriService = {
    * Ottieni statistiche del gestionale per categorizzazione
    */
   async getStatisticheGestionale() {
-    const response = await apiClient.get('/api/spese-fornitori/statistiche-gestionale');
+    const response = await apiClient.get('/spese-fornitori/statistiche-gestionale');
     return response.data;
   },
 
@@ -160,7 +165,7 @@ export const speseFornitioriService = {
    * Test della categorizzazione con esempi predefiniti
    */
   async testCategorizzazione() {
-    const response = await apiClient.get('/api/spese-fornitori/test-categorizzazione');
+    const response = await apiClient.get('/spese-fornitori/test-categorizzazione');
     return response.data;
   },
 
@@ -168,7 +173,7 @@ export const speseFornitioriService = {
    * Pulisce la cache dei pattern per ricaricare i miglioramenti
    */
   async clearCategorizzazioneCache() {
-    const response = await apiClient.post('/api/spese-fornitori/clear-cache');
+    const response = await apiClient.post('/spese-fornitori/clear-cache');
     return response.data;
   },
 
@@ -176,7 +181,7 @@ export const speseFornitioriService = {
    * Analizza le fatture XML SDI per estrarre pattern
    */
   async analyzeXmlFatture() {
-    const response = await apiClient.post('/api/spese-fornitori/analyze-xml-fatture');
+    const response = await apiClient.post('/spese-fornitori/analyze-xml-fatture');
     return response.data;
   },
 
@@ -184,7 +189,7 @@ export const speseFornitioriService = {
    * Integra i pattern delle fatture XML nel sistema di categorizzazione
    */
   async integrateXmlPatterns() {
-    const response = await apiClient.post('/api/spese-fornitori/integrate-xml-patterns');
+    const response = await apiClient.post('/spese-fornitori/integrate-xml-patterns');
     return response.data;
   }
 };

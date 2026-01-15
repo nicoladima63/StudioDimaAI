@@ -13,8 +13,9 @@ import {
 import { Card } from "@/components/ui";
 import FiltriSpeseComponent from "../components/FiltriSpese";
 import RicercaArticoli from "../components/RicercaArticoli";
+import RiepilogoSpeseTab from "../components/RiepilogoSpeseTab";
 //import StatisticheCategorizzazione from "../components/StatisticheCategorizzazione";
-import ContiSottocontiTab from "../components/ContiSottocontiTab";
+//import ContiSottocontiTab from "../components/ContiSottocontiTab";
 import { speseFornitioriService } from "../services/spese.service";
 import type {
   FiltriSpese,
@@ -139,7 +140,7 @@ const SpesePage: React.FC = () => {
             onClick={() => setActiveTab("statistiche")}
             style={{ cursor: "pointer" }}
           >
-            📊 Statistiche Categorizzazione
+            📊 Analisi & Riepilogo
           </CNavLink>
         </CNavItem>
         <CNavItem>
@@ -244,7 +245,7 @@ const SpesePage: React.FC = () => {
 
         {/* Statistiche Categorizzazione Tab */}
         <CTabPane visible={activeTab === "statistiche"} role="tabpanel">
-          {/* <StatisticheCategorizzazione spese={spese} className="mt-4" /> */}
+          <RiepilogoSpeseTab />
         </CTabPane>
 
         {/* Conti-Sottoconti Tab */}

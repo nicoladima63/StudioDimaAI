@@ -80,6 +80,7 @@
         "sottoconto",
         "sottocontoid",
         "sottocontonome",
+        "SPESAFOR",
         "telefono",
         "tipo",
         "totale",
@@ -88,6 +89,7 @@
         "venv",
         "visita",
         "visite",
+        "VOCISPES",
         "windent"
     ],
     "ignorePaths": [

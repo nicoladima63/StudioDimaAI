@@ -29,10 +29,10 @@ export const AppSidebarNav: React.FC<AppSidebarNavProps> = ({ items }) => {
         {icon
           ? icon
           : indent && (
-              <span className="nav-icon">
-                <span className="nav-icon-bullet"></span>
-              </span>
-            )}
+            <span className="nav-icon">
+              <span className="nav-icon-bullet"></span>
+            </span>
+          )}
         {name && name}
         {badge && (
           <CBadge color={badge.color} className="ms-auto">
@@ -46,11 +46,16 @@ export const AppSidebarNav: React.FC<AppSidebarNavProps> = ({ items }) => {
   const navItem = (item: NavItem, index: number, indent = false) => {
     const { component, name, badge, icon, ...rest } = item;
     const Component = component;
+
+    if (indent) {
+      rest.className = `${rest.className || ''} ms-4`.trim();
+    }
+
     return (
       <Component as="div" key={index}>
         {rest.to || rest.href ? (
-          <CNavLink 
-            {...(rest.to && { as: NavLink })} 
+          <CNavLink
+            {...(rest.to && { as: NavLink })}
             {...rest}
           >
             {navLink(name, icon, badge, indent)}
@@ -66,11 +71,11 @@ export const AppSidebarNav: React.FC<AppSidebarNavProps> = ({ items }) => {
     const { component, name, icon, items, to, ...rest } = item;
     const Component = component;
     return (
-      <Component 
-        compact 
-        as="div" 
-        key={index} 
-        toggler={navLink(name, icon)} 
+      <Component
+        compact
+        as="div"
+        key={index}
+        toggler={navLink(name, icon)}
         {...rest}
       >
         {item.items?.map((item, index) =>
