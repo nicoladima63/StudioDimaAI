@@ -55,6 +55,25 @@ class SyncStateManager:
             # logger.debug(f"Salvato stato sincronizzazione: {len(self.sync_state)} eventi")
         except Exception as e:
             logger.error(f"Errore salvataggio stato sincronizzazione: {e}")
+
+    def load_sync_state(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Carica e restituisce lo stato di sincronizzazione. 
+        Wrapper pubblico per _load_sync_state che restituisce lo stato.
+        """
+        self._load_sync_state()
+        return self.sync_state
+
+    def save_sync_state(self, state: Optional[Dict[str, Dict[str, Any]]] = None) -> None:
+        """
+        Aggiorna e salva lo stato di sincronizzazione.
+        
+        Args:
+            state: Il nuovo stato da salvare (opzionale). Se None, salva lo stato corrente.
+        """
+        if state is not None:
+            self.sync_state = state
+        self._save_sync_state()
     
     def generate_appointment_id(self, appointment: Dict[str, Any]) -> str:
         """

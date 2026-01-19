@@ -778,18 +778,25 @@ def reset_sync_state():
         # Reset state
         sync_manager.save_sync_state({})
         
-        return jsonify({
-            'success': True,
-            'message': 'Sync state resettato con successo',
-            'backup': backup_name
-        })
+        from app_v2 import format_response
+        return format_response(
+            success=True,
+            message='Sync state resettato con successo',
+            data={
+                'message': 'Sync state resettato con successo',
+                'backup': backup_name
+            }
+        ), 200
         
     except Exception as e:
         logger.error(f"Errore reset sync state: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        from app_v2 import format_response
+        return format_response(
+            success=False,
+            error='RESET_ERROR',
+            message=str(e),
+            state='error'
+        ), 500
 
 
 @calendar_v2_bp.route('/health', methods=['GET'])
