@@ -103,6 +103,9 @@ server_v2/instance/certs/
 server_v2/data/snapshots/
 server_v2/data/monitoring/
 
+# Server V2 - Script di analisi temporanei (non versionare)
+server_v2/scripts/
+
 #Ignore cursor AI rules
 .cursor\rules\codacy.mdc
 

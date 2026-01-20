@@ -57,9 +57,25 @@ COLONNE = {
         'data2': 'DB_PAMODA2',
         'ultima_visita': 'DB_PAULTVI'
     },
+    'elenco': {
+        # Identificativi Piano di Cura
+        'id': 'DB_CODE',                  # ID univoco del Piano (6 char) - usato come chiave per linkare PREVENT.db_prelcod
+        'id_paziente': 'DB_ELPACOD',      # ID Paziente a cui appartiene il piano (6 char)
+        
+        # Dettagli Piano
+        'descrizione': 'DB_ELDESCR',      # Descrizione del piano (es: "altri impla", "cure nuove")
+        'data': 'DB_ELDATA',              # Data creazione/modifica piano
+        'totale': 'DB_ELTOTAL',           # Totale previsto del piano (Decimal)
+        'stato': 'DB_ELSTATO',            # Stato: 'S' = Stampato/Storico, '' = Bozza/Preventivo
+        'medico': 'DB_ELMEDIC',           # Medico responsabile
+        
+        # Campi tecnici
+        'codice_prestazione': 'DB_ELPRCOD', # Codice prestazione associata (se applicabile)
+        'note': 'DB_NOTE'                 # Note del piano
+    },
     'preventivi': {
-        # Identificativi paziente e prestazione
-        'id_paziente': 'DB_PRELCOD',      # Codice paziente (6 char)
+        # Identificativi - IMPORTANTE: db_prelcod può contenere sia ID Paziente che ID Piano (da ELENCO)
+        'id_piano': 'DB_PRELCOD',         # Link al Piano di Cura (ELENCO.db_code) - campo principale per raggruppare prestazioni
         'id_prestazione': 'DB_PRONCOD',   # Codice prestazione (6 char)
         'data_prestazione': 'DB_PRDATA',  # Data prestazione (DateTime)
         
@@ -74,7 +90,7 @@ COLONNE = {
         
         # Codici collegati
         'codice_fattura': 'DB_PRFACOD',   # Codice fattura (6 char)
-        'codice_anagrafica': 'DB_PRANCOD', # Codice anagrafica (6 char)
+        'codice_anagrafica': 'DB_PRANCOD', # Codice anagrafica/secondario (6 char) - NON usato per linking principale
         
         # Spese e costi
         #'spesa_anagrafica': 'DB_PRSPEAS', # Spesa anagrafica (Decimal 10,2)
@@ -157,6 +173,14 @@ COLONNE = {
         'ritenuta': 'DB_VORITEN',
         'aliquota_iva': 'DB_VOIVA',
         'codice_iva': 'DB_VOIVCOD'
+    },
+    'elenco': {
+        'id': 'DB_CODE',              # ID univoco del Piano
+        'id_paziente': 'DB_ELPACOD',  # ID Paziente (campo essenziale!)
+        'descrizione': 'DB_ELDESCR',  # Descrizione piano
+        'data': 'DB_ELDATA',          # Data piano
+        'totale': 'DB_ELTOTAL',       # Totale previsto
+        'stato': 'DB_ELSTATO'         # Stato: 'S' = Stampato, '' = Bozza
     }
 }
 
@@ -179,6 +203,11 @@ DBF_TABLES = {
         'file': 'PREVENT.DBF',
         'categoria': 'DATI',
         'descrizione': 'Preventivi pazienti'
+    },
+    'elenco': {
+        'file': 'ELENCO.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Tabella Piani di Cura'
     },
     'diario': {
         'file': 'DIARIO.DBF',
