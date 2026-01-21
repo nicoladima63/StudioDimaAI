@@ -181,6 +181,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_materiali import materiali_v2_bp
     from api.v2_fornitori import fornitori_v2_bp
     from api.v2_pazienti import pazienti_v2_bp
+    from api.v2_richiami import richiami_v2_bp
     from api.v2_spese_fornitori import spese_fornitori_v2_bp
     from api.v2_statistiche import statistiche_v2_bp
     from api.v2_classificazioni import classificazioni_v2_bp
@@ -209,6 +210,7 @@ def register_blueprints(app: Flask) -> None:
         materiali_v2_bp,
         fornitori_v2_bp,
         pazienti_v2_bp,
+        richiami_v2_bp,
         spese_fornitori_v2_bp,
         statistiche_v2_bp,
         classificazioni_v2_bp,
