@@ -20,6 +20,45 @@ logger = logging.getLogger(__name__)
 richiami_v2_bp = Blueprint('richiami_v2', __name__)
 
 
+# ===== HELPER FUNCTIONS =====
+
+def handle_error(error, context=""):
+    """Standardized error handling."""
+    if isinstance(error, ValidationError):
+        logger.warning(f"Validation error in {context}: {error}")
+        return format_response({
+            'success': False,
+            'error': 'VALIDATION_ERROR',
+            'message': str(error)
+        }, 400)
+    elif isinstance(error, DatabaseError):
+        logger.error(f"Database error in {context}: {error}")
+        return format_response({
+            'success': False,
+            'error': 'DATABASE_ERROR',
+            'message': 'Database operation failed'
+        }, 500)
+    else:
+        logger.error(f"Unexpected error in {context}: {error}")
+        return format_response({
+            'success': False,
+            'error': 'INTERNAL_ERROR',
+            'message': 'Internal server error'
+        }, 500)
+
+
+def validate_required_param(data, param_name, param_type=str):
+    """Validate required parameter."""
+    if not data:
+        raise ValidationError("Request body is required")
+    value = data.get(param_name)
+    if value is None:
+        raise ValidationError(f"{param_name} is required")
+    if param_type != str and not isinstance(value, param_type):
+        raise ValidationError(f"{param_name} must be a valid {param_type.__name__}")
+    return value
+
+
 @richiami_v2_bp.route('/pazienti/<paziente_id>/richiamo/status', methods=['PUT'])
 @jwt_required()
 def update_richiamo_status(paziente_id):
