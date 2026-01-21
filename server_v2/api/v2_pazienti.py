@@ -101,10 +101,7 @@ def get_pazienti():
         load_all = request.args.get('all', 0, type=int)
         
         # Validate parameters
-        if page < 1:
-            raise ValidationError("Page must be >= 1")
-        if per_page < 1:
-            raise ValidationError("Per page must be >= 1")
+        validate_pagination_params(page, per_page)
         
         # If load_all is requested, set high per_page
         if load_all:
@@ -128,35 +125,14 @@ def get_pazienti():
             filters=filters
         )
         
-        # Extract data from service result for consistent API response
+        # Return response
         if result['success']:
             return format_response(result['data'])
         else:
             return format_response(success=False, error=result.get('error', 'Errore caricamento pazienti'))
         
-    except ValidationError as e:
-        logger.warning(f"Validation error in get_pazienti: {e}")
-        return format_response({
-            'success': False,
-            'error': 'VALIDATION_ERROR',
-            'message': str(e)
-        }, 400)
-        
-    except DatabaseError as e:
-        logger.error(f"Database error in get_pazienti: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error accessing patient data'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in get_pazienti: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "get_pazienti")
 
 
 @pazienti_v2_bp.route('/pazienti/<paziente_id>', methods=['GET'])
