@@ -166,21 +166,8 @@ def get_richiami_da_fare():
         else:
             return format_response(success=False, error=result.get('error', 'Errore caricamento richiami'))
             
-    except DatabaseError as e:
-        logger.error(f"Database error in get_richiami_da_fare: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error loading richiami'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in get_richiami_da_fare: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (DatabaseError, Exception) as e:
+        return handle_error(e, "get_richiami_da_fare")
 
 
 @richiami_v2_bp.route('/richiami/statistiche', methods=['GET'])
@@ -196,21 +183,8 @@ def get_richiami_statistiche():
         else:
             return format_response(success=False, error=result.get('error', 'Errore statistiche'))
             
-    except DatabaseError as e:
-        logger.error(f"Database error in get_richiami_statistiche: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error loading statistics'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in get_richiami_statistiche: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (DatabaseError, Exception) as e:
+        return handle_error(e, "get_richiami_statistiche")
 
 
 @richiami_v2_bp.route('/richiami/<int:richiamo_id>/completato', methods=['PUT'])
@@ -243,21 +217,8 @@ def mark_richiamo_completato(richiamo_id):
         else:
             return format_response(success=False, error=result.get('error', 'Errore completamento richiamo')), 400
             
-    except DatabaseError as e:
-        logger.error(f"Database error in mark_richiamo_completato: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error marking richiamo as completed'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in mark_richiamo_completato: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (DatabaseError, Exception) as e:
+        return handle_error(e, "mark_richiamo_completato")
 
 
 @richiami_v2_bp.route('/richiami/migrate-from-dbf', methods=['POST'])
