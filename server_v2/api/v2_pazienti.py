@@ -159,29 +159,8 @@ def get_paziente(paziente_id):
         
         return format_response(result['data'])
         
-    except ValidationError as e:
-        logger.warning(f"Validation error in get_paziente: {e}")
-        return format_response({
-            'success': False,
-            'error': 'VALIDATION_ERROR',
-            'message': str(e)
-        }, 400)
-        
-    except DatabaseError as e:
-        logger.error(f"Database error in get_paziente: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error accessing patient data'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in get_paziente: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "get_paziente")
 
 
 @pazienti_v2_bp.route('/pazienti/search', methods=['GET'])
@@ -218,29 +197,8 @@ def search_pazienti():
         else:
             return format_response(success=False, error=result.get('error', 'Errore ricerca pazienti'))
         
-    except ValidationError as e:
-        logger.warning(f"Validation error in search_pazienti: {e}")
-        return format_response({
-            'success': False,
-            'error': 'VALIDATION_ERROR',
-            'message': str(e)
-        }, 400)
-        
-    except DatabaseError as e:
-        logger.error(f"Database error in search_pazienti: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error searching patient data'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in search_pazienti: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "search_pazienti")
 
 
 @pazienti_v2_bp.route('/pazienti/stats', methods=['GET'])
