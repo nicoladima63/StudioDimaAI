@@ -71,14 +71,8 @@ def update_richiamo_status(paziente_id):
     """
     try:
         data = request.get_json()
-        if not data:
-            raise ValidationError("Request body is required")
-        
-        da_richiamare = data.get('da_richiamare')
+        da_richiamare = validate_required_param(data, 'da_richiamare')
         data_richiamo = data.get('data_richiamo')
-        
-        if not da_richiamare:
-            raise ValidationError("da_richiamare is required")
         
         if da_richiamare not in ['S', 'N', 'R']:
             raise ValidationError("da_richiamare must be S, N, or R")
@@ -91,29 +85,8 @@ def update_richiamo_status(paziente_id):
         else:
             return format_response(success=False, error=result.get('error', 'Errore aggiornamento stato')), 400
             
-    except ValidationError as e:
-        logger.warning(f"Validation error in update_richiamo_status: {e}")
-        return format_response({
-            'success': False,
-            'error': 'VALIDATION_ERROR',
-            'message': str(e)
-        }, 400)
-        
-    except DatabaseError as e:
-        logger.error(f"Database error in update_richiamo_status: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error updating richiamo status'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in update_richiamo_status: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "update_richiamo_status")
 
 
 @richiami_v2_bp.route('/pazienti/<paziente_id>/richiamo/tipo', methods=['PUT'])
@@ -128,20 +101,11 @@ def update_richiamo_tipo(paziente_id):
     """
     try:
         data = request.get_json()
-        if not data:
-            raise ValidationError("Request body is required")
-        
-        tipo_richiamo = data.get('tipo_richiamo')
-        tempo_richiamo = data.get('tempo_richiamo')
-        
-        if not tipo_richiamo:
-            raise ValidationError("tipo_richiamo is required")
-            
-        if not tempo_richiamo or not isinstance(tempo_richiamo, int):
-            raise ValidationError("tempo_richiamo must be a valid integer")
+        tipo_richiamo = validate_required_param(data, 'tipo_richiamo')
+        tempo_richiamo = validate_required_param(data, 'tempo_richiamo', int)
         
         # Get patient info from gestionale first (optional for now)
-        paziente = {'nome': 'Test Patient'}  # Default data for testing
+        paziente = {'nome': 'Test Patient'}
         try:
             from core.database_manager import DatabaseManager
             db_manager = DatabaseManager()
@@ -151,7 +115,6 @@ def update_richiamo_tipo(paziente_id):
             if paziente_result['success']:
                 paziente = paziente_result['data']
         except Exception as e:
-            # Gestionale not available - use default data for testing
             logger.warning(f"Could not fetch patient from gestionale: {e}")
             paziente = {'id': paziente_id, 'nome': f'Paziente {paziente_id}'}
         
@@ -161,10 +124,8 @@ def update_richiamo_tipo(paziente_id):
         # Check if richiamo exists
         existing_richiami = richiami_service.get_richiami_paziente(paziente_id)
         if existing_richiami['success'] and existing_richiami['data']:
-            # Update existing - pass complete patient data
             result = richiami_service.update_richiamo_config(paziente_id, tipo_richiamo, tempo_richiamo, paziente)
         else:
-            # Create new richiamo
             result = richiami_service.create_richiamo(
                 paziente_id=paziente_id,
                 nome=paziente.get('nome', ''),
@@ -178,29 +139,8 @@ def update_richiamo_tipo(paziente_id):
         else:
             return format_response(success=False, error=result.get('error', 'Errore aggiornamento configurazione')), 400
             
-    except ValidationError as e:
-        logger.warning(f"Validation error in update_richiamo_tipo: {e}")
-        return format_response({
-            'success': False,
-            'error': 'VALIDATION_ERROR',
-            'message': str(e)
-        }, 400)
-        
-    except DatabaseError as e:
-        logger.error(f"Database error in update_richiamo_tipo: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error updating richiamo configuration'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in update_richiamo_tipo: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "update_richiamo_tipo")
 
 
 @richiami_v2_bp.route('/richiami/da-fare', methods=['GET'])
