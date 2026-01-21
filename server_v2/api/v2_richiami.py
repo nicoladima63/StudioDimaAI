@@ -338,26 +338,18 @@ def get_richiami_list():
             result = service.get_richiami_da_fare(limit)
         
         if result['success']:
-            return format_response(
-                success=True,
-                data=result['data'],
-                count=result['count'],
-                filters={
+            return format_response({
+                'richiami': result['data'],
+                'count': result['count'],
+                'filters': {
                     'days_threshold': days_threshold,
                     'status': status,
                     'tipo': tipo,
                     'limit': limit
-                },
-                message='Richiami recuperati con successo',
-                state='success'
-            ), 200
+                }
+            })
         else:
-            return format_response(
-                success=False,
-                error=result.get('error', 'FETCH_FAILED'),
-                message='Errore nel recupero dei richiami',
-                state='error'
-            ), 500
+            return format_response(success=False, error=result.get('error', 'Errore recupero richiami'))
             
     except Exception as e:
         return handle_error(e, "get_richiami_list")
@@ -377,12 +369,7 @@ def get_richiamo_message(richiamo_id):
         result = service.get_richiamo_by_id(richiamo_id)
         
         if not result['success']:
-            return format_response(
-                success=False,
-                error='RICHIAMO_NOT_FOUND',
-                message='Richiamo non trovato',
-                state='error'
-            ), 404
+            return format_response(success=False, error='Richiamo non trovato'), 404
         
         richiamo_data = result['data']
         
@@ -391,22 +378,12 @@ def get_richiamo_message(richiamo_id):
         preview_result = sms_service.preview_recall_message(richiamo_data)
         
         if preview_result['success']:
-            return format_response(
-                success=True,
-                data={
-                    'richiamo': richiamo_data,
-                    'message_preview': preview_result
-                },
-                message='Messaggio richiamo recuperato con successo',
-                state='success'
-            ), 200
+            return format_response({
+                'richiamo': richiamo_data,
+                'message_preview': preview_result
+            })
         else:
-            return format_response(
-                success=False,
-                error=preview_result.get('error', 'MESSAGE_GENERATION_FAILED'),
-                message='Errore nella generazione del messaggio',
-                state='error'
-            ), 500
+            return format_response(success=False, error=preview_result.get('error', 'Errore generazione messaggio'))
             
     except Exception as e:
         return handle_error(e, "get_richiamo_message")
@@ -429,12 +406,7 @@ def update_richiami_dates():
         # Get all active richiami
         richiami_result = service.get_richiami_da_fare()
         if not richiami_result['success']:
-            return format_response(
-                success=False,
-                error='FETCH_FAILED',
-                message='Errore nel recupero dei richiami',
-                state='error'
-            ), 500
+            return format_response(success=False, error='Errore recupero richiami')
         
         richiami = richiami_result['data']
         updated_count = 0
@@ -450,12 +422,7 @@ def update_richiami_dates():
                 logger.warning(f"Failed to update dates for richiamo {richiamo.get('id')}: {e}")
                 continue
         
-        return format_response(
-            success=True,
-            data={'updated': updated_count},
-            message=f'Date aggiornate per {updated_count} richiami',
-            state='success'
-        ), 200
+        return format_response({'updated': updated_count})
         
     except Exception as e:
         return handle_error(e, "update_richiami_dates")
@@ -482,22 +449,14 @@ def export_richiami():
         result = service.get_richiami_da_fare()
         
         if result['success']:
-            return format_response(
-                success=True,
-                data=result['data'],
-                count=result['count'],
-                export_format=export_format,
-                filters={'days_threshold': days_threshold},
-                message='Export richiami completato con successo',
-                state='success'
-            ), 200
+            return format_response({
+                'richiami': result['data'],
+                'count': result['count'],
+                'export_format': export_format,
+                'filters': {'days_threshold': days_threshold}
+            })
         else:
-            return format_response(
-                success=False,
-                error='EXPORT_FAILED',
-                message='Errore nell\'export dei richiami',
-                state='error'
-            ), 500
+            return format_response(success=False, error='Errore export richiami')
             
     except Exception as e:
         return handle_error(e, "export_richiami")
@@ -525,12 +484,7 @@ def test_richiami():
             'service_status': 'OK'
         }
         
-        return format_response(
-            success=True,
-            test_results=test_results,
-            message='Test richiami completato con successo',
-            state='success'
-        ), 200
+        return format_response(test_results)
         
     except Exception as e:
         return handle_error(e, "test_richiami")
