@@ -19,6 +19,61 @@ logger = logging.getLogger(__name__)
 pazienti_v2_bp = Blueprint('pazienti_v2', __name__)
 
 
+# ===== HELPER FUNCTIONS =====
+
+def handle_error(error, context=""):
+    """
+    Standardized error handling for all endpoints.
+    
+    Args:
+        error: The exception object
+        context: Context string for logging (e.g., "get_pazienti")
+    
+    Returns:
+        Tuple of (response, status_code)
+    """
+    if isinstance(error, ValidationError):
+        logger.warning(f"Validation error in {context}: {error}")
+        return format_response({
+            'success': False,
+            'error': 'VALIDATION_ERROR',
+            'message': str(error)
+        }, 400)
+    
+    elif isinstance(error, DatabaseError):
+        logger.error(f"Database error in {context}: {error}")
+        return format_response({
+            'success': False,
+            'error': 'DATABASE_ERROR',
+            'message': 'Database operation failed'
+        }, 500)
+    
+    else:
+        logger.error(f"Unexpected error in {context}: {error}")
+        return format_response({
+            'success': False,
+            'error': 'INTERNAL_ERROR',
+            'message': 'Internal server error'
+        }, 500)
+
+
+def validate_pagination_params(page, per_page):
+    """
+    Validate pagination parameters.
+    
+    Args:
+        page: Page number
+        per_page: Items per page
+    
+    Raises:
+        ValidationError: If parameters are invalid
+    """
+    if page < 1:
+        raise ValidationError("Page must be >= 1")
+    if per_page < 1:
+        raise ValidationError("Per page must be >= 1")
+
+
 @pazienti_v2_bp.route('/pazienti', methods=['GET'])
 @jwt_required()
 def get_pazienti():
