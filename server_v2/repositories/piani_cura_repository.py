@@ -1,8 +1,9 @@
 """
 Piani di Cura Repository - Data Access Layer
 
-Repository per gestione piani di trattamento pazienti.
-Accesso a tabelle ELENCO.DBF (piani) e PREVENT.DBF (prestazioni).
+Repository per lettura piani di trattamento pazienti.
+Accesso READ-ONLY a tabelle ELENCO.DBF (piani) e PREVENT.DBF (prestazioni).
+Il gestionale si occupa della scrittura.
 """
 
 import logging
@@ -10,13 +11,12 @@ from typing import Dict, List, Any, Optional
 from contextlib import contextmanager
 
 from core.database_manager import DatabaseManager
-from core.exceptions import DatabaseError
 
 logger = logging.getLogger(__name__)
 
 
 class PianiCuraRepository:
-    """Repository per operazioni su piani di cura."""
+    """Repository READ-ONLY per piani di cura."""
     
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
@@ -49,7 +49,6 @@ class PianiCuraRepository:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             
-            # Query su ELENCO.DBF
             query = """
                 SELECT 
                     DB_CODE as piano_id,
@@ -120,7 +119,6 @@ class PianiCuraRepository:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             
-            # Query su PREVENT.DBF linkato tramite DB_PRELCOD
             query = """
                 SELECT 
                     DB_CODICE as prestazione_id,
@@ -172,216 +170,4 @@ class PianiCuraRepository:
         }
         
         return piano
-    
-    def create_piano(self, piano_data: Dict[str, Any]) -> str:
-        """
-        Crea un nuovo piano di cura.
-        
-        Args:
-            piano_data: Dati del piano
-            
-        Returns:
-            ID del piano creato
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            
-            # Genera nuovo ID
-            cursor.execute("SELECT MAX(CAST(DB_CODE AS INTEGER)) FROM elenco")
-            max_id = cursor.fetchone()[0] or 0
-            new_id = str(max_id + 1)
-            
-            query = """
-                INSERT INTO elenco (
-                    DB_CODE, DB_CODPAZ, DB_DESCRIZ, DB_DATA,
-                    DB_TOTALE, DB_ACCONTO, DB_SALDO, DB_STATO, DB_NOTE
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            
-            cursor.execute(query, (
-                new_id,
-                piano_data.get('paziente_id'),
-                piano_data.get('descrizione', ''),
-                piano_data.get('data_creazione'),
-                piano_data.get('importo_totale', 0),
-                piano_data.get('acconto', 0),
-                piano_data.get('saldo', 0),
-                piano_data.get('stato', 'ATTIVO'),
-                piano_data.get('note', '')
-            ))
-            
-            conn.commit()
-            return new_id
-    
-    def update_piano(self, piano_id: str, piano_data: Dict[str, Any]) -> bool:
-        """
-        Aggiorna un piano di cura esistente.
-        
-        Args:
-            piano_id: ID del piano
-            piano_data: Dati da aggiornare
-            
-        Returns:
-            True se aggiornato con successo
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            
-            # Build dynamic update
-            fields = []
-            values = []
-            
-            field_mapping = {
-                'descrizione': 'DB_DESCRIZ',
-                'importo_totale': 'DB_TOTALE',
-                'acconto': 'DB_ACCONTO',
-                'saldo': 'DB_SALDO',
-                'stato': 'DB_STATO',
-                'note': 'DB_NOTE'
-            }
-            
-            for key, db_field in field_mapping.items():
-                if key in piano_data:
-                    fields.append(f"{db_field} = ?")
-                    values.append(piano_data[key])
-            
-            if not fields:
-                return False
-            
-            values.append(piano_id)
-            query = f"UPDATE elenco SET {', '.join(fields)} WHERE DB_CODE = ?"
-            
-            cursor.execute(query, values)
-            conn.commit()
-            
-            return cursor.rowcount > 0
-    
-    def delete_piano(self, piano_id: str) -> bool:
-        """
-        Elimina un piano di cura (soft delete cambiando stato).
-        
-        Args:
-            piano_id: ID del piano
-            
-        Returns:
-            True se eliminato con successo
-        """
-        return self.update_piano(piano_id, {'stato': 'ELIMINATO'})
-    
-    def add_prestazione(self, prestazione_data: Dict[str, Any]) -> str:
-        """
-        Aggiunge una prestazione a un piano di cura.
-        
-        Args:
-            prestazione_data: Dati della prestazione
-            
-        Returns:
-            ID della prestazione creata
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            
-            # Genera nuovo ID
-            cursor.execute("SELECT MAX(CAST(DB_CODICE AS INTEGER)) FROM preventivi")
-            max_id = cursor.fetchone()[0] or 0
-            new_id = str(max_id + 1)
-            
-            query = """
-                INSERT INTO preventivi (
-                    DB_CODICE, DB_PRELCOD, DB_DESCRIZ, DB_QUANTIT,
-                    DB_PREZZO, DB_IMPORTO, DB_ESEGUIT, DB_DATA, DB_NOTE
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            
-            quantita = prestazione_data.get('quantita', 1)
-            prezzo = prestazione_data.get('prezzo_unitario', 0)
-            
-            cursor.execute(query, (
-                new_id,
-                prestazione_data.get('piano_id'),
-                prestazione_data.get('descrizione', ''),
-                quantita,
-                prezzo,
-                quantita * prezzo,  # Calcola importo totale
-                prestazione_data.get('eseguita', False),
-                prestazione_data.get('data_esecuzione'),
-                prestazione_data.get('note', '')
-            ))
-            
-            conn.commit()
-            return new_id
-    
-    def update_prestazione(self, prestazione_id: str, prestazione_data: Dict[str, Any]) -> bool:
-        """
-        Aggiorna una prestazione.
-        
-        Args:
-            prestazione_id: ID della prestazione
-            prestazione_data: Dati da aggiornare
-            
-        Returns:
-            True se aggiornata con successo
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            
-            fields = []
-            values = []
-            
-            field_mapping = {
-                'descrizione': 'DB_DESCRIZ',
-                'quantita': 'DB_QUANTIT',
-                'prezzo_unitario': 'DB_PREZZO',
-                'eseguita': 'DB_ESEGUIT',
-                'data_esecuzione': 'DB_DATA',
-                'note': 'DB_NOTE'
-            }
-            
-            for key, db_field in field_mapping.items():
-                if key in prestazione_data:
-                    fields.append(f"{db_field} = ?")
-                    values.append(prestazione_data[key])
-            
-            # Ricalcola importo se quantità o prezzo cambiano
-            if 'quantita' in prestazione_data or 'prezzo_unitario' in prestazione_data:
-                # Recupera valori correnti
-                cursor.execute(
-                    "SELECT DB_QUANTIT, DB_PREZZO FROM preventivi WHERE DB_CODICE = ?",
-                    (prestazione_id,)
-                )
-                current = cursor.fetchone()
-                if current:
-                    quantita = prestazione_data.get('quantita', current[0])
-                    prezzo = prestazione_data.get('prezzo_unitario', current[1])
-                    fields.append("DB_IMPORTO = ?")
-                    values.append(quantita * prezzo)
-            
-            if not fields:
-                return False
-            
-            values.append(prestazione_id)
-            query = f"UPDATE preventivi SET {', '.join(fields)} WHERE DB_CODICE = ?"
-            
-            cursor.execute(query, values)
-            conn.commit()
-            
-            return cursor.rowcount > 0
-    
-    def delete_prestazione(self, prestazione_id: str) -> bool:
-        """
-        Elimina una prestazione.
-        
-        Args:
-            prestazione_id: ID della prestazione
-            
-        Returns:
-            True se eliminata con successo
-        """
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            
-            query = "DELETE FROM preventivi WHERE DB_CODICE = ?"
-            cursor.execute(query, (prestazione_id,))
-            conn.commit()
-            
-            return cursor.rowcount > 0
+
