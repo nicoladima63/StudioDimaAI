@@ -409,13 +409,7 @@ def get_richiamo_message(richiamo_id):
             ), 500
             
     except Exception as e:
-        logger.error(f"Error in get_richiamo_message: {e}")
-        return format_response(
-            success=False,
-            error='INTERNAL_ERROR',
-            message=f'Errore interno: {str(e)}',
-            state='error'
-        ), 500
+        return handle_error(e, "get_richiamo_message")
 
 
 @richiami_v2_bp.route('/richiami/update-dates', methods=['POST'])
@@ -464,13 +458,7 @@ def update_richiami_dates():
         ), 200
         
     except Exception as e:
-        logger.error(f"Error in update_richiami_dates: {e}")
-        return format_response(
-            success=False,
-            error='INTERNAL_ERROR',
-            message=f'Errore interno: {str(e)}',
-            state='error'
-        ), 500
+        return handle_error(e, "update_richiami_dates")
 
 
 @richiami_v2_bp.route('/richiami/export', methods=['GET'])
@@ -512,13 +500,7 @@ def export_richiami():
             ), 500
             
     except Exception as e:
-        logger.error(f"Error in export_richiami: {e}")
-        return format_response(
-            success=False,
-            error='INTERNAL_ERROR',
-            message=f'Errore interno: {str(e)}',
-            state='error'
-        ), 500
+        return handle_error(e, "export_richiami")
 
 
 @richiami_v2_bp.route('/richiami/test', methods=['GET'])
@@ -551,13 +533,7 @@ def test_richiami():
         ), 200
         
     except Exception as e:
-        logger.error(f"Error in test_richiami: {e}")
-        return format_response(
-            success=False,
-            error='TEST_ERROR',
-            message=f'Errore test: {str(e)}',
-            state='error'
-        ), 500
+        return handle_error(e, "test_richiami")
 
 
 # Error handlers for the blueprint
