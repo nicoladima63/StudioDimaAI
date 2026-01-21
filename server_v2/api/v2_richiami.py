@@ -299,21 +299,8 @@ def migrate_richiami_from_dbf():
             'message': f'Migration completed: {migrated_count} migrated, {skipped_count} skipped, {error_count} errors'
         })
             
-    except DatabaseError as e:
-        logger.error(f"Database error in migrate_richiami_from_dbf: {e}")
-        return format_response({
-            'success': False,
-            'error': 'DATABASE_ERROR',
-            'message': 'Error during migration'
-        }, 500)
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in migrate_richiami_from_dbf: {e}")
-        return format_response({
-            'success': False,
-            'error': 'INTERNAL_ERROR',
-            'message': 'Internal server error'
-        }, 500)
+    except (DatabaseError, Exception) as e:
+        return handle_error(e, "migrate_richiami_from_dbf")
 
 
 @richiami_v2_bp.route('/richiami', methods=['GET'])
@@ -373,13 +360,7 @@ def get_richiami_list():
             ), 500
             
     except Exception as e:
-        logger.error(f"Error in get_richiami_list: {e}")
-        return format_response(
-            success=False,
-            error='INTERNAL_ERROR',
-            message=f'Errore interno: {str(e)}',
-            state='error'
-        ), 500
+        return handle_error(e, "get_richiami_list")
 
 
 @richiami_v2_bp.route('/richiami/<int:richiamo_id>/message', methods=['GET'])
