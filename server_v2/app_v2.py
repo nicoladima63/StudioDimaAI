@@ -204,6 +204,11 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_sms_tracking import sms_tracking_bp
     from api.v2_tracker import tracker_bp
     from api.v2_automation_settings import automation_settings_bp
+    from api.v2_works import works_bp
+    from api.v2_tasks import tasks_bp
+    from api.v2_steps import steps_bp
+    from api.v2_todos import todos_bp
+    from api.v2_providers import providers_bp
     
     # Register all V2 blueprints
     blueprints = [
@@ -230,7 +235,13 @@ def register_blueprints(app: Flask) -> None:
         sms_tracking_bp,
         tracker_bp,
         automation_settings_bp,
-        users_v2_bp
+        users_v2_bp,
+        works_bp,
+        tasks_bp,
+        steps_bp,
+        steps_bp,
+        todos_bp,
+        providers_bp
     ]
     
     # Register standard blueprints with API prefix only
