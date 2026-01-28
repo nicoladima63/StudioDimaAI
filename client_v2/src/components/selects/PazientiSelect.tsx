@@ -9,6 +9,7 @@ interface PazientiSelectProps {
   searchable?: boolean;
   clearable?: boolean;
   className?: string;
+  hideDetails?: boolean;
 }
 
 const PazientiSelect: React.FC<PazientiSelectProps> = ({
@@ -18,8 +19,13 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
   disabled = false,
   searchable = true,
   clearable = false,
-  className = ""
+  className = "",
+  hideDetails = false
 }) => {
+
+
+
+
   const { pazienti, allPazienti, isLoading, error, loadAll } = usePazienti();
   const store = usePazientiStore();
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,7 +51,7 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
       );
     }
 
-    return filtered;
+    return filtered.sort((a, b) => a.nome.localeCompare(b.nome));
   }, [allPazienti, searchTerm]);
 
   // Reset search quando chiude
@@ -54,7 +60,7 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
       setSearchTerm("");
     }
   }, [isOpen]);
-  
+
   // Reset search quando cambia il value dall'esterno
   useEffect(() => {
     setSearchTerm("");
@@ -78,15 +84,15 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
         aria-invalid={!!error}
       >
         <option value="">{placeholder}</option>
-        
+
         {isLoading && <option disabled>Caricamento pazienti...</option>}
-        
+
         {error && (
           <option disabled className="text-danger">
             Errore: {error}
           </option>
         )}
-        
+
         {filteredPazienti.map((paziente) => (
           <option key={paziente.id} value={paziente.id}>
             {paziente.nome} {paziente.codice_fiscale ? `(${paziente.codice_fiscale})` : ''}
@@ -103,22 +109,22 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
         <input
           type="text"
           className="form-control"
-          placeholder={placeholder}
+          placeholder={isLoading ? "Caricamento pazienti..." : placeholder}
           value={searchTerm || (selectedPaziente && !isOpen ? `${selectedPaziente.nome} ${selectedPaziente.codice_fiscale ? `(${selectedPaziente.codice_fiscale})` : ''}` : '')}
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsOpen(true)}
           onBlur={() => setTimeout(() => setIsOpen(false), 200)}
-          disabled={disabled || isLoading}
+          disabled={disabled}
           aria-invalid={!!error}
           style={clearable && selectedPaziente ? { paddingRight: '40px' } : {}}
         />
-        
+
         {clearable && selectedPaziente && (
           <button
             type="button"
             className="btn btn-link position-absolute top-50 translate-middle-y p-0"
-            style={{ 
-              right: '8px', 
+            style={{
+              right: '8px',
               zIndex: 10,
               width: '24px',
               height: '24px',
@@ -143,7 +149,7 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
           </button>
         )}
       </div>
-      
+
       {isOpen && (
         <div className="position-absolute w-100" style={{ zIndex: 1060, top: '100%' }}>
           <div className="border border-top-0 bg-white shadow-sm" style={{ maxHeight: '400px', overflowY: 'auto' }}>
@@ -152,19 +158,19 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
                 Caricamento pazienti...
               </div>
             )}
-            
+
             {error && (
               <div className="px-3 py-2 text-danger">
                 Errore: {error}
               </div>
             )}
-            
+
             {!isLoading && !error && filteredPazienti.length === 0 && (
               <div className="px-3 py-2 text-muted">
                 Nessun paziente trovato
               </div>
             )}
-            
+
             {filteredPazienti.map((paziente) => (
               <div
                 key={paziente.id}
@@ -178,25 +184,29 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
                 onMouseDown={(e) => e.preventDefault()}
               >
                 <div className="fw-bold">{paziente.nome}</div>
-                {paziente.codice_fiscale && (
-                  <div className="small text-muted">CF: {paziente.codice_fiscale}</div>
-                )}
-                {paziente.data_nascita && (
-                  <div className="small text-muted">
-                    Nato: {new Date(paziente.data_nascita).toLocaleDateString('it-IT')}
-                  </div>
-                )}
-                {(paziente.telefono || paziente.cellulare) && (
-                  <div className="small text-muted">
-                    {paziente.telefono && `Tel: ${paziente.telefono}`}
-                    {paziente.telefono && paziente.cellulare && ' - '}
-                    {paziente.cellulare && `Cell: ${paziente.cellulare}`}
-                  </div>
-                )}
-                {paziente.ultima_visita && (
-                  <div className="small text-muted">
-                    Ultima visita: {new Date(paziente.ultima_visita).toLocaleDateString('it-IT')}
-                  </div>
+                {!hideDetails && (
+                  <>
+                    {paziente.codice_fiscale && (
+                      <div className="small text-muted">CF: {paziente.codice_fiscale}</div>
+                    )}
+                    {paziente.data_nascita && (
+                      <div className="small text-muted">
+                        Nato: {new Date(paziente.data_nascita).toLocaleDateString('it-IT')}
+                      </div>
+                    )}
+                    {(paziente.telefono || paziente.cellulare) && (
+                      <div className="small text-muted">
+                        {paziente.telefono && `Tel: ${paziente.telefono}`}
+                        {paziente.telefono && paziente.cellulare && ' - '}
+                        {paziente.cellulare && `Cell: ${paziente.cellulare}`}
+                      </div>
+                    )}
+                    {paziente.ultima_visita && (
+                      <div className="small text-muted">
+                        Ultima visita: {new Date(paziente.ultima_visita).toLocaleDateString('it-IT')}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ))}

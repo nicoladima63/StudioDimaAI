@@ -1,5 +1,6 @@
 
 import logging
+import json
 from typing import Dict, Any, List, Optional
 from core.base_repository import BaseRepository, QueryOptions, QueryResult
 from core.database_manager import DatabaseManager
@@ -19,6 +20,20 @@ class WorkRepository(BaseRepository):
     def __init__(self, db_manager: Optional[DatabaseManager] = None):
         super().__init__(db_manager)
         self._ensure_tables_exist()
+
+    def list(self, options: Optional[QueryOptions] = None) -> QueryResult:
+        """List works with their steps."""
+        # Get works using base method
+        result = super().list(options)
+        
+        # Hydrate steps for each work
+        if result.data:
+            for work in result.data:
+                work_id = work.get('id')
+                if work_id:
+                    work['steps'] = self.get_step_templates(work_id)
+        
+        return result
         
     def _ensure_tables_exist(self) -> None:
         """Ensure necessary tables exist."""
@@ -151,4 +166,64 @@ class WorkRepository(BaseRepository):
         except Exception as e:
              logger.error(f"Failed to add step template: {e}")
              raise RepositoryError(f"Failed to add step: {str(e)}", cause=e)
+
+    def update_work_with_steps(self, work_id: int, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Update a work and its steps in a transaction."""
+        try:
+            with self.db_manager.transaction() as conn:
+                # 1. Update Work
+                if work_data:
+                    # Remove steps if present in work_data to avoid DB error
+                    clean_work_data = {k: v for k, v in work_data.items() if k != 'steps'}
+                    self.update(work_id, clean_work_data)
+                
+                # 2. Update Steps
+                if steps_data is not None:
+                    cursor = conn.cursor()
+                    
+                    # Get existing step IDs to detect deletions
+                    existing_steps = self.get_step_templates(work_id)
+                    existing_ids = {s['id'] for s in existing_steps}
+                    incoming_ids = {s['id'] for s in steps_data if 'id' in s}
+                    
+                    # Delete steps that are no longer present
+                    ids_to_delete = existing_ids - incoming_ids
+                    if ids_to_delete:
+                        placeholders = ', '.join(['?' for _ in ids_to_delete])
+                        delete_query = f"UPDATE step_templates SET deleted_at = CURRENT_TIMESTAMP WHERE id IN ({placeholders})"
+                        cursor.execute(delete_query, list(ids_to_delete))
+                    
+                    # Upsert steps
+                    for index, step in enumerate(steps_data):
+                        step_id = step.get('id')
+                        step_data = {
+                            'work_id': work_id,
+                            'name': step['name'],
+                            'description': step.get('description'),
+                            'order_index': step.get('order_index', index),
+                            'provider_id': step.get('provider_id'),
+                            'metadata': step.get('metadata', '{}') if isinstance(step.get('metadata'), str) else json.dumps(step.get('metadata', {}))
+                        }
+                        
+                        if step_id and step_id in existing_ids:
+                            # Update existing
+                            set_clauses = [f"{k} = ?" for k in step_data.keys()]
+                            query = f"UPDATE step_templates SET {', '.join(set_clauses)}, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+                            values = list(step_data.values()) + [step_id]
+                            cursor.execute(query, values)
+                        else:
+                            # Insert new
+                            fields = ', '.join(step_data.keys())
+                            placeholders = ', '.join(['?' for _ in step_data.keys()])
+                            query = f"INSERT INTO step_templates ({fields}) VALUES ({placeholders})"
+                            values = list(step_data.values())
+                            cursor.execute(query, values)
+                            
+                    cursor.close()
+                
+                return self.get_work_with_steps(work_id)
+                
+        except Exception as e:
+            logger.error(f"Failed to update work with steps: {e}")
+            raise RepositoryError(f"Failed to update work: {str(e)}", cause=e)
 

@@ -36,6 +36,14 @@ class WorkService(BaseService):
     def create_work_template(self, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Create a new work template."""
         return self.work_repository.create_work(work_data, steps_data)
+        
+    def update_work_template(self, work_id: int, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Update a work template and its steps."""
+        return self.work_repository.update_work_with_steps(work_id, work_data, steps_data)
+
+    def delete_work_template(self, work_id: int) -> bool:
+        """Delete a work template."""
+        return self.work_repository.delete(work_id)
 
     def create_task_from_work(
         self, 
@@ -44,6 +52,8 @@ class WorkService(BaseService):
         description: str = None, 
         prestazione_id: str = None,
         external_ref_id: str = None,
+        start_date: str = None,
+        due_date: str = None,
         user_id: str = None
     ) -> Dict[str, Any]:
         """
@@ -64,7 +74,8 @@ class WorkService(BaseService):
                 'prestazione_id': prestazione_id,
                 'external_ref_id': external_ref_id,
                 'status': 'active', # Start as active immediately? Or pending? Let's say active.
-                'start_date': datetime.now()
+                'start_date': start_date or datetime.now(),
+                'due_date': due_date
             }
             
             # 3. Prepare Steps Data from Template
@@ -102,6 +113,10 @@ class WorkService(BaseService):
     def get_tasks_for_patient(self, patient_id: str) -> List[Dict[str, Any]]:
         """List tasks for a patient."""
         return self.task_repository.get_tasks_by_patient(patient_id)
+        
+    def get_all_tasks(self) -> List[Dict[str, Any]]:
+        """List all tasks."""
+        return self.task_repository.get_all_tasks()
 
     def complete_step(self, task_id: int, step_id: int, user_id: str = None) -> Dict[str, Any]:
         """
@@ -109,11 +124,7 @@ class WorkService(BaseService):
         Triggers any associated automation.
         """
         try:
-            # 1. Update current step
-            current_step = self.task_repository.get_by_id(step_id, table_name='steps') # Wait, base repo get_by_id uses self.table_name
-            # I need to access steps table directly or via a method in task_repo
-            # task_repository has update_step_status which handles it.
-            
+            # 1. Update current step and get updated Object
             updated_step = self.task_repository.update_step_status(step_id, 'completed', user_id)
             if not updated_step:
                 raise ValidationError(f"Step {step_id} not found")
@@ -148,4 +159,20 @@ class WorkService(BaseService):
         except Exception as e:
             logger.error(f"Failed to complete step: {e}")
             raise ServiceError(f"Failed to complete step: {str(e)}")
+
+    def delete_task(self, task_id: int) -> bool:
+        """Delete a task."""
+        try:
+            return self.task_repository.delete(task_id)
+        except Exception as e:
+            logger.error(f"Failed to delete task {task_id}: {e}")
+            raise ServiceError(f"Failed to delete task: {str(e)}")
+
+    def update_task_status(self, task_id: int, status: str) -> Optional[Dict[str, Any]]:
+        """Update task status."""
+        try:
+            return self.task_repository.update(task_id, {'status': status})
+        except Exception as e:
+            logger.error(f"Failed to update task status {task_id}: {e}")
+            raise ServiceError(f"Failed to update task: {str(e)}")
 

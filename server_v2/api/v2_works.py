@@ -58,3 +58,40 @@ def create_work():
     except Exception as e:
         logger.error(f"Error creating work: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@works_bp.route('/works/<int:work_id>', methods=['PUT'])
+def update_work(work_id):
+    """Update a work template."""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        steps_data = data.get('steps')
+        # Filter out steps from work data if present at top level, though service handles it too
+        work_data = {k: v for k, v in data.items() if k != 'steps'}
+             
+        service = get_work_service()
+        updated_work = service.update_work_template(work_id, work_data, steps_data)
+        
+        return jsonify({'success': True, 'data': updated_work})
+        
+    except Exception as e:
+        logger.error(f"Error updating work {work_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@works_bp.route('/works/<int:work_id>', methods=['DELETE'])
+def delete_work(work_id):
+    """Delete a work template."""
+    try:
+        service = get_work_service()
+        result = service.delete_work_template(work_id)
+        
+        if result:
+            return jsonify({'success': True, 'message': 'Work deleted successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Work not found or failed to delete'}), 404
+            
+    except Exception as e:
+        logger.error(f"Error deleting work {work_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500

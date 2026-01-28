@@ -105,6 +105,14 @@ class RepositoryError(StudioDimaError):
         super().__init__(message, **kwargs)
 
 
+
+class ServiceError(StudioDimaError):
+    """
+    Eccezione per errori nel livello di servizio (logica di business).
+    """
+    pass
+
+
 class ValidationError(StudioDimaError):
     """
     Eccezione per errori di validazione dei dati.

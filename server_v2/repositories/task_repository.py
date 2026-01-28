@@ -105,6 +105,12 @@ class TaskRepository(BaseRepository):
             logger.error(f"Failed to get steps for task {task_id}: {e}")
             return []
             
+    def _attach_steps(self, tasks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Helper to attach steps to a list of tasks."""
+        for task in tasks:
+            task['steps'] = self.get_steps(task['id'])
+        return tasks
+
     def get_tasks_by_patient(self, patient_id: str) -> List[Dict[str, Any]]:
         """Get all tasks for a specific patient."""
         try:
@@ -114,9 +120,22 @@ class TaskRepository(BaseRepository):
             options.order_direction = 'DESC'
             
             result = self.list(options)
-            return result.data
+            return self._attach_steps(result.data)
         except Exception as e:
             logger.error(f"Failed to get tasks for patient {patient_id}: {e}")
+            return []
+            
+    def get_all_tasks(self) -> List[Dict[str, Any]]:
+        """Get all tasks ordered by creation date."""
+        try:
+            options = QueryOptions()
+            options.order_by = 'created_at'
+            options.order_direction = 'DESC'
+            
+            result = self.list(options)
+            return self._attach_steps(result.data)
+        except Exception as e:
+            logger.error(f"Failed to get all tasks: {e}")
             return []
 
     def create_task(self, task_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -148,7 +167,7 @@ class TaskRepository(BaseRepository):
                 
                 cursor.close()
                 
-                return self.get_task_with_steps(task_id)
+            return self.get_task_with_steps(task_id)
                 
         except Exception as e:
             logger.error(f"Failed to create task with steps: {e}")

@@ -6,7 +6,7 @@ Modern API endpoints for patient management with optimized performance.
 
 import logging
 from flask import Blueprint, request, jsonify, g
-from flask_jwt_required import jwt_required
+from flask_jwt_extended import jwt_required
 
 from services.pazienti_service import PazientiService
 from app_v2 import require_auth, format_response, handle_dbf_data

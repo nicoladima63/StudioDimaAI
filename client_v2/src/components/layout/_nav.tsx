@@ -140,6 +140,38 @@ const _nav = [
   },
   {
     component: CNavGroup,
+    name: 'Lavorazioni',
+    to: '/lavorazioni',
+    icon: <CIcon icon={cilLayers} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Works',
+        to: '/works',
+        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Tasks',
+        to: '/tasks',
+        icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Providers',
+        to: '/providers',
+        icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Steps Template',
+        to: '/steps',
+        icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+      },
+    ]
+  },
+  {
+    component: CNavGroup,
     name: 'Analytics',
     to: '/analytics',
     icon: <CIcon icon={cilChart} customClassName="nav-icon" />,

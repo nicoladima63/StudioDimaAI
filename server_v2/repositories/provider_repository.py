@@ -1,6 +1,6 @@
 
 from typing import Optional, List, Dict, Any
-from .base_repository import BaseRepository
+from core.base_repository import BaseRepository
 
 class ProviderRepository(BaseRepository):
     """
@@ -33,9 +33,9 @@ class ProviderRepository(BaseRepository):
     def get_all_active(self) -> List[Dict[str, Any]]:
         """Get all active providers (not soft deleted)."""
         query = f"SELECT * FROM {self.table_name} WHERE deleted_at IS NULL ORDER BY name"
-        return self.execute_query(query)
+        return self.execute_custom_query(query, fetch_all=True)
     
     def find_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         """Find a provider by name."""
         query = f"SELECT * FROM {self.table_name} WHERE name = ? AND deleted_at IS NULL"
-        return self.execute_single_query(query, (name,))
+        return self.execute_custom_query(query, (name,), fetch_one=True)

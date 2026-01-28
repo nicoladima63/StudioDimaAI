@@ -22,9 +22,7 @@ def get_tasks():
         if patient_id:
             tasks = service.get_tasks_for_patient(patient_id)
         else:
-            # Maybe list all tasks or paginate? For now return empty or simple list if needed
-            # Or utilize options. Let's just return empty if no patient for safety/performance
-            return jsonify({'success': True, 'data': []})
+            tasks = service.get_all_tasks()
             
         return jsonify({'success': True, 'data': tasks})
     except Exception as e:
@@ -57,6 +55,8 @@ def create_task():
         description = data.get('description')
         prestazione_id = data.get('prestazione_id')
         external_ref_id = data.get('external_ref_id')
+        start_date = data.get('start_date')
+        due_date = data.get('due_date')
         
         if not patient_id or not work_id:
             return jsonify({'success': False, 'error': 'patient_id and work_id are required'}), 400
@@ -67,11 +67,57 @@ def create_task():
             work_id=work_id,
             description=description,
             prestazione_id=prestazione_id,
-            external_ref_id=external_ref_id
+            external_ref_id=external_ref_id,
+            start_date=start_date,
+            due_date=due_date
         )
         
         return jsonify({'success': True, 'data': new_task}), 201
         
     except Exception as e:
         logger.error(f"Error creating task: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@tasks_bp.route('/tasks/<int:task_id>/steps/<int:step_id>/complete', methods=['POST'])
+def complete_step(task_id, step_id):
+    """Mark a step as completed."""
+    try:
+        service = get_work_service()
+        task = service.complete_step(task_id, step_id)
+        if not task:
+            return jsonify({'success': False, 'error': 'Step or Task not found or failed to complete'}), 404
+        return jsonify({'success': True, 'data': task})
+    except Exception as e:
+        logger.error(f"Error completing step {step_id} for task {task_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@tasks_bp.route('/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    """Delete a task."""
+    try:
+        service = get_work_service()
+        success = service.delete_task(task_id)
+        if not success:
+            return jsonify({'success': False, 'error': 'Task not found or failed to delete'}), 404
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error deleting task {task_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@tasks_bp.route('/tasks/<int:task_id>/status', methods=['PATCH'])
+def update_task_status(task_id):
+    """Update task status (e.g. cancel)."""
+    try:
+        data = request.json
+        status = data.get('status')
+        if not status:
+            return jsonify({'success': False, 'error': 'Status is required'}), 400
+            
+        service = get_work_service()
+        task = service.update_task_status(task_id, status)
+        if not task:
+            return jsonify({'success': False, 'error': 'Task not found'}), 404
+        return jsonify({'success': True, 'data': task})
+    except Exception as e:
+        logger.error(f"Error updating task status {task_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500

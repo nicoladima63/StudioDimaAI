@@ -39,6 +39,12 @@ const SchedulerPage = React.lazy(() => import('@/features/scheduler/pages/Schedu
 const UserListPage = React.lazy(() => import('@/features/users/UserListPage'))
 const UserForm = React.lazy(() => import('@/features/users/UserForm'))
 
+// Lavorazioni Features
+const ProvidersPage = React.lazy(() => import('@/features/lavorazioni/ProvidersPage'))
+const WorksPage = React.lazy(() => import('@/features/lavorazioni/WorksPage'))
+const StepsPage = React.lazy(() => import('@/features/lavorazioni/StepsPage'))
+const TasksPage = React.lazy(() => import('@/features/lavorazioni/TasksPage'))
+
 // Loading fallback component
 const LoadingFallback = () => (
   <div className='d-flex justify-content-center align-items-center' style={{ height: '200px' }}>
@@ -96,6 +102,12 @@ const AppRouter: React.FC = () => {
           <Route path='users' element={<UserListPage />} />
           <Route path='users/new' element={<UserForm />} />
           <Route path='users/edit/:userId' element={<UserForm />} />
+
+          {/* Lavorazioni Routes */}
+          <Route path='providers' element={<ProvidersPage />} />
+          <Route path='works' element={<WorksPage />} />
+          <Route path='steps' element={<StepsPage />} />
+          <Route path='tasks' element={<TasksPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
