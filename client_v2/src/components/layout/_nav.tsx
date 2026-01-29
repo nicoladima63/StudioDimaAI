@@ -146,15 +146,15 @@ const _nav = [
     items: [
       {
         component: CNavItem,
-        name: 'Works',
-        to: '/works',
-        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
         name: 'Tasks',
         to: '/tasks',
         icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Works',
+        to: '/works',
+        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
       },
       {
         component: CNavItem,
