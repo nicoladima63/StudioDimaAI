@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CCard, CCardBody, CCardHeader, CCol, CRow, CButton, CBadge } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CRow, CButton } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilList, cilMediaPlay, cilMediaStop, cilSettings } from '@coreui/icons';
 import { NavLink } from 'react-router-dom';
@@ -8,21 +8,12 @@ import CalendarAutomation from '../components/CalendarAutomation';
 import DatabaseStatusCard from '../components/DatabaseStatusCard';
 import RecallAutomationCard from '../components/RecallAutomationCard';
 import ReminderAutomationCard from '../components/ReminderAutomationCard';
-import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary, } from '@/services/api/monitorPrestazioni';
+import MonitorPrestazioniService, { MonitorSummary, } from '@/services/api/monitorPrestazioni';
 import MonitorRules from '../components/MonitorRules';
 import DashboardStats from '../components/DashboardStats';
+import ActiveWorkCard from '../components/ActiveWorkCard';
 
-const getBadgeColor = (status: string) => {
-  switch (status) {
-    case 'running':
-      return 'success';
-    case 'error':
-      return 'danger';
-    case 'stopped':
-    default:
-      return 'secondary';
-  }
-};
+
 
 const Dashboard: React.FC = () => {
   const { user } = useAuthStore();
@@ -146,8 +137,15 @@ const Dashboard: React.FC = () => {
         </CCol>
       </CRow>
 
-      {/* Stats Section */}
-      <DashboardStats />
+      {/* Stats and Works Section */}
+      <CRow>
+        <CCol lg={8}>
+          <DashboardStats />
+        </CCol>
+        <CCol lg={4}>
+          <ActiveWorkCard />
+        </CCol>
+      </CRow>
 
       {/* Info sections */}
       <CRow>
@@ -182,8 +180,8 @@ const Dashboard: React.FC = () => {
                           <CCardBody>
                             <CRow className="align-items-center">
                               <CCol xs="12">
-                                <h6 className='mb-0'>{monitor.table_name} 
-                                <span className='small text-muted mb-1'> - {monitorId}</span></h6>
+                                <h6 className='mb-0'>{monitor.table_name}
+                                  <span className='small text-muted mb-1'> - {monitorId}</span></h6>
                               </CCol>
                               <CCol xs="12" className="text-end">
                                 {monitor.status === 'running' ? (

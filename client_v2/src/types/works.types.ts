@@ -20,7 +20,7 @@ export interface StepTemplate {
   name: string;
   description?: string;
   order_index: number;
-  provider_id?: string; // stored as string in db linked to Provider(id) or User(id)
+  user_id?: string | number;
   metadata?: Record<string, any>;
   created_at?: string;
   updated_at?: string;
@@ -30,7 +30,7 @@ export interface Work {
   id: number;
   name: string;
   description?: string;
-  category: string; // ID as string e.g. "6"
+  category: string; 
   provider_id?: string;
   version: number;
   steps?: StepTemplate[];
@@ -46,7 +46,7 @@ export interface Step {
   description?: string;
   status: 'pending' | 'active' | 'completed' | 'skipped';
   order_index: number;
-  provider_id?: string;
+  user_id?: string | number; // REPLACED provider_id
   completed_at?: string;
   completed_by?: string;
   metadata?: Record<string, any>;

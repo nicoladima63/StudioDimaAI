@@ -33,7 +33,10 @@ import PazientiSelect from '../../components/selects/PazientiSelect';
 import { usePazienti } from '../../store/pazienti.store';
 import ConfirmDeleteModal from '../../components/modals/ConfirmDeleteModal';
 
+import { useNavigate } from 'react-router-dom';
+
 const TasksPage: React.FC = () => {
+    const navigate = useNavigate();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(false);
     const [worksMap, setWorksMap] = useState<Record<number, Work>>({}); // Cache works to know category
@@ -272,7 +275,7 @@ const TasksPage: React.FC = () => {
                                                 <CIcon icon={cilOptions} />
                                             </CDropdownToggle>
                                             <CDropdownMenu>
-                                                <CDropdownItem href="#" onClick={() => toast('Dettagli non ancora disponibili', { icon: 'ℹ️' })}>Dettagli</CDropdownItem>
+                                                <CDropdownItem onClick={() => navigate(`/works/${task.id}`)}>Dettagli</CDropdownItem>
                                                 <CDropdownItem href="#" className="text-warning" onClick={() => handleCancelTask(task.id)}>Annulla</CDropdownItem>
                                                 <CDropdownItem href="#" className="text-danger" onClick={() => handleDeleteTask(task.id)}>Elimina</CDropdownItem>
                                             </CDropdownMenu>

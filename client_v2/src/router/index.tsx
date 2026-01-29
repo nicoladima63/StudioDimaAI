@@ -42,6 +42,7 @@ const UserForm = React.lazy(() => import('@/features/users/UserForm'))
 // Lavorazioni Features
 const ProvidersPage = React.lazy(() => import('@/features/lavorazioni/ProvidersPage'))
 const WorksPage = React.lazy(() => import('@/features/lavorazioni/WorksPage'))
+const WorkDetailsPage = React.lazy(() => import('@/features/lavorazioni/WorkDetailsPage'))
 const StepsPage = React.lazy(() => import('@/features/lavorazioni/StepsPage'))
 const TasksPage = React.lazy(() => import('@/features/lavorazioni/TasksPage'))
 
@@ -106,6 +107,7 @@ const AppRouter: React.FC = () => {
           {/* Lavorazioni Routes */}
           <Route path='providers' element={<ProvidersPage />} />
           <Route path='works' element={<WorksPage />} />
+          <Route path='works/:taskId' element={<WorkDetailsPage />} />
           <Route path='steps' element={<StepsPage />} />
           <Route path='tasks' element={<TasksPage />} />
 

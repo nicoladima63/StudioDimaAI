@@ -27,7 +27,7 @@ import {
     CFormTextarea
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPlus, cilPencil, cilTrash, cilList } from '@coreui/icons';
+import { cilPlus, cilPencil, cilTrash, cilList, cilChevronTop, cilChevronBottom } from '@coreui/icons';
 import { Work, StepTemplate, Provider, CATEGORY_COLORS, CATEGORY_NAMES } from '../../types/works.types';
 import toast from 'react-hot-toast';
 import ConfirmDeleteModal from '../../components/modals/ConfirmDeleteModal';
@@ -35,6 +35,23 @@ import { useUserStore } from '../../store/user.store';
 import { useWorkStore } from '../../store/works.store';
 import { useProviderStore } from '../../store/provider.store';
 import { worksService } from '../../services/works.service'; // Assuming worksService is still needed for getWork
+
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { WorkStepItem } from './WorkStepItem';
 
 const WorksPage: React.FC = () => {
     // Stores
@@ -50,6 +67,44 @@ const WorksPage: React.FC = () => {
 
     // Steps handling inside modal
     const [tempSteps, setTempSteps] = useState<Partial<StepTemplate>[]>([]);
+    // Maintain a parallel array of unique IDs for dragging if steps don't have IDs
+    const [stepIds, setStepIds] = useState<string[]>([]);
+
+    // Auto-focus logic for new steps
+    const lastInputRef = React.useRef<HTMLInputElement | null>(null);
+    const prevStepsLength = React.useRef(0);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    useEffect(() => {
+        // Sync IDs with steps
+        if (tempSteps.length > stepIds.length) {
+            // Added
+            const newIds = [...stepIds];
+            for (let i = stepIds.length; i < tempSteps.length; i++) {
+                newIds.push(`temp-${Date.now()}-${Math.random()}`);
+            }
+            setStepIds(newIds);
+        } else if (tempSteps.length < stepIds.length) {
+            // Removed - we handle this in removeStep usually, but for safety
+            setStepIds(stepIds.slice(0, tempSteps.length));
+        }
+    }, [tempSteps.length]);
+
+
+    useEffect(() => {
+        if (tempSteps.length > prevStepsLength.current) {
+            if (lastInputRef.current) {
+                lastInputRef.current.focus();
+            }
+        }
+        prevStepsLength.current = tempSteps.length;
+    }, [tempSteps.length]);
 
     useEffect(() => {
         const init = async () => {
@@ -61,6 +116,29 @@ const WorksPage: React.FC = () => {
         };
         init();
     }, []);
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setStepIds((ids) => {
+                const oldIndex = ids.indexOf(active.id as string);
+                const newIndex = ids.indexOf(over.id as string);
+                return arrayMove(ids, oldIndex, newIndex);
+            });
+
+            setTempSteps((items) => {
+                // We need to find indices via IDs to be safe
+                const oldIndex = stepIds.indexOf(active.id as string);
+                const newIndex = stepIds.indexOf(over.id as string);
+
+                const newItems = arrayMove(items, oldIndex, newIndex);
+                // Re-assign order index
+                newItems.forEach((s, i) => s.order_index = i);
+                return newItems;
+            });
+        }
+    };
 
     const handleSave = async () => {
         try {
@@ -105,27 +183,34 @@ const WorksPage: React.FC = () => {
 
     const openModal = async (work?: Work) => {
         if (work) {
-            // Fetch full details including steps if needed, or use what we have if list includes them
-            // API getWork usually returns steps.
             try {
                 const fullWork = await worksService.getWork(work.id);
                 setEditingWork({ ...fullWork });
-                setTempSteps(fullWork.steps || []);
+                const steps = fullWork.steps || [];
+                setTempSteps(steps);
+                // Initialize IDs for existing steps
+                setStepIds(steps.map((s, i) => s.id ? `db-${s.id}` : `temp-${i}-${Date.now()}`));
+
+                prevStepsLength.current = steps.length;
                 setIsEditMode(true);
                 setModalVisible(true);
             } catch (e) {
                 toast.error("Errore recupero dettagli");
             }
         } else {
-            setEditingWork({ category: '1' }); // Default category
+            setEditingWork({ category: '1' });
             setTempSteps([]);
+            setStepIds([]);
+            prevStepsLength.current = 0;
             setIsEditMode(false);
             setModalVisible(true);
         }
     };
 
     const addStep = () => {
-        setTempSteps([...tempSteps, { name: 'Nuovo Step', order_index: tempSteps.length }]);
+        const newStep = { name: '', order_index: tempSteps.length };
+        setTempSteps([...tempSteps, newStep]);
+        // ID will be added by useEffect
     };
 
     const updateStep = (index: number, field: keyof StepTemplate, value: any) => {
@@ -137,9 +222,15 @@ const WorksPage: React.FC = () => {
     const removeStep = (index: number) => {
         const newSteps = [...tempSteps];
         newSteps.splice(index, 1);
-        // Re-index?
+        newSteps.forEach((s, i) => s.order_index = i);
         setTempSteps(newSteps);
+
+        const newIds = [...stepIds];
+        newIds.splice(index, 1);
+        setStepIds(newIds);
     };
+
+
 
     return (
         <CRow>
@@ -273,56 +364,35 @@ const WorksPage: React.FC = () => {
                             </CButton>
                         </div>
 
-                        {tempSteps.map((step, idx) => (
-                            <CCard key={idx} className="mb-2 border-secondary">
-                                <CCardBody className="p-2">
-                                    <CRow className="align-items-center">
-                                        <CCol xs={1}>
-
-
-                                            <CBadge color="dark">{idx + 1}</CBadge>
-                                        </CCol>
-                                        <CCol md={4}>
-                                            <CFormLabel className="mb-0 text-muted" style={{ fontSize: '0.65rem' }}>Nome Step</CFormLabel>
-                                            <CFormInput
-                                                size="sm"
-                                                placeholder="Nome Step (es. Presa impronta)"
-                                                value={step.name || ''}
-                                                onChange={(e) => updateStep(idx, 'name', e.target.value)}
-                                            />
-                                        </CCol>
-                                        <CCol md={2}>
-                                            <CFormLabel className="mb-0 text-muted" style={{ fontSize: '0.65rem' }}>Descrizione</CFormLabel>
-                                            <CFormInput
-                                                size="sm"
-                                                className="mb-1"
-                                                placeholder="opzionale"
-                                                value={step.description || ''}
-                                                onChange={(e) => updateStep(idx, 'description', e.target.value)}
-                                            />
-                                        </CCol>
-                                        <CCol md={4}>
-                                            <CFormLabel className="mb-0 text-muted" style={{ fontSize: '0.65rem' }}>Esecutore</CFormLabel>
-                                            <CFormSelect
-                                                size="sm"
-                                                value={step.provider_id || ''} // We reuse provider_id field to store user ID for steps
-                                                onChange={(e) => updateStep(idx, 'provider_id', e.target.value)}
-                                            >
-                                                <option value="">-- Seleziona un valore --</option>
-                                                {users.filter(u => u.role !== 'admin').map((u) => (
-                                                    <option key={u.id} value={u.id}>{u.username}</option>
-                                                ))}
-                                            </CFormSelect>
-                                        </CCol>
-                                        <CCol xs={1} className="text-end">
-                                            <CButton color="danger" variant="ghost" size="sm" onClick={() => removeStep(idx)}>
-                                                <CIcon icon={cilTrash} />
-                                            </CButton>
-                                        </CCol>
-                                    </CRow>
-                                </CCardBody>
-                            </CCard>
-                        ))}
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={tempSteps.map((_, i) => `step-${i}`)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {tempSteps.map((step, idx) => (
+                                    <WorkStepItem
+                                        key={`step-${idx}-${step.order_index}`} // Use stable key if possible, but index based key + order is tricky with temp items.
+                                        // Actually dnd-kit recommends stable IDs.
+                                        // Since new steps don't have IDs, we need to generate temporary IDs or use index carefully.
+                                        // BUT index changes on reorder. 
+                                        // So we need a stable "local ID" for each step in tempSteps.
+                                        // I'll update addStep to ensure steps have a client-side ID.
+                                        id={stepIds[idx] || `step-${idx}`}
+                                        step={step}
+                                        index={idx}
+                                        users={users}
+                                        updateStep={updateStep}
+                                        removeStep={removeStep}
+                                        lastInputRef={lastInputRef}
+                                        totalSteps={tempSteps.length}
+                                    />
+                                ))}
+                            </SortableContext>
+                        </DndContext>
 
                     </CForm>
                 </CModalBody>

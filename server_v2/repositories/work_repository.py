@@ -104,7 +104,17 @@ class WorkRepository(BaseRepository):
                 ORDER BY order_index ASC
             """
             results = self.execute_custom_query(query, (work_id,), fetch_all=True)
-            return [dict(row) for row in results] if results else []
+            if not results:
+                return []
+            
+            # Filter out provider_id and ensure dict
+            steps = []
+            for row in results:
+                step = dict(row)
+                if 'provider_id' in step:
+                    del step['provider_id']
+                steps.append(step)
+            return steps
         except Exception as e:
             logger.error(f"Failed to get step templates for work {work_id}: {e}")
             return []
@@ -127,6 +137,12 @@ class WorkRepository(BaseRepository):
                         step['work_id'] = work_id
                         step['order_index'] = step.get('order_index', index)
                         
+                        # Map incoming user_id to DB user_id
+                        step['user_id'] = step.get('user_id')
+                        # Ensure provider_id is NOT used for steps
+                        if 'provider_id' in step:
+                            del step['provider_id']
+                            
                         fields = ', '.join(step.keys())
                         placeholders = ', '.join(['?' for _ in step.keys()])
                         values = list(step.values())
@@ -136,8 +152,8 @@ class WorkRepository(BaseRepository):
                 
                 cursor.close()
                 
-                # Return complete object
-                return self.get_work_with_steps(work_id)
+            # Return complete object
+            return self.get_work_with_steps(work_id)
                 
         except Exception as e:
             logger.error(f"Failed to create work with steps: {e}")
@@ -148,6 +164,10 @@ class WorkRepository(BaseRepository):
         try:
             # Simple direct insert using base logic could be tricky due to table name mismatch
             # creating a mini-repo or just custom query is better
+            # Ensure user_id usage
+            if 'provider_id' in step_data:
+                del step_data['provider_id']
+            
             fields = ', '.join(step_data.keys())
             placeholders = ', '.join(['?' for _ in step_data.keys()])
             values = list(step_data.values())
@@ -201,7 +221,9 @@ class WorkRepository(BaseRepository):
                             'name': step['name'],
                             'description': step.get('description'),
                             'order_index': step.get('order_index', index),
-                            'provider_id': step.get('provider_id'),
+                            'order_index': step.get('order_index', index),
+                            'user_id': step.get('user_id'),
+                            # 'provider_id': step.get('provider_id'), # Removed
                             'metadata': step.get('metadata', '{}') if isinstance(step.get('metadata'), str) else json.dumps(step.get('metadata', {}))
                         }
                         
@@ -221,7 +243,7 @@ class WorkRepository(BaseRepository):
                             
                     cursor.close()
                 
-                return self.get_work_with_steps(work_id)
+            return self.get_work_with_steps(work_id)
                 
         except Exception as e:
             logger.error(f"Failed to update work with steps: {e}")

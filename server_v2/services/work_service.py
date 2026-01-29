@@ -85,7 +85,7 @@ class WorkService(BaseService):
                     'name': step_temp['name'],
                     'description': step_temp.get('description'),
                     'order_index': step_temp['order_index'],
-                    'provider_id': step_temp.get('provider_id'),
+                    'user_id': step_temp.get('user_id'),
                     'metadata': step_temp.get('metadata', '{}'),
                     'status': 'pending' 
                 })
@@ -145,10 +145,9 @@ class WorkService(BaseService):
                 self.task_repository.update_step_status(next_step['id'], 'active')
                 logger.info(f"Activated next step {next_step['id']} for task {task_id}")
                 
-                # Check for provider automation
-                if next_step.get('provider_id'):
-                    # TODO: Trigger automation service
-                    pass
+                # Check for automation (if needed for user)
+                # if next_step.get('user_id'):
+                #     pass
             else:
                 # No more steps, complete the task
                 self.task_repository.update(task_id, {'status': 'completed', 'completed_at': datetime.now()})
