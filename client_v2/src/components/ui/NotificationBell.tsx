@@ -41,7 +41,7 @@ const NotificationBell: React.FC = () => {
   }
 
   return (
-    <CDropdown variant="nav-item" placement="bottom-end">
+    <CDropdown variant="nav-item" placement="bottom-end" style={{ listStyle: 'none' }}>
       <CDropdownToggle
         className="py-0 pe-0"
         caret={false}
