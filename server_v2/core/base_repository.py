@@ -280,6 +280,7 @@ class BaseRepository(ABC, Generic[T]):
             # Build and execute insert query
             query, params = self._build_insert_query(data)
             
+            entity_id = None
             with self.db_manager.transaction() as conn:
                 cursor = conn.cursor()
                 cursor.execute(query, params)
@@ -288,17 +289,17 @@ class BaseRepository(ABC, Generic[T]):
                 entity_id = cursor.lastrowid
                 cursor.close()
                 
-                # Return the created entity
-                created_entity = self.get_by_id(entity_id)
-                if created_entity is None:
-                    raise RepositoryError(
-                        f"Failed to retrieve created entity",
-                        entity_type=self.table_name,
-                        entity_id=entity_id
-                    )
-                
-                self.logger.info(f"Created {self.table_name} entity with ID {entity_id}")
-                return created_entity
+            # Return the created entity (fetched after commit)
+            created_entity = self.get_by_id(entity_id)
+            if created_entity is None:
+                raise RepositoryError(
+                    f"Failed to retrieve created entity",
+                    entity_type=self.table_name,
+                    entity_id=entity_id
+                )
+            
+            self.logger.info(f"Created {self.table_name} entity with ID {entity_id}")
+            return created_entity
                 
         except ValidationError:
             raise

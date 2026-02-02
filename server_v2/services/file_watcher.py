@@ -44,6 +44,7 @@ class DbfFileEventHandler(FileSystemEventHandler):
             file_path = event.dest_path
 
         if file_path.upper().endswith('.DBF'):
+            # logger.debug(f"WATCHDOG DBF MATCH: {file_path}")
             self.callback(event.event_type, file_path)
 
 

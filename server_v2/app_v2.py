@@ -239,7 +239,6 @@ def register_blueprints(app: Flask) -> None:
         works_bp,
         tasks_bp,
         steps_bp,
-        steps_bp,
         todos_bp,
         providers_bp
     ]

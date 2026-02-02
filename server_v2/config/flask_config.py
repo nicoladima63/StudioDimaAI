@@ -94,7 +94,7 @@ class FlaskConfig(Config):
 class DevelopmentConfig(FlaskConfig):
     """Development configuration with debug enabled."""
     DEBUG = True
-    LOG_LEVEL = 'DEBUG'
+    LOG_LEVEL = 'INFO'
     # In sviluppo, possiamo usare un URL di ngrok o un altro tunnel
     TRACKED_LINK_BASE_URL = os.environ.get('TRACKED_LINK_BASE_URL_DEV') or 'http://localhost:3001/r'
 

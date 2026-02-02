@@ -52,7 +52,7 @@ def get_status():
     try:
         service = get_monitoring_service()
         status = service.get_monitor_status()
-        logger.info(f"get_status: Returning status: {status}")
+        # logger.debug(f"get_status: Returning status: {status}")
         
         return jsonify({
             'success': True,
@@ -162,8 +162,10 @@ def start_monitor(monitor_id: str):
             return jsonify({
                 'success': True,
                 'message': f'Monitor avviato con successo alle {start_time}',
-                'start_time': start_time,
-                'started_at': start_datetime
+                'data': {
+                    'start_time': start_time,
+                    'started_at': start_datetime
+                }
             })
         else:
             return jsonify({

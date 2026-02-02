@@ -209,3 +209,136 @@ def impl_log_prestazione_eseguita(context_data: Dict[str, Any], **params):
     log_message = f"[LOG AZIONE] {message} | Contesto: {context_data}"
     logger.info(log_message)
     return {'status': 'success', 'message': 'Log registrato.'}
+
+
+from core.database_manager import get_database_manager
+from services.work_service import WorkService
+
+@register_action(
+    name='create_task_from_work',
+    description="Crea un Task da un Work Template quando scatta un evento.",
+    parameters=[
+        {'name': 'work_id', 'type': 'number', 'required': True, 'label': 'ID Work Template'},
+        {'name': 'description', 'type': 'string', 'required': False, 'label': 'Descrizione Task (opzionale)'}
+    ]
+)
+def impl_create_task_from_work(context_data: Dict[str, Any], **params):
+    """Implementazione per creare un Task da un Work."""
+    logger.info(f"[AZIONE] Creazione Task da Work richiesta. Params: {params}")
+    
+    # 1. Ottieni work_id
+    work_id = params.get('work_id')
+    if not work_id:
+        raise ValidationError("Parametro 'work_id' mancante per azione create_task_from_work.")
+    
+    try:
+        work_id = int(work_id)
+    except (ValueError, TypeError):
+        raise ValidationError(f"Parametro 'work_id' non valido: {work_id}")
+
+    # 2. Ottieni ID Paziente dal contesto
+    # Usiamo la funzione di utilità esistente o logica custom se fallisce
+    try:
+        enriched_ctx = _enrich_context_with_patient_data(context_data)
+        # _enrich cercherà id_paziente nelle colonne conosciute (es. DB_APPACOD)
+        # Se il trigger viene da PREVENTIVI, potrebbe non esserci id_paziente diretto ma id_piano (DB_PRELCOD).
+        # Troviamo l'ID effettivo
+        
+        patient_id = None
+        
+        # Cerca ID diretto (es. da PAZIENTI o APPUNTA)
+        for table, cols in COLONNE.items():
+            k = cols.get('id_paziente')
+            if k and k in enriched_ctx:
+                patient_id = enriched_ctx[k]
+                break
+                
+        # Se viene da PREVENTIVI, potremmo avere DB_PRELCOD che spesso è usato come link
+        # Nota: In molti DBF OrisDent, DB_PRELCOD in PREVENT contiene il codice paziente se non c'è piano complesso,
+        # oppure il codice ELENCO. Se è ELENCO, dovremmo cercare in elenco.
+        # Per ora proviamo a usare DB_PRELCOD se presente e non abbiamo altro.
+        if not patient_id and 'DB_PRELCOD' in enriched_ctx:
+            patient_id = enriched_ctx['DB_PRELCOD']
+            logger.debug(f"Usato DB_PRELCOD come patient_id: {patient_id}")
+
+        if not patient_id:
+            # Fallback estremo: se abbiamo un paziente 'enritched' con nome/telefono ma senza ID (nuovo paziente?)
+            # Ma WorkService richiede un patient_id per il link. 
+            # Se siamo qui, il trigger è scattato su un dato DBF che DEV'ESSERE linkato a un paziente.
+            raise ValidationError("Impossibile determinare patient_id dal contesto del trigger.")
+
+    except Exception as e:
+        logger.warning(f"Arricchimento contesto fallito parzialmente, provo recupero raw per Task: {e}")
+        # Se fallback sopra fallisce, l'azione fallisce
+        raise e
+
+    # 3. Ottieni ID Prestazione (Se trigger da Preventivi) e Context Ref
+    prestazione_id = context_data.get('DB_PRONCOD') # Codice univoco riga preventivo/prestazione
+    
+    # 4. Istanzia Service e Crea
+    try:
+        db_manager = get_database_manager()
+        service = WorkService(db_manager)
+        
+        task = service.create_task_from_work(
+            patient_id=str(patient_id),
+            work_id=work_id,
+            description=params.get('description'),
+            prestazione_id=str(prestazione_id) if prestazione_id else None,
+            # Passiamo anche il contesto come external ref se utile? No.
+        )
+        
+        return {'status': 'success', 'task_id': task['id'], 'message': f"Creato Task #{task['id']} per Work #{work_id}"}
+        
+    except Exception as e:
+        logger.error(f"Errore creazione Task da Work: {e}", exc_info=True)
+        return {'status': 'error', 'message': str(e)}
+
+from services.notification_service import NotificationService
+
+@register_action(
+    name='send_system_notification',
+    description="Invia una notifica di sistema (visibile nella dashboard). Utile per debug.",
+    parameters=[
+        {'name': 'message', 'type': 'string', 'required': True, 'label': 'Messaggio Notifica'},
+        {'name': 'user_id', 'type': 'number', 'required': False, 'label': 'ID Utente (Default: 1)'}
+    ]
+)
+def impl_send_system_notification(context_data: Dict[str, Any], **params):
+    """Crea una notifica nel database."""
+    message = params.get('message', 'Trigger attivato!')
+    user_id = params.get('user_id', 1) # Default admin
+    
+    try:
+        user_id = int(user_id)
+    except:
+        user_id = 1
+        
+    # Usiamo WARNING per essere sicuri che appaia nel terminale anche col default log level
+    logger.warning(f"[AZIONE DEBUG] Invio notifica a user {user_id}: {message}")
+    
+    # Arricchisci messaggio con valori contesto se presenti {chiave}
+    try:
+        message = message.format(**context_data)
+    except:
+        pass # Ignora errori format
+        
+    db_manager = get_database_manager()
+    service = NotificationService(db_manager)
+    service.notify_user(user_id, message, type='info')
+    
+    # 3. PUSH to UI Log: Ottieni l'istanza singleton di MonitoringService e aggiungi un log visibile nel Frontend
+    try:
+        from services.monitoring_service import get_monitoring_service
+        from datetime import datetime
+        mon_service = get_monitoring_service()
+        # Aggiungi manuamente il log alla lista che il frontend polla
+        mon_service.logs.append({
+            'timestamp': datetime.now().isoformat(),
+            'message': f"🔔 NOTIFICA INVIATA: {message}",
+            'type': 'success'
+        })
+    except Exception as e:
+        logger.error(f"Impossibile aggiornare UI logs: {e}")
+    
+    return {'status': 'success', 'message': f'Notifica inviata a user {user_id}'}

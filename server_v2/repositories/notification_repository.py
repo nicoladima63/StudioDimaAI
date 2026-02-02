@@ -33,8 +33,7 @@ class NotificationRepository(BaseRepository):
                         type TEXT DEFAULT 'info', -- info, warning, success, error
                         link TEXT,
                         read_at TIMESTAMP,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (user_id) REFERENCES users(id) -- Assuming users table is linked or we just store ID
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, read_at)')

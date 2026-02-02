@@ -182,8 +182,8 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         setError(response.message || "Errore nell'avvio del monitor");
         if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       }
-    } catch (error) {
-      setError("Errore nell'avvio del monitor");
+    } catch (error: any) {
+      setError(error?.message || "Errore nell'avvio del monitor");
       if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       console.error('handleStartMonitorById: Caught exception:', error);
     } finally {
@@ -215,8 +215,8 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         setError(response.message || 'Errore nella fermata del monitor');
         if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       }
-    } catch (error) {
-      setError('Errore nella fermata del monitor');
+    } catch (error: any) {
+      setError(error?.message || "Errore nella fermata del monitor");
       if (originalSummary) setMonitorSummary(originalSummary); // Rollback
       console.error('handleStopMonitorById: Caught exception:', error);
     } finally {

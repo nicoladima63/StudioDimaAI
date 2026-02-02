@@ -216,7 +216,8 @@ class MonitoringService:
 
     def handle_file_change(self, table_name: str):
         with self.lock:
-            logger.debug(f"MODIFICA RILEVATA: File {table_name}.DBF. Avvio processo.")
+            # logger.debug(f"MODIFICA RILEVATA: File {table_name}.DBF. Avvio processo.")
+            self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f"Rilevata variazione file {table_name}.DBF", 'type': 'info'})
             
             physical_table_base_name = table_name.lower()
             logical_table_name = self._dbf_filename_to_logical_name.get(physical_table_base_name, physical_table_base_name)
@@ -233,7 +234,7 @@ class MonitoringService:
                 self.snapshot_manager.update_snapshot(logical_table_name)
                 return
 
-            logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
+            # logger.debug(f"Processando {len(changes)} modifiche per la tabella {logical_table_name}.")
 
             for change_obj in changes:
                 record_data = change_obj.get('new_data')
@@ -277,6 +278,7 @@ class MonitoringService:
                     return
 
                 trigger_id_str = str(trigger_id).strip()
+                logger.debug(f"AUTOMAZIONE: Condizione soddisfatta per {trigger_id_str}. Cerco regole...")
                 
                 has_rules = self.automation_service.execute_query(
                     "SELECT 1 FROM automation_rules WHERE trigger_type = ? AND trigger_id = ? AND attiva = 1 LIMIT 1",
@@ -288,14 +290,22 @@ class MonitoringService:
                     return
 
                 try:
-                    logger.debug(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}' su transizione a stato 3. Esecuzione in corso...")
-                    self.automation_service.execute_rules_for_trigger(
+                    logger.info(f"AUTOMAZIONE: Rilevate regole per trigger '{trigger_type}:{trigger_id_str}' su transizione a stato 3. Esecuzione in corso...")
+                    self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f"Automazione avviata per trigger {trigger_id_str}", 'type': 'info'})
+                    
+                    results = self.automation_service.execute_rules_for_trigger(
                         trigger_type=trigger_type,
                         trigger_id=trigger_id_str,
                         context_data=new_data
                     )
+                    
+                    if results:
+                         self.logs.append({'timestamp': datetime.now().isoformat(), 'message': f"Eseguite {len(results)} azioni per trigger {trigger_id_str}", 'type': 'success'})
+                    
                 except Exception as e:
-                    logger.error(f"Errore esecuzione automazione per trigger {trigger_id_str}: {e}", exc_info=True)
+                    error_msg = f"Errore esecuzione automazione per trigger {trigger_id_str}: {e}"
+                    logger.error(error_msg, exc_info=True)
+                    self.logs.append({'timestamp': datetime.now().isoformat(), 'message': error_msg, 'type': 'error'})
 
         # Logica per altre tabelle (es. 'appunta') rimane invariata
         elif logical_table_name.lower() == 'appunta':
@@ -330,18 +340,20 @@ class MonitoringService:
     def get_monitor_status(self, monitor_id: str = None) -> Dict[str, Any]:
         """Recupera status di monitor specifico o tutti."""
         with self.lock:
-            logger.info(f"get_monitor_status: Called with monitor_id={monitor_id}")
-            logger.info(f"get_monitor_status: Current saved_configs: {self.saved_configs.keys()}")
-            logger.info(f"get_monitor_status: Current active_monitors: {self.active_monitors.keys()}")
+            # logger.debug(f"get_monitor_status: Called with monitor_id={monitor_id}")
 
             if monitor_id:
                 instance = self.active_monitors.get(monitor_id)
                 if instance:
-                    logger.info(f"get_monitor_status: Returning status for active monitor {monitor_id}")
-                    return asdict(instance)
+                    # logger.debug(f"get_monitor_status: Returning status for active monitor {monitor_id}")
+                    # Serialize instance to dict and fix enums
+                    instance_dict = asdict(instance)
+                    instance_dict['status'] = instance.status.value
+                    instance_dict['config']['monitor_type'] = instance.config.monitor_type.value
+                    return instance_dict
                 elif monitor_id in self.saved_configs:
                     config = self.saved_configs[monitor_id]
-                    logger.info(f"get_monitor_status: Returning status for saved (but not active) monitor {monitor_id}")
+                    # logger.debug(f"get_monitor_status: Returning status for saved (but not active) monitor {monitor_id}")
                     
                     # Convert config to dict and fix enum serialization
                     config_dict = asdict(config)
