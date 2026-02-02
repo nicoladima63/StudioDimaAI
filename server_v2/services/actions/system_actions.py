@@ -35,7 +35,6 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
 
     # Caso 1: Telefono già presente nel contesto (prioritario)
     if 'telefono' in enriched_context and enriched_context['telefono']:
-        logger.debug("Arricchimento: 'telefono' già presente. Salto la ricerca.")
         if 'nome_completo' not in enriched_context:
             enriched_context['nome_completo'] = enriched_context.get('nome', 'Gentile Paziente')
         return enriched_context
@@ -48,19 +47,18 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         id_key = columns.get('id_paziente')
         if id_key and id_key in enriched_context:
             patient_id = enriched_context[id_key]
-            if patient_id:
-                logger.debug(f"Trovato ID paziente '{patient_id}' usando la chiave '{id_key}' dalla tabella '{table}'.")
+            # FIX: Considera vuoto anche se contiene solo spazi (pazienti nuovi hanno DB_APPACOD = "      ")
+            if patient_id and str(patient_id).strip():
                 break
+            else:
+                patient_id = None  # Reset se era solo spazi
 
     # Caso 2: ID paziente vuoto (nuovo paziente) - cerca nome in DB_APDESCR e telefono in DB_NOTE
     if not patient_id:
-        logger.debug("ID paziente non trovato. Tentativo di estrarre nome e telefono da DB_APDESCR e DB_NOTE.")
-        
         # Estrai nome da DB_APDESCR
         desc_key = COLONNE.get('appuntamenti', {}).get('descrizione', 'DB_APDESCR')
         if desc_key in enriched_context and enriched_context[desc_key]:
             enriched_context['nome_completo'] = str(enriched_context[desc_key]).strip()
-            logger.debug(f"Nome paziente estratto da DB_APDESCR: {enriched_context['nome_completo']}")
         else:
             enriched_context['nome_completo'] = 'Gentile Paziente'
 
@@ -69,11 +67,11 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         if note_key in enriched_context and enriched_context[note_key]:
             notes_content = str(enriched_context[note_key]).strip()
             first_line = notes_content.split('\n')[0].strip()
-            # Semplice regex per trovare un numero che assomigli a un telefono
-            phone_match = re.search(r'\+?\d[\d\s-]{7,}\d', first_line)
+            # FIX REGEX: Matcha numeri italiani (10 cifre) con o senza prefisso +39
+            # Supporta formati: 3755445058, +393755445058, 375 544 5058, 375-544-5058
+            phone_match = re.search(r'(?:\+39)?[\s-]?3\d[\d\s-]{7,9}', first_line)
             if phone_match:
                 enriched_context['telefono'] = phone_match.group(0).strip()
-                logger.debug(f"Telefono estratto da DB_NOTE: {enriched_context['telefono']}")
         
         # Se dopo questi tentativi non abbiamo un telefono, solleva errore
         if 'telefono' not in enriched_context or not enriched_context['telefono']:
@@ -82,7 +80,6 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         return enriched_context # Abbiamo nome e telefono, possiamo procedere
 
     # Caso 3: ID paziente trovato - recupera dati dal DB
-    logger.debug(f"Arricchimento: ID paziente '{patient_id}' trovato. Recupero dati dal DB.")
     patient_data = dbf_data_service.get_patient_by_id(patient_id)
     if not patient_data:
         raise ValidationError(f"Dati paziente non trovati per ID '{patient_id}'.")
@@ -94,7 +91,6 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
 
     if mobile_phone and str(mobile_phone).strip():
         enriched_context['telefono'] = str(mobile_phone).strip()
-        logger.debug(f"Arricchimento: Trovato e impostato numero cellulare: {enriched_context['telefono']}")
     else:
         raise ValidationError(f"Arricchimento fallito: Numero di cellulare (DB_PACELLU) non trovato per il paziente ID '{patient_id}'.")
 
