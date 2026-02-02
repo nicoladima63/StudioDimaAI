@@ -12,6 +12,7 @@ import { cilUser, cilSettings, cilAccountLogout } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 
 import { useAuthStore } from '@/store/auth.store'
+import NotificationBell from '@/components/ui/NotificationBell'
 
 const Header: React.FC = () => {
   const { user, logout } = useAuthStore()
@@ -34,8 +35,13 @@ const Header: React.FC = () => {
   }
 
   return (
-    <CDropdown variant='nav-item' placement='bottom-end'>
-      <CDropdownToggle className='py-0 pe-0' caret={false}>
+    <div className="d-flex align-items-center">
+      <div className="me-3">
+        <NotificationBell />
+      </div>
+
+      <CDropdown variant='nav-item' placement='bottom-end'>
+        <CDropdownToggle className='py-0 pe-0' caret={false}>
         <div className='d-flex align-items-center'>
           <div className='me-2 text-end d-none d-md-block'>
             <div className='small text-muted'>Benvenuto</div>
@@ -94,6 +100,7 @@ const Header: React.FC = () => {
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
+    </div>
   )
 }
 

@@ -98,7 +98,37 @@ class WorkService(BaseService):
                 first_step = task['steps'][0]
                 self.task_repository.update_step_status(first_step['id'], 'active')
                 task['steps'][0]['status'] = 'active' # Update local object to reflect
-                
+
+                # 6. Send notification to first user
+                first_user_id = first_step.get('user_id')
+                if first_user_id:
+                    try:
+                        from services.notification_service import NotificationService
+                        notification_service = NotificationService(self.db_manager)
+
+                        try:
+                            user_id_int = int(first_user_id)
+                        except (ValueError, TypeError):
+                            logger.warning(f"Invalid user_id format for first step notification: {first_user_id}")
+                            user_id_int = None
+
+                        if user_id_int:
+                            message = f"Nuovo Task #{task['id']}: Step '{first_step['name']}' pronto per essere eseguito"
+                            link = f"/works/{task['id']}"
+
+                            notification_service.notify_user(
+                                user_id=user_id_int,
+                                message=message,
+                                type='info',
+                                link=link
+                            )
+
+                            logger.info(f"Notification sent to user {user_id_int} for new task {task['id']}")
+
+                    except Exception as notif_error:
+                        # Non-critical error, log and continue
+                        logger.error(f"Failed to send notification for new task: {notif_error}")
+
             logger.info(f"Created Task {task['id']} for Patient {patient_id} from Work {work_id}")
             return task
             
@@ -144,10 +174,41 @@ class WorkService(BaseService):
             if next_step:
                 self.task_repository.update_step_status(next_step['id'], 'active')
                 logger.info(f"Activated next step {next_step['id']} for task {task_id}")
-                
-                # Check for automation (if needed for user)
-                # if next_step.get('user_id'):
-                #     pass
+
+                # 4. Send notification if operator changes
+                next_user_id = next_step.get('user_id')
+                current_user_id = updated_step.get('user_id')
+
+                if (next_user_id and
+                    current_user_id and
+                    str(next_user_id) != str(current_user_id)):
+
+                    try:
+                        from services.notification_service import NotificationService
+                        notification_service = NotificationService(self.db_manager)
+
+                        try:
+                            next_user_id_int = int(next_user_id)
+                        except (ValueError, TypeError):
+                            logger.warning(f"Invalid user_id format for notification: {next_user_id}")
+                            next_user_id_int = None
+
+                        if next_user_id_int:
+                            message = f"Step '{next_step['name']}' attivato per Task #{task_id}"
+                            link = f"/works/{task_id}"
+
+                            notification_service.notify_user(
+                                user_id=next_user_id_int,
+                                message=message,
+                                type='info',
+                                link=link
+                            )
+
+                            logger.info(f"Notification sent to user {next_user_id_int} for step {next_step['id']}")
+
+                    except Exception as notif_error:
+                        # Non-critical error, log and continue
+                        logger.error(f"Failed to send notification: {notif_error}")
             else:
                 # No more steps, complete the task
                 self.task_repository.update(task_id, {'status': 'completed', 'completed_at': datetime.now()})

@@ -30,7 +30,7 @@ const GestioneRegoleCard: React.FC<GestioneRegoleCardProps> = ({
 
     const options = prestationsInSelectedCategory.map(p => ({
       value: p.id,
-      label: `[${p.codice_breve}] ${p.nome}`,
+      label: `${p.codice_breve} ${p.nome}`,
       prestazione: p, // Salva l'oggetto completo per un facile recupero
     }));
     setPrestationsOptions(options);
@@ -102,6 +102,10 @@ const GestioneRegoleCard: React.FC<GestioneRegoleCardProps> = ({
                   placeholder='Digita per cercare...'
                   isDisabled={isLoading}
                   noOptionsMessage={() => "Nessuna prestazione trovata"}
+                  filterOption={(option, inputValue) => {
+                    if (!inputValue) return true;
+                    return option.label.toLowerCase().startsWith(inputValue.toLowerCase());
+                  }}
                 />
               </div>
             )}

@@ -87,7 +87,11 @@ def create_rule():
         data = request.get_json()
         if not data:
             return jsonify({'success': False, 'error': 'Dati JSON richiesti'}), 400
-        
+
+        # Converti action_params in action_params_json se presente
+        if 'action_params' in data:
+            data['action_params_json'] = data.pop('action_params')
+
         new_rule = automation_service.create_rule(data)
         
         return jsonify({
@@ -107,7 +111,11 @@ def update_rule(rule_id: int):
         data = request.get_json()
         if not data:
             return jsonify({'success': False, 'error': 'Dati JSON richiesti'}), 400
-        
+
+        # Converti action_params in action_params_json se presente
+        if 'action_params' in data:
+            data['action_params_json'] = data.pop('action_params')
+
         updated_rule = automation_service.update_rule(rule_id, data)
         
         return jsonify({

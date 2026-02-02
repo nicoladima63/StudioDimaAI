@@ -2,6 +2,7 @@ import React from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth.store'
 import AppSidebar from './AppSidebar'
+import NotificationBell from '@/components/ui/NotificationBell'
 
 // Layout CoreUI con AppSidebar moderna
 const Layout: React.FC = () => {
@@ -58,19 +59,19 @@ const Layout: React.FC = () => {
           </div>
 
           {/* Auth section */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             {isAuthenticated && user ? (
               <>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px',
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
                   color: '#2c3e50',
                   fontSize: '14px'
                 }}>
-                  <span style={{ 
-                    background: '#e9ecef', 
-                    padding: '6px 8px', 
+                  <span style={{
+                    background: '#e9ecef',
+                    padding: '6px 8px',
                     borderRadius: '4px',
                     fontWeight: '500',
                     display: 'inline-flex',
@@ -80,10 +81,10 @@ const Layout: React.FC = () => {
                   }}>
                     👤 {user.username}
                   </span>
-                  <span style={{ 
-                    background: user.role === 'admin' ? '#28a745' : '#007bff', 
+                  <span style={{
+                    background: user.role === 'admin' ? '#28a745' : '#007bff',
                     color: 'white',
-                    padding: '6px 8px', 
+                    padding: '6px 8px',
                     borderRadius: '4px',
                     fontSize: '12px',
                     fontWeight: '500',
@@ -94,6 +95,7 @@ const Layout: React.FC = () => {
                     {user.role}
                   </span>
                 </div>
+                <NotificationBell />
                 <button
                   onClick={handleLogout}
                   style={{

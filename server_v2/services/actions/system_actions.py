@@ -213,23 +213,44 @@ def impl_log_prestazione_eseguita(context_data: Dict[str, Any], **params):
 
 from core.database_manager import get_database_manager
 from services.work_service import WorkService
+from repositories.prestazione_work_mapping_repository import PrestazioneWorkMappingRepository
 
 @register_action(
     name='create_task_from_work',
     description="Crea un Task da un Work Template quando scatta un evento.",
     parameters=[
-        {'name': 'work_id', 'type': 'number', 'required': True, 'label': 'ID Work Template'},
+        {'name': 'work_id', 'type': 'number', 'required': False, 'label': 'ID Work Template (opzionale se mappato)'},
         {'name': 'description', 'type': 'string', 'required': False, 'label': 'Descrizione Task (opzionale)'}
     ]
 )
 def impl_create_task_from_work(context_data: Dict[str, Any], **params):
     """Implementazione per creare un Task da un Work."""
     logger.info(f"[AZIONE] Creazione Task da Work richiesta. Params: {params}")
-    
-    # 1. Ottieni work_id
+
+    # 1. Ottieni work_id (da parametri o da mapping automatico)
     work_id = params.get('work_id')
+
+    # Se work_id non è nei parametri, cerca nel mapping automatico usando il trigger_id
     if not work_id:
-        raise ValidationError("Parametro 'work_id' mancante per azione create_task_from_work.")
+        # Il trigger_id dovrebbe essere il codice prestazione (es. ZZZZDJ)
+        # Cerchiamo nel context se c'è DB_PRCODICE o deduciamo dal trigger
+        codice_prestazione = context_data.get('trigger_id') or context_data.get('DB_PRCODICE')
+
+        if codice_prestazione:
+            try:
+                db_manager = get_database_manager()
+                mapping_repo = PrestazioneWorkMappingRepository(db_manager)
+                work_id = mapping_repo.get_work_id_by_prestazione(codice_prestazione)
+
+                if work_id:
+                    logger.info(f"work_id={work_id} trovato tramite mapping per prestazione {codice_prestazione}")
+                else:
+                    logger.warning(f"Nessun mapping trovato per prestazione {codice_prestazione}")
+            except Exception as e:
+                logger.error(f"Errore ricerca mapping: {e}")
+
+    if not work_id:
+        raise ValidationError("Parametro 'work_id' mancante e nessun mapping automatico trovato per questa prestazione.")
     
     try:
         work_id = int(work_id)
@@ -237,40 +258,31 @@ def impl_create_task_from_work(context_data: Dict[str, Any], **params):
         raise ValidationError(f"Parametro 'work_id' non valido: {work_id}")
 
     # 2. Ottieni ID Paziente dal contesto
-    # Usiamo la funzione di utilità esistente o logica custom se fallisce
-    try:
-        enriched_ctx = _enrich_context_with_patient_data(context_data)
-        # _enrich cercherà id_paziente nelle colonne conosciute (es. DB_APPACOD)
-        # Se il trigger viene da PREVENTIVI, potrebbe non esserci id_paziente diretto ma id_piano (DB_PRELCOD).
-        # Troviamo l'ID effettivo
-        
-        patient_id = None
-        
-        # Cerca ID diretto (es. da PAZIENTI o APPUNTA)
+    # NON usiamo _enrich_context_with_patient_data perché richiede telefono (per SMS)
+    # Per i task serve solo il patient_id che è già nel context_data
+    patient_id = None
+
+    # Cerca ID paziente nel context_data (già arricchito dal monitor)
+    # Prova prima 'id_paziente' (aggiunto dal monitor con enrichment)
+    if 'id_paziente' in context_data and context_data['id_paziente']:
+        patient_id = context_data['id_paziente']
+        logger.debug(f"Trovato id_paziente nel contesto: {patient_id}")
+    else:
+        # Fallback: cerca nelle colonne standard
         for table, cols in COLONNE.items():
             k = cols.get('id_paziente')
-            if k and k in enriched_ctx:
-                patient_id = enriched_ctx[k]
+            if k and k in context_data and context_data[k]:
+                patient_id = context_data[k]
+                logger.debug(f"Trovato {k} nel contesto: {patient_id}")
                 break
-                
-        # Se viene da PREVENTIVI, potremmo avere DB_PRELCOD che spesso è usato come link
-        # Nota: In molti DBF OrisDent, DB_PRELCOD in PREVENT contiene il codice paziente se non c'è piano complesso,
-        # oppure il codice ELENCO. Se è ELENCO, dovremmo cercare in elenco.
-        # Per ora proviamo a usare DB_PRELCOD se presente e non abbiamo altro.
-        if not patient_id and 'DB_PRELCOD' in enriched_ctx:
-            patient_id = enriched_ctx['DB_PRELCOD']
-            logger.debug(f"Usato DB_PRELCOD come patient_id: {patient_id}")
 
-        if not patient_id:
-            # Fallback estremo: se abbiamo un paziente 'enritched' con nome/telefono ma senza ID (nuovo paziente?)
-            # Ma WorkService richiede un patient_id per il link. 
-            # Se siamo qui, il trigger è scattato su un dato DBF che DEV'ESSERE linkato a un paziente.
-            raise ValidationError("Impossibile determinare patient_id dal contesto del trigger.")
+    # Se viene da PREVENTIVI, potremmo avere DB_PRELCOD
+    if not patient_id and 'DB_PRELCOD' in context_data and context_data['DB_PRELCOD']:
+        patient_id = context_data['DB_PRELCOD']
+        logger.debug(f"Usato DB_PRELCOD come patient_id: {patient_id}")
 
-    except Exception as e:
-        logger.warning(f"Arricchimento contesto fallito parzialmente, provo recupero raw per Task: {e}")
-        # Se fallback sopra fallisce, l'azione fallisce
-        raise e
+    if not patient_id:
+        raise ValidationError(f"Impossibile determinare patient_id dal contesto del trigger. Context keys: {list(context_data.keys())}")
 
     # 3. Ottieni ID Prestazione (Se trigger da Preventivi) e Context Ref
     prestazione_id = context_data.get('DB_PRONCOD') # Codice univoco riga preventivo/prestazione

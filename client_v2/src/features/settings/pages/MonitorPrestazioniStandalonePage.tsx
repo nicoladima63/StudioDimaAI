@@ -35,6 +35,7 @@ import LogMonitorCard from '@/features/settings/components/monitor/LogMonitorCar
 import CallbackCard from '@/features/settings/components/monitor/CallbackCard';
 import AssociaRegolaCard from '@/features/settings/components/monitor/AssociaRegolaCard';
 import TriggerSourceSelector, { Trigger } from '@/features/settings/components/monitor/TriggerSourceSelector';
+import MappingPrestazioniCard from '@/features/settings/components/monitor/MappingPrestazioniCard';
 
 import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary } from '@/services/api/monitorPrestazioni';
 
@@ -350,6 +351,29 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     setSelectedActionParams(null);
   };
 
+  const handleDirectSaveParams = async (params: any) => {
+    if (!editingRule || !selectedActionId) {
+      throw new Error("Modalità edit non valida");
+    }
+
+    try {
+      setLoading(true);
+      const payload = {
+        action_id: selectedActionId,
+        action_params: params || {},
+      };
+      await automationApi.updateRule(editingRule.id, payload);
+      setSuccess('Parametri aggiornati con successo');
+      handleCancelEdit();
+      if (selectedMonitorId) await loadMonitorDetails(selectedMonitorId);
+    } catch (e: any) {
+      setError(e?.message || 'Errore durante l\'aggiornamento dei parametri.');
+      throw e; // Re-throw per far sapere a CallbackCard che c'è stato un errore
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAssocia = async (e: React.MouseEvent) => {
     e.preventDefault();
 
@@ -571,6 +595,11 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         )}
       </PageLayout.ContentHeader>
 
+      {/* Area 1.5: Gestione Mapping Prestazioni → Works */}
+      <PageLayout.ContentHeader>
+        <MappingPrestazioniCard />
+      </PageLayout.ContentHeader>
+
       {/* Area 2: Dettaglio Regole del Monitor Selezionato */}
       {selectedMonitorId && (
         <PageLayout.ContentBody>
@@ -602,6 +631,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                         onParamsChange={setSelectedActionParams}
                         isModalOpen={isParamsModalOpen}
                         setIsModalOpen={setIsParamsModalOpen}
+                        {...(editingRule ? { onDirectSave: handleDirectSaveParams } : {})}
                       />
                     </CCol>
                     <CCol md={4}>

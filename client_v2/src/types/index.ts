@@ -70,6 +70,25 @@ export interface StoreState<T> {
   lastUpdated: number | null
 }
 
+// Notification types
+export interface Notification {
+  id: number
+  user_id: number
+  message: string
+  type: 'info' | 'warning' | 'success' | 'error'
+  link?: string
+  read_at?: string
+  created_at: string
+}
+
+export interface NotificationState {
+  notifications: Notification[]
+  unreadCount: number
+  loading: LoadingState
+  error: string | null
+  lastFetched: number | null
+}
+
 // Route types
 export interface RouteConfig {
   path: string

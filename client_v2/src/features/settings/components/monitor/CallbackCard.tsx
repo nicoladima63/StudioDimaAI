@@ -17,6 +17,8 @@ import CIcon from '@coreui/icons-react';
 import { cilList, cilSettings } from '@coreui/icons';
 import { Action, ActionParameter } from '@/features/settings/services/automation.service';
 import templatesService, { SmsTemplate } from '@/features/settings/services/templates.service';
+import worksService, { Work } from '@/services/api/works.service';
+import toast from 'react-hot-toast';
 interface CallbackCardProps {
   actions: Action[];
   selectedActionId: number | null;
@@ -25,6 +27,7 @@ interface CallbackCardProps {
   initialParams: any;
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
+  onDirectSave?: (params: any) => Promise<void>; // Callback opzionale per salvare direttamente in edit mode
 }
 
 const CallbackCard: React.FC<CallbackCardProps> = ({
@@ -35,9 +38,12 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
   initialParams,
   isModalOpen,
   setIsModalOpen,
+  onDirectSave,
 }) => {
   const [currentParams, setCurrentParams] = useState<Record<string, any>>(initialParams || {});
   const [smsTemplates, setSmsTemplates] = useState<SmsTemplate[]>([]);
+  const [works, setWorks] = useState<Work[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchSmsTemplates = async () => {
@@ -49,6 +55,17 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
       }
     };
     fetchSmsTemplates();
+
+    const fetchWorks = async () => {
+      try {
+        const data = await worksService.apiGetAll();
+        setWorks(data || []);
+      } catch (error) {
+        console.error("Failed to fetch works", error);
+        toast.error('Errore caricamento work templates');
+      }
+    };
+    fetchWorks();
   }, []);
 
   // Sincronizza i parametri quando si apre il modale o cambiano gli input dal parent
@@ -66,9 +83,24 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
-    onParamsChange(currentParams);
-    setIsModalOpen(false);
+  const handleSave = async () => {
+    // Se esiste onDirectSave (modalità edit), salva direttamente al DB
+    if (onDirectSave) {
+      try {
+        setSaving(true);
+        await onDirectSave(currentParams);
+        setIsModalOpen(false);
+      } catch (error) {
+        // L'errore viene gestito dal parent
+        console.error('Error saving params:', error);
+      } finally {
+        setSaving(false);
+      }
+    } else {
+      // Altrimenti, aggiorna solo lo stato locale (modalità create)
+      onParamsChange(currentParams);
+      setIsModalOpen(false);
+    }
   };
 
   const handleParamChange = (field: string, value: any) => {
@@ -79,7 +111,6 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
     const paramValue = currentParams[param.name];
 
     // Eccezione speciale per 'template_id' per mostrare una dropdown di template SMS.
-    // Questa è un'eccezione specifica dell'UI, non una violazione della genericità.
     if (param.name === 'template_id') {
       return (
         <div className='mb-3' key={param.name}>
@@ -94,6 +125,28 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
             {smsTemplates.map(template => (
               <option key={template.id} value={template.id}>
                 {template.name} ({template.description})
+              </option>
+            ))}
+          </CFormSelect>
+        </div>
+      );
+    }
+
+    // Eccezione speciale per 'work_id' per mostrare una dropdown di work templates.
+    if (param.name === 'work_id') {
+      return (
+        <div className='mb-3' key={param.name}>
+          <CFormLabel htmlFor={param.name}>{param.label}</CFormLabel>
+          <CFormSelect
+            id={param.name}
+            value={paramValue ?? ''}
+            onChange={(e) => handleParamChange(param.name, e.target.value === '' ? null : Number(e.target.value))}
+            required={param.required}
+          >
+            <option value=''>-- Seleziona work template --</option>
+            {works.map(work => (
+              <option key={work.id} value={work.id}>
+                {work.name}
               </option>
             ))}
           </CFormSelect>
@@ -205,8 +258,10 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
           {selectedAction?.parameters?.map(param => renderParamInput(param))}
         </CModalBody>
         <CModalFooter>
-          <CButton color='secondary' variant='outline' onClick={() => setIsModalOpen(false)}>Annulla</CButton>
-          <CButton color='primary' onClick={handleSave}>Salva Parametri</CButton>
+          <CButton color='secondary' variant='outline' onClick={() => setIsModalOpen(false)} disabled={saving}>Annulla</CButton>
+          <CButton color='primary' onClick={handleSave} disabled={saving}>
+            {saving ? 'Salvataggio...' : 'Salva Parametri'}
+          </CButton>
         </CModalFooter>
       </CModal>
     </>)

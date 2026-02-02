@@ -84,7 +84,7 @@ class AutomationService(BaseService):
         start_time = datetime.now()
         action_name = rule.get('action_name')
         implementation_func = self.action_implementation_registry.get(action_name)
-        
+
         if not implementation_func:
             logger.error(f"Implementazione per l'azione '{action_name}' non trovata nel registro.")
             return {'status': 'error', 'rule_id': rule['id'], 'message': f"Azione '{action_name}' non implementata."}
@@ -92,9 +92,14 @@ class AutomationService(BaseService):
         try:
             # Prepara i parametri per l'azione
             action_params = rule.get('action_params', {})
-            
-            # Esegui l'azione passando sia il contesto iniziale che i parametri specifici della regola
-            result = implementation_func(initial_context_data, **action_params)
+
+            # Arricchisci il context con trigger_id per permettere il mapping automatico
+            enriched_context = dict(initial_context_data)
+            enriched_context['trigger_id'] = rule.get('trigger_id')
+            enriched_context['trigger_type'] = rule.get('trigger_type')
+
+            # Esegui l'azione passando il contesto arricchito e i parametri specifici della regola
+            result = implementation_func(enriched_context, **action_params)
             
             execution_time = (datetime.now() - start_time).total_seconds()
             logger.debug(f"Regola {rule['id']} ('{rule['name']}'): Azione '{action_name}' eseguita in {execution_time:.2f}s.")
