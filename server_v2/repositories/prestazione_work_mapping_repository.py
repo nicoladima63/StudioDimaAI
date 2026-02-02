@@ -41,7 +41,7 @@ class PrestazioneWorkMappingRepository(BaseRepository):
         """Ottiene work_id dato il codice prestazione."""
         try:
             query = "SELECT work_id FROM prestazione_work_mapping WHERE codice_prestazione = ?"
-            result = self.execute_custom_query(query, (codice_prestazione,), fetch_all=False)
+            result = self.execute_custom_query(query, (codice_prestazione,), fetch_one=True, fetch_all=False)
             return result['work_id'] if result else None
         except Exception as e:
             logger.error(f"Failed to get work_id for prestazione {codice_prestazione}: {e}")

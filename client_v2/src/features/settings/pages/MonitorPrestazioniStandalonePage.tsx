@@ -466,133 +466,138 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
 
       {/* Area 1: Gestione Monitor */}
       <PageLayout.ContentHeader>
-        <CCard className='mb-4'>
-          <CCardHeader>
-            <h5 className='mb-0'>
-              <CIcon icon={cilPlus} className='me-2' />
-              Crea Nuovo Monitor
-            </h5>
-          </CCardHeader>
-          <CCardBody>
-            <CRow className='g-3 align-items-end'>
-              <CCol md={4}>
-                <CFormLabel htmlFor='monitorTableName'>Tabella DBF da Monitorare</CFormLabel>
-                <CFormSelect
-                  id='monitorTableName'
-                  value={monitorTableName}
-                  onChange={(e) => setMonitorTableName(e.target.value)}
-                  disabled={loading || monitorableTables.length === 0}>
-                  {monitorableTables.length === 0 ? (
-                    <option>Caricamento tabelle...</option>
-                  ) : (
-                    monitorableTables.map(table => (
-                      <option key={table.name} value={table.name}>
-                        {table.name} ({table.description})
-                      </option>
-                    ))
-                  )}
-                </CFormSelect>
-              </CCol>
-              <CCol md={4}>
-                <CFormLabel htmlFor='monitorType'>Tipo di Monitoraggio</CFormLabel>
-                <CFormSelect
-                  id='monitorType'
-                  value={monitorType}
-                  onChange={(e) => setMonitorType(e.target.value)}
-                  disabled={loading}>
-                  <option value='file_watcher'>File Watcher (in tempo reale)</option>
-                </CFormSelect>
-              </CCol>
-              <CCol md={4}>
-                <CButton
-                  color='primary'
-                  onClick={handleCreateMonitor}
-                  disabled={loading || !monitorTableName || !monitorType}>
-                  <CIcon icon={cilPlus} className='me-1' />
-                  Crea Monitor
-                </CButton>
-              </CCol>
-            </CRow>
-          </CCardBody>
-        </CCard>
+        <CRow>
+          <CCol md={4}>
+            <CCard className='mb-4'>
+              <CCardHeader>
+                <h5 className='mb-0'>
+                  <CIcon icon={cilPlus} className='me-2' />
+                  Crea Nuovo Monitor
+                </h5>
+              </CCardHeader>
+              <CCardBody>
+                <CRow className='g-3 align-items-end'>
+                  <CCol md={12}>
+                    <CFormLabel htmlFor='monitorTableName'>Tabella DBF da Monitorare</CFormLabel>
+                    <CFormSelect
+                      id='monitorTableName'
+                      value={monitorTableName}
+                      onChange={(e) => setMonitorTableName(e.target.value)}
+                      disabled={loading || monitorableTables.length === 0}>
+                      {monitorableTables.length === 0 ? (
+                        <option>Caricamento tabelle...</option>
+                      ) : (
+                        monitorableTables.map(table => (
+                          <option key={table.name} value={table.name}>
+                            {table.name} ({table.description})
+                          </option>
+                        ))
+                      )}
+                    </CFormSelect>
 
-        {monitorSummary && (
-          <CCard className='mb-4'>
-            <CCardHeader>
-              <h5 className='mb-0'>
-                <CIcon icon={cilList} className='me-2' />
-                Monitor Configurati ({monitorSummary.total_monitors})
-              </h5>
-            </CCardHeader>
-            <CCardBody>
-              {Object.keys(monitorSummary.monitors).length > 0 ? (
-                <CRow>
-                  {Object.entries(monitorSummary.monitors).map(([monitorId, monitor]) => (
-                    <CCol md={4} lg={3} key={monitorId} className='mb-3'>
-                      <CCard className={`h-100 ${selectedMonitorId === monitorId ? 'border-primary border-2' : ''}`}>
-                        <CCardBody className='d-flex flex-column'>
-                          <div className='d-flex justify-content-between align-items-start mb-2'>
-                            <h6 className='mb-0'>{monitor.table_name}</h6>
-                            <CBadge color={getBadgeColor(monitor.status)}>
-                              {monitor.status}
-                            </CBadge>
-                          </div>
-                          <p className='small text-muted mb-1'>ID: {monitorId}</p>
-                          <div className='mt-auto'>
-                            <div className='d-flex justify-content-between align-items-center mt-3'>
-                              <CButton
-                                color='primary'
-                                variant='outline'
-                                size='sm'
-                                onClick={() => setSelectedMonitorId(monitorId)}>
-                                <CIcon icon={cilSettings} className='me-1' />
-                                Gestisci
-                              </CButton>
-                              <div className='d-flex gap-1'>
-                                {monitor.status === 'running' ? (
-                                  <CButton
-                                    color='warning'
-                                    size='sm'
-                                    variant='outline'
-                                    onClick={() => handleStopMonitorById(monitorId)}
-                                    disabled={loading}
-                                    title="Ferma monitor">
-                                    <CIcon icon={cilMediaStop} />
-                                  </CButton>
-                                ) : (
-                                  <CButton
-                                    color='success'
-                                    size='sm'
-                                    variant='outline'
-                                    onClick={() => handleStartMonitorById(monitorId)}
-                                    disabled={loading}
-                                    title="Avvia monitor">
-                                    <CIcon icon={cilMediaPlay} />
-                                  </CButton>
-                                )}
-                                <CButton
-                                  color='danger'
-                                  size='sm'
-                                  variant='outline'
-                                  onClick={() => requestDeleteMonitor(monitorId)}
-                                  disabled={loading}
-                                  title="Elimina monitor">
-                                  <CIcon icon={cilTrash} />
-                                </CButton>
-                              </div>
-                            </div>
-                          </div>
-                        </CCardBody>
-                      </CCard>
-                    </CCol>
-                  ))}
+                    <CFormLabel htmlFor='monitorType'>Tipo di Monitoraggio</CFormLabel>
+                    <CFormSelect
+                      id='monitorType'
+                      value={monitorType}
+                      onChange={(e) => setMonitorType(e.target.value)}
+                      disabled={loading}>
+                      <option value='file_watcher'>File Watcher (in tempo reale)</option>
+                    </CFormSelect>
+
+                    <CButton className='mt-3'
+                      color='primary'
+                      onClick={handleCreateMonitor}
+                      disabled={loading || !monitorTableName || !monitorType}>
+                      <CIcon icon={cilPlus} className='me-1' />
+                      Crea Monitor
+                    </CButton>
+                  </CCol>
                 </CRow>
-              ) : (
-                <p className='text-muted'>Nessun monitor configurato. Creane uno per iniziare.</p>
-              )}
-            </CCardBody>
-          </CCard>
-        )}
+              </CCardBody>
+            </CCard>
+
+          </CCol>
+          <CCol md={8}>
+            {monitorSummary && (
+              <CCard className='mb-4'>
+                <CCardHeader>
+                  <h5 className='mb-0'>
+                    <CIcon icon={cilList} className='me-2' />
+                    Monitor Configurati ({monitorSummary.total_monitors})
+                  </h5>
+                </CCardHeader>
+                <CCardBody>
+                  {Object.keys(monitorSummary.monitors).length > 0 ? (
+                    <CRow>
+                      {Object.entries(monitorSummary.monitors).map(([monitorId, monitor]) => (
+                        <CCol md={4} lg={3} key={monitorId} className='mb-3'>
+                          <CCard className={`h-100 ${selectedMonitorId === monitorId ? 'border-primary border-2' : ''}`}>
+                            <CCardBody className='d-flex flex-column'>
+                              <div className='d-flex justify-content-between align-items-start mb-2'>
+                                <h6 className='mb-0'>{monitor.table_name}</h6>
+                                <CBadge color={getBadgeColor(monitor.status)}>
+                                  {monitor.status}
+                                </CBadge>
+                              </div>
+                              <p className='small text-muted mb-1'>ID: {monitorId}</p>
+                              <div className='mt-auto'>
+                                <div className='d-flex justify-content-between align-items-center mt-3'>
+                                  <CButton
+                                    color='primary'
+                                    variant='outline'
+                                    size='sm'
+                                    onClick={() => setSelectedMonitorId(monitorId)}>
+                                    <CIcon icon={cilSettings} className='me-1' />
+                                    Gestisci
+                                  </CButton>
+                                  <div className='d-flex gap-1'>
+                                    {monitor.status === 'running' ? (
+                                      <CButton
+                                        color='warning'
+                                        size='sm'
+                                        variant='outline'
+                                        onClick={() => handleStopMonitorById(monitorId)}
+                                        disabled={loading}
+                                        title="Ferma monitor">
+                                        <CIcon icon={cilMediaStop} />
+                                      </CButton>
+                                    ) : (
+                                      <CButton
+                                        color='success'
+                                        size='sm'
+                                        variant='outline'
+                                        onClick={() => handleStartMonitorById(monitorId)}
+                                        disabled={loading}
+                                        title="Avvia monitor">
+                                        <CIcon icon={cilMediaPlay} />
+                                      </CButton>
+                                    )}
+                                    <CButton
+                                      color='danger'
+                                      size='sm'
+                                      variant='outline'
+                                      onClick={() => requestDeleteMonitor(monitorId)}
+                                      disabled={loading}
+                                      title="Elimina monitor">
+                                      <CIcon icon={cilTrash} />
+                                    </CButton>
+                                  </div>
+                                </div>
+                              </div>
+                            </CCardBody>
+                          </CCard>
+                        </CCol>
+                      ))}
+                    </CRow>
+                  ) : (
+                    <p className='text-muted'>Nessun monitor configurato. Creane uno per iniziare.</p>
+                  )}
+                </CCardBody>
+              </CCard>
+            )}
+          </CCol>
+        </CRow>
+
       </PageLayout.ContentHeader>
 
       {/* Area 1.5: Gestione Mapping Prestazioni → Works */}
