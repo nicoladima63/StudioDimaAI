@@ -29,7 +29,14 @@ from utils.dbf_utils import convert_bytes_to_string, clean_dbf_value
 # Importa i moduli delle azioni per attivare la registrazione
 from services.actions import system_actions
 
+# WebSocket support
+from flask_socketio import SocketIO
+
 logger = logging.getLogger(__name__)
+
+# Global SocketIO instance (will be initialized in create_app_v2)
+socketio = None
+websocket_service = None
 
 def create_app_v2(config_name: Optional[str] = None) -> Flask:
     """
@@ -61,6 +68,9 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     # Server V2 initialization
     # Initialize extensions
     init_extensions(app)
+    
+    # Initialize SocketIO
+    init_socketio(app)
     
     # Initialize database manager
     init_database_manager(app)
@@ -167,6 +177,26 @@ def init_extensions(app: Flask) -> None:
     def missing_token_callback(error):
         logger.warning(f"JWT missing token: {error}")
         return jsonify({'error': 'Token required', 'message': 'Authorization token is required'}), 401
+
+
+def init_socketio(app: Flask) -> None:
+    """Initialize Flask-SocketIO for real-time notifications."""
+    global socketio, websocket_service
+    
+    # Initialize SocketIO with CORS support
+    socketio = SocketIO(
+        app,
+        cors_allowed_origins=app.config['CORS_ORIGINS'],
+        async_mode='threading',  # Use threading for compatibility with Waitress
+        logger=False,  # Disable SocketIO logging to reduce noise
+        engineio_logger=False
+    )
+    
+    # Initialize WebSocket service
+    from services.websocket_service import WebSocketService
+    websocket_service = WebSocketService(socketio)
+    
+    logger.info("WebSocket service initialized")
 
 
 def init_database_manager(app: Flask) -> None:

@@ -156,40 +156,36 @@ from collections import defaultdict
 
 
 def run_with_waitress(app, args):
-    """Run server using Waitress WSGI server."""
+    """Run server using SocketIO (WebSocket support)."""
     try:
-        import logging
-        # Disabilita log waitress
-        logging.getLogger('waitress').setLevel(logging.WARNING)
+        # Import socketio from app_v2
+        from app_v2 import socketio
         
-        from waitress import serve
+        if not socketio:
+            print("ERROR: SocketIO not initialized")
+            sys.exit(1)
         
-        print(f"Server avviato su http://{args.host}:{args.port}")
+        print(f"Server con WebSocket avviato su http://{args.host}:{args.port}")
         print("Press Ctrl+C to stop the server")
         print()
         
-        serve(
+        # Use SocketIO's run method which handles WebSocket connections
+        socketio.run(
             app,
             host=args.host,
             port=args.port,
-            threads=args.threads,
-            connection_limit=100,
-            cleanup_interval=30,
-            channel_timeout=120
+            debug=args.debug,
+            use_reloader=False,
+            allow_unsafe_werkzeug=True  # Required for production use
         )
         
-    except ImportError:
-        print("Waitress not installed. Install with: pip install waitress")
-        # print("Falling back to Flask development server...")
-        run_with_flask_dev(app, args)
     except KeyboardInterrupt:
         print("\nServer stopped by user")
         # Shutdown scheduler
         try:
             from services.scheduler_service import scheduler_service
-            print("topping scheduler service...")
+            print("Stopping scheduler service...")
             scheduler_service.shutdown()
-            # print("Scheduler service stopped")
         except Exception as e:
             print(f"Error stopping scheduler: {e}")
     except Exception as e:
@@ -204,17 +200,19 @@ def run_with_waitress(app, args):
 
 
 def run_with_flask_dev(app, args):
-    """Run server using Flask development server."""
-    print(f"Server Flask avviato su http://{args.host}:{args.port}")
+    """Run server using Flask development server with SocketIO."""
+    from app_v2 import socketio
+    
+    print(f"Server Flask con WebSocket avviato su http://{args.host}:{args.port}")
     print("Press Ctrl+C to stop the server")
     print()
     
     try:
-        app.run(
+        socketio.run(
+            app,
             host=args.host,
             port=args.port,
             debug=args.debug,
-            threaded=True,
             use_reloader=False  # Disable reloader to avoid issues
         )
     except KeyboardInterrupt:

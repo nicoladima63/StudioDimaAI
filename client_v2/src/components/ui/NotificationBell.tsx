@@ -4,13 +4,17 @@ import CIcon from '@coreui/icons-react'
 import { cilBell } from '@coreui/icons'
 import { useNotificationStore } from '@/store/notifications.store'
 import NotificationCenter from './NotificationCenter'
+import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications'
 
-const POLLING_INTERVAL = 30000 // 30 seconds
+const POLLING_INTERVAL = 60000 // 60 seconds (reduced, WebSocket is primary)
 
 const NotificationBell: React.FC = () => {
   const { unreadCount, fetchUnread } = useNotificationStore()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const [hasError, setHasError] = React.useState(false)
+
+  // Enable real-time notifications via WebSocket
+  const { isConnected } = useRealtimeNotifications()
 
   // Initial fetch
   useEffect(() => {
@@ -20,7 +24,7 @@ const NotificationBell: React.FC = () => {
     })
   }, [fetchUnread])
 
-  // Setup polling
+  // Setup polling as fallback (reduced frequency since WebSocket is primary)
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       fetchUnread().catch((err) => {

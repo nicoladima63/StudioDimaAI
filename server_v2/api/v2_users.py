@@ -16,14 +16,17 @@ user_repo = UserRepository()
 
 @users_v2_bp.route('/users', methods=['GET'])
 @jwt_required()
-@roles_required('admin')
 def get_all_users():
     """
     Get a list of all users.
-    Accessible only by admins.
+    Accessible by all authenticated users (needed for work assignment UI).
     """
     try:
         users = user_repo.get_all()
+        # Remove password hashes from response for security
+        for user in users:
+            if 'password_hash' in user:
+                del user['password_hash']
         return format_response(data=users), 200
     except Exception as e:
         logger.error(f"Error getting all users: {e}", exc_info=True)

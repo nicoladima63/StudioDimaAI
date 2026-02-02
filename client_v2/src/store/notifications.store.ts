@@ -17,6 +17,7 @@ interface NotificationStore {
   fetchUnread: () => Promise<void>
   markAsRead: (notificationId: number) => Promise<void>
   markAllAsRead: () => Promise<void>
+  incrementUnread: () => void
   clearError: () => void
 
   // Helper
@@ -97,6 +98,12 @@ export const useNotificationStore = create<NotificationStore>()(
           })
           throw err
         }
+      },
+
+      incrementUnread: () => {
+        set((state) => {
+          state.unreadCount += 1
+        })
       },
 
       clearError: () => {
