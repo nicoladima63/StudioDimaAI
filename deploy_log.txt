@@ -1,14 +1,13 @@
 ========================================== 
-DEPLOY LOG - 03/02/2026  9:20:21,04 
+DEPLOY LOG - 03/02/2026 10:37:24,74 
 ========================================== 
 Server: \\SERVERDIMA\StudioDimaAI 
-Timestamp: 20260203_092021 
+Timestamp: 20260203_103724 
 [0/7] Backup file sensibili... 
-  [SKIP] token.json non presente 
   [SKIP] credentials.json non presente 
+  [SKIP] google_calendar.json non presente 
   [SKIP] sync_state.json non presente 
-  [SKIP] feature_flags.json non presente 
-Backup completato in: \\SERVERDIMA\StudioDimaAI\instance\.backup_20260203_092021 
+Backup completato in: \\SERVERDIMA\StudioDimaAI\.backup_20260203_103724 
 [1/7] Verifica cartelle server... 
 [2/7] Sincronizzazione Server V2... 
 
@@ -16,13 +15,15 @@ Backup completato in: \\SERVERDIMA\StudioDimaAI\instance\.backup_20260203_092021
    ROBOCOPY     ::     Copia di file efficace per Windows                              
 -------------------------------------------------------------------------------
 
-  Avviato: martedç 3 febbraio 2026 09:20:22
+  Avviato: martedç 3 febbraio 2026 10:37:26
       Origine : C:\Users\gengi\Desktop\StudioDimaAI\server_v2\
  Destinazione : \\SERVERDIMA\StudioDimaAI\
 
          File: *.*
 	    
      File exc: .env
+	    credentials.json
+	    sync_state.json
 	    *.pyc
 	    *.log
 	    *.legacy_ricetta
@@ -31,25 +32,21 @@ Directory exc: venv
 	    __pycache__
 	    .pytest_cache
 	    .git
-	    instance
 	    logs
 	    legacy_ricetta
+	    tokens
 	    
       Opzioni: *.* /S /E /DCOPY:DA /COPY:DAT /PURGE /MIR /NP /R:2 /W:2 
 
 -------------------------------------------------------------------------------
 
-	                  11	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\
+	                   7	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\
+	*directory supplementare      -1	\\SERVERDIMA\StudioDimaAI\.backup_20260203_103724\
 	*directory supplementare      -1	\\SERVERDIMA\StudioDimaAI\static\
 	    Nuovo file		   22442	app_v2.py
-	    Nuovo file		    3110	calvisi_check_2025.txt
-	    Nuovo file		     409	credentials.json
-	    Nuovo file		     720	debug_spese.py
-	    Nuovo file		    2809	Piano di Azione Modifica di calendar.txt
 	    Nuovo file		   11632	README.md
 	    Nuovo file		    1507	requirements.txt
 	    Nuovo file		   10044	run_v2.py
-	    Nuovo file		     709	test_works.py
 	    Nuovo file		     696	__init__.py
 	Nuova directory      38	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\api\
 	    Nuovo file		   45056	.v2_ricetta.py.swp
@@ -149,6 +146,17 @@ Directory exc: venv
 	    Nuovo file		    4353	code-review.txt
 	    Nuovo file		   11668	frontend-audit-report.md
 	    Nuovo file		    6526	MATERIALI_SYSTEM.md
+	                  11	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\instance\
+	    Nuovo file		     751	automation_settings.json
+	    Nuovo file		       0	database.db
+	    Nuovo file		       3	database_mode.txt
+	    Nuovo file		   45056	protocolli.db
+	    Nuovo file		   61440	ricette_elettroniche.db
+	    Nuovo file		   1.1 m	studio_dima.db
+	    Nuovo file		   32768	studio_dima.db-shm
+	    Nuovo file		  832272	studio_dima.db-wal
+	    Nuovo file		     730	token.json
+	    Nuovo file		   16384	users.db
 	Nuova directory      13	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\repositories\
 	    Nuovo file		   21773	calendar_repository.py
 	    Nuovo file		   29338	fornitori_repository.py
@@ -239,9 +247,6 @@ Directory exc: venv
 	    Nuovo file		     169	__init__.py
 	Nuova directory       1	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\services\actions\
 	    Nuovo file		   16331	system_actions.py
-	Nuova directory       2	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\tokens\
-	    Nuovo file		     737	google_calendar.json
-	    Nuovo file		     729	token.json
 	Nuova directory       5	C:\Users\gengi\Desktop\StudioDimaAI\server_v2\utils\
 	    Nuovo file		    1253	auth_utils.py
 	    Nuovo file		   60718	dbf_utils.py
@@ -252,15 +257,15 @@ Directory exc: venv
 -------------------------------------------------------------------------------
 
               Totale   Copiato  IgnorateNon corrispondentiNon riuscitaSupplementari
-Directory:        30        16        14         0         0         1
-     File:       192       191         1         0         0         0
-     Byte:   57.69 m   57.69 m     1.2 k         0         0         0
-   Durata:   0:00:10   0:00:09                       0:00:00   0:00:00
+Directory:        30        15        15         0         0         2
+     File:       197       194         3         0         0         0
+     Byte:   59.79 m   59.79 m     2.0 k         0         0         0
+   Durata:   0:00:08   0:00:08                       0:00:00   0:00:00
 
 
- VelocitÖ:           6.554.670 Byte/sec.
- VelocitÖ:             375,061 MB/min.
-   Terminato: martedç 3 febbraio 2026 09:20:32
+ VelocitÖ:           7.760.606 Byte/sec.
+ VelocitÖ:             444,065 MB/min.
+   Terminato: martedç 3 febbraio 2026 10:37:35
 
 Robocopy exit code: 3 
   [OK] Sync Server V2 completata. 
@@ -369,7 +374,7 @@ computing gzip size...
 [2mdist/[22m[36massets/index-CxtiuZ4M.js                             [39m[1m[2m137.27 kB[22m[1m[22m[2m ‚îÇ gzip:  45.04 kB[22m[2m ‚îÇ map:   507.03 kB[22m
 [2mdist/[22m[36massets/vendor-D4XL6Uff.js                            [39m[1m[2m163.89 kB[22m[1m[22m[2m ‚îÇ gzip:  53.48 kB[22m[2m ‚îÇ map:   705.46 kB[22m
 [2mdist/[22m[36massets/Dashboard-BXHF7DeJ.js                         [39m[1m[2m361.13 kB[22m[1m[22m[2m ‚îÇ gzip: 107.94 kB[22m[2m ‚îÇ map: 1,812.39 kB[22m
-[32m‚úì built in 8.64s[39m
+[32m‚úì built in 7.63s[39m
   [OK] Build completata. 
 [5/7] Deploy frontend in static... 
 
@@ -377,7 +382,7 @@ computing gzip size...
    ROBOCOPY     ::     Copia di file efficace per Windows                              
 -------------------------------------------------------------------------------
 
-  Avviato: martedç 3 febbraio 2026 09:20:42
+  Avviato: martedç 3 febbraio 2026 10:37:44
       Origine : C:\Users\gengi\Desktop\StudioDimaAI\client_v2\dist\
  Destinazione : \\SERVERDIMA\StudioDimaAI\static\
 
@@ -546,12 +551,12 @@ computing gzip size...
 Directory:         2         2         0         0         0         0
      File:       150       150         0         0         0         0
      Byte:    8.64 m    8.64 m         0         0         0         0
-   Durata:   0:00:05   0:00:05                       0:00:00   0:00:00
+   Durata:   0:00:07   0:00:07                       0:00:00   0:00:00
 
 
- VelocitÖ:           1.676.441 Byte/sec.
- VelocitÖ:              95,927 MB/min.
-   Terminato: martedç 3 febbraio 2026 09:20:48
+ VelocitÖ:           1.268.715 Byte/sec.
+ VelocitÖ:              72,596 MB/min.
+   Terminato: martedç 3 febbraio 2026 10:37:52
 
 Robocopy frontend exit code: 1 
   [OK] Frontend deployato. 

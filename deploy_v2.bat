@@ -107,8 +107,8 @@ echo [2/7] Sincronizzazione Server V2...
 echo [2/7] Sincronizzazione Server V2... >> "%LOGFILE%"
 
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
-    /XD "venv" "__pycache__" ".pytest_cache" ".git" "instance" "logs" "legacy_ricetta" "tokens" ^
-    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "credentials.json" ^
+    /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" "tokens" ^
+    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "credentials.json" "sync_state.json" ^
     /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
 
 set "ROBO_EXIT=%ERRORLEVEL%"
