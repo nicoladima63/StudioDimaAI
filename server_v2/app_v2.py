@@ -20,7 +20,7 @@ from config.flask_config import get_config
 # Determine base path for Google Calendar credentials
 # app_v2.py is in server_v2/ root
 _BASE_DIR = Path(__file__).parent  # server_v2/
-_CREDENTIALS_PATH = _BASE_DIR / "credentials.json"
+_CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
 _TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
 from core.database_manager import get_database_manager
 from core.exceptions import StudioDimaError

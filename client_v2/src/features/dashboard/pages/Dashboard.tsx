@@ -12,6 +12,8 @@ import MonitorPrestazioniService, { MonitorSummary, } from '@/services/api/monit
 import MonitorRules from '../components/MonitorRules';
 import DashboardStats from '../components/DashboardStats';
 import ActiveWorkCard from '../components/ActiveWorkCard';
+import { AutoSyncModal } from '@/features/calendar/components/AutoSyncModal';
+import { calendarHealthService } from '@/features/calendar/services/calendarHealthCheck';
 
 
 
@@ -24,8 +26,13 @@ const Dashboard: React.FC = () => {
   // Stato per il monitor selezionato (master-detail)
   const [selectedMonitorId, setSelectedMonitorId] = useState<string | null>(null);
 
+  // Auto-sync state
+  const [showAutoSyncModal, setShowAutoSyncModal] = useState(false);
+  const [autoSyncJobId, setAutoSyncJobId] = useState<string | null>(null);
+
   useEffect(() => {
     loadStatus();
+    checkFirstSync(); // Verifica se è il primo avvio
     //loadLogs();
     //loadActions();
     //loadRules(); // Le regole ora vengono caricate quando si seleziona un monitor
@@ -124,6 +131,34 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const checkFirstSync = async () => {
+    try {
+      const status = await calendarHealthService.checkFirstSyncStatus();
+
+      // Se serve autenticazione OAuth, non fare nulla (l'utente deve autenticarsi prima)
+      if (status.needs_auth) {
+        console.log('OAuth authentication required, skipping auto-sync');
+        return;
+      }
+
+      // Se è il primo avvio e tutto è pronto, avvia auto-sync
+      if (status.needs_auto_sync) {
+        console.log('First sync detected, starting auto-reset-and-sync...');
+        const jobId = await calendarHealthService.startAutoResetAndSync(1); // Studio 1 default
+        setAutoSyncJobId(jobId);
+        setShowAutoSyncModal(true);
+      }
+    } catch (error) {
+      console.error('Error checking first sync status:', error);
+    }
+  };
+
+  const handleAutoSyncComplete = () => {
+    setShowAutoSyncModal(false);
+    setAutoSyncJobId(null);
+  };
+
 
   return (
     <div className='fade-in'>
@@ -258,6 +293,13 @@ const Dashboard: React.FC = () => {
           </CCard>
         </CCol>
       </CRow>
+
+      {/* Auto-Sync Modal */}
+      <AutoSyncModal
+        visible={showAutoSyncModal}
+        jobId={autoSyncJobId}
+        onComplete={handleAutoSyncComplete}
+      />
 
     </div>
   );

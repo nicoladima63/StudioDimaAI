@@ -22,7 +22,7 @@ import services.calendar_service as calendar_service_module
 # Determine base path for Google Calendar credentials
 # Go up from api/ to server_v2/
 _BASE_DIR = Path(__file__).parent.parent  # api/ -> server_v2/
-_CREDENTIALS_PATH = _BASE_DIR / "credentials.json"
+_CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
 _TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
 from core.exceptions import (
     GoogleCredentialsNotFoundError,
@@ -808,6 +808,52 @@ def reset_sync_state():
         ), 500
 
 
+
+
+@calendar_v2_bp.route('/first-sync-status', methods=['GET'])
+@jwt_required()
+def check_first_sync_status():
+    """
+    Verifica se è il primo avvio (sync_state.json mancante) e se il token OAuth esiste.
+    Usato dalla Dashboard per decidere se avviare la procedura automatica.
+    """
+    try:
+        import os
+        from pathlib import Path
+        
+        # Check sync_state.json
+        sync_state_path = Path('instance/sync_state.json')
+        is_first_sync = not sync_state_path.exists()
+        
+        # Check token OAuth
+        token_exists = os.path.exists(_TOKEN_PATH)
+        
+        # Check credentials
+        credentials_exist = os.path.exists(_CREDENTIALS_PATH)
+        
+        return format_response(
+            success=True,
+            data={
+                'is_first_sync': is_first_sync,
+                'token_exists': token_exists,
+                'credentials_exist': credentials_exist,
+                'needs_auth': not token_exists or not credentials_exist,
+                'needs_auto_sync': is_first_sync and token_exists and credentials_exist
+            },
+            message='First sync status retrieved',
+            state='success'
+        ), 200
+        
+    except Exception as e:
+        logger.error(f"Error checking first sync status: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='FIRST_SYNC_CHECK_ERROR',
+            message=str(e),
+            state='error'
+        ), 500
+
+
 @calendar_v2_bp.route('/health', methods=['GET'])
 def calendar_health_check():
     try:
@@ -844,6 +890,197 @@ def calendar_health_check():
         return format_response(
             success=False,
             error='HEALTH_CHECK_ERROR',
+            message=str(e),
+            state='error'
+        ), 500
+
+
+
+
+@calendar_v2_bp.route('/auto-reset-and-sync', methods=['POST'])
+@jwt_required()
+def auto_reset_and_sync():
+    """
+    Pulizia automatica Google Calendar + sincronizzazione 3 settimane successive.
+    Usato al primo avvio quando sync_state.json manca.
+    """
+    try:
+        from datetime import datetime, timedelta
+        
+        # Calcola range 3 settimane successive
+        today = datetime.now()
+        # Lunedì della settimana SUCCESSIVA
+        days_until_next_monday = (7 - today.weekday()) % 7
+        if days_until_next_monday == 0:
+            days_until_next_monday = 7  # Se oggi è lunedì, prendi il prossimo
+        next_monday = today + timedelta(days=days_until_next_monday)
+        
+        # 3 settimane = 21 giorni
+        end_date = next_monday + timedelta(days=20)  # 20 giorni dopo lunedì = 3 settimane
+        
+        # Ottieni studio_id dalla richiesta
+        data = request.get_json() or {}
+        studio_id = data.get('studio_id', 1)  # Default studio 1
+        
+        # Determina calendar_id
+        if studio_id == 1:
+            calendar_id = os.getenv('CALENDAR_ID_STUDIO_1')
+        elif studio_id == 2:
+            calendar_id = os.getenv('CALENDAR_ID_STUDIO_2')
+        else:
+            return format_response(
+                success=False,
+                error='INVALID_STUDIO',
+                message='Studio ID non valido',
+                state='error'
+            ), 400
+        
+        if not calendar_id:
+            return format_response(
+                success=False,
+                error='CALENDAR_ID_MISSING',
+                message=f'CALENDAR_ID_STUDIO_{studio_id} non configurato',
+                state='error'
+            ), 500
+        
+        # Genera job ID
+        job_id = str(uuid.uuid4())
+        
+        # Inizializza job tracking
+        sync_jobs[job_id] = {
+            "status": "in_progress",
+            "progress": 0,
+            "phase": "clearing",
+            "message": "Pulizia Google Calendar in corso...",
+            "cleared": 0,
+            "synced": 0,
+            "total_weeks": 3,
+            "current_week": 0,
+            "error": None,
+            "cancelled": False,
+            "start_date": next_monday.strftime('%Y-%m-%d'),
+            "end_date": end_date.strftime('%Y-%m-%d')
+        }
+        
+        def auto_sync_job():
+            try:
+                # FASE 1: Pulizia Calendar
+                sync_jobs[job_id]["phase"] = "clearing"
+                sync_jobs[job_id]["message"] = "Pulizia Google Calendar..."
+                
+                deleted_count = calendar_service_module.clear_calendar(calendar_id)
+                sync_jobs[job_id]["cleared"] = deleted_count
+                sync_jobs[job_id]["progress"] = 25
+                
+                # FASE 2: Sincronizzazione 3 settimane
+                dbf_reader = get_optimized_reader()
+                
+                current_date = next_monday
+                week_num = 1
+                total_synced = 0
+                
+                while current_date <= end_date:
+                    if sync_jobs[job_id]["cancelled"]:
+                        raise Exception("Operazione annullata dall'utente")
+                    
+                    sync_jobs[job_id]["phase"] = f"syncing_week_{week_num}"
+                    sync_jobs[job_id]["current_week"] = week_num
+                    sync_jobs[job_id]["message"] = f"Sincronizzazione settimana {week_num}/3..."
+                    
+                    # Sincronizza la settimana corrente (7 giorni)
+                    week_end = min(current_date + timedelta(days=6), end_date)
+                    
+                    # Leggi appuntamenti per questa settimana
+                    month = current_date.month
+                    year = current_date.year
+                    appointments = dbf_reader.get_appointments_optimized(month, year, studio_id=studio_id)
+                    
+                    # Filtra per range settimana
+                    week_appointments = [
+                        app for app in appointments
+                        if current_date.strftime('%Y%m%d') <= app.get('DATA', '') <= week_end.strftime('%Y%m%d')
+                    ]
+                    
+                    # Sincronizza
+                    if week_appointments:
+                        result = calendar_service_module.sync_calendar_from_records(
+                            week_appointments,
+                            on_progress=None
+                        )
+                        total_synced += result['sync'].get('inserted', 0) + result['sync'].get('updated', 0)
+                    
+                    sync_jobs[job_id]["synced"] = total_synced
+                    sync_jobs[job_id]["progress"] = 25 + (week_num * 25)
+                    
+                    # Prossima settimana
+                    current_date = week_end + timedelta(days=1)
+                    week_num += 1
+                
+                # Completato
+                sync_jobs[job_id]["status"] = "completed"
+                sync_jobs[job_id]["progress"] = 100
+                sync_jobs[job_id]["phase"] = "completed"
+                sync_jobs[job_id]["message"] = f"Completato! {deleted_count} eventi rimossi, {total_synced} eventi sincronizzati"
+                
+            except GoogleQuotaError as e:
+                logger.error(f"Google Quota Error: {e}")
+                sync_jobs[job_id]["status"] = "error"
+                sync_jobs[job_id]["error"] = "Quota API Google superata"
+                sync_jobs[job_id]["message"] = "Errore: Quota API superata"
+            except Exception as e:
+                logger.error(f"Auto sync error: {e}", exc_info=True)
+                sync_jobs[job_id]["status"] = "error"
+                sync_jobs[job_id]["error"] = str(e)
+                sync_jobs[job_id]["message"] = f"Errore: {str(e)}"
+        
+        # Avvia thread
+        thread = threading.Thread(target=auto_sync_job)
+        thread.start()
+        
+        return jsonify({"job_id": job_id}), 202
+        
+    except Exception as e:
+        logger.error(f"Error starting auto-reset-and-sync: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='AUTO_SYNC_START_ERROR',
+            message=str(e),
+            state='error'
+        ), 500
+
+
+
+
+@calendar_v2_bp.route('/sync/job/<job_id>', methods=['GET'])
+@jwt_required()
+def get_auto_sync_job_status(job_id: str):
+    """
+    Controlla lo stato del job di auto-reset-and-sync.
+    Usato dal frontend per mostrare il progress nella modal.
+    """
+    try:
+        if job_id not in sync_jobs:
+            return format_response(
+                success=False,
+                error='JOB_NOT_FOUND',
+                message=f'Job {job_id} non trovato',
+                state='error'
+            ), 404
+        
+        job_status = sync_jobs[job_id]
+        
+        return format_response(
+            success=True,
+            data=job_status,
+            message='Job status retrieved',
+            state='success'
+        ), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting job status: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error='JOB_STATUS_ERROR',
             message=str(e),
             state='error'
         ), 500

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # Determine base path for Google Calendar credentials
 # If running from server_v2 directory, use current dir, otherwise use server_v2 subdirectory
 _BASE_DIR = Path(__file__).parent.parent  # Go up from services/ to server_v2/
-_CREDENTIALS_PATH = _BASE_DIR / "credentials.json"
+_CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
 _TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
 
 

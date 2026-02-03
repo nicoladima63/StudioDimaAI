@@ -41,12 +41,12 @@ set "BACKUP_DIR=%DEPLOY_PATH%\.backup_%TIMESTAMP%"
 mkdir "%BACKUP_DIR%" 2>nul
 
 :: File da preservare (con i path corretti dove il codice li cerca)
-:: credentials.json -> root
+:: credentials.json -> instance/
 :: tokens/google_calendar.json -> tokens/
 :: instance/sync_state.json -> instance/
 
-if exist "%DEPLOY_PATH%\credentials.json" (
-    copy "%DEPLOY_PATH%\credentials.json" "%BACKUP_DIR%\credentials.json" /Y >nul 2>&1
+if exist "%DEPLOY_PATH%\instance\credentials.json" (
+    copy "%DEPLOY_PATH%\instance\credentials.json" "%BACKUP_DIR%\credentials.json" /Y >nul 2>&1
     if !errorlevel! neq 0 (
         echo   [WARN] Impossibile fare backup di credentials.json
         echo   [WARN] Impossibile fare backup di credentials.json >> "%LOGFILE%"
@@ -107,8 +107,8 @@ echo [2/7] Sincronizzazione Server V2...
 echo [2/7] Sincronizzazione Server V2... >> "%LOGFILE%"
 
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
-    /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" "tokens" ^
-    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "credentials.json" "sync_state.json" ^
+    /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" ^
+    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "sync_state.json" ^
     /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
 
 set "ROBO_EXIT=%ERRORLEVEL%"
@@ -134,9 +134,9 @@ echo [2.5/7] Ripristino file sensibili... >> "%LOGFILE%"
 if not exist "%DEPLOY_PATH%\tokens" mkdir "%DEPLOY_PATH%\tokens"
 if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
 
-:: Ripristina credentials.json nella root
+:: Ripristina credentials.json in instance/
 if exist "%BACKUP_DIR%\credentials.json" (
-    copy "%BACKUP_DIR%\credentials.json" "%DEPLOY_PATH%\credentials.json" /Y >nul 2>&1
+    copy "%BACKUP_DIR%\credentials.json" "%DEPLOY_PATH%\instance\credentials.json" /Y >nul 2>&1
     if !errorlevel! neq 0 (
         echo   [ERR] Impossibile ripristinare credentials.json!
         echo   [ERR] Impossibile ripristinare credentials.json! >> "%LOGFILE%"
