@@ -372,6 +372,6 @@ def get_sync_state_manager() -> SyncStateManager:
     global _sync_state_manager
     
     if _sync_state_manager is None:
-        _sync_state_manager = SyncStateManager()
+        _sync_state_manager = SyncStateManager("instance/sync_state.json")
     
     return _sync_state_manager

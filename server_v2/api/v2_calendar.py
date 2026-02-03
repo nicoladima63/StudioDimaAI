@@ -769,11 +769,19 @@ def reset_sync_state():
         
         sync_manager = get_sync_state_manager()
         
-        # Backup vecchio state
+        # Backup vecchio state (se esiste)
         import shutil
         import datetime
-        backup_name = f"instance/sync_state.backup.{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        shutil.copy('instance/sync_state.json', backup_name)
+        import os
+        
+        sync_state_path = 'instance/sync_state.json'
+        if os.path.exists(sync_state_path):
+            backup_name = f"instance/sync_state.backup.{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            shutil.copy(sync_state_path, backup_name)
+            backup_msg = f'Backup creato: {backup_name}'
+        else:
+            backup_name = None
+            backup_msg = 'Nessun file da backuppare'
         
         # Reset state
         sync_manager.save_sync_state({})
@@ -784,7 +792,8 @@ def reset_sync_state():
             message='Sync state resettato con successo',
             data={
                 'message': 'Sync state resettato con successo',
-                'backup': backup_name
+                'backup': backup_name,
+                'backup_info': backup_msg
             }
         ), 200
         
