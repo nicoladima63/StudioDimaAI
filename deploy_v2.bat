@@ -37,25 +37,54 @@ pause
 echo [0/7] Backup file sensibili...
 echo [0/7] Backup file sensibili... >> "%LOGFILE%"
 
-set "BACKUP_DIR=%DEPLOY_PATH%\instance\.backup_%TIMESTAMP%"
+set "BACKUP_DIR=%DEPLOY_PATH%\.backup_%TIMESTAMP%"
 mkdir "%BACKUP_DIR%" 2>nul
 
-set "SENSITIVE_FILES=token.json credentials.json sync_state.json feature_flags.json"
+:: File da preservare (con i path corretti dove il codice li cerca)
+:: credentials.json -> root
+:: tokens/google_calendar.json -> tokens/
+:: instance/sync_state.json -> instance/
 
-for %%F in (%SENSITIVE_FILES%) do (
-    if exist "%DEPLOY_PATH%\instance\%%F" (
-        copy "%DEPLOY_PATH%\instance\%%F" "%BACKUP_DIR%\%%F" /Y >nul 2>&1
-        if !errorlevel! neq 0 (
-            echo   [WARN] Impossibile fare backup di %%F
-            echo   [WARN] Impossibile fare backup di %%F >> "%LOGFILE%"
-        ) else (
-            echo   [OK] %%F salvato
-            echo   [OK] %%F salvato >> "%LOGFILE%"
-        )
+if exist "%DEPLOY_PATH%\credentials.json" (
+    copy "%DEPLOY_PATH%\credentials.json" "%BACKUP_DIR%\credentials.json" /Y >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo   [WARN] Impossibile fare backup di credentials.json
+        echo   [WARN] Impossibile fare backup di credentials.json >> "%LOGFILE%"
     ) else (
-        echo   [SKIP] %%F non presente
-        echo   [SKIP] %%F non presente >> "%LOGFILE%"
+        echo   [OK] credentials.json salvato
+        echo   [OK] credentials.json salvato >> "%LOGFILE%"
     )
+) else (
+    echo   [SKIP] credentials.json non presente
+    echo   [SKIP] credentials.json non presente >> "%LOGFILE%"
+)
+
+if exist "%DEPLOY_PATH%\tokens\google_calendar.json" (
+    copy "%DEPLOY_PATH%\tokens\google_calendar.json" "%BACKUP_DIR%\google_calendar.json" /Y >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo   [WARN] Impossibile fare backup di google_calendar.json
+        echo   [WARN] Impossibile fare backup di google_calendar.json >> "%LOGFILE%"
+    ) else (
+        echo   [OK] google_calendar.json salvato
+        echo   [OK] google_calendar.json salvato >> "%LOGFILE%"
+    )
+) else (
+    echo   [SKIP] google_calendar.json non presente
+    echo   [SKIP] google_calendar.json non presente >> "%LOGFILE%"
+)
+
+if exist "%DEPLOY_PATH%\instance\sync_state.json" (
+    copy "%DEPLOY_PATH%\instance\sync_state.json" "%BACKUP_DIR%\sync_state.json" /Y >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo   [WARN] Impossibile fare backup di sync_state.json
+        echo   [WARN] Impossibile fare backup di sync_state.json >> "%LOGFILE%"
+    ) else (
+        echo   [OK] sync_state.json salvato
+        echo   [OK] sync_state.json salvato >> "%LOGFILE%"
+    )
+) else (
+    echo   [SKIP] sync_state.json non presente
+    echo   [SKIP] sync_state.json non presente >> "%LOGFILE%"
 )
 
 echo Backup completato in: %BACKUP_DIR%
@@ -78,8 +107,8 @@ echo [2/7] Sincronizzazione Server V2...
 echo [2/7] Sincronizzazione Server V2... >> "%LOGFILE%"
 
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
-    /XD "venv" "__pycache__" ".pytest_cache" ".git" "instance" "logs" "legacy_ricetta" ^
-    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" ^
+    /XD "venv" "__pycache__" ".pytest_cache" ".git" "instance" "logs" "legacy_ricetta" "tokens" ^
+    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "credentials.json" ^
     /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
 
 set "ROBO_EXIT=%ERRORLEVEL%"
@@ -101,16 +130,43 @@ echo   [OK] Sync Server V2 completata. >> "%LOGFILE%"
 echo [2.5/7] Ripristino file sensibili...
 echo [2.5/7] Ripristino file sensibili... >> "%LOGFILE%"
 
-for %%F in (%SENSITIVE_FILES%) do (
-    if exist "%BACKUP_DIR%\%%F" (
-        copy "%BACKUP_DIR%\%%F" "%DEPLOY_PATH%\instance\%%F" /Y >nul 2>&1
-        if !errorlevel! neq 0 (
-            echo   [ERR] Impossibile ripristinare %%F!
-            echo   [ERR] Impossibile ripristinare %%F! >> "%LOGFILE%"
-        ) else (
-            echo   [OK] %%F ripristinato
-            echo   [OK] %%F ripristinato >> "%LOGFILE%"
-        )
+:: Crea le directory necessarie
+if not exist "%DEPLOY_PATH%\tokens" mkdir "%DEPLOY_PATH%\tokens"
+if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
+
+:: Ripristina credentials.json nella root
+if exist "%BACKUP_DIR%\credentials.json" (
+    copy "%BACKUP_DIR%\credentials.json" "%DEPLOY_PATH%\credentials.json" /Y >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo   [ERR] Impossibile ripristinare credentials.json!
+        echo   [ERR] Impossibile ripristinare credentials.json! >> "%LOGFILE%"
+    ) else (
+        echo   [OK] credentials.json ripristinato
+        echo   [OK] credentials.json ripristinato >> "%LOGFILE%"
+    )
+)
+
+:: Ripristina google_calendar.json in tokens/
+if exist "%BACKUP_DIR%\google_calendar.json" (
+    copy "%BACKUP_DIR%\google_calendar.json" "%DEPLOY_PATH%\tokens\google_calendar.json" /Y >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo   [ERR] Impossibile ripristinare google_calendar.json!
+        echo   [ERR] Impossibile ripristinare google_calendar.json! >> "%LOGFILE%"
+    ) else (
+        echo   [OK] google_calendar.json ripristinato
+        echo   [OK] google_calendar.json ripristinato >> "%LOGFILE%"
+    )
+)
+
+:: Ripristina sync_state.json in instance/
+if exist "%BACKUP_DIR%\sync_state.json" (
+    copy "%BACKUP_DIR%\sync_state.json" "%DEPLOY_PATH%\instance\sync_state.json" /Y >nul 2>&1
+    if !errorlevel! neq 0 (
+        echo   [ERR] Impossibile ripristinare sync_state.json!
+        echo   [ERR] Impossibile ripristinare sync_state.json! >> "%LOGFILE%"
+    ) else (
+        echo   [OK] sync_state.json ripristinato
+        echo   [OK] sync_state.json ripristinato >> "%LOGFILE%"
     )
 )
 
