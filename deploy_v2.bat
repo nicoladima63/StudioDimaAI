@@ -108,7 +108,7 @@ echo [2/7] Sincronizzazione Server V2... >> "%LOGFILE%"
 
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
     /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" ^
-    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "sync_state.json" ^
+    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "sync_state.json" "database_mode.txt" ^
     /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
 
 set "ROBO_EXIT=%ERRORLEVEL%"
@@ -169,6 +169,29 @@ if exist "%BACKUP_DIR%\sync_state.json" (
         echo   [OK] sync_state.json ripristinato >> "%LOGFILE%"
     )
 )
+
+echo Ripristino file sensibili completato.
+echo Ripristino file sensibili completato. >> "%LOGFILE%"
+
+:: ============================================================================
+:: [2.6/7] Creazione database_mode.txt per PROD
+:: ============================================================================
+echo [2.6/7] Creazione database_mode.txt per produzione...
+echo [2.6/7] Creazione database_mode.txt per produzione... >> "%LOGFILE%"
+
+:: Verifica che la directory instance esista
+if not exist "%DEPLOY_PATH%\instance" (
+    echo   [WARN] Directory instance non trovata, la creo...
+    echo   [WARN] Directory instance non trovata, la creo... >> "%LOGFILE%"
+    mkdir "%DEPLOY_PATH%\instance"
+)
+
+:: Crea database_mode.txt con "prod"
+echo prod > "%DEPLOY_PATH%\instance\database_mode.txt"
+echo   [OK] database_mode.txt creato con modalità PROD
+echo   [OK] database_mode.txt creato con modalità PROD >> "%LOGFILE%"
+
+
 
 :: ============================================================================
 :: [3/7] Aggiornamento .env
