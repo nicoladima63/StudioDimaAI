@@ -106,7 +106,11 @@ const ActiveWorkCard: React.FC = () => {
                                 const work = worksMap[task.work_id];
 
                                 return (
-                                    <CTableRow key={task.id}>
+                                    <CTableRow
+                                        key={task.id}
+                                        onClick={() => navigate(`/works/${task.id}`)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <CTableDataCell>
                                             <div className="fw-bold text-truncate" style={{ maxWidth: '120px' }} title={getPatientName(task.patient_id)}>
                                                 {getPatientName(task.patient_id)}
@@ -122,14 +126,7 @@ const ActiveWorkCard: React.FC = () => {
                                             <CBadge color="info" shape="rounded-pill">{getPhaseLabel(task)}</CBadge>
                                         </CTableDataCell>
                                         <CTableDataCell className="text-end">
-                                            <CButton
-                                                color="light"
-                                                size="sm"
-                                                onClick={() => navigate(`/works/${task.id}`)}
-                                                title="Veed Dettaglio"
-                                            >
-                                                <CIcon icon={cilArrowRight} size="sm" />
-                                            </CButton>
+                                            <CIcon icon={cilArrowRight} size="sm" className="text-muted" />
                                         </CTableDataCell>
                                     </CTableRow>
                                 );

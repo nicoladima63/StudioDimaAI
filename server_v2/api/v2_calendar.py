@@ -947,8 +947,6 @@ def auto_reset_and_sync():
         job_id = str(uuid.uuid4())
         
         # Verifica requisiti per il pre-check
-        import os
-        from pathlib import Path
         token_exists = os.path.exists(_TOKEN_PATH)
         credentials_exist = os.path.exists(_CREDENTIALS_PATH)
         sync_state_path = Path('instance/sync_state.json')

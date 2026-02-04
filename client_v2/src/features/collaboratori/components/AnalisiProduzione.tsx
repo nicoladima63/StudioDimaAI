@@ -45,13 +45,13 @@ const AnalisiProduzione: React.FC<AnalisiProduzioneProps> = ({ data, loading }) 
     return (
         <CRow>
             {data.map((op) => (
-                <CCol xs={12} lg={6} xl={4} className="mb-4" key={op.operatore}>
+                <CCol xs={12} lg={6} xl={2} className="mb-4" key={op.operatore}>
                     <CCard className="h-100 border-top-primary border-top-3 shadow-sm">
                         <CCardBody>
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <h5 className="mb-0 fw-bold">{op.operatore}</h5>
-                                <CBadge color="success" className="fs-6">{formatCurrency(op.totale_periodo)}</CBadge>
                             </div>
+                            <CBadge color="success" className="fs-6 float-end">{formatCurrency(op.totale_periodo)}</CBadge>
                             <CTable small hover borderless className="mb-0">
                                 <CTableBody>
                                     {op.dettaglio_branche.map((b) => (

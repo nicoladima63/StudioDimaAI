@@ -53,31 +53,49 @@ export const useRealtimeNotifications = () => {
       // Show toast notification (persistent until clicked)
       const toastType = data.type === 'error' ? 'error' : data.type === 'success' ? 'success' : 'default';
       
-      // Extract task ID from message for navigation
-      const taskMatch = data.message.match(/Task #(\d+)/);
-      const taskId = taskMatch ? taskMatch[1] : null;
-      
+      // Create toast and capture its ID
       const toastOptions = {
         duration: Infinity, // Persistent
         icon: '🔔',
-        onClick: () => {
-          // Navigate to task page on click
-          if (data.link) {
-            window.location.href = data.link;
-          } else if (taskId) {
-            window.location.href = `/works/${taskId}`;
-          } else {
-            window.location.href = '/tasks';
-          }
-        },
       };
       
+      let toastId = '';
       if (toastType === 'error') {
-        toast.error(data.message, toastOptions);
+        toastId = toast.error(data.message, toastOptions);
       } else if (toastType === 'success') {
-        toast.success(data.message, toastOptions);
+        toastId = toast.success(data.message, toastOptions);
       } else {
-        toast(data.message, toastOptions);
+        toastId = toast(data.message, toastOptions);
+      }
+      
+      // Add click handler to the toast to dismiss and navigate
+      if (toastId) {
+        setTimeout(() => {
+          // Find the toast element by searching for the toast with our message
+          const toastElements = document.querySelectorAll('[role="status"]');
+          toastElements.forEach((element) => {
+            if (element.textContent?.includes(data.message)) {
+              const handleClick = () => {
+                // Dismiss the toast first
+                toast.dismiss(toastId);
+                
+                // Then navigate
+                setTimeout(() => {
+                  if (data.link) {
+                    window.location.href = data.link;
+                  } else {
+                    window.location.href = '/tasks';
+                  }
+                }, 100);
+                
+                // Remove listener after first click
+                element.removeEventListener('click', handleClick);
+              };
+              
+              element.addEventListener('click', handleClick);
+            }
+          });
+        }, 100);
       }
 
       // Show browser notification (always, for better visibility)

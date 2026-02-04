@@ -104,7 +104,12 @@ class WorkService(BaseService):
                 if first_user_id:
                     try:
                         from services.notification_service import NotificationService
+                        from repositories.user_repository import UserRepository
+                        from services.dbf_data_service import get_dbf_data_service
+                        
                         notification_service = NotificationService(self.db_manager)
+                        user_repository = UserRepository()
+                        dbf_service = get_dbf_data_service()
 
                         try:
                             user_id_int = int(first_user_id)
@@ -113,7 +118,17 @@ class WorkService(BaseService):
                             user_id_int = None
 
                         if user_id_int:
-                            message = f"Nuovo Task #{task['id']}: Step '{first_step['name']}' pronto per essere eseguito"
+                            # Recupera nome paziente
+                            patient_name = "un nuovo paziente"
+                            patient_data = dbf_service.get_patient_by_id(patient_id)
+                            if patient_data and patient_data.get('nome'):
+                                patient_name = patient_data['nome']
+                            
+                            # Recupera nome utente
+                            user = user_repository.find_by_id(user_id_int)
+                            username = user.get('username', 'tu') if user else 'tu'
+                            
+                            message = f"{username}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
                             link = f"/works/{task['id']}"
 
                             notification_service.notify_user(
@@ -125,9 +140,8 @@ class WorkService(BaseService):
 
                             logger.info(f"Notification sent to user {user_id_int} for new task {task['id']}")
 
-                    except Exception as notif_error:
-                        # Non-critical error, log and continue
-                        logger.error(f"Failed to send notification for new task: {notif_error}")
+                    except Exception as e:
+                        logger.error(f"Failed to send notification for new task: {e}")
 
             logger.info(f"Created Task {task['id']} for Patient {patient_id} from Work {work_id}")
             return task
@@ -185,7 +199,12 @@ class WorkService(BaseService):
 
                     try:
                         from services.notification_service import NotificationService
+                        from repositories.user_repository import UserRepository
+                        from services.dbf_data_service import get_dbf_data_service
+                        
                         notification_service = NotificationService(self.db_manager)
+                        user_repository = UserRepository()
+                        dbf_service = get_dbf_data_service()
 
                         try:
                             next_user_id_int = int(next_user_id)
@@ -194,7 +213,23 @@ class WorkService(BaseService):
                             next_user_id_int = None
 
                         if next_user_id_int:
-                            message = f"Step '{next_step['name']}' attivato per Task #{task_id}"
+                            # Recupera nomi utenti
+                            current_user = user_repository.find_by_id(int(current_user_id))
+                            next_user = user_repository.find_by_id(next_user_id_int)
+                            
+                            current_username = current_user.get('username', 'Un collega') if current_user else 'Un collega'
+                            next_username = next_user.get('username', 'tu') if next_user else 'tu'
+                            
+                            # Recupera nome paziente
+                            task = self.get_task_details(task_id)
+                            patient_name = "il paziente"
+                            if task and task.get('patient_id'):
+                                patient_data = dbf_service.get_patient_by_id(task['patient_id'])
+                                if patient_data and patient_data.get('nome'):
+                                    patient_name = patient_data['nome']
+                            
+                            # Messaggio personalizzato e umano
+                            message = f"{current_username} ha completato la sua fase per {patient_name}. {next_username}, hai la tua fase da completare: '{next_step['name']}'"
                             link = f"/works/{task_id}"
 
                             notification_service.notify_user(

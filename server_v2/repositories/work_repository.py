@@ -124,9 +124,12 @@ class WorkRepository(BaseRepository):
         try:
             with self.db_manager.transaction() as conn:
                 # 1. Create Work
+                # Remove 'steps' field if present (it's not a column in works table)
+                clean_work_data = {k: v for k, v in work_data.items() if k != 'steps'}
+                
                 # validation is handled by base create(), but here we do manual insert for transaction safety
-                self._validate_entity_data(work_data)
-                query, params = self._build_insert_query(work_data)
+                self._validate_entity_data(clean_work_data)
+                query, params = self._build_insert_query(clean_work_data)
                 cursor = conn.cursor()
                 cursor.execute(query, params)
                 work_id = cursor.lastrowid
