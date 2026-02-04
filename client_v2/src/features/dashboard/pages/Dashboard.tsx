@@ -134,7 +134,21 @@ const Dashboard: React.FC = () => {
 
   const checkFirstSync = async () => {
     try {
+      // Chiave per localStorage
+      const STORAGE_KEY = 'calendar_first_sync_checked';
+
+      // Verifica se il check è già stato fatto in questa sessione/browser
+      const alreadyChecked = localStorage.getItem(STORAGE_KEY);
+      if (alreadyChecked === 'true') {
+        console.log('Calendar first sync check already performed, skipping');
+        return;
+      }
+
+      // Esegui il check solo la prima volta
       const status = await calendarHealthService.checkFirstSyncStatus();
+
+      // Memorizza che il check è stato fatto
+      localStorage.setItem(STORAGE_KEY, 'true');
 
       // Se serve autenticazione OAuth, non fare nulla (l'utente deve autenticarsi prima)
       if (status.needs_auth) {
@@ -158,6 +172,18 @@ const Dashboard: React.FC = () => {
     setShowAutoSyncModal(false);
     setAutoSyncJobId(null);
   };
+
+  // Funzione helper per resettare il flag del check (utile per debug/testing)
+  // Può essere chiamata dalla console: window.resetCalendarCheck()
+  const resetCalendarFirstSyncCheck = () => {
+    localStorage.removeItem('calendar_first_sync_checked');
+    console.log('Calendar first sync check flag reset. Reload the page to trigger a new check.');
+  };
+
+  // Esponi la funzione per debug (solo in development)
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    (window as any).resetCalendarCheck = resetCalendarFirstSyncCheck;
+  }
 
 
   return (

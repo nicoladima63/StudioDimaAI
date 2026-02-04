@@ -40,6 +40,12 @@ export interface AutoSyncJobStatus {
   error: string | null
   start_date: string
   end_date: string
+  pre_check?: {
+    token_exists: boolean
+    credentials_exist: boolean
+    sync_state_exists: boolean
+    completed: boolean
+  }
 }
 
 class CalendarHealthService {

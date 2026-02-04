@@ -946,12 +946,20 @@ def auto_reset_and_sync():
         # Genera job ID
         job_id = str(uuid.uuid4())
         
-        # Inizializza job tracking
+        # Verifica requisiti per il pre-check
+        import os
+        from pathlib import Path
+        token_exists = os.path.exists(_TOKEN_PATH)
+        credentials_exist = os.path.exists(_CREDENTIALS_PATH)
+        sync_state_path = Path('instance/sync_state.json')
+        sync_state_exists = sync_state_path.exists()
+        
+        # Inizializza job tracking con fase di pre-check
         sync_jobs[job_id] = {
             "status": "in_progress",
             "progress": 0,
-            "phase": "clearing",
-            "message": "Pulizia Google Calendar in corso...",
+            "phase": "pre_check",
+            "message": "Verifica requisiti in corso...",
             "cleared": 0,
             "synced": 0,
             "total_weeks": 3,
@@ -959,18 +967,31 @@ def auto_reset_and_sync():
             "error": None,
             "cancelled": False,
             "start_date": next_monday.strftime('%Y-%m-%d'),
-            "end_date": end_date.strftime('%Y-%m-%d')
+            "end_date": end_date.strftime('%Y-%m-%d'),
+            # Dettagli pre-check
+            "pre_check": {
+                "token_exists": token_exists,
+                "credentials_exist": credentials_exist,
+                "sync_state_exists": sync_state_exists,
+                "completed": False
+            }
         }
         
         def auto_sync_job():
             try:
+                # FASE 0: Pre-check (già inizializzato, aspetta 2 secondi per mostrare i risultati)
+                import time
+                time.sleep(2)
+                sync_jobs[job_id]["pre_check"]["completed"] = True
+                sync_jobs[job_id]["progress"] = 10
+                
                 # FASE 1: Pulizia Calendar
                 sync_jobs[job_id]["phase"] = "clearing"
                 sync_jobs[job_id]["message"] = "Pulizia Google Calendar..."
                 
                 deleted_count = calendar_service_module.clear_calendar(calendar_id)
                 sync_jobs[job_id]["cleared"] = deleted_count
-                sync_jobs[job_id]["progress"] = 25
+                sync_jobs[job_id]["progress"] = 30
                 
                 # FASE 2: Sincronizzazione 3 settimane
                 dbf_reader = get_optimized_reader()
@@ -1010,7 +1031,8 @@ def auto_reset_and_sync():
                         total_synced += result['sync'].get('inserted', 0) + result['sync'].get('updated', 0)
                     
                     sync_jobs[job_id]["synced"] = total_synced
-                    sync_jobs[job_id]["progress"] = 25 + (week_num * 25)
+                    # Progresso: 10% pre-check + 30% clearing + 60% sync (20% per settimana)
+                    sync_jobs[job_id]["progress"] = 40 + (week_num * 20)
                     
                     # Prossima settimana
                     current_date = week_end + timedelta(days=1)

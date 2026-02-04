@@ -7,8 +7,12 @@ import {
     CProgress,
     CProgressBar,
     CSpinner,
-    CAlert
+    CAlert,
+    CListGroup,
+    CListGroupItem
 } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilCheckCircle, cilXCircle, cilWarning, cilSync } from '@coreui/icons';
 import { calendarHealthService, type AutoSyncJobStatus } from '../services/calendarHealthCheck';
 
 interface AutoSyncModalProps {
@@ -34,7 +38,7 @@ export const AutoSyncModal: React.FC<AutoSyncModalProps> = ({ visible, jobId, on
                     if (status.status === 'completed') {
                         setTimeout(() => {
                             onComplete();
-                        }, 2000); // Chiudi dopo 2 secondi
+                        }, 3000); // Chiudi dopo 3 secondi
                     }
                 }
             } catch (err) {
@@ -48,15 +52,60 @@ export const AutoSyncModal: React.FC<AutoSyncModalProps> = ({ visible, jobId, on
 
     if (!visible) return null;
 
+    // Helper per determinare lo stato di una fase
+    const getPhaseStatus = (phaseName: string): 'pending' | 'in_progress' | 'completed' | 'error' => {
+        if (!jobStatus) return 'pending';
+        if (jobStatus.status === 'error') return 'error';
+
+        if (phaseName === 'pre_check') {
+            if (jobStatus.pre_check?.completed) return 'completed';
+            if (jobStatus.phase === 'pre_check') return 'in_progress';
+            return 'pending';
+        }
+
+        if (phaseName === 'clearing') {
+            if (jobStatus.phase === 'completed' || jobStatus.phase.startsWith('syncing_week_')) return 'completed';
+            if (jobStatus.phase === 'clearing') return 'in_progress';
+            if (jobStatus.pre_check?.completed) return 'pending';
+            return 'pending';
+        }
+
+        if (phaseName === 'syncing') {
+            if (jobStatus.phase === 'completed') return 'completed';
+            if (jobStatus.phase.startsWith('syncing_week_')) return 'in_progress';
+            return 'pending';
+        }
+
+        return 'pending';
+    };
+
+    const renderPhaseIcon = (status: 'pending' | 'in_progress' | 'completed' | 'error') => {
+        switch (status) {
+            case 'completed':
+                return <CIcon icon={cilCheckCircle} className="text-success" />;
+            case 'in_progress':
+                return <CSpinner size="sm" className="text-primary" />;
+            case 'error':
+                return <CIcon icon={cilXCircle} className="text-danger" />;
+            default:
+                return <CIcon icon={cilSync} className="text-muted" />;
+        }
+    };
+
+    const preCheckStatus = getPhaseStatus('pre_check');
+    const clearingStatus = getPhaseStatus('clearing');
+    const syncingStatus = getPhaseStatus('syncing');
+
     return (
         <CModal
             visible={visible}
             backdrop="static"
             keyboard={false}
             alignment="center"
+            size="lg"
         >
             <CModalHeader>
-                <CModalTitle>Primo Avvio - Sincronizzazione Automatica</CModalTitle>
+                <CModalTitle>Primo Avvio - Configurazione Automatica</CModalTitle>
             </CModalHeader>
             <CModalBody>
                 {error && (
@@ -67,7 +116,7 @@ export const AutoSyncModal: React.FC<AutoSyncModalProps> = ({ visible, jobId, on
 
                 {jobStatus && jobStatus.status === 'error' && (
                     <CAlert color="danger">
-                        <strong>Errore durante la sincronizzazione:</strong> {jobStatus.error}
+                        <strong>Errore durante la configurazione:</strong> {jobStatus.error}
                     </CAlert>
                 )}
 
@@ -77,53 +126,105 @@ export const AutoSyncModal: React.FC<AutoSyncModalProps> = ({ visible, jobId, on
                     </CAlert>
                 )}
 
-                {jobStatus && jobStatus.status === 'in_progress' && (
-                    <>
-                        <div className="mb-3">
-                            <p className="mb-2">
-                                <strong>{jobStatus.message}</strong>
-                            </p>
-                            <CProgress className="mb-3">
-                                <CProgressBar value={jobStatus.progress} color="primary">
-                                    {jobStatus.progress}%
-                                </CProgressBar>
-                            </CProgress>
-                        </div>
+                {/* Barra di progresso generale */}
+                <div className="mb-4">
+                    <CProgress className="mb-2">
+                        <CProgressBar value={jobStatus?.progress || 0} color="primary">
+                            {jobStatus?.progress || 0}%
+                        </CProgressBar>
+                    </CProgress>
+                    <small className="text-muted">{jobStatus?.message || 'Inizializzazione...'}</small>
+                </div>
 
-                        <div className="text-muted small">
-                            {jobStatus.phase === 'clearing' && (
-                                <div className="d-flex align-items-center">
-                                    <CSpinner size="sm" className="me-2" />
-                                    <span>Pulizia Google Calendar in corso...</span>
-                                </div>
-                            )}
-
-                            {jobStatus.phase.startsWith('syncing_week_') && (
-                                <div>
-                                    <div className="d-flex align-items-center mb-2">
-                                        <CSpinner size="sm" className="me-2" />
-                                        <span>Sincronizzazione settimana {jobStatus.current_week}/{jobStatus.total_weeks}</span>
+                {/* Lista fasi dettagliate */}
+                <CListGroup>
+                    {/* FASE 1: Pre-check Requisiti */}
+                    <CListGroupItem
+                        className={preCheckStatus === 'completed' ? 'text-decoration-line-through opacity-75' : ''}
+                    >
+                        <div className="d-flex align-items-center">
+                            <div className="me-3">{renderPhaseIcon(preCheckStatus)}</div>
+                            <div className="flex-grow-1">
+                                <strong>1. Verifica Requisiti</strong>
+                                {jobStatus?.pre_check && (
+                                    <div className="mt-2 ms-4 small">
+                                        <div className="d-flex align-items-center mb-1">
+                                            {jobStatus.pre_check.token_exists ? (
+                                                <CIcon icon={cilCheckCircle} className="text-success me-2" size="sm" />
+                                            ) : (
+                                                <CIcon icon={cilXCircle} className="text-danger me-2" size="sm" />
+                                            )}
+                                            <span>Token OAuth (token.json) - {jobStatus.pre_check.token_exists ? 'OK' : 'MANCANTE'}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center mb-1">
+                                            {jobStatus.pre_check.credentials_exist ? (
+                                                <CIcon icon={cilCheckCircle} className="text-success me-2" size="sm" />
+                                            ) : (
+                                                <CIcon icon={cilXCircle} className="text-danger me-2" size="sm" />
+                                            )}
+                                            <span>Credenziali Google (credentials.json) - {jobStatus.pre_check.credentials_exist ? 'OK' : 'MANCANTE'}</span>
+                                        </div>
+                                        <div className="d-flex align-items-center">
+                                            {jobStatus.pre_check.sync_state_exists ? (
+                                                <CIcon icon={cilCheckCircle} className="text-success me-2" size="sm" />
+                                            ) : (
+                                                <CIcon icon={cilWarning} className="text-warning me-2" size="sm" />
+                                            )}
+                                            <span>Stato sincronizzazione (sync_state.json) - {jobStatus.pre_check.sync_state_exists ? 'OK' : 'ASSENTE - Richiesto setup'}</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <small>
-                                            Range: {jobStatus.start_date} - {jobStatus.end_date}
-                                        </small>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="mt-3">
-                                <div>Eventi rimossi: <strong>{jobStatus.cleared}</strong></div>
-                                <div>Eventi sincronizzati: <strong>{jobStatus.synced}</strong></div>
+                                )}
                             </div>
                         </div>
-                    </>
-                )}
+                    </CListGroupItem>
+
+                    {/* FASE 2: Pulizia Calendar */}
+                    <CListGroupItem
+                        className={clearingStatus === 'completed' ? 'text-decoration-line-through opacity-75' : ''}
+                    >
+                        <div className="d-flex align-items-center">
+                            <div className="me-3">{renderPhaseIcon(clearingStatus)}</div>
+                            <div className="flex-grow-1">
+                                <strong>2. Pulizia Google Calendar</strong>
+                                {jobStatus && jobStatus.cleared > 0 && (
+                                    <div className="mt-1 ms-4 small text-muted">
+                                        Eventi rimossi: <strong>{jobStatus.cleared}</strong>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </CListGroupItem>
+
+                    {/* FASE 3: Sincronizzazione */}
+                    <CListGroupItem
+                        className={syncingStatus === 'completed' ? 'text-decoration-line-through opacity-75' : ''}
+                    >
+                        <div className="d-flex align-items-center">
+                            <div className="me-3">{renderPhaseIcon(syncingStatus)}</div>
+                            <div className="flex-grow-1">
+                                <strong>3. Sincronizzazione Appuntamenti</strong>
+                                {jobStatus && syncingStatus !== 'pending' && (
+                                    <div className="mt-2 ms-4 small">
+                                        <div className="mb-1">
+                                            Settimana: <strong>{jobStatus.current_week}/{jobStatus.total_weeks}</strong>
+                                        </div>
+                                        <div className="mb-1">
+                                            Range: <span className="text-muted">{jobStatus.start_date} - {jobStatus.end_date}</span>
+                                        </div>
+                                        <div>
+                                            Eventi sincronizzati: <strong>{jobStatus.synced}</strong>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </CListGroupItem>
+                </CListGroup>
 
                 {!jobStatus && !error && (
-                    <div className="text-center">
+                    <div className="text-center mt-4">
                         <CSpinner />
-                        <p className="mt-2">Avvio sincronizzazione...</p>
+                        <p className="mt-2">Avvio configurazione...</p>
                     </div>
                 )}
             </CModalBody>
