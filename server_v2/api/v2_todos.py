@@ -1,5 +1,6 @@
 
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required
 from core.database_manager import get_database_manager
 from services.todo_service import TodoService
 import logging
@@ -13,6 +14,7 @@ def get_todo_service():
     return TodoService(db_manager)
 
 @todos_bp.route('/todos', methods=['GET'])
+@jwt_required()
 def get_todos():
     """Get todos with optional filters."""
     try:
@@ -44,6 +46,7 @@ def get_todos():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/<int:todo_id>', methods=['GET'])
+@jwt_required()
 def get_todo(todo_id):
     """Get a single todo by ID."""
     try:
@@ -59,6 +62,7 @@ def get_todo(todo_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/inbox', methods=['GET'])
+@jwt_required()
 def get_inbox():
     """Get inbox for a user."""
     try:
@@ -75,6 +79,7 @@ def get_inbox():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/sent', methods=['GET'])
+@jwt_required()
 def get_sent():
     """Get sent todos for a user."""
     try:
@@ -91,6 +96,7 @@ def get_sent():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/pending', methods=['GET'])
+@jwt_required()
 def get_pending():
     """Get pending todos for a user (shortcut)."""
     try:
@@ -107,6 +113,7 @@ def get_pending():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos', methods=['POST'])
+@jwt_required()
 def create_todo():
     """Create a new todo/message."""
     try:
@@ -138,6 +145,7 @@ def create_todo():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/<int:todo_id>', methods=['PATCH'])
+@jwt_required()
 def update_todo(todo_id):
     """Update a todo."""
     try:
@@ -162,6 +170,7 @@ def update_todo(todo_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/<int:todo_id>', methods=['DELETE'])
+@jwt_required()
 def delete_todo(todo_id):
     """Soft delete (archive) a todo."""
     try:
@@ -181,6 +190,7 @@ def delete_todo(todo_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/<int:todo_id>/complete', methods=['POST'])
+@jwt_required()
 def complete_todo(todo_id):
     """Mark a todo as completed."""
     try:
@@ -200,6 +210,7 @@ def complete_todo(todo_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/<int:todo_id>/read', methods=['POST'])
+@jwt_required()
 def mark_todo_read(todo_id):
     """Mark a todo as read."""
     try:
@@ -219,6 +230,7 @@ def mark_todo_read(todo_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/<int:todo_id>/snooze', methods=['POST'])
+@jwt_required()
 def snooze_todo(todo_id):
     """Snooze/postpone a todo by X days."""
     try:
@@ -244,6 +256,7 @@ def snooze_todo(todo_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/tasks/<int:task_id>/todos/postpone', methods=['POST'])
+@jwt_required()
 def postpone_task_todos(task_id):
     """Postpone all todos of a task by X days (e.g., when patient reschedules)."""
     try:

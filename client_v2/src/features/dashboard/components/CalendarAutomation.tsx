@@ -39,8 +39,12 @@ const CalendarAutomation: React.FC = () => {
       const settings = response.settings;
 
       setEnabled(settings.calendar_sync_enabled);
-      setHour(settings.calendar_sync_hour);
-      setMinute(settings.calendar_sync_minute);
+
+      // Parse fallback_time "HH:MM" to hour and minute
+      const fallbackTime = settings.calendar_sync_fallback_time || "21:00";
+      const [h, m] = fallbackTime.split(':').map(Number);
+      setHour(h);
+      setMinute(m);
     } catch (err: any) {
       setError('Errore nel recupero delle impostazioni');
     } finally {
@@ -51,10 +55,11 @@ const CalendarAutomation: React.FC = () => {
   const handleEnabledChange = async (newEnabled: boolean) => {
     setEnabled(newEnabled);
     try {
+      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: newEnabled,
-        calendar_sync_hour: hour,
-        calendar_sync_minute: minute,
+        calendar_sync_fallback_time: timeStr,
+        calendar_sync_times: [timeStr],
       });
     } catch (err: any) {
       setError('Errore nel salvataggio dello stato');
@@ -67,10 +72,11 @@ const CalendarAutomation: React.FC = () => {
     setError(null);
     setSuccess(null);
     try {
+      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
       await schedulerService.apiUpdateSettings('calendar', {
         calendar_sync_enabled: enabled,
-        calendar_sync_hour: hour,
-        calendar_sync_minute: minute,
+        calendar_sync_fallback_time: timeStr,
+        calendar_sync_times: [timeStr],
       });
       setSuccess('Orario salvato!');
     } catch (err: any) {
