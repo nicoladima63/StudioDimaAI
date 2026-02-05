@@ -231,4 +231,47 @@ class TodoRepository(BaseRepository):
         except Exception as e:
             logger.error(f"Failed to update urgency level for message {message_id}: {e}")
             return False
+    
+    def snooze_todo(self, message_id: int, days: int, user_id: int) -> bool:
+        """
+        Snooze/postpone a todo by X days.
+        Updates due_date and resets urgency to normal.
+        """
+        try:
+            from datetime import datetime, timedelta
+            
+            message = self.get_by_id(message_id)
+            if not message:
+                return False
+            
+            # Ensure only recipient can snooze
+            if str(message['recipient_id']) != str(user_id):
+                logger.warning(f"User {user_id} attempted to snooze message {message_id}, but is not the recipient")
+                return False
+            
+            # Calculate new due_date
+            current_due_date = message.get('due_date')
+            if current_due_date:
+                if 'T' in current_due_date:
+                    due_date_obj = datetime.fromisoformat(current_due_date.replace('Z', '+00:00'))
+                else:
+                    due_date_obj = datetime.strptime(current_due_date, '%Y-%m-%d')
+                
+                new_due_date = due_date_obj + timedelta(days=days)
+            else:
+                # If no due_date, set to X days from now
+                new_due_date = datetime.now() + timedelta(days=days)
+            
+            # Update due_date and reset urgency
+            self.update(message_id, {
+                'due_date': new_due_date.isoformat(),
+                'urgency_level': 'normal'
+            })
+            
+            logger.info(f"Snoozed todo {message_id} by {days} days, new due_date: {new_due_date.date()}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to snooze todo {message_id}: {e}")
+            return False
 

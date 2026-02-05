@@ -134,3 +134,29 @@ def reset_task(task_id):
     except Exception as e:
         logger.error(f"Error resetting task {task_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@tasks_bp.route('/tasks/<int:task_id>/postpone', methods=['POST'])
+def postpone_task(task_id):
+    """Postpone a task by X days (e.g., when patient reschedules appointment)."""
+    try:
+        data = request.json or {}
+        user_id = data.get('user_id')
+        days = data.get('days', 7)  # Default 7 days
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'user_id is required'}), 400
+        
+        if not isinstance(days, int) or days < 1:
+            return jsonify({'success': False, 'error': 'days must be a positive integer'}), 400
+        
+        service = get_work_service()
+        task = service.postpone_task(task_id, days, int(user_id))
+        
+        if not task:
+            return jsonify({'success': False, 'error': 'Task not found'}), 404
+        
+        return jsonify({'success': True, 'data': task, 'days': days})
+    except Exception as e:
+        logger.error(f"Error postponing task {task_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+

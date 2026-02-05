@@ -331,5 +331,51 @@ class WorkService(BaseService):
         except Exception as e:
             logger.error(f"Failed to reset task {task_id}: {e}")
             raise ServiceError(f"Failed to reset task: {str(e)}")
+    
+    def postpone_task(self, task_id: int, days: int, user_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Postpone a task by X days.
+        Updates task due_date and postpones all related todos.
+        Useful when patient reschedules appointment.
+        """
+        try:
+            from datetime import datetime, timedelta
+            from services.todo_service import TodoService
+            
+            # Get task
+            task = self.task_repository.get_task_with_steps(task_id)
+            if not task:
+                return None
+            
+            # Calculate new due_date
+            current_due_date = task.get('due_date')
+            if current_due_date:
+                if 'T' in current_due_date:
+                    due_date_obj = datetime.fromisoformat(current_due_date.replace('Z', '+00:00'))
+                else:
+                    due_date_obj = datetime.strptime(current_due_date, '%Y-%m-%d')
+                
+                new_due_date = due_date_obj + timedelta(days=days)
+            else:
+                # If no due_date, set to X days from now
+                new_due_date = datetime.now() + timedelta(days=days)
+            
+            # Update task due_date
+            updated_task = self.task_repository.update(task_id, {
+                'due_date': new_due_date.isoformat(),
+                'updated_at': datetime.utcnow().isoformat()
+            })
+            
+            # Postpone all related todos
+            todo_service = TodoService(self.db_manager)
+            result = todo_service.postpone_task_todos(task_id, days, user_id)
+            
+            logger.info(f"Task {task_id} postponed by {days} days, {result.get('postponed_count', 0)} todos affected")
+            
+            return updated_task
+            
+        except Exception as e:
+            logger.error(f"Failed to postpone task {task_id}: {e}")
+            raise ServiceError(f"Failed to postpone task: {str(e)}")
 
 

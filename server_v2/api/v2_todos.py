@@ -218,3 +218,50 @@ def mark_todo_read(todo_id):
         logger.error(f"Error marking todo {todo_id} as read: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@todos_bp.route('/todos/<int:todo_id>/snooze', methods=['POST'])
+def snooze_todo(todo_id):
+    """Snooze/postpone a todo by X days."""
+    try:
+        data = request.json or {}
+        user_id = data.get('user_id')
+        days = data.get('days', 1)  # Default 1 day
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'user_id is required'}), 400
+        
+        if not isinstance(days, int) or days < 1:
+            return jsonify({'success': False, 'error': 'days must be a positive integer'}), 400
+        
+        service = get_todo_service()
+        success = service.snooze_todo(todo_id, days, int(user_id))
+        
+        if not success:
+            return jsonify({'success': False, 'error': 'Todo not found or unauthorized'}), 404
+        
+        return jsonify({'success': True, 'days': days})
+    except Exception as e:
+        logger.error(f"Error snoozing todo {todo_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@todos_bp.route('/tasks/<int:task_id>/todos/postpone', methods=['POST'])
+def postpone_task_todos(task_id):
+    """Postpone all todos of a task by X days (e.g., when patient reschedules)."""
+    try:
+        data = request.json or {}
+        user_id = data.get('user_id')
+        days = data.get('days', 7)  # Default 7 days
+        
+        if not user_id:
+            return jsonify({'success': False, 'error': 'user_id is required'}), 400
+        
+        if not isinstance(days, int) or days < 1:
+            return jsonify({'success': False, 'error': 'days must be a positive integer'}), 400
+        
+        service = get_todo_service()
+        result = service.postpone_task_todos(task_id, days, int(user_id))
+        
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error postponing task {task_id} todos: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+

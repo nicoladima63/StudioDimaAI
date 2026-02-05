@@ -239,4 +239,80 @@ class TodoService(BaseService):
                 
         except Exception as e:
             logger.error(f"Failed to broadcast todo {todo.get('id')}: {e}")
+    
+    def snooze_todo(self, todo_id: int, days: int, user_id: int) -> bool:
+        """
+        Snooze/postpone a todo by X days.
+        Resets urgency and broadcasts update.
+        """
+        success = self.todo_repository.snooze_todo(todo_id, days, user_id)
+        
+        if success:
+            # Broadcast update
+            todo = self.get_by_id(todo_id)
+            if todo:
+                self._broadcast_todo(todo, event_type='snoozed')
+                
+                # Send notification
+                try:
+                    from services.notification_service import NotificationService
+                    notification_service = NotificationService(self.db_manager)
+                    
+                    notification_service.notify_user(
+                        user_id=todo['recipient_id'],
+                        message=f"Todo '{todo['subject']}' posticipato di {days} giorni",
+                        type='info',
+                        link=f"/todos/{todo_id}"
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send snooze notification: {e}")
+        
+        return success
+    
+    def postpone_task_todos(self, task_id: int, days: int, user_id: int) -> Dict[str, Any]:
+        """
+        Postpone all todos related to a task by X days.
+        Useful when patient reschedules appointment.
+        """
+        try:
+            todos = self.get_related_to_task(task_id)
+            postponed_count = 0
+            
+            for todo in todos:
+                # Only postpone pending/read todos
+                if todo['status'] in ('pending', 'read'):
+                    # Use repository directly to avoid multiple broadcasts
+                    if self.todo_repository.snooze_todo(todo['id'], days, user_id):
+                        postponed_count += 1
+            
+            logger.info(f"Postponed {postponed_count} todos for task {task_id} by {days} days")
+            
+            # Single broadcast for task postpone
+            try:
+                from app_v2 import websocket_service
+                if websocket_service:
+                    websocket_service.broadcast_notification(
+                        user_id=user_id,
+                        data={
+                            'type': 'task_postponed',
+                            'task_id': task_id,
+                            'days': days,
+                            'todos_affected': postponed_count
+                        }
+                    )
+            except Exception as e:
+                logger.error(f"Failed to broadcast task postpone: {e}")
+            
+            return {
+                'success': True,
+                'postponed_count': postponed_count,
+                'days': days
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to postpone task todos: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
