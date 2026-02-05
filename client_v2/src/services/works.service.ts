@@ -56,6 +56,11 @@ export const worksService = {
   deleteTask: async (id: number): Promise<void> => {
     await apiClient.delete(`${TASKS_URL}/${id}`);
   },
+
+  resetTask: async (id: number): Promise<Task> => {
+    const response = await apiClient.post<any>(`${TASKS_URL}/${id}/reset`);
+    return response.data.data;
+  },
   
   // PROVIDERS
   getAllProviders: async (): Promise<Provider[]> => {

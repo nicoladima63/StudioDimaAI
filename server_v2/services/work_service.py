@@ -271,3 +271,39 @@ class WorkService(BaseService):
             logger.error(f"Failed to update task status {task_id}: {e}")
             raise ServiceError(f"Failed to update task: {str(e)}")
 
+    def reset_task(self, task_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Reset all steps of a task to pending status.
+        Sets the first step to active and the task status to in_progress.
+        """
+        try:
+            # Get task details
+            task = self.task_repository.get_task_with_steps(task_id)
+            if not task:
+                return None
+            
+            # Reset all steps to pending
+            steps = task.get('steps', [])
+            for step in steps:
+                self.task_repository.update_step_status(step['id'], 'pending')
+            
+            # Activate the first step (if exists)
+            if steps:
+                sorted_steps = sorted(steps, key=lambda s: s.get('order_index', 0))
+                first_step = sorted_steps[0]
+                self.task_repository.update_step_status(first_step['id'], 'active')
+            
+            # Update task status to in_progress
+            updated_task = self.task_repository.update(task_id, {
+                'status': 'in_progress',
+                'updated_at': datetime.utcnow().isoformat()
+            })
+            
+            logger.info(f"Task {task_id} reset successfully")
+            return updated_task
+            
+        except Exception as e:
+            logger.error(f"Failed to reset task {task_id}: {e}")
+            raise ServiceError(f"Failed to reset task: {str(e)}")
+
+

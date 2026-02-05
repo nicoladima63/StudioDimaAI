@@ -20,6 +20,7 @@ import { Task } from '../../types/works.types';
 import toast from 'react-hot-toast';
 import { useUserStore } from '../../store/user.store';
 import { usePazienti } from '@/store/pazienti.store';
+import { useAuthStore } from '../../store/auth.store';
 
 const WorkDetailsPage: React.FC = () => {
     const { taskId } = useParams<{ taskId: string }>();
@@ -28,6 +29,7 @@ const WorkDetailsPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const { allPazienti, loadAll: loadPazienti } = usePazienti();
     const { users, loadUsers } = useUserStore();
+    const { user: currentUser } = useAuthStore();
 
     useEffect(() => {
         if (taskId) {
@@ -157,7 +159,7 @@ const WorkDetailsPage: React.FC = () => {
                                             </div>
 
                                             <div>
-                                                {isActive && (
+                                                {isActive && step.user_id && currentUser && step.user_id.toString() === currentUser.id.toString() && (
                                                     <CButton
                                                         color="success"
                                                         className="text-white"
@@ -166,6 +168,9 @@ const WorkDetailsPage: React.FC = () => {
                                                         <CIcon icon={cilCheckCircle} className="me-2" />
                                                         Fatto
                                                     </CButton>
+                                                )}
+                                                {isActive && (!step.user_id || !currentUser || step.user_id.toString() !== currentUser.id.toString()) && (
+                                                    <span className="text-muted small">Assegnato a: {getUserName(step.user_id)}</span>
                                                 )}
                                                 {isCompleted && (
                                                     <span className="text-success small fw-bold">Completato il {new Date(step.updated_at).toLocaleDateString()}</span>

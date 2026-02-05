@@ -25,13 +25,15 @@ import {
     CFormSelect
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPlus, cilCheckCircle, cilOptions, cilTask } from '@coreui/icons';
+import { cilPlus, cilCheckCircle, cilOptions, cilTask, cilList, cilTrash, cilReload, cilDeaf, cilDelete } from '@coreui/icons';
 import { worksService } from '../../services/works.service';
 import { Task, CATEGORY_COLORS, CATEGORY_NAMES, Work } from '../../types/works.types';
 import toast from 'react-hot-toast';
 import PazientiSelect from '../../components/selects/PazientiSelect';
 import { usePazienti } from '../../store/pazienti.store';
 import ConfirmDeleteModal from '../../components/modals/ConfirmDeleteModal';
+import ConfirmActionModal from '../../components/modals/ConfirmActionModal';
+import { useAuthStore } from '../../store/auth.store';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -42,6 +44,7 @@ const TasksPage: React.FC = () => {
     const [worksMap, setWorksMap] = useState<Record<number, Work>>({}); // Cache works to know category
     const [worksList, setWorksList] = useState<Work[]>([]); // For select
     const [filterStatus, setFilterStatus] = useState<'active' | 'completed' | 'all'>('active');
+    const { user: currentUser } = useAuthStore();
 
     // Modal state
     const [modalVisible, setModalVisible] = useState(false);
@@ -160,6 +163,12 @@ const TasksPage: React.FC = () => {
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
+    const [resetModalVisible, setResetModalVisible] = useState(false);
+    const [itemToReset, setItemToReset] = useState<number | null>(null);
+
+    const [cancelModalVisible, setCancelModalVisible] = useState(false);
+    const [itemToCancel, setItemToCancel] = useState<number | null>(null);
+
     const handleDeleteTask = (taskId: number) => {
         setItemToDelete(taskId);
         setDeleteModalVisible(true);
@@ -181,15 +190,45 @@ const TasksPage: React.FC = () => {
         }
     };
 
-    const handleCancelTask = async (taskId: number) => {
-        if (!window.confirm('Vuoi annullare questa lavorazione?')) return;
+    const handleCancelTask = (taskId: number) => {
+        setItemToCancel(taskId);
+        setCancelModalVisible(true);
+    };
+
+    const confirmCancel = async () => {
+        if (!itemToCancel) return;
         try {
-            await worksService.updateTaskStatus(taskId, 'cancelled');
+            await worksService.updateTaskStatus(itemToCancel, 'cancelled');
             toast.success('Lavorazione annullata');
             fetchTasks();
         } catch (error) {
             console.error('Error cancelling task:', error);
             toast.error('Errore nell\'annullamento');
+            throw error;
+        } finally {
+            setCancelModalVisible(false);
+            setItemToCancel(null);
+        }
+    };
+
+    const handleResetTask = (taskId: number) => {
+        setItemToReset(taskId);
+        setResetModalVisible(true);
+    };
+
+    const confirmReset = async () => {
+        if (!itemToReset) return;
+        try {
+            await worksService.resetTask(itemToReset);
+            toast.success('Lavorazione ripristinata!');
+            fetchTasks();
+        } catch (error) {
+            console.error('Error resetting task:', error);
+            toast.error('Errore nel ripristino');
+            throw error;
+        } finally {
+            setResetModalVisible(false);
+            setItemToReset(null);
         }
     };
 
@@ -270,16 +309,18 @@ const TasksPage: React.FC = () => {
                                             </CBadge>
                                             <span className="text-muted fw-bold">{patientName}</span>
                                         </div>
-                                        <CDropdown variant="btn-group">
-                                            <CDropdownToggle color="transparent" size="sm" className="p-0 text-secondary" caret={false}>
-                                                <CIcon icon={cilOptions} />
-                                            </CDropdownToggle>
-                                            <CDropdownMenu>
-                                                <CDropdownItem onClick={() => navigate(`/works/${task.id}`)}>Dettagli</CDropdownItem>
-                                                <CDropdownItem href="#" className="text-warning" onClick={() => handleCancelTask(task.id)}>Annulla</CDropdownItem>
-                                                <CDropdownItem href="#" className="text-danger" onClick={() => handleDeleteTask(task.id)}>Elimina</CDropdownItem>
-                                            </CDropdownMenu>
-                                        </CDropdown>
+                                        <div>
+
+                                            <CButton color='success' variant="outline" size="sm" onClick={() => navigate(`/works/${task.id}`)} title='Dettagli'>
+                                                <CIcon icon={cilList} size='sm' />
+                                            </CButton>
+                                            <CButton color='info' variant="outline" size="sm" onClick={() => handleResetTask(task.id)} title='Ripristina'>
+                                                <CIcon icon={cilReload} size='sm' />
+                                            </CButton>
+                                            <CButton color='danger' variant="outline" size="sm" onClick={() => handleDeleteTask(task.id)} title='Elimina'>
+                                                <CIcon icon={cilTrash} size='sm' />
+                                            </CButton>
+                                        </div>
                                     </CCardHeader>
                                     <CCardBody>
                                         <div className="mb-2">
@@ -306,14 +347,18 @@ const TasksPage: React.FC = () => {
                                                 <div className="text-truncate me-2" style={{ maxWidth: '60%' }}>
                                                     <span className="small fw-bold text-dark">{activeStep.name}</span>
                                                 </div>
-                                                <CButton
-                                                    size="sm"
-                                                    color="success"
-                                                    className="text-white"
-                                                    onClick={() => handleCompleteStep(task.id, activeStep.id)}
-                                                >
-                                                    <CIcon icon={cilCheckCircle} className="me-1" /> Fatto
-                                                </CButton>
+                                                {activeStep.user_id && currentUser && activeStep.user_id.toString() === currentUser.id.toString() ? (
+                                                    <CButton
+                                                        size="sm"
+                                                        color="success"
+                                                        className="text-white"
+                                                        onClick={() => handleCompleteStep(task.id, activeStep.id)}
+                                                    >
+                                                        <CIcon icon={cilCheckCircle} className="me-1" /> Fatto
+                                                    </CButton>
+                                                ) : (
+                                                    <span className="text-muted small">Non assegnato a te</span>
+                                                )}
                                             </div>
                                         ) : (
                                             <div className="text-center text-success">
@@ -423,6 +468,30 @@ const TasksPage: React.FC = () => {
                 itemName={itemToDelete ? (tasks.find(t => t.id === itemToDelete)?.description || 'Lavorazione') : ''}
                 itemType="lavorazione"
                 warning="Questa operazione cancellerà tutti i dati relativi a questa lavorazione."
+            />
+
+            <ConfirmActionModal
+                visible={resetModalVisible}
+                onClose={() => setResetModalVisible(false)}
+                onConfirm={confirmReset}
+                title="Ripristina Lavorazione"
+                message="Vuoi ripristinare questa lavorazione?"
+                itemName={itemToReset ? (tasks.find(t => t.id === itemToReset)?.description || 'Lavorazione') : ''}
+                actionType="info"
+                confirmText="Ripristina"
+                warning="Tutte le fasi verranno resettate allo stato iniziale."
+            />
+
+            <ConfirmActionModal
+                visible={cancelModalVisible}
+                onClose={() => setCancelModalVisible(false)}
+                onConfirm={confirmCancel}
+                title="Annulla Lavorazione"
+                message="Vuoi annullare questa lavorazione?"
+                itemName={itemToCancel ? (tasks.find(t => t.id === itemToCancel)?.description || 'Lavorazione') : ''}
+                actionType="warning"
+                confirmText="Annulla Lavorazione"
+                warning="La lavorazione verrà contrassegnata come annullata."
             />
         </div >
     );

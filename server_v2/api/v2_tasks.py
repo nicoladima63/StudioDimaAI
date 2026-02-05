@@ -121,3 +121,16 @@ def update_task_status(task_id):
     except Exception as e:
         logger.error(f"Error updating task status {task_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@tasks_bp.route('/tasks/<int:task_id>/reset', methods=['POST'])
+def reset_task(task_id):
+    """Reset all steps of a task to pending status."""
+    try:
+        service = get_work_service()
+        task = service.reset_task(task_id)
+        if not task:
+            return jsonify({'success': False, 'error': 'Task not found'}), 404
+        return jsonify({'success': True, 'data': task})
+    except Exception as e:
+        logger.error(f"Error resetting task {task_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
