@@ -26,6 +26,7 @@ class SchedulerService:
         self._current_reminder_job = None
         self._current_recall_job = None
         self._current_calendar_sync_job = None
+        self._current_todo_escalation_job = None
         
     def start(self):
         """Avvia lo scheduler e programma tutti i job"""
@@ -37,6 +38,7 @@ class SchedulerService:
         self.schedule_reminder_job()
         self.schedule_recall_job() 
         self.schedule_calendar_sync_job()
+        self.schedule_todo_escalation_job()
         
     def shutdown(self):
         """Ferma lo scheduler"""
@@ -287,6 +289,56 @@ class SchedulerService:
     def reschedule_calendar_sync_job(self):
         """Riprogramma job sync calendario quando cambia la configurazione"""
         self.schedule_calendar_sync_job()
+    
+    def schedule_todo_escalation_job(self):
+        """Schedula job escalation todo scaduti"""
+        settings = get_automation_settings()
+        hour = int(settings.get("todo_escalation_hour", 9))
+        minute = int(settings.get("todo_escalation_minute", 0))
+        enabled = settings.get("todo_escalation_enabled", True)
+        
+        # Rimuovi job precedente se esiste
+        if self._current_todo_escalation_job:
+            try:
+                self.scheduler.remove_job(self._current_todo_escalation_job.id)
+            except Exception:
+                pass
+            self._current_todo_escalation_job = None
+
+        if not enabled:
+            logger.info("Automazione escalation todo disattivata.")
+            return
+
+        def job():
+            """Job di escalation todo scaduti"""
+            logger.info(f"[TODO ESCALATION] Avvio controllo todo scaduti.")
+            
+            try:
+                from core.database_manager import get_database_manager
+                from services.todo_escalation_job import TodoEscalationJob
+                
+                db_manager = get_database_manager()
+                escalation_job = TodoEscalationJob(db_manager)
+                result = escalation_job.check_and_escalate()
+                
+                if result.get('success'):
+                    logger.info(f"[TODO ESCALATION] Completato: {result.get('escalated_count')}/{result.get('overdue_count')} todo escalati")
+                else:
+                    logger.error(f"[TODO ESCALATION] Errore: {result.get('error')}")
+                    
+            except Exception as e:
+                logger.error(f"[TODO ESCALATION] Errore esecuzione job: {e}", exc_info=True)
+
+        # Programma il job
+        trigger = CronTrigger(hour=hour, minute=minute)
+        self._current_todo_escalation_job = self.scheduler.add_job(
+            job, trigger, id="todo_escalation_job_v2", replace_existing=True
+        )
+        logger.info(f"Automazione escalation todo schedulata alle {hour:02d}:{minute:02d}.")
+    
+    def reschedule_todo_escalation_job(self):
+        """Riprogramma job escalation todo quando cambia la configurazione"""
+        self.schedule_todo_escalation_job()
         
     def get_scheduler_status(self) -> Dict[str, Any]:
         """Ottieni status dello scheduler e dei job attivi"""

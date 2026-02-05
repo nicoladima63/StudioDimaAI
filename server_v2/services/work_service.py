@@ -99,15 +99,17 @@ class WorkService(BaseService):
                 self.task_repository.update_step_status(first_step['id'], 'active')
                 task['steps'][0]['status'] = 'active' # Update local object to reflect
 
-                # 6. Send notification to first user
+                # 6. Send notification to first user AND create todo
                 first_user_id = first_step.get('user_id')
                 if first_user_id:
                     try:
                         from services.notification_service import NotificationService
+                        from services.todo_service import TodoService
                         from repositories.user_repository import UserRepository
                         from services.dbf_data_service import get_dbf_data_service
                         
                         notification_service = NotificationService(self.db_manager)
+                        todo_service = TodoService(self.db_manager)
                         user_repository = UserRepository()
                         dbf_service = get_dbf_data_service()
 
@@ -131,6 +133,7 @@ class WorkService(BaseService):
                             message = f"{username}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
                             link = f"/works/{task['id']}"
 
+                            # Send push notification
                             notification_service.notify_user(
                                 user_id=user_id_int,
                                 message=message,
@@ -138,10 +141,17 @@ class WorkService(BaseService):
                                 link=link
                             )
 
-                            logger.info(f"Notification sent to user {user_id_int} for new task {task['id']}")
+                            # Create persistent todo
+                            todo_service.create_todo_from_step(
+                                step=first_step,
+                                task=task,
+                                sender_id=1  # System user
+                            )
+
+                            logger.info(f"Notification and todo sent to user {user_id_int} for new task {task['id']}")
 
                     except Exception as e:
-                        logger.error(f"Failed to send notification for new task: {e}")
+                        logger.error(f"Failed to send notification/todo for new task: {e}")
 
             logger.info(f"Created Task {task['id']} for Patient {patient_id} from Work {work_id}")
             return task
@@ -184,25 +194,33 @@ class WorkService(BaseService):
                     next_step = step
                     break
             
-            # 3. Activate next step
+            # 3. Auto-complete todos for completed step
+            try:
+                from services.todo_service import TodoService
+                todo_service = TodoService(self.db_manager)
+                todo_service.auto_complete_step_todos(step_id)
+            except Exception as e:
+                logger.error(f"Failed to auto-complete todos for step {step_id}: {e}")
+            
+            # 4. Activate next step
             if next_step:
                 self.task_repository.update_step_status(next_step['id'], 'active')
                 logger.info(f"Activated next step {next_step['id']} for task {task_id}")
 
-                # 4. Send notification if operator changes
+                # 5. Send notification if operator changes, but ALWAYS create todo
                 next_user_id = next_step.get('user_id')
                 current_user_id = updated_step.get('user_id')
+                operator_changed = (next_user_id and current_user_id and str(next_user_id) != str(current_user_id))
 
-                if (next_user_id and
-                    current_user_id and
-                    str(next_user_id) != str(current_user_id)):
-
+                if next_user_id:
                     try:
                         from services.notification_service import NotificationService
+                        from services.todo_service import TodoService
                         from repositories.user_repository import UserRepository
                         from services.dbf_data_service import get_dbf_data_service
                         
                         notification_service = NotificationService(self.db_manager)
+                        todo_service = TodoService(self.db_manager)
                         user_repository = UserRepository()
                         dbf_service = get_dbf_data_service()
 
@@ -214,7 +232,7 @@ class WorkService(BaseService):
 
                         if next_user_id_int:
                             # Recupera nomi utenti
-                            current_user = user_repository.find_by_id(int(current_user_id))
+                            current_user = user_repository.find_by_id(int(current_user_id)) if current_user_id else None
                             next_user = user_repository.find_by_id(next_user_id_int)
                             
                             current_username = current_user.get('username', 'Un collega') if current_user else 'Un collega'
@@ -228,22 +246,30 @@ class WorkService(BaseService):
                                 if patient_data and patient_data.get('nome'):
                                     patient_name = patient_data['nome']
                             
-                            # Messaggio personalizzato e umano
-                            message = f"{current_username} ha completato la sua fase per {patient_name}. {next_username}, hai la tua fase da completare: '{next_step['name']}'"
-                            link = f"/works/{task_id}"
+                            # Send push notification ONLY if operator changed
+                            if operator_changed:
+                                message = f"{current_username} ha completato la sua fase per {patient_name}. {next_username}, hai la tua fase da completare: '{next_step['name']}'"
+                                link = f"/works/{task_id}"
 
-                            notification_service.notify_user(
-                                user_id=next_user_id_int,
-                                message=message,
-                                type='info',
-                                link=link
+                                notification_service.notify_user(
+                                    user_id=next_user_id_int,
+                                    message=message,
+                                    type='info',
+                                    link=link
+                                )
+                                logger.info(f"Notification sent to user {next_user_id_int} for step {next_step['id']}")
+                            
+                            # ALWAYS create todo (even if same operator)
+                            todo_service.create_todo_from_step(
+                                step=next_step,
+                                task=task,
+                                sender_id=int(current_user_id) if current_user_id else 1
                             )
-
-                            logger.info(f"Notification sent to user {next_user_id_int} for step {next_step['id']}")
+                            logger.info(f"Todo created for user {next_user_id_int} for step {next_step['id']}")
 
                     except Exception as notif_error:
                         # Non-critical error, log and continue
-                        logger.error(f"Failed to send notification: {notif_error}")
+                        logger.error(f"Failed to send notification/todo: {notif_error}")
             else:
                 # No more steps, complete the task
                 self.task_repository.update(task_id, {'status': 'completed', 'completed_at': datetime.now()})
