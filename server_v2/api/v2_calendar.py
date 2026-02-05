@@ -23,7 +23,7 @@ import services.calendar_service as calendar_service_module
 # Go up from api/ to server_v2/
 _BASE_DIR = Path(__file__).parent.parent  # api/ -> server_v2/
 _CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
-_TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
+_TOKEN_PATH = _BASE_DIR / "tokens" / "token.json"
 from core.exceptions import (
     GoogleCredentialsNotFoundError,
     CalendarSyncError,
@@ -700,7 +700,7 @@ def oauth_status():
     try:
         import os
         
-        if os.path.exists('instance/token.json'):
+        if _TOKEN_PATH.exists():
             return format_response(
                 success=True,
                 data={'authenticated': True},

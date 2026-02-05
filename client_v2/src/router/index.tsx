@@ -45,6 +45,7 @@ const WorksPage = React.lazy(() => import('@/features/lavorazioni/WorksPage'))
 const WorkDetailsPage = React.lazy(() => import('@/features/lavorazioni/WorkDetailsPage'))
 const StepsPage = React.lazy(() => import('@/features/lavorazioni/StepsPage'))
 const TasksPage = React.lazy(() => import('@/features/lavorazioni/TasksPage'))
+const TodosPage = React.lazy(() => import('@/features/todos/pages/TodosPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -110,6 +111,9 @@ const AppRouter: React.FC = () => {
           <Route path='works/:taskId' element={<WorkDetailsPage />} />
           <Route path='steps' element={<StepsPage />} />
           <Route path='tasks' element={<TasksPage />} />
+
+          {/* Todo Routes */}
+          <Route path='todos' element={<TodosPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}

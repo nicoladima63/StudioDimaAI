@@ -50,70 +50,28 @@ export const useRealtimeNotifications = () => {
       // Increment unread count in store
       incrementUnread();
 
-      // Show toast notification (persistent until clicked)
-      const toastType = data.type === 'error' ? 'error' : data.type === 'success' ? 'success' : 'default';
-      
-      // Create toast and capture its ID
+      // Show toast notification
+      // Use standard styling and duration
       const toastOptions = {
-        duration: Infinity, // Persistent
-        icon: '🔔',
+        duration: 4000, // 4 seconds
+        // Custom icon if needed, but standard ones are fine. 
+        // If we want a bell for generic 'info' we can add it, but standard types are better.
       };
-      
-      let toastId = '';
-      if (toastType === 'error') {
-        toastId = toast.error(data.message, toastOptions);
-      } else if (toastType === 'success') {
-        toastId = toast.success(data.message, toastOptions);
+
+      if (data.type === 'error') {
+        toast.error(data.message, toastOptions);
+      } else if (data.type === 'success') {
+        toast.success(data.message, toastOptions);
+      } else if (data.type === 'warning') {
+        toast(data.message, { ...toastOptions, icon: '⚠️' });
       } else {
-        toastId = toast(data.message, toastOptions);
-      }
-      
-      // Add click handler to the toast to dismiss and navigate
-      if (toastId) {
-        setTimeout(() => {
-          // Find the toast element by searching for the toast with our message
-          const toastElements = document.querySelectorAll('[role="status"]');
-          toastElements.forEach((element) => {
-            if (element.textContent?.includes(data.message)) {
-              const handleClick = () => {
-                // Dismiss the toast first
-                toast.dismiss(toastId);
-                
-                // Then navigate
-                setTimeout(() => {
-                  if (data.link) {
-                    window.location.href = data.link;
-                  } else {
-                    window.location.href = '/tasks';
-                  }
-                }, 100);
-                
-                // Remove listener after first click
-                element.removeEventListener('click', handleClick);
-              };
-              
-              element.addEventListener('click', handleClick);
-            }
-          });
-        }, 100);
+        // Info/Default
+         toast(data.message, { ...toastOptions, icon: 'ℹ️' });
       }
 
-      // Show browser notification (always, for better visibility)
-      console.log('[Realtime] Permission status:', permission);
-      console.log('[Realtime] Document hidden:', document.hidden);
-      
+      // Show browser notification if permitted
       if (permission === 'granted') {
         showBrowserNotification(data);
-      } else if (permission === 'default') {
-        console.log('[Realtime] Requesting notification permission...');
-        Notification.requestPermission().then((perm) => {
-          setPermission(perm);
-          if (perm === 'granted') {
-            showBrowserNotification(data);
-          }
-        });
-      } else {
-        console.log('[Realtime] Notification permission denied');
       }
     };
 

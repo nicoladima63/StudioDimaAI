@@ -128,6 +128,14 @@ class TodoService(BaseService):
         result = self.todo_repository.get_sent(user_id)
         return result.data if hasattr(result, 'data') else result
     
+    def get_all_todos(self, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """Get all todos with optional filters."""
+        from core.base_repository import QueryOptions
+        
+        options = QueryOptions(filters=filters or {})
+        result = self.todo_repository.list(options)
+        return result.data if hasattr(result, 'data') else result
+    
     def get_by_id(self, todo_id: int) -> Optional[Dict[str, Any]]:
         """Get todo by ID."""
         return self.todo_repository.get_by_id(todo_id)
@@ -226,11 +234,11 @@ class TodoService(BaseService):
         """Broadcast todo via WebSocket."""
         try:
             from app_v2 import websocket_service
-            
+
             if websocket_service:
                 websocket_service.broadcast_notification(
                     user_id=todo['recipient_id'],
-                    data={
+                    notification_data={
                         'type': 'todo',
                         'event': event_type,
                         'todo': todo
@@ -293,7 +301,7 @@ class TodoService(BaseService):
                 if websocket_service:
                     websocket_service.broadcast_notification(
                         user_id=user_id,
-                        data={
+                        notification_data={
                             'type': 'task_postponed',
                             'task_id': task_id,
                             'days': days,

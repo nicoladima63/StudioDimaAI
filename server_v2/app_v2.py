@@ -21,7 +21,7 @@ from config.flask_config import get_config
 # app_v2.py is in server_v2/ root
 _BASE_DIR = Path(__file__).parent  # server_v2/
 _CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
-_TOKEN_PATH = _BASE_DIR / "tokens" / "google_calendar.json"
+_TOKEN_PATH = _BASE_DIR / "tokens" / "token.json"
 from core.database_manager import get_database_manager
 from core.exceptions import StudioDimaError
 from utils.dbf_utils import convert_bytes_to_string, clean_dbf_value

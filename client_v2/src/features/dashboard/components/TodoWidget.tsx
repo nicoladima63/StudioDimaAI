@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { CCard, CCardBody, CCardHeader, CButton, CBadge, CSpinner } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilBell, cilCheckCircle, cilClock, cilArrowRight } from '@coreui/icons';
+import { cilBell, cilCheckCircle, cilClock, cilArrowRight, cilPlus, cilPencil } from '@coreui/icons';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
-import { todoService, Todo } from '@/services/api/todos';
+import { todoService } from '@/services/api/todos';
+import type { Todo } from '@/services/api/todos';
+import TodoModal from './TodoModal';
 
 const TodoWidget: React.FC = () => {
     const { user } = useAuthStore();
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(true);
     const [completingId, setCompletingId] = useState<number | null>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
     useEffect(() => {
         if (user?.id) {
@@ -52,11 +56,29 @@ const TodoWidget: React.FC = () => {
         try {
             const response = await todoService.snooze(todoId, user!.id, 1);
             if (response.success) {
-                // Rimuovi dalla lista
-                setTodos(prev => prev.filter(t => t.id !== todoId));
+                // Ricarica la lista per vedere la nuova data
+                loadTodos();
             }
         } catch (error) {
             console.error('Error snoozing todo:', error);
+        }
+    };
+
+    const getEffectiveUrgency = (todo: Todo): string => {
+        // 'lowered' significa esplicitamente abbassato (da snooze), trattalo come 'normal'
+        if (todo.urgency_level === 'lowered') {
+            return 'normal';
+        }
+        // Se urgency_level è impostato (non normal), usa quello
+        if (todo.urgency_level && todo.urgency_level !== 'normal') {
+            return todo.urgency_level;
+        }
+        // Altrimenti deriva dalla priority
+        switch (todo.priority) {
+            case 'urgent': return 'critical';
+            case 'high': return 'urgent';
+            case 'medium': return 'attention';
+            default: return 'normal';
         }
     };
 
@@ -71,10 +93,10 @@ const TodoWidget: React.FC = () => {
 
     const getUrgencyIcon = (urgency: string) => {
         switch (urgency) {
-            case 'critical': return '🚨';
-            case 'urgent': return '🔥';
-            case 'attention': return '⚠️';
-            default: return '✓';
+            case 'critical': return '!!';
+            case 'urgent': return '!';
+            case 'attention': return '*';
+            default: return '-';
         }
     };
 
@@ -94,14 +116,20 @@ const TodoWidget: React.FC = () => {
             const now = new Date();
             const diffDays = Math.floor((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
+            // Formato data dd/mm/yyyy
+            const dd = String(date.getDate()).padStart(2, '0');
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const yyyy = date.getFullYear();
+            const dateStr = `${dd}/${mm}/${yyyy}`;
+
             if (diffDays < 0) {
-                return `Scaduto ${Math.abs(diffDays)} giorni fa`;
+                return `Scaduto il ${dateStr} (${Math.abs(diffDays)} gg fa)`;
             } else if (diffDays === 0) {
-                return 'Scade oggi';
+                return `Scade il ${dateStr} (oggi)`;
             } else if (diffDays === 1) {
-                return 'Scade domani';
+                return `Scade il ${dateStr} (domani)`;
             } else {
-                return `Scade tra ${diffDays} giorni`;
+                return `Scade il ${dateStr} (${diffDays} gg)`;
             }
         } catch {
             return null;
@@ -127,10 +155,20 @@ const TodoWidget: React.FC = () => {
                         </CBadge>
                     )}
                 </div>
-                <NavLink to="/todos" className="btn btn-sm btn-primary">
-                    Vedi tutti
-                    <CIcon icon={cilArrowRight} className="ms-1" size="sm" />
-                </NavLink>
+                <div className="d-flex gap-2">
+                    <CButton
+                        color="success"
+                        size="sm"
+                        onClick={() => { setEditingTodo(null); setShowModal(true); }}
+                    >
+                        <CIcon icon={cilPlus} className="me-1" size="sm" />
+                        Nuovo
+                    </CButton>
+                    <NavLink to="/todos" className="btn btn-sm btn-primary">
+                        Vedi tutti
+                        <CIcon icon={cilArrowRight} className="ms-1" size="sm" />
+                    </NavLink>
+                </div>
             </CCardHeader>
             <CCardBody style={{ maxHeight: '600px', overflowY: 'auto' }}>
                 {loading ? (
@@ -145,48 +183,65 @@ const TodoWidget: React.FC = () => {
                     </div>
                 ) : (
                     <div className="d-flex flex-column gap-3">
-                        {todos.map((todo) => (
+                        {todos.map((todo) => {
+                            const effectiveUrgency = getEffectiveUrgency(todo);
+                            return (
                             <div
                                 key={todo.id}
-                                className={`p-3 rounded border border-${getUrgencyColor(todo.urgency_level)} bg-light`}
+                                className={`p-3 rounded border border-${getUrgencyColor(effectiveUrgency)} bg-light`}
                                 style={{
-                                    borderWidth: todo.urgency_level === 'critical' ? '3px' : '1px',
-                                    animation: todo.urgency_level === 'critical' ? 'pulse 2s infinite' : 'none'
+                                    borderWidth: effectiveUrgency === 'critical' ? '3px' : '1px',
+                                    animation: effectiveUrgency === 'critical' ? 'pulse 2s infinite' : 'none'
                                 }}
                             >
-                                {/* Header con urgenza */}
+                                {/* Header con urgenza e icona edit */}
                                 <div className="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <CBadge color={getUrgencyColor(todo.urgency_level)} className="me-2">
-                                            {getUrgencyIcon(todo.urgency_level)} {getUrgencyLabel(todo.urgency_level)}
-                                        </CBadge>
-                                        {todo.priority && (
-                                            <CBadge color="secondary" className="text-uppercase">
-                                                {todo.priority}
-                                            </CBadge>
-                                        )}
-                                    </div>
+                                    <CBadge color={getUrgencyColor(effectiveUrgency)}>
+                                        {getUrgencyIcon(effectiveUrgency)} {getUrgencyLabel(effectiveUrgency)}
+                                    </CBadge>
+                                    <CButton
+                                        color="light"
+                                        size="sm"
+                                        className="p-1"
+                                        style={{ lineHeight: 1 }}
+                                        onClick={() => { setEditingTodo(todo); setShowModal(true); }}
+                                    >
+                                        <CIcon icon={cilPencil} size="sm" />
+                                    </CButton>
                                 </div>
 
                                 {/* Contenuto */}
                                 <div className="mb-2">
-                                    <strong className="d-block mb-1">{todo.subject}</strong>
+                                    <div className="mb-1">
+                                        <small className="text-muted">Titolo: </small>
+                                        <strong>{todo.subject}</strong>
+                                    </div>
                                     {todo.message && (
-                                        <small className="text-muted d-block">{todo.message}</small>
+                                        <div>
+                                            <small className="text-muted">Descrizione: </small>
+                                            <span>{todo.message}</span>
+                                        </div>
                                     )}
                                 </div>
 
-                                {/* Info aggiuntive */}
-                                {todo.due_date && (
-                                    <div className="mb-2">
-                                        <small className={`text-${todo.urgency_level === 'normal' ? 'muted' : 'danger'}`}>
-                                            📅 {formatDueDate(todo.due_date)}
-                                        </small>
+                                {/* Footer: scadenza + snooze a sinistra, completa a destra */}
+                                <div className="d-flex justify-content-between align-items-center mt-2">
+                                    <div className="d-flex align-items-center gap-2">
+                                        {todo.due_date && (
+                                            <small className={`text-${effectiveUrgency === 'normal' ? 'muted' : 'danger'}`}>
+                                                {formatDueDate(todo.due_date)}
+                                            </small>
+                                        )}
+                                        <CButton
+                                            color="info"
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleSnooze(todo.id)}
+                                        >
+                                            <CIcon icon={cilClock} className="me-1" size="sm" />
+                                            +1 giorno
+                                        </CButton>
                                     </div>
-                                )}
-
-                                {/* Azioni */}
-                                <div className="d-flex gap-2 mt-2">
                                     <CButton
                                         color="success"
                                         size="sm"
@@ -202,18 +257,10 @@ const TodoWidget: React.FC = () => {
                                             </>
                                         )}
                                     </CButton>
-                                    <CButton
-                                        color="info"
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleSnooze(todo.id)}
-                                    >
-                                        <CIcon icon={cilClock} className="me-1" size="sm" />
-                                        +1 giorno
-                                    </CButton>
                                 </div>
                             </div>
-                        ))}
+                        );
+                        })}
                     </div>
                 )}
             </CCardBody>
@@ -229,6 +276,14 @@ const TodoWidget: React.FC = () => {
           }
         }
       `}</style>
+
+            {/* Modal Todo (new/edit) */}
+            <TodoModal
+                visible={showModal}
+                onClose={() => { setShowModal(false); setEditingTodo(null); }}
+                onSaved={loadTodos}
+                editTodo={editingTodo}
+            />
         </CCard>
     );
 };

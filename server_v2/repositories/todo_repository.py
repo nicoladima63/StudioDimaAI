@@ -53,7 +53,14 @@ class TodoRepository(BaseRepository):
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_todos_recipient ON todo_messages(recipient_id)')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_todos_sender ON todo_messages(sender_id)')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_todos_status ON todo_messages(status)')
-                
+
+                # Migration: add urgency_level column if missing
+                cursor.execute("PRAGMA table_info(todo_messages)")
+                columns = [row[1] for row in cursor.fetchall()]
+                if 'urgency_level' not in columns:
+                    cursor.execute("ALTER TABLE todo_messages ADD COLUMN urgency_level TEXT DEFAULT 'normal'")
+                    logger.info("Added urgency_level column to todo_messages table")
+
                 cursor.close()
                 
         except Exception as e:
@@ -235,20 +242,20 @@ class TodoRepository(BaseRepository):
     def snooze_todo(self, message_id: int, days: int, user_id: int) -> bool:
         """
         Snooze/postpone a todo by X days.
-        Updates due_date and resets urgency to normal.
+        Updates due_date and lowers urgency by one level.
         """
         try:
             from datetime import datetime, timedelta
-            
+
             message = self.get_by_id(message_id)
             if not message:
                 return False
-            
+
             # Ensure only recipient can snooze
             if str(message['recipient_id']) != str(user_id):
                 logger.warning(f"User {user_id} attempted to snooze message {message_id}, but is not the recipient")
                 return False
-            
+
             # Calculate new due_date
             current_due_date = message.get('due_date')
             if current_due_date:
@@ -256,21 +263,44 @@ class TodoRepository(BaseRepository):
                     due_date_obj = datetime.fromisoformat(current_due_date.replace('Z', '+00:00'))
                 else:
                     due_date_obj = datetime.strptime(current_due_date, '%Y-%m-%d')
-                
+
                 new_due_date = due_date_obj + timedelta(days=days)
             else:
                 # If no due_date, set to X days from now
                 new_due_date = datetime.now() + timedelta(days=days)
-            
-            # Update due_date and reset urgency
+
+            # Calculate effective urgency (same logic as frontend getEffectiveUrgency)
+            current_urgency = message.get('urgency_level', 'normal')
+            if current_urgency == 'normal':
+                # Derive from priority like frontend does
+                priority = message.get('priority', 'medium')
+                if priority == 'urgent':
+                    current_urgency = 'critical'
+                elif priority == 'high':
+                    current_urgency = 'urgent'
+                elif priority == 'medium':
+                    current_urgency = 'attention'
+                # low stays 'normal'
+
+            # Lower urgency by one level (use 'lowered' instead of 'normal' to prevent priority fallback in FE)
+            urgency_downgrade = {
+                'critical': 'urgent',
+                'urgent': 'attention',
+                'attention': 'lowered',
+                'normal': 'lowered',
+                'lowered': 'lowered'
+            }
+            new_urgency = urgency_downgrade.get(current_urgency, 'lowered')
+
+            # Update due_date and lowered urgency
             self.update(message_id, {
                 'due_date': new_due_date.isoformat(),
-                'urgency_level': 'normal'
+                'urgency_level': new_urgency
             })
-            
-            logger.info(f"Snoozed todo {message_id} by {days} days, new due_date: {new_due_date.date()}")
+
+            logger.info(f"Snoozed todo {message_id} by {days} days, urgency: {current_urgency} -> {new_urgency}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to snooze todo {message_id}: {e}")
             return False

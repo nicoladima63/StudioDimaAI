@@ -22,23 +22,45 @@ def get_todos():
         status = request.args.get('status')
         priority = request.args.get('priority')
         type_filter = request.args.get('type')
+        mode = request.args.get('mode')  # 'all' or 'inbox' (default)
         
         service = get_todo_service()
         
-        # For now, return inbox if user_id provided, else error
-        if not user_id:
-            return jsonify({'success': False, 'error': 'user_id is required'}), 400
-        
-        # Get inbox and filter if needed
-        todos = service.get_inbox(user_id)
-        
-        # Apply filters
-        if status:
-            todos = [t for t in todos if t.get('status') == status]
-        if priority:
-            todos = [t for t in todos if t.get('priority') == priority]
-        if type_filter:
-            todos = [t for t in todos if t.get('type') == type_filter]
+        if mode == 'all':
+            # Get all todos (for admin/monitoring)
+            filters = {}
+            if status: filters['status'] = status
+            if priority: filters['priority'] = priority
+            if type_filter: filters['type'] = type_filter
+            # If user_id provided in 'all' mode, filter by sender OR recipient? 
+            # Or strict match? For now let's assume strict match if explicitly requested,
+            # but usually 'all' implies comprehensive list.
+            # To imitate previous logic, if status/priority are passed, they are applied.
+            
+            # Use the new service method
+            todos = service.get_all_todos(filters)
+            
+            # Further in-memory filtering if needed (e.g. user_id as sender OR recipient)
+            # If user_id is passed in 'all' mode, maybe we want todos related to that user?
+            if user_id:
+                uid = int(user_id)
+                todos = [t for t in todos if t['sender_id'] == uid or t['recipient_id'] == uid]
+                
+        else:
+            # Default: Inbox for user
+            if not user_id:
+                return jsonify({'success': False, 'error': 'user_id is required for inbox mode'}), 400
+            
+            # Get inbox
+            todos = service.get_inbox(user_id)
+            
+            # Apply in-memory filters for inbox
+            if status:
+                todos = [t for t in todos if t.get('status') == status]
+            if priority:
+                todos = [t for t in todos if t.get('priority') == priority]
+            if type_filter:
+                todos = [t for t in todos if t.get('type') == type_filter]
         
         return jsonify({'success': True, 'data': todos})
     except Exception as e:
