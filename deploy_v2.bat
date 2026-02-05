@@ -42,7 +42,7 @@ mkdir "%BACKUP_DIR%" 2>nul
 
 :: File da preservare (con i path corretti dove il codice li cerca)
 :: credentials.json -> instance/
-:: tokens/google_calendar.json -> tokens/
+:: tokens/token.json -> tokens/
 :: instance/sync_state.json -> instance/
 
 if exist "%DEPLOY_PATH%\instance\credentials.json" (
@@ -59,18 +59,18 @@ if exist "%DEPLOY_PATH%\instance\credentials.json" (
     echo   [SKIP] credentials.json non presente >> "%LOGFILE%"
 )
 
-if exist "%DEPLOY_PATH%\tokens\google_calendar.json" (
-    copy "%DEPLOY_PATH%\tokens\google_calendar.json" "%BACKUP_DIR%\google_calendar.json" /Y >nul 2>&1
+if exist "%DEPLOY_PATH%\tokens\token.json" (
+    copy "%DEPLOY_PATH%\tokens\token.json" "%BACKUP_DIR%\token.json" /Y >nul 2>&1
     if !errorlevel! neq 0 (
-        echo   [WARN] Impossibile fare backup di google_calendar.json
-        echo   [WARN] Impossibile fare backup di google_calendar.json >> "%LOGFILE%"
+        echo   [WARN] Impossibile fare backup di token.json
+        echo   [WARN] Impossibile fare backup di token.json >> "%LOGFILE%"
     ) else (
-        echo   [OK] google_calendar.json salvato
-        echo   [OK] google_calendar.json salvato >> "%LOGFILE%"
+        echo   [OK] token.json salvato
+        echo   [OK] token.json salvato >> "%LOGFILE%"
     )
 ) else (
-    echo   [SKIP] google_calendar.json non presente
-    echo   [SKIP] google_calendar.json non presente >> "%LOGFILE%"
+    echo   [SKIP] token.json non presente
+    echo   [SKIP] token.json non presente >> "%LOGFILE%"
 )
 
 if exist "%DEPLOY_PATH%\instance\sync_state.json" (
@@ -146,15 +146,15 @@ if exist "%BACKUP_DIR%\credentials.json" (
     )
 )
 
-:: Ripristina google_calendar.json in tokens/
-if exist "%BACKUP_DIR%\google_calendar.json" (
-    copy "%BACKUP_DIR%\google_calendar.json" "%DEPLOY_PATH%\tokens\google_calendar.json" /Y >nul 2>&1
+:: Ripristina token.json in tokens/
+if exist "%BACKUP_DIR%\token.json" (
+    copy "%BACKUP_DIR%\token.json" "%DEPLOY_PATH%\tokens\token.json" /Y >nul 2>&1
     if !errorlevel! neq 0 (
-        echo   [ERR] Impossibile ripristinare google_calendar.json!
-        echo   [ERR] Impossibile ripristinare google_calendar.json! >> "%LOGFILE%"
+        echo   [ERR] Impossibile ripristinare token.json!
+        echo   [ERR] Impossibile ripristinare token.json! >> "%LOGFILE%"
     ) else (
-        echo   [OK] google_calendar.json ripristinato
-        echo   [OK] google_calendar.json ripristinato >> "%LOGFILE%"
+        echo   [OK] token.json ripristinato
+        echo   [OK] token.json ripristinato >> "%LOGFILE%"
     )
 )
 
