@@ -55,10 +55,7 @@ const RecallAutomationCard: React.FC = () => {
     <CCard className='mb-3'>
       <CCardBody>
         <CRow className='align-items-center mb-3'>
-          <CCol md={5}>
-            <h6>Richiami</h6>
-          </CCol>
-          <CCol md={2}>
+          <CCol md={8}>
             <CFormSwitch
               id='calendar-sync-switch'
               checked={enabled}

@@ -60,11 +60,8 @@ const ReminderAutomationCard: React.FC = () => {
   return (
     <CCard>
       <CCardBody>
-      <CRow className='align-items-center mb-3'>
-      <CCol md={5}>
-            <h6>Promemoria Appuntamenti</h6>
-          </CCol>
-          <CCol md={2}>
+        <CRow className='align-items-center mb-3'>
+          <CCol md={8}>
             <CFormSwitch
               id='calendar-sync-switch'
               checked={enabled}

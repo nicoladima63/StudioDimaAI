@@ -294,9 +294,20 @@ const Dashboard: React.FC = () => {
                   </CRow>
                 </CCardHeader>
                 <CCardBody>
-                  <CalendarAutomation />
-                  <RecallAutomationCard />
-                  <ReminderAutomationCard />
+                  <CRow>
+                    <CCol md={6}>
+                      <h6 className='mb-0'>Sincro Calendario</h6>
+                      <CalendarAutomation />
+                    </CCol>
+                    <CCol md={3}>
+                      <h6 className='mb-0'>Richiami</h6>
+                      <RecallAutomationCard />
+                    </CCol>
+                    <CCol md={3}>
+                      <h6 className='mb-0'>Promemoria</h6>
+                      <ReminderAutomationCard />
+                    </CCol>
+                  </CRow>
                 </CCardBody>
               </CCard>
             </CCol>

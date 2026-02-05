@@ -98,9 +98,6 @@ const CalendarAutomation: React.FC = () => {
     <CCard className='mb-3'>
       <CCardBody className='d-flex flex-column'>
         <CRow className='align-items-center mb-3'>
-        <CCol md={2}>
-        <h6>Calendario</h6>
-          </CCol>
           <CCol md={3}>
             <CFormSwitch
               id='calendar-sync-switch'
