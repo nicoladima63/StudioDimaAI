@@ -16,6 +16,7 @@ export interface MonitorStatus {
   monitor_id: string;
   status: 'stopped' | 'running' | 'paused' | 'error';
   table_name: string;
+  monitor_type?: string;
   config: MonitorConfig;
   last_check: string | null;
   last_change: string | null;
