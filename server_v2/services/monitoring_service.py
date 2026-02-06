@@ -116,6 +116,17 @@ class MonitoringService:
             for logical_name, info in DBF_TABLES.items()
         }
     
+    
+    def _is_path_reachable(self, path_str: str) -> bool:
+        """Verifica se un percorso è raggiungibile."""
+        try:
+            if not path_str:
+                return False
+            return os.path.exists(path_str)
+        except Exception as e:
+            logger.warning(f"Path access check failed for {path_str}: {e}")
+            return False
+
     def _get_rules_summary(self, monitor_id: str = None) -> Dict[str, Any]:
         try:
             filters = {'attiva': True}
@@ -186,6 +197,13 @@ class MonitoringService:
                 start_time = datetime.now()
                 self.logs.append({'timestamp': start_time.isoformat(), 'message': f'Avvio monitor {monitor_id}', 'type': 'info'})
                 
+                # SAFETY CHECK: Verifica se il path è raggiungibile prima di provare
+                if not self._is_path_reachable(config.file_path):
+                    msg = f"Impossibile avviare monitor {monitor_id}: Path non raggiungibile: {config.file_path}"
+                    logger.warning(msg)
+                    self.logs.append({'timestamp': datetime.now().isoformat(), 'message': msg, 'type': 'warning'})
+                    return False
+
                 if not self.snapshot_manager.start_monitoring(config.table_name, config.file_path):
                     raise RuntimeError(f"Creazione snapshot iniziale fallita per {config.table_name}")
                 

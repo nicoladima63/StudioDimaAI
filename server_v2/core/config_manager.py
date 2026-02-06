@@ -212,7 +212,7 @@ class ConfigManager:
             raise ValueError(f"Unknown table name: {table_name}. Available tables: {list(DBF_TABLES.keys())}")
         
         # Determina il percorso base dal mode
-        mode = self._get_database_mode()
+        mode = self.get_mode()
         categoria = table_info['categoria']
         filename = table_info['file']
         
