@@ -176,11 +176,10 @@ class AutomationService(BaseService):
         existing_rules = self.get_all_rules({
             'monitor_id': rule_data['monitor_id'],
             'trigger_id': rule_data['trigger_id'],
-            'action_id': rule_data['action_id'],
             'attiva': True
         })
         if existing_rules:
-            raise ValidationError("Esiste già una regola attiva con lo stesso monitor, trigger e azione.")
+            raise ValidationError("Esiste già una regola attiva per questo trigger.")
         query = """
             INSERT INTO automation_rules (
                 name, description, trigger_type, trigger_id, 

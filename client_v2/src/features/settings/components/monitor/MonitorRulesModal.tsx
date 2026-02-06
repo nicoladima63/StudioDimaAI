@@ -159,7 +159,7 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
             try {
                 setLoading(true);
                 await automationApi.createRule({
-                    name: `Regola per ${trigger.name} - ${selectedAction?.name}`,
+                    name: `${trigger.name}`,
                     description: `Trigger: ${trigger.name}`,
                     trigger_type: trigger.type,
                     trigger_id: trigger.id,

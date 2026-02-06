@@ -116,17 +116,26 @@ class MonitoringService:
             for logical_name, info in DBF_TABLES.items()
         }
     
-    def _get_rules_summary(self) -> Dict[str, Any]:
+    def _get_rules_summary(self, monitor_id: str = None) -> Dict[str, Any]:
         try:
-            rules = self.automation_service.get_all_rules({'trigger_type': 'prestazione', 'attiva': True})
+            filters = {'attiva': True}
+            if monitor_id:
+                filters['monitor_id'] = monitor_id
+            else:
+                filters['trigger_type'] = 'prestazione' # Fallback legacy behavior? Or just remove?
+
+            rules = self.automation_service.get_all_rules(filters)
             action_names: List[str] = [r.get('action_name') for r in rules if r.get('action_name')]
+            rule_names: List[str] = [r.get('name') for r in rules if r.get('name')]
+            
             return {
                 'active_rules': len(rules),
-                'example_actions': list(set(action_names))[:3]
+                'example_actions': list(set(action_names))[:3],
+                'rule_names': rule_names[:5] # Limit to 5 names
             }
         except Exception as e:
             logger.warning(f"Failed to compute rules summary: {e}")
-            return {'active_rules': 0, 'example_actions': []}
+            return {'active_rules': 0, 'example_actions': [], 'rule_names': []}
 
     def create_monitor(self,
                        table_name: str,
@@ -396,7 +405,7 @@ class MonitoringService:
                             'error_count': instance.error_count,
                         'created_at': instance.created_at,
                         'started_at': instance.started_at,
-                        'rules_summary': self._get_rules_summary()
+                        'rules_summary': self._get_rules_summary(mid)
                         }
                     else:
                         # Convert config to dict and fix enum serialization
@@ -414,7 +423,7 @@ class MonitoringService:
                             'error_count': 0,
                         'created_at': None,  # MonitorConfig doesn't have created_at
                         'started_at': None,
-                        'rules_summary': self._get_rules_summary()
+                        'rules_summary': self._get_rules_summary(mid)
                         }
                 logger.info(f"get_monitor_status: Returning summary of {len(monitors_data)} monitors.")
                 return {

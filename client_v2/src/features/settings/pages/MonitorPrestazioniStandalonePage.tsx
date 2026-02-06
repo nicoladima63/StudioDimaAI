@@ -9,7 +9,6 @@ import {
   CRow,
   CCol,
   CCard,
-  CCardHeader,
   CCardBody,
   CBadge,
 } from '@coreui/react';
@@ -24,14 +23,13 @@ import {
 } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
 
-import LogMonitorCard from '@/features/settings/components/monitor/LogMonitorCard';
 import MappingPrestazioniCard from '@/features/settings/components/monitor/MappingPrestazioniCard';
 import CreateMonitorModal from '@/features/settings/components/monitor/CreateMonitorModal';
 import MonitorRulesModal from '@/features/settings/components/monitor/MonitorRulesModal';
+import MonitorRules from '@/features/dashboard/components/MonitorRules';
 
-import MonitorPrestazioniService, { MonitorLog as BackendMonitorLog, MonitorSummary } from '@/services/api/monitorPrestazioni';
+import MonitorPrestazioniService, { MonitorSummary } from '@/services/api/monitorPrestazioni';
 
-interface MonitorLog extends BackendMonitorLog { }
 
 const getBadgeColor = (status: string) => {
   switch (status) {
@@ -45,7 +43,6 @@ const getBadgeColor = (status: string) => {
 const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Main State
   const [monitorSummary, setMonitorSummary] = useState<MonitorSummary | null>(null);
-  const [logs, setLogs] = useState<MonitorLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -68,7 +65,6 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Initialization
   useEffect(() => {
     loadStatus();
-    loadLogs();
     loadMonitorableTables();
   }, []);
 
@@ -97,16 +93,6 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
     }
   };
 
-  const loadLogs = async () => {
-    try {
-      const response = await MonitorPrestazioniService.getLogs();
-      if (response.success && response.data) {
-        setLogs(response.data.logs || []);
-      }
-    } catch (error) {
-      console.error('loadLogs error:', error);
-    }
-  };
 
   // --- Monitor Actions ---
 
@@ -224,15 +210,23 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                         <h5 className="mb-0 text-truncate" title={monitor.table_name}>
                           {monitor.table_name}
                         </h5>
-                        <CBadge color={getBadgeColor(monitor.status)} shape="rounded-pill">
+                        <CBadge color={getBadgeColor(monitor.status)} shape="rounded" className="p-2">
                           {monitor.status.toUpperCase()}
                         </CBadge>
                       </div>
 
-                      <p className="small text-muted mb-4 flex-grow-1">
-                        ID: <span className="font-monospace">{monitorId}</span><br />
-                        Type: {monitor.monitor_type}
+                      <p className="small text-muted mb-2">
+                        ID: <span className="font-monospace">{monitorId}</span>
                       </p>
+                      <div className="mt-2 p-2 bg-light rounded bg-opacity-50 border small">
+                        <strong>Regole Attive:</strong>
+                        <div className="mt-1">
+                          <MonitorRules monitorId={monitorId} />
+                        </div>
+                      </div>
+
+
+                      <div className="flex-grow-1"></div>
 
                       <div className="d-flex justify-content-between align-items-center pt-3 border-top">
                         <div className="d-flex gap-2">
@@ -308,10 +302,6 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         <MappingPrestazioniCard />
       </PageLayout.ContentBody>
 
-      {/* Logs Section */}
-      <PageLayout.ContentBody>
-        <LogMonitorCard logs={logs} />
-      </PageLayout.ContentBody>
 
       {/* Modals */}
       <CreateMonitorModal
