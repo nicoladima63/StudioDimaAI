@@ -1,10 +1,10 @@
 /**
- * AccountCard Component - MVP Phase 1
- * Card minimale per visualizzare account social (mock statici per MVP)
+ * AccountCard Component - Phase 2
+ * Card per visualizzare e connettere account social con OAuth
  */
 
-import React from 'react';
-import { CCard, CCardBody, CBadge, CButton } from '@coreui/react';
+import React, { useState } from 'react';
+import { CCard, CCardBody, CBadge, CButton, CSpinner } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilCheckCircle, cilXCircle } from '@coreui/icons';
 import {
@@ -13,15 +13,18 @@ import {
   cibLinkedin,
   cibTiktok
 } from '@coreui/icons';
+import toast from 'react-hot-toast';
+import apiClient from '@/services/api/client';
+import { useSocialMediaStore } from '@/store/socialMedia.store';
 import type { SocialAccount } from '../types';
 
 interface AccountCardProps {
   account: SocialAccount;
-  onConnect?: (accountId: number) => void;
-  onDisconnect?: (accountId: number) => void;
 }
 
-const AccountCard: React.FC<AccountCardProps> = ({ account, onConnect, onDisconnect }) => {
+const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
+  const { loadAccounts } = useSocialMediaStore();
+  const [isConnecting, setIsConnecting] = useState(false);
   // Icon mapping per piattaforma
   const getPlatformIcon = () => {
     switch (account.platform) {
@@ -54,11 +57,70 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onConnect, onDisconn
     }
   };
 
+  const handleConnect = async () => {
+    setIsConnecting(true);
+    try {
+      // Initiate OAuth flow
+      const response = await apiClient.post(
+        `/social-media/accounts/${account.id}/connect`
+      );
+
+      const { authorization_url } = response.data.data;
+
+      // Open OAuth popup
+      const popup = window.open(
+        authorization_url,
+        'oauth_popup',
+        'width=600,height=700,scrollbars=yes'
+      );
+
+      if (!popup) {
+        toast.error('Popup bloccato! Abilita i popup per questo sito.');
+        setIsConnecting(false);
+        return;
+      }
+
+      // Listen for OAuth callback (popup closes)
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          // Reload accounts to get updated connection status
+          setTimeout(() => {
+            // Invalidate cache first to force fresh data fetch
+            useSocialMediaStore.getState().invalidateCache('accounts');
+            loadAccounts();
+            setIsConnecting(false);
+          }, 500);
+        }
+      }, 1000);
+
+    } catch (error: any) {
+      console.error('OAuth connection error:', error);
+      toast.error(error.response?.data?.error || 'Errore durante la connessione');
+      setIsConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!window.confirm(`Disconnettere ${account.account_name}?`)) {
+      return;
+    }
+
+    try {
+      await apiClient.post(`/social-media/accounts/${account.id}/disconnect`);
+      toast.success('Account disconnesso con successo');
+      loadAccounts();
+    } catch (error: any) {
+      console.error('Disconnect error:', error);
+      toast.error(error.response?.data?.error || 'Errore durante la disconnessione');
+    }
+  };
+
   const handleAction = () => {
-    if (account.is_connected && onDisconnect) {
-      onDisconnect(account.id);
-    } else if (!account.is_connected && onConnect) {
-      onConnect(account.id);
+    if (account.is_connected) {
+      handleDisconnect();
+    } else {
+      handleConnect();
     }
   };
 
@@ -108,21 +170,30 @@ const AccountCard: React.FC<AccountCardProps> = ({ account, onConnect, onDisconn
           )}
         </div>
 
-        {/* Action Button - MVP: Disabled */}
+        {/* Action Button */}
         <CButton
           size="sm"
           color={account.is_connected ? 'danger' : 'primary'}
           variant="outline"
-          disabled
-          title="Disponibile in Phase 2 (OAuth)"
+          onClick={handleAction}
+          disabled={isConnecting}
         >
-          {account.is_connected ? 'Disconnetti' : 'Connetti'}
+          {isConnecting ? (
+            <>
+              <CSpinner size="sm" className="me-2" />
+              Connessione...
+            </>
+          ) : (
+            account.is_connected ? 'Disconnetti' : 'Connetti'
+          )}
         </CButton>
 
-        {/* MVP Notice */}
-        <small className="text-muted mt-2" style={{ fontSize: '0.7rem' }}>
-          OAuth disponibile in Phase 2
-        </small>
+        {/* Last synced info */}
+        {account.is_connected && account.last_synced_at && (
+          <small className="text-muted mt-2" style={{ fontSize: '0.7rem' }}>
+            Ultimo sync: {new Date(account.last_synced_at).toLocaleString('it-IT')}
+          </small>
+        )}
       </CCardBody>
     </CCard>
   );

@@ -219,7 +219,30 @@ class SocialMediaRepository(BaseRepository):
         """Aggiorna account social."""
         try:
             data['updated_at'] = datetime.utcnow().isoformat()
-            return self.update(account_id, data, table_name='social_accounts')
+
+            # Build UPDATE query manually since we're updating a different table than self.table_name
+            set_clauses = [f"{field} = ?" for field in data.keys()]
+            values = list(data.values())
+            values.append(account_id)
+
+            query = f"""
+                UPDATE social_accounts
+                SET {', '.join(set_clauses)}
+                WHERE id = ?
+            """
+
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, tuple(values))
+                rows_affected = cursor.rowcount
+                cursor.close()
+
+                if rows_affected == 0:
+                    raise RepositoryError(f"Account {account_id} not found or not updated")
+
+            logger.info(f"Updated social account {account_id}")
+            return self.get_account_by_id(account_id)
+
         except Exception as e:
             logger.error(f"Error updating account {account_id}: {e}")
             raise RepositoryError(f"Failed to update account: {str(e)}", cause=e)
@@ -538,3 +561,71 @@ class SocialMediaRepository(BaseRepository):
         except Exception as e:
             logger.error(f"Error getting posts by status {status}: {e}")
             raise RepositoryError(f"Failed to get posts by status: {str(e)}", cause=e)
+
+    def get_connected_accounts_for_platforms(
+        self,
+        platforms: List[str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Ottieni tutti gli account connessi per le piattaforme specificate.
+
+        Args:
+            platforms: Lista di platform names (es. ['instagram', 'facebook'])
+
+        Returns:
+            Lista di account connessi
+        """
+        if not platforms:
+            return []
+
+        try:
+            placeholders = ','.join('?' * len(platforms))
+            query = f"""
+                SELECT * FROM social_accounts
+                WHERE platform IN ({placeholders})
+                AND is_connected = 1
+                AND deleted_at IS NULL
+            """
+            results = self.execute_custom_query(query, tuple(platforms), fetch_all=True)
+            return [dict(r) for r in results] if results else []
+        except Exception as e:
+            logger.error(f"Error getting connected accounts for platforms {platforms}: {e}")
+            raise RepositoryError(f"Failed to get connected accounts: {str(e)}", cause=e)
+
+    def create_publication_record(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Crea record di pubblicazione in post_publications table.
+
+        Args:
+            data: Dati pubblicazione
+
+        Returns:
+            Record creato con ID
+        """
+        try:
+            insert_sql = """
+                INSERT INTO post_publications (
+                    post_id, social_account_id, platform_post_id,
+                    status, published_at, error_message
+                ) VALUES (?, ?, ?, ?, ?, ?)
+            """
+
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute(insert_sql, (
+                    data['post_id'],
+                    data['social_account_id'],
+                    data.get('platform_post_id'),
+                    data.get('status', 'pending'),
+                    data.get('published_at'),
+                    data.get('error_message')
+                ))
+                record_id = cursor.lastrowid
+                cursor.close()
+
+            logger.info(f"Created publication record: {record_id}")
+            return {'id': record_id, **data}
+
+        except Exception as e:
+            logger.error(f"Error creating publication record: {e}")
+            raise RepositoryError(f"Failed to create publication record: {str(e)}", cause=e)

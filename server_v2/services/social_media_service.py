@@ -27,56 +27,23 @@ class SocialMediaService(BaseService):
 
     def get_all_accounts(self) -> List[Dict[str, Any]]:
         """
-        Ottieni tutti gli account social.
-        MVP: Ritorna account mock statici.
+        Ottieni tutti gli account social dal database.
+        Phase 2: Legge dati reali dal DB.
         """
         try:
-            # Per MVP: ritorna account mock
-            # In Phase 2 questi saranno letti dal DB
-            mock_accounts = [
-                {
-                    'id': 1,
-                    'platform': 'instagram',
-                    'account_name': 'Studio Dima',
-                    'account_username': '@studiodima',
-                    'is_connected': 0,
-                    'connection_status': 'disconnected',
-                    'last_synced_at': None,
-                    'metadata': json.dumps({'followers': 0})
-                },
-                {
-                    'id': 2,
-                    'platform': 'facebook',
-                    'account_name': 'Studio Dima Odontoiatrico',
-                    'account_username': 'StudioDima',
-                    'is_connected': 0,
-                    'connection_status': 'disconnected',
-                    'last_synced_at': None,
-                    'metadata': json.dumps({'followers': 0})
-                },
-                {
-                    'id': 3,
-                    'platform': 'linkedin',
-                    'account_name': 'Studio Dima',
-                    'account_username': 'studio-dima',
-                    'is_connected': 0,
-                    'connection_status': 'disconnected',
-                    'last_synced_at': None,
-                    'metadata': json.dumps({'followers': 0})
-                },
-                {
-                    'id': 4,
-                    'platform': 'tiktok',
-                    'account_name': 'Studio Dima',
-                    'account_username': '@studiodima',
-                    'is_connected': 0,
-                    'connection_status': 'disconnected',
-                    'last_synced_at': None,
-                    'metadata': json.dumps({'followers': 0})
-                }
-            ]
+            # Leggi account dal database
+            accounts = self.repository.get_all_accounts()
 
-            return mock_accounts
+            # Convert is_connected from INTEGER (0/1) to boolean-like for consistency
+            for account in accounts:
+                # SQLite stores boolean as INTEGER, ensure it's properly typed
+                if 'is_connected' in account:
+                    account['is_connected'] = int(account['is_connected']) if account['is_connected'] is not None else 0
+
+                # Add connection_status derived field
+                account['connection_status'] = 'connected' if account.get('is_connected') else 'disconnected'
+
+            return accounts
         except Exception as e:
             logger.error(f"Error getting accounts: {e}")
             raise DatabaseError(f"Failed to get accounts: {str(e)}")
@@ -110,6 +77,33 @@ class SocialMediaService(BaseService):
         except Exception as e:
             logger.error(f"Error updating account {account_id}: {e}")
             raise DatabaseError(f"Failed to update account: {str(e)}")
+
+    def get_account_by_id(self, account_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Ottieni account social per ID.
+
+        Args:
+            account_id: ID account
+
+        Returns:
+            Account data o None se non trovato
+        """
+        try:
+            account = self.repository.get_account_by_id(account_id)
+            if not account:
+                return None
+
+            # Parse JSON fields if present
+            if account.get('metadata'):
+                try:
+                    account['metadata'] = json.loads(account['metadata'])
+                except:
+                    account['metadata'] = {}
+
+            return account
+        except Exception as e:
+            logger.error(f"Error getting account {account_id}: {e}")
+            raise DatabaseError(f"Failed to get account: {str(e)}")
 
     # ==========================================================================
     # CATEGORIES METHODS

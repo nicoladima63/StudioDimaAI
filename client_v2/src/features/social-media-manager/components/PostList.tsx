@@ -25,8 +25,9 @@ import {
   CCol
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPencil, cilTrash, cilReload } from '@coreui/icons';
+import { cilPencil, cilTrash, cilReload, cilCloudUpload } from '@coreui/icons';
 import { useSocialMediaStore } from '@/store/socialMedia.store';
+import apiClient from '@/services/api/client';
 import toast from 'react-hot-toast';
 import type { Post } from '../types';
 
@@ -75,6 +76,32 @@ const PostList: React.FC<PostListProps> = ({ onEdit }) => {
       toast.success('Post eliminato');
     } catch (error: any) {
       toast.error(error.message || 'Errore nell\'eliminazione');
+    }
+  };
+
+  const handlePublish = async (post: Post) => {
+    if (post.status === 'published') {
+      toast('Post già pubblicato');
+      return;
+    }
+
+    if (!window.confirm(`Pubblicare "${post.title}" su tutte le piattaforme selezionate?`)) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.post(`/social-media/posts/${post.id}/publish`);
+      const result = response.data;
+
+      if (result.success) {
+        toast.success(result.message || 'Post pubblicato con successo!');
+        loadPosts(); // Reload to update status
+      } else {
+        toast.error(result.error || 'Errore durante la pubblicazione');
+      }
+    } catch (error: any) {
+      console.error('Publish error:', error);
+      toast.error(error.response?.data?.error || 'Errore durante la pubblicazione');
     }
   };
 
@@ -230,6 +257,16 @@ const PostList: React.FC<PostListProps> = ({ onEdit }) => {
                           title="Modifica"
                         >
                           <CIcon icon={cilPencil} />
+                        </CButton>
+                        <CButton
+                          size="sm"
+                          color="success"
+                          variant="ghost"
+                          onClick={() => handlePublish(post)}
+                          disabled={post.status === 'published'}
+                          title="Pubblica ora"
+                        >
+                          <CIcon icon={cilCloudUpload} />
                         </CButton>
                         <CButton
                           size="sm"

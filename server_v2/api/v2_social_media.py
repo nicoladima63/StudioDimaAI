@@ -3,11 +3,14 @@ Social Media Management API V2 for StudioDimaAI.
 Endpoints per gestione account social, posts, categorie - MVP Phase 1.
 """
 
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, redirect
 from flask_jwt_extended import jwt_required
 from services.social_media_service import SocialMediaService
+from services.social_publishing_service import SocialPublishingService
+from utils.oauth_manager import OAuthManager, OAuthProvider
 from app_v2 import require_auth, format_response
 from core.exceptions import ValidationError, DatabaseError
+from datetime import datetime, timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -386,6 +389,258 @@ def get_stats():
 
 
 # =============================================================================
+# OAUTH & PUBLISHING ENDPOINTS (Phase 2)
+# =============================================================================
+
+# In-memory storage for OAuth states (in production, use Redis or DB)
+_oauth_states = {}
+
+@social_media_v2_bp.route('/social-media/accounts/<int:account_id>/connect', methods=['POST'])
+@jwt_required()
+def initiate_oauth_connection(account_id):
+    """
+    Inizia OAuth flow per connettere account social.
+
+    Returns:
+        authorization_url: URL per autorizzazione OAuth
+        state: State token per CSRF protection
+    """
+    try:
+        user = require_auth()
+        user_id = user['id']  # Extract only the ID, not the full user dict
+
+        # Get account and determine platform
+        service = SocialMediaService(g.database_manager)
+        account = service.get_account_by_id(account_id)
+
+        if not account:
+            return format_response(
+                success=False,
+                error=f"Account {account_id} not found",
+                state='error'
+            ), 404
+
+        # Generate OAuth URL
+        oauth_manager = OAuthManager()
+        platform = account['platform']
+        provider = oauth_manager.get_provider_from_platform(platform)
+
+        auth_url, state = oauth_manager.generate_authorization_url(provider, user_id, account_id)
+
+        # Store state temporarily for validation in callback
+        _oauth_states[state] = {
+            'user_id': user_id,
+            'account_id': account_id,
+            'platform': platform,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+
+        logger.info(f"OAuth flow initiated for account {account_id} (platform: {platform})")
+
+        return format_response(
+            data={
+                'authorization_url': auth_url,
+                'state': state
+            },
+            message='OAuth flow initiated',
+            state='success'
+        )
+
+    except Exception as e:
+        logger.error(f"Error initiating OAuth for account {account_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+@social_media_v2_bp.route('/social-media/callback/<platform>', methods=['GET'])
+def oauth_callback(platform):
+    """
+    OAuth callback endpoint per tutte le piattaforme.
+
+    Query params:
+        code: Authorization code
+        state: State token for CSRF protection
+    """
+    code = request.args.get('code')
+    state = request.args.get('state')
+
+    if not code or not state:
+        logger.error("Missing code or state in OAuth callback")
+        return redirect(f'/oauth-result?success=false&error=missing_params')
+
+    try:
+        # Validate state
+        oauth_manager = OAuthManager()
+        user_id, account_id, provider = oauth_manager.validate_state(state)
+
+        # Verify state exists in our storage
+        if state not in _oauth_states:
+            logger.error("State not found in storage")
+            return redirect(f'/oauth-result?success=false&error=invalid_state')
+
+        # Remove used state
+        del _oauth_states[state]
+
+        # Exchange code for token
+        logger.info(f"Exchanging code for token (account: {account_id})")
+        token_data = oauth_manager.exchange_code_for_token(provider, code)
+
+        # Calculate token expiration
+        expires_in = token_data.get('expires_in', 3600)
+        token_expires_at = (datetime.utcnow() + timedelta(seconds=expires_in)).isoformat()
+
+        # Update account with tokens
+        service = SocialMediaService(g.database_manager)
+        service.update_account(account_id, {
+            'access_token': token_data['access_token'],
+            'refresh_token': token_data.get('refresh_token'),
+            'token_expires_at': token_expires_at,
+            'is_connected': 1,
+            'last_synced_at': datetime.utcnow().isoformat()
+        })
+
+        logger.info(f"Account {account_id} connected successfully")
+
+        return redirect(f'/oauth-result?success=true&platform={platform}')
+
+    except Exception as e:
+        logger.error(f"OAuth callback error: {e}", exc_info=True)
+        return redirect(f'/oauth-result?success=false&error={str(e)}')
+
+
+@social_media_v2_bp.route('/social-media/accounts/<int:account_id>/disconnect', methods=['POST'])
+@jwt_required()
+def disconnect_account(account_id):
+    """Disconnetti account social"""
+    try:
+        user_id = require_auth()
+
+        service = SocialMediaService(g.database_manager)
+        service.update_account(account_id, {
+            'is_connected': 0,
+            'access_token': None,
+            'refresh_token': None,
+            'token_expires_at': None
+        })
+
+        logger.info(f"Account {account_id} disconnected")
+
+        return format_response(
+            message='Account disconnected successfully',
+            state='success'
+        )
+
+    except Exception as e:
+        logger.error(f"Error disconnecting account {account_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+@social_media_v2_bp.route('/social-media/posts/<int:post_id>/publish', methods=['POST'])
+@jwt_required()
+def publish_post_now(post_id):
+    """
+    Pubblica post immediatamente su tutte le piattaforme selezionate.
+
+    Body (optional):
+        account_ids: [1, 2, 3] - Specific accounts, default: all connected for selected platforms
+    """
+    try:
+        user_id = require_auth()
+        data = request.get_json() or {}
+
+        service = SocialPublishingService(g.database_manager)
+        post = service.repository.get_post_by_id(post_id)
+
+        if not post:
+            return format_response(
+                success=False,
+                error=f"Post {post_id} not found",
+                state='error'
+            ), 404
+
+        # Deserialize platforms
+        if isinstance(post.get('platforms'), str):
+            import json
+            post['platforms'] = json.loads(post['platforms']) if post['platforms'] else []
+
+        # Determine accounts to publish to
+        account_ids = data.get('account_ids')
+        if not account_ids:
+            # Get all connected accounts for selected platforms
+            accounts = service.repository.get_connected_accounts_for_platforms(post['platforms'])
+            account_ids = [acc['id'] for acc in accounts]
+
+        if not account_ids:
+            return format_response(
+                success=False,
+                error='No connected accounts found for selected platforms',
+                state='error'
+            ), 400
+
+        # Publish to each account
+        results = []
+        for account_id in account_ids:
+            try:
+                result = service.publish_post(post_id, account_id)
+                results.append({
+                    'account_id': account_id,
+                    'success': result['success'],
+                    'platform_post_id': result.get('platform_post_id'),
+                    'error': result.get('error_message')
+                })
+
+                # Save publication record
+                service.repository.create_publication_record({
+                    'post_id': post_id,
+                    'social_account_id': account_id,
+                    'platform_post_id': result.get('platform_post_id'),
+                    'status': 'published' if result['success'] else 'failed',
+                    'published_at': datetime.utcnow().isoformat() if result['success'] else None,
+                    'error_message': result.get('error_message')
+                })
+
+            except Exception as e:
+                logger.error(f"Error publishing to account {account_id}: {e}")
+                results.append({
+                    'account_id': account_id,
+                    'success': False,
+                    'error': str(e)
+                })
+
+        # Update post status
+        all_success = all(r['success'] for r in results)
+        any_success = any(r['success'] for r in results)
+
+        service.repository.update_post(post_id, {
+            'status': 'published' if all_success else ('failed' if not any_success else 'published'),
+            'published_at': datetime.utcnow().isoformat() if any_success else None
+        })
+
+        success_count = len([r for r in results if r['success']])
+
+        return format_response(
+            data={'publications': results},
+            message=f'Published to {success_count}/{len(results)} accounts',
+            state='success' if all_success else ('warning' if any_success else 'error')
+        )
+
+    except Exception as e:
+        logger.error(f"Error publishing post {post_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+# =============================================================================
 # HEALTH CHECK
 # =============================================================================
 
@@ -395,6 +650,6 @@ def health_check():
     return jsonify({
         'status': 'ok',
         'service': 'social_media',
-        'version': 'mvp',
+        'version': 'phase2',
         'message': 'Social Media Manager API is running'
     }), 200

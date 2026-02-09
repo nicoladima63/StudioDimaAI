@@ -49,6 +49,7 @@ const TodosPage = React.lazy(() => import('@/features/todos/pages/TodosPage'))
 const SocialMediaManagerPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaManagerPage'))
 const SocialMediaPostsPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaPostsPage'))
 const SocialMediaSettingsPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaSettingsPage'))
+const OAuthResultPage = React.lazy(() => import('@/features/social-media-manager/pages/OAuthResultPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -64,6 +65,7 @@ const AppRouter: React.FC = () => {
         {/* Public routes */}
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
+        <Route path='/oauth-result' element={<OAuthResultPage />} />
 
         {/* Protected routes with layout */}
         <Route
