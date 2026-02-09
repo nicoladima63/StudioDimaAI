@@ -73,24 +73,25 @@ export interface PostsResponse {
 export interface CreatePostRequest {
   title: string;
   content: string;
-  category_id?: number;
+  category_id?: number | null;
   content_type?: string;
   platforms?: string[];
   media_urls?: string[];
   hashtags?: string[];
-  scheduled_at?: string;
+  scheduled_at?: string | null;
+  status?: string;
 }
 
 export interface UpdatePostRequest {
   title?: string;
   content?: string;
-  category_id?: number;
+  category_id?: number | null;
   content_type?: string;
   platforms?: string[];
   media_urls?: string[];
   hashtags?: string[];
   status?: string;
-  scheduled_at?: string;
+  scheduled_at?: string | null;
 }
 
 export interface CreateCategoryRequest {

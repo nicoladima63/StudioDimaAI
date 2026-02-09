@@ -48,6 +48,7 @@ const TasksPage = React.lazy(() => import('@/features/lavorazioni/TasksPage'))
 const TodosPage = React.lazy(() => import('@/features/todos/pages/TodosPage'))
 const SocialMediaManagerPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaManagerPage'))
 const SocialMediaPostsPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaPostsPage'))
+const SocialMediaCalendarPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaCalendarPage'))
 const SocialMediaSettingsPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaSettingsPage'))
 const OAuthResultPage = React.lazy(() => import('@/features/social-media-manager/pages/OAuthResultPage'))
 
@@ -123,6 +124,7 @@ const AppRouter: React.FC = () => {
           {/* Social Media Manager */}
           <Route path='social-media' element={<SocialMediaManagerPage />} />
           <Route path='social-media/posts' element={<SocialMediaPostsPage />} />
+          <Route path='social-media/calendar' element={<SocialMediaCalendarPage />} />
           <Route path='social-media/settings' element={<SocialMediaSettingsPage />} />
 
           {/* Catch-all for 404 */}

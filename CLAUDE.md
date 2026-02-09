@@ -2,8 +2,12 @@
 
 ## TypeScript e Import
 - Usare sempre `import type` per i tipi TypeScript
-- Usare `import apiClient from '@/api/client'` (default import) per le chiamate API
+- **Path Corretti Import**:
+  - `import apiClient from '@/services/api/client'` (NON `@/api/client`)
+  - `import type { ApiResponse } from '@/types'` (NON `@/types/api`)
+  - `import toast from 'react-hot-toast'` (NON `react-toastify`)
 - Non usare `{ apiClient }` ma il default import
+- Sempre verificare i path consultando altri file esistenti nella stessa feature prima di creare nuovi import
 
 ## API e Backend
 - Uniformarsi alle strutture di risposta delle altre API esistenti nel progetto
@@ -34,6 +38,21 @@
 
 ## Service e API
 - Crea sempre il service per le chiamate API nella cartella service della features creata
+
+## React Big Calendar e Gestione Date
+- **Libreria**: `react-big-calendar` con `moment` localizer
+- **Locale**: Configurare sempre `moment.locale('it')` per italiano
+- **Import Pattern**:
+  ```typescript
+  import { Calendar, momentLocalizer } from 'react-big-calendar';
+  import moment from 'moment';
+  import 'moment/locale/it';
+  import 'react-big-calendar/lib/css/react-big-calendar.css';
+  ```
+- **Eventi**: Formato con `start` e `end` come Date objects
+- **Colori**: Usare `eventStyleGetter` per colorare eventi per categoria
+- **Interattività**: Implementare `onSelectEvent` per dettagli e `onEventDrop` per drag & drop rescheduling
+- **Messages**: Sempre tradurre in italiano (next, previous, today, month, week, etc.)
 
 ## Comandi Utili
 - Test: `npm test` (se configurato)

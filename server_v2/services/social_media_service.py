@@ -327,3 +327,52 @@ class SocialMediaService(BaseService):
                 'scheduled': 0,
                 'published': 0
             }
+
+    def get_calendar_events(
+        self,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Ottieni eventi per il calendario (posts schedulati).
+
+        Args:
+            start_date: Data inizio range (ISO format)
+            end_date: Data fine range (ISO format)
+
+        Returns:
+            Lista di eventi con dati formattati per react-big-calendar
+        """
+        try:
+            # Ottieni posts schedulati nel range di date
+            posts = self.repository.get_scheduled_posts(start_date, end_date)
+
+            # Formatta eventi per react-big-calendar
+            events = []
+            for post in posts:
+                # Parse JSON fields
+                platforms = json.loads(post.get('platforms') or '[]')
+
+                # Crea evento
+                event = {
+                    'id': post['id'],
+                    'title': post['title'],
+                    'start': post['scheduled_at'],
+                    'end': post['scheduled_at'],  # Stesso orario per eventi puntuali
+                    'platforms': platforms,
+                    'category_id': post.get('category_id'),
+                    'status': post.get('status'),
+                    'content_type': post.get('content_type'),
+                    # Aggiungi dati extra per il tooltip/modal
+                    'content': post.get('content'),
+                    'hashtags': json.loads(post.get('hashtags') or '[]'),
+                    'media_urls': json.loads(post.get('media_urls') or '[]')
+                }
+                events.append(event)
+
+            logger.info(f"Retrieved {len(events)} calendar events")
+            return events
+
+        except Exception as e:
+            logger.error(f"Error getting calendar events: {e}")
+            raise DatabaseError(f"Failed to get calendar events: {str(e)}")

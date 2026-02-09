@@ -160,6 +160,12 @@ const _nav = [
       },
       {
         component: CNavItem,
+        name: 'Calendario',
+        to: '/social-media/calendar',
+        icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
         name: 'Settings',
         to: '/social-media/settings',
         icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,

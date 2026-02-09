@@ -389,6 +389,49 @@ def get_stats():
 
 
 # =============================================================================
+# CALENDAR ENDPOINT (Phase 2)
+# =============================================================================
+
+@social_media_v2_bp.route('/social-media/calendar', methods=['GET'])
+@jwt_required()
+def get_calendar_events():
+    """
+    Ottieni eventi calendario per posts schedulati.
+
+    Query params:
+        start_date: Data inizio range (ISO format)
+        end_date: Data fine range (ISO format)
+
+    Returns:
+        events: Lista eventi formattati per react-big-calendar
+    """
+    try:
+        user_id = require_auth()
+
+        # Parse query params
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        # Get calendar events from service
+        service = SocialMediaService(g.database_manager)
+        events = service.get_calendar_events(start_date, end_date)
+
+        return format_response(
+            data={'events': events},
+            message=f"Retrieved {len(events)} calendar events",
+            state='success'
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting calendar events: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+# =============================================================================
 # OAUTH & PUBLISHING ENDPOINTS (Phase 2)
 # =============================================================================
 
@@ -542,6 +585,116 @@ def disconnect_account(account_id):
         ), 500
 
 
+@social_media_v2_bp.route('/social-media/accounts/<int:account_id>/pages', methods=['GET'])
+@jwt_required()
+def get_facebook_pages(account_id):
+    """
+    Recupera le Facebook Pages gestite dall'account connesso.
+    Usato per selezionare quale Page usare per pubblicare.
+    """
+    try:
+        user_id = require_auth()
+
+        service = SocialMediaService(g.database_manager)
+        account = service.get_account_by_id(account_id)
+
+        if not account:
+            return format_response(
+                success=False,
+                error=f"Account {account_id} not found",
+                state='error'
+            ), 404
+
+        if not account['is_connected']:
+            return format_response(
+                success=False,
+                error="Account not connected",
+                state='error'
+            ), 400
+
+        # Call Facebook Graph API to get Pages
+        import requests
+        access_token = account['access_token']
+
+        response = requests.get(
+            'https://graph.facebook.com/v18.0/me/accounts',
+            params={'access_token': access_token},
+            timeout=10
+        )
+        response.raise_for_status()
+
+        pages_data = response.json()
+        pages = pages_data.get('data', [])
+
+        logger.info(f"Retrieved {len(pages)} Facebook Pages for account {account_id}")
+
+        return format_response(
+            data={'pages': pages},
+            message=f"Retrieved {len(pages)} Facebook Pages",
+            state='success'
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting Facebook Pages for account {account_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+@social_media_v2_bp.route('/social-media/accounts/<int:account_id>/select-page', methods=['POST'])
+@jwt_required()
+def select_facebook_page(account_id):
+    """
+    Seleziona quale Facebook Page usare per pubblicare.
+
+    Body:
+        page_id: ID della Page Facebook
+        page_access_token: Access token specifico per la Page (opzionale)
+    """
+    try:
+        user_id = require_auth()
+        data = request.get_json(silent=True, force=True) or {}
+
+        page_id = data.get('page_id')
+        if not page_id:
+            return format_response(
+                success=False,
+                error="page_id is required",
+                state='error'
+            ), 400
+
+        service = SocialMediaService(g.database_manager)
+
+        # Update account with Page ID
+        update_data = {
+            'account_id': page_id
+        }
+
+        # If page-specific access token provided, use it
+        if data.get('page_access_token'):
+            update_data['access_token'] = data['page_access_token']
+
+        updated_account = service.update_account(account_id, update_data)
+
+        logger.info(f"Facebook Page {page_id} selected for account {account_id}")
+
+        return format_response(
+            data=updated_account,
+            message="Facebook Page selected successfully",
+            state='success'
+        )
+
+    except Exception as e:
+        logger.error(f"Error selecting Facebook Page for account {account_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
 @social_media_v2_bp.route('/social-media/posts/<int:post_id>/publish', methods=['POST'])
 @jwt_required()
 def publish_post_now(post_id):
@@ -553,7 +706,8 @@ def publish_post_now(post_id):
     """
     try:
         user_id = require_auth()
-        data = request.get_json() or {}
+        # Get JSON body if present, silent=True to handle missing Content-Type
+        data = request.get_json(silent=True, force=True) or {}
 
         service = SocialPublishingService(g.database_manager)
         post = service.repository.get_post_by_id(post_id)
@@ -653,3 +807,32 @@ def health_check():
         'version': 'phase2',
         'message': 'Social Media Manager API is running'
     }), 200
+
+
+# TEMPORARY ENDPOINT FOR TESTING (REMOVE IN PRODUCTION)
+@social_media_v2_bp.route('/social-media/test/set-page-id', methods=['POST'])
+def test_set_page_id():
+    """
+    TEMPORARY: Set Facebook Page ID without authentication.
+    Body: {"account_id": 2, "page_id": "372172199587722"}
+    """
+    try:
+        data = request.get_json(silent=True, force=True) or {}
+        account_id = data.get('account_id', 2)
+        page_id = data.get('page_id')
+
+        if not page_id:
+            return jsonify({'error': 'page_id required'}), 400
+
+        service = SocialMediaService(g.database_manager)
+        updated = service.update_account(account_id, {'account_id': page_id})
+
+        return jsonify({
+            'success': True,
+            'message': f'Page ID {page_id} set for account {account_id}',
+            'account': updated
+        })
+
+    except Exception as e:
+        logger.error(f"Error setting page ID: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500

@@ -30,6 +30,7 @@ import { useSocialMediaStore } from '@/store/socialMedia.store';
 import apiClient from '@/services/api/client';
 import toast from 'react-hot-toast';
 import type { Post } from '../types';
+import { getPlatformColor, getPlatformAbbr } from '../constants/socialPlatforms';
 
 interface PostListProps {
   onEdit: (post: Post) => void;
@@ -139,7 +140,14 @@ const PostList: React.FC<PostListProps> = ({ onEdit }) => {
     return (
       <div className="d-flex gap-1 flex-wrap">
         {platforms.map(platform => (
-          <CBadge key={platform} color="info" className="text-capitalize">
+          <CBadge
+            key={platform}
+            className="text-capitalize"
+            style={{
+              backgroundColor: getPlatformColor(platform),
+              color: '#fff'
+            }}
+          >
             {platform}
           </CBadge>
         ))}
@@ -171,7 +179,7 @@ const PostList: React.FC<PostListProps> = ({ onEdit }) => {
           <CCol md={3}>
             <CFormSelect
               value={filters.status || ''}
-              onChange={(e) => setFilters({ status: e.target.value || undefined })}
+              onChange={(e) => setFilters({ status: e.target.value || undefined } as any)}
             >
               <option value="">Tutti gli stati</option>
               <option value="draft">Bozza</option>
@@ -183,7 +191,7 @@ const PostList: React.FC<PostListProps> = ({ onEdit }) => {
           <CCol md={3}>
             <CFormSelect
               value={filters.category_id || ''}
-              onChange={(e) => setFilters({ category_id: e.target.value ? Number(e.target.value) : undefined })}
+              onChange={(e) => setFilters({ category_id: e.target.value ? Number(e.target.value) : undefined } as any)}
             >
               <option value="">Tutte le categorie</option>
               {categories.map(cat => (

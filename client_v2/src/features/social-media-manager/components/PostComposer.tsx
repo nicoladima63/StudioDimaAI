@@ -18,6 +18,8 @@ import {
   CSpinner,
   CFormCheck
 } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilX } from '@coreui/icons';
 import { useSocialMediaStore } from '@/store/socialMedia.store';
 import CategorySelector from './CategorySelector';
 import toast from 'react-hot-toast';
@@ -44,6 +46,22 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
 
   const [hashtagsInput, setHashtagsInput] = useState('');
 
+  // Helper per formattare data per input datetime-local
+  const formatForInput = (dateString?: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      // Adjust to local time for input
+      const offset = date.getTimezoneOffset() * 60000;
+      const localDate = new Date(date.getTime() - offset);
+      return localDate.toISOString().slice(0, 16);
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const [scheduledAtInput, setScheduledAtInput] = useState('');
+
   // Populate form when editing
   useEffect(() => {
     if (editPost) {
@@ -57,6 +75,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
         media_urls: editPost.media_urls || []
       });
       setHashtagsInput(editPost.hashtags?.join(', ') || '');
+      setScheduledAtInput(formatForInput(editPost.scheduled_at));
     } else {
       // Reset form
       setFormData({
@@ -69,6 +88,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
         media_urls: []
       });
       setHashtagsInput('');
+      setScheduledAtInput('');
     }
   }, [editPost, visible]);
 
@@ -95,17 +115,27 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
         .map(h => h.trim())
         .filter(h => h.length > 0);
 
+      // Gestione schedulazione
+      // Se c'è input data, format to ISO. Se vuoto, null per rimuovere schedulazione dal DB.
+      const scheduled_at = scheduledAtInput
+        ? new Date(scheduledAtInput).toISOString()
+        : null;
+
+      const status = scheduledAtInput ? 'scheduled' : 'draft';
+
       const postData = {
         ...formData,
-        hashtags
+        hashtags,
+        scheduled_at,
+        status
       };
 
       if (editPost) {
         await updatePost(editPost.id, postData);
-        toast.success('Post aggiornato con successo');
+        toast.success(status === 'scheduled' ? 'Post schedulato con successo' : 'Post aggiornato con successo');
       } else {
         await createPost(postData);
-        toast.success('Post creato con successo');
+        toast.success(status === 'scheduled' ? 'Post schedulato con successo' : 'Post creato con successo');
       }
 
       onClose();
@@ -162,6 +192,35 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
               placeholder="Scrivi il contenuto del post..."
               required
             />
+          </div>
+
+          {/* Schedulazione */}
+          <div className="mb-3">
+            <CFormLabel htmlFor="post-scheduled-at">Programma Pubblicazione (Opzionale)</CFormLabel>
+            <div className="d-flex align-items-center gap-2">
+              <CFormInput
+                type="datetime-local"
+                id="post-scheduled-at"
+                value={scheduledAtInput}
+                onChange={(e) => setScheduledAtInput(e.target.value)}
+                className="flex-grow-1"
+                step={60}
+              />
+              {scheduledAtInput && (
+                <CButton
+                  color="danger"
+                  variant="ghost"
+                  onClick={() => setScheduledAtInput('')}
+                  title="Rimuovi pianificazione"
+                  className="px-2"
+                >
+                  <CIcon icon={cilX} />
+                </CButton>
+              )}
+            </div>
+            <small className="text-muted">
+              Lascia vuoto per salvare come bozza. Se imposti una data, il post verrà programmato.
+            </small>
           </div>
 
           {/* Piattaforme */}
@@ -226,7 +285,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
               Salvataggio...
             </>
           ) : (
-            'Salva Bozza'
+            scheduledAtInput ? 'Schedula Post' : 'Salva Bozza'
           )}
         </CButton>
       </CModalFooter>

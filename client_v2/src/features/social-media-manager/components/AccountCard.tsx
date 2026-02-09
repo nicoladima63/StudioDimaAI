@@ -109,6 +109,8 @@ const AccountCard: React.FC<AccountCardProps> = ({ account }) => {
     try {
       await apiClient.post(`/social-media/accounts/${account.id}/disconnect`);
       toast.success('Account disconnesso con successo');
+      // Invalidate cache first to force fresh data fetch
+      useSocialMediaStore.getState().invalidateCache('accounts');
       loadAccounts();
     } catch (error: any) {
       console.error('Disconnect error:', error);
