@@ -24,7 +24,7 @@ import {
     CFormInput,
     CFormLabel,
     CFormSelect,
-    
+
     CNav,
     CNavItem,
     CNavLink,
@@ -56,8 +56,8 @@ interface SchedulerSettings {
     recall_hour: number;
     recall_minute: number;
     calendar_sync_enabled: boolean;
-    calendar_sync_hour: number;
-    calendar_sync_minute: number;
+    calendar_sync_hour?: number;
+    calendar_sync_minute?: number;
     calendar_studio_blu_id: string;
     calendar_studio_giallo_id: string;
 }
@@ -138,9 +138,9 @@ const SchedulerPage: React.FC = () => {
 
     const handleEditSettings = (service: 'reminder' | 'recall' | 'calendar') => {
         if (!settings) return;
-        
+
         setEditingService(service);
-        
+
         if (service === 'reminder') {
             setTempSettings({
                 reminder_enabled: settings.reminder_enabled,
@@ -156,19 +156,19 @@ const SchedulerPage: React.FC = () => {
         } else if (service === 'calendar') {
             setTempSettings({
                 calendar_sync_enabled: settings.calendar_sync_enabled,
-                calendar_sync_hour: settings.calendar_sync_hour,
-                calendar_sync_minute: settings.calendar_sync_minute,
+                calendar_sync_hour: settings.calendar_sync_hour ?? 0,
+                calendar_sync_minute: settings.calendar_sync_minute ?? 0,
                 calendar_studio_blu_id: settings.calendar_studio_blu_id,
                 calendar_studio_giallo_id: settings.calendar_studio_giallo_id
             });
         }
-        
+
         setShowSettingsModal(true);
     };
 
     const handleSaveSettings = async () => {
         if (!editingService) return;
-        
+
         setLoading(true);
         try {
             await schedulerService.apiUpdateSettings(editingService, tempSettings);
@@ -189,10 +189,10 @@ const SchedulerPage: React.FC = () => {
 
     const getServiceStatus = (service: 'reminder' | 'recall' | 'calendar') => {
         if (!settings || !status) return { enabled: false, nextRun: null };
-        
+
         let enabled = false;
         let jobId = '';
-        
+
         if (service === 'reminder') {
             enabled = settings.reminder_enabled;
             jobId = 'reminder_job_v2';
@@ -203,7 +203,7 @@ const SchedulerPage: React.FC = () => {
             enabled = settings.calendar_sync_enabled;
             jobId = 'calendar_sync_job_v2';
         }
-        
+
         const job = status.jobs.find(j => j.id === jobId);
         return { enabled, nextRun: job?.next_run || null };
     };
@@ -257,7 +257,7 @@ const SchedulerPage: React.FC = () => {
                                 )}
                             </div>
                         </CCardHeader>
-                        
+
                         <CCardBody>
                             <CNav variant="tabs" role="tablist">
                                 <CNavItem>
@@ -284,14 +284,14 @@ const SchedulerPage: React.FC = () => {
                                     </CNavLink>
                                 </CNavItem>
                             </CNav>
-                            
+
                             <CTabContent>
                                 <CTabPane visible={activeTab === 'status'}>
                                     <div className="mt-3">
                                         <CAlert color={status?.running ? 'success' : 'warning'}>
                                             <strong>Scheduler Status:</strong> {status?.running ? 'ATTIVO' : 'INATTIVO'}
                                         </CAlert>
-                                        
+
                                         <h6>Servizi Programmati</h6>
                                         <CTable striped>
                                             <CTableHead>
@@ -313,7 +313,7 @@ const SchedulerPage: React.FC = () => {
                                                         </CBadge>
                                                     </CTableDataCell>
                                                     <CTableDataCell>
-                                                        {settings ? `${settings.reminder_hour.toString().padStart(2, '0')}:${settings.reminder_minute.toString().padStart(2, '0')}` : '-'}
+                                                        {settings && settings.reminder_hour !== undefined ? `${settings.reminder_hour.toString().padStart(2, '0')}:${settings.reminder_minute?.toString().padStart(2, '0')}` : '-'}
                                                     </CTableDataCell>
                                                     <CTableDataCell>
                                                         {formatNextRun(getServiceStatus('reminder').nextRun)}
@@ -329,7 +329,7 @@ const SchedulerPage: React.FC = () => {
                                                         </CButton>
                                                     </CTableDataCell>
                                                 </CTableRow>
-                                                
+
                                                 {/* Richiami Pazienti */}
                                                 <CTableRow>
                                                     <CTableDataCell>Richiami Pazienti</CTableDataCell>
@@ -339,7 +339,7 @@ const SchedulerPage: React.FC = () => {
                                                         </CBadge>
                                                     </CTableDataCell>
                                                     <CTableDataCell>
-                                                        {settings ? `${settings.recall_hour.toString().padStart(2, '0')}:${settings.recall_minute.toString().padStart(2, '0')}` : '-'}
+                                                        {settings && settings.recall_hour !== undefined ? `${settings.recall_hour.toString().padStart(2, '0')}:${settings.recall_minute?.toString().padStart(2, '0')}` : '-'}
                                                     </CTableDataCell>
                                                     <CTableDataCell>
                                                         {formatNextRun(getServiceStatus('recall').nextRun)}
@@ -355,7 +355,7 @@ const SchedulerPage: React.FC = () => {
                                                         </CButton>
                                                     </CTableDataCell>
                                                 </CTableRow>
-                                                
+
                                                 {/* Sincronizzazione Calendario */}
                                                 <CTableRow>
                                                     <CTableDataCell>Sincronizzazione Calendario</CTableDataCell>
@@ -365,7 +365,7 @@ const SchedulerPage: React.FC = () => {
                                                         </CBadge>
                                                     </CTableDataCell>
                                                     <CTableDataCell>
-                                                        {settings ? `${settings.calendar_sync_hour.toString().padStart(2, '0')}:${settings.calendar_sync_minute.toString().padStart(2, '0')}` : '-'}
+                                                        {settings && settings.calendar_sync_hour !== undefined ? `${settings.calendar_sync_hour.toString().padStart(2, '0')}:${settings.calendar_sync_minute?.toString().padStart(2, '0')}` : '-'}
                                                     </CTableDataCell>
                                                     <CTableDataCell>
                                                         {formatNextRun(getServiceStatus('calendar').nextRun)}
@@ -385,7 +385,7 @@ const SchedulerPage: React.FC = () => {
                                         </CTable>
                                     </div>
                                 </CTabPane>
-                                
+
                                 <CTabPane visible={activeTab === 'logs'}>
                                     <div className="mt-3">
                                         <CRow>
@@ -420,7 +420,7 @@ const SchedulerPage: React.FC = () => {
                                                     <CAlert color="info">Nessun log richiami disponibile</CAlert>
                                                 )}
                                             </CCol>
-                                            
+
                                             <CCol md={6}>
                                                 <h6>Log Sincronizzazione Calendario (Ultimi 10)</h6>
                                                 {calendarLogs.length > 0 ? (
@@ -460,20 +460,20 @@ const SchedulerPage: React.FC = () => {
                     </CCard>
                 </CCol>
             </CRow>
-            
+
             {/* Modal Settings */}
             <CModal visible={showSettingsModal} onClose={() => setShowSettingsModal(false)}>
                 <CModalHeader>
                     <CModalTitle>
-                        Configurazione {editingService === 'reminder' ? 'Promemoria' : 
-                                      editingService === 'recall' ? 'Richiami' : 'Calendario'}
+                        Configurazione {editingService === 'reminder' ? 'Promemoria' :
+                            editingService === 'recall' ? 'Richiami' : 'Calendario'}
                     </CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     <CForm>
                         <div className="mb-3">
                             <CFormLabel>Stato</CFormLabel>
-                                <CFormSelect
+                            <CFormSelect
                                 value={(tempSettings[`${editingService}_enabled` as keyof SchedulerSettings] ? 'true' : 'false') as string}
                                 onChange={(e) => setTempSettings(prev => ({
                                     ...prev,
@@ -484,7 +484,7 @@ const SchedulerPage: React.FC = () => {
                                 <option value="false">Disabilitato</option>
                             </CFormSelect>
                         </div>
-                        
+
                         <CRow>
                             <CCol md={6}>
                                 <div className="mb-3">
@@ -493,7 +493,7 @@ const SchedulerPage: React.FC = () => {
                                         type="number"
                                         min="0"
                                         max="23"
-                                    value={(tempSettings[`${editingService}_hour` as keyof SchedulerSettings] as number) || 0}
+                                        value={(tempSettings[`${editingService}_hour` as keyof SchedulerSettings] as number) || 0}
                                         onChange={(e) => setTempSettings(prev => ({
                                             ...prev,
                                             [`${editingService}_hour`]: parseInt(e.target.value)
@@ -508,7 +508,7 @@ const SchedulerPage: React.FC = () => {
                                         type="number"
                                         min="0"
                                         max="59"
-                                    value={(tempSettings[`${editingService}_minute` as keyof SchedulerSettings] as number) || 0}
+                                        value={(tempSettings[`${editingService}_minute` as keyof SchedulerSettings] as number) || 0}
                                         onChange={(e) => setTempSettings(prev => ({
                                             ...prev,
                                             [`${editingService}_minute`]: parseInt(e.target.value)
@@ -517,7 +517,7 @@ const SchedulerPage: React.FC = () => {
                                 </div>
                             </CCol>
                         </CRow>
-                        
+
                         {editingService === 'calendar' && (
                             <>
                                 <div className="mb-3">

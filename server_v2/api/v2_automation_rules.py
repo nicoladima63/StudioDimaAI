@@ -88,9 +88,10 @@ def create_rule():
         if not data:
             return jsonify({'success': False, 'error': 'Dati JSON richiesti'}), 400
 
-        # Converti action_params in action_params_json se presente
-        if 'action_params' in data:
-            data['action_params_json'] = data.pop('action_params')
+        # FIX: Il service create_rule si aspetta 'action_params' e lo dumpa internamente.
+        # Non rinominiamo in action_params_json qui per la create.
+        # if 'action_params' in data:
+        #    data['action_params_json'] = data.pop('action_params')
 
         new_rule = automation_service.create_rule(data)
         

@@ -8,7 +8,8 @@ import {
     CModalFooter,
     CRow,
     CCol,
-    CAlert
+    CAlert,
+    CCard
 } from '@coreui/react';
 import automationApi, { type Action, type AutomationRule } from '@/features/settings/services/automation.service';
 import MonitorPrestazioniService from '@/services/api/monitorPrestazioni';
@@ -229,6 +230,45 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
                                 setIsModalOpen={setIsParamsModalOpen}
                                 {...(editingRule ? { onDirectSave: handleDirectSaveParams } : {})}
                             />
+                        </div>
+
+                        {/* RIEPILOGO VISIVO */}
+                        <div className="mt-3">
+                            <CCard className="bg-light border-0">
+                                <CModalHeader className="py-2">
+                                    <h6 className="mb-0 fw-bold">Riepilogo Regola</h6>
+                                </CModalHeader>
+                                <CModalBody className="py-2 small">
+                                    <div className="mb-2">
+                                        <strong>Trigger: </strong>
+                                        {trigger ? (
+                                            <span className="text-success">{trigger.name} ({trigger.type})</span>
+                                        ) : (
+                                            <span className="text-muted fst-italic">Non selezionato</span>
+                                        )}
+                                    </div>
+                                    <div className="mb-2">
+                                        <strong>Azione: </strong>
+                                        {selectedActionId ? (
+                                            <span className="text-primary fw-bold">
+                                                {actions.find(a => a.id === selectedActionId)?.name || 'Sconosciuta'}
+                                            </span>
+                                        ) : (
+                                            <span className="text-muted fst-italic">Non selezionata</span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <strong>Parametri: </strong>
+                                        {selectedActionParams && Object.keys(selectedActionParams).length > 0 ? (
+                                            <pre className="mt-1 p-2 bg-white border rounded" style={{ fontSize: '0.75rem' }}>
+                                                {JSON.stringify(selectedActionParams, null, 2)}
+                                            </pre>
+                                        ) : (
+                                            <span className="text-muted fst-italic">Nessuno</span>
+                                        )}
+                                    </div>
+                                </CModalBody>
+                            </CCard>
                         </div>
 
                         {editingRule && (
