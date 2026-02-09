@@ -46,6 +46,9 @@ const WorkDetailsPage = React.lazy(() => import('@/features/lavorazioni/WorkDeta
 const StepsPage = React.lazy(() => import('@/features/lavorazioni/StepsPage'))
 const TasksPage = React.lazy(() => import('@/features/lavorazioni/TasksPage'))
 const TodosPage = React.lazy(() => import('@/features/todos/pages/TodosPage'))
+const SocialMediaManagerPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaManagerPage'))
+const SocialMediaPostsPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaPostsPage'))
+const SocialMediaSettingsPage = React.lazy(() => import('@/features/social-media-manager/pages/SocialMediaSettingsPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -114,6 +117,11 @@ const AppRouter: React.FC = () => {
 
           {/* Todo Routes */}
           <Route path='todos' element={<TodosPage />} />
+
+          {/* Social Media Manager */}
+          <Route path='social-media' element={<SocialMediaManagerPage />} />
+          <Route path='social-media/posts' element={<SocialMediaPostsPage />} />
+          <Route path='social-media/settings' element={<SocialMediaSettingsPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}

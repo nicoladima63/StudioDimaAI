@@ -11,7 +11,9 @@ import {
   cilUser,
   cilCalendar,
   cilSearch,
-  cilTask
+  cilTask,
+  cilShare,
+  cilHome
 } from '@coreui/icons';
 import { CNavItem, CNavGroup } from '@coreui/react';
 
@@ -135,6 +137,32 @@ const _nav = [
         name: 'Monitor Quaderno',
         to: '/settings/monitor-prestazioni',
         icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+      },
+    ]
+  },
+  {
+    component: CNavGroup,
+    name: 'Social Media',
+    to: '/social-media',
+    icon: <CIcon icon={cilShare} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Dashboard',
+        to: '/social-media',
+        icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Posts',
+        to: '/social-media/posts',
+        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Settings',
+        to: '/social-media/settings',
+        icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
       },
     ]
   },
