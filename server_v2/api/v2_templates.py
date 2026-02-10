@@ -8,10 +8,19 @@ templates_v2_bp = Blueprint('templates_v2', __name__)
 
 @templates_v2_bp.route('/sms-templates', methods=['GET'])
 def get_sms_templates():
-    """Restituisce tutti i template SMS disponibili."""
+    """
+    Restituisce tutti i template SMS disponibili.
+
+    Query Params:
+        type (optional): Filtra per tipo (promemoria, richiami, social, newsletter, email_team)
+
+    Example:
+        GET /sms-templates?type=social
+    """
     try:
         template_manager = get_template_manager()
-        templates = template_manager.get_all_templates()
+        template_type = request.args.get('type')  # Filtro opzionale per type
+        templates = template_manager.get_all_templates(template_type=template_type)
         return jsonify({'success': True, 'data': templates})
     except Exception as e:
         logger.error(f"Errore API get_sms_templates: {e}", exc_info=True)
@@ -19,14 +28,27 @@ def get_sms_templates():
 
 @templates_v2_bp.route('/sms-templates', methods=['POST'])
 def create_sms_template():
-    """Crea un nuovo template SMS."""
+    """
+    Crea un nuovo template SMS.
+
+    Body:
+        name: Nome univoco del template (required)
+        content: Contenuto con placeholders (required)
+        description: Descrizione opzionale
+        type: Tipo template (promemoria, richiami, social, newsletter, email_team) - default: 'promemoria'
+    """
     data = request.get_json()
     if not data or 'name' not in data or 'content' not in data:
         return jsonify({'success': False, 'message': "Dati 'name' e 'content' richiesti."}), 400
-    
+
     try:
         template_manager = get_template_manager()
-        new_template = template_manager.create_template(data['name'], data['content'], data.get('description'))
+        new_template = template_manager.create_template(
+            name=data['name'],
+            content=data['content'],
+            description=data.get('description'),
+            template_type=data.get('type', 'promemoria')  # Default: 'promemoria'
+        )
         return jsonify({'success': True, 'data': new_template}), 201
     except ValueError as e:
         return jsonify({'success': False, 'message': str(e)}), 409 # Conflict
@@ -36,14 +58,26 @@ def create_sms_template():
 
 @templates_v2_bp.route('/sms-templates/<template_name>', methods=['PUT'])
 def update_sms_template(template_name):
-    """Aggiorna un template SMS esistente."""
+    """
+    Aggiorna un template SMS esistente.
+
+    Body:
+        content: Nuovo contenuto (required)
+        description: Nuova descrizione (optional)
+        type: Nuovo tipo (optional)
+    """
     data = request.get_json()
     if not data or 'content' not in data:
         return jsonify({'success': False, 'message': "Dato 'content' richiesto."}), 400
 
     try:
         template_manager = get_template_manager()
-        updated_template = template_manager.update_template(template_name, data['content'], data.get('description'))
+        updated_template = template_manager.update_template(
+            name=template_name,
+            new_content=data['content'],
+            new_description=data.get('description'),
+            new_type=data.get('type')  # Optional: aggiorna type se fornito
+        )
         return jsonify({'success': True, 'data': updated_template})
     except ValueError as e:
         return jsonify({'success': False, 'message': str(e)}), 404 # Not Found

@@ -8,6 +8,7 @@ import {
   CFormInput,
   CFormTextarea,
   CFormLabel,
+  CFormSelect,
   CRow,
   CCol,
   CCard,
@@ -32,6 +33,7 @@ interface SmsTemplate {
   name: string;
   content: string;
   description?: string;
+  type: string; // 'promemoria', 'richiami', 'social', 'newsletter', 'email_team'
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +47,26 @@ const PLACEHOLDERS = [
   '{medico}',
   '{tempo_richiamo}',
 ];
+
+const TEMPLATE_TYPES = [
+  { value: 'promemoria', label: 'Promemoria Appuntamenti' },
+  { value: 'richiami', label: 'Richiami Pazienti' },
+  { value: 'social', label: 'Social Media' },
+  { value: 'newsletter', label: 'Newsletter' },
+  { value: 'email_team', label: 'Email Team' },
+];
+
+// Helper per colore badge tipo
+const getTypeColor = (type: string): string => {
+  const colorMap: Record<string, string> = {
+    promemoria: 'info',
+    richiami: 'warning',
+    social: 'success',
+    newsletter: 'primary',
+    email_team: 'secondary',
+  };
+  return colorMap[type] || 'secondary';
+};
 
 const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
@@ -156,7 +178,7 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
 
   const handleCreateEditClick = (template?: SmsTemplate) => {
     setIsEditing(!!template);
-    setCurrentTemplate(template || {});
+    setCurrentTemplate(template || { type: 'promemoria' }); // Default type
     setShowModal(true);
   };
 
@@ -250,6 +272,7 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
                 <CTableHead>
                   <CTableRow>
                     <CTableHeaderCell>Nome</CTableHeaderCell>
+                    <CTableHeaderCell>Tipo</CTableHeaderCell>
                     <CTableHeaderCell>Contenuto</CTableHeaderCell>
                     <CTableHeaderCell>Descrizione</CTableHeaderCell>
                     <CTableHeaderCell>Azioni</CTableHeaderCell>
@@ -259,6 +282,11 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
                   {templates.map((template) => (
                     <CTableRow key={template.id}>
                       <CTableDataCell>{template.name}</CTableDataCell>
+                      <CTableDataCell>
+                        <CBadge color={getTypeColor(template.type)}>
+                          {TEMPLATE_TYPES.find(t => t.value === template.type)?.label || template.type}
+                        </CBadge>
+                      </CTableDataCell>
                       <CTableDataCell className='text-truncate' style={{ maxWidth: '300px' }}>{template.content}</CTableDataCell>
                       <CTableDataCell>{template.description || '-'}</CTableDataCell>
                       <CTableDataCell>
@@ -315,6 +343,22 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
                     value={currentTemplate.description || ''}
                     onChange={(e) => setCurrentTemplate({ ...currentTemplate, description: e.target.value })}
                   />
+                </CCol>
+              </CRow>
+              <CRow className='mb-3'>
+                <CCol>
+                  <CFormLabel htmlFor='templateType'>Tipo Template</CFormLabel>
+                  <CFormSelect
+                    id='templateType'
+                    value={currentTemplate.type || 'promemoria'}
+                    onChange={(e) => setCurrentTemplate({ ...currentTemplate, type: e.target.value })}
+                  >
+                    {TEMPLATE_TYPES.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </CFormSelect>
                 </CCol>
               </CRow>
             </CCol> {/* Fine Colonna sinistra */}

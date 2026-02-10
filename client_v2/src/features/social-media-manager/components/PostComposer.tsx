@@ -22,6 +22,7 @@ import CIcon from '@coreui/icons-react';
 import { cilX } from '@coreui/icons';
 import { useSocialMediaStore } from '@/store/socialMedia.store';
 import CategorySelector from './CategorySelector';
+import TemplateSelector from './TemplateSelector';
 import toast from 'react-hot-toast';
 import type { Post } from '../types';
 
@@ -29,10 +30,29 @@ interface PostComposerProps {
   visible: boolean;
   onClose: () => void;
   editPost?: Post | null;
+  postId?: number | null;
 }
 
-const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost }) => {
-  const { createPost, updatePost, isLoading } = useSocialMediaStore();
+const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost: editPostProp, postId }) => {
+  const { createPost, updatePost, isLoading, posts, loadPostById } = useSocialMediaStore();
+  const [fetchedPost, setFetchedPost] = useState<Post | null>(null);
+
+  const editPost = editPostProp || fetchedPost;
+
+  useEffect(() => {
+    if (postId && !editPostProp) {
+      const found = posts.find(p => p.id === postId);
+      if (found) {
+        setFetchedPost(found);
+      } else {
+        loadPostById(postId).then(post => {
+          if (post) setFetchedPost(post);
+        });
+      }
+    } else if (!postId && !editPostProp) {
+      setFetchedPost(null);
+    }
+  }, [postId, editPostProp, posts, loadPostById]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -105,6 +125,15 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
       platforms: prev.platforms.includes(platform)
         ? prev.platforms.filter(p => p !== platform)
         : [...prev.platforms, platform]
+    }));
+  };
+
+  // Handler per applicare template
+  const handleTemplateApply = (templateContent: string, templateName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      content: templateContent,
+      title: prev.title || templateName, // Usa template name se title vuoto
     }));
   };
 
@@ -201,6 +230,16 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
             <CategorySelector
               value={formData.category_id}
               onChange={(categoryId) => setFormData(prev => ({ ...prev, category_id: categoryId }))}
+            />
+          </div>
+
+          {/* Template Selector */}
+          <div className="mb-3">
+            <TemplateSelector
+              templateType="social"
+              onTemplateApply={handleTemplateApply}
+              label="Carica da Template"
+              showReload={true}
             />
           </div>
 

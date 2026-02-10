@@ -40,40 +40,78 @@ class TemplateManager:
     def get_template_by_id(self, template_id: int) -> Optional[Dict[str, Any]]:
         """Recupera un template dal DB tramite il suo ID."""
         logger.debug(f"TemplateManager: get_template_by_id called with ID: {template_id}")
-        query = "SELECT id, name, content, description, created_at, updated_at FROM sms_templates WHERE id = ?"
+        query = "SELECT id, name, content, description, type, created_at, updated_at FROM sms_templates WHERE id = ?"
         result = self._execute_query(query, (template_id,))
         return result[0] if result else None
 
     def get_template_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         """Recupera un template dal DB tramite il suo nome."""
-        query = "SELECT id, name, content, description, created_at, updated_at FROM sms_templates WHERE name = ?"
+        query = "SELECT id, name, content, description, type, created_at, updated_at FROM sms_templates WHERE name = ?"
         result = self._execute_query(query, (name.strip(),))
         return result[0] if result else None
 
-    def get_all_templates(self) -> List[Dict[str, Any]]:
-        """Recupera tutti i template dal DB."""
-        query = "SELECT id, name, content, description, created_at, updated_at FROM sms_templates ORDER BY name"
-        return self._execute_query(query)
+    def get_all_templates(self, template_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Recupera tutti i template dal DB, opzionalmente filtrati per type.
 
-    def create_template(self, name: str, content: str, description: Optional[str] = None) -> Dict[str, Any]:
-        """Crea un nuovo template nel DB."""
+        Args:
+            template_type: Filtra per type (es. 'social', 'promemoria', 'richiami')
+
+        Returns:
+            Lista di template
+        """
+        if template_type:
+            query = "SELECT id, name, content, description, type, created_at, updated_at FROM sms_templates WHERE type = ? ORDER BY name"
+            return self._execute_query(query, (template_type,))
+        else:
+            query = "SELECT id, name, content, description, type, created_at, updated_at FROM sms_templates ORDER BY name"
+            return self._execute_query(query)
+
+    def create_template(self, name: str, content: str, description: Optional[str] = None, template_type: str = 'promemoria') -> Dict[str, Any]:
+        """
+        Crea un nuovo template nel DB.
+
+        Args:
+            name: Nome univoco del template
+            content: Contenuto del template con placeholders
+            description: Descrizione opzionale
+            template_type: Tipo di template (promemoria, richiami, social, newsletter, email_team)
+
+        Returns:
+            Template creato con tutti i campi
+        """
         if self.get_template_by_name(name):
             raise ValueError(f"Template con nome '{name}' esiste già.")
-        
-        query = "INSERT INTO sms_templates (name, content, description) VALUES (?, ?, ?)"
-        template_id = self._execute_command(query, (name, content, description))
+
+        query = "INSERT INTO sms_templates (name, content, description, type) VALUES (?, ?, ?, ?)"
+        template_id = self._execute_command(query, (name, content, description, template_type))
         if not template_id:
             raise Exception("Errore nella creazione del template.")
         return self.get_template_by_name(name) # Recupera il template completo con ID e timestamp
 
-    def update_template(self, name: str, new_content: str, new_description: Optional[str] = None) -> Dict[str, Any]:
-        """Aggiorna un template esistente nel DB."""
+    def update_template(self, name: str, new_content: str, new_description: Optional[str] = None, new_type: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Aggiorna un template esistente nel DB.
+
+        Args:
+            name: Nome del template da aggiornare
+            new_content: Nuovo contenuto
+            new_description: Nuova descrizione (opzionale)
+            new_type: Nuovo type (opzionale)
+
+        Returns:
+            Template aggiornato
+        """
         template = self.get_template_by_name(name)
         if not template:
             raise ValueError(f"Template con nome '{name}' non trovato.")
-        
-        query = "UPDATE sms_templates SET content = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE name = ?"
-        self._execute_command(query, (new_content, new_description, name))
+
+        if new_type is not None:
+            query = "UPDATE sms_templates SET content = ?, description = ?, type = ?, updated_at = CURRENT_TIMESTAMP WHERE name = ?"
+            self._execute_command(query, (new_content, new_description, new_type, name))
+        else:
+            query = "UPDATE sms_templates SET content = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE name = ?"
+            self._execute_command(query, (new_content, new_description, name))
         return self.get_template_by_name(name)
 
     def delete_template(self, name: str) -> bool:
