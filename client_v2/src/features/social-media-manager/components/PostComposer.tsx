@@ -46,21 +46,9 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
 
   const [hashtagsInput, setHashtagsInput] = useState('');
 
-  // Helper per formattare data per input datetime-local
-  const formatForInput = (dateString?: string) => {
-    if (!dateString) return '';
-    try {
-      const date = new Date(dateString);
-      // Adjust to local time for input
-      const offset = date.getTimezoneOffset() * 60000;
-      const localDate = new Date(date.getTime() - offset);
-      return localDate.toISOString().slice(0, 16);
-    } catch (e) {
-      return '';
-    }
-  };
-
-  const [scheduledAtInput, setScheduledAtInput] = useState('');
+  // Gestione separata date e time
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
 
   // Populate form when editing
   useEffect(() => {
@@ -75,7 +63,25 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
         media_urls: editPost.media_urls || []
       });
       setHashtagsInput(editPost.hashtags?.join(', ') || '');
-      setScheduledAtInput(formatForInput(editPost.scheduled_at));
+
+      if (editPost.scheduled_at) {
+        try {
+          const dateObj = new Date(editPost.scheduled_at);
+          // Adjust to local time
+          const offset = dateObj.getTimezoneOffset() * 60000;
+          const localDate = new Date(dateObj.getTime() - offset);
+
+          setScheduledDate(localDate.toISOString().slice(0, 10)); // YYYY-MM-DD
+          setScheduledTime(localDate.toISOString().slice(11, 16)); // HH:MM
+        } catch (e) {
+          setScheduledDate('');
+          setScheduledTime('');
+        }
+      } else {
+        setScheduledDate('');
+        setScheduledTime('');
+      }
+
     } else {
       // Reset form
       setFormData({
@@ -88,7 +94,8 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
         media_urls: []
       });
       setHashtagsInput('');
-      setScheduledAtInput('');
+      setScheduledDate('');
+      setScheduledTime('');
     }
   }, [editPost, visible]);
 
@@ -99,6 +106,11 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
         ? prev.platforms.filter(p => p !== platform)
         : [...prev.platforms, platform]
     }));
+  };
+
+  const clearScheduling = () => {
+    setScheduledDate('');
+    setScheduledTime('');
   };
 
   const handleSave = async () => {
@@ -116,12 +128,23 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
         .filter(h => h.length > 0);
 
       // Gestione schedulazione
-      // Se c'è input data, format to ISO. Se vuoto, null per rimuovere schedulazione dal DB.
-      const scheduled_at = scheduledAtInput
-        ? new Date(scheduledAtInput).toISOString()
-        : null;
+      let scheduled_at = null;
+      let status = 'draft';
 
-      const status = scheduledAtInput ? 'scheduled' : 'draft';
+      if (scheduledDate) {
+        // Se c'è la data, l'ora è opzionale (default 09:00 se manca)
+        const timeToUse = scheduledTime || '09:00';
+        const dateTimeString = `${scheduledDate}T${timeToUse}:00`;
+        try {
+          const dateObj = new Date(dateTimeString);
+          if (!isNaN(dateObj.getTime())) {
+            scheduled_at = dateObj.toISOString();
+            status = 'scheduled';
+          }
+        } catch (e) {
+          console.error("Invalid date:", dateTimeString);
+        }
+      }
 
       const postData = {
         ...formData,
@@ -194,23 +217,34 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
             />
           </div>
 
-          {/* Schedulazione */}
+          {/* Schedulazione Separata */}
           <div className="mb-3">
-            <CFormLabel htmlFor="post-scheduled-at">Programma Pubblicazione (Opzionale)</CFormLabel>
+            <CFormLabel>Programma Pubblicazione (Opzionale)</CFormLabel>
             <div className="d-flex align-items-center gap-2">
-              <CFormInput
-                type="datetime-local"
-                id="post-scheduled-at"
-                value={scheduledAtInput}
-                onChange={(e) => setScheduledAtInput(e.target.value)}
-                className="flex-grow-1"
-                step={60}
-              />
-              {scheduledAtInput && (
+              <div className="flex-grow-1">
+                <CFormInput
+                  type="date"
+                  id="post-scheduled-date"
+                  value={scheduledDate}
+                  onChange={(e) => setScheduledDate(e.target.value)}
+                  placeholder="Data"
+                />
+              </div>
+              <div style={{ width: '130px' }}>
+                <CFormInput
+                  type="time"
+                  id="post-scheduled-time"
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                  placeholder="Ora"
+                  disabled={!scheduledDate}
+                />
+              </div>
+              {(scheduledDate || scheduledTime) && (
                 <CButton
                   color="danger"
                   variant="ghost"
-                  onClick={() => setScheduledAtInput('')}
+                  onClick={clearScheduling}
                   title="Rimuovi pianificazione"
                   className="px-2"
                 >
@@ -219,7 +253,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
               )}
             </div>
             <small className="text-muted">
-              Lascia vuoto per salvare come bozza. Se imposti una data, il post verrà programmato.
+              Seleziona una data per programmare. L'ora è opzionale (default 09:00).
             </small>
           </div>
 
@@ -285,7 +319,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost 
               Salvataggio...
             </>
           ) : (
-            scheduledAtInput ? 'Schedula Post' : 'Salva Bozza'
+            scheduledDate ? 'Schedula Post' : 'Salva Bozza'
           )}
         </CButton>
       </CModalFooter>

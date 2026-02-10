@@ -54,7 +54,9 @@ interface SocialMediaState {
 
   // Actions - Categories
   loadCategories: () => Promise<void>;
-  createCategory: (data: { name: string; description?: string; color?: string; icon?: string }) => Promise<Category>;
+  createCategory: (data: { name: string; description?: string; color?: string; icon?: string; sort_order?: number }) => Promise<Category>;
+  updateCategory: (id: number, data: Partial<Category>) => Promise<Category>;
+  deleteCategory: (id: number) => Promise<void>;
 
   // Actions - Posts
   loadPosts: (options?: { page?: number; per_page?: number; status?: string; category_id?: number; content_type?: string; search?: string }) => Promise<void>;
@@ -233,6 +235,63 @@ export const useSocialMediaStore = create<SocialMediaState>()(
         } catch (error: any) {
           set({
             error: error.message || 'Failed to create category',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      // Update Category
+      updateCategory: async (id, data) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await apiClient.put(`/social-media/categories/${id}`, data);
+
+          if (!response.data.success) {
+            throw new Error(response.data.error || 'Failed to update category');
+          }
+
+          const updatedCategory = response.data.data;
+
+          // Optimistic update
+          set((state) => ({
+            categories: state.categories.map((cat) => (cat.id === id ? updatedCategory : cat)),
+            isLoading: false
+          }));
+
+          return updatedCategory;
+        } catch (error: any) {
+          set({
+            error: error.message || 'Failed to update category',
+            isLoading: false
+          });
+          throw error;
+        }
+      },
+
+      // Delete Category
+      deleteCategory: async (id) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const response = await apiClient.delete(`/social-media/categories/${id}`);
+
+          if (!response.data.success) {
+            throw new Error(response.data.error || 'Failed to delete category');
+          }
+
+          // Optimistic update
+          set((state) => ({
+            categories: state.categories.filter((cat) => cat.id !== id),
+            isLoading: false
+          }));
+
+          // Invalidate cache
+          get().invalidateCache('categories');
+        } catch (error: any) {
+          set({
+            error: error.message || 'Failed to delete category',
             isLoading: false
           });
           throw error;

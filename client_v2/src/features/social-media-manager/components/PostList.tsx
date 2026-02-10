@@ -148,7 +148,7 @@ const PostList: React.FC<PostListProps> = ({ onEdit }) => {
               color: '#fff'
             }}
           >
-            {platform}
+            {getPlatformAbbr(platform)}
           </CBadge>
         ))}
       </div>

@@ -30,14 +30,13 @@ import {
   cilPencil,
   cilTrash,
 } from '@coreui/icons';
-import socialMediaManagerService, {
-  type CalendarEvent,
-} from '../services/socialMediaManager.service';
+import socialMediaManagerService from '../services/socialMediaManager.service';
 import toast from 'react-hot-toast';
 import { useSocialMediaStore } from '@/store/socialMedia.store';
 import { getPlatformColor, getPlatformAbbr } from '../constants/socialPlatforms';
 
 // Configura moment con locale italiano
+import 'moment/dist/locale/it';
 moment.locale('it');
 const localizer = momentLocalizer(moment);
 
@@ -49,6 +48,8 @@ interface CalendarViewProps {
 interface CalendarEventExtended extends BigCalendarEvent {
   id: number;
   title: string;
+  start: Date;
+  end: Date;
   platforms: string[];
   category_id?: number;
   status: string;
@@ -56,6 +57,8 @@ interface CalendarEventExtended extends BigCalendarEvent {
   content?: string;
   hashtags?: string[];
   media_urls?: string[];
+  allDay?: boolean;
+  resource?: any;
 }
 
 const CalendarView: React.FC<CalendarViewProps> = ({
@@ -280,7 +283,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           {!loading && (
             <Calendar
               localizer={localizer}
-              culture="it-IT"
+              culture="it"
               events={events}
               startAccessor="start"
               endAccessor="end"
@@ -306,7 +309,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 time: 'Ora',
                 event: 'Evento',
                 noEventsInRange: 'Nessun evento programmato in questo periodo',
-                showMore: (total) => `+${total} altri`,
+                showMore: (total: number) => `+${total} altri`,
               }}
             />
           )}

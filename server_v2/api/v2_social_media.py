@@ -161,6 +161,81 @@ def create_category():
         ), 500
 
 
+@social_media_v2_bp.route('/social-media/categories/<int:category_id>', methods=['PUT'])
+@jwt_required()
+def update_category(category_id):
+    """Aggiorna categoria esistente."""
+    try:
+        user_id = require_auth()
+        data = request.get_json()
+
+        if not data:
+            return format_response(
+                success=False,
+                error="JSON body required",
+                state='error'
+            ), 400
+
+        service = SocialMediaService(g.database_manager)
+        category = service.update_category(category_id, data)
+
+        if not category:
+            return format_response(
+                success=False,
+                error=f"Category {category_id} not found",
+                state='error'
+            ), 404
+
+        return format_response(
+            data=category,
+            message="Category updated successfully",
+            state='success'
+        )
+    except ValidationError as e:
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 400
+    except Exception as e:
+        logger.error(f"Error updating category {category_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+@social_media_v2_bp.route('/social-media/categories/<int:category_id>', methods=['DELETE'])
+@jwt_required()
+def delete_category(category_id):
+    """Soft delete di una categoria."""
+    try:
+        user_id = require_auth()
+        service = SocialMediaService(g.database_manager)
+
+        success = service.delete_category(category_id)
+
+        if not success:
+            return format_response(
+                success=False,
+                error=f"Category {category_id} not found",
+                state='error'
+            ), 404
+
+        return format_response(
+            message="Category deleted successfully",
+            state='success'
+        )
+    except Exception as e:
+        logger.error(f"Error deleting category {category_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
 # =============================================================================
 # POSTS CRUD ENDPOINTS
 # =============================================================================

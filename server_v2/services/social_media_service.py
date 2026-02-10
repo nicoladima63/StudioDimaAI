@@ -131,6 +131,30 @@ class SocialMediaService(BaseService):
             logger.error(f"Error creating category: {e}")
             raise
 
+    def update_category(self, category_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Aggiorna categoria esistente."""
+        try:
+            # Validazione
+            if 'name' in data and not data['name'].strip():
+                raise ValidationError("Category name cannot be empty")
+
+            category = self.repository.update_category(category_id, data)
+            return category
+        except ValidationError:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating category {category_id}: {e}")
+            raise DatabaseError(f"Failed to update category: {str(e)}")
+
+    def delete_category(self, category_id: int) -> bool:
+        """Soft delete di una categoria."""
+        try:
+            result = self.repository.delete_category(category_id)
+            return result
+        except Exception as e:
+            logger.error(f"Error deleting category {category_id}: {e}")
+            raise DatabaseError(f"Failed to delete category: {str(e)}")
+
     # ==========================================================================
     # POSTS CRUD METHODS
     # ==========================================================================

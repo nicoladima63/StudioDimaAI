@@ -300,6 +300,95 @@ class SocialMediaRepository(BaseRepository):
             logger.error(f"Error creating category: {e}")
             raise RepositoryError(f"Failed to create category: {str(e)}", cause=e)
 
+    def update_category(self, category_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Aggiorna categoria esistente."""
+        try:
+            # Verifica esistenza
+            existing = self.execute_custom_query(
+                "SELECT * FROM content_categories WHERE id = ? AND deleted_at IS NULL",
+                (category_id,),
+                fetch_one=True
+            )
+            if not existing:
+                return None
+
+            # Prepara update
+            update_fields = []
+            params = []
+
+            if 'name' in data:
+                update_fields.append('name = ?')
+                params.append(data['name'])
+            if 'description' in data:
+                update_fields.append('description = ?')
+                params.append(data['description'])
+            if 'color' in data:
+                update_fields.append('color = ?')
+                params.append(data['color'])
+            if 'icon' in data:
+                update_fields.append('icon = ?')
+                params.append(data['icon'])
+            if 'sort_order' in data:
+                update_fields.append('sort_order = ?')
+                params.append(data['sort_order'])
+
+            if not update_fields:
+                return dict(existing)
+
+            update_fields.append('updated_at = CURRENT_TIMESTAMP')
+            params.append(category_id)
+
+            update_sql = f'''
+                UPDATE content_categories
+                SET {', '.join(update_fields)}
+                WHERE id = ? AND deleted_at IS NULL
+            '''
+
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute(update_sql, params)
+                cursor.close()
+
+            # Ritorna categoria aggiornata
+            result = self.execute_custom_query(
+                "SELECT * FROM content_categories WHERE id = ?",
+                (category_id,),
+                fetch_one=True
+            )
+            return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Error updating category {category_id}: {e}")
+            raise RepositoryError(f"Failed to update category: {str(e)}", cause=e)
+
+    def delete_category(self, category_id: int) -> bool:
+        """Soft delete di una categoria."""
+        try:
+            # Verifica esistenza
+            existing = self.execute_custom_query(
+                "SELECT * FROM content_categories WHERE id = ? AND deleted_at IS NULL",
+                (category_id,),
+                fetch_one=True
+            )
+            if not existing:
+                return False
+
+            # Soft delete
+            delete_sql = '''
+                UPDATE content_categories
+                SET deleted_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND deleted_at IS NULL
+            '''
+
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute(delete_sql, (category_id,))
+                cursor.close()
+
+            return True
+        except Exception as e:
+            logger.error(f"Error deleting category {category_id}: {e}")
+            raise RepositoryError(f"Failed to delete category: {str(e)}", cause=e)
+
     # ==========================================================================
     # POSTS METHODS (CRUD)
     # ==========================================================================

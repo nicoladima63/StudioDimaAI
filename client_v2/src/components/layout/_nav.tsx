@@ -13,7 +13,8 @@ import {
   cilSearch,
   cilTask,
   cilShare,
-  cilHome
+  cilHome,
+  cilTag
 } from '@coreui/icons';
 import { CNavItem, CNavGroup } from '@coreui/react';
 
@@ -157,6 +158,12 @@ const _nav = [
         name: 'Posts',
         to: '/social-media/posts',
         icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Categorie',
+        to: '/social-media/categories',
+        icon: <CIcon icon={cilTag} customClassName="nav-icon" />,
       },
       {
         component: CNavItem,
