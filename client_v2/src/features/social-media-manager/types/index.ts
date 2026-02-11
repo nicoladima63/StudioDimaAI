@@ -14,6 +14,7 @@ export interface SocialAccount {
   is_connected: boolean;
   connection_status: 'connected' | 'disconnected';
   last_synced_at?: string;
+  logo_url?: string;
   metadata?: string;
   created_at?: string;
   updated_at?: string;

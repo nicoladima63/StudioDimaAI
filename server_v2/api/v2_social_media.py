@@ -11,6 +11,7 @@ from utils.oauth_manager import OAuthManager, OAuthProvider
 from app_v2 import require_auth, format_response
 from core.exceptions import ValidationError, DatabaseError
 from datetime import datetime, timedelta
+from typing import Dict, Any
 import logging
 
 logger = logging.getLogger(__name__)
@@ -872,6 +873,256 @@ def publish_post_now(post_id):
 # =============================================================================
 # HEALTH CHECK
 # =============================================================================
+
+@social_media_v2_bp.route('/social-media/accounts/<int:account_id>/verify', methods=['GET'])
+@jwt_required()
+def verify_account_connection(account_id):
+    """
+    Verifica lo stato della connessione OAuth e i permessi disponibili.
+    Testa effettivamente la validita del token e le API permissions.
+
+    Returns:
+        is_valid: bool - Token valido
+        is_operational: bool - API funzionanti
+        scopes: list - Permessi disponibili
+        error: str - Eventuale errore
+        token_expires_at: str - Scadenza token
+        account_info: dict - Info account dalla piattaforma
+    """
+    try:
+        user_id = require_auth()
+
+        service = SocialMediaService(g.database_manager)
+        account = service.get_account_by_id(account_id)
+
+        if not account:
+            return format_response(
+                success=False,
+                error=f"Account {account_id} not found",
+                state='error'
+            ), 404
+
+        if not account.get('access_token'):
+            return format_response(
+                success=False,
+                error="Account has no access token",
+                state='error',
+                data={
+                    'is_valid': False,
+                    'is_operational': False,
+                    'scopes': [],
+                    'error': 'No access token configured'
+                }
+            ), 400
+
+        # Verify based on platform
+        platform = account['platform']
+        access_token = account['access_token']
+
+        if platform in ['instagram', 'facebook']:
+            result = _verify_meta_token(access_token, platform)
+        elif platform == 'linkedin':
+            result = _verify_linkedin_token(access_token)
+        elif platform == 'tiktok':
+            result = _verify_tiktok_token(access_token)
+        else:
+            return format_response(
+                success=False,
+                error=f"Unsupported platform: {platform}",
+                state='error'
+            ), 400
+
+        # Add account metadata
+        result['account_name'] = account.get('account_name')
+        result['platform'] = platform
+        result['token_expires_at'] = account.get('token_expires_at')
+        result['is_connected'] = account.get('is_connected', False)
+
+        # Determine overall state
+        if result['is_operational']:
+            state = 'success'
+            message = f"{platform.capitalize()} account is operational"
+        elif result['is_valid']:
+            state = 'warning'
+            message = f"Token is valid but API test failed: {result.get('error', 'Unknown error')}"
+        else:
+            state = 'error'
+            message = f"Account verification failed: {result.get('error', 'Unknown error')}"
+
+        return format_response(
+            data=result,
+            message=message,
+            state=state
+        )
+
+    except Exception as e:
+        logger.error(f"Error verifying account {account_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+def _verify_meta_token(access_token: str, platform: str) -> Dict[str, Any]:
+    """
+    Verifica token Meta (Facebook/Instagram) usando Debug Token API.
+
+    Returns:
+        is_valid: bool
+        is_operational: bool
+        scopes: list
+        account_info: dict
+        error: str
+    """
+    import requests
+
+    result = {
+        'is_valid': False,
+        'is_operational': False,
+        'scopes': [],
+        'account_info': {},
+        'error': None
+    }
+
+    try:
+        # Step 1: Debug Token to check validity and scopes
+        debug_url = 'https://graph.facebook.com/v18.0/debug_token'
+        debug_params = {
+            'input_token': access_token,
+            'access_token': access_token  # Can use same token for debug
+        }
+
+        logger.info("Checking Meta token validity via debug_token API")
+        response = requests.get(debug_url, params=debug_params, timeout=10)
+        response.raise_for_status()
+
+        debug_data = response.json().get('data', {})
+
+        # Check if token is valid
+        is_valid = debug_data.get('is_valid', False)
+        result['is_valid'] = is_valid
+
+        if not is_valid:
+            result['error'] = debug_data.get('error', {}).get('message', 'Token is not valid')
+            return result
+
+        # Extract scopes
+        scopes = debug_data.get('scopes', [])
+        result['scopes'] = scopes
+
+        # Check expiration
+        expires_at = debug_data.get('expires_at', 0)
+        if expires_at > 0:
+            result['expires_at_timestamp'] = expires_at
+
+        # Step 2: Test actual API call to verify operational status
+        logger.info("Testing Meta API call to verify operational status")
+
+        if platform == 'facebook':
+            # Test Facebook Graph API - get user's pages
+            test_url = 'https://graph.facebook.com/v18.0/me/accounts'
+            test_params = {'access_token': access_token}
+        else:  # instagram
+            # Test Instagram Graph API - get user info
+            test_url = 'https://graph.facebook.com/v18.0/me'
+            test_params = {
+                'fields': 'id,username',
+                'access_token': access_token
+            }
+
+        test_response = requests.get(test_url, params=test_params, timeout=10)
+        test_response.raise_for_status()
+
+        api_data = test_response.json()
+        result['is_operational'] = True
+        result['account_info'] = api_data
+
+        logger.info(f"Meta {platform} account verified successfully")
+
+    except requests.exceptions.HTTPError as e:
+        error_msg = f"API error: {e}"
+        if e.response is not None:
+            try:
+                error_data = e.response.json()
+                error_msg = error_data.get('error', {}).get('message', str(e))
+            except:
+                pass
+        result['error'] = error_msg
+        logger.error(f"Meta token verification failed: {error_msg}")
+
+    except Exception as e:
+        result['error'] = str(e)
+        logger.error(f"Meta token verification error: {e}", exc_info=True)
+
+    return result
+
+
+def _verify_linkedin_token(access_token: str) -> Dict[str, Any]:
+    """Verifica token LinkedIn."""
+    import requests
+
+    result = {
+        'is_valid': False,
+        'is_operational': False,
+        'scopes': [],
+        'account_info': {},
+        'error': None
+    }
+
+    try:
+        # Test LinkedIn API - get user info
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'X-Restli-Protocol-Version': '2.0.0'
+        }
+
+        response = requests.get(
+            'https://api.linkedin.com/v2/me',
+            headers=headers,
+            timeout=10
+        )
+        response.raise_for_status()
+
+        user_data = response.json()
+
+        result['is_valid'] = True
+        result['is_operational'] = True
+        result['account_info'] = user_data
+
+        logger.info("LinkedIn account verified successfully")
+
+    except requests.exceptions.HTTPError as e:
+        error_msg = f"API error: {e}"
+        if e.response is not None:
+            try:
+                error_data = e.response.json()
+                error_msg = error_data.get('message', str(e))
+            except:
+                pass
+        result['error'] = error_msg
+        logger.error(f"LinkedIn token verification failed: {error_msg}")
+
+    except Exception as e:
+        result['error'] = str(e)
+        logger.error(f"LinkedIn token verification error: {e}", exc_info=True)
+
+    return result
+
+
+def _verify_tiktok_token(access_token: str) -> Dict[str, Any]:
+    """Verifica token TikTok (not yet implemented)."""
+    # TODO: Implement TikTok token verification when TikTok integration is ready
+    _ = access_token  # Unused for now
+    result = {
+        'is_valid': False,
+        'is_operational': False,
+        'scopes': [],
+        'account_info': {},
+        'error': 'TikTok verification not yet implemented'
+    }
+    return result
+
 
 @social_media_v2_bp.route('/social-media/health', methods=['GET'])
 def health_check():

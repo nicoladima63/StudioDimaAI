@@ -34,6 +34,7 @@ interface SmsTemplate {
   content: string;
   description?: string;
   type: string; // 'promemoria', 'richiami', 'social', 'newsletter', 'email_team'
+  category_id?: number | null; // Categoria associata (opzionale)
   created_at: string;
   updated_at: string;
 }
@@ -73,6 +74,7 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Array<{id: number, name: string}>>([]);
 
   // Stato per il modal di creazione/modifica
   const [showModal, setShowModal] = useState(false);
@@ -172,9 +174,21 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
     }
   }, []);
 
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await apiClient.get('/social-media/categories');
+      if (response.data.success) {
+        setCategories(response.data.data || []);
+      }
+    } catch (err: any) {
+      console.error('Error loading categories:', err);
+    }
+  }, []);
+
   useEffect(() => {
     loadTemplates();
-  }, [loadTemplates]);
+    loadCategories();
+  }, [loadTemplates, loadCategories]);
 
   const handleCreateEditClick = (template?: SmsTemplate) => {
     setIsEditing(!!template);
@@ -359,6 +373,30 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
                       </option>
                     ))}
                   </CFormSelect>
+                </CCol>
+              </CRow>
+              <CRow className='mb-3'>
+                <CCol>
+                  <CFormLabel htmlFor='templateCategory'>Categoria Social (opzionale)</CFormLabel>
+                  <CFormSelect
+                    id='templateCategory'
+                    value={currentTemplate.category_id || ''}
+                    onChange={(e) => setCurrentTemplate({
+                      ...currentTemplate,
+                      category_id: e.target.value ? Number(e.target.value) : null
+                    })}
+                    disabled={currentTemplate.type !== 'social'}
+                  >
+                    <option value="">Nessuna (template generico)</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </CFormSelect>
+                  <small className="text-muted">
+                    Associa il template a una categoria specifica. I template generici sono disponibili per tutte le categorie.
+                  </small>
                 </CCol>
               </CRow>
             </CCol> {/* Fine Colonna sinistra */}

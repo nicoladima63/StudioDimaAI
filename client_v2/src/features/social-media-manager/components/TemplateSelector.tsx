@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   CFormSelect,
-  CFormLabel,
   CButton,
-  CCard,
-  CCardBody,
-  CBadge,
   CSpinner,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
@@ -30,41 +26,48 @@ interface TemplateSelectorProps {
   templateType?: string;
 
   /**
+   * ID categoria per filtrare i template (opzionale)
+   * Se fornito, mostra solo template della categoria + template generici
+   */
+  categoryId?: number | null;
+
+  /**
    * Callback quando un template viene selezionato e applicato
    */
   onTemplateApply: (templateContent: string, templateName: string) => void;
 
   /**
-   * Label personalizzata (default: 'Seleziona Template')
-   */
-  label?: string;
-
-  /**
-   * Mostra pulsante reload (default: true)
+   * Mostra pulsante reload (default: false)
    */
   showReload?: boolean;
 }
 
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   templateType = 'social',
+  categoryId,
   onTemplateApply,
-  label = 'Seleziona Template',
-  showReload = true,
+  showReload = false,
 }) => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Carica templates filtrati per type
+  // Carica templates filtrati per type e category_id
   const loadTemplates = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get(`/sms-templates?type=${templateType}`);
+      // Build query params
+      const params = new URLSearchParams({ type: templateType });
+      if (categoryId !== null && categoryId !== undefined) {
+        params.append('category_id', categoryId.toString());
+      }
+
+      const response = await apiClient.get(`/sms-templates?${params.toString()}`);
 
       if (response.data.success) {
         setTemplates(response.data.data || []);
         if (response.data.data.length === 0) {
-          toast('Nessun template trovato per questo tipo', { icon: 'ℹ️' });
+          toast('Nessun template trovato per questa categoria', { icon: 'ℹ️' });
         }
       } else {
         toast.error(response.data.message || 'Errore nel caricamento dei template');
@@ -77,10 +80,10 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     }
   };
 
-  // Carica templates al mount
+  // Carica templates al mount e quando cambia category_id
   useEffect(() => {
     loadTemplates();
-  }, [templateType]);
+  }, [templateType, categoryId]);
 
   // Gestisci selezione template
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -105,107 +108,51 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     toast.success(`Template "${selectedTemplate.name}" applicato!`);
   };
 
-  // Template selezionato corrente
-  const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
-
   return (
-    <div className="template-selector">
-      <CFormLabel htmlFor="templateSelect">{label}</CFormLabel>
+    <div className="d-flex gap-2">
+      <CFormSelect
+        id="templateSelect"
+        value={selectedTemplateId || ''}
+        onChange={handleSelectChange}
+        disabled={loading || templates.length === 0}
+        className="flex-grow-1"
+      >
+        <option value="">-- seleziona --</option>
+        {templates.map((template) => (
+          <option key={template.id} value={template.id}>
+            {template.name} {template.description ? `- ${template.description}` : ''}
+          </option>
+        ))}
+      </CFormSelect>
 
-      <div className="d-flex gap-2 mb-3">
-        <CFormSelect
-          id="templateSelect"
-          value={selectedTemplateId || ''}
-          onChange={handleSelectChange}
-          disabled={loading || templates.length === 0}
-          className="flex-grow-1"
-        >
-          <option value="">-- Seleziona un template --</option>
-          {templates.map((template) => (
-            <option key={template.id} value={template.id}>
-              {template.name} {template.description ? `- ${template.description}` : ''}
-            </option>
-          ))}
-        </CFormSelect>
-
-        {showReload && (
-          <CButton
-            color="secondary"
-            variant="outline"
-            onClick={loadTemplates}
-            disabled={loading}
-            title="Ricarica template"
-          >
-            {loading ? <CSpinner size="sm" /> : <CIcon icon={cilReload} />}
-          </CButton>
-        )}
-
+      {showReload && (
         <CButton
-          color="primary"
-          onClick={handleApplyTemplate}
-          disabled={!selectedTemplateId || loading}
+          color="secondary"
+          variant="outline"
+          onClick={loadTemplates}
+          disabled={loading}
+          title="Ricarica template"
         >
-          <CIcon icon={cilCloudDownload} className="me-1" />
-          Applica
+          {loading ? <CSpinner size="sm" /> : <CIcon icon={cilReload} />}
         </CButton>
-      </div>
-
-      {/* Anteprima template selezionato */}
-      {selectedTemplate && (
-        <CCard className="mb-3">
-          <CCardBody>
-            <div className="d-flex justify-content-between align-items-start mb-2">
-              <h6 className="mb-0">{selectedTemplate.name}</h6>
-              <CBadge color="info">{selectedTemplate.type}</CBadge>
-            </div>
-
-            {selectedTemplate.description && (
-              <p className="text-muted small mb-2">{selectedTemplate.description}</p>
-            )}
-
-            <div className="border rounded p-2 bg-light">
-              <strong>Anteprima:</strong>
-              <pre className="mb-0 mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
-                {selectedTemplate.content}
-              </pre>
-            </div>
-
-            {/* Estrai e mostra variabili disponibili */}
-            {extractVariables(selectedTemplate.content).length > 0 && (
-              <div className="mt-2">
-                <small className="text-muted">
-                  <strong>Variabili:</strong>{' '}
-                  {extractVariables(selectedTemplate.content).map((variable, idx) => (
-                    <CBadge key={idx} color="secondary" className="me-1">
-                      {variable}
-                    </CBadge>
-                  ))}
-                </small>
-              </div>
-            )}
-          </CCardBody>
-        </CCard>
       )}
+
+      <CButton
+        color="primary"
+        onClick={handleApplyTemplate}
+        disabled={!selectedTemplateId || loading}
+      >
+        Applica
+      </CButton>
 
       {/* Info quando non ci sono templates */}
       {!loading && templates.length === 0 && (
-        <p className="text-muted small">
+        <p className="text-muted small position-absolute" style={{ top: '100%', marginTop: '4px' }}>
           Nessun template di tipo "{templateType}" disponibile.
-          Crea il primo template dalla sezione Impostazioni.
         </p>
       )}
     </div>
   );
 };
-
-/**
- * Estrae variabili dal contenuto template (formato {variabile})
- */
-function extractVariables(content: string): string[] {
-  const regex = /\{(\w+)\}/g;
-  const matches = content.matchAll(regex);
-  const variables = Array.from(matches, m => `{${m[1]}}`);
-  return [...new Set(variables)]; // Rimuovi duplicati
-}
 
 export default TemplateSelector;

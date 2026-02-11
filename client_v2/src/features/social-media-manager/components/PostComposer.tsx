@@ -3,7 +3,7 @@
  * Modal per creare/editare posts (versione semplificata MVP)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   CModal,
   CModalHeader,
@@ -16,13 +16,21 @@ import {
   CFormTextarea,
   CFormLabel,
   CSpinner,
-  CFormCheck
+  CFormCheck,
+  CRow,
+  CCol,
+  CCard,
+  CCardBody,
+  CCardHeader
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilX } from '@coreui/icons';
 import { useSocialMediaStore } from '@/store/socialMedia.store';
 import CategorySelector from './CategorySelector';
 import TemplateSelector from './TemplateSelector';
+import PostPreview from './PostPreview';
+import MediaUploader from './MediaUploader';
+import HashtagsInput from './HashtagsInput';
 import toast from 'react-hot-toast';
 import type { Post } from '../types';
 
@@ -34,10 +42,27 @@ interface PostComposerProps {
 }
 
 const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost: editPostProp, postId }) => {
-  const { createPost, updatePost, isLoading, posts, loadPostById } = useSocialMediaStore();
+  const { createPost, updatePost, isLoading, posts, loadPostById, accounts, loadAccounts, invalidateCache } = useSocialMediaStore();
   const [fetchedPost, setFetchedPost] = useState<Post | null>(null);
 
   const editPost = editPostProp || fetchedPost;
+
+  // Load accounts when modal opens (to get fresh data including logos)
+  useEffect(() => {
+    if (visible) {
+      // Invalida la cache per forzare il reload dal server
+      invalidateCache('accounts');
+      loadAccounts();
+    }
+  }, [visible, loadAccounts, invalidateCache]);
+
+  // Build account logos map - recalculate when accounts change
+  const accountLogos = useMemo(() => {
+    return accounts.reduce((acc, account) => {
+      acc[account.platform] = account.logo_url || null;
+      return acc;
+    }, {} as Record<string, string | null>);
+  }, [accounts]);
 
   useEffect(() => {
     if (postId && !editPostProp) {
@@ -64,8 +89,6 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
     media_urls: [] as string[]
   });
 
-  const [hashtagsInput, setHashtagsInput] = useState('');
-
   // Gestione separata date e time
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
@@ -82,7 +105,6 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
         hashtags: editPost.hashtags || [],
         media_urls: editPost.media_urls || []
       });
-      setHashtagsInput(editPost.hashtags?.join(', ') || '');
 
       if (editPost.scheduled_at) {
         try {
@@ -113,7 +135,6 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
         hashtags: [],
         media_urls: []
       });
-      setHashtagsInput('');
       setScheduledDate('');
       setScheduledTime('');
     }
@@ -150,12 +171,6 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
     }
 
     try {
-      // Parse hashtags
-      const hashtags = hashtagsInput
-        .split(',')
-        .map(h => h.trim())
-        .filter(h => h.length > 0);
-
       // Gestione schedulazione
       let scheduled_at = null;
       let status = 'draft';
@@ -177,7 +192,6 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
 
       const postData = {
         ...formData,
-        hashtags,
         scheduled_at,
         status
       };
@@ -200,7 +214,7 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
     <CModal
       visible={visible}
       onClose={onClose}
-      size="lg"
+      size="xl"
       backdrop="static"
     >
       <CModalHeader>
@@ -210,141 +224,186 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
       </CModalHeader>
 
       <CModalBody>
-        <CForm>
-          {/* Titolo */}
-          <div className="mb-3">
-            <CFormLabel htmlFor="post-title">Titolo *</CFormLabel>
-            <CFormInput
-              type="text"
-              id="post-title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Inserisci il titolo del post"
-              required
+        <CRow>
+          {/* Colonna Sinistra: Form */}
+          <CCol md={7}>
+            <CForm>
+
+              <CCard className='mb-2'>
+                <CCardHeader className='fw-bold'>Pubblica su</CCardHeader>
+                <CCardBody>
+                  {/* Piattaforme */}
+                  <div className="mb-3">
+                    <div className="d-flex gap-3 justify-content-between">
+                      <CFormCheck
+                        id="platform-instagram"
+                        label="Instagram"
+                        checked={formData.platforms.includes('instagram')}
+                        onChange={() => handlePlatformToggle('instagram')}
+                      />
+                      <CFormCheck
+                        id="platform-facebook"
+                        label="Facebook"
+                        checked={formData.platforms.includes('facebook')}
+                        onChange={() => handlePlatformToggle('facebook')}
+                      />
+                      <CFormCheck
+                        id="platform-linkedin"
+                        label="LinkedIn"
+                        checked={formData.platforms.includes('linkedin')}
+                        onChange={() => handlePlatformToggle('linkedin')}
+                      />
+                      <CFormCheck
+                        id="platform-tiktok"
+                        label="TikTok"
+                        checked={formData.platforms.includes('tiktok')}
+                        onChange={() => handlePlatformToggle('tiktok')}
+                      />
+                    </div>
+                  </div>
+                </CCardBody>
+              </CCard>
+              <CCard className='mb-2'>
+                <CCardHeader className='fw-bold'>Contenuti multimediali</CCardHeader>
+                <CCardBody>
+                  {/* Media Uploader */}
+                  <div className="mb-3">
+                    <MediaUploader
+                      mediaUrls={formData.media_urls}
+                      onChange={(urls) => setFormData(prev => ({ ...prev, media_urls: urls }))}
+                      maxFiles={4}
+                    />
+                  </div>
+
+                  {/* Tipo Contenuto (hidden per MVP, sempre 'post') */}
+                  <input type="hidden" value={formData.content_type} />
+
+                </CCardBody>
+              </CCard>
+
+              <CCard className='mb-2'>
+                <CCardHeader className='fw-bold'>Dettagli del post</CCardHeader>
+                <CCardBody>
+                  <div className="d-flex justify-content-between gap-3">
+                    {/* Categoria */}
+                    <div className="mb-2 w-50">
+                      <CFormLabel className="form-text text-body-secondary small">Categoria</CFormLabel>
+                      <CategorySelector
+                        value={formData.category_id}
+                        onChange={(categoryId) => setFormData(prev => ({ ...prev, category_id: categoryId }))}
+                      />
+                    </div>
+
+                    {/* Template Selector */}
+                    <div className="mb-2 w-50">
+                      <CFormLabel className="form-text text-body-secondary small">Template</CFormLabel>
+                      <TemplateSelector
+                        templateType="social"
+                        categoryId={formData.category_id}
+                        onTemplateApply={handleTemplateApply}
+                      />
+                    </div>
+                  </div>
+                  {/* Titolo */}
+                  <div className="mb-2">
+                    <CFormLabel className="form-text text-body-secondary small" htmlFor="post-title">Titolo *</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      id="post-title"
+                      value={formData.title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="-- titolo del post --"
+                      required
+                    />
+                  </div>
+
+
+                  {/* Contenuto */}
+                  <div className="mb-2">
+                    <CFormLabel className="form-text text-body-secondary small" htmlFor="post-content">Contenuto *</CFormLabel>
+                    <CFormTextarea
+                      id="post-content"
+                      rows={6}
+                      value={formData.content}
+                      onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                      placeholder="-- contenuto del post --"
+                      required
+                    />
+                  </div>
+
+                  {/* Hashtags */}
+                  <div className="mb-2">
+                    <CFormLabel className="form-text text-body-secondary small">Hashtags</CFormLabel>
+                    <HashtagsInput
+                      hashtags={formData.hashtags}
+                      onChange={(hashtags) => setFormData(prev => ({ ...prev, hashtags }))}
+                      maxHashtags={30}
+                    />
+                  </div>
+                </CCardBody>
+              </CCard>
+
+              <CCard>
+                <CCardHeader className='fw-bold'>Opzioni di programmazione (opzionale)</CCardHeader>
+                <CCardBody>
+                  {/* Schedulazione Separata */}
+                  <div className="mb-2">
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="flex-grow-1">
+                        <CFormInput
+                          type="date"
+                          id="post-scheduled-date"
+                          value={scheduledDate}
+                          onChange={(e) => setScheduledDate(e.target.value)}
+                          placeholder="-- Data --"
+                        />
+                      </div>
+                      <div style={{ width: '130px' }}>
+                        <CFormInput
+                          type="time"
+                          id="post-scheduled-time"
+                          value={scheduledTime}
+                          onChange={(e) => setScheduledTime(e.target.value)}
+                          placeholder="Ora"
+                          disabled={!scheduledDate}
+                        />
+                      </div>
+                      {(scheduledDate || scheduledTime) && (
+                        <CButton
+                          color="danger"
+                          variant="ghost"
+                          onClick={clearScheduling}
+                          title="Rimuovi pianificazione"
+                          className="px-2"
+                        >
+                          <CIcon icon={cilX} />
+                        </CButton>
+                      )}
+                    </div>
+                    <small className="text-muted">
+                      Seleziona una data per programmare. L'ora è opzionale (default 09:00).
+                    </small>
+                  </div>
+
+                </CCardBody>
+              </CCard>
+
+
+            </CForm>
+          </CCol>
+
+          {/* Colonna Destra: Preview */}
+          <CCol md={5}>
+            <PostPreview
+              title={formData.title}
+              content={formData.content}
+              mediaUrls={formData.media_urls}
+              hashtags={formData.hashtags}
+              platforms={formData.platforms}
+              accountLogos={accountLogos}
             />
-          </div>
-
-          {/* Categoria */}
-          <div className="mb-3">
-            <CFormLabel htmlFor="post-category">Categoria</CFormLabel>
-            <CategorySelector
-              value={formData.category_id}
-              onChange={(categoryId) => setFormData(prev => ({ ...prev, category_id: categoryId }))}
-            />
-          </div>
-
-          {/* Template Selector */}
-          <div className="mb-3">
-            <TemplateSelector
-              templateType="social"
-              onTemplateApply={handleTemplateApply}
-              label="Carica da Template"
-              showReload={true}
-            />
-          </div>
-
-          {/* Contenuto */}
-          <div className="mb-3">
-            <CFormLabel htmlFor="post-content">Contenuto *</CFormLabel>
-            <CFormTextarea
-              id="post-content"
-              rows={6}
-              value={formData.content}
-              onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Scrivi il contenuto del post..."
-              required
-            />
-          </div>
-
-          {/* Schedulazione Separata */}
-          <div className="mb-3">
-            <CFormLabel>Programma Pubblicazione (Opzionale)</CFormLabel>
-            <div className="d-flex align-items-center gap-2">
-              <div className="flex-grow-1">
-                <CFormInput
-                  type="date"
-                  id="post-scheduled-date"
-                  value={scheduledDate}
-                  onChange={(e) => setScheduledDate(e.target.value)}
-                  placeholder="Data"
-                />
-              </div>
-              <div style={{ width: '130px' }}>
-                <CFormInput
-                  type="time"
-                  id="post-scheduled-time"
-                  value={scheduledTime}
-                  onChange={(e) => setScheduledTime(e.target.value)}
-                  placeholder="Ora"
-                  disabled={!scheduledDate}
-                />
-              </div>
-              {(scheduledDate || scheduledTime) && (
-                <CButton
-                  color="danger"
-                  variant="ghost"
-                  onClick={clearScheduling}
-                  title="Rimuovi pianificazione"
-                  className="px-2"
-                >
-                  <CIcon icon={cilX} />
-                </CButton>
-              )}
-            </div>
-            <small className="text-muted">
-              Seleziona una data per programmare. L'ora è opzionale (default 09:00).
-            </small>
-          </div>
-
-          {/* Piattaforme */}
-          <div className="mb-3">
-            <CFormLabel>Piattaforme</CFormLabel>
-            <div className="d-flex gap-3">
-              <CFormCheck
-                id="platform-instagram"
-                label="Instagram"
-                checked={formData.platforms.includes('instagram')}
-                onChange={() => handlePlatformToggle('instagram')}
-              />
-              <CFormCheck
-                id="platform-facebook"
-                label="Facebook"
-                checked={formData.platforms.includes('facebook')}
-                onChange={() => handlePlatformToggle('facebook')}
-              />
-              <CFormCheck
-                id="platform-linkedin"
-                label="LinkedIn"
-                checked={formData.platforms.includes('linkedin')}
-                onChange={() => handlePlatformToggle('linkedin')}
-              />
-              <CFormCheck
-                id="platform-tiktok"
-                label="TikTok"
-                checked={formData.platforms.includes('tiktok')}
-                onChange={() => handlePlatformToggle('tiktok')}
-              />
-            </div>
-          </div>
-
-          {/* Hashtags */}
-          <div className="mb-3">
-            <CFormLabel htmlFor="post-hashtags">Hashtags (separati da virgola)</CFormLabel>
-            <CFormInput
-              type="text"
-              id="post-hashtags"
-              value={hashtagsInput}
-              onChange={(e) => setHashtagsInput(e.target.value)}
-              placeholder="es: #dental, #odontoiatria, #salute"
-            />
-            <small className="text-muted">
-              Inserisci gli hashtags separati da virgola
-            </small>
-          </div>
-
-          {/* Tipo Contenuto (hidden per MVP, sempre 'post') */}
-          <input type="hidden" value={formData.content_type} />
-        </CForm>
+          </CCol>
+        </CRow>
       </CModalBody>
 
       <CModalFooter>

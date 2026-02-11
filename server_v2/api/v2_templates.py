@@ -13,14 +13,16 @@ def get_sms_templates():
 
     Query Params:
         type (optional): Filtra per tipo (promemoria, richiami, social, newsletter, email_team)
+        category_id (optional): Filtra per categoria (restituisce template della categoria + generici)
 
     Example:
-        GET /sms-templates?type=social
+        GET /sms-templates?type=social&category_id=3
     """
     try:
         template_manager = get_template_manager()
         template_type = request.args.get('type')  # Filtro opzionale per type
-        templates = template_manager.get_all_templates(template_type=template_type)
+        category_id = request.args.get('category_id', type=int)  # Filtro opzionale per category_id
+        templates = template_manager.get_all_templates(template_type=template_type, category_id=category_id)
         return jsonify({'success': True, 'data': templates})
     except Exception as e:
         logger.error(f"Errore API get_sms_templates: {e}", exc_info=True)
@@ -36,6 +38,7 @@ def create_sms_template():
         content: Contenuto con placeholders (required)
         description: Descrizione opzionale
         type: Tipo template (promemoria, richiami, social, newsletter, email_team) - default: 'promemoria'
+        category_id: ID categoria associata (opzionale, NULL = template generico)
     """
     data = request.get_json()
     if not data or 'name' not in data or 'content' not in data:
@@ -47,7 +50,8 @@ def create_sms_template():
             name=data['name'],
             content=data['content'],
             description=data.get('description'),
-            template_type=data.get('type', 'promemoria')  # Default: 'promemoria'
+            template_type=data.get('type', 'promemoria'),  # Default: 'promemoria'
+            category_id=data.get('category_id')  # Opzionale
         )
         return jsonify({'success': True, 'data': new_template}), 201
     except ValueError as e:
@@ -65,6 +69,7 @@ def update_sms_template(template_name):
         content: Nuovo contenuto (required)
         description: Nuova descrizione (optional)
         type: Nuovo tipo (optional)
+        category_id: Nuovo category_id (optional, can be null to remove category)
     """
     data = request.get_json()
     if not data or 'content' not in data:
@@ -72,11 +77,15 @@ def update_sms_template(template_name):
 
     try:
         template_manager = get_template_manager()
+        # Se category_id è presente nel body (anche se null), aggiornalo
+        update_category = 'category_id' in data
         updated_template = template_manager.update_template(
             name=template_name,
             new_content=data['content'],
             new_description=data.get('description'),
-            new_type=data.get('type')  # Optional: aggiorna type se fornito
+            new_type=data.get('type'),  # Optional: aggiorna type se fornito
+            new_category_id=data.get('category_id'),
+            update_category=update_category
         )
         return jsonify({'success': True, 'data': updated_template})
     except ValueError as e:

@@ -27,6 +27,9 @@ import { cilSave, cilCheckCircle, cilXCircle } from '@coreui/icons';
 import { useSocialMediaStore } from '@/store/socialMedia.store';
 import toast from 'react-hot-toast';
 import type { SocialAccount } from '../types';
+import LogoUploader from '../components/LogoUploader';
+import AccountVerificationStatus from '../components/AccountVerificationStatus';
+import OAuthConnectButton from '../components/OAuthConnectButton';
 
 const SocialMediaSettingsPage: React.FC = () => {
   const { accounts, loadAccounts, updateAccount, isLoading } = useSocialMediaStore();
@@ -47,7 +50,8 @@ const SocialMediaSettingsPage: React.FC = () => {
           account_username: account.account_username || '',
           access_token: account.access_token || '',
           refresh_token: account.refresh_token || '',
-          token_expires_at: account.token_expires_at || ''
+          token_expires_at: account.token_expires_at || '',
+          logo_url: account.logo_url || ''
         };
       });
       setEditingAccounts(initialState);
@@ -83,6 +87,7 @@ const SocialMediaSettingsPage: React.FC = () => {
         access_token: editedData.access_token,
         refresh_token: editedData.refresh_token,
         token_expires_at: editedData.token_expires_at,
+        logo_url: editedData.logo_url,
         is_connected: !!(editedData.access_token?.trim()) // Auto-set connected if token exists
       });
 
@@ -178,6 +183,25 @@ const SocialMediaSettingsPage: React.FC = () => {
                   </CAccordionHeader>
                   <CAccordionBody>
                     <CForm>
+                      {/* Logo Uploader */}
+                      <LogoUploader
+                        currentLogoUrl={editedData.logo_url}
+                        accountId={account.id}
+                        accountName={account.account_name}
+                        onLogoChange={async (logoUrl) => {
+                          // Update local state first
+                          handleInputChange(account.platform, 'logo_url', logoUrl || '');
+
+                          // Auto-save logo immediately to database
+                          try {
+                            await updateAccount(account.id, { logo_url: logoUrl });
+                            // Logo already saved, no need for extra toast
+                          } catch (error: any) {
+                            toast.error('Errore salvataggio logo');
+                          }
+                        }}
+                      />
+
                       {/* Account Name */}
                       <div className="mb-3">
                         <CFormLabel htmlFor={`${account.platform}-name`}>
@@ -206,20 +230,37 @@ const SocialMediaSettingsPage: React.FC = () => {
                         />
                       </div>
 
-                      {/* Access Token */}
+                      {/* OAuth Connect Button */}
+                      <div className="mb-4">
+                        <CFormLabel>Connessione Automatica (Raccomandato)</CFormLabel>
+                        <OAuthConnectButton
+                          account={account}
+                          onConnected={() => {
+                            loadAccounts();
+                            toast.success('Account connesso! Verifica la connessione sotto.');
+                          }}
+                        />
+                        <small className="text-muted d-block mt-2">
+                          Autorizza con {account.platform === 'facebook' ? 'Facebook' : 'Instagram'} e
+                          seleziona la tua pagina. Il token verrà configurato automaticamente.
+                        </small>
+                      </div>
+
+                      {/* Manual Token Entry (Alternative) */}
                       <div className="mb-3">
                         <CFormLabel htmlFor={`${account.platform}-token`}>
-                          Access Token
+                          Access Token (Configurazione Manuale)
                         </CFormLabel>
                         <CFormTextarea
                           id={`${account.platform}-token`}
                           rows={3}
                           value={editedData.access_token || ''}
                           onChange={(e) => handleInputChange(account.platform, 'access_token', e.target.value)}
-                          placeholder="Inserisci l'access token dalla piattaforma"
+                          placeholder="Oppure inserisci manualmente il Page Access Token"
+                          disabled={true}
                         />
                         <small className="text-muted">
-                          Token necessario per la pubblicazione automatica
+                          Token configurato automaticamente tramite OAuth. Non modificare manualmente.
                         </small>
                       </div>
 
@@ -252,7 +293,7 @@ const SocialMediaSettingsPage: React.FC = () => {
                       </div>
 
                       {/* Save Button */}
-                      <div className="d-flex justify-content-end">
+                      <div className="d-flex justify-content-end mb-4">
                         <CButton
                           color="primary"
                           onClick={() => handleSaveAccount(account)}
@@ -271,6 +312,20 @@ const SocialMediaSettingsPage: React.FC = () => {
                           )}
                         </CButton>
                       </div>
+
+                      {/* Account Verification Section */}
+                      {account.is_connected && (
+                        <div className="mt-4 pt-4 border-top">
+                          <h6 className="mb-3">Verifica Connessione</h6>
+                          <AccountVerificationStatus
+                            account={account}
+                            onVerified={() => {
+                              // Reload accounts after successful verification
+                              loadAccounts();
+                            }}
+                          />
+                        </div>
+                      )}
                     </CForm>
                   </CAccordionBody>
                 </CAccordionItem>

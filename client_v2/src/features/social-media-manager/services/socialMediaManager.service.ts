@@ -93,6 +93,17 @@ const socialMediaManagerService = {
     );
     return response.data;
   },
+
+  /**
+   * Verifica stato connessione e permessi account social
+   * @param accountId ID account da verificare
+   */
+  apiVerifyAccount: async (accountId: number): Promise<ApiResponse<any>> => {
+    const response = await apiClient.get<ApiResponse<any>>(
+      `/social-media/accounts/${accountId}/verify`
+    );
+    return response.data;
+  },
 };
 
 export default socialMediaManagerService;

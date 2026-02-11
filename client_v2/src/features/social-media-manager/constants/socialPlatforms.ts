@@ -3,7 +3,7 @@
  * Colori, abbreviazioni e configurazioni per tutte le piattaforme social
  */
 
-export type SocialPlatform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok';
+export type SocialPlatform = 'instagram' | 'facebook' | 'linkedin' | 'tiktok' | 'whatsapp';
 
 export interface PlatformConfig {
   name: string;
@@ -28,13 +28,18 @@ export const SOCIAL_PLATFORMS: Record<SocialPlatform, PlatformConfig> = {
   },
   linkedin: {
     name: 'LinkedIn',
-    abbr: 'LN',
+    abbr: 'in',
     color: '#0A66C2', // Blu LinkedIn ufficiale
   },
   tiktok: {
     name: 'TikTok',
     abbr: 'TT',
     color: '#000000', // Nero TikTok
+  },
+  whatsapp: {
+    name: 'WhatsApp',
+    abbr: 'WA',
+    color: '#25D366', // Verde WhatsApp ufficiale
   },
 };
 

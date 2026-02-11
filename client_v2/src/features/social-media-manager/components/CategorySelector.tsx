@@ -39,7 +39,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       required={required}
     >
       <option value="">
-        {isLoadingCategories ? 'Caricamento...' : '-- Seleziona Categoria --'}
+        {isLoadingCategories ? 'Caricamento...' : '-- seleziona --'}
       </option>
       {categories.map((category) => (
         <option key={category.id} value={category.id}>
