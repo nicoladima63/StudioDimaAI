@@ -12,16 +12,17 @@ from flask import Flask, jsonify, request, g, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
 from typing import Optional
-from pathlib import Path
 from core.google_calendar_client import GoogleCalendarClient
+from core.paths import (
+    GOOGLE_CREDENTIALS_PATH,
+    GOOGLE_OAUTH_STATE_PATH,
+    GOOGLE_TOKEN_PATH,
+    STUDIO_DIMA_DB_PATH,
+    ensure_data_dir,
+)
 
 from config.flask_config import get_config
 
-# Determine base path for Google Calendar credentials
-# app_v2.py is in server_v2/ root
-_BASE_DIR = Path(__file__).parent  # server_v2/
-_CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
-_TOKEN_PATH = _BASE_DIR / "tokens" / "token.json"
 from core.database_manager import get_database_manager
 from core.exceptions import StudioDimaError
 from utils.dbf_utils import convert_bytes_to_string, clean_dbf_value
@@ -59,6 +60,9 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     # Load configuration
     config_class = get_config(config_name)
     app.config.from_object(config_class)
+
+    # Ensure persistent data dir exists early (tokens/state/db)
+    ensure_data_dir()
     
     # Configure logging
     setup_logging(app)
@@ -486,12 +490,18 @@ def register_health_check(app: Flask) -> None:
             
             # Instantiate client
             client = GoogleCalendarClient(
-                credentials_path=_CREDENTIALS_PATH,
-                token_path=_TOKEN_PATH,
+                credentials_path=GOOGLE_CREDENTIALS_PATH,
+                token_path=GOOGLE_TOKEN_PATH,
+                oauth_state_path=GOOGLE_OAUTH_STATE_PATH,
             )
             
             # Define the redirect URI used to generate the auth URL
-            redirect_uri = 'http://localhost:5001/oauth/callback'
+            redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+            if not redirect_uri:
+                # Build from current request (supports reverse proxies via X-Forwarded-Proto)
+                proto = request.headers.get("X-Forwarded-Proto", request.scheme)
+                host = request.headers.get("X-Forwarded-Host", request.host)
+                redirect_uri = f"{proto}://{host}/oauth/callback"
 
             # Handle the callback
             client.handle_web_auth_callback(
@@ -565,7 +575,7 @@ def register_health_check(app: Flask) -> None:
             # Initialize database manager with local config
             from core.database_manager import initialize_database_manager
             from core.config import Config
-            local_config = Config(db_path="instance/studio_dima.db")
+            local_config = Config(db_path=str(STUDIO_DIMA_DB_PATH))
             initialize_database_manager(local_config)
             
             # Check database connectivity

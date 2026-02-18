@@ -241,8 +241,8 @@ class ConfigManager:
     def get_google_config(self) -> Dict[str, Any]:
         """Recupera configurazione Google Calendar."""
         return {
-            'credentials_path': self.get('GOOGLE_CREDENTIALS_PATH', 'server_v2/instance/credentials.json'),
-            'token_path': self.get('GOOGLE_TOKEN_PATH', 'server_v2/instance/token.json'),
+            'credentials_path': self.get('GOOGLE_CREDENTIALS_PATH', 'instance/credentials.json'),
+            'token_path': self.get('GOOGLE_TOKEN_PATH', 'instance/token.json'),
             'timezone': self.get('GOOGLE_TIMEZONE', 'Europe/Rome')
         }
     

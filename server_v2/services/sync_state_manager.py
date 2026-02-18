@@ -18,9 +18,7 @@ class SyncStateManager:
     Gestisce lo stato di sincronizzazione per evitare duplicati.
     Mantiene traccia degli appuntamenti già sincronizzati con Google Calendar.
     """
-    
-    """
-    
+
     def __init__(self, sync_state_file: Optional[str] = None):
         """
         Inizializza il manager dello stato di sincronizzazione.
@@ -28,13 +26,14 @@ class SyncStateManager:
         Args:
             sync_state_file: Percorso del file per salvare lo stato
         """
+        from core.paths import CALENDAR_SYNC_STATE_PATH, ensure_data_dir
+        ensure_data_dir()
+
         if sync_state_file:
             self.sync_state_file = Path(sync_state_file)
         else:
-            # Use absolute path relative to server_v2 root to ensure persistence
-            # regardless of where the script is run from (CWD)
-            _BASE_DIR = Path(__file__).parent.parent
-            self.sync_state_file = _BASE_DIR / "instance" / "sync_state.json"
+            # Default: persistent data directory (configurable via env)
+            self.sync_state_file = CALENDAR_SYNC_STATE_PATH
             
         self.sync_state: Dict[str, Dict[str, Any]] = {}
         self._load_sync_state()
@@ -56,6 +55,8 @@ class SyncStateManager:
     def _save_sync_state(self) -> None:
         """Salva lo stato di sincronizzazione su file."""
         try:
+            from core.paths import ensure_data_dir
+            ensure_data_dir()
             # Crea directory se non esiste
             self.sync_state_file.parent.mkdir(parents=True, exist_ok=True)
             

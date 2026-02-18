@@ -1,21 +1,14 @@
 import os
 import logging
-from pathlib import Path
 from typing import List, Dict, Any
 
 from core.appointment_normalizer import normalize_batch
 from core.google_calendar_client import GoogleCalendarClient
 from core.exceptions import CalendarSyncError
+from core.paths import GOOGLE_CREDENTIALS_PATH, GOOGLE_TOKEN_PATH, ensure_data_dir
 from services.calendar_sync_engine import sync_appointments, execute_with_retry
 
 logger = logging.getLogger(__name__)
-
-# Determine base path for Google Calendar credentials
-# If running from server_v2 directory, use current dir, otherwise use server_v2 subdirectory
-_BASE_DIR = Path(__file__).parent.parent  # Go up from services/ to server_v2/
-_CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
-_TOKEN_PATH = _BASE_DIR / "tokens" / "token.json"
-
 
 # ============================================================
 # PUBLIC – ENTRY POINT PRINCIPALE (SYNC)
@@ -50,18 +43,23 @@ def sync_calendar_from_records(records: List[Dict[str, Any]], on_progress=None) 
     # --------------------------------------------------------
     # 2. OAuth / Google Service
     # --------------------------------------------------------
+    ensure_data_dir()
     client = GoogleCalendarClient(
-        credentials_path=_CREDENTIALS_PATH,
-        token_path=_TOKEN_PATH,
+        credentials_path=GOOGLE_CREDENTIALS_PATH,
+        token_path=GOOGLE_TOKEN_PATH,
     )
     service = client.get_service()
 
     # --------------------------------------------------------
     # 3. Caricamento eventi Google esistenti
     # --------------------------------------------------------
-    existing_events = load_existing_google_events(service)
+    existing_by_uid, existing_by_fingerprint = load_existing_google_events(service)
 
-    logger.info("Eventi Google indicizzati: %s", len(existing_events))
+    logger.info(
+        "Eventi Google indicizzati: uid=%s fingerprint=%s",
+        len(existing_by_uid),
+        len(existing_by_fingerprint),
+    )
 
     # --------------------------------------------------------
     # 4. Sync
@@ -69,7 +67,8 @@ def sync_calendar_from_records(records: List[Dict[str, Any]], on_progress=None) 
     stats = sync_appointments(
         service=service,
         appointments=normalization.valid,
-        existing_events=existing_events,
+        existing_by_uid=existing_by_uid,
+        existing_by_fingerprint=existing_by_fingerprint,
         on_progress=on_progress,
     )
 
@@ -91,14 +90,15 @@ def sync_calendar_from_records(records: List[Dict[str, Any]], on_progress=None) 
 # GOOGLE – LOADER EVENTI (ESSENZIALE)
 # ============================================================
 
-def load_existing_google_events(service) -> Dict[str, Dict]:
+def load_existing_google_events(service) -> tuple[Dict[str, Dict], Dict[str, Dict]]:
     """
-    Costruisce una mappa:
-        uid -> evento Google
-    Serve al sync engine.
+    Costruisce due mappe:
+      - uid -> evento Google (source of truth per sync)
+      - fingerprint -> evento Google (fallback per "heal" eventi legacy senza uid)
     """
 
-    events_map: Dict[str, Dict] = {}
+    by_uid: Dict[str, Dict] = {}
+    by_fingerprint: Dict[str, Dict] = {}
 
     calendar_ids = [
         os.getenv("CALENDAR_ID_STUDIO_1"),
@@ -122,21 +122,57 @@ def load_existing_google_events(service) -> Dict[str, Dict]:
             )
 
             for event in result.get("items", []):
+                event["calendarId"] = calendar_id
+
                 uid = (
-                    event
-                    .get("extendedProperties", {})
+                    event.get("extendedProperties", {})
                     .get("private", {})
                     .get("uid")
                 )
                 if uid:
-                    event["calendarId"] = calendar_id
-                    events_map[uid] = event
+                    by_uid[str(uid)] = event
+                else:
+                    fp = _event_fingerprint(event)
+                    if fp:
+                        by_fingerprint[fp] = event
 
             page_token = result.get("nextPageToken")
             if not page_token:
                 break
 
-    return events_map
+    return by_uid, by_fingerprint
+
+
+def _event_fingerprint(event: Dict[str, Any]) -> str | None:
+    """
+    Fingerprint per riconciliare eventi legacy senza extendedProperties.private.uid.
+    Usa: calendarId + data + start/end HH:MM + summary normalizzato.
+    """
+    try:
+        calendar_id = event.get("calendarId")
+        summary = (event.get("summary") or "").strip().lower()
+
+        start_dt = (event.get("start") or {}).get("dateTime")
+        end_dt = (event.get("end") or {}).get("dateTime")
+        if not calendar_id or not summary or not start_dt or not end_dt:
+            return None
+
+        # RFC3339 → YYYY-MM-DD + HH:MM
+        # python datetime.fromisoformat supports "+01:00" offsets but not "Z"
+        start_iso = str(start_dt).replace("Z", "+00:00")
+        end_iso = str(end_dt).replace("Z", "+00:00")
+        from datetime import datetime
+
+        start_parsed = datetime.fromisoformat(start_iso)
+        end_parsed = datetime.fromisoformat(end_iso)
+
+        date = start_parsed.date().isoformat()
+        start_hm = start_parsed.strftime("%H:%M")
+        end_hm = end_parsed.strftime("%H:%M")
+
+        return f"{calendar_id}|{date}|{start_hm}|{end_hm}|{summary}"
+    except Exception:
+        return None
 
 
 # ============================================================
@@ -154,8 +190,8 @@ def list_google_calendars() -> List[Dict[str, Any]]:
     
     try:
         client = GoogleCalendarClient(
-            credentials_path=_CREDENTIALS_PATH,
-            token_path=_TOKEN_PATH,
+            credentials_path=GOOGLE_CREDENTIALS_PATH,
+            token_path=GOOGLE_TOKEN_PATH,
         )
         service = client.get_service()
     except GoogleCredentialsNotFoundError:
@@ -224,8 +260,8 @@ def clear_calendar(calendar_id: str) -> int:
     La teniamo perché esiste già nel vecchio servizio.
     """
     client = GoogleCalendarClient(
-        credentials_path=_CREDENTIALS_PATH,
-        token_path=_TOKEN_PATH,
+        credentials_path=GOOGLE_CREDENTIALS_PATH,
+        token_path=GOOGLE_TOKEN_PATH,
     )
     service = client.get_service()
 
@@ -266,8 +302,8 @@ def test_google_connection() -> bool:
     """
     try:
         client = GoogleCalendarClient(
-            credentials_path=_CREDENTIALS_PATH,
-            token_path=_TOKEN_PATH,
+            credentials_path=GOOGLE_CREDENTIALS_PATH,
+            token_path=GOOGLE_TOKEN_PATH,
         )
         service = client.get_service()
         service.calendarList().list(maxResults=1).execute()

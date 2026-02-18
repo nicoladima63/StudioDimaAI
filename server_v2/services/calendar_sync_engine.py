@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 from googleapiclient.errors import HttpError
 
@@ -28,11 +28,13 @@ def sync_appointments(
     *,
     service,   # google calendar service autenticato
     appointments: List[NormalizedAppointment],
-    existing_events: Dict[str, Dict],  # uid -> event (da Google)
+    existing_by_uid: Dict[str, Dict],  # uid -> event (da Google)
+    existing_by_fingerprint: Dict[str, Dict],  # fingerprint -> event (legacy fallback)
     on_progress=None,  # callback(synced, total)
 ) -> Dict[str, int]:
     """
-    existing_events: mappa uid -> evento google esistente
+    existing_by_uid: mappa uid -> evento google esistente
+    existing_by_fingerprint: fallback per riconciliare eventi legacy senza uid
     """
 
     stats = {
@@ -47,16 +49,31 @@ def sync_appointments(
 
     for appt in appointments:
         uid = appt.uid
-        google_event = existing_events.get(uid)
+        google_event = existing_by_uid.get(uid)
 
         try:
             if google_event is None:
-                _insert_event(service, appt)
-                stats["inserted"] += 1
+                # Fallback: prova a riconciliare evento legacy senza uid (stesso slot)
+                fp = _appointment_fingerprint(appt)
+                legacy_event = existing_by_fingerprint.get(fp) if fp else None
+
+                if legacy_event is not None:
+                    _patch_event_add_uid(service, legacy_event, uid, appt_kind=appt.kind.value)
+                    existing_by_uid[uid] = legacy_event
+                    google_event = legacy_event
+
+                if google_event is None:
+                    _insert_event(service, appt)
+                    stats["inserted"] += 1
+                else:
+                    if _is_modified(appt, google_event):
+                        _upsert_event(service, appt, google_event)
+                        stats["updated"] += 1
+                    else:
+                        stats["skipped"] += 1
             else:
                 if _is_modified(appt, google_event):
-                    _delete_event(service, google_event)
-                    _insert_event(service, appt)
+                    _upsert_event(service, appt, google_event)
                     stats["updated"] += 1
                 else:
                     stats["skipped"] += 1
@@ -101,13 +118,87 @@ def _insert_event(service, appointment: NormalizedAppointment):
         else:
             raise ValueError(f"Studio non valido uid={appointment.uid}")
 
-    execute_with_retry(
-        lambda: service.events().insert(
-            calendarId=calendar_id,
-            body=event
-        ).execute(),
-        context=f"INSERT uid={appointment.uid}"
-    )
+    # Deterministic event id → idempotent inserts across restarts/deploys
+    event["id"] = _desired_event_id(appointment.uid)
+
+    try:
+        execute_with_retry(
+            lambda: service.events().insert(
+                calendarId=calendar_id,
+                body=event
+            ).execute(),
+            context=f"INSERT uid={appointment.uid}"
+        )
+    except HttpError as e:
+        # If event id already exists, treat as upsert and update it
+        if getattr(e, "resp", None) is not None and getattr(e.resp, "status", None) == 409:
+            execute_with_retry(
+                lambda: service.events().update(
+                    calendarId=calendar_id,
+                    eventId=event["id"],
+                    body=event,
+                ).execute(),
+                context=f"INSERT_CONFLICT_UPDATE uid={appointment.uid}",
+            )
+            return
+        raise
+
+
+def _upsert_event(service, appointment: NormalizedAppointment, google_event: Dict):
+    """
+    Aggiorna in-place se l'evento ha già l'id deterministico;
+    altrimenti migra via delete+insert per fissare l'id e prevenire duplicati futuri.
+    """
+    desired_id = _desired_event_id(appointment.uid)
+
+    # Build target event
+    new_event, calendar_id = build_google_event(appointment)
+    if not calendar_id:
+        studio = appointment.metadata.get("studio")
+        try:
+            studio = int(studio)
+        except (TypeError, ValueError):
+            studio = None
+        if studio == 1:
+            calendar_id = os.getenv("CALENDAR_ID_STUDIO_1")
+        elif studio == 2:
+            calendar_id = os.getenv("CALENDAR_ID_STUDIO_2")
+        else:
+            raise ValueError(f"Studio non valido uid={appointment.uid}")
+
+    new_event["id"] = desired_id
+
+    current_calendar_id = google_event.get("calendarId", calendar_id)
+    current_event_id = google_event.get("id")
+
+    # Update in place if already deterministic
+    if current_calendar_id == calendar_id and current_event_id == desired_id:
+        execute_with_retry(
+            lambda: service.events().update(
+                calendarId=calendar_id,
+                eventId=desired_id,
+                body=new_event,
+            ).execute(),
+            context=f"UPDATE uid={appointment.uid}",
+        )
+        return
+
+    # Migrate: delete old then insert deterministic
+    _delete_event(service, google_event)
+    try:
+        _insert_event(service, appointment)
+    except HttpError as e:
+        if getattr(e, "resp", None) is not None and getattr(e.resp, "status", None) == 409:
+            execute_with_retry(
+                lambda: service.events().update(
+                    calendarId=calendar_id,
+                    eventId=desired_id,
+                    body=new_event,
+                ).execute(),
+                context=f"UPDATE_AFTER_CONFLICT uid={appointment.uid}",
+            )
+            return
+        raise
 
 
 def _delete_event(service, google_event: Dict):
@@ -156,6 +247,69 @@ def _is_modified(appt: NormalizedAppointment, google_event: Dict) -> bool:
     return False
 
 
+def _desired_event_id(uid: str) -> str:
+    # Start with a letter for maximum compatibility with Google event id rules
+    return f"sdai_{uid}"
+
+
+def _appointment_fingerprint(appt: NormalizedAppointment) -> Optional[str]:
+    """
+    Fingerprint per riconciliare eventi legacy senza uid.
+    calendarId + YYYY-MM-DD + HH:MM start/end + summary normalizzato
+    """
+    try:
+        studio = appt.metadata.get("studio")
+        try:
+            studio_int = int(studio)
+        except (TypeError, ValueError):
+            studio_int = None
+
+        if studio_int == 1:
+            calendar_id = os.getenv("CALENDAR_ID_STUDIO_1")
+        elif studio_int == 2:
+            calendar_id = os.getenv("CALENDAR_ID_STUDIO_2")
+        else:
+            calendar_id = None
+
+        if not calendar_id:
+            return None
+
+        summary = (appt.title or "").strip().lower()
+        if not summary:
+            return None
+
+        return f"{calendar_id}|{appt.date}|{appt.start_time}|{appt.end_time}|{summary}"
+    except Exception:
+        return None
+
+
+def _patch_event_add_uid(service, google_event: Dict, uid: str, appt_kind: str):
+    """
+    Adds extendedProperties.private.uid to an existing Google event (legacy),
+    so future runs match by uid and we stop producing duplicates.
+    """
+    calendar_id = google_event.get("calendarId")
+    event_id = google_event.get("id")
+    if not calendar_id or not event_id:
+        return
+
+    private_props = ((google_event.get("extendedProperties") or {}).get("private") or {})
+    private_props = dict(private_props)
+    private_props["uid"] = str(uid)
+    private_props.setdefault("kind", appt_kind)
+
+    patch_body = {"extendedProperties": {"private": private_props}}
+
+    execute_with_retry(
+        lambda: service.events().patch(
+            calendarId=calendar_id,
+            eventId=event_id,
+            body=patch_body,
+        ).execute(),
+        context=f"PATCH_ADD_UID uid={uid}",
+    )
+
+
 # ============================================================
 # ERROR HANDLING / QUOTA
 # ============================================================
@@ -173,6 +327,11 @@ def execute_with_retry(fn, context: str):
             # 401 / invalid_grant → hard fail
             if status == 401:
                 logger.critical("OAuth invalid (%s)", context)
+                raise
+
+            # 4xx (other than quota/rate) are not retriable (e.g. 400, 404, 409)
+            if 400 <= status < 500 and status not in (403, 429):
+                logger.error("Non-retriable Google API error %s (%s)", status, context)
                 raise
 
             # 403 quota / rate limit

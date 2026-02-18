@@ -37,7 +37,9 @@ pause
 echo [0/7] Backup file sensibili...
 echo [0/7] Backup file sensibili... >> "%LOGFILE%"
 
-set "BACKUP_DIR=%DEPLOY_PATH%\.backup_%TIMESTAMP%"
+set "BACKUP_ROOT=%DEPLOY_PATH%\_deploy_backups"
+set "BACKUP_DIR=%BACKUP_ROOT%\backup_%TIMESTAMP%"
+if not exist "%BACKUP_ROOT%" mkdir "%BACKUP_ROOT%" 2>nul
 mkdir "%BACKUP_DIR%" 2>nul
 
 :: File da preservare (con i path corretti dove il codice li cerca)
@@ -69,8 +71,19 @@ if exist "%DEPLOY_PATH%\tokens\token.json" (
         echo   [OK] token.json salvato >> "%LOGFILE%"
     )
 ) else (
-    echo   [SKIP] token.json non presente
-    echo   [SKIP] token.json non presente >> "%LOGFILE%"
+    if exist "%DEPLOY_PATH%\instance\token.json" (
+        copy "%DEPLOY_PATH%\instance\token.json" "%BACKUP_DIR%\token.json" /Y >nul 2>&1
+        if !errorlevel! neq 0 (
+            echo   [WARN] Impossibile fare backup di token.json (instance)
+            echo   [WARN] Impossibile fare backup di token.json (instance) >> "%LOGFILE%"
+        ) else (
+            echo   [OK] token.json salvato (da instance)
+            echo   [OK] token.json salvato (da instance) >> "%LOGFILE%"
+        )
+    ) else (
+        echo   [SKIP] token.json non presente
+        echo   [SKIP] token.json non presente >> "%LOGFILE%"
+    )
 )
 
 if exist "%DEPLOY_PATH%\instance\sync_state.json" (
@@ -98,7 +111,9 @@ echo [1/7] Verifica cartelle server... >> "%LOGFILE%"
 if not exist "%DEPLOY_PATH%" mkdir "%DEPLOY_PATH%"
 if not exist "%DEPLOY_PATH%\static" mkdir "%DEPLOY_PATH%\static"
 if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
+if not exist "%DEPLOY_PATH%\tokens" mkdir "%DEPLOY_PATH%\tokens"
 if not exist "%DEPLOY_PATH%\logs" mkdir "%DEPLOY_PATH%\logs"
+if not exist "%DEPLOY_PATH%\_deploy_backups" mkdir "%DEPLOY_PATH%\_deploy_backups"
 
 :: ============================================================================
 :: [2/7] Sincronizzazione Server V2 (ROBOCOPY)
@@ -107,7 +122,7 @@ echo [2/7] Sincronizzazione Server V2...
 echo [2/7] Sincronizzazione Server V2... >> "%LOGFILE%"
 
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
-    /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" ^
+    /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" "instance" "tokens" "_deploy_backups" ^
     /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "sync_state.json" "database_mode.txt" ^
     /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
 
@@ -156,6 +171,7 @@ if exist "%BACKUP_DIR%\token.json" (
         echo   [OK] token.json ripristinato
         echo   [OK] token.json ripristinato >> "%LOGFILE%"
     )
+    copy "%BACKUP_DIR%\token.json" "%DEPLOY_PATH%\instance\token.json" /Y >nul 2>&1
 )
 
 :: Ripristina sync_state.json in instance/
@@ -294,6 +310,17 @@ echo echo ==========================================
 echo echo    STUDIO DIMA AI V2 - STARTING SERVER
 echo echo ==========================================
 echo.
+echo :: Persistent paths (avoid losing OAuth token/sync state on redeploy)
+echo set "STUDIODIMAAI_DATA_DIR=%%~dp0instance"
+echo set "GOOGLE_CREDENTIALS_PATH=%%~dp0instance\credentials.json"
+echo set "GOOGLE_TOKEN_PATH=%%~dp0tokens\token.json"
+echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
+echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
+echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"
+echo.
+echo :: OAuth redirect for intranet (update if you use IIS/reverse-proxy)
+echo set "GOOGLE_OAUTH_REDIRECT_URI=http://SERVERDIMA:5001/oauth/callback"
+echo.
 echo :: VENV Check
 echo if not exist venv ^(
 echo     echo Creazione virtual environment...
@@ -308,7 +335,7 @@ echo pip install -r requirements.txt --quiet
 echo.
 echo :: Health Checks
 echo echo Verifica connessioni...
-echo python -c "from services.calendar_service import calendar_service; r = calendar_service.test_google_connection(); print(' Google: ' + ('OK' if r['success'] else '! ERR: '+r.get('message','?')))"
+echo python -c "import services.calendar_service as cs; ok = cs.test_google_connection(); print(' Google: ' + ('OK' if ok else '! ERR'))"
 echo.
 echo echo Server in avvio su porta 5001...
 echo start "StudioDimaAI V2 Server" cmd /k python run_v2.py --config production --port 5001

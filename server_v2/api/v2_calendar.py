@@ -15,15 +15,17 @@ import os
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from core.google_calendar_client import GoogleCalendarClient
+from core.paths import (
+    GOOGLE_CREDENTIALS_PATH,
+    GOOGLE_OAUTH_STATE_PATH,
+    GOOGLE_TOKEN_PATH,
+    CALENDAR_SYNC_STATE_PATH,
+    ensure_data_dir,
+)
 from utils.dbf_utils import get_optimized_reader # New import
 
 import services.calendar_service as calendar_service_module
 
-# Determine base path for Google Calendar credentials
-# Go up from api/ to server_v2/
-_BASE_DIR = Path(__file__).parent.parent  # api/ -> server_v2/
-_CREDENTIALS_PATH = _BASE_DIR / "instance" / "credentials.json"
-_TOKEN_PATH = _BASE_DIR / "tokens" / "token.json"
 from core.exceptions import (
     GoogleCredentialsNotFoundError,
     CalendarSyncError,
@@ -636,27 +638,32 @@ def get_google_oauth_url():
     from flask_jwt_extended import get_jwt_identity
     
     try:
+        ensure_data_dir()
         # Verify JWT is working
         current_user = get_jwt_identity()
         logger.info(f"get_google_oauth_url called by user: {current_user}")
         
         # Check if credentials file exists
-        if not _CREDENTIALS_PATH.exists():
-            logger.error(f"Google credentials file not found at: {_CREDENTIALS_PATH}")
+        if not GOOGLE_CREDENTIALS_PATH.exists():
+            logger.error(f"Google credentials file not found at: {GOOGLE_CREDENTIALS_PATH}")
             return format_response(
                 success=False,
                 error='CREDENTIALS_FILE_NOT_FOUND',
-                message=f'Google credentials file not found at: {_CREDENTIALS_PATH}. Please ensure credentials.json is in the server_v2 directory.',
+                message=f'Google credentials file not found at: {GOOGLE_CREDENTIALS_PATH}. Please ensure credentials.json is present in the persistent data directory.',
                 state='error'
             ), 404
         
         client = GoogleCalendarClient(
-            credentials_path=_CREDENTIALS_PATH,
-            token_path=_TOKEN_PATH,
+            credentials_path=GOOGLE_CREDENTIALS_PATH,
+            token_path=GOOGLE_TOKEN_PATH,
+            oauth_state_path=GOOGLE_OAUTH_STATE_PATH,
         )
         # The redirect URI must match exactly what's in Google Cloud Console
-        # This was the value used in the old service code.
-        redirect_uri = 'http://localhost:5001/oauth/callback'
+        redirect_uri = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")
+        if not redirect_uri:
+            proto = request.headers.get("X-Forwarded-Proto", request.scheme)
+            host = request.headers.get("X-Forwarded-Host", request.host)
+            redirect_uri = f"{proto}://{host}/oauth/callback"
 
         auth_url = client.generate_web_auth_url(redirect_uri=redirect_uri)
         
@@ -700,7 +707,7 @@ def oauth_status():
     try:
         import os
         
-        if _TOKEN_PATH.exists():
+        if GOOGLE_TOKEN_PATH.exists():
             return format_response(
                 success=True,
                 data={'authenticated': True},
@@ -774,9 +781,9 @@ def reset_sync_state():
         import datetime
         import os
         
-        sync_state_path = 'instance/sync_state.json'
+        sync_state_path = str(CALENDAR_SYNC_STATE_PATH)
         if os.path.exists(sync_state_path):
-            backup_name = f"instance/sync_state.backup.{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            backup_name = str(CALENDAR_SYNC_STATE_PATH.parent / f"sync_state.backup.{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
             shutil.copy(sync_state_path, backup_name)
             backup_msg = f'Backup creato: {backup_name}'
         else:
@@ -821,15 +828,14 @@ def check_first_sync_status():
         import os
         from pathlib import Path
         
-        # Check sync_state.json
-        sync_state_path = Path('instance/sync_state.json')
-        is_first_sync = not sync_state_path.exists()
+        # Check sync_state.json (persistent absolute path)
+        is_first_sync = not CALENDAR_SYNC_STATE_PATH.exists()
         
         # Check token OAuth
-        token_exists = os.path.exists(_TOKEN_PATH)
+        token_exists = GOOGLE_TOKEN_PATH.exists()
         
         # Check credentials
-        credentials_exist = os.path.exists(_CREDENTIALS_PATH)
+        credentials_exist = GOOGLE_CREDENTIALS_PATH.exists()
         
         return format_response(
             success=True,
@@ -879,8 +885,8 @@ def calendar_health_check():
                 'google_calendar_connected': connection_test,
                 'google_error': None if connection_test else "Impossibile connettersi a Google Calendar",
                 'sync_state_entries': len(sync_manager.sync_state) if hasattr(sync_manager, 'sync_state') else 0,
-                'token_exists': os.path.exists('instance/token.json') or os.path.exists(_TOKEN_PATH),
-                'credentials_exists': os.path.exists('instance/credentials.json') or os.path.exists(_CREDENTIALS_PATH)
+                'token_exists': GOOGLE_TOKEN_PATH.exists(),
+                'credentials_exists': GOOGLE_CREDENTIALS_PATH.exists()
             },
             message='Health check passed',
             state='success'
@@ -947,10 +953,9 @@ def auto_reset_and_sync():
         job_id = str(uuid.uuid4())
         
         # Verifica requisiti per il pre-check
-        token_exists = os.path.exists(_TOKEN_PATH)
-        credentials_exist = os.path.exists(_CREDENTIALS_PATH)
-        sync_state_path = Path('instance/sync_state.json')
-        sync_state_exists = sync_state_path.exists()
+        token_exists = GOOGLE_TOKEN_PATH.exists()
+        credentials_exist = GOOGLE_CREDENTIALS_PATH.exists()
+        sync_state_exists = CALENDAR_SYNC_STATE_PATH.exists()
         
         # Inizializza job tracking con fase di pre-check
         sync_jobs[job_id] = {

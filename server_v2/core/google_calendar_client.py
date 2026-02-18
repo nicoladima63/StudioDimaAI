@@ -11,6 +11,7 @@ from googleapiclient.discovery import build
 from google.auth.exceptions import RefreshError
 
 from .exceptions import GoogleCredentialsNotFoundError
+from .paths import ensure_data_dir
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +24,12 @@ class GoogleCalendarClient:
         *,
         credentials_path: Path,
         token_path: Path,
+        oauth_state_path: Optional[Path] = None,
         app_name: str = "StudioDimaAI",
     ):
         self.credentials_path = credentials_path
         self.token_path = token_path
+        self.oauth_state_path = oauth_state_path
         self.app_name = app_name
         self.creds: Optional[Credentials] = None
 
@@ -122,6 +125,7 @@ class GoogleCalendarClient:
         raise GoogleCredentialsNotFoundError("No valid credentials found. Re-authentication is required.")
 
     def _save_token(self):
+        ensure_data_dir()
         self.token_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.token_path, "w") as f:
             f.write(self.creds.to_json())
@@ -133,10 +137,14 @@ class GoogleCalendarClient:
         self.creds = None
 
     def _get_state_path(self) -> Path:
+        if self.oauth_state_path:
+            return self.oauth_state_path
         return self.token_path.parent / "oauth_state.json"
 
     def _save_state_for_callback(self, state: str):
+        ensure_data_dir()
         state_path = self._get_state_path()
+        state_path.parent.mkdir(parents=True, exist_ok=True)
         with open(state_path, "w") as f:
             json.dump({'state': state}, f)
             
