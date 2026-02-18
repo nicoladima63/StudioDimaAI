@@ -38,6 +38,10 @@ logger = logging.getLogger(__name__)
 socketio = None
 websocket_service = None
 
+# Global Push Notification service (will be initialized in create_app_v2)
+push_service = None
+vapid_public_key = None
+
 def create_app_v2(config_name: Optional[str] = None) -> Flask:
     """
     Create and configure the Flask application for Server V2.
@@ -71,7 +75,10 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
     
     # Initialize SocketIO
     init_socketio(app)
-    
+
+    # Initialize Push Notifications
+    init_push_service(app)
+
     # Initialize database manager
     init_database_manager(app)
     
@@ -199,6 +206,48 @@ def init_socketio(app: Flask) -> None:
     logger.info("WebSocket service initialized")
 
 
+def init_push_service(app: Flask) -> None:
+    """Initialize Push Notification service for browser push."""
+    global push_service, vapid_public_key
+
+    try:
+        # Read configuration from environment variables
+        push_enabled = os.environ.get('PUSH_NOTIFICATIONS_ENABLED', 'false').lower() == 'true'
+
+        if not push_enabled:
+            logger.info("Push notifications disabled in config (PUSH_NOTIFICATIONS_ENABLED=false)")
+            return
+
+        vapid_private_key = os.environ.get('VAPID_PRIVATE_KEY')
+        # Use standard base64 version for frontend (with padding)
+        vapid_public_key_base64 = os.environ.get('VAPID_PUBLIC_KEY_BASE64')
+        vapid_claims_email = os.environ.get('VAPID_CLAIMS_EMAIL', 'admin@studiodima.com')
+
+        # Validate required keys
+        if not vapid_private_key or not vapid_public_key_base64:
+            logger.warning("VAPID keys not found in environment. Push notifications disabled.")
+            logger.warning("Run: python generate_vapid_keys.py and add keys to .env file")
+            return
+
+        # Initialize push service
+        from services.push_notification_service import PushNotificationService
+        db_manager = get_database_manager()
+
+        push_service = PushNotificationService(
+            db_manager=db_manager,
+            vapid_private_key=vapid_private_key,
+            vapid_claims={"sub": f"mailto:{vapid_claims_email}"}
+        )
+        # Store base64 version for frontend
+        vapid_public_key = vapid_public_key_base64
+
+        logger.info("Push notification service initialized successfully")
+
+    except Exception as e:
+        logger.error(f"Failed to initialize push service: {e}")
+        logger.warning("Push notifications will be disabled")
+
+
 def init_database_manager(app: Flask) -> None:
     """Initialize the database manager."""
     # Database manager will be initialized per request
@@ -241,6 +290,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_providers import providers_bp
     from api.v2_notifications import notifications_bp
     from api.v2_prestazione_work_mapping import prestazione_mapping_bp
+    from api.v2_push import push_bp
 
     # Register all V2 blueprints
     blueprints = [
@@ -274,7 +324,8 @@ def register_blueprints(app: Flask) -> None:
         todos_bp,
         providers_bp,
         notifications_bp,
-        prestazione_mapping_bp
+        prestazione_mapping_bp,
+        push_bp
     ]
     
     # Register standard blueprints with API prefix only

@@ -96,20 +96,17 @@ class TodoEscalationJob:
     def _calculate_urgency_level(self, days_overdue: int) -> str:
         """
         Calculate urgency level based on days overdue.
-        
-        - 0 days: normal (no action)
-        - 1 day: attention (soft reminder)
-        - 2-3 days: urgent (insistent reminder)
-        - 4+ days: critical (very insistent reminder)
+
+        - 0 days: attention (appena scaduto)
+        - 1-2 days: urgent (insistent reminder)
+        - 3+ days: critical (very insistent reminder)
         """
-        if days_overdue >= 4:
+        if days_overdue > 2:  # 3+ giorni
             return 'critical'
-        elif days_overdue >= 2:
+        elif days_overdue >= 1:  # 1-2 giorni
             return 'urgent'
-        elif days_overdue >= 1:
+        else:  # 0 giorni (appena scaduto)
             return 'attention'
-        else:
-            return 'normal'
     
     def _send_reminder_notification(self, todo: Dict[str, Any], urgency_level: str, days_overdue: int) -> None:
         """Send reminder notification based on urgency level."""
@@ -152,7 +149,7 @@ class TodoEscalationJob:
                 if websocket_service:
                     websocket_service.broadcast_notification(
                         user_id=recipient_id,
-                        data={
+                        notification_data={
                             'type': 'todo_escalation',
                             'todo_id': todo['id'],
                             'urgency_level': urgency_level,

@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth.store'
 import AppSidebar from './AppSidebar'
 import NotificationBell from '@/components/ui/NotificationBell'
+import PushNotificationToggle from '@/components/PushNotificationToggle'
 
 // Layout CoreUI con AppSidebar moderna
 const Layout: React.FC = () => {
@@ -95,6 +96,12 @@ const Layout: React.FC = () => {
                     {user.role}
                   </span>
                 </div>
+                <PushNotificationToggle
+                  showLabel={false}
+                  size="sm"
+                  onSuccess={(msg) => alert(msg)}
+                  onError={(msg) => alert(msg)}
+                />
                 <NotificationBell />
                 <button
                   onClick={handleLogout}
