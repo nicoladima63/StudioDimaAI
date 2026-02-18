@@ -105,11 +105,13 @@ apiClient.interceptors.response.use(
         try {
           const response = await axios.post(
             `${config.api.baseUrl}/auth/refresh`,
-            { refresh_token: refreshToken }
+            {},
+            { headers: { Authorization: `Bearer ${refreshToken}` } }
           )
 
           const { access_token, refresh_token } = response.data.data
-          setTokens(access_token, refresh_token)
+          // Server may not return a new refresh token - keep the existing one in that case
+          setTokens(access_token, refresh_token || refreshToken)
 
           // Retry original request
           originalRequest.headers.Authorization = `Bearer ${access_token}`

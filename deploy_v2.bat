@@ -45,7 +45,7 @@ mkdir "%BACKUP_DIR%" 2>nul
 :: File da preservare (con i path corretti dove il codice li cerca)
 :: credentials.json -> instance/
 :: tokens/token.json -> tokens/
-:: instance/sync_state.json -> instance/
+:: NOTA: sync_state.json NON e' critico - il sync engine V2 usa UID/fingerprint da Google Calendar
 
 if exist "%DEPLOY_PATH%\instance\credentials.json" (
     copy "%DEPLOY_PATH%\instance\credentials.json" "%BACKUP_DIR%\credentials.json" /Y >nul 2>&1
@@ -86,20 +86,6 @@ if exist "%DEPLOY_PATH%\tokens\token.json" (
     )
 )
 
-if exist "%DEPLOY_PATH%\instance\sync_state.json" (
-    copy "%DEPLOY_PATH%\instance\sync_state.json" "%BACKUP_DIR%\sync_state.json" /Y >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo   [WARN] Impossibile fare backup di sync_state.json
-        echo   [WARN] Impossibile fare backup di sync_state.json >> "%LOGFILE%"
-    ) else (
-        echo   [OK] sync_state.json salvato
-        echo   [OK] sync_state.json salvato >> "%LOGFILE%"
-    )
-) else (
-    echo   [SKIP] sync_state.json non presente
-    echo   [SKIP] sync_state.json non presente >> "%LOGFILE%"
-)
-
 echo Backup completato in: %BACKUP_DIR%
 echo Backup completato in: %BACKUP_DIR% >> "%LOGFILE%"
 
@@ -123,7 +109,7 @@ echo [2/7] Sincronizzazione Server V2... >> "%LOGFILE%"
 
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
     /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" "instance" "tokens" "_deploy_backups" ^
-    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "sync_state.json" "database_mode.txt" ^
+    /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "sync_state.json" "database_mode.txt" "credentials.json" "token.json" ^
     /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
 
 set "ROBO_EXIT=%ERRORLEVEL%"
@@ -140,54 +126,65 @@ echo   [OK] Sync Server V2 completata.
 echo   [OK] Sync Server V2 completata. >> "%LOGFILE%"
 
 :: ============================================================================
-:: [2.5/7] Ripristino file sensibili
+:: [2.5/7] Verifica e ripristino file sensibili (PROD ha priorita')
 :: ============================================================================
-echo [2.5/7] Ripristino file sensibili...
-echo [2.5/7] Ripristino file sensibili... >> "%LOGFILE%"
+echo [2.5/7] Verifica file sensibili post-sync (prod ha priorita')...
+echo [2.5/7] Verifica file sensibili post-sync (prod ha priorita')... >> "%LOGFILE%"
 
 :: Crea le directory necessarie
-if not exist "%DEPLOY_PATH%\tokens" mkdir "%DEPLOY_PATH%\tokens"
 if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
 
-:: Ripristina credentials.json in instance/
-if exist "%BACKUP_DIR%\credentials.json" (
+:: --- credentials.json ---
+:: Se esiste ancora su prod (come dovrebbe - instance/ e' esclusa da robocopy), non toccare.
+:: Ripristina da backup SOLO se e' sparito.
+if exist "%DEPLOY_PATH%\instance\credentials.json" (
+    echo   [OK] credentials.json preservato su prod (nessuna azione)
+    echo   [OK] credentials.json preservato su prod >> "%LOGFILE%"
+) else if exist "%BACKUP_DIR%\credentials.json" (
+    echo   [WARN] credentials.json mancante dopo sync! Ripristino da backup...
+    echo   [WARN] credentials.json mancante dopo sync! Ripristino da backup... >> "%LOGFILE%"
     copy "%BACKUP_DIR%\credentials.json" "%DEPLOY_PATH%\instance\credentials.json" /Y >nul 2>&1
     if !errorlevel! neq 0 (
         echo   [ERR] Impossibile ripristinare credentials.json!
         echo   [ERR] Impossibile ripristinare credentials.json! >> "%LOGFILE%"
     ) else (
-        echo   [OK] credentials.json ripristinato
-        echo   [OK] credentials.json ripristinato >> "%LOGFILE%"
+        echo   [OK] credentials.json ripristinato da backup
+        echo   [OK] credentials.json ripristinato da backup >> "%LOGFILE%"
     )
+) else (
+    echo   [WARN] credentials.json non presente su prod ne' in backup - configurazione manuale necessaria
+    echo   [WARN] credentials.json non presente su prod ne' in backup >> "%LOGFILE%"
 )
 
-:: Ripristina token.json in tokens/
-if exist "%BACKUP_DIR%\token.json" (
-    copy "%BACKUP_DIR%\token.json" "%DEPLOY_PATH%\tokens\token.json" /Y >nul 2>&1
+:: --- token.json ---
+:: Percorso standard: instance/token.json (unica fonte di verita')
+:: Se esiste su prod, non toccare. Ripristina SOLO se sparito.
+:: Gestione migrazione: se backup ha token (preso da tokens/ o instance/), va in instance/
+if exist "%DEPLOY_PATH%\instance\token.json" (
+    echo   [OK] token.json preservato su prod in instance/ (nessuna azione)
+    echo   [OK] token.json preservato su prod in instance/ >> "%LOGFILE%"
+) else if exist "%DEPLOY_PATH%\tokens\token.json" (
+    echo   [OK] token.json trovato in tokens/ - copio in instance/ per standardizzare
+    echo   [OK] token.json trovato in tokens/ - migrazione a instance/ >> "%LOGFILE%"
+    copy "%DEPLOY_PATH%\tokens\token.json" "%DEPLOY_PATH%\instance\token.json" /Y >nul 2>&1
+) else if exist "%BACKUP_DIR%\token.json" (
+    echo   [WARN] token.json mancante dopo sync! Ripristino da backup...
+    echo   [WARN] token.json mancante dopo sync! Ripristino da backup... >> "%LOGFILE%"
+    copy "%BACKUP_DIR%\token.json" "%DEPLOY_PATH%\instance\token.json" /Y >nul 2>&1
     if !errorlevel! neq 0 (
         echo   [ERR] Impossibile ripristinare token.json!
         echo   [ERR] Impossibile ripristinare token.json! >> "%LOGFILE%"
     ) else (
-        echo   [OK] token.json ripristinato
-        echo   [OK] token.json ripristinato >> "%LOGFILE%"
+        echo   [OK] token.json ripristinato da backup in instance/
+        echo   [OK] token.json ripristinato da backup in instance/ >> "%LOGFILE%"
     )
-    copy "%BACKUP_DIR%\token.json" "%DEPLOY_PATH%\instance\token.json" /Y >nul 2>&1
+) else (
+    echo   [WARN] token.json non presente - ri-autenticazione Google necessaria dopo avvio
+    echo   [WARN] token.json non presente - ri-autenticazione necessaria >> "%LOGFILE%"
 )
 
-:: Ripristina sync_state.json in instance/
-if exist "%BACKUP_DIR%\sync_state.json" (
-    copy "%BACKUP_DIR%\sync_state.json" "%DEPLOY_PATH%\instance\sync_state.json" /Y >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo   [ERR] Impossibile ripristinare sync_state.json!
-        echo   [ERR] Impossibile ripristinare sync_state.json! >> "%LOGFILE%"
-    ) else (
-        echo   [OK] sync_state.json ripristinato
-        echo   [OK] sync_state.json ripristinato >> "%LOGFILE%"
-    )
-)
-
-echo Ripristino file sensibili completato.
-echo Ripristino file sensibili completato. >> "%LOGFILE%"
+echo Verifica file sensibili completata.
+echo Verifica file sensibili completata. >> "%LOGFILE%"
 
 :: ============================================================================
 :: [2.6/7] Creazione database_mode.txt per PROD
@@ -313,7 +310,7 @@ echo.
 echo :: Persistent paths (avoid losing OAuth token/sync state on redeploy)
 echo set "STUDIODIMAAI_DATA_DIR=%%~dp0instance"
 echo set "GOOGLE_CREDENTIALS_PATH=%%~dp0instance\credentials.json"
-echo set "GOOGLE_TOKEN_PATH=%%~dp0tokens\token.json"
+echo set "GOOGLE_TOKEN_PATH=%%~dp0instance\token.json"
 echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
 echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
 echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"

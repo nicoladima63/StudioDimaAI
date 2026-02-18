@@ -5,11 +5,13 @@ import { cilBell } from '@coreui/icons'
 import { useNotificationStore } from '@/store/notifications.store'
 import NotificationCenter from './NotificationCenter'
 import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications'
+import { useAuthStore } from '@/store/auth.store'
 
 const POLLING_INTERVAL = 60000 // 60 seconds (reduced, WebSocket is primary)
 
 const NotificationBell: React.FC = () => {
   const { unreadCount, fetchUnread } = useNotificationStore()
+  const { isAuthenticated } = useAuthStore()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const [hasError, setHasError] = React.useState(false)
 
@@ -18,16 +20,25 @@ const NotificationBell: React.FC = () => {
 
   // Initial fetch
   useEffect(() => {
-    fetchUnread().catch((err) => {
-      // Silent fail, component should still render
+    if (!isAuthenticated) return
+    fetchUnread().catch(() => {
       setHasError(true)
     })
-  }, [fetchUnread])
+  }, [fetchUnread, isAuthenticated])
 
   // Setup polling as fallback (reduced frequency since WebSocket is primary)
+  // Polling runs only when authenticated - avoids "Missing Authorization Header" spam in logs
   useEffect(() => {
+    if (!isAuthenticated) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      return
+    }
+
     intervalRef.current = setInterval(() => {
-      fetchUnread().catch((err) => {
+      fetchUnread().catch(() => {
         // Silent fail, will retry on next interval
       })
     }, POLLING_INTERVAL)
@@ -37,7 +48,7 @@ const NotificationBell: React.FC = () => {
         clearInterval(intervalRef.current)
       }
     }
-  }, [fetchUnread])
+  }, [fetchUnread, isAuthenticated])
 
   // Fallback render if icon fails
   if (!cilBell) {
