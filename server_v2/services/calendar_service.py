@@ -73,10 +73,11 @@ def sync_calendar_from_records(records: List[Dict[str, Any]], on_progress=None) 
     )
 
     logger.info(
-        "Sync completata | inserted=%s updated=%s skipped=%s errors=%s",
+        "Sync completata | inserted=%s updated=%s skipped=%s pruned=%s errors=%s",
         stats.get("inserted"),
         stats.get("updated"),
         stats.get("skipped"),
+        stats.get("pruned"),
         stats.get("errors"),
     )
 

@@ -58,6 +58,8 @@ def build_google_event(
     event = {
         "summary": appointment.title,
         "description": full_description,
+        "eventType": "default",
+        "status": "confirmed",
         "start": {
             "dateTime": start_dt,
             "timeZone": "Europe/Rome",
@@ -67,7 +69,8 @@ def build_google_event(
             "timeZone": "Europe/Rome",
         },
         "reminders": {
-            "useDefault": False
+            "useDefault": False,
+            "overrides": [],
         },
         "extendedProperties": {
             "private": {

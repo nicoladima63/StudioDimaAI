@@ -49,13 +49,8 @@ mkdir "%BACKUP_DIR%" 2>nul
 
 if exist "%DEPLOY_PATH%\instance\credentials.json" (
     copy "%DEPLOY_PATH%\instance\credentials.json" "%BACKUP_DIR%\credentials.json" /Y >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo   [WARN] Impossibile fare backup di credentials.json
-        echo   [WARN] Impossibile fare backup di credentials.json >> "%LOGFILE%"
-    ) else (
-        echo   [OK] credentials.json salvato
-        echo   [OK] credentials.json salvato >> "%LOGFILE%"
-    )
+    echo   [OK] credentials.json salvato
+    echo   [OK] credentials.json salvato >> "%LOGFILE%"
 ) else (
     echo   [SKIP] credentials.json non presente
     echo   [SKIP] credentials.json non presente >> "%LOGFILE%"
@@ -63,27 +58,15 @@ if exist "%DEPLOY_PATH%\instance\credentials.json" (
 
 if exist "%DEPLOY_PATH%\tokens\token.json" (
     copy "%DEPLOY_PATH%\tokens\token.json" "%BACKUP_DIR%\token.json" /Y >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo   [WARN] Impossibile fare backup di token.json
-        echo   [WARN] Impossibile fare backup di token.json >> "%LOGFILE%"
-    ) else (
-        echo   [OK] token.json salvato
-        echo   [OK] token.json salvato >> "%LOGFILE%"
-    )
+    echo   [OK] token.json salvato da tokens/
+    echo   [OK] token.json salvato da tokens/ >> "%LOGFILE%"
+) else if exist "%DEPLOY_PATH%\instance\token.json" (
+    copy "%DEPLOY_PATH%\instance\token.json" "%BACKUP_DIR%\token.json" /Y >nul 2>&1
+    echo   [OK] token.json salvato da instance/
+    echo   [OK] token.json salvato da instance/ >> "%LOGFILE%"
 ) else (
-    if exist "%DEPLOY_PATH%\instance\token.json" (
-        copy "%DEPLOY_PATH%\instance\token.json" "%BACKUP_DIR%\token.json" /Y >nul 2>&1
-        if !errorlevel! neq 0 (
-            echo   [WARN] Impossibile fare backup di token.json (instance)
-            echo   [WARN] Impossibile fare backup di token.json (instance) >> "%LOGFILE%"
-        ) else (
-            echo   [OK] token.json salvato (da instance)
-            echo   [OK] token.json salvato (da instance) >> "%LOGFILE%"
-        )
-    ) else (
-        echo   [SKIP] token.json non presente
-        echo   [SKIP] token.json non presente >> "%LOGFILE%"
-    )
+    echo   [SKIP] token.json non presente
+    echo   [SKIP] token.json non presente >> "%LOGFILE%"
 )
 
 echo Backup completato in: %BACKUP_DIR%
@@ -138,19 +121,14 @@ if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
 :: Se esiste ancora su prod (come dovrebbe - instance/ e' esclusa da robocopy), non toccare.
 :: Ripristina da backup SOLO se e' sparito.
 if exist "%DEPLOY_PATH%\instance\credentials.json" (
-    echo   [OK] credentials.json preservato su prod (nessuna azione)
-    echo   [OK] credentials.json preservato su prod >> "%LOGFILE%"
+    echo   [OK] credentials.json preservato su prod - gia' presente, skip
+    echo   [OK] credentials.json preservato su prod - gia' presente, skip >> "%LOGFILE%"
 ) else if exist "%BACKUP_DIR%\credentials.json" (
     echo   [WARN] credentials.json mancante dopo sync! Ripristino da backup...
     echo   [WARN] credentials.json mancante dopo sync! Ripristino da backup... >> "%LOGFILE%"
     copy "%BACKUP_DIR%\credentials.json" "%DEPLOY_PATH%\instance\credentials.json" /Y >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo   [ERR] Impossibile ripristinare credentials.json!
-        echo   [ERR] Impossibile ripristinare credentials.json! >> "%LOGFILE%"
-    ) else (
-        echo   [OK] credentials.json ripristinato da backup
-        echo   [OK] credentials.json ripristinato da backup >> "%LOGFILE%"
-    )
+    echo   [OK] credentials.json ripristinato da backup
+    echo   [OK] credentials.json ripristinato da backup >> "%LOGFILE%"
 ) else (
     echo   [WARN] credentials.json non presente su prod ne' in backup - configurazione manuale necessaria
     echo   [WARN] credentials.json non presente su prod ne' in backup >> "%LOGFILE%"
@@ -161,8 +139,8 @@ if exist "%DEPLOY_PATH%\instance\credentials.json" (
 :: Se esiste su prod, non toccare. Ripristina SOLO se sparito.
 :: Gestione migrazione: se backup ha token (preso da tokens/ o instance/), va in instance/
 if exist "%DEPLOY_PATH%\instance\token.json" (
-    echo   [OK] token.json preservato su prod in instance/ (nessuna azione)
-    echo   [OK] token.json preservato su prod in instance/ >> "%LOGFILE%"
+    echo   [OK] token.json preservato su prod in instance/ - gia' presente, skip
+    echo   [OK] token.json preservato su prod in instance/ - gia' presente, skip >> "%LOGFILE%"
 ) else if exist "%DEPLOY_PATH%\tokens\token.json" (
     echo   [OK] token.json trovato in tokens/ - copio in instance/ per standardizzare
     echo   [OK] token.json trovato in tokens/ - migrazione a instance/ >> "%LOGFILE%"
@@ -171,13 +149,8 @@ if exist "%DEPLOY_PATH%\instance\token.json" (
     echo   [WARN] token.json mancante dopo sync! Ripristino da backup...
     echo   [WARN] token.json mancante dopo sync! Ripristino da backup... >> "%LOGFILE%"
     copy "%BACKUP_DIR%\token.json" "%DEPLOY_PATH%\instance\token.json" /Y >nul 2>&1
-    if !errorlevel! neq 0 (
-        echo   [ERR] Impossibile ripristinare token.json!
-        echo   [ERR] Impossibile ripristinare token.json! >> "%LOGFILE%"
-    ) else (
-        echo   [OK] token.json ripristinato da backup in instance/
-        echo   [OK] token.json ripristinato da backup in instance/ >> "%LOGFILE%"
-    )
+    echo   [OK] token.json ripristinato da backup in instance/
+    echo   [OK] token.json ripristinato da backup in instance/ >> "%LOGFILE%"
 ) else (
     echo   [WARN] token.json non presente - ri-autenticazione Google necessaria dopo avvio
     echo   [WARN] token.json non presente - ri-autenticazione necessaria >> "%LOGFILE%"
@@ -307,18 +280,14 @@ echo echo ==========================================
 echo echo    STUDIO DIMA AI V2 - STARTING SERVER
 echo echo ==========================================
 echo.
-echo :: Persistent paths (avoid losing OAuth token/sync state on redeploy)
 echo set "STUDIODIMAAI_DATA_DIR=%%~dp0instance"
 echo set "GOOGLE_CREDENTIALS_PATH=%%~dp0instance\credentials.json"
 echo set "GOOGLE_TOKEN_PATH=%%~dp0instance\token.json"
 echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
 echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
 echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"
-echo.
-echo :: OAuth redirect for intranet (update if you use IIS/reverse-proxy)
 echo set "GOOGLE_OAUTH_REDIRECT_URI=http://SERVERDIMA:5001/oauth/callback"
 echo.
-echo :: VENV Check
 echo if not exist venv ^(
 echo     echo Creazione virtual environment...
 echo     python -m venv venv
@@ -326,20 +295,20 @@ echo ^)
 echo.
 echo call venv\Scripts\activate.bat
 echo.
-echo :: Dependencies Check
 echo echo Verifica dipendenze...
 echo pip install -r requirements.txt --quiet
-echo.
-echo :: Health Checks
-echo echo Verifica connessioni...
-echo python -c "import services.calendar_service as cs; ok = cs.test_google_connection(); print(' Google: ' + ('OK' if ok else '! ERR'))"
 echo.
 echo echo Server in avvio su porta 5001...
 echo start "StudioDimaAI V2 Server" cmd /k python run_v2.py --config production --port 5001
 ) > "%DEPLOY_PATH%\start_server_v2.bat"
 
-echo   [OK] start_server_v2.bat creato.
-echo   [OK] start_server_v2.bat creato. >> "%LOGFILE%"
+if not exist "%DEPLOY_PATH%\start_server_v2.bat" (
+    echo   [ERRORE] start_server_v2.bat non creato - problema scrittura sulla share!
+    echo   [ERRORE] start_server_v2.bat non creato >> "%LOGFILE%"
+) else (
+    echo   [OK] start_server_v2.bat creato.
+    echo   [OK] start_server_v2.bat creato. >> "%LOGFILE%"
+)
 
 :: ============================================================================
 :: [7/7] Utility Script

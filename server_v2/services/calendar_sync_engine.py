@@ -41,6 +41,7 @@ def sync_appointments(
         "inserted": 0,
         "updated": 0,
         "skipped": 0,
+        "pruned": 0,
         "errors": 0,
     }
 
@@ -92,6 +93,57 @@ def sync_appointments(
                 str(e),
                 exc_info=True
             )
+
+    # ---- PRUNE: cancella eventi Google orfani per le date sincronizzate ----
+    synced_dates = {appt.date for appt in appointments}
+    synced_uids = {appt.uid for appt in appointments}
+
+    # Determina i calendarId coinvolti in questo batch di sync
+    synced_calendar_ids = set()
+    for appt in appointments:
+        studio = appt.metadata.get("studio")
+        try:
+            studio = int(studio)
+        except (TypeError, ValueError):
+            continue
+        if studio == 1:
+            cal_id = os.getenv("CALENDAR_ID_STUDIO_1")
+        elif studio == 2:
+            cal_id = os.getenv("CALENDAR_ID_STUDIO_2")
+        else:
+            continue
+        if cal_id:
+            synced_calendar_ids.add(cal_id)
+
+    for uid, google_event in existing_by_uid.items():
+        start_dt = google_event.get("start", {}).get("dateTime", "")
+        if not start_dt:
+            continue
+        event_date = start_dt[:10]  # "2026-02-25T10:00:00" -> "2026-02-25"
+
+        event_id = google_event.get("id", "")
+        event_calendar = google_event.get("calendarId", "")
+
+        # Prune solo eventi dello stesso calendario, stesse date, UID non piu nel sorgente
+        if (event_date in synced_dates
+                and uid not in synced_uids
+                and event_id.startswith("sdai")
+                and event_calendar in synced_calendar_ids):
+            try:
+                logger.info("PRUNE orphan uid=%s date=%s", uid, event_date)
+                _delete_event(service, google_event)
+                stats["pruned"] += 1
+                time.sleep(SYNC_SLEEP_SECONDS)
+            except HttpError as e:
+                if e.resp.status == 410:
+                    # Already deleted on Google side, count as pruned
+                    stats["pruned"] += 1
+                else:
+                    logger.error("Prune error uid=%s (%s)", uid, str(e))
+                    stats["errors"] += 1
+            except Exception as e:
+                logger.error("Prune error uid=%s (%s)", uid, str(e))
+                stats["errors"] += 1
 
     return stats
 
@@ -248,8 +300,8 @@ def _is_modified(appt: NormalizedAppointment, google_event: Dict) -> bool:
 
 
 def _desired_event_id(uid: str) -> str:
-    # Start with a letter for maximum compatibility with Google event id rules
-    return f"sdai_{uid}"
+    # Google Calendar event IDs: only base32hex chars allowed (a-v and 0-9), no underscores
+    return f"sdai{uid}"
 
 
 def _appointment_fingerprint(appt: NormalizedAppointment) -> Optional[str]:
