@@ -78,6 +78,30 @@ class DbfDataService:
             logger.error(f"Errore nel recupero prestazione {prestazione_id}: {e}", exc_info=True)
             return None
 
+    def get_patient_id_from_piano(self, piano_id: str) -> Optional[str]:
+        """
+        Risale dal piano di cura (ELENCO) all'ID paziente.
+        PREVENT.DB_PRELCOD -> ELENCO.DB_CODE -> ELENCO.DB_ELPACOD
+        """
+        try:
+            elenco_path = self.reader._get_dbf_path('ELENCO.DBF')
+            col_elenco = COLONNE['elenco']
+            id_field = col_elenco['id']  # DB_CODE
+            paziente_field = col_elenco['id_paziente']  # DB_ELPACOD
+
+            with dbf.Table(elenco_path, codepage='cp1252') as table:
+                for record in table:
+                    current_id = clean_dbf_value(getattr(record, id_field, ''))
+                    if current_id == piano_id:
+                        patient_id = clean_dbf_value(getattr(record, paziente_field, ''))
+                        if patient_id and str(patient_id).strip():
+                            return str(patient_id).strip()
+                        return None
+            return None
+        except Exception as e:
+            logger.error(f"Errore nel recupero paziente dal piano {piano_id}: {e}", exc_info=True)
+            return None
+
     def enrich_record(self, source_record: Dict[str, Any], enrichment_config: Dict[str, Any]) -> None:
         """
         Arricchisce un record sorgente con dati presi da un'altra tabella DBF,

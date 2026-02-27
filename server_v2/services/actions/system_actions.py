@@ -53,7 +53,17 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
             else:
                 patient_id = None  # Reset se era solo spazi
 
-    # Caso 2: ID paziente vuoto (nuovo paziente) - cerca nome in DB_APDESCR e telefono in DB_NOTE
+    # Caso 2a: Contesto da preventivi - risali tramite ELENCO (piano di cura) al paziente
+    if not patient_id:
+        piano_key = COLONNE.get('preventivi', {}).get('id_piano')  # DB_PRELCOD
+        if piano_key and piano_key in enriched_context:
+            piano_id = enriched_context[piano_key]
+            if piano_id and str(piano_id).strip():
+                patient_id = dbf_data_service.get_patient_id_from_piano(str(piano_id).strip())
+                if patient_id:
+                    logger.info(f"Paziente {patient_id} trovato tramite piano di cura {piano_id}")
+
+    # Caso 2b: ID paziente vuoto (nuovo paziente) - cerca nome in DB_APDESCR e telefono in DB_NOTE
     if not patient_id:
         # Estrai nome da DB_APDESCR
         desc_key = COLONNE.get('appuntamenti', {}).get('descrizione', 'DB_APDESCR')
@@ -72,11 +82,11 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
             phone_match = re.search(r'(?:\+39)?[\s-]?3\d[\d\s-]{7,9}', first_line)
             if phone_match:
                 enriched_context['telefono'] = phone_match.group(0).strip()
-        
+
         # Se dopo questi tentativi non abbiamo un telefono, solleva errore
         if 'telefono' not in enriched_context or not enriched_context['telefono']:
             raise ValidationError("Arricchimento fallito: Impossibile determinare un numero di telefono valido per il nuovo paziente.")
-        
+
         return enriched_context # Abbiamo nome e telefono, possiamo procedere
 
     # Caso 3: ID paziente trovato - recupera dati dal DB
@@ -272,10 +282,15 @@ def impl_create_task_from_work(context_data: Dict[str, Any], **params):
                 logger.debug(f"Trovato {k} nel contesto: {patient_id}")
                 break
 
-    # Se viene da PREVENTIVI, potremmo avere DB_PRELCOD
+    # Se viene da PREVENTIVI, risali tramite ELENCO (piano di cura) al paziente
     if not patient_id and 'DB_PRELCOD' in context_data and context_data['DB_PRELCOD']:
-        patient_id = context_data['DB_PRELCOD']
-        logger.debug(f"Usato DB_PRELCOD come patient_id: {patient_id}")
+        piano_id = str(context_data['DB_PRELCOD']).strip()
+        if piano_id:
+            patient_id = get_dbf_data_service().get_patient_id_from_piano(piano_id)
+            if patient_id:
+                logger.info(f"Paziente {patient_id} trovato tramite piano di cura {piano_id}")
+            else:
+                logger.warning(f"Nessun paziente trovato per piano di cura {piano_id}")
 
     if not patient_id:
         raise ValidationError(f"Impossibile determinare patient_id dal contesto del trigger. Context keys: {list(context_data.keys())}")
