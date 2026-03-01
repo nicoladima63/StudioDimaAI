@@ -108,7 +108,7 @@ class ConfigManager:
         """Imposta valori di default per configurazioni mancanti."""
         defaults = {
             'APP_MODE': 'dev',
-            'DEV_DB_BASE_PATH': 'C:\\windent',
+            'DEV_DB_BASE_PATH': 'C:\\pixel\\windent',
             'PROD_DB_BASE_PATH': '\\\\serverdima\\pixel\\windent',
             'PROD_DBF_APPOINTMENTS_PATH': '\\\\serverdima\\pixel\\windent\\USER\\APPUNTA.DBF',
             'PROD_DBF_PATIENTS_PATH': '\\\\serverdima\\pixel\\windent\\DATI\\PAZIENTI.DBF',

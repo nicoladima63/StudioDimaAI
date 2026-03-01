@@ -16,7 +16,8 @@ import {
   cilCode,
   cilAccountLogout,
   cilBarChart,
-  cilMedicalCross
+  cilMedicalCross,
+  cilChartPie
 } from '@coreui/icons';
 import { CNavItem, CNavTitle } from '@coreui/react';
 
@@ -126,6 +127,12 @@ const _nav = [
     name: 'Statistiche',
     to: '/statistiche',
     icon: <CIcon icon={cilBarChart} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Economics',
+    to: '/economics',
+    icon: <CIcon icon={cilChartPie} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,

@@ -28,6 +28,7 @@ import ContiPage from '@/features/studio/pages/ContiPage';
 import StatistichePage from '@/features/pki/statistiche/pages/StatistichePage'
 import MaterialiPage from '@/features/materiali/pages/MaterialiPage';
 import MaterialiBundlePage from '@/features/materiali/pages/MaterialiBundlePage';
+import EconomicsPage from '@/features/economics/pages/EconomicsPage';
 
 import Template from '@/features/test/TemplatePage';
 
@@ -72,6 +73,7 @@ const AppRouter: React.FC = () => {
           <Route path="/studio/conti" element={<ContiPage />} />
           <Route path="/materiali" element={<MaterialiPage />} />
           <Route path="/materiali/bundle" element={<MaterialiBundlePage />} />
+          <Route path="/economics" element={<EconomicsPage />} />
         </Route>
 
         {/* Route fallback */}
