@@ -4,6 +4,7 @@ Analisi trend di produzione con regressione lineare.
 """
 
 import logging
+import math
 from datetime import datetime
 from typing import Dict, Any
 
@@ -12,6 +13,19 @@ import numpy as np
 from services.economics.monthly_aggregator import get_monthly_summary
 
 logger = logging.getLogger(__name__)
+
+
+def _safe(val, default=0):
+    """Converte NaN/Inf in un valore sicuro per JSON."""
+    if val is None:
+        return default
+    try:
+        f = float(val)
+        if math.isnan(f) or math.isinf(f):
+            return default
+        return f
+    except (TypeError, ValueError):
+        return default
 
 
 def get_trend_analysis() -> Dict[str, Any]:
@@ -107,11 +121,11 @@ def get_trend_analysis() -> Dict[str, Any]:
         })
 
     return {
-        'crescita_annuale_pct': round(crescita_annuale_pct, 2),
+        'crescita_annuale_pct': round(_safe(crescita_annuale_pct), 2),
         'trend_direction': trend_direction,
-        'r_squared_annuale': round(r_squared_annuale, 4),
-        'trend_12_mesi_pct': round(trend_12m, 2),
-        'proiezione_mese_corrente': round(max(0, proiezione_mese_corrente), 2),
+        'r_squared_annuale': round(_safe(r_squared_annuale), 4),
+        'trend_12_mesi_pct': round(_safe(trend_12m), 2),
+        'proiezione_mese_corrente': round(max(0, _safe(proiezione_mese_corrente)), 2),
         'anni_analizzati': len(anni_validi),
         'range_anni': f"{min(anni_validi.keys())}-{max(anni_validi.keys())}" if anni_validi else 'N/A',
         'anni_trend': anni_trend,

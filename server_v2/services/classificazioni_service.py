@@ -82,29 +82,30 @@ class ClassificazioniService(BaseService):
             print(f"Errore nella classificazione fornitore: {e}")
             return False
     
-    def classifica_fornitore_completo(self, codice_fornitore: str, contoid: int, brancaid: int = 0, 
-                                    sottocontoid: int = 0, note: str = None, fornitore_nome: str = None) -> bool:
+    def classifica_fornitore_completo(self, codice_fornitore: str, contoid: int, brancaid: int = 0,
+                                    sottocontoid: int = 0, tipo_di_costo: int = 1, note: str = None, fornitore_nome: str = None) -> bool:
         """
         Classifica un fornitore con gerarchia completa conto->branca->sottoconto
-        
+
         Args:
             codice_fornitore: ID del fornitore
             contoid: ID del conto
             brancaid: ID della branca (0 se non specificato)
             sottocontoid: ID del sottoconto (0 se non specificato)
+            tipo_di_costo: Tipo di costo (1=diretto, 2=indiretto, 3=non_deducibile)
             note: Note (opzionali)
             fornitore_nome: Nome del fornitore (opzionale)
-            
+
         Returns:
             True se la classificazione è avvenuta con successo
         """
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute('''
-                    INSERT OR REPLACE INTO classificazioni_costi 
+                    INSERT OR REPLACE INTO classificazioni_costi
                     (codice_riferimento, tipo_entita, tipo_di_costo, contoid, brancaid, sottocontoid, data_modifica, fornitore_nome)
-                    VALUES (?, 'fornitore', 1, ?, ?, ?, CURRENT_TIMESTAMP, ?)
-                ''', (codice_fornitore, contoid, brancaid, sottocontoid, fornitore_nome))
+                    VALUES (?, 'fornitore', ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+                ''', (codice_fornitore, tipo_di_costo, contoid, brancaid, sottocontoid, fornitore_nome))
                 return True
         except Exception as e:
             print(f"Errore nella classificazione completa fornitore: {e}")

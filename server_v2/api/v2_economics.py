@@ -184,6 +184,50 @@ def simulate_scenario():
 
 
 # =============================================================================
+# MULTI-YEAR COMPARISON & TRIMESTER FORECAST
+# =============================================================================
+
+@economics_bp.route('/economics/comparison/multi-year', methods=['GET'])
+@jwt_required()
+def get_multi_year_comparison():
+    """Confronto multi-anno con forecast."""
+    try:
+        require_auth()
+        anni_param = request.args.get('anni', '')
+        anni = []
+        if anni_param:
+            try:
+                anni = [int(a.strip()) for a in anni_param.split(',') if a.strip()]
+            except ValueError:
+                return jsonify({'state': 'error', 'error': 'Formato anni non valido. Usa: anni=2023,2024,2025'}), 400
+
+        from services.economics.comparison_engine import get_multi_year_comparison as multi_comp
+        data = multi_comp(anni=anni)
+
+        return jsonify({'state': 'success', 'data': data})
+    except Exception as e:
+        logger.error(f"Errore get_multi_year_comparison: {e}")
+        return jsonify({'state': 'error', 'error': str(e)}), 500
+
+
+@economics_bp.route('/economics/comparison/trimester-forecast', methods=['GET'])
+@jwt_required()
+def get_trimester_forecast():
+    """Previsione trimestrale dettagliata."""
+    try:
+        require_auth()
+        anno = request.args.get('anno', type=int)
+
+        from services.economics.comparison_engine import get_trimester_forecast as trim_fc
+        data = trim_fc(anno=anno)
+
+        return jsonify({'state': 'success', 'data': data})
+    except Exception as e:
+        logger.error(f"Errore get_trimester_forecast: {e}")
+        return jsonify({'state': 'error', 'error': str(e)}), 500
+
+
+# =============================================================================
 # CACHE MANAGEMENT
 # =============================================================================
 

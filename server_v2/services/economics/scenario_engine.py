@@ -4,12 +4,26 @@ Simulatore decisionale con variabili modificabili.
 """
 
 import logging
+import math
 from datetime import datetime
 from typing import Dict, Any
 
 from services.economics.forecast_engine import get_forecast
 
 logger = logging.getLogger(__name__)
+
+
+def _safe(val, default=0):
+    """Converte NaN/Inf in un valore sicuro per JSON."""
+    if val is None:
+        return default
+    try:
+        f = float(val)
+        if math.isnan(f) or math.isinf(f):
+            return default
+        return f
+    except (TypeError, ValueError):
+        return default
 
 
 def simulate(params: Dict[str, Any]) -> Dict[str, Any]:
@@ -99,28 +113,28 @@ def simulate(params: Dict[str, Any]) -> Dict[str, Any]:
     return {
         'anno': anno,
         'base': {
-            'produzione': round(produzione_base, 2),
-            'costi': round(costi_base, 2),
-            'margine': round(margine_base, 2),
+            'produzione': round(_safe(produzione_base), 2),
+            'costi': round(_safe(costi_base), 2),
+            'margine': round(_safe(margine_base), 2),
         },
         'simulato': {
-            'produzione': round(nuova_produzione, 2),
-            'costi': round(nuovi_costi, 2),
-            'margine': round(nuovo_margine, 2),
-            'margine_pct': round(nuovo_margine_pct, 2),
+            'produzione': round(_safe(nuova_produzione), 2),
+            'costi': round(_safe(nuovi_costi), 2),
+            'margine': round(_safe(nuovo_margine), 2),
+            'margine_pct': round(_safe(nuovo_margine_pct), 2),
         },
         'delta': {
-            'produzione': round(delta_produzione, 2),
-            'margine': round(delta_margine, 2),
-            'produzione_pct': round(delta_produzione / produzione_base * 100, 2) if produzione_base > 0 else 0,
+            'produzione': round(_safe(delta_produzione), 2),
+            'margine': round(_safe(delta_margine), 2),
+            'produzione_pct': round(_safe(delta_produzione / produzione_base * 100), 2) if produzione_base > 0 else 0,
         },
         'dettaglio_impatti': {
-            'aumento_tariffa': round(impatto_tariffa, 2),
-            'aumento_saturazione': round(impatto_saturazione, 2),
-            'nuovo_operatore_prod': round(impatto_nuovo_op_prod, 2),
-            'nuovo_operatore_costi': round(impatto_nuovo_op_costi, 2),
-            'riduzione_costi': round(impatto_riduzione_costi, 2),
-            'aumento_ore_cliniche': round(impatto_ore, 2),
+            'aumento_tariffa': round(_safe(impatto_tariffa), 2),
+            'aumento_saturazione': round(_safe(impatto_saturazione), 2),
+            'nuovo_operatore_prod': round(_safe(impatto_nuovo_op_prod), 2),
+            'nuovo_operatore_costi': round(_safe(impatto_nuovo_op_costi), 2),
+            'riduzione_costi': round(_safe(impatto_riduzione_costi), 2),
+            'aumento_ore_cliniche': round(_safe(impatto_ore), 2),
         },
         'parametri_usati': {
             'aumento_tariffa_pct': aumento_tariffa,

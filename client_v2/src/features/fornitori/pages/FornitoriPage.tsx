@@ -15,20 +15,20 @@ import type { ClassificazioneCosto } from '@/features/fornitori/types';
 const FornitoriPage: React.FC = () => {
   const { fornitori, isLoading, error, loadAll } = useFornitori();
   const { invalidateCache } = useFornitoriStore();
-  
+
   // Stato per il filtro fornitore
   const [selectedFornitore, setSelectedFornitore] = useState<Fornitore | null>(null);
-  
+
   // Stato per le classificazioni
   const [classificazioni, setClassificazioni] = useState<ClassificazioneCosto[]>([]);
-  
+
   // Hook per gestire le 3 modal riusabili
   const {
     // Stati modal
     anagraficaModalVisible,
     fattureElencoModalVisible,
     fatturaDetailModalVisible,
-    
+
     // Dati selezionati
     selectedFornitore: selectedFornitoreModal,
     selectedFatturaId,
@@ -49,7 +49,7 @@ const FornitoriPage: React.FC = () => {
     closeFattureElencoModal,
     closeFatturaDetailModal
   } = useFornitoreModals();
-  
+
   // Fornitori filtrati per la tabella
   const filteredFornitori = selectedFornitore ? [selectedFornitore] : fornitori;
 
@@ -114,7 +114,7 @@ const FornitoriPage: React.FC = () => {
 
   return (
     <PageLayout>
-      <PageLayout.Header 
+      <PageLayout.Header
         title="Gestione Fornitori (Esperimento)"
         headerAction={
           <div className="d-flex gap-2">
@@ -137,10 +137,10 @@ const FornitoriPage: React.FC = () => {
 
       <PageLayout.ContentHeader>
         <div className="row">
-          <div className="col-md-10">
+          <div className="col-md-6">
             <h5 className="mb-3">Filtri e Ricerca</h5>
-            <div className="row g-3">
-              <div className="col-md-6">
+            <div className="row g-2">
+              <div className="col-md-8">
                 <label className="form-label fw-bold">Filtro Fornitore</label>
                 <FornitoriSelect
                   value={selectedFornitore?.id || null}
@@ -156,16 +156,17 @@ const FornitoriPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="col-md-2">
+          <div className="col-md-3">
             <h5 className="mb-3">Statistiche</h5>
             <div className="row g-2">
-              <div className="col-12">
-                <div className="d-flex justify-content-between">
-                  <span>Totale fornitori:</span>
-                  <strong>{fornitori.length}</strong>
-                </div>
+              <div className="justify-content-start">
+                <span>Totale fornitori:</span>
+                <strong>{fornitori.length}</strong>
               </div>
             </div>
+          </div>
+          <div className="col-md-3">
+            Classificazione Fornitori per tipo di costo
           </div>
         </div>
       </PageLayout.ContentHeader>
@@ -193,7 +194,7 @@ const FornitoriPage: React.FC = () => {
               <CTableBody>
                 {filteredFornitori.map((fornitore) => {
                   const classificazione = getClassificazioneForFornitore(fornitore.id);
-                  
+
                   return (
                     <CTableRow key={fornitore.id}>
                       <CTableDataCell>
@@ -251,7 +252,7 @@ const FornitoriPage: React.FC = () => {
       </PageLayout.ContentBody>
 
       <PageLayout.Footer text="Sistema modulare con 3 modal riusabili per fornitori" />
-      
+
       {/* 1. Modal Anagrafica Fornitore */}
       {selectedFornitoreModal && (
         <ModalAnagrafica

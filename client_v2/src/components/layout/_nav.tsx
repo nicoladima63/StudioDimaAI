@@ -11,7 +11,9 @@ import {
   cilUser,
   cilCalendar,
   cilSearch,
-  cilTask
+  cilTask,
+  cilChartPie,
+  cilChartLine
 } from '@coreui/icons';
 import { CNavItem, CNavGroup } from '@coreui/react';
 
@@ -39,6 +41,12 @@ const _nav = [
         name: 'Fornitori',
         to: '/fornitori',
         icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Classifica Fornitori',
+        to: '/fornitori/classificazione',
+        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
       },
       {
         component: CNavItem,
@@ -181,6 +189,18 @@ const _nav = [
         name: 'Statistiche',
         to: '/statistiche',
         icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Economics',
+        to: '/economics',
+        icon: <CIcon icon={cilChartPie} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Analisi Comparativa',
+        to: '/economics/comparativa',
+        icon: <CIcon icon={cilChartLine} customClassName="nav-icon" />,
       },
     ]
   },

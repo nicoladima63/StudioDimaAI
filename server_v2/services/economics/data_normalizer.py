@@ -47,6 +47,17 @@ def _safe_int(value, default=0) -> int:
         return default
 
 
+def _dbf_time_to_minutes(val: float) -> int:
+    """
+    Converte un orario in formato DBF (es. 17.25 = 17:25) in minuti totali.
+    Il formato DBF usa ore.minuti dove i minuti sono in base 60 (0-59).
+    Esempio: 9.30 = 9:30 = 570 min, 17.25 = 17:25 = 1045 min.
+    """
+    ore = int(val)
+    minuti = round((val - ore) * 100)
+    return ore * 60 + minuti
+
+
 def _safe_date(value) -> Optional[date]:
     """Converte un valore in date in modo sicuro."""
     if value is None:
@@ -133,7 +144,7 @@ def get_df_appointments(anno: Optional[int] = None) -> pd.DataFrame:
     """
     Legge APPUNTA.DBF e restituisce un DataFrame normalizzato.
 
-    Colonne output: data, ora_inizio, ora_fine, pazienteid, tipo, tipo_nome, medico, medico_nome, studio, durata_ore
+    Colonne output: data, ora_inizio, ora_fine, pazienteid, tipo, tipo_nome, medico, medico_nome, studio, durata_minuti
     """
     col = COLONNE['appuntamenti']
 
@@ -157,8 +168,10 @@ def get_df_appointments(anno: Optional[int] = None) -> pd.DataFrame:
                     ora_fine = _safe_float(getattr(record, col['ora_fine'].lower(), 0))
                     medico_id = _safe_int(getattr(record, col['medico'].lower(), 0))
 
-                    # Calcola durata in ore (i campi sono in formato decimale, es. 9.5 = 9:30)
-                    durata_ore = max(0, ora_fine - ora_inizio) if ora_fine > ora_inizio else 0
+                    # Converte da formato DBF (ore.minuti base 60) a minuti totali
+                    min_inizio = _dbf_time_to_minutes(ora_inizio)
+                    min_fine = _dbf_time_to_minutes(ora_fine)
+                    durata_minuti = max(0, min_fine - min_inizio) if min_fine > min_inizio else 0
 
                     records.append({
                         'data': record_date,
@@ -170,7 +183,7 @@ def get_df_appointments(anno: Optional[int] = None) -> pd.DataFrame:
                         'medico': medico_id,
                         'medico_nome': MEDICI.get(medico_id, f'Medico {medico_id}'),
                         'studio': _safe_int(getattr(record, col['studio'].lower(), 1)),
-                        'durata_ore': durata_ore,
+                        'durata_minuti': durata_minuti,
                     })
                 except Exception:
                     continue

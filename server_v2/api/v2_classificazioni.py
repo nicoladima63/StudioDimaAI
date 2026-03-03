@@ -80,6 +80,7 @@ def classifica_fornitore(fornitore_id):
                 contoid=contoid,
                 brancaid=data.get('brancaid', 0),
                 sottocontoid=data.get('sottocontoid', 0),
+                tipo_di_costo=data.get('tipo_di_costo', 1),
                 note=data.get('note'),
                 fornitore_nome=data.get('fornitore_nome')
             )

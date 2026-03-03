@@ -4,6 +4,7 @@ Genera previsioni di fine anno con tre scenari.
 """
 
 import logging
+import math
 from datetime import datetime
 from typing import Optional, Dict, Any
 
@@ -13,6 +14,19 @@ from services.economics.trend_model import get_trend_analysis
 from services.economics.data_normalizer import get_df_estimates
 
 logger = logging.getLogger(__name__)
+
+
+def _safe(val, default=0):
+    """Converte NaN/Inf in un valore sicuro per JSON."""
+    if val is None:
+        return default
+    try:
+        f = float(val)
+        if math.isnan(f) or math.isinf(f):
+            return default
+        return f
+    except (TypeError, ValueError):
+        return default
 
 
 def get_forecast(anno: Optional[int] = None) -> Dict[str, Any]:
@@ -99,10 +113,10 @@ def get_forecast(anno: Optional[int] = None) -> Dict[str, Any]:
     return {
         'anno': anno,
         'mese_corrente': mese_corrente,
-        'produzione_ytd': round(produzione_reale_tot, 2),
+        'produzione_ytd': round(_safe(produzione_reale_tot), 2),
         'forecast_produzione': scenari['realistico']['produzione'],
         'forecast_margine': scenari['realistico']['margine'],
-        'pipeline_preventivi': round(pipeline_valore, 2),
+        'pipeline_preventivi': round(_safe(pipeline_valore), 2),
         'scenario_conservativo': scenari['conservativo'],
         'scenario_realistico': scenari['realistico'],
         'scenario_ottimistico': scenari['ottimistico'],
@@ -125,7 +139,7 @@ def _calcola_pipeline_preventivi(anno: int) -> float:
 
         # Stato 1 = Da Eseguire (pendenti)
         pendenti = df_est[df_est['stato'] == 1]
-        return float(pendenti['spesa'].sum()) if not pendenti.empty else 0.0
+        return _safe(pendenti['spesa'].sum()) if not pendenti.empty else 0.0
     except Exception as e:
         logger.warning(f"Errore calcolo pipeline preventivi: {e}")
         return 0.0
@@ -138,12 +152,12 @@ def _calcola_scenari(
     """Calcola i tre scenari di previsione."""
 
     def _scenario(trend_factor: float, conv_rate: float) -> Dict[str, float]:
-        prod_futura = prod_prevista_futura * trend_factor
-        prod_pipeline = pipeline * conv_rate
-        produzione_totale = prod_reale + prod_futura + prod_pipeline
-        costi_totali = costi_reali + costi_stimati_futuri
-        margine = produzione_totale - costi_totali
-        margine_pct = (margine / produzione_totale * 100) if produzione_totale > 0 else 0
+        prod_futura = _safe(prod_prevista_futura * trend_factor)
+        prod_pipeline = _safe(pipeline * conv_rate)
+        produzione_totale = _safe(prod_reale + prod_futura + prod_pipeline)
+        costi_totali = _safe(costi_reali + costi_stimati_futuri)
+        margine = _safe(produzione_totale - costi_totali)
+        margine_pct = _safe(margine / produzione_totale * 100) if produzione_totale > 0 else 0
 
         return {
             'produzione': round(produzione_totale, 2),

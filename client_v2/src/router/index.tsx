@@ -46,6 +46,9 @@ const WorkDetailsPage = React.lazy(() => import('@/features/lavorazioni/WorkDeta
 const StepsPage = React.lazy(() => import('@/features/lavorazioni/StepsPage'))
 const TasksPage = React.lazy(() => import('@/features/lavorazioni/TasksPage'))
 const TodosPage = React.lazy(() => import('@/features/todos/pages/TodosPage'))
+const EconomicsPage = React.lazy(() => import('@/features/economics/pages/EconomicsPage'))
+const AnalisiComparativaPage = React.lazy(() => import('@/features/economics/pages/AnalisiComparativaPage'))
+const FornitoriClassificazione = React.lazy(() => import('@/features/fornitori/pages/FornitoriClassificazione'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -82,6 +85,7 @@ const AppRouter: React.FC = () => {
           <Route path='materiali/ricerca' element={<RicercaArticoli />} />
 
           <Route path='fornitori' element={<FornitoriPage />} />
+          <Route path='fornitori/classificazione' element={<FornitoriClassificazione />} />
           <Route path='pazienti' element={<PazientiPage />} />
           <Route path='conti' element={<ContiPage />} />
           <Route path='ricetta' element={<RicettaElettronicaPage />} />
@@ -114,6 +118,10 @@ const AppRouter: React.FC = () => {
 
           {/* Todo Routes */}
           <Route path='todos' element={<TodosPage />} />
+
+          {/* Economics */}
+          <Route path='economics' element={<EconomicsPage />} />
+          <Route path='economics/comparativa' element={<AnalisiComparativaPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
