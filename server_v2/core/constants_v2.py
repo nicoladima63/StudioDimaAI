@@ -181,6 +181,22 @@ COLONNE = {
         'data': 'DB_ELDATA',          # Data piano
         'totale': 'DB_ELTOTAL',       # Totale previsto
         'stato': 'DB_ELSTATO'         # Stato: 'S' = Stampato, '' = Bozza
+    },
+    'primanota': {
+        'data': 'DB_PRDATA',          # Data del movimento
+        'numero': 'DB_PRNUMER',       # Numero progressivo (sempre 0)
+        'importo': 'DB_PRTOTAL',      # Importo: negativo=uscita, positivo=entrata
+        'tipo_chi': 'DB_PRTIPCH',     # 1=paziente, 2=fornitore, 3=altro
+        'descrizione': 'DB_PRCHI',    # Descrizione movimento (testo libero o da gestionale)
+        'tipo_operazione': 'DB_PRTIPOP',  # Tipo operazione (vedi PRIMANOTA_TIPO_OPERAZIONE)
+        'operatore': 'DB_PROPER',     # Operatore che ha inserito (sempre vuoto)
+        'tipo_conto': 'DB_PRTIPCO',   # 1=CASSA, 2=MEDIO (banca Mediolanum)
+        'conto': 'DB_PRCONTO',        # Nome conto: "CASSA" o "MEDIO"
+        'tipo_movimento': 'DB_PRMUOVI',   # Tipo movimento (vedi PRIMANOTA_TIPO_MOVIMENTO)
+        'ricevuta': 'DB_PRRICEV',     # Numero ricevuta (quasi sempre vuoto)
+        'tipo_ricevuta': 'DB_PRTIPRI',    # 1=con ricevuta, 6=senza ricevuta
+        'riferimento': 'DB_PRRIFER',  # Riferimento (numero polizza, ecc.)
+        'saldo': 'DB_PRSALDO',        # Flag saldo (0=default)
     }
 }
 
@@ -238,7 +254,11 @@ DBF_TABLES = {
         'categoria': 'DATI',
         'descrizione': 'Fatture clienti'
     },
-
+    'primanota': {
+        'file': 'PRIMANO.DBF',
+        'categoria': 'DATI',
+        'descrizione': 'Prima nota - movimenti cassa e banca'
+    },
 }
 
 # =============================================================================
@@ -300,6 +320,55 @@ GUARDIA_MAP = {
     2: 'In Corso',
     3: 'Eseguito',
     }
+
+# =============================================================================
+# PRIMANOTA - Mapping valori enumerati
+# =============================================================================
+
+# DB_PRTIPCH - Chi e' coinvolto nel movimento
+PRIMANOTA_TIPO_CHI = {
+    1: 'Paziente',
+    2: 'Fornitore',
+    3: 'Altro',          # Stipendi, tasse, assicurazioni, giroconti, ecc.
+}
+
+# DB_PRTIPOP - Tipo operazione
+# I valori 1 e 4 sono generati dal gestionale per operazioni standard
+# Gli altri sono inseriti manualmente per operazioni extra-gestionale
+PRIMANOTA_TIPO_OPERAZIONE = {
+    1: 'Incasso paziente',           # Pagamento ricevuto dal paziente
+    3: 'Versamento cassa-banca',     # Entrata in banca da cassa (importo positivo, conto=MEDIO)
+    4: 'Pagamento fornitore/studio', # Uscite operative: stipendi, INPS, tasse, assicurazioni studio, TFR, Enpam
+    5: 'Pagamento (raro)',           # 1 solo record - probabilmente errore classificazione
+    6: 'Uscita personale/mista',     # Giroconti, affitto personale, polizze personali, corsi, bollo auto
+    7: 'Prelievo cassa-banca',       # Uscita da cassa per versamento banca (mirror del tipo 3, conto=CASSA)
+    8: 'Pagamento (raro)',           # 1 solo record - probabilmente errore classificazione
+    11: 'Tributi F24',              # Contributi INPS via F24
+    12: 'Altro',                     # 1 solo record
+}
+
+# DB_PRTIPCO - Tipo conto
+PRIMANOTA_TIPO_CONTO = {
+    1: 'CASSA',
+    2: 'MEDIO',   # Banca Mediolanum
+}
+
+# DB_PRMUOVI - Tipo movimento
+PRIMANOTA_TIPO_MOVIMENTO = {
+    1: 'Pagamento generico',        # F24, tributi, tasse, contributi
+    2: 'Pagamento diretto',         # Raro (1 record: bollo auto)
+    3: 'Trasferimento cassa-banca', # Movimenti interni tra conti
+    5: 'Bonifico',                  # Stipendi, assicurazioni, affitti, giroconti
+}
+
+# DB_PRTIPRI - Tipo ricevuta
+PRIMANOTA_TIPO_RICEVUTA = {
+    1: 'Con ricevuta',
+    6: 'Senza ricevuta',
+}
+
+# Tipi operazione che sono movimenti interni (da escludere dai costi reali)
+PRIMANOTA_MOVIMENTI_INTERNI = [3, 7]
 
 # =============================================================================
 # REGOLE DI VALIDAZIONE
@@ -490,6 +559,8 @@ def get_all_guardia_types() -> dict:
 __all__ = [
     'COLONNE', 'DBF_TABLES', 'TIPI_APPUNTAMENTO', 'TIPO_RICHIAMI', 'GUARDIA_MAP',
     'MEDICI', 'COLORI_APPUNTAMENTO', 'GOOGLE_COLOR_MAP',
+    'PRIMANOTA_TIPO_CHI', 'PRIMANOTA_TIPO_OPERAZIONE', 'PRIMANOTA_TIPO_CONTO',
+    'PRIMANOTA_TIPO_MOVIMENTO', 'PRIMANOTA_TIPO_RICEVUTA', 'PRIMANOTA_MOVIMENTI_INTERNI',
     'get_appointment_type_name', 'get_appointment_color', 'get_google_color_id',
     'get_medico_name', 'get_campo_dbf', 'get_dbf_table_info',
     'is_valid_appointment_type', 'is_valid_medico_id',

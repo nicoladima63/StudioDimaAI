@@ -6,6 +6,7 @@ interface HealthIndex {
   label: string
   value: number
   description: string
+  thresholds: { ok: number; warn: number }
 }
 
 function computeIndices(data: MultiYearComparison): HealthIndex[] {
@@ -23,27 +24,31 @@ function computeIndices(data: MultiYearComparison): HealthIndex[] {
     label: 'Crescita',
     value: Math.round(data.statistiche.crescita_media_pct * 10) / 10,
     description: 'Crescita media annua produzione',
+    thresholds: { ok: 1, warn: -1 },
   })
 
-  // 2. Indice Redditivita: margine % ultimo anno
-  const marginePctUltimo = datiUltimo && datiUltimo.totale_produzione > 0
+  // 2. MOL %: Margine Operativo Lordo (margine/produzione ultimo anno)
+  // Gli ammortamenti non sono nei costi del gestionale, quindi margine ≈ MOL
+  const molPct = datiUltimo && datiUltimo.totale_produzione > 0
     ? Math.round((datiUltimo.totale_margine / datiUltimo.totale_produzione) * 1000) / 10
     : 0
   indices.push({
-    label: 'Redditivita',
-    value: marginePctUltimo,
-    description: `Margine % su produzione (${ultimoAnno})`,
+    label: 'MOL %',
+    value: molPct,
+    description: `Margine Operativo Lordo (${ultimoAnno})`,
+    thresholds: { ok: 20, warn: 10 },
   })
 
   // 3. Indice Tendenza: variazione margine % tra ultimi 2 anni
   if (datiPenultimo && datiPenultimo.totale_produzione > 0) {
-    const marginePctPenultimo = Math.round(
+    const molPctPenultimo = Math.round(
       (datiPenultimo.totale_margine / datiPenultimo.totale_produzione) * 1000
     ) / 10
     indices.push({
       label: 'Tendenza',
-      value: Math.round((marginePctUltimo - marginePctPenultimo) * 10) / 10,
-      description: `Variazione margine % (${penultimoAnno} > ${ultimoAnno})`,
+      value: Math.round((molPct - molPctPenultimo) * 10) / 10,
+      description: `Variazione MOL % (${penultimoAnno} > ${ultimoAnno})`,
+      thresholds: { ok: 1, warn: -1 },
     })
   }
 
@@ -64,21 +69,22 @@ function computeIndices(data: MultiYearComparison): HealthIndex[] {
       label: 'Efficienza Costi',
       value: Math.round((crescitaProd - crescitaCosti) * 10) / 10,
       description: 'Crescita ricavi meno crescita costi',
+      thresholds: { ok: 1, warn: -1 },
     })
   }
 
   return indices
 }
 
-function getColor(value: number): string {
-  if (value > 1) return '#2eb85c'
-  if (value > -1) return '#f9b115'
+function getColor(value: number, t: { ok: number; warn: number }): string {
+  if (value >= t.ok) return '#2eb85c'
+  if (value >= t.warn) return '#f9b115'
   return '#e55353'
 }
 
-function getStatusLabel(value: number): { text: string; bg: string } {
-  if (value > 1) return { text: 'OK', bg: '#d4edda' }
-  if (value > -1) return { text: 'ATTENZIONE', bg: '#fff3cd' }
+function getStatusLabel(value: number, t: { ok: number; warn: number }): { text: string; bg: string } {
+  if (value >= t.ok) return { text: 'OK', bg: '#d4edda' }
+  if (value >= t.warn) return { text: 'ATTENZIONE', bg: '#fff3cd' }
   return { text: 'INTERVIENI', bg: '#f8d7da' }
 }
 
@@ -98,8 +104,8 @@ const HealthPulse: React.FC<{ data: MultiYearComparison }> = ({ data }) => {
       <CCardBody className="pt-2 pb-3">
         <CRow>
           {indices.map((idx) => {
-            const color = getColor(idx.value)
-            const status = getStatusLabel(idx.value)
+            const color = getColor(idx.value, idx.thresholds)
+            const status = getStatusLabel(idx.value, idx.thresholds)
             return (
               <CCol key={idx.label} xs={6} md={3}>
                 <div

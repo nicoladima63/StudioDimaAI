@@ -1,0 +1,60 @@
+Now I can see the structure of PRIMANO.DBF. Let me analyze:
+
+Fields:
+
+DB_PRDATA - Date
+
+DB_PRNUMER - Number (seems always 0)
+
+DB_PRTOTAL - Amount (negative = outgoing, positive = incoming)
+
+DB_PRTIPCH - Type of... (1, 2, 3)
+
+DB_PRCHI - Description/Who (the key description field)
+
+DB_PRTIPOP - Operation type (1-12, the main classifier)
+
+DB_PROPER - Operator (mostly empty)
+
+DB_PRTIPCO - Account type (1=CASSA, 2=banca MEDIO)
+
+DB_PRCONTO - Account name (CASSA, MEDIO)
+
+DB_PRMUOVI - Movement type (1, 2, 3, 5)
+
+DB_PRRICEV - Receipt
+
+DB_PRTIPRI - Receipt type
+
+DB_PRRIFER - Reference
+
+DB_PRSALDO - Balance flag
+
+Ecco cosa c'e' nella primanota. E' esattamente il pezzo che mancava.
+
+Struttura PRIMANO.DBF
+449 movimenti dal 2020 al 2026. Campi principali:
+
+Campo	Significato
+DB_PRDATA	Data movimento
+DB_PRTOTAL	Importo (negativo = uscita, positivo = entrata)
+DB_PRCHI	Descrizione (chi/cosa)
+DB_PRTIPOP	Tipo operazione
+DB_PRCONTO	Conto (CASSA o MEDIO/banca)
+Cosa contiene - i costi che mancavano
+Tipo	Esempi	Cosa sono
+4 (240 mov)	PONZECCHI STIPENDIO, REALE MUTUA RC AUTO	Stipendi, assicurazioni
+6 (159 mov)	giroconto, affitto, prelievi personali	Giroconti, affitti, personale
+5/8	BALDI STIPENDIO	Stipendi dipendenti
+11	F24 CONTRIBUTI INPS	Contributi previdenziali
+3/7	versamento/prelievo cassa-banca	Movimenti interni
+Uscite per anno (solo primanota)
+Anno	Uscite	Note
+2021	-95.323	
+2022	-108.419	
+2023	-93.814	
+2024	-64.766	
+2025	-52.793	
+Ecco perche' il MOL era al 68%. SPESAFOR.DBF ha solo le fatture fornitori (materiali, laboratorio). Ma stipendi, affitto, assicurazioni, INPS sono qui nella primanota - da 65k a 108k l'anno di costi in piu' che non stavano nel calcolo.
+
+Vuoi che integri la primanota nel calcolo dei costi per avere un MOL realistico? Dovrei escludere i giroconti (tipo 3 e 7 che sono solo spostamenti cassa-banca) e i prelievi personali, e contare solo i costi operativi reali (stipendi, affitto, assicurazioni, contributi).
