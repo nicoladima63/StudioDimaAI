@@ -7,6 +7,7 @@ from flask import Blueprint, request, jsonify, g, redirect
 from flask_jwt_extended import jwt_required
 from services.social_media_service import SocialMediaService
 from services.social_publishing_service import SocialPublishingService
+from services.social_content_generation_service import SocialContentGenerationService
 from utils.oauth_manager import OAuthManager, OAuthProvider
 from app_v2 import require_auth, format_response
 from core.exceptions import ValidationError, DatabaseError
@@ -863,6 +864,98 @@ def publish_post_now(post_id):
 
     except Exception as e:
         logger.error(f"Error publishing post {post_id}: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+# =============================================================================
+# AI CONTENT GENERATION
+# =============================================================================
+
+@social_media_v2_bp.route('/social-media/ai/generate', methods=['POST'])
+@jwt_required()
+def generate_ai_content():
+    """
+    Genera contenuto per social media con AI.
+
+    Body:
+        platform: str (instagram, facebook, linkedin)
+        content_pillar: str (educational, authority, trust, promo)
+        objective: str (obiettivo del post)
+        topic: str (opzionale, topic specifico)
+    """
+    try:
+        user = require_auth()
+        user_id = user['id'] if isinstance(user, dict) else user
+        data = request.get_json()
+
+        if not data:
+            return format_response(
+                success=False,
+                error="JSON body required",
+                state='error'
+            ), 400
+
+        platform = data.get('platform', 'instagram')
+        content_pillar = data.get('content_pillar', 'educational')
+        objective = data.get('objective', 'engagement')
+        topic = data.get('topic')
+
+        service = SocialContentGenerationService(g.database_manager)
+        result = service.generate_post(
+            platform=platform,
+            content_pillar=content_pillar,
+            objective=objective,
+            topic=topic,
+            user_id=user_id,
+        )
+
+        return format_response(
+            data=result,
+            message='Contenuto generato con successo',
+            state='success'
+        )
+
+    except RuntimeError as e:
+        logger.error(f"AI generation error: {e}")
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+    except ValueError as e:
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 400
+    except Exception as e:
+        logger.error(f"Unexpected error in AI generation: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+
+@social_media_v2_bp.route('/social-media/ai/pillars', methods=['GET'])
+@jwt_required()
+def get_content_pillars():
+    """Restituisce i content pillars disponibili."""
+    try:
+        require_auth()
+        service = SocialContentGenerationService()
+        pillars = service.get_pillars()
+
+        return format_response(
+            data={'pillars': pillars},
+            state='success'
+        )
+    except Exception as e:
+        logger.error(f"Error getting pillars: {e}", exc_info=True)
         return format_response(
             success=False,
             error=str(e),

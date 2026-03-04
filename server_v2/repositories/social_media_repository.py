@@ -106,6 +106,13 @@ class SocialMediaRepository(BaseRepository):
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_posts_type ON posts(content_type)')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_posts_deleted ON posts(deleted_at)')
 
+                # Migrazione: aggiungi campi AI se non esistono
+                for col_name, col_type in [('ai_generated', 'INTEGER DEFAULT 0'), ('content_pillar', 'TEXT')]:
+                    try:
+                        cursor.execute(f"ALTER TABLE posts ADD COLUMN {col_name} {col_type}")
+                    except Exception:
+                        pass
+
                 # Tabella: post_publications
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS post_publications (
@@ -488,8 +495,9 @@ class SocialMediaRepository(BaseRepository):
                 INSERT INTO posts (
                     category_id, title, content, content_type,
                     platforms, media_urls, hashtags, status,
-                    scheduled_at, created_by, metadata
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    scheduled_at, created_by, metadata,
+                    ai_generated, content_pillar
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             '''
 
             # Handle created_by (ensure it's not a dict)
@@ -511,7 +519,9 @@ class SocialMediaRepository(BaseRepository):
                     data.get('status', 'draft'),
                     data.get('scheduled_at'),
                     created_by,
-                    metadata
+                    metadata,
+                    1 if data.get('ai_generated') else 0,
+                    data.get('content_pillar')
                 ))
                 post_id = cursor.lastrowid
                 cursor.close()
@@ -561,7 +571,8 @@ class SocialMediaRepository(BaseRepository):
             allowed_fields = [
                 'category_id', 'title', 'content', 'content_type',
                 'platforms', 'media_urls', 'hashtags', 'status',
-                'scheduled_at', 'published_at', 'metadata'
+                'scheduled_at', 'published_at', 'metadata',
+                'ai_generated', 'content_pillar'
             ]
 
             for field in allowed_fields:

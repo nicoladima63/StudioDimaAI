@@ -46,8 +46,27 @@ export interface Post {
   created_by?: number;
   metadata?: Record<string, any>;
   template_id?: number;
+  ai_generated?: boolean;
+  content_pillar?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export type ContentPillar = 'educational' | 'authority' | 'trust' | 'promo';
+
+export interface GenerateContentRequest {
+  platform: string;
+  content_pillar: ContentPillar;
+  objective: string;
+  topic?: string;
+}
+
+export interface GeneratedContent {
+  title: string;
+  content: string;
+  hashtags: string[];
+  cta: string;
+  content_pillar: string;
 }
 
 export interface PostsStats {

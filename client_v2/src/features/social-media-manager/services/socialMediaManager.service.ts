@@ -5,6 +5,7 @@
 
 import apiClient from '@/services/api/client';
 import type { ApiResponse } from '@/types';
+import type { GenerateContentRequest, GeneratedContent } from '../types';
 
 export interface CalendarEvent {
   id: number;
@@ -66,17 +67,21 @@ const socialMediaManagerService = {
 
   /**
    * Genera contenuto con AI
-   * @param request Parametri per generazione AI
    */
-  apiGenerateContent: async (request: {
-    prompt: string;
-    content_type: string;
-    tone?: string;
-    length?: string;
-  }): Promise<ApiResponse<any>> => {
-    const response = await apiClient.post<ApiResponse<any>>(
+  apiGenerateContent: async (request: GenerateContentRequest): Promise<ApiResponse<GeneratedContent>> => {
+    const response = await apiClient.post<ApiResponse<GeneratedContent>>(
       `/social-media/ai/generate`,
       request
+    );
+    return response.data;
+  },
+
+  /**
+   * Ottieni content pillars disponibili
+   */
+  apiGetPillars: async (): Promise<ApiResponse<any>> => {
+    const response = await apiClient.get<ApiResponse<any>>(
+      `/social-media/ai/pillars`
     );
     return response.data;
   },

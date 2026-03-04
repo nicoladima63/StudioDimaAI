@@ -15,24 +15,27 @@ import {
   CFormInput,
   CFormTextarea,
   CFormLabel,
+  CFormSelect,
   CSpinner,
   CFormCheck,
   CRow,
   CCol,
   CCard,
   CCardBody,
-  CCardHeader
+  CCardHeader,
+  CCollapse,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilX } from '@coreui/icons';
+import { cilX, cilLightbulb } from '@coreui/icons';
 import { useSocialMediaStore } from '@/store/socialMedia.store';
 import CategorySelector from './CategorySelector';
 import TemplateSelector from './TemplateSelector';
 import PostPreview from './PostPreview';
 import MediaUploader from './MediaUploader';
 import HashtagsInput from './HashtagsInput';
+import socialMediaManagerService from '../services/socialMediaManager.service';
 import toast from 'react-hot-toast';
-import type { Post } from '../types';
+import type { Post, ContentPillar } from '../types';
 
 interface PostComposerProps {
   visible: boolean;
@@ -92,6 +95,13 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
   // Gestione separata date e time
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
+
+  // AI generation
+  const [showAiPanel, setShowAiPanel] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiPillar, setAiPillar] = useState<ContentPillar>('educational');
+  const [aiObjective, setAiObjective] = useState('engagement');
+  const [aiTopic, setAiTopic] = useState('');
 
   // Populate form when editing
   useEffect(() => {
@@ -161,6 +171,35 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
   const clearScheduling = () => {
     setScheduledDate('');
     setScheduledTime('');
+  };
+
+  const handleAiGenerate = async () => {
+    const platform = formData.platforms[0] || 'instagram';
+    setAiLoading(true);
+    try {
+      const res = await socialMediaManagerService.apiGenerateContent({
+        platform,
+        content_pillar: aiPillar,
+        objective: aiObjective,
+        topic: aiTopic || undefined,
+      });
+      if (res.state === 'success' && res.data) {
+        setFormData(prev => ({
+          ...prev,
+          title: res.data.title || prev.title,
+          content: res.data.content || prev.content,
+          hashtags: res.data.hashtags?.length ? res.data.hashtags : prev.hashtags,
+        }));
+        toast.success('Contenuto generato con AI');
+        setShowAiPanel(false);
+      } else {
+        toast.error(res.error || 'Errore generazione AI');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Errore generazione AI');
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -279,6 +318,80 @@ const PostComposer: React.FC<PostComposerProps> = ({ visible, onClose, editPost:
                   <input type="hidden" value={formData.content_type} />
 
                 </CCardBody>
+              </CCard>
+
+              <CCard className='mb-2'>
+                <CCardHeader
+                  className='fw-bold d-flex justify-content-between align-items-center'
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setShowAiPanel(!showAiPanel)}
+                >
+                  <span>
+                    <CIcon icon={cilLightbulb} className="me-2" />
+                    Genera con AI
+                  </span>
+                  <small className="text-body-secondary">{showAiPanel ? 'Chiudi' : 'Apri'}</small>
+                </CCardHeader>
+                <CCollapse visible={showAiPanel}>
+                  <CCardBody>
+                    <CRow className="g-2 mb-2">
+                      <CCol xs={6}>
+                        <CFormLabel className="form-text text-body-secondary small">Pilastro</CFormLabel>
+                        <CFormSelect
+                          size="sm"
+                          value={aiPillar}
+                          onChange={(e) => setAiPillar(e.target.value as ContentPillar)}
+                        >
+                          <option value="educational">Educativo</option>
+                          <option value="authority">Autorevole</option>
+                          <option value="trust">Fiducia</option>
+                          <option value="promo">Promo</option>
+                        </CFormSelect>
+                      </CCol>
+                      <CCol xs={6}>
+                        <CFormLabel className="form-text text-body-secondary small">Obiettivo</CFormLabel>
+                        <CFormSelect
+                          size="sm"
+                          value={aiObjective}
+                          onChange={(e) => setAiObjective(e.target.value)}
+                        >
+                          <option value="engagement">Engagement</option>
+                          <option value="informare">Informare</option>
+                          <option value="promuovere">Promuovere</option>
+                          <option value="fidelizzare">Fidelizzare</option>
+                        </CFormSelect>
+                      </CCol>
+                    </CRow>
+                    <div className="mb-2">
+                      <CFormLabel className="form-text text-body-secondary small">Topic (opzionale)</CFormLabel>
+                      <CFormInput
+                        size="sm"
+                        value={aiTopic}
+                        onChange={(e) => setAiTopic(e.target.value)}
+                        placeholder="es. prevenzione carie nei bambini"
+                      />
+                    </div>
+                    <CButton
+                      color="primary"
+                      size="sm"
+                      onClick={handleAiGenerate}
+                      disabled={aiLoading}
+                      className="w-100"
+                    >
+                      {aiLoading ? (
+                        <>
+                          <CSpinner size="sm" className="me-2" />
+                          Generazione in corso...
+                        </>
+                      ) : (
+                        <>
+                          <CIcon icon={cilLightbulb} className="me-1" />
+                          Genera contenuto
+                        </>
+                      )}
+                    </CButton>
+                  </CCardBody>
+                </CCollapse>
               </CCard>
 
               <CCard className='mb-2'>
