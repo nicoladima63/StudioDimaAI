@@ -250,3 +250,36 @@ export interface TrendData {
   r_squared: number
   trend_12_mesi: number
 }
+
+// ========== COLLABORATORI REDDITIVITA ==========
+
+export interface BrancaRedditivita {
+  branca: string
+  importo: number
+  count: number
+  percentuale: number
+}
+
+export interface CollaboratoreRedditivita {
+  medico_id: number
+  medico_nome: string
+  tipo_compenso: 'titolare' | 'percentuale' | 'per_intervento' | 'sconosciuto'
+  dettaglio_compenso: string
+  produzione: number
+  compenso: number
+  margine_studio: number
+  margine_pct: number
+  num_prestazioni: number
+  branche: BrancaRedditivita[]
+}
+
+export interface CollaboratoriRedditivitaData {
+  anno: number
+  collaboratori: CollaboratoreRedditivita[]
+  totali: {
+    produzione: number
+    compensi: number
+    margine_studio: number
+    margine_pct: number
+  }
+}

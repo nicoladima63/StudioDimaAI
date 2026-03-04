@@ -12,6 +12,7 @@ import type {
   TrendData,
   MultiYearComparison,
   TrimesterForecast,
+  CollaboratoriRedditivitaData,
 } from '../types'
 
 interface ApiResponse<T> {
@@ -89,6 +90,13 @@ export const economicsService = {
     const params = new URLSearchParams()
     if (anno) params.append('anno', anno.toString())
     const response = await apiClient.get(`/economics/comparison/trimester-forecast?${params.toString()}`)
+    return response.data
+  },
+
+  async apiGetCollaboratoriRedditivita(anno?: number): Promise<ApiResponse<CollaboratoriRedditivitaData>> {
+    const params = new URLSearchParams()
+    if (anno) params.append('anno', anno.toString())
+    const response = await apiClient.get(`/economics/collaboratori/redditivita?${params.toString()}`)
     return response.data
   },
 

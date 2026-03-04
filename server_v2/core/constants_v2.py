@@ -316,11 +316,46 @@ VALID_NO_PATIENT_TYPES = list(TIPI_APPUNTAMENTO.keys())
 
 MEDICI = {
     1: 'Dr. Nicola Di Martino',
-    2: 'Dr.ssa Lara ', 
+    2: 'Dr.ssa Lara ',
     4: 'Dr. Giacomo D Orlandi',
     3: 'Dr. Roberto Calvisi',
     5: 'Dr.ssa Anet Jablonvsky',
     6: 'Dr.ssa Rossella Pisante'
+}
+
+# =============================================================================
+# COMPENSI COLLABORATORI - Regole di compenso per analisi redditivita
+# tipo: 'titolare' | 'percentuale' | 'per_intervento'
+# percentuale: quota della produzione (0.45 = 45%)
+# tariffa: EUR per intervento
+# categorie_intervento: ID categorie prestazioni contate come intervento
+# =============================================================================
+
+COMPENSI_COLLABORATORI = {
+    1: {
+        'tipo': 'titolare',
+    },
+    2: {
+        'tipo': 'percentuale',
+        'percentuale': 0.45,
+    },
+    3: {
+        'tipo': 'per_intervento',
+        'tariffa': 300,
+        'categorie_intervento': [5, 6, 12],  # Chirurgia, Implantologia, Chirurgia implantare
+    },
+    4: {
+        'tipo': 'percentuale',
+        'percentuale': 0.70,
+    },
+    5: {
+        'tipo': 'percentuale',
+        'percentuale': 0.45,
+    },
+    6: {
+        'tipo': 'percentuale',
+        'percentuale': 0.45,
+    },
 }
 
 # =============================================================================

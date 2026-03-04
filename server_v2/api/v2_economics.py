@@ -228,6 +228,27 @@ def get_trimester_forecast():
 
 
 # =============================================================================
+# COLLABORATORI REDDITIVITA
+# =============================================================================
+
+@economics_bp.route('/economics/collaboratori/redditivita', methods=['GET'])
+@jwt_required()
+def get_collaboratori_redditivita():
+    """Analisi redditivita per collaboratore."""
+    try:
+        require_auth()
+        anno = request.args.get('anno', type=int)
+
+        from services.economics.collaboratori_engine import get_collaboratori_redditivita as collab_redd
+        data = collab_redd(anno=anno)
+
+        return jsonify({'state': 'success', 'data': data})
+    except Exception as e:
+        logger.error(f"Errore get_collaboratori_redditivita: {e}")
+        return jsonify({'state': 'error', 'error': str(e)}), 500
+
+
+# =============================================================================
 # CACHE MANAGEMENT
 # =============================================================================
 

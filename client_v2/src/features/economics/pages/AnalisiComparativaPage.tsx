@@ -11,6 +11,7 @@ import MultiYearChart from '../components/MultiYearChart'
 import TrimesterForecastCard from '../components/TrimesterForecastCard'
 import KpiCard from '../components/KpiCard'
 import HealthPulse from '../components/HealthPulse'
+import CollaboratoriRedditivita from '../components/CollaboratoriRedditivita'
 import { economicsService } from '../services/economics.service'
 import type { MultiYearComparison, TrimesterForecast } from '../types'
 
@@ -332,6 +333,9 @@ const AnalisiComparativaPage: React.FC = () => {
             ) : trimesterData ? (
               <TrimesterForecastCard data={trimesterData} />
             ) : null}
+
+            {/* Redditivita collaboratori */}
+            <CollaboratoriRedditivita anno={currentYear} />
           </>
         ) : (
           <CAlert color="info">Seleziona almeno un anno e clicca "Carica" per visualizzare i dati.</CAlert>
