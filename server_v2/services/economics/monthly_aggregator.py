@@ -5,6 +5,7 @@ Aggrega i dati normalizzati in sommari mensili con cache SQLite.
 
 import logging
 import math
+import re
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 
@@ -28,6 +29,7 @@ from services.economics.data_normalizer import (
     get_df_production,
     get_df_appointments,
     get_df_costs,
+    get_df_primanota,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,55 @@ TIPI_NON_CLINICI = {'F', 'A'}  # Ferie/Assenza, Attivita/Manutenzione
 
 # Ore disponibili al mese di default (configurabile)
 ORE_DISPONIBILI_MESE = 160.0
+
+# Pattern descrizione primanota da ESCLUDERE (spese personali, non studio)
+_PRIMANOTA_ESCLUSIONI = [
+    'giroconto',
+    'giroc ',
+    'martelli',
+    'affitto.*firenze',
+    'affitto.*allori',
+    'via allori',
+    'condominio.*firenze',
+    'condominio.*allori',
+    'prelievo personale',
+    'bollo auto',
+    'imu nicola',
+    'imu.*caiano',
+    'unipol',
+    'motorini',
+    'rata uni',
+    'moto filippo',
+]
+
+# Compila i pattern una volta sola
+_PRIMANOTA_ESCLUSIONI_RE = [re.compile(p, re.IGNORECASE) for p in _PRIMANOTA_ESCLUSIONI]
+
+
+def _is_costo_studio(descrizione: str, tipo_operazione: int) -> bool:
+    """
+    Determina se un movimento primanota e' un costo dello studio.
+
+    Args:
+        descrizione: Testo descrittivo del movimento (DB_PRCHI)
+        tipo_operazione: Tipo operazione (DB_PRTIPOP)
+
+    Returns:
+        True se e' un costo dello studio, False se e' personale/da escludere
+    """
+    # Tipo 4, 5, 8, 11 = costi operativi studio (sempre inclusi)
+    # Tipo 1 = normalmente incasso paziente, ma qui abbiamo solo uscite (importi negativi)
+    # quindi sono costi misclassificati nel gestionale
+    if tipo_operazione in (1, 4, 5, 8, 11):
+        return True
+
+    # Tipo 6, 12 = misto, classifico per descrizione
+    desc_lower = (descrizione or '').lower().strip()
+    for pattern in _PRIMANOTA_ESCLUSIONI_RE:
+        if pattern.search(desc_lower):
+            return False
+
+    return True
 
 
 def _ensure_cache_table():
@@ -68,7 +119,7 @@ def _ensure_cache_table():
         """)
         # Migrazione: aggiungi colonne se non esistono (per cache esistenti)
         migrated = False
-        for col_name in ('costi_diretti', 'costi_indiretti', 'costi_non_classificati', 'costi_non_deducibili'):
+        for col_name in ('costi_diretti', 'costi_indiretti', 'costi_non_classificati', 'costi_non_deducibili', 'costi_primanota'):
             try:
                 conn.execute(f"ALTER TABLE economics_monthly_cache ADD COLUMN {col_name} REAL DEFAULT 0")
                 migrated = True
@@ -79,7 +130,7 @@ def _ensure_cache_table():
         if migrated:
             conn.execute("DELETE FROM economics_monthly_cache")
             conn.commit()
-            logger.info("Cache economics invalidata per migrazione nuove colonne costi classificati")
+            logger.info("Cache economics invalidata per migrazione nuove colonne")
 
 
 def _get_cached_data(anno: int) -> Optional[List[Dict[str, Any]]]:
@@ -125,9 +176,9 @@ def _save_to_cache(records: List[Dict[str, Any]]):
                 INSERT OR REPLACE INTO economics_monthly_cache
                     (anno, mese, produzione, incasso, ore_cliniche, ricavo_orario,
                      costi_totali, costi_diretti, costi_indiretti, costi_non_classificati,
-                     costi_non_deducibili, margine, saturazione, num_fatture,
+                     costi_non_deducibili, costi_primanota, margine, saturazione, num_fatture,
                      num_appuntamenti, num_spese, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 rec['anno'], rec['mese'],
                 rec['produzione'], rec['incasso'], rec['ore_cliniche'],
@@ -135,6 +186,7 @@ def _save_to_cache(records: List[Dict[str, Any]]):
                 rec.get('costi_diretti', 0), rec.get('costi_indiretti', 0),
                 rec.get('costi_non_classificati', 0),
                 rec.get('costi_non_deducibili', 0),
+                rec.get('costi_primanota', 0),
                 rec['margine'], rec['saturazione'],
                 rec.get('num_fatture', 0),
                 rec.get('num_appuntamenti', 0), rec.get('num_spese', 0),
@@ -238,6 +290,7 @@ def _compute_monthly_for_year(anno: int, ore_disponibili: float) -> List[Dict[st
     df_prod = get_df_production(anno=anno)
     df_app = get_df_appointments(anno=anno)
     df_costs = get_df_costs(anno=anno)
+    df_prima = get_df_primanota(anno=anno)
 
     # Carica classificazioni fornitori per split costi
     classif_map = _load_classificazioni_fornitori()
@@ -268,6 +321,7 @@ def _compute_monthly_for_year(anno: int, ore_disponibili: float) -> List[Dict[st
         costi_indiretti = 0.0
         costi_non_deducibili = 0.0
         costi_non_classificati = 0.0
+        costi_primanota = 0.0
         num_spese = 0
 
         if not costs_mese.empty:
@@ -286,6 +340,20 @@ def _compute_monthly_for_year(anno: int, ore_disponibili: float) -> List[Dict[st
                 else:
                     costi_non_classificati += importo
 
+        # Costi primanota (stipendi, tasse, INPS, assicurazioni, ecc.)
+        prima_mese = df_prima[df_prima['mese'] == mese] if not df_prima.empty else pd.DataFrame()
+        if not prima_mese.empty:
+            for _, mov in prima_mese.iterrows():
+                desc = mov.get('descrizione', '')
+                tipo_op = mov.get('tipo_operazione', 0)
+                if _is_costo_studio(desc, tipo_op):
+                    importo = _safe_num(mov['importo'])
+                    costi_primanota += importo
+
+        # Aggrega primanota in costi indiretti e totali
+        costi_indiretti += costi_primanota
+        costi_totali += costi_primanota
+
         # Calcoli derivati
         ricavo_orario = _safe_num(produzione / ore_cliniche) if ore_cliniche > 0 else 0.0
         margine = _safe_num(produzione - costi_totali)
@@ -303,6 +371,7 @@ def _compute_monthly_for_year(anno: int, ore_disponibili: float) -> List[Dict[st
             'costi_indiretti': round(costi_indiretti, 2),
             'costi_non_deducibili': round(costi_non_deducibili, 2),
             'costi_non_classificati': round(costi_non_classificati, 2),
+            'costi_primanota': round(costi_primanota, 2),
             'margine': round(margine, 2),
             'saturazione': round(saturazione, 2),
             'num_fatture': num_fatture,
@@ -310,7 +379,9 @@ def _compute_monthly_for_year(anno: int, ore_disponibili: float) -> List[Dict[st
             'num_spese': num_spese,
         })
 
+    tot_primanota = sum(r['costi_primanota'] for r in records)
     logger.info(f"Monthly summary anno {anno}: {sum(r['num_fatture'] for r in records)} fatture, "
                 f"{sum(r['num_appuntamenti'] for r in records)} appuntamenti, "
-                f"{sum(r['num_spese'] for r in records)} spese")
+                f"{sum(r['num_spese'] for r in records)} spese, "
+                f"primanota studio: {tot_primanota:.2f}")
     return records

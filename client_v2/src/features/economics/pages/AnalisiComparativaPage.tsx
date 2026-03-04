@@ -96,6 +96,22 @@ const AnalisiComparativaPage: React.FC = () => {
     loadData()
   }
 
+  const handleClearCache = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await economicsService.apiInvalidateCache()
+      if (res.state === 'success') {
+
+      }
+    } catch {
+
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
   if (error && !comparisonData) {
     return (
       <CCard>
@@ -122,6 +138,15 @@ const AnalisiComparativaPage: React.FC = () => {
         >
           {loading ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilReload} className="me-1" />}
           Aggiorna
+        </CButton>
+        <CButton
+          color="success"
+          size="sm"
+          onClick={handleClearCache}
+          disabled={loading || anniSelezionati.length === 0}
+        >
+          {loading ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilReload} className="me-1" />}
+          Clear Cache
         </CButton>
       </CCardHeader>
       <CCardBody>

@@ -11,7 +11,7 @@ from typing import Optional
 from decimal import Decimal
 
 from core.config_manager import get_config
-from core.constants_v2 import COLONNE, DBF_TABLES, TIPI_APPUNTAMENTO, MEDICI
+from core.constants_v2 import COLONNE, DBF_TABLES, TIPI_APPUNTAMENTO, MEDICI, PRIMANOTA_MOVIMENTI_INTERNI
 from utils.dbf_utils import clean_dbf_value
 
 logger = logging.getLogger(__name__)
@@ -302,3 +302,64 @@ def get_df_estimates(anno: Optional[int] = None) -> pd.DataFrame:
 def get_df_payments(anno: Optional[int] = None) -> pd.DataFrame:
     """Alias di get_df_production - le fatture rappresentano i pagamenti/incassi."""
     return get_df_production(anno=anno)
+
+
+def get_df_primanota(anno: Optional[int] = None) -> pd.DataFrame:
+    """
+    Legge PRIMANO.DBF e restituisce un DataFrame normalizzato con solo le uscite.
+
+    Esclude movimenti interni cassa-banca (tipo_operazione 3 e 7).
+    Gli importi negativi vengono resi positivi (valore assoluto).
+
+    Colonne output: data, importo, descrizione, tipo_operazione, tipo_chi, conto
+    """
+    col = COLONNE['primanota']
+
+    records = []
+    try:
+        path = _get_dbf_path('primanota')
+        with dbf.Table(path, codepage='cp1252') as table:
+            for record in table:
+                try:
+                    raw_date = getattr(record, col['data'].lower(), None)
+                    record_date = _safe_date(raw_date)
+
+                    if record_date is None:
+                        continue
+
+                    if anno is not None and record_date.year != anno:
+                        continue
+
+                    importo = _safe_float(getattr(record, col['importo'].lower(), 0))
+
+                    # Solo uscite (importi negativi)
+                    if importo >= 0:
+                        continue
+
+                    tipo_op = _safe_int(getattr(record, col['tipo_operazione'].lower(), 0))
+
+                    # Escludi movimenti interni cassa-banca
+                    if tipo_op in PRIMANOTA_MOVIMENTI_INTERNI:
+                        continue
+
+                    records.append({
+                        'data': record_date,
+                        'importo': abs(importo),
+                        'descrizione': clean_dbf_value(getattr(record, col['descrizione'].lower(), '')),
+                        'tipo_operazione': tipo_op,
+                        'tipo_chi': _safe_int(getattr(record, col['tipo_chi'].lower(), 0)),
+                        'conto': clean_dbf_value(getattr(record, col['conto'].lower(), '')),
+                    })
+                except Exception:
+                    continue
+    except Exception as e:
+        logger.error(f"Errore lettura PRIMANO.DBF: {e}")
+
+    df = pd.DataFrame(records)
+    if not df.empty:
+        df['data'] = pd.to_datetime(df['data'])
+        df['anno'] = df['data'].dt.year
+        df['mese'] = df['data'].dt.month
+
+    logger.info(f"get_df_primanota: {len(df)} movimenti caricati" + (f" (anno={anno})" if anno else ""))
+    return df
