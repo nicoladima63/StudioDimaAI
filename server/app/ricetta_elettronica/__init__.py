@@ -1,1 +1,0 @@
-# Modulo per la gestione della ricetta elettronica

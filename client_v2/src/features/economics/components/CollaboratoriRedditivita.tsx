@@ -202,7 +202,7 @@ const CollaboratoriRedditivita: React.FC<{ anno?: number }> = ({ anno }) => {
                     <div className="fs-5 fw-bold" style={{ color: '#321fdb' }}>{formatCurrency(data.totali.produzione)}</div>
                   </CCol>
                   <CCol xs={6} md={3}>
-                    <div className="text-body-secondary small">Compensi Totali</div>
+                    <div className="text-body-secondary small">Totale dei compensi ai collaboratori</div>
                     <div className="fs-5 fw-bold" style={{ color: '#e55353' }}>{formatCurrency(data.totali.compensi)}</div>
                   </CCol>
                   <CCol xs={6} md={3}>

@@ -1,0 +1,12 @@
+nella card redditività collaboratori ci sono dei totali tra cui compensi totali=24.621,50 che dovrebbe essere la somma della parte 'resta allo studio' dei vari collaboratori. ma se faccio la somma a mano mi viene 23.117,9
+@/c:/Users/gengi/Desktop/StudioDimaAI/client_v2/src/features/economics/pages/AnalisiComparativaPage.tsx siamo qui
+
+
+nel report dei compensi collaboratori il chirurgo va rivisto. dal totale dei suoi interventi va detratto la somme delle sue fatture  in quanto il calcolo a 300 a intervento non è reale
+probabilmente anche per ortodonzia va rivisto il conteggio in quanto ci sono interventi di ortodonzia che faccio io e altri che fa lui
+
+discorso previsione, se non mi salvo i dati cge la dashboard mi mostra non posso sapere se effettivamente ho mantenuto o meno le aspettative. quindi serve una tabella per salvare le previsioni ad ogni ultimo o primo del mese, poi un salvataggio a trimestre e poi a quadrimestre per avere un quadro chiaro dell'andamento della produzione e dei costi
+
+
+
+https://business.facebook.com/latest/settings/security_center/?nav_ref=bm_settings_redirect_migration&bm_redirect_migration=true&business_id=370804584300018
