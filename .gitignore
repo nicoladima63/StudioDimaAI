@@ -116,3 +116,6 @@ server_v2/instance/automation_settings.json
 # Python Virtual Environments
 /venv/
 /server_v2/venv/
+
+# Studio Analytics - Generated output
+studio-analytics/output/

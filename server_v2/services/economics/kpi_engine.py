@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 
 from services.economics.monthly_aggregator import get_monthly_summary
-from services.economics.data_normalizer import get_df_appointments, get_df_production
+from services.economics.data_normalizer import get_df_appointments, get_df_estimates
 
 logger = logging.getLogger(__name__)
 
@@ -147,45 +147,44 @@ def get_kpi_by_operator(anno: Optional[int] = None) -> Dict[str, Any]:
     """
     Calcola KPI raggruppati per medico/operatore.
 
+    Produzione per medico calcolata da PREVENT.DBF (stato=3 "Eseguito")
+    che e' l'unica fonte con attribuzione diretta medico-prestazione.
+    Gli appuntamenti non sono affidabili per medico (il gestionale attribuisce
+    tutti gli appuntamenti di uno studio al medico di riferimento dello studio).
+
     Returns:
-        Dict con anno e array operatori con produzione, ore, ricavo/ora per ciascuno.
+        Dict con anno e array operatori con produzione, ore, num_prestazioni, ricavo/ora.
     """
     if anno is None:
         anno = datetime.now().year
 
-    df_app = get_df_appointments(anno=anno)
-    df_prod = get_df_production(anno=anno)
+    from core.constants_v2 import MEDICI
 
-    # Raggruppa appuntamenti per medico
+    df_estimates = get_df_estimates(anno=anno)
+
     operatori = {}
-    if not df_app.empty:
-        # Escludi tipi non clinici
-        df_clinici = df_app[~df_app['tipo'].isin({'F', 'A'})]
-        for medico_id, group in df_clinici.groupby('medico'):
-            medico_nome = group['medico_nome'].iloc[0] if not group.empty else f'Medico {medico_id}'
+
+    if not df_estimates.empty:
+        df_eseguiti = df_estimates[df_estimates['stato'] == 3]
+
+        for medico_id, group in df_eseguiti.groupby('medico'):
+            medico_id = int(medico_id)
+            medico_nome = MEDICI.get(medico_id, f'Medico {medico_id}')
+            produzione = round(_safe(group['spesa'].sum()), 2)
+            num_prestazioni = len(group)
+
             operatori[medico_id] = {
-                'medico_id': int(medico_id),
+                'medico_id': medico_id,
                 'medico_nome': medico_nome,
-                'ore_cliniche': round(_safe(group['durata_minuti'].sum() / 60.0), 2),
-                'num_appuntamenti': len(group),
-                'produzione': 0.0,
-                'ricavo_orario': 0.0,
+                'produzione': produzione,
+                'num_prestazioni': num_prestazioni,
+                'ricavo_medio_prestazione': round(produzione / num_prestazioni, 2) if num_prestazioni > 0 else 0.0,
             }
-
-    # Per ora non abbiamo link diretto fattura->medico
-    # La produzione viene divisa proporzionalmente alle ore
-    if operatori:
-        totale_ore = sum(op['ore_cliniche'] for op in operatori.values())
-        totale_produzione = _safe(df_prod['importo'].sum()) if not df_prod.empty else 0.0
-
-        for op in operatori.values():
-            if totale_ore > 0:
-                op['produzione'] = round(_safe(totale_produzione * (op['ore_cliniche'] / totale_ore)), 2)
-                op['ricavo_orario'] = round(_safe(op['produzione'] / op['ore_cliniche']), 2) if op['ore_cliniche'] > 0 else 0.0
 
     return {
         'anno': anno,
-        'operatori': list(operatori.values()),
+        'fonte': 'PREVENT.DBF (stato=3 Eseguito)',
+        'operatori': sorted(operatori.values(), key=lambda x: x['produzione'], reverse=True),
     }
 
 

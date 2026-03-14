@@ -13,6 +13,8 @@ import type {
   MultiYearComparison,
   TrimesterForecast,
   CollaboratoriRedditivitaData,
+  ReportAppuntamentiData,
+  ReportPrestazioniData,
 } from '../types'
 
 interface ApiResponse<T> {
@@ -104,6 +106,28 @@ export const economicsService = {
     const params = new URLSearchParams()
     if (anno) params.append('anno', anno.toString())
     const response = await apiClient.post(`/economics/cache/invalidate?${params.toString()}`)
+    return response.data
+  },
+
+  async apiGetReportAppuntamenti(anno?: number, anni?: number[]): Promise<ApiResponse<ReportAppuntamentiData>> {
+    const params = new URLSearchParams()
+    if (anni && anni.length > 0) {
+      params.append('anni', anni.join(','))
+    } else if (anno) {
+      params.append('anno', anno.toString())
+    }
+    const response = await apiClient.get(`/economics/report/appuntamenti?${params.toString()}`)
+    return response.data
+  },
+
+  async apiGetReportPrestazioni(anno?: number, anni?: number[]): Promise<ApiResponse<ReportPrestazioniData>> {
+    const params = new URLSearchParams()
+    if (anni && anni.length > 0) {
+      params.append('anni', anni.join(','))
+    } else if (anno) {
+      params.append('anno', anno.toString())
+    }
+    const response = await apiClient.get(`/economics/report/prestazioni?${params.toString()}`)
     return response.data
   },
 }

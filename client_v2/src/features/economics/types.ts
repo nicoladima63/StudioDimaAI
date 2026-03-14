@@ -283,3 +283,137 @@ export interface CollaboratoriRedditivitaData {
     margine_pct: number
   }
 }
+
+// ========== REPORT APPUNTAMENTI ==========
+
+export interface TipoMedico {
+  tipo: string
+  tipo_nome: string
+  count: number
+}
+
+export interface AppuntamentiPerTipo {
+  tipo: string
+  tipo_nome: string
+  num_appuntamenti: number
+  percentuale: number
+  ore_cliniche: number
+  durata_media_minuti: number
+}
+
+export interface AppuntamentiPerMedico {
+  medico_id: number
+  medico_nome: string
+  num_appuntamenti: number
+  percentuale: number
+  ore_cliniche: number
+  tipi: TipoMedico[]
+}
+
+export interface AppuntamentiPerStudio {
+  studio: number
+  num_appuntamenti: number
+  percentuale: number
+  ore_cliniche: number
+}
+
+export interface TrendMensile {
+  mese: number
+  num_appuntamenti: number
+  ore_cliniche: number
+  tipi: TipoMedico[]
+}
+
+export interface ReportAppuntamentiAnno {
+  anno: number
+  totale_appuntamenti: number
+  totale_ore_cliniche: number
+  per_tipo: AppuntamentiPerTipo[]
+  per_medico: AppuntamentiPerMedico[]
+  per_studio: AppuntamentiPerStudio[]
+  trend_mensile: TrendMensile[]
+}
+
+export interface DeltaTipo {
+  tipo: string
+  tipo_nome: string
+  count_primo: number
+  count_ultimo: number
+  delta_count: number
+  delta_pct: number
+}
+
+export interface ConfrontoAppuntamenti {
+  anno_base: number
+  anno_confronto: number
+  delta_totale_appuntamenti: number
+  delta_totale_ore: number
+  delta_per_tipo: DeltaTipo[]
+}
+
+export interface ReportAppuntamentiData {
+  anni: ReportAppuntamentiAnno[]
+  confronto: ConfrontoAppuntamenti | null
+}
+
+// ========== REPORT PRESTAZIONI ==========
+
+export interface PrestazioneDistribuzione {
+  id_prestazione: string
+  codice_prestazione: string
+  descrizione: string
+  categoria_id: number | null
+  categoria_nome: string
+  count: number
+  percentuale_count: number
+  fatturato: number
+  percentuale_fatturato: number
+  ricavo_medio: number
+  prezzo_tariffario: number
+}
+
+export interface CategoriaDistribuzione {
+  categoria_id: number | null
+  categoria_nome: string
+  count: number
+  fatturato: number
+  percentuale_count: number
+  percentuale_fatturato: number
+  ricavo_medio: number
+}
+
+export interface ReportPrestazioniAnno {
+  anno: number
+  totale_prestazioni: number
+  totale_fatturato: number
+  per_prestazione: PrestazioneDistribuzione[]
+  per_categoria: CategoriaDistribuzione[]
+  top_frequenza: PrestazioneDistribuzione[]
+  bottom_frequenza: PrestazioneDistribuzione[]
+  top_fatturato: PrestazioneDistribuzione[]
+  bottom_fatturato: PrestazioneDistribuzione[]
+}
+
+export interface DeltaCategoria {
+  categoria_nome: string
+  count_primo: number
+  count_ultimo: number
+  delta_count: number
+  fatturato_primo: number
+  fatturato_ultimo: number
+  delta_fatturato: number
+  variazione_pct: number | null
+}
+
+export interface ConfrontoPrestazioni {
+  anno_base: number
+  anno_confronto: number
+  delta_totale_prestazioni: number
+  delta_totale_fatturato: number
+  delta_per_categoria: DeltaCategoria[]
+}
+
+export interface ReportPrestazioniData {
+  anni: ReportPrestazioniAnno[]
+  confronto: ConfrontoPrestazioni | null
+}

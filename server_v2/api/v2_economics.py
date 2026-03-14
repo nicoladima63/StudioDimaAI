@@ -231,6 +231,58 @@ def get_trimester_forecast():
 # COLLABORATORI REDDITIVITA
 # =============================================================================
 
+# =============================================================================
+# REPORT DISTRIBUZIONE
+# =============================================================================
+
+@economics_bp.route('/economics/report/appuntamenti', methods=['GET'])
+@jwt_required()
+def get_report_appuntamenti():
+    """Report distribuzione appuntamenti in agenda."""
+    try:
+        require_auth()
+        anno = request.args.get('anno', type=int)
+        anni_param = request.args.get('anni', '')
+        anni = None
+        if anni_param:
+            try:
+                anni = [int(a.strip()) for a in anni_param.split(',') if a.strip()]
+            except ValueError:
+                return jsonify({'state': 'error', 'error': 'Formato anni non valido. Usa: anni=2024,2025'}), 400
+
+        from services.economics.prestazioni_engine import get_distribuzione_appuntamenti
+        data = get_distribuzione_appuntamenti(anno=anno, anni=anni)
+
+        return jsonify({'state': 'success', 'data': data})
+    except Exception as e:
+        logger.error(f"Errore get_report_appuntamenti: {e}")
+        return jsonify({'state': 'error', 'error': str(e)}), 500
+
+
+@economics_bp.route('/economics/report/prestazioni', methods=['GET'])
+@jwt_required()
+def get_report_prestazioni():
+    """Report distribuzione prestazioni eseguite."""
+    try:
+        require_auth()
+        anno = request.args.get('anno', type=int)
+        anni_param = request.args.get('anni', '')
+        anni = None
+        if anni_param:
+            try:
+                anni = [int(a.strip()) for a in anni_param.split(',') if a.strip()]
+            except ValueError:
+                return jsonify({'state': 'error', 'error': 'Formato anni non valido. Usa: anni=2024,2025'}), 400
+
+        from services.economics.prestazioni_engine import get_distribuzione_prestazioni
+        data = get_distribuzione_prestazioni(anno=anno, anni=anni)
+
+        return jsonify({'state': 'success', 'data': data})
+    except Exception as e:
+        logger.error(f"Errore get_report_prestazioni: {e}")
+        return jsonify({'state': 'error', 'error': str(e)}), 500
+
+
 @economics_bp.route('/economics/collaboratori/redditivita', methods=['GET'])
 @jwt_required()
 def get_collaboratori_redditivita():

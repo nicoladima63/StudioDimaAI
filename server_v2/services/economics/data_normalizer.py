@@ -277,6 +277,7 @@ def get_df_estimates(anno: Optional[int] = None) -> pd.DataFrame:
 
                     records.append({
                         'id_piano': clean_dbf_value(getattr(record, col['id_piano'].lower(), '')),
+                        'id_prestazione': clean_dbf_value(getattr(record, col['id_prestazione'].lower(), '')),
                         'codice_prestazione': clean_dbf_value(getattr(record, col['codice_prestazione'].lower(), '')),
                         'data': record_date,
                         'spesa': spesa,
