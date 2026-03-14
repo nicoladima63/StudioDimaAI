@@ -117,5 +117,8 @@ server_v2/instance/automation_settings.json
 /venv/
 /server_v2/venv/
 
-# Studio Analytics - Generated output
-studio-analytics/output/
+# Studio Analytics
+studio-analytics/
+
+# Prompt e appunti
+prompt.md
