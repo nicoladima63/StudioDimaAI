@@ -49,6 +49,7 @@ const TodosPage = React.lazy(() => import('@/features/todos/pages/TodosPage'))
 const EconomicsPage = React.lazy(() => import('@/features/economics/pages/EconomicsPage'))
 const AnalisiComparativaPage = React.lazy(() => import('@/features/economics/pages/AnalisiComparativaPage'))
 const FornitoriClassificazione = React.lazy(() => import('@/features/fornitori/pages/FornitoriClassificazione'))
+const EmailPage = React.lazy(() => import('@/features/email/pages/EmailPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -92,6 +93,7 @@ const AppRouter: React.FC = () => {
           <Route path='calendar' element={<CalendarPage />} />
           <Route path='spese' element={<SpesePage />} />
           <Route path='collaboratori' element={<CollaboratoriPage />} />
+          <Route path='email' element={<EmailPage />} />
           {/* Pagina di test per le select */}
           <Route path='test' element={<TestSelectPage />} />
           <Route path='ricetta/test' element={<RicettaTestPage />} />

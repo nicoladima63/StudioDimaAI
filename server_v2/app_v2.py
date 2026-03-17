@@ -13,10 +13,13 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
 from typing import Optional
 from core.google_calendar_client import GoogleCalendarClient
+from core.google_gmail_client import GoogleGmailClient
 from core.paths import (
     GOOGLE_CREDENTIALS_PATH,
     GOOGLE_OAUTH_STATE_PATH,
     GOOGLE_TOKEN_PATH,
+    GMAIL_TOKEN_PATH,
+    GMAIL_OAUTH_STATE_PATH,
     STUDIO_DIMA_DB_PATH,
     ensure_data_dir,
 )
@@ -296,6 +299,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_prestazione_work_mapping import prestazione_mapping_bp
     from api.v2_push import push_bp
     from api.v2_economics import economics_bp
+    from api.v2_email import email_v2_bp
 
     # Register all V2 blueprints
     blueprints = [
@@ -331,7 +335,8 @@ def register_blueprints(app: Flask) -> None:
         notifications_bp,
         prestazione_mapping_bp,
         push_bp,
-        economics_bp
+        economics_bp,
+        email_v2_bp
     ]
     
     # Register standard blueprints with API prefix only
@@ -517,6 +522,49 @@ def register_health_check(app: Flask) -> None:
                 
         except Exception as e:
             logger.error(f"Error in OAuth callback: {e}", exc_info=True)
+            return redirect(f"/oauth-result?success=false&error=callback_error&details={str(e)}")
+
+    @app.route("/oauth/gmail/callback")
+    def gmail_oauth_callback():
+        """Handle OAuth callback from Gmail."""
+        try:
+            from flask import request, redirect
+
+            code = request.args.get('code')
+            state = request.args.get('state')
+            error = request.args.get('error')
+
+            if error:
+                logger.error(f"Gmail OAuth error from Google: {error}")
+                return redirect(f"/oauth-result?success=false&error={error}")
+
+            if not code or not state:
+                logger.error("Missing authorization code or state in Gmail OAuth callback.")
+                return redirect("/oauth-result?success=false&error=missing_code_or_state")
+
+            client = GoogleGmailClient(
+                credentials_path=GOOGLE_CREDENTIALS_PATH,
+                token_path=GMAIL_TOKEN_PATH,
+                oauth_state_path=GMAIL_OAUTH_STATE_PATH,
+            )
+
+            redirect_uri = os.getenv("GMAIL_OAUTH_REDIRECT_URI")
+            if not redirect_uri:
+                proto = request.headers.get("X-Forwarded-Proto", request.scheme)
+                host = request.headers.get("X-Forwarded-Host", request.host)
+                redirect_uri = f"{proto}://{host}/oauth/gmail/callback"
+
+            client.handle_web_auth_callback(
+                code=code,
+                state=state,
+                redirect_uri=redirect_uri
+            )
+
+            logger.info("Gmail OAuth callback completed successfully")
+            return redirect("/oauth-result?success=true")
+
+        except Exception as e:
+            logger.error(f"Error in Gmail OAuth callback: {e}", exc_info=True)
             return redirect(f"/oauth-result?success=false&error=callback_error&details={str(e)}")
 
     @app.route("/oauth-result")

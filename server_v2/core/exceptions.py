@@ -307,3 +307,22 @@ class GoogleQuotaError(CalendarSyncError):
     Eccezione per superamento della quota API di Google.
     """
     pass
+
+
+# =============================================================================
+# GMAIL EXCEPTIONS
+# =============================================================================
+
+
+class GmailCredentialsNotFoundError(StudioDimaError):
+    """
+    Eccezione per credenziali Gmail non trovate (gmail_token.json).
+    """
+    pass
+
+
+class GmailApiError(StudioDimaError):
+    """
+    Eccezione per errori durante le chiamate alle Gmail API.
+    """
+    pass

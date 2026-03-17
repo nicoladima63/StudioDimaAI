@@ -27,6 +27,14 @@ GOOGLE_OAUTH_STATE_PATH = Path(
     os.getenv("GOOGLE_OAUTH_STATE_PATH", str(DATA_DIR / "oauth_state.json"))
 ).resolve()
 
+# Gmail OAuth files (separate token from Calendar)
+GMAIL_TOKEN_PATH = Path(
+    os.getenv("GMAIL_TOKEN_PATH", str(DATA_DIR / "gmail_token.json"))
+).resolve()
+GMAIL_OAUTH_STATE_PATH = Path(
+    os.getenv("GMAIL_OAUTH_STATE_PATH", str(DATA_DIR / "gmail_oauth_state.json"))
+).resolve()
+
 # Calendar sync state (legacy / diagnostics)
 CALENDAR_SYNC_STATE_PATH = Path(
     os.getenv("CALENDAR_SYNC_STATE_PATH", str(DATA_DIR / "sync_state.json"))

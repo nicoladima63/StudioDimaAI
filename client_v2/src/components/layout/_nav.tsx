@@ -13,7 +13,8 @@ import {
   cilSearch,
   cilTask,
   cilChartPie,
-  cilChartLine
+  cilChartLine,
+  cilEnvelopeClosed,
 } from '@coreui/icons';
 import { CNavItem, CNavGroup } from '@coreui/react';
 
@@ -29,6 +30,12 @@ const _nav = [
     name: 'Matrice di Eisenhower',
     to: '/eisenhower',
     icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Email',
+    to: '/email',
+    icon: <CIcon icon={cilEnvelopeClosed} customClassName="nav-icon" />,
   },
   {
     component: CNavGroup,
