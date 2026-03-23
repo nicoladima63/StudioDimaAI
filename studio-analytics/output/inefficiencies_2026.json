@@ -1,0 +1,400 @@
+{
+  "anno": 2026,
+  "mese_filtro": null,
+  "soglia_gap_minuti": 30,
+  "generated_at": "2026-03-09T16:20:17.544180",
+  "unused_chair_time": {
+    "total_gaps": 120,
+    "total_unused_minutes": 13910,
+    "total_unused_hours": 231.8,
+    "avg_gap_minutes": 115.9,
+    "worst_days": [
+      {
+        "data": "2026-11-11",
+        "studio": 2,
+        "mese": 11,
+        "unused_minutes": 470,
+        "num_gaps": 1
+      },
+      {
+        "data": "2026-09-02",
+        "studio": 2,
+        "mese": 9,
+        "unused_minutes": 460,
+        "num_gaps": 2
+      },
+      {
+        "data": "2026-05-13",
+        "studio": 2,
+        "mese": 5,
+        "unused_minutes": 450,
+        "num_gaps": 3
+      },
+      {
+        "data": "2026-05-27",
+        "studio": 2,
+        "mese": 5,
+        "unused_minutes": 420,
+        "num_gaps": 3
+      },
+      {
+        "data": "2026-09-30",
+        "studio": 2,
+        "mese": 9,
+        "unused_minutes": 400,
+        "num_gaps": 1
+      },
+      {
+        "data": "2026-02-25",
+        "studio": 2,
+        "mese": 2,
+        "unused_minutes": 390,
+        "num_gaps": 3
+      },
+      {
+        "data": "2026-03-02",
+        "studio": 2,
+        "mese": 3,
+        "unused_minutes": 380,
+        "num_gaps": 2
+      },
+      {
+        "data": "2026-03-04",
+        "studio": 1,
+        "mese": 3,
+        "unused_minutes": 380,
+        "num_gaps": 1
+      },
+      {
+        "data": "2026-03-14",
+        "studio": 1,
+        "mese": 3,
+        "unused_minutes": 370,
+        "num_gaps": 1
+      },
+      {
+        "data": "2026-10-28",
+        "studio": 2,
+        "mese": 10,
+        "unused_minutes": 350,
+        "num_gaps": 1
+      }
+    ],
+    "monthly_summary": [
+      {
+        "mese": 1,
+        "unused_hours": 52.0,
+        "working_days": 18,
+        "avg_daily_unused_min": 173.3,
+        "gaps": 35
+      },
+      {
+        "mese": 2,
+        "unused_hours": 48.8,
+        "working_days": 17,
+        "avg_daily_unused_min": 172.4,
+        "gaps": 33
+      },
+      {
+        "mese": 3,
+        "unused_hours": 43.0,
+        "working_days": 12,
+        "avg_daily_unused_min": 215.0,
+        "gaps": 17
+      },
+      {
+        "mese": 4,
+        "unused_hours": 13.2,
+        "working_days": 5,
+        "avg_daily_unused_min": 158.0,
+        "gaps": 7
+      },
+      {
+        "mese": 5,
+        "unused_hours": 16.5,
+        "working_days": 3,
+        "avg_daily_unused_min": 330.0,
+        "gaps": 7
+      },
+      {
+        "mese": 6,
+        "unused_hours": 4.8,
+        "working_days": 2,
+        "avg_daily_unused_min": 145.0,
+        "gaps": 4
+      },
+      {
+        "mese": 7,
+        "unused_hours": 9.5,
+        "working_days": 4,
+        "avg_daily_unused_min": 142.5,
+        "gaps": 6
+      },
+      {
+        "mese": 9,
+        "unused_hours": 23.7,
+        "working_days": 6,
+        "avg_daily_unused_min": 236.7,
+        "gaps": 7
+      },
+      {
+        "mese": 10,
+        "unused_hours": 5.8,
+        "working_days": 1,
+        "avg_daily_unused_min": 350.0,
+        "gaps": 1
+      },
+      {
+        "mese": 11,
+        "unused_hours": 13.7,
+        "working_days": 2,
+        "avg_daily_unused_min": 410.0,
+        "gaps": 2
+      },
+      {
+        "mese": 12,
+        "unused_hours": 0.8,
+        "working_days": 1,
+        "avg_daily_unused_min": 50.0,
+        "gaps": 1
+      }
+    ],
+    "lunch_gaps_excluded": 24
+  },
+  "fragmentation": {
+    "total_fragments": 106,
+    "total_wasted_minutes": 1300,
+    "avg_fragment_minutes": 12.3,
+    "by_month": [
+      {
+        "mese": 1,
+        "fragments": 22,
+        "wasted_minutes": 285
+      },
+      {
+        "mese": 2,
+        "fragments": 34,
+        "wasted_minutes": 445
+      },
+      {
+        "mese": 3,
+        "fragments": 25,
+        "wasted_minutes": 320
+      },
+      {
+        "mese": 4,
+        "fragments": 14,
+        "wasted_minutes": 140
+      },
+      {
+        "mese": 6,
+        "fragments": 4,
+        "wasted_minutes": 40
+      },
+      {
+        "mese": 7,
+        "fragments": 2,
+        "wasted_minutes": 20
+      },
+      {
+        "mese": 9,
+        "fragments": 4,
+        "wasted_minutes": 40
+      },
+      {
+        "mese": 12,
+        "fragments": 1,
+        "wasted_minutes": 10
+      }
+    ]
+  },
+  "prime_slot_analysis": {
+    "prime_total_appointments": 345,
+    "prime_low_revenue_count": 160,
+    "prime_low_revenue_pct": 46.4,
+    "prime_slot_types": [
+      {
+        "tipo": "I",
+        "tipo_nome": "Igiene",
+        "count": 86,
+        "pct_of_prime": 24.9
+      },
+      {
+        "tipo": "S",
+        "tipo_nome": "Controllo",
+        "count": 34,
+        "pct_of_prime": 9.9
+      },
+      {
+        "tipo": "M",
+        "tipo_nome": "privato",
+        "count": 30,
+        "pct_of_prime": 8.7
+      },
+      {
+        "tipo": "V",
+        "tipo_nome": "Prima visita",
+        "count": 10,
+        "pct_of_prime": 2.9
+      }
+    ],
+    "recommendation": "46.4% degli slot mattutini (9-12) sono usati per procedure a basso ricavo. Valutare lo spostamento di igiene e controlli agli slot pomeridiani per liberare le fasce orarie premium per procedure ad alto valore."
+  },
+  "potential_no_shows": {
+    "total_potential_no_shows": 442,
+    "total_clinical_appointments": 1004,
+    "no_show_rate_pct": 44.0,
+    "by_month": [
+      {
+        "mese": 1,
+        "no_shows": 67,
+        "appointments": 280,
+        "rate_pct": 23.9
+      },
+      {
+        "mese": 2,
+        "no_shows": 70,
+        "appointments": 332,
+        "rate_pct": 21.1
+      },
+      {
+        "mese": 3,
+        "no_shows": 127,
+        "appointments": 214,
+        "rate_pct": 59.3
+      },
+      {
+        "mese": 4,
+        "no_shows": 67,
+        "appointments": 67,
+        "rate_pct": 100.0
+      },
+      {
+        "mese": 5,
+        "no_shows": 17,
+        "appointments": 17,
+        "rate_pct": 100.0
+      },
+      {
+        "mese": 6,
+        "no_shows": 26,
+        "appointments": 26,
+        "rate_pct": 100.0
+      },
+      {
+        "mese": 7,
+        "no_shows": 21,
+        "appointments": 21,
+        "rate_pct": 100.0
+      },
+      {
+        "mese": 9,
+        "no_shows": 28,
+        "appointments": 28,
+        "rate_pct": 100.0
+      },
+      {
+        "mese": 10,
+        "no_shows": 8,
+        "appointments": 8,
+        "rate_pct": 100.0
+      },
+      {
+        "mese": 11,
+        "no_shows": 7,
+        "appointments": 7,
+        "rate_pct": 100.0
+      },
+      {
+        "mese": 12,
+        "no_shows": 4,
+        "appointments": 4,
+        "rate_pct": 100.0
+      }
+    ],
+    "by_tipo": [
+      {
+        "tipo": "I",
+        "tipo_nome": "Igiene",
+        "no_shows": 273,
+        "appointments": 352,
+        "rate_pct": 77.6
+      },
+      {
+        "tipo": "C",
+        "tipo_nome": "Conservativa",
+        "no_shows": 45,
+        "appointments": 178,
+        "rate_pct": 25.3
+      },
+      {
+        "tipo": "M",
+        "tipo_nome": "privato",
+        "no_shows": 24,
+        "appointments": 64,
+        "rate_pct": 37.5
+      },
+      {
+        "tipo": "P",
+        "tipo_nome": "Protesi",
+        "no_shows": 17,
+        "appointments": 102,
+        "rate_pct": 16.7
+      },
+      {
+        "tipo": "O",
+        "tipo_nome": "Ortodonzia",
+        "no_shows": 16,
+        "appointments": 64,
+        "rate_pct": 25.0
+      },
+      {
+        "tipo": "S",
+        "tipo_nome": "Controllo",
+        "no_shows": 12,
+        "appointments": 81,
+        "rate_pct": 14.8
+      },
+      {
+        "tipo": "E",
+        "tipo_nome": "Endodonzia",
+        "no_shows": 9,
+        "appointments": 43,
+        "rate_pct": 20.9
+      },
+      {
+        "tipo": "H",
+        "tipo_nome": "Chirurgia",
+        "no_shows": 6,
+        "appointments": 26,
+        "rate_pct": 23.1
+      },
+      {
+        "tipo": "V",
+        "tipo_nome": "Prima visita",
+        "no_shows": 3,
+        "appointments": 41,
+        "rate_pct": 7.3
+      },
+      {
+        "tipo": "L",
+        "tipo_nome": "Implantologia",
+        "no_shows": 2,
+        "appointments": 14,
+        "rate_pct": 14.3
+      }
+    ],
+    "caveat": "Detection euristica basata su assenza di prestazioni eseguite corrispondenti. Consultazioni, follow-up e visite di controllo possono risultare come falsi positivi perche' non generano record in PREVENT.DBF."
+  },
+  "summary": {
+    "total_inefficiency_hours": 253.5,
+    "estimated_revenue_loss": 12230.5,
+    "revenue_per_hour_used": 48.25,
+    "top_recommendations": [
+      "Ridurre i gap tra appuntamenti (231.8 ore inutilizzate, 120 gap rilevati)",
+      "Ridurre la frammentazione (106 micro-gap per 1300 minuti persi)",
+      "Spostare procedure a basso ricavo dal mattino (46.4% degli slot 9-12 usati per igiene/controlli)",
+      "Gestire tasso no-show (44.0% stimato)"
+    ]
+  }
+}

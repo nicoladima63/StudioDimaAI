@@ -48,6 +48,7 @@ const TasksPage = React.lazy(() => import('@/features/lavorazioni/TasksPage'))
 const TodosPage = React.lazy(() => import('@/features/todos/pages/TodosPage'))
 const EconomicsPage = React.lazy(() => import('@/features/economics/pages/EconomicsPage'))
 const AnalisiComparativaPage = React.lazy(() => import('@/features/economics/pages/AnalisiComparativaPage'))
+const CentroCostoPage = React.lazy(() => import('@/features/economics/pages/CentroCostoPage'))
 const FornitoriClassificazione = React.lazy(() => import('@/features/fornitori/pages/FornitoriClassificazione'))
 
 // Loading fallback component
@@ -122,6 +123,7 @@ const AppRouter: React.FC = () => {
           {/* Economics */}
           <Route path='economics' element={<EconomicsPage />} />
           <Route path='economics/comparativa' element={<AnalisiComparativaPage />} />
+          <Route path='economics/centro-costo' element={<CentroCostoPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
