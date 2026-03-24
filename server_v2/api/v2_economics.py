@@ -301,6 +301,35 @@ def get_collaboratori_redditivita():
 
 
 # =============================================================================
+# COLLABORATORI LISTA (per calcolatore centro di costo)
+# =============================================================================
+
+@economics_bp.route('/economics/collaboratori/lista', methods=['GET'])
+@jwt_required()
+def get_collaboratori_lista():
+    """Lista collaboratori dello studio."""
+    try:
+        require_auth()
+        from core.constants_v2 import MEDICI, COMPENSI_COLLABORATORI
+
+        collaboratori = []
+        for medico_id, nome in MEDICI.items():
+            compenso_info = COMPENSI_COLLABORATORI.get(medico_id, {})
+            collaboratori.append({
+                'id': medico_id,
+                'nome': nome,
+                'tipo': compenso_info.get('tipo', 'sconosciuto'),
+            })
+
+        collaboratori.sort(key=lambda x: (0 if x['tipo'] == 'titolare' else 1, x['nome']))
+
+        return jsonify({'state': 'success', 'data': collaboratori})
+    except Exception as e:
+        logger.error(f"Errore get_collaboratori_lista: {e}")
+        return jsonify({'state': 'error', 'error': str(e)}), 500
+
+
+# =============================================================================
 # CACHE MANAGEMENT
 # =============================================================================
 

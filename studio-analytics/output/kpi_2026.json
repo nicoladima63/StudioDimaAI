@@ -1,0 +1,442 @@
+{
+  "anno": 2026,
+  "current": {
+    "anno": 2026,
+    "mese_corrente": 3,
+    "produzione_ytd": 23542.0,
+    "incasso_ytd": 23542.0,
+    "ore_cliniche_ytd": 487.42,
+    "costi_totali_ytd": 10564.26,
+    "costi_diretti_ytd": 0.0,
+    "costi_indiretti_ytd": 3705.0,
+    "costi_non_deducibili_ytd": 0.0,
+    "costi_non_classificati_ytd": 6859.26,
+    "margine_ytd": 12977.74,
+    "ricavo_medio_ora": 48.3,
+    "costo_orario_totale": 21.67,
+    "margine_pct": 55.13,
+    "break_even_mensile": 5282.13,
+    "produzione_media_mensile": 11771.0,
+    "margine_contribuzione": 100.0,
+    "num_fatture_ytd": 127,
+    "num_appuntamenti_ytd": 646,
+    "mesi_con_dati": 2
+  },
+  "monthly": {
+    "anno": 2026,
+    "mesi": [
+      {
+        "mese": 1,
+        "produzione": 12082.0,
+        "incasso": 12082.0,
+        "ore_cliniche": 182.5,
+        "ricavo_orario": 66.2,
+        "costi_totali": 7245.52,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 2605.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 4640.52,
+        "margine": 4836.48,
+        "saturazione": 114.06,
+        "num_fatture": 67,
+        "num_appuntamenti": 280
+      },
+      {
+        "mese": 2,
+        "produzione": 11460.0,
+        "incasso": 11460.0,
+        "ore_cliniche": 205.75,
+        "ricavo_orario": 55.7,
+        "costi_totali": 3318.74,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 1100.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 2218.74,
+        "margine": 8141.26,
+        "saturazione": 128.59,
+        "num_fatture": 60,
+        "num_appuntamenti": 284
+      },
+      {
+        "mese": 3,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 99.17,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 61.98,
+        "num_fatture": 0,
+        "num_appuntamenti": 82
+      },
+      {
+        "mese": 4,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 28.67,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 17.92,
+        "num_fatture": 0,
+        "num_appuntamenti": 40
+      },
+      {
+        "mese": 5,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 10.0,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 6.25,
+        "num_fatture": 0,
+        "num_appuntamenti": 15
+      },
+      {
+        "mese": 6,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 19.0,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 11.88,
+        "num_fatture": 0,
+        "num_appuntamenti": 25
+      },
+      {
+        "mese": 7,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 14.83,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 9.27,
+        "num_fatture": 0,
+        "num_appuntamenti": 20
+      },
+      {
+        "mese": 8,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 0.0,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 0.0,
+        "num_fatture": 0,
+        "num_appuntamenti": 0
+      },
+      {
+        "mese": 9,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 13.0,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 8.12,
+        "num_fatture": 0,
+        "num_appuntamenti": 19
+      },
+      {
+        "mese": 10,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 2.83,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 1.77,
+        "num_fatture": 0,
+        "num_appuntamenti": 6
+      },
+      {
+        "mese": 11,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 4.83,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 3.02,
+        "num_fatture": 0,
+        "num_appuntamenti": 7
+      },
+      {
+        "mese": 12,
+        "produzione": 0.0,
+        "incasso": 0.0,
+        "ore_cliniche": 2.0,
+        "ricavo_orario": 0.0,
+        "costi_totali": 0.0,
+        "costi_diretti": 0.0,
+        "costi_indiretti": 0.0,
+        "costi_non_deducibili": 0.0,
+        "costi_non_classificati": 0.0,
+        "margine": 0.0,
+        "saturazione": 1.25,
+        "num_fatture": 0,
+        "num_appuntamenti": 4
+      }
+    ]
+  },
+  "by_category": {
+    "anno": 2026,
+    "categorie": [
+      {
+        "tipo": "I",
+        "tipo_nome": "Igiene",
+        "ore_cliniche": 290.83,
+        "num_appuntamenti": 352,
+        "percentuale": 36.33
+      },
+      {
+        "tipo": "C",
+        "tipo_nome": "Conservativa",
+        "ore_cliniche": 117.17,
+        "num_appuntamenti": 178,
+        "percentuale": 18.37
+      },
+      {
+        "tipo": "P",
+        "tipo_nome": "Protesi",
+        "ore_cliniche": 53.08,
+        "num_appuntamenti": 102,
+        "percentuale": 10.53
+      },
+      {
+        "tipo": "S",
+        "tipo_nome": "Controllo",
+        "ore_cliniche": 28.5,
+        "num_appuntamenti": 81,
+        "percentuale": 8.36
+      },
+      {
+        "tipo": "M",
+        "tipo_nome": "privato",
+        "ore_cliniche": 122.17,
+        "num_appuntamenti": 64,
+        "percentuale": 6.6
+      },
+      {
+        "tipo": "O",
+        "tipo_nome": "Ortodonzia",
+        "ore_cliniche": 24.17,
+        "num_appuntamenti": 64,
+        "percentuale": 6.6
+      },
+      {
+        "tipo": "E",
+        "tipo_nome": "Endodonzia",
+        "ore_cliniche": 27.5,
+        "num_appuntamenti": 43,
+        "percentuale": 4.44
+      },
+      {
+        "tipo": "V",
+        "tipo_nome": "Prima visita",
+        "ore_cliniche": 19.0,
+        "num_appuntamenti": 41,
+        "percentuale": 4.23
+      },
+      {
+        "tipo": "H",
+        "tipo_nome": "Chirurgia",
+        "ore_cliniche": 16.0,
+        "num_appuntamenti": 26,
+        "percentuale": 2.68
+      },
+      {
+        "tipo": "L",
+        "tipo_nome": "Implantologia",
+        "ore_cliniche": 14.83,
+        "num_appuntamenti": 14,
+        "percentuale": 1.44
+      },
+      {
+        "tipo": "R",
+        "tipo_nome": "Parodontologia",
+        "ore_cliniche": 2.0,
+        "num_appuntamenti": 3,
+        "percentuale": 0.31
+      },
+      {
+        "tipo": "U",
+        "tipo_nome": "Gnatologia",
+        "ore_cliniche": 0.5,
+        "num_appuntamenti": 1,
+        "percentuale": 0.1
+      }
+    ]
+  },
+  "by_operator": {
+    "anno": 2026,
+    "operatori": [
+      {
+        "medico_id": 0,
+        "medico_nome": "Medico 0",
+        "ore_cliniche": 0.0,
+        "num_appuntamenti": 35,
+        "produzione": 0.0,
+        "ricavo_orario": 0.0
+      },
+      {
+        "medico_id": 1,
+        "medico_nome": "Dr. Nicola Di Martino",
+        "ore_cliniche": 422.92,
+        "num_appuntamenti": 625,
+        "produzione": 20407.11,
+        "ricavo_orario": 48.25
+      },
+      {
+        "medico_id": 2,
+        "medico_nome": "Dr.ssa Lara ",
+        "ore_cliniche": 292.83,
+        "num_appuntamenti": 344,
+        "produzione": 14129.89,
+        "ricavo_orario": 48.25
+      }
+    ]
+  },
+  "chair_utilization": {
+    "ytd_pct": 41.1,
+    "monthly": [
+      {
+        "mese": 1,
+        "utilization_pct": 57.5,
+        "ore_occupate": 174.7,
+        "ore_disponibili": 304.0,
+        "giornate_lavoro": 38
+      },
+      {
+        "mese": 2,
+        "utilization_pct": 54.6,
+        "ore_occupate": 209.8,
+        "ore_disponibili": 384.0,
+        "giornate_lavoro": 48
+      },
+      {
+        "mese": 3,
+        "utilization_pct": 49.9,
+        "ore_occupate": 163.8,
+        "ore_disponibili": 328.0,
+        "giornate_lavoro": 41
+      },
+      {
+        "mese": 4,
+        "utilization_pct": 27.0,
+        "ore_occupate": 47.5,
+        "ore_disponibili": 176.0,
+        "giornate_lavoro": 22
+      },
+      {
+        "mese": 5,
+        "utilization_pct": 13.8,
+        "ore_occupate": 11.0,
+        "ore_disponibili": 80.0,
+        "giornate_lavoro": 10
+      },
+      {
+        "mese": 6,
+        "utilization_pct": 19.1,
+        "ore_occupate": 19.8,
+        "ore_disponibili": 104.0,
+        "giornate_lavoro": 13
+      },
+      {
+        "mese": 7,
+        "utilization_pct": 24.5,
+        "ore_occupate": 15.7,
+        "ore_disponibili": 64.0,
+        "giornate_lavoro": 8
+      },
+      {
+        "mese": 9,
+        "utilization_pct": 23.3,
+        "ore_occupate": 20.5,
+        "ore_disponibili": 88.0,
+        "giornate_lavoro": 11
+      },
+      {
+        "mese": 10,
+        "utilization_pct": 8.0,
+        "ore_occupate": 4.5,
+        "ore_disponibili": 56.0,
+        "giornate_lavoro": 7
+      },
+      {
+        "mese": 11,
+        "utilization_pct": 12.1,
+        "ore_occupate": 4.8,
+        "ore_disponibili": 40.0,
+        "giornate_lavoro": 5
+      },
+      {
+        "mese": 12,
+        "utilization_pct": 12.5,
+        "ore_occupate": 2.0,
+        "ore_disponibili": 16.0,
+        "giornate_lavoro": 2
+      }
+    ],
+    "per_studio": [
+      {
+        "studio": 0,
+        "utilization_pct": 0.0,
+        "ore_occupate": 0.0,
+        "giornate_lavoro": 35
+      },
+      {
+        "studio": 1,
+        "utilization_pct": 56.9,
+        "ore_occupate": 377.9,
+        "giornate_lavoro": 83
+      },
+      {
+        "studio": 2,
+        "utilization_pct": 42.6,
+        "ore_occupate": 296.2,
+        "giornate_lavoro": 87
+      }
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "anno": 2025,
+  "mese_corrente": 12,
+  "produzione_ytd": 205465.0,
+  "forecast_produzione": 324258.46,
+  "forecast_margine": 167075.15,
+  "pipeline_preventivi": 233270.0,
+  "scenario_conservativo": {
+    "produzione": 277388.61,
+    "costi": 157183.31,
+    "margine": 120205.3,
+    "margine_pct": 43.33,
+    "pipeline_convertita": 69981.0
+  },
+  "scenario_realistico": {
+    "produzione": 324258.46,
+    "costi": 157183.31,
+    "margine": 167075.15,
+    "margine_pct": 51.53,
+    "pipeline_convertita": 116635.0
+  },
+  "scenario_ottimistico": {
+    "produzione": 371128.31,
+    "costi": 157183.31,
+    "margine": 213945.0,
+    "margine_pct": 57.65,
+    "pipeline_convertita": 163289.0
+  },
+  "mesi": [
+    {
+      "mese": 1,
+      "reale": 14315.0,
+      "previsto": null,
+      "costi_reali": 8337.92,
+      "tipo": "reale"
+    },
+    {
+      "mese": 2,
+      "reale": 16145.0,
+      "previsto": null,
+      "costi_reali": 19501.83,
+      "tipo": "reale"
+    },
+    {
+      "mese": 3,
+      "reale": 20600.0,
+      "previsto": null,
+      "costi_reali": 16868.76,
+      "tipo": "reale"
+    },
+    {
+      "mese": 4,
+      "reale": 16060.0,
+      "previsto": null,
+      "costi_reali": 10939.88,
+      "tipo": "reale"
+    },
+    {
+      "mese": 5,
+      "reale": 14365.0,
+      "previsto": null,
+      "costi_reali": 13292.48,
+      "tipo": "reale"
+    },
+    {
+      "mese": 6,
+      "reale": 18720.0,
+      "previsto": null,
+      "costi_reali": 9166.72,
+      "tipo": "reale"
+    },
+    {
+      "mese": 7,
+      "reale": 25925.0,
+      "previsto": null,
+      "costi_reali": 12391.33,
+      "tipo": "reale"
+    },
+    {
+      "mese": 8,
+      "reale": null,
+      "previsto": 2158.46,
+      "costi_reali": null,
+      "tipo": "previsto"
+    },
+    {
+      "mese": 9,
+      "reale": 16655.0,
+      "previsto": null,
+      "costi_reali": 12072.77,
+      "tipo": "reale"
+    },
+    {
+      "mese": 10,
+      "reale": 19130.0,
+      "previsto": null,
+      "costi_reali": 12764.77,
+      "tipo": "reale"
+    },
+    {
+      "mese": 11,
+      "reale": 20475.0,
+      "previsto": null,
+      "costi_reali": 10720.81,
+      "tipo": "reale"
+    },
+    {
+      "mese": 12,
+      "reale": 23075.0,
+      "previsto": null,
+      "costi_reali": 18027.43,
+      "tipo": "reale"
+    }
+  ],
+  "parametri": {
+    "fattore_trend": 0.8421,
+    "media_globale_mensile": 17436.62,
+    "crescita_annuale_pct": -15.79,
+    "anni_storico": 5
+  }
+}

@@ -15,6 +15,7 @@ import {
   cilChartPie,
   cilChartLine,
   cilEnvelopeClosed,
+  cilCalculator,
 } from '@coreui/icons';
 import { CNavItem, CNavGroup } from '@coreui/react';
 
@@ -208,6 +209,12 @@ const _nav = [
         name: 'Analisi Comparativa',
         to: '/economics/comparativa',
         icon: <CIcon icon={cilChartLine} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Centro di Costo',
+        to: '/economics/centro-costo',
+        icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
       },
     ]
   },

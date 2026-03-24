@@ -102,6 +102,11 @@ export const economicsService = {
     return response.data
   },
 
+  async apiGetCollaboratoriLista(): Promise<ApiResponse<{ id: number; nome: string; tipo: string }[]>> {
+    const response = await apiClient.get('/economics/collaboratori/lista')
+    return response.data
+  },
+
   async apiInvalidateCache(anno?: number): Promise<ApiResponse<{ message: string }>> {
     const params = new URLSearchParams()
     if (anno) params.append('anno', anno.toString())
