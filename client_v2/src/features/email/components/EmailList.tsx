@@ -103,10 +103,10 @@ const EmailList: React.FC<EmailListProps> = ({
                 <CTableRow>
                   <CTableHeaderCell style={{ width: '30px' }}></CTableHeaderCell>
                   {showClassification && (
-                    <CTableHeaderCell style={{ width: '120px' }}>Categoria</CTableHeaderCell>
+                    <CTableHeaderCell style={{ width: '180px' }}>Categoria</CTableHeaderCell>
                   )}
                   <CTableHeaderCell style={{ width: '80px' }}>Data</CTableHeaderCell>
-                  <CTableHeaderCell style={{ width: '200px' }}>Da</CTableHeaderCell>
+                  <CTableHeaderCell style={{ width: '240px' }}>Da</CTableHeaderCell>
                   <CTableHeaderCell>Oggetto</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>

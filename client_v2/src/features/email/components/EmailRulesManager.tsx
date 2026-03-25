@@ -62,7 +62,7 @@ interface EmailRulesManagerProps {
 }
 
 const EmailRulesManager: React.FC<EmailRulesManagerProps> = ({ preset, onPresetConsumed }) => {
-  const { scopes, rules, fetchRules, fetchScopes } = useEmailStore()
+  const { scopes, rules, fetchRules, fetchScopes, invalidateAndRefresh } = useEmailStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -213,6 +213,7 @@ const EmailRulesManager: React.FC<EmailRulesManagerProps> = ({ preset, onPresetC
       }
       setShowModal(false)
       handleRefresh()
+      invalidateAndRefresh()
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -225,6 +226,7 @@ const EmailRulesManager: React.FC<EmailRulesManagerProps> = ({ preset, onPresetC
     try {
       await emailService.apiDeleteRule(id)
       handleRefresh()
+      invalidateAndRefresh()
     } catch (err: any) {
       setError(err.message)
     }
