@@ -241,6 +241,12 @@ const _nav = [
         to: '/settings/scheduler',
         icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
       },
+      {
+        component: CNavItem,
+        name: 'SEO',
+        to: '/settings/seo',
+        icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
+      },
     ]
   },
   {

@@ -50,6 +50,7 @@ const EconomicsPage = React.lazy(() => import('@/features/economics/pages/Econom
 const AnalisiComparativaPage = React.lazy(() => import('@/features/economics/pages/AnalisiComparativaPage'))
 const FornitoriClassificazione = React.lazy(() => import('@/features/fornitori/pages/FornitoriClassificazione'))
 const EmailPage = React.lazy(() => import('@/features/email/pages/EmailPage'))
+const SeoPage = React.lazy(() => import('@/features/seo/pages/SeoPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -105,6 +106,7 @@ const AppRouter: React.FC = () => {
           <Route path='settings/monitor-prestazioni' element={<MonitorPrestazioniStandalonePage />} />
           <Route path='settings/automazioni' element={<AutomationPage />} />
           <Route path='settings/scheduler' element={<SchedulerPage />} />
+          <Route path='settings/seo' element={<SeoPage />} />
 
           {/* User Management Routes */}
           <Route path='users' element={<UserListPage />} />

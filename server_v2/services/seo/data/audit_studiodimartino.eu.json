@@ -1,0 +1,145 @@
+{
+  "success": true,
+  "url": "https://www.studiodimartino.eu/",
+  "timestamp": "2026-03-30T18:37:19.817847",
+  "elapsed_seconds": 0.34,
+  "overall_score": 98,
+  "score_label": "Eccellente",
+  "categories": {
+    "on_page": {
+      "label": "On-Page SEO",
+      "score": 100,
+      "weight": "20%",
+      "data": {
+        "title": "Studio Dentistico Di Martino | Dentista Agliana (PT)",
+        "title_length": 52,
+        "meta_description": "Studio Dentistico Dr. Nicola Di Martino ad Agliana (PT). Soluzioni su misura: Odontoiatria, Implantologia, Ortodonzia ed Estetica Dentale. Prenota una visita!",
+        "meta_description_length": 158,
+        "h1_count": 1,
+        "h1_values": [
+          "Studio Dentistico Dr. Nicola Di Martino - Dentista ad Agliana (PT)"
+        ],
+        "h2_count": 8,
+        "h3_count": 5,
+        "canonical": "https://studiodimartino.eu/",
+        "has_viewport": true,
+        "has_lang": true,
+        "og_tags": 8,
+        "twitter_tags": 4
+      },
+      "issues_count": 0
+    },
+    "content": {
+      "label": "Qualità Contenuto",
+      "score": 100,
+      "weight": "23%",
+      "data": {
+        "word_count": 722,
+        "heading_count": 14,
+        "internal_links": 4,
+        "external_links": 5,
+        "has_author": true,
+        "eeat_signals": {
+          "experience": 0,
+          "expertise": 25,
+          "authoritativeness": 0,
+          "trustworthiness": 0
+        }
+      },
+      "issues_count": 0
+    },
+    "technical": {
+      "label": "SEO Tecnico",
+      "score": 100,
+      "weight": "22%",
+      "data": {
+        "https": true,
+        "status_code": 200,
+        "redirect_count": 1,
+        "redirect_chain": [
+          {
+            "url": "https://studiodimartino.eu/",
+            "status_code": 301
+          }
+        ],
+        "missing_security_headers": [],
+        "url_length": 31
+      },
+      "issues_count": 0
+    },
+    "schema": {
+      "label": "Schema / Dati Strutturati",
+      "score": 100,
+      "weight": "10%",
+      "data": {
+        "schema_count": 4,
+        "types_found": [
+          "Dentist",
+          "LocalBusiness",
+          "WebSite",
+          "BreadcrumbList"
+        ],
+        "deprecated_found": [],
+        "validation_issues": []
+      },
+      "issues_count": 0
+    },
+    "images": {
+      "label": "Immagini",
+      "score": 100,
+      "weight": "5%",
+      "data": {
+        "total_images": 1,
+        "missing_alt": 0,
+        "decorative_images": 0,
+        "missing_dimensions": 0,
+        "missing_lazy_loading": 0,
+        "non_optimized_format": 0
+      },
+      "issues_count": 0
+    },
+    "ai_readiness": {
+      "label": "AI Search Readiness",
+      "score": 100,
+      "weight": "10%",
+      "data": {
+        "heading_structure": "H1:1 H2:8 H3:5",
+        "has_schema": true,
+        "word_count": 722,
+        "has_og_metadata": true
+      },
+      "issues_count": 0
+    },
+    "performance": {
+      "label": "Performance (CWV Hints)",
+      "score": 85,
+      "weight": "10%",
+      "data": {
+        "blocking_scripts": 3,
+        "total_scripts": 4,
+        "external_stylesheets": 2
+      },
+      "issues_count": 1
+    }
+  },
+  "issues": [
+    {
+      "category": "Performance",
+      "severity": "high",
+      "message": "3 script bloccanti (senza async/defer). Impattano LCP e INP."
+    }
+  ],
+  "issues_summary": {
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "low": 0
+  },
+  "quick_wins": [
+    {
+      "category": "Performance",
+      "severity": "high",
+      "message": "3 script bloccanti (senza async/defer). Impattano LCP e INP."
+    }
+  ]
+}
