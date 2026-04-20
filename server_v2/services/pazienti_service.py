@@ -223,29 +223,36 @@ class PazientiService(BaseService):
             self.logger.error(f"Error getting paziente {paziente_id}: {e}")
             raise DatabaseError(f"Failed to get paziente: {str(e)}")
 
-    def search_pazienti(self, query: str, limit: int = 20) -> Dict[str, Any]:
-        """Search pazienti by name or codice fiscale."""
+    def search_pazienti(self, query: str, limit: int = 20, telefono: str = '') -> Dict[str, Any]:
+        """Search pazienti by name, codice fiscale or telefono."""
         try:
             pazienti_path = self._get_pazienti_dbf_path()
-            
+
             if not os.path.exists(pazienti_path):
                 raise DatabaseError(f"Pazienti DBF file not found: {pazienti_path}")
-            
+
             results = []
             query_lower = query.lower().strip()
-            
+            telefono_clean = telefono.strip()
+
             with dbf.Table(pazienti_path, codepage='cp1252') as table:
                 for record in table:
                     if len(results) >= limit:
                         break
-                        
+
                     if record[PAZIENTI_FIELDS['id']]:
-                        nome = clean_dbf_value(record.get(PAZIENTI_FIELDS['nome'], ''))
-                        cf = clean_dbf_value(record.get(PAZIENTI_FIELDS['codice_fiscale'], ''))
-                        
-                        if (query_lower in nome.lower() or 
-                            query_lower in cf.lower()):
-                            
+                        match = False
+
+                        if telefono_clean:
+                            tel = str(clean_dbf_value(record[PAZIENTI_FIELDS['telefono']]))
+                            cell = str(clean_dbf_value(record[PAZIENTI_FIELDS['cellulare']]))
+                            match = telefono_clean in tel or telefono_clean in cell
+                        elif query_lower:
+                            nome = clean_dbf_value(record[PAZIENTI_FIELDS['nome']])
+                            cf = clean_dbf_value(record[PAZIENTI_FIELDS['codice_fiscale']])
+                            match = query_lower in nome.lower() or query_lower in cf.lower()
+
+                        if match:
                             paziente = self._extract_paziente_data(record)
                             if paziente:
                                 results.append(paziente)
@@ -267,7 +274,7 @@ class PazientiService(BaseService):
             paziente = {}
             
             for field_name, dbf_field in PAZIENTI_FIELDS.items():
-                value = clean_dbf_value(record.get(dbf_field))
+                value = clean_dbf_value(record[dbf_field])
                 
                 # Clean and format values
                 if field_name in ['id']:
