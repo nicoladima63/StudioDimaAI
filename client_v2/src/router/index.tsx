@@ -51,6 +51,7 @@ const AnalisiComparativaPage = React.lazy(() => import('@/features/economics/pag
 const FornitoriClassificazione = React.lazy(() => import('@/features/fornitori/pages/FornitoriClassificazione'))
 const EmailPage = React.lazy(() => import('@/features/email/pages/EmailPage'))
 const SeoPage = React.lazy(() => import('@/features/seo/pages/SeoPage'))
+const BotPage = React.lazy(() => import('@/features/bot/pages/BotPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -126,6 +127,9 @@ const AppRouter: React.FC = () => {
           {/* Economics */}
           <Route path='economics' element={<EconomicsPage />} />
           <Route path='economics/comparativa' element={<AnalisiComparativaPage />} />
+
+          {/* Bot WhatsApp */}
+          <Route path='bot' element={<BotPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
