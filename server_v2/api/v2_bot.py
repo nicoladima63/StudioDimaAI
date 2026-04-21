@@ -10,6 +10,7 @@ import logging
 import requests
 import psycopg2
 import psycopg2.extras
+from datetime import datetime, timedelta, timezone, time as dtime
 from flask import Blueprint, request, g
 from flask_jwt_extended import jwt_required
 from functools import wraps
@@ -222,6 +223,7 @@ def delete_conversazione(conv_id: int):
         conn = _get_bot_db_conn()
         with conn:
             with conn.cursor() as cur:
+                cur.execute('DELETE FROM studiobot_escalazioni WHERE conversazione_id = %s', (conv_id,))
                 cur.execute('DELETE FROM studiobot_messaggi WHERE conversazione_id = %s', (conv_id,))
                 cur.execute('DELETE FROM studiobot_conversazioni WHERE id = %s', (conv_id,))
                 if cur.rowcount == 0:
@@ -303,3 +305,218 @@ def get_messaggi(conv_id: int):
     except Exception as e:
         logger.error(f'Error fetching messaggi for conv {conv_id}: {e}')
         return format_response(success=False, error='Errore recupero messaggi'), 500
+
+
+# ---------------------------------------------------------------------------
+# Igienista schedule constraints
+# ---------------------------------------------------------------------------
+IGIENISTA_CAL_ID = os.getenv('CALENDAR_ID_STUDIO_2', '')
+SLOT_DURATION = timedelta(minutes=50)
+ROME = timezone(timedelta(hours=2))  # CEST; adjust to +1 in winter if needed
+
+# Weekday -> list of (start_hour, start_min, end_hour, end_min)
+IGIENISTA_WINDOWS = {
+    0: [(14, 0, 19, 0)],                 # Lunedi (Anet)
+    2: [(9, 0, 13, 0), (14, 0, 19, 0)], # Mercoledi (Lara)
+    3: [(15, 0, 19, 0)],                 # Giovedi (Lara)
+}
+ANET_DAYS = {0}
+LARA_DAYS = {2, 3}
+
+
+def _fetch_calendar_events(service, cal_id: str, time_min: datetime, time_max: datetime) -> list:
+    result = service.events().list(
+        calendarId=cal_id,
+        timeMin=time_min.isoformat(),
+        timeMax=time_max.isoformat(),
+        singleEvents=True,
+        orderBy='startTime',
+    ).execute()
+    return result.get('items', [])
+
+
+def _is_lara_no_day(events: list, day: datetime.date) -> bool:
+    """Return True if there is a LARA NO event starting at 08:xx on that day."""
+    for ev in events:
+        start = ev.get('start', {})
+        dt_str = start.get('dateTime')
+        if not dt_str:
+            continue
+        try:
+            dt = datetime.fromisoformat(dt_str)
+        except ValueError:
+            continue
+        title = (ev.get('summary') or '').upper().strip()
+        if dt.date() == day and dt.hour == 8 and 'LARA NO' in title:
+            return True
+    return False
+
+
+def _busy_intervals(events: list, day: datetime.date) -> list:
+    """Return list of (start, end) datetime for events on that day (excluding LARA NO)."""
+    intervals = []
+    for ev in events:
+        start_raw = ev.get('start', {}).get('dateTime')
+        end_raw = ev.get('end', {}).get('dateTime')
+        if not start_raw or not end_raw:
+            continue
+        try:
+            s = datetime.fromisoformat(start_raw)
+            e = datetime.fromisoformat(end_raw)
+        except ValueError:
+            continue
+        title = (ev.get('summary') or '').upper().strip()
+        if s.date() == day and 'LARA NO' not in title:
+            intervals.append((s, e))
+    return intervals
+
+
+def _free_slots(day: datetime.date, windows: list, busy: list, slot_dur: timedelta, max_slots: int = 3) -> list:
+    slots = []
+    for wh, wm, eh, em in windows:
+        cursor = datetime(day.year, day.month, day.day, wh, wm, tzinfo=ROME)
+        window_end = datetime(day.year, day.month, day.day, eh, em, tzinfo=ROME)
+        while cursor + slot_dur <= window_end and len(slots) < max_slots:
+            slot_end = cursor + slot_dur
+            overlap = any(
+                s < slot_end and e > cursor
+                for s, e in busy
+            )
+            if not overlap:
+                giorni_ita = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica']
+                label = f"{giorni_ita[cursor.weekday()]} {cursor.strftime('%d/%m alle %H:%M')}"
+                slots.append(label)
+            cursor += slot_dur
+    return slots
+
+
+@bot_v2_bp.route('/bot/available-slots', methods=['GET'])
+@_require_bot_key
+def get_available_slots():
+    """Return next available hygiene slots from Google Calendar 2."""
+    days_ahead = int(request.args.get('giorni', 14))
+    max_results = int(request.args.get('max', 5))
+    igienista = request.args.get('igienista', 'any').lower().strip()  # anet | lara | any
+
+    if igienista == 'anet':
+        allowed_days = ANET_DAYS
+    elif igienista == 'lara':
+        allowed_days = LARA_DAYS
+    else:
+        allowed_days = ANET_DAYS | LARA_DAYS
+
+    try:
+        from core.google_calendar_client import GoogleCalendarClient
+        from core.paths import GOOGLE_CREDENTIALS_PATH, GOOGLE_TOKEN_PATH
+        client = GoogleCalendarClient(credentials_path=GOOGLE_CREDENTIALS_PATH, token_path=GOOGLE_TOKEN_PATH)
+        service = client.get_service()
+
+        now = datetime.now(tz=ROME)
+        time_max = now + timedelta(days=days_ahead)
+        events = _fetch_calendar_events(service, IGIENISTA_CAL_ID, now, time_max)
+
+        slots = []
+        current = now.date()
+        for i in range(days_ahead):
+            day = current + timedelta(days=i)
+            weekday = day.weekday()
+            if weekday not in IGIENISTA_WINDOWS or weekday not in allowed_days:
+                continue
+            if weekday in LARA_DAYS and _is_lara_no_day(events, day):
+                continue
+            busy = _busy_intervals(events, day)
+            windows = IGIENISTA_WINDOWS[weekday]
+            day_slots = _free_slots(day, windows, busy, SLOT_DURATION, max_slots=3)
+            slots.extend(day_slots)
+            if len(slots) >= max_results:
+                break
+
+        return format_response({'slots': slots[:max_results], 'igienista': igienista})
+    except Exception as e:
+        logger.error(f'Error fetching available slots: {e}')
+        return format_response(success=False, error='Errore recupero slot disponibili'), 500
+
+
+# MEDICI da constants_v2: 5=Anet, 2=Lara
+_MEDICO_TO_IGIENISTA = {5: 'anet', 2: 'lara'}
+_IGIENISTI_IDS = set(_MEDICO_TO_IGIENISTA.keys())
+
+
+@bot_v2_bp.route('/bot/last-igienista/<db_code>', methods=['GET'])
+@_require_bot_key
+def get_last_igienista(db_code: str):
+    """Return the hygienist (anet/lara/any) from the patient's last executed treatment in PREVENT.DBF."""
+    try:
+        import dbf as dbflib
+        from utils.dbf_utils import get_optimized_reader, clean_dbf_value
+        from core.constants_v2 import COLONNE
+
+        reader = get_optimized_reader()
+        db_code_stripped = db_code.strip()
+
+        # Step 1: collect piano IDs belonging to this patient (ELENCO.DBF)
+        elenco_path = reader._get_dbf_path('ELENCO.DBF')
+        col_el = COLONNE['elenco']
+        f_el_id  = col_el['id'].lower()           # db_code
+        f_el_paz = col_el['id_paziente'].lower()  # db_elpacod
+
+        piano_ids = set()
+        with dbflib.Table(elenco_path, codepage='cp1252') as table:
+            for record in table:
+                try:
+                    paz = clean_dbf_value(getattr(record, f_el_paz, ''))
+                    if paz == db_code_stripped:
+                        pid = clean_dbf_value(getattr(record, f_el_id, ''))
+                        if pid:
+                            piano_ids.add(pid)
+                except Exception:
+                    continue
+
+        if not piano_ids:
+            return format_response({'igienista': 'any', 'last_date': None})
+
+        # Step 2: scan PREVENT.DBF for executed igienista treatments
+        prevent_path = reader._get_dbf_path('PREVENT.DBF')
+        col_pr = COLONNE['preventivi']
+        f_pr_piano  = col_pr['id_piano'].lower()           # db_prelcod
+        f_pr_medico = col_pr['medico'].lower()             # db_prmedic
+        f_pr_data   = col_pr['data_prestazione'].lower()   # db_prdata
+        f_pr_stato  = col_pr['stato_prestazione'].lower()  # db_guardia (3=eseguito)
+
+        best_date = None
+        best_medico_id = None
+
+        with dbflib.Table(prevent_path, codepage='cp1252') as table:
+            for record in table:
+                try:
+                    stato = clean_dbf_value(getattr(record, f_pr_stato, None))
+                    if stato != 3:
+                        continue
+                    piano = clean_dbf_value(getattr(record, f_pr_piano, ''))
+                    if piano not in piano_ids:
+                        continue
+                    try:
+                        medico_id = int(clean_dbf_value(getattr(record, f_pr_medico, None)))
+                    except (TypeError, ValueError):
+                        continue
+                    if medico_id not in _IGIENISTI_IDS:
+                        continue
+                    pdata = getattr(record, f_pr_data, None)
+                    if not pdata:
+                        continue
+                    if best_date is None or pdata > best_date:
+                        best_date = pdata
+                        best_medico_id = medico_id
+                except Exception:
+                    continue
+
+        if best_medico_id is None:
+            return format_response({'igienista': 'any', 'last_date': None})
+
+        igienista = _MEDICO_TO_IGIENISTA.get(best_medico_id, 'any')
+        last_date_str = best_date.strftime('%Y-%m-%d') if best_date else None
+        return format_response({'igienista': igienista, 'last_date': last_date_str, 'medico_id': best_medico_id})
+
+    except Exception as e:
+        logger.error(f'Error fetching last igienista for {db_code}: {e}')
+        return format_response(success=False, error='Errore recupero igienista'), 500

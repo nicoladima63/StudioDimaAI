@@ -131,15 +131,17 @@ const ConversazioniTab: React.FC = () => {
                 <CTableHeaderCell>Iniziata</CTableHeaderCell>
                 <CTableHeaderCell>Ultima attività</CTableHeaderCell>
                 <CTableHeaderCell>Stato</CTableHeaderCell>
-                <CTableHeaderCell style={{ width: '80px' }}></CTableHeaderCell>
+                <CTableHeaderCell style={{ width: '160px' }}>Azioni</CTableHeaderCell>
               </CTableRow>
             </CTableHead>
             <CTableBody>
               {conversazioni.map(c => (
                 <CTableRow key={c.id}>
                   <CTableDataCell>
-                    <div>{nomePaziente(c)}</div>
-                    <small className="text-muted font-monospace">{c.wa_jid.replace('@s.whatsapp.net', '')}</small>
+                    <div>
+                      {c.wa_jid.replace('@s.whatsapp.net', '')}
+                      <small className="text-muted ms-2" >{nomePaziente(c)}</small>
+                    </div>
                   </CTableDataCell>
                   <CTableDataCell>{formatDate(c.iniziata_at)}</CTableDataCell>
                   <CTableDataCell>{formatDate(c.ultima_attivita)}</CTableDataCell>
@@ -152,10 +154,10 @@ const ConversazioniTab: React.FC = () => {
                     }
                   </CTableDataCell>
                   <CTableDataCell>
-                    <CButton color="primary" variant="ghost" size="sm" className="me-1" onClick={() => handleOpenChat(c)}>
+                    <CButton color="primary" variant="outline" size="sm" className="me-1" onClick={() => handleOpenChat(c)}>
                       <CIcon icon={cilChatBubble} />
                     </CButton>
-                    <CButton color="danger" variant="ghost" size="sm" onClick={() => handleDelete(c)}>
+                    <CButton color="danger" variant="outline" size="sm" onClick={() => handleDelete(c)}>
                       <CIcon icon={cilTrash} />
                     </CButton>
                   </CTableDataCell>
