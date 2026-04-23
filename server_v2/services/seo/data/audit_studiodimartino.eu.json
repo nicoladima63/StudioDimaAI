@@ -1,9 +1,9 @@
 {
   "success": true,
   "url": "https://www.studiodimartino.eu/",
-  "timestamp": "2026-03-30T18:37:19.817847",
-  "elapsed_seconds": 0.34,
-  "overall_score": 98,
+  "timestamp": "2026-04-23T11:10:00.443754",
+  "elapsed_seconds": 0.57,
+  "overall_score": 91,
   "score_label": "Eccellente",
   "categories": {
     "on_page": {
@@ -13,44 +13,44 @@
       "data": {
         "title": "Studio Dentistico Di Martino | Dentista Agliana (PT)",
         "title_length": 52,
-        "meta_description": "Studio Dentistico Dr. Nicola Di Martino ad Agliana (PT). Soluzioni su misura: Odontoiatria, Implantologia, Ortodonzia ed Estetica Dentale. Prenota una visita!",
-        "meta_description_length": 158,
+        "meta_description": "Studio Dentistico Dr. Nicola Di Martino ad Agliana (PT). Odontoiatria, Implantologia, Ortodonzia ed Estetica Dentale. Prima visita gratuita. Prenota ora!",
+        "meta_description_length": 153,
         "h1_count": 1,
         "h1_values": [
-          "Studio Dentistico Dr. Nicola Di Martino - Dentista ad Agliana (PT)"
+          "Studio Dentistico ad AglianaDr. Nicola Di Martino"
         ],
-        "h2_count": 8,
-        "h3_count": 5,
-        "canonical": "https://studiodimartino.eu/",
+        "h2_count": 9,
+        "h3_count": 26,
+        "canonical": "https://studiodimartino.eu",
         "has_viewport": true,
         "has_lang": true,
-        "og_tags": 8,
+        "og_tags": 10,
         "twitter_tags": 4
       },
       "issues_count": 0
     },
     "content": {
       "label": "Qualità Contenuto",
-      "score": 100,
+      "score": 95,
       "weight": "23%",
       "data": {
-        "word_count": 722,
-        "heading_count": 14,
+        "word_count": 732,
+        "heading_count": 36,
         "internal_links": 4,
-        "external_links": 5,
-        "has_author": true,
+        "external_links": 9,
+        "has_author": false,
         "eeat_signals": {
           "experience": 0,
-          "expertise": 25,
+          "expertise": 0,
           "authoritativeness": 0,
           "trustworthiness": 0
         }
       },
-      "issues_count": 0
+      "issues_count": 1
     },
     "technical": {
       "label": "SEO Tecnico",
-      "score": 100,
+      "score": 88,
       "weight": "22%",
       "data": {
         "https": true,
@@ -59,87 +59,124 @@
         "redirect_chain": [
           {
             "url": "https://studiodimartino.eu/",
-            "status_code": 301
+            "status_code": 308
           }
         ],
-        "missing_security_headers": [],
+        "missing_security_headers": [
+          "CSP",
+          "X-Frame-Options",
+          "X-Content-Type-Options",
+          "Referrer-Policy"
+        ],
         "url_length": 31
       },
-      "issues_count": 0
+      "issues_count": 1
     },
     "schema": {
       "label": "Schema / Dati Strutturati",
-      "score": 100,
+      "score": 91,
       "weight": "10%",
       "data": {
-        "schema_count": 4,
+        "schema_count": 1,
         "types_found": [
-          "Dentist",
-          "LocalBusiness",
-          "WebSite",
-          "BreadcrumbList"
+          "Dentist"
         ],
         "deprecated_found": [],
         "validation_issues": []
       },
-      "issues_count": 0
+      "issues_count": 1
     },
     "images": {
       "label": "Immagini",
-      "score": 100,
+      "score": 75,
       "weight": "5%",
       "data": {
-        "total_images": 1,
+        "total_images": 8,
         "missing_alt": 0,
         "decorative_images": 0,
-        "missing_dimensions": 0,
+        "missing_dimensions": 8,
         "missing_lazy_loading": 0,
-        "non_optimized_format": 0
+        "non_optimized_format": 8
       },
-      "issues_count": 0
+      "issues_count": 2
     },
     "ai_readiness": {
       "label": "AI Search Readiness",
       "score": 100,
       "weight": "10%",
       "data": {
-        "heading_structure": "H1:1 H2:8 H3:5",
+        "heading_structure": "H1:1 H2:9 H3:26",
         "has_schema": true,
-        "word_count": 722,
+        "word_count": 732,
         "has_og_metadata": true
       },
       "issues_count": 0
     },
     "performance": {
       "label": "Performance (CWV Hints)",
-      "score": 85,
+      "score": 65,
       "weight": "10%",
       "data": {
-        "blocking_scripts": 3,
-        "total_scripts": 4,
+        "blocking_scripts": 8,
+        "total_scripts": 8,
         "external_stylesheets": 2
       },
-      "issues_count": 1
+      "issues_count": 3
     }
   },
   "issues": [
     {
       "category": "Performance",
       "severity": "high",
-      "message": "3 script bloccanti (senza async/defer). Impattano LCP e INP."
+      "message": "8 script bloccanti (senza async/defer). Impattano LCP e INP."
+    },
+    {
+      "category": "Qualità Contenuto",
+      "severity": "medium",
+      "message": "Nessuna informazione autore rilevata. Aggiungi author bio per migliorare l'E-E-A-T."
+    },
+    {
+      "category": "SEO Tecnico",
+      "severity": "medium",
+      "message": "Header di sicurezza mancanti: CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy"
+    },
+    {
+      "category": "Immagini",
+      "severity": "medium",
+      "message": "8 immagini senza dimensioni (width/height). Causa CLS (spostamento layout)."
+    },
+    {
+      "category": "Performance",
+      "severity": "medium",
+      "message": "1 script inline molto grandi. Esternalizzali per il caching."
+    },
+    {
+      "category": "Performance",
+      "severity": "medium",
+      "message": "8 immagini senza dimensioni esplicite. Causa CLS (Cumulative Layout Shift)."
+    },
+    {
+      "category": "Schema / Dati Strutturati",
+      "severity": "low",
+      "message": "Schema consigliati mancanti: Organization/LocalBusiness, WebSite (con SearchAction per sitelinks), BreadcrumbList"
+    },
+    {
+      "category": "Immagini",
+      "severity": "low",
+      "message": "8 immagini in formato non ottimale (JPEG/PNG). Converti in WebP/AVIF."
     }
   ],
   "issues_summary": {
     "critical": 0,
     "high": 1,
-    "medium": 0,
-    "low": 0
+    "medium": 5,
+    "low": 2
   },
   "quick_wins": [
     {
       "category": "Performance",
       "severity": "high",
-      "message": "3 script bloccanti (senza async/defer). Impattano LCP e INP."
+      "message": "8 script bloccanti (senza async/defer). Impattano LCP e INP."
     }
   ]
 }

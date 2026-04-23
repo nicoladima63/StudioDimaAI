@@ -220,7 +220,7 @@ const _nav = [
         component: CNavItem,
         name: 'Centro di Costo',
         to: '/economics/centro-costo',
-        icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
+        icon: <CIcon icon={cilChatBubble} customClassName="nav-icon" />,
       },
     ]
   },
