@@ -371,12 +371,15 @@ def _busy_intervals(events: list, day: datetime.date) -> list:
     return intervals
 
 
-def _free_slots(day: datetime.date, windows: list, busy: list, slot_dur: timedelta, max_slots: int = 3) -> list:
+def _free_slots(day: datetime.date, windows: list, busy: list, slot_dur: timedelta, max_slots: int = 3, min_start: datetime = None) -> list:
     slots = []
     for wh, wm, eh, em in windows:
         cursor = datetime(day.year, day.month, day.day, wh, wm, tzinfo=ROME)
         window_end = datetime(day.year, day.month, day.day, eh, em, tzinfo=ROME)
         while cursor + slot_dur <= window_end and len(slots) < max_slots:
+            if min_start and cursor < min_start:
+                cursor += slot_dur
+                continue
             slot_end = cursor + slot_dur
             overlap = any(
                 s < slot_end and e > cursor
@@ -417,6 +420,7 @@ def get_available_slots():
 
         slots = []
         current = now.date()
+        min_start = now + timedelta(minutes=30)
         for i in range(days_ahead):
             day = current + timedelta(days=i)
             weekday = day.weekday()
@@ -426,7 +430,7 @@ def get_available_slots():
                 continue
             busy = _busy_intervals(events, day)
             windows = IGIENISTA_WINDOWS[weekday]
-            day_slots = _free_slots(day, windows, busy, SLOT_DURATION, max_slots=3)
+            day_slots = _free_slots(day, windows, busy, SLOT_DURATION, max_slots=3, min_start=min_start)
             slots.extend(day_slots)
             if len(slots) >= max_results:
                 break
@@ -435,6 +439,78 @@ def get_available_slots():
     except Exception as e:
         logger.error(f'Error fetching available slots: {e}')
         return format_response(success=False, error='Errore recupero slot disponibili'), 500
+
+
+# ---------------------------------------------------------------------------
+# Doctor (studio 1) schedule constraints
+# ---------------------------------------------------------------------------
+DOTTORE_CAL_ID = os.getenv('CALENDAR_ID_STUDIO_1', '')
+DOTTORE_SLOT_DURATION = timedelta(minutes=30)
+
+DOTTORE_WINDOWS = {
+    0: [(9, 0, 13, 0), (15, 0, 19, 0)],  # Lunedi
+    1: [(9, 0, 16, 0)],                    # Martedi
+    2: [(9, 0, 13, 0), (15, 0, 19, 0)],  # Mercoledi
+    3: [(9, 0, 13, 0), (15, 0, 19, 0)],  # Giovedi
+    4: [(9, 0, 16, 0)],                    # Venerdi
+}
+
+
+@bot_v2_bp.route('/bot/available-slots-visita', methods=['GET'])
+@_require_bot_key
+def get_available_slots_visita():
+    """Return next available doctor appointment slots from Google Calendar 1."""
+    days_ahead = int(request.args.get('giorni', 14))
+    max_results = int(request.args.get('max', 5))
+
+    try:
+        from core.google_calendar_client import GoogleCalendarClient
+        from core.paths import GOOGLE_CREDENTIALS_PATH, GOOGLE_TOKEN_PATH
+        client = GoogleCalendarClient(credentials_path=GOOGLE_CREDENTIALS_PATH, token_path=GOOGLE_TOKEN_PATH)
+        service = client.get_service()
+
+        now = datetime.now(tz=ROME)
+        time_max = now + timedelta(days=days_ahead)
+        events = _fetch_calendar_events(service, DOTTORE_CAL_ID, now, time_max)
+
+        slots = []
+        current = now.date()
+        min_start = now + timedelta(minutes=30)
+        for i in range(days_ahead):
+            day = current + timedelta(days=i)
+            weekday = day.weekday()
+            if weekday not in DOTTORE_WINDOWS:
+                continue
+            busy = _busy_intervals(events, day)
+            windows = DOTTORE_WINDOWS[weekday]
+            day_slots = _free_slots(day, windows, busy, DOTTORE_SLOT_DURATION, max_slots=3, min_start=min_start)
+            slots.extend(day_slots)
+            if len(slots) >= max_results:
+                break
+
+        return format_response({'slots': slots[:max_results]})
+    except Exception as e:
+        logger.error(f'Error fetching visita slots: {e}')
+        return format_response(success=False, error='Errore recupero slot visite'), 500
+
+
+@bot_v2_bp.route('/bot/triage-config', methods=['GET'])
+@_require_bot_key
+def get_triage_config():
+    """Return triage keywords and ordered questions from DB."""
+    try:
+        conn = _get_bot_db_conn()
+        with conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute("SELECT keyword FROM studiobot_triage_keywords WHERE attivo = true ORDER BY keyword")
+                keywords = [r['keyword'] for r in cur.fetchall()]
+                cur.execute("SELECT id, domanda, ordine, urgency_if_yes FROM studiobot_triage_domande WHERE attivo = true ORDER BY ordine")
+                domande = [dict(r) for r in cur.fetchall()]
+        conn.close()
+        return format_response({'keywords': keywords, 'domande': domande})
+    except Exception as e:
+        logger.error(f'Error fetching triage config: {e}')
+        return format_response(success=False, error='Errore recupero triage config'), 500
 
 
 # MEDICI da constants_v2: 5=Anet, 2=Lara

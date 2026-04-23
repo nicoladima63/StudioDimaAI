@@ -58,12 +58,14 @@ def update_sms_settings():
         # si dovrebbe modificare il file .env o un altro sistema di configurazione persistente.
         # Dato che non posso farlo, simulo l'operazione e invalido la cache.
         
-        from dotenv import set_key, find_dotenv
+        from dotenv import set_key
         import os
+        from pathlib import Path
 
-        dotenv_path = find_dotenv()
-        if not dotenv_path:
-            # Se non c'è un file .env, non possiamo salvare in modo persistente.
+        # Path esplicito: server_v2/.env — evita che find_dotenv() risalga
+        # l'albero e trovi (o scriva su) un .env nella root del progetto.
+        dotenv_path = str(Path(__file__).parent.parent / '.env')
+        if not os.path.exists(dotenv_path):
             return format_response(success=False, error="File .env non trovato. Impossibile salvare le impostazioni in modo persistente."), 500
 
         updated_values = {}

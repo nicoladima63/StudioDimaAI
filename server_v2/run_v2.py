@@ -18,6 +18,7 @@ import os
 import sys
 import argparse
 import logging
+from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
 
@@ -251,8 +252,9 @@ def startup_health_check():
 def main():
     """Main entry point for the server."""
     try:
-        # Load environment variables from .env file
-        load_dotenv()
+        # Load .env from server_v2 directory — explicit path prevents dotenv
+        # from walking up the tree and accidentally loading a root-level .env.
+        load_dotenv(Path(__file__).parent / '.env')
         
         # FIX: Remove SSLKEYLOGFILE if present to avoid PermissionError on some Windows systems
         if 'SSLKEYLOGFILE' in os.environ:

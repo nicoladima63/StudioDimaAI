@@ -69,6 +69,15 @@ if exist "%DEPLOY_PATH%\tokens\token.json" (
     echo   [SKIP] token.json non presente >> "%LOGFILE%"
 )
 
+if exist "%DEPLOY_PATH%\instance\gmail_token.json" (
+    copy "%DEPLOY_PATH%\instance\gmail_token.json" "%BACKUP_DIR%\gmail_token.json" /Y >nul 2>&1
+    echo   [OK] gmail_token.json salvato da instance/
+    echo   [OK] gmail_token.json salvato da instance/ >> "%LOGFILE%"
+) else (
+    echo   [SKIP] gmail_token.json non presente
+    echo   [SKIP] gmail_token.json non presente >> "%LOGFILE%"
+)
+
 echo Backup completato in: %BACKUP_DIR%
 echo Backup completato in: %BACKUP_DIR% >> "%LOGFILE%"
 
@@ -184,15 +193,15 @@ echo   [OK] database_mode.txt creato con modalità PROD >> "%LOGFILE%"
 :: ============================================================================
 echo [3/7] Copia file .env...
 echo [3/7] Copia file .env... >> "%LOGFILE%"
-copy ".env" "%DEPLOY_PATH%" /Y >nul
+copy "server_v2\.env" "%DEPLOY_PATH%" /Y >nul
 if errorlevel 1 (
-    echo ERRORE: Copia .env fallita.
-    echo ERRORE: Copia .env fallita. >> "%LOGFILE%"
+    echo ERRORE: Copia server_v2\.env fallita.
+    echo ERRORE: Copia server_v2\.env fallita. >> "%LOGFILE%"
     pause
     exit /b 1
 )
-echo   [OK] .env aggiornato.
-echo   [OK] .env aggiornato. >> "%LOGFILE%"
+echo   [OK] .env aggiornato (da server_v2).
+echo   [OK] .env aggiornato (da server_v2). >> "%LOGFILE%"
 
 :: ============================================================================
 :: [4/7] Build Frontend React V2
@@ -286,7 +295,6 @@ echo set "GOOGLE_TOKEN_PATH=%%~dp0instance\token.json"
 echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
 echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
 echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"
-echo set "GOOGLE_OAUTH_REDIRECT_URI=http://SERVERDIMA:5001/oauth/callback"
 echo.
 echo if not exist venv ^(
 echo     echo Creazione virtual environment...

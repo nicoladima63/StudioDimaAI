@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -16,6 +17,9 @@ from .paths import ensure_data_dir
 logger = logging.getLogger(__name__)
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
+
+# Process-wide lock: prevents two threads from refreshing the same token concurrently
+_token_refresh_lock = threading.Lock()
 
 
 class GoogleCalendarClient:
@@ -110,19 +114,30 @@ class GoogleCalendarClient:
 
     def _refresh_or_reauth(self):
         """Tries to refresh the token. If it fails, raises an error."""
-        if self.creds and self.creds.expired and self.creds.refresh_token:
-            try:
-                logger.info("Refreshing Google token")
-                self.creds.refresh(Request())
-                self._save_token()
-                return  # Success
-            except RefreshError as e:
-                logger.error("Error refreshing credentials, token is likely invalid: %s", str(e))
-                self._invalidate_token()
-                raise GoogleCredentialsNotFoundError("Token refresh failed. Re-authentication is required.") from e
+        with _token_refresh_lock:
+            # Re-read from disk inside the lock: another thread/process may have already
+            # refreshed the token while we were waiting.
+            self._load_credentials()
 
-        # If we are here, creds are invalid or missing a refresh token.
-        raise GoogleCredentialsNotFoundError("No valid credentials found. Re-authentication is required.")
+            if self.creds and self.creds.valid:
+                return  # Another thread already refreshed — nothing to do
+
+            if self.creds and self.creds.expired and self.creds.refresh_token:
+                try:
+                    logger.info("Refreshing Google token")
+                    self.creds.refresh(Request())
+                    self._save_token()
+                    return  # Success
+                except RefreshError as e:
+                    # Clear in-memory state only. Do NOT delete the token file: the disk
+                    # copy might be newer than our in-memory copy (written by another
+                    # thread), and an invalid_grant can be transient (clock skew, quota).
+                    logger.error("Token refresh failed, clearing in-memory credentials: %s", str(e))
+                    self.creds = None
+                    raise GoogleCredentialsNotFoundError("Token refresh failed. Re-authentication is required.") from e
+
+            # Creds are missing or have no refresh token.
+            raise GoogleCredentialsNotFoundError("No valid credentials found. Re-authentication is required.")
 
     def _save_token(self):
         ensure_data_dir()
@@ -130,9 +145,11 @@ class GoogleCalendarClient:
         with open(self.token_path, "w") as f:
             f.write(self.creds.to_json())
 
-    def _invalidate_token(self):
-        """Deletes local token to force a clean OAuth flow."""
-        if self.token_path.exists():
+    def _invalidate_token(self, delete_file: bool = False):
+        """Clears in-memory credentials. Pass delete_file=True only when you
+        are certain the token is permanently revoked (e.g. after a successful
+        new OAuth flow that will immediately write a replacement)."""
+        if delete_file and self.token_path.exists():
             self.token_path.unlink()
         self.creds = None
 
