@@ -17,6 +17,12 @@ const apiClient: AxiosInstance = axios.create({
 let accessToken: string | null = null
 let refreshToken: string | null = null
 
+// Callback called when a 401 forces logout (registered by auth store to avoid circular imports)
+let onUnauthorized: (() => void) | null = null
+export const setUnauthorizedCallback = (cb: () => void): void => {
+  onUnauthorized = cb
+}
+
 export const setTokens = (access: string, refresh: string): void => {
   accessToken = access
   refreshToken = refresh
@@ -117,13 +123,13 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${access_token}`
           return apiClient(originalRequest)
         } catch (refreshError) {
-          // Refresh failed - clear tokens and let router handle redirect
-          clearTokens()
+          // Refresh failed - clear auth state (triggers redirect via ProtectedRoute)
+          onUnauthorized ? onUnauthorized() : clearTokens()
           return Promise.reject(refreshError)
         }
       } else {
-        // No refresh token - clear tokens and let router handle redirect
-        clearTokens()
+        // No refresh token - clear auth state (triggers redirect via ProtectedRoute)
+        onUnauthorized ? onUnauthorized() : clearTokens()
       }
     }
 

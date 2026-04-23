@@ -15,7 +15,7 @@ import {
   cilChartPie,
   cilChartLine,
   cilEnvelopeClosed,
-  cilCalculator,
+  cilChatBubble,
 } from '@coreui/icons';
 import { CNavItem, CNavGroup } from '@coreui/react';
 
@@ -37,6 +37,12 @@ const _nav = [
     name: 'Email',
     to: '/email',
     icon: <CIcon icon={cilEnvelopeClosed} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Bot WhatsApp',
+    to: '/bot',
+    icon: <CIcon icon={cilChatBubble} customClassName="nav-icon" />,
   },
   {
     component: CNavGroup,
@@ -247,6 +253,12 @@ const _nav = [
         name: 'Scheduler',
         to: '/settings/scheduler',
         icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'SEO',
+        to: '/settings/seo',
+        icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
       },
     ]
   },

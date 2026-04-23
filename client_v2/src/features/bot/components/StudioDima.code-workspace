@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../../../../.."
+		},
+		{
+			"path": "../../../../../../dentalai"
+		},
+		{
+			"path": "../../../../../../studiodimartino"
+		},
+		{
+			"path": "../../../../../../ortho-dima"
+		},
+		{
+			"path": "../../../../../../studiodimartino-next"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}

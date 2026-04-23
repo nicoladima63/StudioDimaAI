@@ -24,6 +24,8 @@ interface EmailStore {
   searchQuery: string
   selectedScopeIds: number[]
 
+  rulesChanged: boolean
+
   // Actions
   checkAuth: () => Promise<void>
   fetchEmails: (reset?: boolean) => Promise<void>
@@ -31,6 +33,7 @@ interface EmailStore {
   fetchScopes: (force?: boolean) => Promise<void>
   fetchRules: (scopeId?: number) => Promise<void>
   fetchAiConfig: () => Promise<void>
+  invalidateAndRefresh: () => Promise<void>
   setSearchQuery: (query: string) => void
   setSelectedScopeIds: (ids: number[]) => void
   clearError: () => void
@@ -54,6 +57,7 @@ export const useEmailStore = create<EmailStore>()(
       lastScopesFetched: null,
       searchQuery: '',
       selectedScopeIds: [],
+      rulesChanged: false,
 
       checkAuth: async () => {
         const result = await emailService.apiGetOAuthStatus()
@@ -191,6 +195,20 @@ export const useEmailStore = create<EmailStore>()(
         } catch (err: any) {
           set((state) => {
             state.error = err.message || 'Errore recupero config AI'
+          })
+        }
+      },
+
+      invalidateAndRefresh: async () => {
+        try {
+          await emailService.apiClearCache()
+          set((state) => {
+            state.rulesChanged = false
+          })
+          await get().fetchRelevantEmails(true)
+        } catch (err: any) {
+          set((state) => {
+            state.error = err.message || 'Errore invalidazione cache'
           })
         }
       },

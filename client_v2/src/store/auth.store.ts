@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 import type { AuthState, User, AuthTokens } from '@/types'
 import { authService } from '@/services/api'
-import { setTokens, clearTokens } from '@/services/api/client'
+import { setTokens, clearTokens, setUnauthorizedCallback } from '@/services/api/client'
 
 interface AuthStore extends AuthState {
   // Actions
@@ -146,3 +146,6 @@ export const useAuthStore = create<AuthStore>()(
     }
   )
 )
+
+// Register callback so the API client can trigger logout without circular imports
+setUnauthorizedCallback(() => useAuthStore.getState().clearAuth())

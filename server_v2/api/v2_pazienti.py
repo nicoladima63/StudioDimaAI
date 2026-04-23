@@ -167,26 +167,28 @@ def get_paziente(paziente_id):
 @jwt_required()
 def search_pazienti():
     """
-    Search patients by name or codice fiscale.
-    
+    Search patients by name, codice fiscale or telefono.
+
     Query Parameters:
         q (str): Search query (required)
         limit (int): Maximum results (default: 20, max: 100)
-    
+        telefono (str): Search by phone number (optional, alternative to q)
+
     Returns:
         JSON response with search results
     """
     try:
         query = request.args.get('q', '').strip()
+        telefono = request.args.get('telefono', '').strip()
         limit = min(request.args.get('limit', 20, type=int), 100)
-        
-        if not query:
+
+        if not query and not telefono:
             raise ValidationError("Search query is required")
-        if len(query) < 2:
+        if query and len(query) < 2:
             raise ValidationError("Search query must be at least 2 characters")
-        
+
         service = PazientiService(g.database_manager)
-        result = service.search_pazienti(query, limit)
+        result = service.search_pazienti(query, limit, telefono=telefono)
         
         if result['success']:
             return format_response({

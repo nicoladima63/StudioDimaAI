@@ -64,15 +64,20 @@ class EnvironmentManager:
     def __init__(self):
         if hasattr(self, '_initialized'):
             return
-            
+
         self.project_root = Path(__file__).parent.parent.parent
         self.instance_dir = self.project_root / "server_v2" / "instance"
         self.instance_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Cache configurazioni con TTL
         self._cache: Dict[str, Any] = {}
         self._cache_timestamps: Dict[str, datetime] = {}
         self._cache_ttl = timedelta(minutes=5)
+
+        # Cache per check raggiungibilità prod (evita ping ad ogni chiamata)
+        self._prod_reachable: Optional[bool] = None
+        self._prod_reachable_time: Optional[datetime] = None
+        self._prod_reachable_ttl = timedelta(seconds=30)
         
         # Configurazioni servizi
         self._services: Dict[ServiceType, ServiceConfig] = {}
@@ -239,11 +244,50 @@ class EnvironmentManager:
             return self._cache.get(cache_key)
         return None
     
+    def _is_prod_db_reachable(self) -> bool:
+        """Verifica se il database di produzione è raggiungibile (con cache 30s)."""
+        now = datetime.now()
+        if (self._prod_reachable is not None and
+                self._prod_reachable_time is not None and
+                (now - self._prod_reachable_time) < self._prod_reachable_ttl):
+            return self._prod_reachable
+
+        try:
+            import subprocess
+            result = subprocess.run(
+                ['ping', '-n', '1', 'SERVERDIMA'],
+                capture_output=True, timeout=5
+            )
+            if result.returncode != 0:
+                self._prod_reachable = False
+                self._prod_reachable_time = now
+                return False
+
+            prod_path = Path(r'\\serverdima\pixel\windent')
+            reachable = prod_path.exists()
+        except Exception as e:
+            logger.debug(f"Check raggiungibilita prod fallito: {e}")
+            reachable = False
+
+        self._prod_reachable = reachable
+        self._prod_reachable_time = now
+        return reachable
+
     def get_environment(self, service: ServiceType) -> Environment:
-        """Ottiene ambiente corrente per servizio"""
+        """Ottiene ambiente corrente per servizio.
+
+        Per il DATABASE in modalita PROD verifica la raggiungibilita della rete:
+        se il server non e accessibile ritorna DEV come fallback automatico
+        (senza modificare database_mode.txt, cosi all'rientro in studio torna prod).
+        """
         if service not in self._services:
             return Environment.DEV
-        return self._services[service].current_environment
+        env = self._services[service].current_environment
+        if service == ServiceType.DATABASE and env == Environment.PROD:
+            if not self._is_prod_db_reachable():
+                logger.warning("DB prod non raggiungibile, fallback automatico a DEV")
+                return Environment.DEV
+        return env
     
 
 

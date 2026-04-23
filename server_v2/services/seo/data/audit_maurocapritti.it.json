@@ -1,0 +1,213 @@
+{
+  "success": true,
+  "url": "https://maurocapritti.it/",
+  "timestamp": "2026-03-26T14:15:39.074019",
+  "elapsed_seconds": 0.82,
+  "overall_score": 87,
+  "score_label": "Buono",
+  "categories": {
+    "on_page": {
+      "label": "On-Page SEO",
+      "score": 95,
+      "weight": "20%",
+      "data": {
+        "title": "Dott. Mauro Capritti | Ortodontista e Gnatologo a Pistoia",
+        "title_length": 57,
+        "meta_description": "Il Dott. Mauro Capritti è ortodontista e gnatologo a Pistoia, specializzato in allineatori invisibili e trattamenti odontoiatrici moderni e personalizzati.",
+        "meta_description_length": 155,
+        "h1_count": 2,
+        "h1_values": [
+          "Dr. Mauro Capritti",
+          "Ortodontista e gnatologo a Pistoia – Dott. Mauro Capritti"
+        ],
+        "h2_count": 11,
+        "h3_count": 17,
+        "canonical": "https://maurocapritti.it/",
+        "has_viewport": true,
+        "has_lang": true,
+        "og_tags": 13,
+        "twitter_tags": 8
+      },
+      "issues_count": 1
+    },
+    "content": {
+      "label": "Qualità Contenuto",
+      "score": 95,
+      "weight": "23%",
+      "data": {
+        "word_count": 1786,
+        "heading_count": 30,
+        "internal_links": 16,
+        "external_links": 6,
+        "has_author": false,
+        "eeat_signals": {
+          "experience": 0,
+          "expertise": 0,
+          "authoritativeness": 0,
+          "trustworthiness": 0
+        }
+      },
+      "issues_count": 1
+    },
+    "technical": {
+      "label": "SEO Tecnico",
+      "score": 88,
+      "weight": "22%",
+      "data": {
+        "https": true,
+        "status_code": 200,
+        "redirect_count": 0,
+        "redirect_chain": [],
+        "missing_security_headers": [
+          "HSTS",
+          "X-Frame-Options",
+          "X-Content-Type-Options",
+          "Referrer-Policy"
+        ],
+        "url_length": 25
+      },
+      "issues_count": 1
+    },
+    "schema": {
+      "label": "Schema / Dati Strutturati",
+      "score": 91,
+      "weight": "10%",
+      "data": {
+        "schema_count": 1,
+        "types_found": [
+          "Unknown"
+        ],
+        "deprecated_found": [],
+        "validation_issues": []
+      },
+      "issues_count": 1
+    },
+    "images": {
+      "label": "Immagini",
+      "score": 49,
+      "weight": "5%",
+      "data": {
+        "total_images": 25,
+        "missing_alt": 4,
+        "decorative_images": 0,
+        "missing_dimensions": 6,
+        "missing_lazy_loading": 3,
+        "non_optimized_format": 20
+      },
+      "issues_count": 4
+    },
+    "ai_readiness": {
+      "label": "AI Search Readiness",
+      "score": 97,
+      "weight": "10%",
+      "data": {
+        "heading_structure": "H1:2 H2:11 H3:17",
+        "has_schema": true,
+        "word_count": 1786,
+        "has_og_metadata": true
+      },
+      "issues_count": 1
+    },
+    "performance": {
+      "label": "Performance (CWV Hints)",
+      "score": 60,
+      "weight": "10%",
+      "data": {
+        "blocking_scripts": 37,
+        "total_scripts": 40,
+        "external_stylesheets": 44
+      },
+      "issues_count": 4
+    }
+  },
+  "issues": [
+    {
+      "category": "SEO Tecnico",
+      "severity": "high",
+      "message": "Header di sicurezza mancanti: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy"
+    },
+    {
+      "category": "Immagini",
+      "severity": "high",
+      "message": "4 immagini senza attributo alt. Fondamentale per accessibilità e SEO."
+    },
+    {
+      "category": "Performance",
+      "severity": "high",
+      "message": "37 script bloccanti (senza async/defer). Impattano LCP e INP."
+    },
+    {
+      "category": "On-Page SEO",
+      "severity": "medium",
+      "message": "Troppi tag H1: 2. Ideale: esattamente 1 per pagina."
+    },
+    {
+      "category": "Qualità Contenuto",
+      "severity": "medium",
+      "message": "Nessuna informazione autore rilevata. Aggiungi author bio per migliorare l'E-E-A-T."
+    },
+    {
+      "category": "Immagini",
+      "severity": "medium",
+      "message": "6 immagini senza dimensioni (width/height). Causa CLS (spostamento layout)."
+    },
+    {
+      "category": "Performance",
+      "severity": "medium",
+      "message": "44 fogli di stile esterni. Considera di combinarne alcuni per ridurre le richieste."
+    },
+    {
+      "category": "Performance",
+      "severity": "medium",
+      "message": "4 script inline molto grandi. Esternalizzali per il caching."
+    },
+    {
+      "category": "Performance",
+      "severity": "medium",
+      "message": "6 immagini senza dimensioni esplicite. Causa CLS (Cumulative Layout Shift)."
+    },
+    {
+      "category": "Schema / Dati Strutturati",
+      "severity": "low",
+      "message": "Schema consigliati mancanti: Organization/LocalBusiness, WebSite (con SearchAction per sitelinks), BreadcrumbList"
+    },
+    {
+      "category": "Immagini",
+      "severity": "low",
+      "message": "3 immagini below-fold senza loading='lazy'. Rallentano il caricamento."
+    },
+    {
+      "category": "Immagini",
+      "severity": "low",
+      "message": "20 immagini in formato non ottimale (JPEG/PNG). Converti in WebP/AVIF."
+    },
+    {
+      "category": "AI Search Readiness",
+      "severity": "low",
+      "message": "Suggerimento: usa tabelle e liste puntate per dati comparativi. Gli AI engine li preferiscono."
+    }
+  ],
+  "issues_summary": {
+    "critical": 0,
+    "high": 3,
+    "medium": 6,
+    "low": 4
+  },
+  "quick_wins": [
+    {
+      "category": "SEO Tecnico",
+      "severity": "high",
+      "message": "Header di sicurezza mancanti: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy"
+    },
+    {
+      "category": "Immagini",
+      "severity": "high",
+      "message": "4 immagini senza attributo alt. Fondamentale per accessibilità e SEO."
+    },
+    {
+      "category": "Performance",
+      "severity": "high",
+      "message": "37 script bloccanti (senza async/defer). Impattano LCP e INP."
+    }
+  ]
+}

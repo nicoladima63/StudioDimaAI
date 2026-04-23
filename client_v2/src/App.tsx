@@ -42,7 +42,7 @@ const App: React.FC = () => {
         // logErrorToService(error, errorInfo)
       }}
     >
-      <div className='c-app c-default-layout'>
+      <div className='c-app c-default-layout' data-coreui-theme='light'>
         <AppRouter />
       </div>
     </ErrorBoundary>

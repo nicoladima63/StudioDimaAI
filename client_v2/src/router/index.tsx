@@ -51,6 +51,8 @@ const AnalisiComparativaPage = React.lazy(() => import('@/features/economics/pag
 const CentroCostoPage = React.lazy(() => import('@/features/economics/pages/CentroCostoPage'))
 const FornitoriClassificazione = React.lazy(() => import('@/features/fornitori/pages/FornitoriClassificazione'))
 const EmailPage = React.lazy(() => import('@/features/email/pages/EmailPage'))
+const SeoPage = React.lazy(() => import('@/features/seo/pages/SeoPage'))
+const BotPage = React.lazy(() => import('@/features/bot/pages/BotPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -106,6 +108,7 @@ const AppRouter: React.FC = () => {
           <Route path='settings/monitor-prestazioni' element={<MonitorPrestazioniStandalonePage />} />
           <Route path='settings/automazioni' element={<AutomationPage />} />
           <Route path='settings/scheduler' element={<SchedulerPage />} />
+          <Route path='settings/seo' element={<SeoPage />} />
 
           {/* User Management Routes */}
           <Route path='users' element={<UserListPage />} />
@@ -126,6 +129,9 @@ const AppRouter: React.FC = () => {
           <Route path='economics' element={<EconomicsPage />} />
           <Route path='economics/comparativa' element={<AnalisiComparativaPage />} />
           <Route path='economics/centro-costo' element={<CentroCostoPage />} />
+
+          {/* Bot WhatsApp */}
+          <Route path='bot' element={<BotPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}
