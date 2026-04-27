@@ -3,7 +3,7 @@
 ## TypeScript e Import
 
 * Usare sempre `import type` per i tipi TypeScript
-* Usare `import apiClient from '@/api/client'` (default import) per le chiamate API
+* Usare `import apiClient from '@/services/api/client'` (default import) per le chiamate API
 * Non usare `{ apiClient }` ma il default import
 
 ## API e Backend
@@ -67,6 +67,7 @@
 ## Database
 
 * Usare studio_dima.db come database per eventuali nuove tabelle
+* **Auto-migrazione obbligatoria**: ogni blueprint o service che dipende da tabelle SQLite proprie deve includere una funzione `_ensure_tables()` con `CREATE TABLE IF NOT EXISTS` per ogni tabella necessaria. La funzione va chiamata all'inizio di ogni endpoint/funzione che accede a quelle tabelle. Usare un flag di modulo `_TABLES_READY = False` per eseguirla una sola volta per sessione. Il codice deve portare con sé i propri prerequisiti — zero script manuali, zero migration da eseguire a mano.
 
 ## Sistema Classificazione Fornitori
 

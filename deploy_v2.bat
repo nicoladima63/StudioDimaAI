@@ -22,6 +22,45 @@ set "TIMESTAMP=%TIMESTAMP: =0%"
 echo Server: %DEPLOY_PATH% >> "%LOGFILE%"
 echo Timestamp: %TIMESTAMP% >> "%LOGFILE%"
 
+:: ============================================================================
+:: [BUILD VERSIONING] Leggi build corrente e incrementa
+:: ============================================================================
+set "LOCAL_BUILD_INFO=%~dp0server_v2\build_info.json"
+set BUILD_NUMBER=0
+
+if exist "%LOCAL_BUILD_INFO%" (
+    for /f "usebackq tokens=2 delims=:," %%a in (`findstr "build" "%LOCAL_BUILD_INFO%"`) do (
+        set "RAW=%%a"
+        set "RAW=!RAW: =!"
+        set "RAW=!RAW:"=!"
+        :: solo la prima occorrenza (la riga "build")
+        if "!BUILD_NUMBER!" == "0" if "!RAW!" NEQ "" (
+            set /a BUILD_NUMBER=!RAW!
+        )
+    )
+)
+set /a BUILD_NUMBER+=1
+
+:: Ottieni git hash
+for /f %%i in ('git -C "%~dp0" rev-parse --short HEAD 2^>nul') do set GIT_HASH=%%i
+if not defined GIT_HASH set GIT_HASH=unknown
+
+:: Scrivi build_info.json locale (verra' deployato da robocopy)
+set "BUILT_AT=%date:~-4%-%date:~3,2%-%date:~0,2%T%time:~0,2%:%time:~3,2%:%time:~6,2%"
+set "BUILT_AT=%BUILT_AT: =0%"
+(
+echo {
+echo   "version": "2.0.0",
+echo   "build": !BUILD_NUMBER!,
+echo   "built_at": "!BUILT_AT!",
+echo   "git_hash": "!GIT_HASH!",
+echo   "env": "production"
+echo }
+) > "%LOCAL_BUILD_INFO%"
+
+echo [BUILD] Numero build: #!BUILD_NUMBER! ^(!GIT_HASH!^)
+echo [BUILD] Numero build: #!BUILD_NUMBER! (!GIT_HASH!) >> "%LOGFILE%"
+
 echo ATTENZIONE: Questo script aggiornera' l'installazione in:
 echo %DEPLOY_PATH%
 echo.
@@ -283,6 +322,7 @@ echo [6/7] Generazione start script...
 echo [6/7] Generazione start script... >> "%LOGFILE%"
 (
 echo @echo off
+echo setlocal enabledelayedexpansion
 echo cd /d "%%~dp0"
 echo.
 echo echo ==========================================
@@ -306,8 +346,19 @@ echo.
 echo echo Verifica dipendenze...
 echo pip install -r requirements.txt --quiet
 echo.
+echo :restart_loop
+echo echo ==========================================
 echo echo Server in avvio su porta 5001...
-echo start "StudioDimaAI V2 Server" cmd /k python run_v2.py --config production --port 5001
+echo echo ==========================================
+echo python run_v2.py --config production --port 5001
+echo set EXIT_CODE=%%ERRORLEVEL%%
+echo if %%EXIT_CODE%% EQU 75 ^(
+echo     echo Riavvio richiesto via API. Attendo 3 secondi...
+echo     timeout /t 3 /nobreak ^>nul
+echo     goto restart_loop
+echo ^)
+echo echo Server terminato con codice %%EXIT_CODE%%.
+echo pause
 ) > "%DEPLOY_PATH%\start_server_v2.bat"
 
 if not exist "%DEPLOY_PATH%\start_server_v2.bat" (

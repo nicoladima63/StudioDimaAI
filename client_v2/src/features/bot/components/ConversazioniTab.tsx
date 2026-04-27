@@ -23,17 +23,23 @@ const ConversazioniTab: React.FC = () => {
   const [searchPhone, setSearchPhone] = useState('')
   const [searchResult, setSearchResult] = useState<string | null>(null)
   const [searching, setSearching] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const perPage = 20
   const totalPages = Math.ceil(total / perPage)
 
   const load = async (p = page) => {
     setLoading(true)
+    setLoadError(null)
     try {
       const res = await botService.apiGetConversazioni(p, perPage)
       if (res.success) {
         setConversazioni(res.data.conversazioni)
         setTotal(res.data.total)
+      } else {
+        setLoadError(res.error || 'Errore recupero conversazioni')
       }
+    } catch (err: any) {
+      setLoadError(err?.response?.data?.error || err?.message || 'Errore di rete')
     } finally {
       setLoading(false)
     }
@@ -111,6 +117,12 @@ const ConversazioniTab: React.FC = () => {
           )}
         </CCardBody>
       </CCard>
+
+      {loadError && (
+        <CAlert color="danger" className="mb-3">
+          Errore caricamento conversazioni: {loadError}
+        </CAlert>
+      )}
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <span className="text-muted">{total} conversazioni totali</span>

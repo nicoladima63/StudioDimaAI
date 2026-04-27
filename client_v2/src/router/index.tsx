@@ -102,6 +102,7 @@ const AppRouter: React.FC = () => {
           <Route path='ricetta/test' element={<RicettaTestPage />} />
 
           {/* Pagine di settings */}
+          <Route path='settings' element={<Navigate to='/settings/scheduler' replace />} />
           <Route path='settings/calendar' element={<SettingCalendarPage />} />
           <Route path='settings/template' element={<TemplatesPage />} />
           <Route path='settings/monitoring' element={<MonitoringSettingsPage />} />

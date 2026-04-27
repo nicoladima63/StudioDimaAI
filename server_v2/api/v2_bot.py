@@ -7,6 +7,7 @@ directly from StudioDimaAI without going through n8n UI.
 
 import os
 import logging
+import sqlite3
 import requests
 import psycopg2
 import psycopg2.extras
@@ -16,12 +17,44 @@ from flask_jwt_extended import jwt_required
 from functools import wraps
 
 from app_v2 import format_response
+from core.paths import STUDIO_DIMA_DB_PATH
 
 logger = logging.getLogger(__name__)
 
 bot_v2_bp = Blueprint('bot_v2', __name__)
 
 BOT_API_KEY = os.getenv('BOT_API_KEY', '')
+
+_SQLITE_TABLES_READY = False
+
+def _ensure_sqlite_tables():
+    global _SQLITE_TABLES_READY
+    if _SQLITE_TABLES_READY:
+        return
+    try:
+        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS patient_communications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                patient_id TEXT NOT NULL, patient_name TEXT, phone TEXT,
+                channel TEXT NOT NULL, type TEXT NOT NULL,
+                appointment_date TEXT, appointment_time TEXT,
+                stato TEXT DEFAULT 'sent', message_id TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS appointment_confirmations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                patient_id TEXT, phone TEXT NOT NULL,
+                appointment_date TEXT, appointment_time TEXT,
+                response TEXT, communication_id INTEGER,
+                received_at TEXT DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        conn.commit()
+        conn.close()
+        _SQLITE_TABLES_READY = True
+    except Exception as e:
+        logger.error(f"Errore auto-creazione tabelle SQLite: {e}")
 
 
 def _require_bot_key(f):
@@ -596,3 +629,155 @@ def get_last_igienista(db_code: str):
     except Exception as e:
         logger.error(f'Error fetching last igienista for {db_code}: {e}')
         return format_response(success=False, error='Errore recupero igienista'), 500
+
+
+@bot_v2_bp.route('/bot/appointment-confirmation', methods=['POST'])
+@_require_bot_key
+def receive_appointment_confirmation():
+    """
+    Riceve conferma/cancellazione appuntamento da n8n (risposta SI/NO del paziente su WA).
+
+    Body: {
+        "phone": "393xxxxxxxxx",
+        "response": "confirmed" | "cancelled",
+        "appointment_date": "YYYY-MM-DD"  (opzionale)
+    }
+    """
+    _ensure_sqlite_tables()
+    data = request.get_json() or {}
+    phone = data.get('phone', '').strip()
+    response_val = data.get('response', '').strip().lower()
+    appointment_date = data.get('appointment_date', '')
+
+    if not phone or response_val not in ('confirmed', 'cancelled'):
+        return format_response(success=False, error='phone e response (confirmed|cancelled) richiesti'), 400
+
+    try:
+        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        # Trova l'ultima comunicazione per questo numero (con o senza data specifica)
+        if appointment_date:
+            cur.execute("""
+                SELECT id, patient_id, patient_name, appointment_date, appointment_time
+                FROM patient_communications
+                WHERE phone LIKE ? AND appointment_date = ? AND stato NOT IN ('confirmed', 'cancelled')
+                ORDER BY created_at DESC LIMIT 1
+            """, ('%' + phone[-9:], appointment_date))
+        else:
+            cur.execute("""
+                SELECT id, patient_id, patient_name, appointment_date, appointment_time
+                FROM patient_communications
+                WHERE phone LIKE ? AND stato NOT IN ('confirmed', 'cancelled')
+                ORDER BY created_at DESC LIMIT 1
+            """, ('%' + phone[-9:],))
+
+        comm = cur.fetchone()
+        comm_id = None
+        patient_id = None
+        patient_name = 'Paziente'
+        ap_date = appointment_date
+        ap_time = ''
+
+        if comm:
+            comm_id = comm['id']
+            patient_id = comm['patient_id']
+            patient_name = comm['patient_name'] or 'Paziente'
+            ap_date = comm['appointment_date']
+            ap_time = comm['appointment_time']
+            cur.execute(
+                "UPDATE patient_communications SET stato = ? WHERE id = ?",
+                (response_val, comm_id)
+            )
+
+        # Inserisce in appointment_confirmations
+        cur.execute("""
+            INSERT INTO appointment_confirmations
+                (patient_id, phone, appointment_date, appointment_time, response, communication_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (patient_id, phone, ap_date, ap_time, response_val, comm_id))
+
+        conn.commit()
+        conn.close()
+
+        # Se cancellato: notifica push alla segreteria
+        if response_val == 'cancelled':
+            try:
+                from app_v2 import push_service
+                if push_service:
+                    push_service.send_notification_to_all(
+                        title="Appuntamento cancellato",
+                        body=f"{patient_name} ha cancellato l'appuntamento del {ap_date} ore {ap_time}.",
+                        data={'type': 'appointment_cancelled', 'patient_id': patient_id,
+                              'appointment_date': ap_date, 'appointment_time': ap_time}
+                    )
+            except Exception as e:
+                logger.warning(f"Errore notifica cancellazione: {e}")
+
+        return format_response({
+            'response': response_val,
+            'patient_name': patient_name,
+            'appointment_date': ap_date,
+            'appointment_time': ap_time,
+            'communication_id': comm_id,
+        })
+    except Exception as e:
+        logger.error(f"Errore appointment-confirmation: {e}")
+        return format_response(success=False, error=str(e)), 500
+
+
+@bot_v2_bp.route('/bot/pending-reminder', methods=['GET'])
+@_require_bot_key
+def get_pending_reminder():
+    """
+    Controlla se esiste un reminder in attesa per un numero di telefono.
+    Usato da n8n per decidere se smistare il messaggio al Reminder Handler.
+
+    Query: ?phone=393xxxxxxxxx
+    Risposta: {has_pending: bool, communication_id, appointment_date, appointment_time, patient_name}
+    """
+    _ensure_sqlite_tables()
+    phone = request.args.get('phone', '').strip()
+    if not phone:
+        return format_response(success=False, error='phone richiesto'), 400
+
+    phone_suffix = phone[-9:]
+    now = datetime.now()
+    today = now.strftime('%Y-%m-%d')
+    current_time = now.strftime('%H:%M')
+
+    try:
+        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, patient_id, patient_name, appointment_date, appointment_time
+            FROM patient_communications
+            WHERE phone LIKE ?
+              AND stato NOT IN ('confirmed', 'cancelled', 'failed')
+              AND (
+                  appointment_date > ?
+                  OR (appointment_date = ? AND appointment_time > ?)
+              )
+            ORDER BY appointment_date ASC, created_at DESC
+            LIMIT 1
+        """, ('%' + phone_suffix, today, today, current_time))
+        row = cur.fetchone()
+        conn.close()
+
+        if row:
+            return format_response({
+                'has_pending': True,
+                'communication_id': row['id'],
+                'patient_id': row['patient_id'],
+                'patient_name': row['patient_name'],
+                'appointment_date': row['appointment_date'],
+                'appointment_time': row['appointment_time'],
+            })
+        else:
+            return format_response({'has_pending': False})
+
+    except Exception as e:
+        logger.error(f"Errore pending-reminder: {e}")
+        return format_response(success=False, error=str(e)), 500

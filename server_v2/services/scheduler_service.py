@@ -27,18 +27,22 @@ class SchedulerService:
         self._current_recall_job = None
         self._current_calendar_sync_job = None
         self._current_todo_escalation_job = None
-        
+        self._current_reminder_24h_morning_job = None
+        self._current_reminder_24h_afternoon_job = None
+        self._current_reminder_2h_job = None
+
     def start(self):
         """Avvia lo scheduler e programma tutti i job"""
         if not self.scheduler.running:
             self.scheduler.start()
             # logger.info("Scheduler avviato")
-            
+
         # Programma tutti i job all'avvio
         self.schedule_reminder_job()
-        self.schedule_recall_job() 
+        self.schedule_recall_job()
         self.schedule_calendar_sync_job()
         self.schedule_todo_escalation_job()
+        self.schedule_appointment_reminders()
         
     def shutdown(self):
         """Ferma lo scheduler"""
@@ -339,7 +343,88 @@ class SchedulerService:
     def reschedule_todo_escalation_job(self):
         """Riprogramma job escalation todo quando cambia la configurazione"""
         self.schedule_todo_escalation_job()
-        
+
+    def schedule_appointment_reminders(self):
+        """
+        Schedula i job reminder appuntamenti.
+
+        24h: due esecuzioni giornaliere (ore 8 per appuntamenti mattina, ore 14 per pomeriggio).
+        2h:  ogni 30 minuti dalle 7 alle 20.
+        """
+        settings = get_automation_settings()
+        enabled_24h = settings.get('appointment_reminder_24h_enabled', True)
+        enabled_2h = settings.get('appointment_reminder_2h_enabled', True)
+
+        # Rimuovi job esistenti
+        for attr, job_id in [
+            ('_current_reminder_24h_morning_job', 'appt_reminder_24h_morning'),
+            ('_current_reminder_24h_afternoon_job', 'appt_reminder_24h_afternoon'),
+            ('_current_reminder_2h_job', 'appt_reminder_2h'),
+        ]:
+            job = getattr(self, attr, None)
+            if job:
+                try:
+                    self.scheduler.remove_job(job_id)
+                except Exception:
+                    pass
+                setattr(self, attr, None)
+
+        if enabled_24h:
+            def job_24h():
+                from services.appointment_reminder_service import run_reminders
+                try:
+                    run_reminders('24h')
+                except Exception as e:
+                    logger.error(f"[REMINDER 24h] Errore: {e}")
+
+            self._current_reminder_24h_morning_job = self.scheduler.add_job(
+                job_24h, CronTrigger(hour=8, minute=0),
+                id='appt_reminder_24h_morning', replace_existing=True
+            )
+            self._current_reminder_24h_afternoon_job = self.scheduler.add_job(
+                job_24h, CronTrigger(hour=14, minute=0),
+                id='appt_reminder_24h_afternoon', replace_existing=True
+            )
+
+        if enabled_2h:
+            def job_2h():
+                from services.appointment_reminder_service import run_reminders
+                try:
+                    run_reminders('2h')
+                except Exception as e:
+                    logger.error(f"[REMINDER 2h] Errore: {e}")
+
+            # Ogni 30 min dalle 7 alle 20
+            self._current_reminder_2h_job = self.scheduler.add_job(
+                job_2h, CronTrigger(hour='7-20', minute='0,30'),
+                id='appt_reminder_2h', replace_existing=True
+            )
+
+        # Follow-up: ogni ora dalle 7 alle 20
+        # Invia secondo reminder agli appuntamenti di oggi senza risposta entro N ore
+        followup_enabled = settings.get('appointment_followup_enabled', True)
+        followup_hours = int(settings.get('appointment_followup_hours_before', 3))
+
+        if getattr(self, '_current_reminder_followup_job', None):
+            try:
+                self.scheduler.remove_job('appt_reminder_followup')
+            except Exception:
+                pass
+            self._current_reminder_followup_job = None
+
+        if followup_enabled:
+            def job_followup():
+                from services.appointment_reminder_service import run_followup_reminders
+                try:
+                    run_followup_reminders(hours_before=followup_hours)
+                except Exception as e:
+                    logger.error(f"[REMINDER FOLLOWUP] Errore: {e}")
+
+            self._current_reminder_followup_job = self.scheduler.add_job(
+                job_followup, CronTrigger(hour='7-20', minute=0),
+                id='appt_reminder_followup', replace_existing=True
+            )
+
     def get_scheduler_status(self) -> Dict[str, Any]:
         """Ottieni status dello scheduler e dei job attivi"""
         jobs = []

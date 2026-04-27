@@ -9,7 +9,9 @@ import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '@/store/auth.store';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+const SOCKET_URL = typeof window !== 'undefined'
+  ? window.location.origin
+  : (import.meta.env.VITE_API_URL || 'http://localhost:5001');
 
 export const useWebSocket = () => {
   const socketRef = useRef<Socket | null>(null);

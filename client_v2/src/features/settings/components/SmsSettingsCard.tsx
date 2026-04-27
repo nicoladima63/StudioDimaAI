@@ -12,7 +12,7 @@ import {
   CAlert,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilSave, cilSettings } from '@coreui/icons';
+import { cilSave, cilSettings, cilCheckCircle, cilXCircle } from '@coreui/icons';
 import apiClient from '@/services/api/client'; // Assumendo che apiClient sia configurato
 
 const SmsSettingsCard: React.FC = () => {
@@ -21,8 +21,10 @@ const SmsSettingsCard: React.FC = () => {
   const [currentEnv, setCurrentEnv] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -46,6 +48,24 @@ const SmsSettingsCard: React.FC = () => {
 
     fetchSettings();
   }, []);
+
+  const handleTest = async () => {
+    setTesting(true)
+    setTestResult(null)
+    try {
+      const response = await apiClient.post('/sms/test')
+      const ok = response.data?.success === true
+      const info = response.data?.data
+      const msg = ok
+        ? `Connessione OK — account: ${info?.account_info?.email ?? ''}`
+        : response.data?.message ?? 'Test fallito'
+      setTestResult({ ok, message: msg })
+    } catch (err: any) {
+      setTestResult({ ok: false, message: err.message ?? 'Errore di rete' })
+    } finally {
+      setTesting(false)
+    }
+  }
 
   const handleSave = async () => {
     try {
@@ -109,10 +129,20 @@ const SmsSettingsCard: React.FC = () => {
                 </small>
               </CCol>
             </CRow>
-            <div className="d-flex justify-content-end mt-3">
-              <CButton color="primary" onClick={handleSave} disabled={saving}>
-                {saving ? <CSpinner size="sm" /> : <CIcon icon={cilSave} className="me-2" />}
-                Salva Impostazioni
+            {testResult && (
+              <CAlert color={testResult.ok ? 'success' : 'danger'} className="mt-3 mb-0">
+                <CIcon icon={testResult.ok ? cilCheckCircle : cilXCircle} className="me-2" />
+                {testResult.message}
+              </CAlert>
+            )}
+            <div className="d-flex justify-content-end gap-2 mt-3">
+              <CButton color="info" variant="outline" onClick={handleTest} disabled={testing || saving}>
+                {testing ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilSettings} className="me-1" />}
+                Test connessione
+              </CButton>
+              <CButton color="primary" onClick={handleSave} disabled={saving || testing}>
+                {saving ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilSave} className="me-1" />}
+                Salva
               </CButton>
             </div>
           </>

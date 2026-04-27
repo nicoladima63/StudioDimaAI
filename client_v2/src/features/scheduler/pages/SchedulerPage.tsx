@@ -35,6 +35,9 @@ import { cilClock, cilMediaPlay, cilMediaStop, cilSettings, cilReload } from '@c
 import CIcon from '@coreui/icons-react';
 import toast from 'react-hot-toast';
 import { schedulerService } from '../services/schedulerService';
+import { remindersService } from '../services/remindersService';
+import type { ReminderSettings, TriggerResult } from '../services/remindersService';
+import { CFormSwitch, CFormInput as CInput, CFormLabel as CLabel } from '@coreui/react';
 
 interface SchedulerJob {
     id: string;
@@ -86,9 +89,15 @@ const SchedulerPage: React.FC = () => {
     const [showSettingsModal, setShowSettingsModal] = useState(false);
     const [editingService, setEditingService] = useState<'reminder' | 'recall' | 'calendar' | null>(null);
     const [tempSettings, setTempSettings] = useState<Partial<SchedulerSettings>>({});
+    const [reminderSettings, setReminderSettings] = useState<ReminderSettings | null>(null);
+    const [reminderSaving, setReminderSaving] = useState(false);
+    const [triggerResult, setTriggerResult] = useState<TriggerResult | null>(null);
+    const [triggerLoading, setTriggerLoading] = useState(false);
+    const [patientIdFilter, setPatientIdFilter] = useState('');
 
     useEffect(() => {
         loadSchedulerData();
+        remindersService.apiGetSettings().then(setReminderSettings).catch(() => {});
     }, []);
 
     const loadSchedulerData = async () => {
@@ -179,6 +188,36 @@ const SchedulerPage: React.FC = () => {
             toast.error('Errore aggiornamento impostazioni');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleReminderToggle = async (field: keyof ReminderSettings, value: boolean | number) => {
+        if (!reminderSettings) return;
+        const updated = { ...reminderSettings, [field]: value };
+        setReminderSettings(updated);
+        setReminderSaving(true);
+        try {
+            await remindersService.apiUpdateSettings({ [field]: value });
+            toast.success('Impostazione salvata');
+        } catch {
+            toast.error('Errore salvataggio');
+            setReminderSettings(reminderSettings);
+        } finally {
+            setReminderSaving(false);
+        }
+    };
+
+    const handleTrigger = async (dryRun: boolean) => {
+        setTriggerLoading(true);
+        setTriggerResult(null);
+        try {
+            const res = await remindersService.apiTrigger24h(dryRun, patientIdFilter || undefined);
+            setTriggerResult(res);
+            toast.success(dryRun ? 'Dry run completato' : 'Reminder inviati');
+        } catch {
+            toast.error('Errore trigger reminder');
+        } finally {
+            setTriggerLoading(false);
         }
     };
 
@@ -384,6 +423,77 @@ const SchedulerPage: React.FC = () => {
                                             </CTableBody>
                                         </CTable>
                                     </div>
+
+                                    {/* Card Reminder WA/SMS */}
+                                    {reminderSettings && (
+                                        <CCard className="mt-4 border-top pt-3">
+                                            <CCardHeader><strong>Reminder Appuntamenti WA/SMS</strong></CCardHeader>
+                                            <CCardBody>
+                                                <CRow className="mb-3 align-items-center">
+                                                    <CCol md={4}>
+                                                        <CFormSwitch
+                                                            label="Reminder 24h (giorno prima)"
+                                                            checked={reminderSettings.appointment_reminder_24h_enabled}
+                                                            onChange={e => handleReminderToggle('appointment_reminder_24h_enabled', e.target.checked)}
+                                                            disabled={reminderSaving}
+                                                        />
+                                                    </CCol>
+                                                    <CCol md={4}>
+                                                        <CFormSwitch
+                                                            label="Follow-up (stesso giorno)"
+                                                            checked={reminderSettings.appointment_followup_enabled}
+                                                            onChange={e => handleReminderToggle('appointment_followup_enabled', e.target.checked)}
+                                                            disabled={reminderSaving}
+                                                        />
+                                                    </CCol>
+                                                    <CCol md={4} className="d-flex align-items-center gap-2">
+                                                        <CLabel className="mb-0 text-nowrap">Ore prima:</CLabel>
+                                                        <CInput
+                                                            type="number"
+                                                            min={1} max={12}
+                                                            style={{ width: 70 }}
+                                                            value={reminderSettings.appointment_followup_hours_before}
+                                                            onChange={e => handleReminderToggle('appointment_followup_hours_before', parseInt(e.target.value) || 3)}
+                                                            disabled={reminderSaving || !reminderSettings.appointment_followup_enabled}
+                                                        />
+                                                    </CCol>
+                                                </CRow>
+
+                                                <hr />
+                                                <h6>Test manuale</h6>
+                                                <CRow className="align-items-end gap-2 mb-2">
+                                                    <CCol md={4}>
+                                                        <CLabel>Patient ID (opzionale)</CLabel>
+                                                        <CInput
+                                                            placeholder="es. 00042 — solo per questo paziente"
+                                                            value={patientIdFilter}
+                                                            onChange={e => setPatientIdFilter(e.target.value)}
+                                                        />
+                                                    </CCol>
+                                                    <CCol md="auto">
+                                                        <CButton color="info" size="sm" onClick={() => handleTrigger(true)} disabled={triggerLoading}>
+                                                            {triggerLoading ? <CSpinner size="sm" className="me-1" /> : null}
+                                                            Dry Run
+                                                        </CButton>
+                                                    </CCol>
+                                                    <CCol md="auto">
+                                                        <CButton color="danger" size="sm" onClick={() => handleTrigger(false)} disabled={triggerLoading}>
+                                                            Invia Reminder
+                                                        </CButton>
+                                                    </CCol>
+                                                </CRow>
+
+                                                {triggerResult && (
+                                                    <CAlert color={triggerResult.dry_run ? 'info' : 'success'} className="mt-2 mb-0">
+                                                        {triggerResult.dry_run ? 'DRY RUN — ' : ''}
+                                                        WA: <strong>{triggerResult.sent_wa}</strong> &nbsp;|&nbsp;
+                                                        SMS: <strong>{triggerResult.sent_sms}</strong> &nbsp;|&nbsp;
+                                                        Errori: <strong>{triggerResult.errors?.length ?? 0}</strong>
+                                                    </CAlert>
+                                                )}
+                                            </CCardBody>
+                                        </CCard>
+                                    )}
                                 </CTabPane>
 
                                 <CTabPane visible={activeTab === 'logs'}>
