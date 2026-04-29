@@ -203,6 +203,31 @@ class PushNotificationService:
                 'sent_count': 0
             }
 
+    def send_notification_to_all(
+        self,
+        title: str,
+        body: str,
+        data: Optional[Dict[str, Any]] = None,
+        url: Optional[str] = None,
+        urgency: str = 'normal',
+    ) -> Dict[str, Any]:
+        """Invia push notification a tutti gli utenti con subscription attiva."""
+        try:
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT DISTINCT user_id FROM push_subscriptions')
+                user_ids = [row[0] for row in cursor.fetchall()]
+                cursor.close()
+            sent = 0
+            for uid in user_ids:
+                res = self.send_notification(user_id=uid, title=title, body=body, url=url, urgency=urgency)
+                if res.get('success'):
+                    sent += res.get('sent_count', 0)
+            return {'success': True, 'sent_to': len(user_ids), 'sent_count': sent}
+        except Exception as e:
+            logger.error(f"Errore send_notification_to_all: {e}")
+            return {'success': False, 'error': str(e)}
+
     def _get_user_subscriptions(self, user_id: int):
         """Get all push subscriptions for a user."""
         try:

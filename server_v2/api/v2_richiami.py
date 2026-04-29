@@ -13,6 +13,7 @@ from jwt.exceptions import InvalidTokenError
 
 from services.pazienti_service import PazientiService
 from services.richiami_service import RichiamiService
+from services.slot_finder_service import trova_slot_liberi, trova_ultimo_igienista, build_last_igiene_lookup
 from app_v2 import format_response
 from core.exceptions import ValidationError, DatabaseError
 from core.constants_v2 import TIPO_RICHIAMI
@@ -565,6 +566,7 @@ def get_pazienti_da_richiamare():
     eta_max = request.args.get('eta_max', 16, type=int)
     solo_cellulare = request.args.get('solo_cellulare', 'true').lower() != 'false'
     scaduti_solo = request.args.get('scaduti_solo', 'false').lower() == 'true'
+    ritardo_max_giorni = request.args.get('ritardo_max_giorni', 3650, type=int)
     limit = request.args.get('limit', type=int)
 
     # Risolvi il codice tipo
@@ -580,6 +582,10 @@ def get_pazienti_da_richiamare():
         pazienti = raw['data']['pazienti']
         today = date.today()
         result = []
+
+        # Lookup data ultima igiene da PREVENT.DBF per tutti i pazienti in una sola lettura.
+        # Usato per sovrascrivere ultima_visita (DB_PAULTVI) che Windent aggiorna raramente.
+        igiene_lookup = build_last_igiene_lookup()
 
         for p in pazienti:
             # Solo quelli marcati da richiamare
@@ -606,8 +612,15 @@ def get_pazienti_da_richiamare():
             if solo_cellulare and not cellulare:
                 continue
 
-            # Calcola scadenza richiamo
-            uv = _parse_date(p.get('ultima_visita'))
+            # Calcola scadenza richiamo.
+            # Per pazienti con igiene ('2' in tipo): usa data reale da PREVENT.DBF.
+            # Per altri tipi: usa ultima_visita dal record paziente.
+            paziente_id = p.get('id', '').strip()
+            igiene_entry = igiene_lookup.get(paziente_id) if '2' in tipo_paz else None
+            if igiene_entry:
+                uv = igiene_entry[0]  # già un oggetto date
+            else:
+                uv = _parse_date(p.get('ultima_visita'))
             mesi = None
             raw_mesi = p.get('tempo_richiamo') or p.get('mesi_richiamo')
             if raw_mesi is not None:
@@ -628,6 +641,9 @@ def get_pazienti_da_richiamare():
                 giorni_ritardo = (today - data_richiamo_prevista).days if scaduto else 0
 
             if scaduti_solo and not scaduto:
+                continue
+
+            if giorni_ritardo > ritardo_max_giorni:
                 continue
 
             # Decodifica multi-carattere: "21" → ["Igiene", "Generico"]
@@ -671,6 +687,90 @@ def get_pazienti_da_richiamare():
 
     except Exception as e:
         logger.error(f'Errore get_pazienti_da_richiamare: {e}', exc_info=True)
+        return format_response({'success': False, 'error': str(e)}), 500
+
+
+@richiami_v2_bp.route('/richiami/slot-per-paziente/<db_code>', methods=['GET'])
+def get_slot_per_paziente(db_code: str):
+    """
+    Restituisce i prossimi slot liberi per un paziente da richiamare.
+
+    Logica operatore:
+      - tipo_richiamo contiene '2' (igiene):
+          cerca ultima igiene in PREVENT.DBF → slot Lara (2) o Anet (5) o entrambe
+      - altri tipi: slot Dr. Nicola (1)
+
+    Query params:
+        giorni_avanti : int (default 14)
+        max_slot      : int (default 5)
+
+    Auth: X-API-Key o JWT.
+    """
+    _check_auth()
+
+    giorni_avanti = request.args.get('giorni_avanti', 14, type=int)
+    max_slot      = request.args.get('max_slot', 5, type=int)
+
+    try:
+        service = PazientiService(g.database_manager)
+        res = service.get_paziente_by_id(db_code)
+        if not res.get('success'):
+            return format_response({'success': False, 'error': 'Paziente non trovato'}), 404
+
+        paziente = res['data']
+        tipo_richiamo = (paziente.get('tipo_richiamo') or '').strip()
+        nome = (paziente.get('nome') or '').strip()
+
+        if '2' in tipo_richiamo:
+            operatore_id, ultima_data = trova_ultimo_igienista(db_code)
+
+            if operatore_id == 2:
+                operatori = [2]
+                operatore_suggerito = 'lara'
+            elif operatore_id == 5:
+                operatori = [5]
+                operatore_suggerito = 'anet'
+            else:
+                operatori = [2, 5]
+                operatore_suggerito = 'entrambe'
+
+            tipo = 'igiene'
+            durata = 50
+            ultima_igiene = {'operatore_id': operatore_id, 'data': ultima_data}
+        else:
+            operatori = [1]
+            operatore_suggerito = 'nicola'
+            tipo = 'altro'
+            durata = 30
+            ultima_igiene = None
+
+        slots = []
+        for op_id in operatori:
+            op_slots = trova_slot_liberi(
+                operatore_id=op_id,
+                durata_minuti=durata,
+                giorni_avanti=giorni_avanti,
+                max_slot=max_slot,
+            )
+            slots.extend(op_slots)
+
+        slots.sort(key=lambda s: (s['data'], s['inizio']))
+        slots = slots[:max_slot]
+
+        return format_response({
+            'paziente': {
+                'db_code': db_code,
+                'nome': nome,
+                'tipo_richiamo': tipo_richiamo,
+            },
+            'tipo': tipo,
+            'operatore_suggerito': operatore_suggerito,
+            'ultima_igiene': ultima_igiene,
+            'slots': slots,
+        })
+
+    except Exception as e:
+        logger.error(f'Errore get_slot_per_paziente {db_code}: {e}', exc_info=True)
         return format_response({'success': False, 'error': str(e)}), 500
 
 

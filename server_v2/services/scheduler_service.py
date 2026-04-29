@@ -402,7 +402,7 @@ class SchedulerService:
 
         # Follow-up: ogni ora dalle 7 alle 20
         # Invia secondo reminder agli appuntamenti di oggi senza risposta entro N ore
-        followup_enabled = settings.get('appointment_followup_enabled', True)
+        followup_enabled = settings.get('appointment_followup_enabled', False)
         followup_hours = int(settings.get('appointment_followup_hours_before', 3))
 
         if getattr(self, '_current_reminder_followup_job', None):

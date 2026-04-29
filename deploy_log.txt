@@ -1,14 +1,14 @@
 ========================================== 
-DEPLOY LOG - 27/04/2026 18:12:53,95 
+DEPLOY LOG - 29/04/2026 18:43:54,68 
 ========================================== 
 Server: \\SERVERDIMA\StudioDimaAI 
-Timestamp: 20260427_181253 
-[BUILD] Numero build: #3 (unknown) 
+Timestamp: 20260429_184354 
+[BUILD] Numero build: #5 (unknown) 
 [0/7] Backup file sensibili... 
   [OK] credentials.json salvato 
   [OK] token.json salvato da tokens/ 
   [SKIP] gmail_token.json non presente 
-Backup completato in: \\SERVERDIMA\StudioDimaAI\_deploy_backups\backup_20260427_181253 
+Backup completato in: \\SERVERDIMA\StudioDimaAI\_deploy_backups\backup_20260429_184354 
 [1/7] Verifica cartelle server... 
 [2/7] Sincronizzazione Server V2... 
 
@@ -16,7 +16,7 @@ Backup completato in: \\SERVERDIMA\StudioDimaAI\_deploy_backups\backup_20260427_
    ROBOCOPY     ::     Copia di file efficace per Windows                              
 -------------------------------------------------------------------------------
 
-  Avviato: luned� 27 aprile 2026 18:12:55
+  Avviato: mercoled� 29 aprile 2026 18:43:56
       Origine : C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\
  Destinazione : \\SERVERDIMA\StudioDimaAI\
 
@@ -45,32 +45,32 @@ Directory exc: venv
 
 -------------------------------------------------------------------------------
 
-	                  20	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\
+	                  23	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\
 	*directory supplementare      -1	\\SERVERDIMA\StudioDimaAI\static\
 	  *File supplementare		     792	index.html
 	  *File supplementare		    2733	service-worker.js
 	  *File supplementare		    1497	vite.svg
 	*directory supplementare      -1	\\SERVERDIMA\StudioDimaAI\static\assets\
-	  *File supplementare		   30724	AnalisiComparativaPage-pUEsQCD4.js
-	  *File supplementare		  114160	AnalisiComparativaPage-pUEsQCD4.js.map
-	  *File supplementare		     982	automation.service-ut_0Xdkq.js
-	  *File supplementare		    4865	automation.service-ut_0Xdkq.js.map
-	  *File supplementare		    2414	AutomationPage-DlW4TWJX.js
-	  *File supplementare		    8497	AutomationPage-DlW4TWJX.js.map
-	  *File supplementare		   16323	BotPage-Bi8FGw6x.js
-	  *File supplementare		   50480	BotPage-Bi8FGw6x.js.map
-	  *File supplementare		     678	calendarHealthCheck-DsC0MBQF.js
-	  *File supplementare		    3733	calendarHealthCheck-DsC0MBQF.js.map
-	  *File supplementare		   36039	CalendarPage-WYcdpTPM.js
-	  *File supplementare		  123762	CalendarPage-WYcdpTPM.js.map
-	  *File supplementare		   16220	CalendarSettings-COQs1OgU.js
-	  *File supplementare		   56051	CalendarSettings-COQs1OgU.js.map
-	  *File supplementare		    4287	CallbackCard-78uznv8I.js
-	  *File supplementare		   17667	CallbackCard-78uznv8I.js.map
-	  *File supplementare		  328719	CartesianChart-CXZnygEY.js
-	  *File supplementare		   1.5 m	CartesianChart-CXZnygEY.js.map
-	  *File supplementare		    8971	CentroCostoPage-BUW-fz_v.js
-	  *File supplementare		   28974	CentroCostoPage-BUW-fz_v.js.map
+	  *File supplementare		   30724	AnalisiComparativaPage-ewZirTMB.js
+	  *File supplementare		  114160	AnalisiComparativaPage-ewZirTMB.js.map
+	  *File supplementare		     982	automation.service-GWMolvKL.js
+	  *File supplementare		    4865	automation.service-GWMolvKL.js.map
+	  *File supplementare		    2414	AutomationPage-CzFeLXqP.js
+	  *File supplementare		    8497	AutomationPage-CzFeLXqP.js.map
+	  *File supplementare		   20393	BotPage-D8KNbFPc.js
+	  *File supplementare		   63054	BotPage-D8KNbFPc.js.map
+	  *File supplementare		     678	calendarHealthCheck-B9ApRBAb.js
+	  *File supplementare		    3733	calendarHealthCheck-B9ApRBAb.js.map
+	  *File supplementare		   36039	CalendarPage-Lu4xZv4Q.js
+	  *File supplementare		  123762	CalendarPage-Lu4xZv4Q.js.map
+	  *File supplementare		   16220	CalendarSettings-q6qAOqIA.js
+	  *File supplementare		   56051	CalendarSettings-q6qAOqIA.js.map
+	  *File supplementare		    4287	CallbackCard-Y6-52VyR.js
+	  *File supplementare		   17667	CallbackCard-Y6-52VyR.js.map
+	  *File supplementare		  328719	CartesianChart-CLIHiCQS.js
+	  *File supplementare		   1.5 m	CartesianChart-CLIHiCQS.js.map
+	  *File supplementare		    8971	CentroCostoPage-C7bkPu3g.js
+	  *File supplementare		   28974	CentroCostoPage-C7bkPu3g.js.map
 	  *File supplementare		     322	cil-arrow-left-D66Kb3Zq.js
 	  *File supplementare		     593	cil-arrow-left-D66Kb3Zq.js.map
 	  *File supplementare		     456	cil-chevron-bottom-C8eOormY.js
@@ -99,163 +99,174 @@ Directory exc: venv
 	  *File supplementare		    1023	cil-trash-CBbKHhHb.js.map
 	  *File supplementare		     623	cil-x-circle-Bi9E-sdv.js
 	  *File supplementare		     886	cil-x-circle-Bi9E-sdv.js.map
-	  *File supplementare		    1101	classificazioni.service-CUedjNLU.js
-	  *File supplementare		    4175	classificazioni.service-CUedjNLU.js.map
-	  *File supplementare		    3922	CollaboratoriPage-CY6KoRW_.js
-	  *File supplementare		   14353	CollaboratoriPage-CY6KoRW_.js.map
-	  *File supplementare		    2110	ConfirmDeleteModal-CJoV93Ru.js
-	  *File supplementare		    6638	ConfirmDeleteModal-CJoV93Ru.js.map
-	  *File supplementare		   12511	conti.store-D_5G-Ih5.js
-	  *File supplementare		   48145	conti.store-D_5G-Ih5.js.map
-	  *File supplementare		   10600	ContiPage-BzzlTDQm.js
-	  *File supplementare		   51586	ContiPage-BzzlTDQm.js.map
+	  *File supplementare		    1101	classificazioni.service-GcZSaAXl.js
+	  *File supplementare		    4175	classificazioni.service-GcZSaAXl.js.map
+	  *File supplementare		    3922	CollaboratoriPage-DcJT05FA.js
+	  *File supplementare		   14353	CollaboratoriPage-DcJT05FA.js.map
+	  *File supplementare		    2110	ConfirmDeleteModal-D_sRuLOp.js
+	  *File supplementare		    6638	ConfirmDeleteModal-D_sRuLOp.js.map
+	  *File supplementare		   12511	conti.store-NkGk-pxq.js
+	  *File supplementare		   48145	conti.store-NkGk-pxq.js.map
+	  *File supplementare		   10600	ContiPage-DyLjfY1L.js
+	  *File supplementare		   51586	ContiPage-DyLjfY1L.js.map
 	  *File supplementare		   95054	coreui-Dyzyx4tS.js
 	  *File supplementare		  484025	coreui-Dyzyx4tS.js.map
 	  *File supplementare		   78996	CoreUI-Icons-Free-6fr294fT.woff
 	  *File supplementare		  146944	CoreUI-Icons-Free-BUWU6kzH.eot
 	  *File supplementare		  146740	CoreUI-Icons-Free-Bzz1TPaB.ttf
 	  *File supplementare		  560248	CoreUI-Icons-Free-DXXkrSta.svg
-	  *File supplementare		   21985	Dashboard-U6w-D8vf.js
-	  *File supplementare		   84064	Dashboard-U6w-D8vf.js.map
-	  *File supplementare		    8330	DataTable-CGVviRdX.js
-	  *File supplementare		   46376	DataTable-CGVviRdX.js.map
+	  *File supplementare		   21985	Dashboard-5hDaNUms.js
+	  *File supplementare		   84064	Dashboard-5hDaNUms.js.map
+	  *File supplementare		    8330	DataTable-D080q5M0.js
+	  *File supplementare		   46376	DataTable-D080q5M0.js.map
 	  *File supplementare		    2015	DataTable-q9BskI5o.css
-	  *File supplementare		    3057	economics.service-BMn4F-dA.js
-	  *File supplementare		    9601	economics.service-BMn4F-dA.js.map
-	  *File supplementare		   73301	EconomicsPage-D2JDxlEN.js
-	  *File supplementare		  300106	EconomicsPage-D2JDxlEN.js.map
-	  *File supplementare		   35458	EmailPage-BbSGymqz.js
-	  *File supplementare		  130819	EmailPage-BbSGymqz.js.map
-	  *File supplementare		    4689	environment.service-CXWEaN-p.js
-	  *File supplementare		   17847	environment.service-CXWEaN-p.js.map
-	  *File supplementare		    2389	fornitori.store-CpM34mBt.js
-	  *File supplementare		   10785	fornitori.store-CpM34mBt.js.map
-	  *File supplementare		   12648	FornitoriClassificazione-zArZanbs.js
-	  *File supplementare		   45611	FornitoriClassificazione-zArZanbs.js.map
-	  *File supplementare		   22025	FornitoriPage-CXCvz90i.js
-	  *File supplementare		   80921	FornitoriPage-CXCvz90i.js.map
-	  *File supplementare		    3801	FornitoriSelect-CkqbhIA6.js
-	  *File supplementare		   15342	FornitoriSelect-CkqbhIA6.js.map
+	  *File supplementare		    3057	economics.service-qLTM0YOm.js
+	  *File supplementare		    9601	economics.service-qLTM0YOm.js.map
+	  *File supplementare		   73301	EconomicsPage-BKKkOV55.js
+	  *File supplementare		  300106	EconomicsPage-BKKkOV55.js.map
+	  *File supplementare		   35458	EmailPage-CGG4dIn6.js
+	  *File supplementare		  130819	EmailPage-CGG4dIn6.js.map
+	  *File supplementare		    4689	environment.service-DnhD-xdy.js
+	  *File supplementare		   17847	environment.service-DnhD-xdy.js.map
+	  *File supplementare		    2389	fornitori.store-Bhdw4G6o.js
+	  *File supplementare		   10785	fornitori.store-Bhdw4G6o.js.map
+	  *File supplementare		   12648	FornitoriClassificazione-B8zEBWdn.js
+	  *File supplementare		   45611	FornitoriClassificazione-B8zEBWdn.js.map
+	  *File supplementare		   22025	FornitoriPage-DHM--_Tl.js
+	  *File supplementare		   80921	FornitoriPage-DHM--_Tl.js.map
+	  *File supplementare		    3801	FornitoriSelect-ep30-GZW.js
+	  *File supplementare		   15342	FornitoriSelect-ep30-GZW.js.map
 	  *File supplementare		  336907	index-BBDfkehP.css
-	  *File supplementare		  151120	index-C_ukiPBZ.js
-	  *File supplementare		  548906	index-C_ukiPBZ.js.map
-	  *File supplementare		   27124	LoginPage-KjiR4t8h.js
-	  *File supplementare		  164705	LoginPage-KjiR4t8h.js.map
-	  *File supplementare		    2153	materiali-classification.service-Cb_o0USj.js
-	  *File supplementare		    9161	materiali-classification.service-Cb_o0USj.js.map
-	  *File supplementare		    4392	materiali.store-CWQtyZ1y.js
-	  *File supplementare		   17704	materiali.store-CWQtyZ1y.js.map
-	  *File supplementare		   16696	MaterialiMigrazione-CIMWK3Jx.js
-	  *File supplementare		   66022	MaterialiMigrazione-CIMWK3Jx.js.map
-	  *File supplementare		   12020	MaterialiPage-6NtUxw0G.js
-	  *File supplementare		   43947	MaterialiPage-6NtUxw0G.js.map
-	  *File supplementare		    1976	ModalAnagrafica-Bs3ncwfP.js
-	  *File supplementare		    7222	ModalAnagrafica-Bs3ncwfP.js.map
-	  *File supplementare		    5342	ModalFatturaDetail-B49wOls7.js
-	  *File supplementare		   16700	ModalFatturaDetail-B49wOls7.js.map
+	  *File supplementare		  152110	index-DX4gcDuS.js
+	  *File supplementare		  550447	index-DX4gcDuS.js.map
+	  *File supplementare		   27124	LoginPage-DdsNo4ae.js
+	  *File supplementare		  164705	LoginPage-DdsNo4ae.js.map
+	  *File supplementare		    2153	materiali-classification.service-jlGXdBRM.js
+	  *File supplementare		    9161	materiali-classification.service-jlGXdBRM.js.map
+	  *File supplementare		    4392	materiali.store-Kx4v9kZk.js
+	  *File supplementare		   17704	materiali.store-Kx4v9kZk.js.map
+	  *File supplementare		   16696	MaterialiMigrazione-DmWoej3N.js
+	  *File supplementare		   66022	MaterialiMigrazione-DmWoej3N.js.map
+	  *File supplementare		   12020	MaterialiPage-DZcHr_5E.js
+	  *File supplementare		   43947	MaterialiPage-DZcHr_5E.js.map
+	  *File supplementare		    1976	ModalAnagrafica-C--6NPKT.js
+	  *File supplementare		    7222	ModalAnagrafica-C--6NPKT.js.map
+	  *File supplementare		    5342	ModalFatturaDetail-DwOcxF_R.js
+	  *File supplementare		   16700	ModalFatturaDetail-DwOcxF_R.js.map
 	  *File supplementare		    2691	modals-DzMO3UFJ.css
-	  *File supplementare		    1304	MonitoringSettings-DYM1PAtq.js
-	  *File supplementare		    5107	MonitoringSettings-DYM1PAtq.js.map
-	  *File supplementare		   22745	MonitorPrestazioniStandalonePage-DlBOL1Pe.js
-	  *File supplementare		   96002	MonitorPrestazioniStandalonePage-DlBOL1Pe.js.map
-	  *File supplementare		    1551	MonitorRules-BubHB3U8.js
-	  *File supplementare		    7491	MonitorRules-BubHB3U8.js.map
-	  *File supplementare		    1557	NotFoundPage-9id08U7h.js
-	  *File supplementare		    3107	NotFoundPage-9id08U7h.js.map
-	  *File supplementare		     947	PageLayout-BYBPIVK7.js
-	  *File supplementare		    2895	PageLayout-BYBPIVK7.js.map
-	  *File supplementare		    3352	pazienti.store-aPdJMaKB.js
-	  *File supplementare		   14761	pazienti.store-aPdJMaKB.js.map
-	  *File supplementare		   16512	PazientiPage-BaRnKqh5.js
-	  *File supplementare		   59190	PazientiPage-BaRnKqh5.js.map
-	  *File supplementare		    3685	PazientiSelect-XSA_Aw0_.js
-	  *File supplementare		   12335	PazientiSelect-XSA_Aw0_.js.map
-	  *File supplementare		    1304	provider.store-0D0Twth5.js
-	  *File supplementare		    4792	provider.store-0D0Twth5.js.map
-	  *File supplementare		    4104	ProvidersPage-RacyftJg.js
-	  *File supplementare		   16230	ProvidersPage-RacyftJg.js.map
+	  *File supplementare		    1304	MonitoringSettings-BbCkLrWa.js
+	  *File supplementare		    5107	MonitoringSettings-BbCkLrWa.js.map
+	  *File supplementare		   22745	MonitorPrestazioniStandalonePage-BEYYJZRk.js
+	  *File supplementare		   96002	MonitorPrestazioniStandalonePage-BEYYJZRk.js.map
+	  *File supplementare		    1551	MonitorRules-BnOULQU5.js
+	  *File supplementare		    7491	MonitorRules-BnOULQU5.js.map
+	  *File supplementare		    1557	NotFoundPage-CYiUHKy4.js
+	  *File supplementare		    3107	NotFoundPage-CYiUHKy4.js.map
+	  *File supplementare		     947	PageLayout-DRJvErkl.js
+	  *File supplementare		    2895	PageLayout-DRJvErkl.js.map
+	  *File supplementare		    3352	pazienti.store-DulBXo4y.js
+	  *File supplementare		   14761	pazienti.store-DulBXo4y.js.map
+	  *File supplementare		   16512	PazientiPage-CY2Xynxx.js
+	  *File supplementare		   59190	PazientiPage-CY2Xynxx.js.map
+	  *File supplementare		    3685	PazientiSelect-DDlq7vU5.js
+	  *File supplementare		   12335	PazientiSelect-DDlq7vU5.js.map
+	  *File supplementare		    1304	provider.store-DeUqJci9.js
+	  *File supplementare		    4792	provider.store-DeUqJci9.js.map
+	  *File supplementare		    4104	ProvidersPage-LMIvJeEc.js
+	  *File supplementare		   16230	ProvidersPage-LMIvJeEc.js.map
 	  *File supplementare		   86622	react-select.esm-BGFHhF6d.js
 	  *File supplementare		  431230	react-select.esm-BGFHhF6d.js.map
-	  *File supplementare		    2604	RegisterPage-D7LWG2aQ.js
-	  *File supplementare		    5794	RegisterPage-D7LWG2aQ.js.map
-	  *File supplementare		   15110	RicercaArticoli-BjwZnf32.js
-	  *File supplementare		   60130	RicercaArticoli-BjwZnf32.js.map
-	  *File supplementare		   28124	RicettaElettronicaPage-D-CnOitw.js
-	  *File supplementare		  102481	RicettaElettronicaPage-D-CnOitw.js.map
-	  *File supplementare		    8408	ricette_ts.service-wuarAGpn.js
-	  *File supplementare		   28973	ricette_ts.service-wuarAGpn.js.map
-	  *File supplementare		   12603	RNETestPage-DwWvRdU2.js
-	  *File supplementare		   41046	RNETestPage-DwWvRdU2.js.map
-	  *File supplementare		   11705	SchedulerPage-DOyFGcw3.js
-	  *File supplementare		   55398	SchedulerPage-DOyFGcw3.js.map
-	  *File supplementare		    1134	schedulerService-CVZHFPJR.js
-	  *File supplementare		    4921	schedulerService-CVZHFPJR.js.map
-	  *File supplementare		   11549	SeoPage-BGzKfHgV.js
-	  *File supplementare		   40910	SeoPage-BGzKfHgV.js.map
+	  *File supplementare		    2604	RegisterPage-DhVrWZum.js
+	  *File supplementare		    5794	RegisterPage-DhVrWZum.js.map
+	  *File supplementare		     827	remindersService-DDVD8Ybd.js
+	  *File supplementare		    3704	remindersService-DDVD8Ybd.js.map
+	  *File supplementare		   15110	RicercaArticoli-QwkSs1dV.js
+	  *File supplementare		   60130	RicercaArticoli-QwkSs1dV.js.map
+	  *File supplementare		   28124	RicettaElettronicaPage-utaLvLg4.js
+	  *File supplementare		  102481	RicettaElettronicaPage-utaLvLg4.js.map
+	  *File supplementare		    8408	ricette_ts.service-DUw8LlqQ.js
+	  *File supplementare		   28973	ricette_ts.service-DUw8LlqQ.js.map
+	  *File supplementare		    9692	RichiamiPage-2L04TM8c.js
+	  *File supplementare		   34649	RichiamiPage-2L04TM8c.js.map
+	  *File supplementare		   12603	RNETestPage-D5o-2OxM.js
+	  *File supplementare		   41046	RNETestPage-D5o-2OxM.js.map
+	  *File supplementare		   11269	SchedulerPage-gMjjQshY.js
+	  *File supplementare		   53062	SchedulerPage-gMjjQshY.js.map
+	  *File supplementare		    1134	schedulerService-lSjXJ48f.js
+	  *File supplementare		    4921	schedulerService-lSjXJ48f.js.map
+	  *File supplementare		   11549	SeoPage-v1Ln1ivO.js
+	  *File supplementare		   40910	SeoPage-v1Ln1ivO.js.map
 	  *File supplementare		   47100	slimselect-BlWzLcjj.js
 	  *File supplementare		  108299	slimselect-BlWzLcjj.js.map
 	  *File supplementare		   10864	slimselect-KZ7ZrbRL.css
-	  *File supplementare		    2105	SottocontiSelect-Chd0MJzr.js
-	  *File supplementare		    8131	SottocontiSelect-Chd0MJzr.js.map
-	  *File supplementare		    3317	spese.service-BEw-44RQ.js
-	  *File supplementare		   11327	spese.service-BEw-44RQ.js.map
-	  *File supplementare		   13987	SpesePage-Dk3HS_V_.js
-	  *File supplementare		   55584	SpesePage-Dk3HS_V_.js.map
-	  *File supplementare		     713	StepsPage-CdTkb8jp.js
-	  *File supplementare		    2088	StepsPage-CdTkb8jp.js.map
-	  *File supplementare		   11882	TasksPage-p6_4_zZe.js
-	  *File supplementare		   45422	TasksPage-p6_4_zZe.js.map
-	  *File supplementare		    9138	TemplatesPage-C33lI_PZ.js
-	  *File supplementare		   32334	TemplatesPage-C33lI_PZ.js.map
-	  *File supplementare		   10312	TempoPage-Ptoh6kVm.js
-	  *File supplementare		   36700	TempoPage-Ptoh6kVm.js.map
-	  *File supplementare		   11050	TestSelectPage-MpkSKq77.js
-	  *File supplementare		   39495	TestSelectPage-MpkSKq77.js.map
-	  *File supplementare		    4589	TodoModal-Djdol6v6.js
-	  *File supplementare		   20406	TodoModal-Djdol6v6.js.map
-	  *File supplementare		    7777	TodosPage-Cwl0_igT.js
-	  *File supplementare		   34124	TodosPage-Cwl0_igT.js.map
-	  *File supplementare		     425	user.service-SRGd8sOa.js
-	  *File supplementare		    2198	user.service-SRGd8sOa.js.map
-	  *File supplementare		    2254	user.store-6Z3yaER0.js
-	  *File supplementare		    7880	user.store-6Z3yaER0.js.map
-	  *File supplementare		    3994	UserForm-YepyYOql.js
-	  *File supplementare		   10645	UserForm-YepyYOql.js.map
-	  *File supplementare		    2488	UserListPage-wMud9jaB.js
-	  *File supplementare		    7532	UserListPage-wMud9jaB.js.map
+	  *File supplementare		    2105	SottocontiSelect-ChgaEt1O.js
+	  *File supplementare		    8131	SottocontiSelect-ChgaEt1O.js.map
+	  *File supplementare		    3317	spese.service-gYvwrY6v.js
+	  *File supplementare		   11327	spese.service-gYvwrY6v.js.map
+	  *File supplementare		   13987	SpesePage-iUuOYrd7.js
+	  *File supplementare		   55584	SpesePage-iUuOYrd7.js.map
+	  *File supplementare		     713	StepsPage-RCW2BlaO.js
+	  *File supplementare		    2088	StepsPage-RCW2BlaO.js.map
+	  *File supplementare		   11882	TasksPage-B91vjDPm.js
+	  *File supplementare		   45422	TasksPage-B91vjDPm.js.map
+	  *File supplementare		    9856	TemplatesPage-DUeCFQon.js
+	  *File supplementare		   34762	TemplatesPage-DUeCFQon.js.map
+	  *File supplementare		   10312	TempoPage-C8nrNHXE.js
+	  *File supplementare		   36700	TempoPage-C8nrNHXE.js.map
+	  *File supplementare		   11050	TestSelectPage-CeKVAtqV.js
+	  *File supplementare		   39495	TestSelectPage-CeKVAtqV.js.map
+	  *File supplementare		    4589	TodoModal-B6FUn7zk.js
+	  *File supplementare		   20406	TodoModal-B6FUn7zk.js.map
+	  *File supplementare		    7777	TodosPage-CEXwPNlx.js
+	  *File supplementare		   34124	TodosPage-CEXwPNlx.js.map
+	  *File supplementare		     425	user.service-CboxFApS.js
+	  *File supplementare		    2198	user.service-CboxFApS.js.map
+	  *File supplementare		    2254	user.store-n3Q3riMw.js
+	  *File supplementare		    7880	user.store-n3Q3riMw.js.map
+	  *File supplementare		    3994	UserForm-C5lCccO2.js
+	  *File supplementare		   10645	UserForm-C5lCccO2.js.map
+	  *File supplementare		    2488	UserListPage-Ciocdopi.js
+	  *File supplementare		    7532	UserListPage-Ciocdopi.js.map
 	  *File supplementare		   89230	utils-Cxn89fKV.js
 	  *File supplementare		  393301	utils-Cxn89fKV.js.map
 	  *File supplementare		  163888	vendor-D4XL6Uff.js
 	  *File supplementare		  705455	vendor-D4XL6Uff.js.map
-	  *File supplementare		    4283	WorkDetailsPage-qbcp4AjN.js
-	  *File supplementare		   14747	WorkDetailsPage-qbcp4AjN.js.map
-	  *File supplementare		    1150	works.service-B00Id7Ey.js
-	  *File supplementare		    4926	works.service-B00Id7Ey.js.map
+	  *File supplementare		    4283	WorkDetailsPage-n9E7I9cB.js
+	  *File supplementare		   14747	WorkDetailsPage-n9E7I9cB.js.map
+	  *File supplementare		    1150	works.service-BXrtrsKf.js
+	  *File supplementare		    4926	works.service-BXrtrsKf.js.map
 	  *File supplementare		     460	works.types-DhAvz77K.js
 	  *File supplementare		    3220	works.types-DhAvz77K.js.map
-	  *File supplementare		   55196	WorksPage-Bvpt6c6T.js
-	  *File supplementare		  258615	WorksPage-Bvpt6c6T.js.map
+	  *File supplementare		   55196	WorksPage-CEGGD1b9.js
+	  *File supplementare		  258615	WorksPage-CEGGD1b9.js.map
 	  *File supplementare		     204	reset_sync_state.bat
 	  *File supplementare		    1168	start_server_v2.bat
 	   Pi� recente		     131	build_info.json
+	    Nuovo file		    3401	debug_igiene_paziente.py
+	    Nuovo file		    4012	test_paz_da_richiamare.py
+	    Nuovo file		    3219	test_slot_finder.py
 	                  45	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\
-	   Pi� recente		   32132	v2_bot.py
-	   Pi� recente		   10626	v2_reminders.py
+	   Pi� recente		   32209	v2_bot.py
+	   Pi� recente		   29214	v2_richiami.py
 	                   0	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\certs\
 	                   9	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\certs\rentri\
 	                   3	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\config\
 	                  20	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\core\
+	   Pi� recente		   11890	config_manager.py
 	                   2	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\data\
 	                   2	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\data\monitoring\
 	                   7	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\data\ricetta\
 	                   2	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\data\snapshots\
-	   Pi� vecchio		  44.3 m	preventivi_snapshot.json
+	   Pi� recente		  44.3 m	preventivi_snapshot.json
 	                   7	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\docs\
 	                   2	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\migrations\
 	                  14	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\
 	                  38	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\scripts\
-	                  43	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\
-	   Pi� recente		   25474	appointment_reminder_service.py
+	                  44	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\
+	   Pi� recente		   26390	appointment_reminder_service.py
+	   Pi� recente		    9315	push_notification_service.py
+	   Pi� recente		   20305	scheduler_service.py
+	    Nuovo file		   14574	slot_finder_service.py
 	                   1	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\actions\
 	                  11	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\economics\
 	                   7	C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\seo\
@@ -266,14 +277,14 @@ Directory exc: venv
 
               Totale   Copiato  IgnorateNon corrispondentiNon riuscitaSupplementari
 Directory:        36         0        36         0         0         3
-     File:       240         5       235         0         0       189
-     Byte:   59.48 m   44.39 m   15.08 m         0         0    9.59 m
-   Durata:   0:00:07   0:00:02                       0:00:00   0:00:05
+     File:       244        12       232         0         0       193
+     Byte:   59.54 m   44.50 m   15.04 m         0         0    9.66 m
+   Durata:   0:00:14   0:00:05                       0:00:00   0:00:08
 
 
- Velocit�:           18.285.104 Byte/sec.
- Velocit�:             1046,282 MB/min.
-   Terminato: luned� 27 aprile 2026 18:13:03
+ Velocit�:           8.628.799 Byte/sec.
+ Velocit�:             493,744 MB/min.
+   Terminato: mercoled� 29 aprile 2026 18:44:10
 
 Robocopy exit code: 3 
   [OK] Sync Server V2 completata. 
@@ -302,10 +313,10 @@ transforming...
 169|        ricetta.nre?.toLowerCase().includes(searchLower) ||
 170|        ricetta.prodotto_aic?.toLowerCase().includes(searchLower) ||
 [39m
-[32m✓[39m 2949 modules transformed.
+[32m✓[39m 2952 modules transformed.
 rendering chunks...
 [1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
-(!) C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/client.ts is dynamically imported by C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/App.tsx but also statically imported by C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/components/layout/ProtectedRoute.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/admin/services/adminService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/bot/services/botService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/calendar/services/calendar.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/calendar/services/calendarHealthCheck.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/economics/services/economics.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/email/services/emailService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/fornitori/hooks/useFornitoreModals.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/fornitori/services/classificazioni.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/materiali/services/materiali-classification.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/materiali/services/materiali-migration.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/pazienti/services/richiami.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/scheduler/services/remindersService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/scheduler/services/schedulerService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/seo/services/seoService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/components/SmsSettingsCard.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/pages/TemplatesPage.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/services/automation.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/services/environment.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/services/templates.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/spese/services/spese.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/automation-settings.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/base.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/index.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/monitorPrestazioni.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/notifications.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/prestazioneWorkMapping.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/todos.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/works.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/pushService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/ricette_ts.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/works.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/auth.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/conti.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/fornitori.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/materiali.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/pazienti.store.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/prestazioni.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/ricette.store.ts, dynamic import will not move module into another chunk.
+(!) C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/client.ts is dynamically imported by C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/App.tsx but also statically imported by C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/components/layout/ProtectedRoute.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/admin/services/adminService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/bot/services/botService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/calendar/services/calendar.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/calendar/services/calendarHealthCheck.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/economics/services/economics.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/email/services/emailService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/fornitori/hooks/useFornitoreModals.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/fornitori/services/classificazioni.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/materiali/services/materiali-classification.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/materiali/services/materiali-migration.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/pazienti/pages/RichiamiPage.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/pazienti/services/richiami.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/scheduler/services/remindersService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/scheduler/services/schedulerService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/seo/services/seoService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/components/SmsSettingsCard.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/pages/TemplatesPage.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/services/automation.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/services/environment.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/settings/services/templates.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/spese/services/spese.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/automation-settings.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/base.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/index.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/monitorPrestazioni.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/notifications.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/prestazioneWorkMapping.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/todos.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/works.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/pushService.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/ricette_ts.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/works.service.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/auth.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/conti.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/fornitori.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/materiali.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/pazienti.store.tsx, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/prestazioni.store.ts, C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/store/ricette.store.ts, dynamic import will not move module into another chunk.
 [39m
 computing gzip size...
 [2mdist/[22m[32mindex.html                                           [39m[1m[2m  0.79 kB[22m[1m[22m[2m │ gzip:   0.40 kB[22m
@@ -323,7 +334,7 @@ computing gzip size...
 [2mdist/[22m[36massets/cil-arrow-left-D66Kb3Zq.js                    [39m[1m[2m  0.32 kB[22m[1m[22m[2m │ gzip:   0.25 kB[22m[2m │ map:     0.59 kB[22m
 [2mdist/[22m[36massets/cil-media-play-C2ys8wjv.js                    [39m[1m[2m  0.33 kB[22m[1m[22m[2m │ gzip:   0.27 kB[22m[2m │ map:     0.60 kB[22m
 [2mdist/[22m[36massets/cil-lock-locked-DmxpJbVL.js                   [39m[1m[2m  0.35 kB[22m[1m[22m[2m │ gzip:   0.28 kB[22m[2m │ map:     0.63 kB[22m
-[2mdist/[22m[36massets/user.service-BthLojNQ.js                      [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m[2m │ map:     2.20 kB[22m
+[2mdist/[22m[36massets/user.service-CQB12Iz2.js                      [39m[1m[2m  0.43 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m[2m │ map:     2.20 kB[22m
 [2mdist/[22m[36massets/cil-chevron-bottom-C8eOormY.js                [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m[2m │ map:     0.75 kB[22m
 [2mdist/[22m[36massets/works.types-DhAvz77K.js                       [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m[2m │ map:     3.22 kB[22m
 [2mdist/[22m[36massets/cil-chevron-right-V6FDXyza.js                 [39m[1m[2m  0.46 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m[2m │ map:     0.75 kB[22m
@@ -332,81 +343,84 @@ computing gzip size...
 [2mdist/[22m[36massets/cil-sync-DTxDyR9B.js                          [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:   0.33 kB[22m[2m │ map:     0.78 kB[22m
 [2mdist/[22m[36massets/cil-save-CHBg7z_U.js                          [39m[1m[2m  0.60 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m[2m │ map:     0.85 kB[22m
 [2mdist/[22m[36massets/cil-x-circle-Bi9E-sdv.js                      [39m[1m[2m  0.62 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m[2m │ map:     0.89 kB[22m
-[2mdist/[22m[36massets/calendarHealthCheck-CuJR0XOf.js               [39m[1m[2m  0.68 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m[2m │ map:     3.73 kB[22m
-[2mdist/[22m[36massets/StepsPage-D_d7Ryfy.js                         [39m[1m[2m  0.71 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m[2m │ map:     2.09 kB[22m
+[2mdist/[22m[36massets/calendarHealthCheck-ClyAAevc.js               [39m[1m[2m  0.68 kB[22m[1m[22m[2m │ gzip:   0.38 kB[22m[2m │ map:     3.73 kB[22m
+[2mdist/[22m[36massets/StepsPage-BfcNb_qP.js                         [39m[1m[2m  0.71 kB[22m[1m[22m[2m │ gzip:   0.45 kB[22m[2m │ map:     2.09 kB[22m
 [2mdist/[22m[36massets/cil-trash-CBbKHhHb.js                         [39m[1m[2m  0.77 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m[2m │ map:     1.02 kB[22m
-[2mdist/[22m[36massets/remindersService-_IMpADlR.js                  [39m[1m[2m  0.83 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m[2m │ map:     3.70 kB[22m
-[2mdist/[22m[36massets/PageLayout-CqwdiLhl.js                        [39m[1m[2m  0.95 kB[22m[1m[22m[2m │ gzip:   0.41 kB[22m[2m │ map:     2.89 kB[22m
-[2mdist/[22m[36massets/automation.service-FxzO5UV2.js                [39m[1m[2m  0.98 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m[2m │ map:     4.86 kB[22m
-[2mdist/[22m[36massets/classificazioni.service-CQ8vc3qh.js           [39m[1m[2m  1.10 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m[2m │ map:     4.17 kB[22m
-[2mdist/[22m[36massets/schedulerService-SfGHvS7t.js                  [39m[1m[2m  1.13 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m[2m │ map:     4.92 kB[22m
-[2mdist/[22m[36massets/works.service-CbMTESro.js                     [39m[1m[2m  1.15 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m[2m │ map:     4.93 kB[22m
-[2mdist/[22m[36massets/MonitoringSettings-DJWbfPtF.js                [39m[1m[2m  1.30 kB[22m[1m[22m[2m │ gzip:   0.76 kB[22m[2m │ map:     5.11 kB[22m
-[2mdist/[22m[36massets/provider.store-BwU9sxVu.js                    [39m[1m[2m  1.30 kB[22m[1m[22m[2m │ gzip:   0.54 kB[22m[2m │ map:     4.79 kB[22m
-[2mdist/[22m[36massets/MonitorRules-Br_WxEFk.js                      [39m[1m[2m  1.55 kB[22m[1m[22m[2m │ gzip:   0.68 kB[22m[2m │ map:     7.49 kB[22m
-[2mdist/[22m[36massets/NotFoundPage-BFxkR5oK.js                      [39m[1m[2m  1.56 kB[22m[1m[22m[2m │ gzip:   0.84 kB[22m[2m │ map:     3.11 kB[22m
-[2mdist/[22m[36massets/ModalAnagrafica-BhSRe1ac.js                   [39m[1m[2m  1.98 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m[2m │ map:     7.22 kB[22m
-[2mdist/[22m[36massets/SottocontiSelect-BKk8g-1k.js                  [39m[1m[2m  2.11 kB[22m[1m[22m[2m │ gzip:   0.70 kB[22m[2m │ map:     8.13 kB[22m
-[2mdist/[22m[36massets/ConfirmDeleteModal-C8Ty9CZd.js                [39m[1m[2m  2.11 kB[22m[1m[22m[2m │ gzip:   0.87 kB[22m[2m │ map:     6.64 kB[22m
-[2mdist/[22m[36massets/materiali-classification.service-CgX_Obw8.js  [39m[1m[2m  2.15 kB[22m[1m[22m[2m │ gzip:   0.56 kB[22m[2m │ map:     9.16 kB[22m
-[2mdist/[22m[36massets/user.store-BCBByIKG.js                        [39m[1m[2m  2.25 kB[22m[1m[22m[2m │ gzip:   0.77 kB[22m[2m │ map:     7.88 kB[22m
-[2mdist/[22m[36massets/fornitori.store-CXKyxzgc.js                   [39m[1m[2m  2.39 kB[22m[1m[22m[2m │ gzip:   0.95 kB[22m[2m │ map:    10.78 kB[22m
-[2mdist/[22m[36massets/AutomationPage-P18VkA2p.js                    [39m[1m[2m  2.41 kB[22m[1m[22m[2m │ gzip:   1.11 kB[22m[2m │ map:     8.50 kB[22m
-[2mdist/[22m[36massets/UserListPage-DixNSDxR.js                      [39m[1m[2m  2.49 kB[22m[1m[22m[2m │ gzip:   1.18 kB[22m[2m │ map:     7.53 kB[22m
-[2mdist/[22m[36massets/RegisterPage-D83l4XHh.js                      [39m[1m[2m  2.60 kB[22m[1m[22m[2m │ gzip:   1.00 kB[22m[2m │ map:     5.79 kB[22m
-[2mdist/[22m[36massets/economics.service-cneIb4vB.js                 [39m[1m[2m  3.06 kB[22m[1m[22m[2m │ gzip:   0.83 kB[22m[2m │ map:     9.60 kB[22m
-[2mdist/[22m[36massets/spese.service-DhSVWi6W.js                     [39m[1m[2m  3.32 kB[22m[1m[22m[2m │ gzip:   0.84 kB[22m[2m │ map:    11.33 kB[22m
-[2mdist/[22m[36massets/pazienti.store-CtKx3gz_.js                    [39m[1m[2m  3.35 kB[22m[1m[22m[2m │ gzip:   1.24 kB[22m[2m │ map:    14.76 kB[22m
-[2mdist/[22m[36massets/PazientiSelect-CrScxtNL.js                    [39m[1m[2m  3.69 kB[22m[1m[22m[2m │ gzip:   1.54 kB[22m[2m │ map:    12.34 kB[22m
-[2mdist/[22m[36massets/FornitoriSelect-B3n0XLGt.js                   [39m[1m[2m  3.80 kB[22m[1m[22m[2m │ gzip:   1.71 kB[22m[2m │ map:    15.34 kB[22m
-[2mdist/[22m[36massets/CollaboratoriPage-CsJNwYHY.js                 [39m[1m[2m  3.92 kB[22m[1m[22m[2m │ gzip:   1.57 kB[22m[2m │ map:    14.35 kB[22m
-[2mdist/[22m[36massets/UserForm-bLQzpV7u.js                          [39m[1m[2m  3.99 kB[22m[1m[22m[2m │ gzip:   1.81 kB[22m[2m │ map:    10.64 kB[22m
-[2mdist/[22m[36massets/ProvidersPage--bNSW0mR.js                     [39m[1m[2m  4.10 kB[22m[1m[22m[2m │ gzip:   1.58 kB[22m[2m │ map:    16.23 kB[22m
-[2mdist/[22m[36massets/WorkDetailsPage-BpBPa5ci.js                   [39m[1m[2m  4.28 kB[22m[1m[22m[2m │ gzip:   1.72 kB[22m[2m │ map:    14.75 kB[22m
-[2mdist/[22m[36massets/CallbackCard-CAeYCoJG.js                      [39m[1m[2m  4.29 kB[22m[1m[22m[2m │ gzip:   1.57 kB[22m[2m │ map:    17.67 kB[22m
-[2mdist/[22m[36massets/materiali.store-CuR1_w_i.js                   [39m[1m[2m  4.37 kB[22m[1m[22m[2m │ gzip:   1.34 kB[22m[2m │ map:    17.67 kB[22m
-[2mdist/[22m[36massets/TodoModal-qLQAN9vF.js                         [39m[1m[2m  4.59 kB[22m[1m[22m[2m │ gzip:   1.68 kB[22m[2m │ map:    20.41 kB[22m
-[2mdist/[22m[36massets/environment.service-BAlr6D8Q.js               [39m[1m[2m  4.69 kB[22m[1m[22m[2m │ gzip:   1.48 kB[22m[2m │ map:    17.85 kB[22m
-[2mdist/[22m[36massets/ModalFatturaDetail-BCoxVCvG.js                [39m[1m[2m  5.34 kB[22m[1m[22m[2m │ gzip:   1.71 kB[22m[2m │ map:    16.70 kB[22m
-[2mdist/[22m[36massets/TodosPage-B56U7QXb.js                         [39m[1m[2m  7.78 kB[22m[1m[22m[2m │ gzip:   2.71 kB[22m[2m │ map:    34.12 kB[22m
-[2mdist/[22m[36massets/DataTable-C4sI-beE.js                         [39m[1m[2m  8.30 kB[22m[1m[22m[2m │ gzip:   3.42 kB[22m[2m │ map:    46.33 kB[22m
-[2mdist/[22m[36massets/ricette_ts.service-DTIk7KHv.js                [39m[1m[2m  8.41 kB[22m[1m[22m[2m │ gzip:   1.99 kB[22m[2m │ map:    28.97 kB[22m
-[2mdist/[22m[36massets/CentroCostoPage-CCNaf4qk.js                   [39m[1m[2m  8.97 kB[22m[1m[22m[2m │ gzip:   2.76 kB[22m[2m │ map:    28.97 kB[22m
-[2mdist/[22m[36massets/TemplatesPage-CZti9EcR.js                     [39m[1m[2m  9.85 kB[22m[1m[22m[2m │ gzip:   3.31 kB[22m[2m │ map:    34.75 kB[22m
-[2mdist/[22m[36massets/TempoPage-D3rc8gfj.js                         [39m[1m[2m 10.29 kB[22m[1m[22m[2m │ gzip:   3.88 kB[22m[2m │ map:    36.68 kB[22m
-[2mdist/[22m[36massets/ContiPage-CkxFrBD0.js                         [39m[1m[2m 10.60 kB[22m[1m[22m[2m │ gzip:   2.86 kB[22m[2m │ map:    51.58 kB[22m
-[2mdist/[22m[36massets/TestSelectPage-Bi5ISNEn.js                    [39m[1m[2m 11.04 kB[22m[1m[22m[2m │ gzip:   3.63 kB[22m[2m │ map:    39.48 kB[22m
-[2mdist/[22m[36massets/SchedulerPage-Bq2wzebd.js                     [39m[1m[2m 11.26 kB[22m[1m[22m[2m │ gzip:   3.28 kB[22m[2m │ map:    53.06 kB[22m
-[2mdist/[22m[36massets/SeoPage-D9dmeIHI.js                           [39m[1m[2m 11.55 kB[22m[1m[22m[2m │ gzip:   3.44 kB[22m[2m │ map:    40.91 kB[22m
-[2mdist/[22m[36massets/TasksPage-BYSQtr5A.js                         [39m[1m[2m 11.88 kB[22m[1m[22m[2m │ gzip:   3.87 kB[22m[2m │ map:    45.42 kB[22m
-[2mdist/[22m[36massets/MaterialiPage-bYDcjG9y.js                     [39m[1m[2m 12.00 kB[22m[1m[22m[2m │ gzip:   4.12 kB[22m[2m │ map:    43.92 kB[22m
-[2mdist/[22m[36massets/conti.store-CTVyeG5c.js                       [39m[1m[2m 12.51 kB[22m[1m[22m[2m │ gzip:   2.61 kB[22m[2m │ map:    48.14 kB[22m
-[2mdist/[22m[36massets/RNETestPage-BKz96kpr.js                       [39m[1m[2m 12.56 kB[22m[1m[22m[2m │ gzip:   4.20 kB[22m[2m │ map:    41.00 kB[22m
-[2mdist/[22m[36massets/FornitoriClassificazione-CAEQvPK7.js          [39m[1m[2m 12.64 kB[22m[1m[22m[2m │ gzip:   4.09 kB[22m[2m │ map:    45.61 kB[22m
-[2mdist/[22m[36massets/SpesePage-DrOnMQBo.js                         [39m[1m[2m 13.98 kB[22m[1m[22m[2m │ gzip:   3.62 kB[22m[2m │ map:    55.58 kB[22m
-[2mdist/[22m[36massets/RicercaArticoli-TY8ekOeC.js                   [39m[1m[2m 15.05 kB[22m[1m[22m[2m │ gzip:   4.63 kB[22m[2m │ map:    60.07 kB[22m
-[2mdist/[22m[36massets/CalendarSettings-Dx3AHcJI.js                  [39m[1m[2m 16.20 kB[22m[1m[22m[2m │ gzip:   4.70 kB[22m[2m │ map:    56.03 kB[22m
-[2mdist/[22m[36massets/PazientiPage-bpZzyB3V.js                      [39m[1m[2m 16.51 kB[22m[1m[22m[2m │ gzip:   4.63 kB[22m[2m │ map:    59.18 kB[22m
-[2mdist/[22m[36massets/MaterialiMigrazione-CfmwSHFo.js               [39m[1m[2m 16.69 kB[22m[1m[22m[2m │ gzip:   5.02 kB[22m[2m │ map:    66.01 kB[22m
-[2mdist/[22m[36massets/BotPage-B-O3QLxk.js                           [39m[1m[2m 20.91 kB[22m[1m[22m[2m │ gzip:   6.54 kB[22m[2m │ map:    63.75 kB[22m
-[2mdist/[22m[36massets/Dashboard-B4MGJx50.js                         [39m[1m[2m 21.98 kB[22m[1m[22m[2m │ gzip:   6.46 kB[22m[2m │ map:    84.05 kB[22m
-[2mdist/[22m[36massets/FornitoriPage-BbF3JPQ_.js                     [39m[1m[2m 22.00 kB[22m[1m[22m[2m │ gzip:   6.42 kB[22m[2m │ map:    80.89 kB[22m
-[2mdist/[22m[36massets/MonitorPrestazioniStandalonePage-SJCNtmbZ.js  [39m[1m[2m 22.74 kB[22m[1m[22m[2m │ gzip:   6.93 kB[22m[2m │ map:    95.98 kB[22m
-[2mdist/[22m[36massets/LoginPage-BAAzqHjC.js                         [39m[1m[2m 27.12 kB[22m[1m[22m[2m │ gzip:  10.45 kB[22m[2m │ map:   164.67 kB[22m
-[2mdist/[22m[36massets/RicettaElettronicaPage-DLqsr8-R.js            [39m[1m[2m 28.00 kB[22m[1m[22m[2m │ gzip:   8.45 kB[22m[2m │ map:   102.35 kB[22m
-[2mdist/[22m[36massets/AnalisiComparativaPage-C0bUHWWA.js            [39m[1m[2m 30.72 kB[22m[1m[22m[2m │ gzip:   9.39 kB[22m[2m │ map:   114.16 kB[22m
-[2mdist/[22m[36massets/EmailPage-DwTxPdXN.js                         [39m[1m[2m 35.46 kB[22m[1m[22m[2m │ gzip:  10.19 kB[22m[2m │ map:   130.82 kB[22m
-[2mdist/[22m[36massets/CalendarPage-AMn8ALCF.js                      [39m[1m[2m 36.01 kB[22m[1m[22m[2m │ gzip:   9.08 kB[22m[2m │ map:   123.73 kB[22m
+[2mdist/[22m[36massets/PageLayout-B3FhiX5S.js                        [39m[1m[2m  0.95 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m[2m │ map:     2.89 kB[22m
+[2mdist/[22m[36massets/remindersService-CyCQwDgu.js                  [39m[1m[2m  0.96 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m[2m │ map:     4.47 kB[22m
+[2mdist/[22m[36massets/automation.service-Dj_oMwyB.js                [39m[1m[2m  0.98 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m[2m │ map:     4.86 kB[22m
+[2mdist/[22m[36massets/classificazioni.service-WAgS-A_4.js           [39m[1m[2m  1.10 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m[2m │ map:     4.17 kB[22m
+[2mdist/[22m[36massets/schedulerService-D1UVw5m-.js                  [39m[1m[2m  1.13 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m[2m │ map:     4.92 kB[22m
+[2mdist/[22m[36massets/works.service-DKY4iW_s.js                     [39m[1m[2m  1.15 kB[22m[1m[22m[2m │ gzip:   0.44 kB[22m[2m │ map:     4.93 kB[22m
+[2mdist/[22m[36massets/MonitoringSettings-DYGvtRUo.js                [39m[1m[2m  1.30 kB[22m[1m[22m[2m │ gzip:   0.76 kB[22m[2m │ map:     5.11 kB[22m
+[2mdist/[22m[36massets/provider.store-CZHLSiJd.js                    [39m[1m[2m  1.30 kB[22m[1m[22m[2m │ gzip:   0.54 kB[22m[2m │ map:     4.79 kB[22m
+[2mdist/[22m[36massets/MonitorRules-6IepGJq2.js                      [39m[1m[2m  1.55 kB[22m[1m[22m[2m │ gzip:   0.68 kB[22m[2m │ map:     7.49 kB[22m
+[2mdist/[22m[36massets/NotFoundPage-ZDNMpIbv.js                      [39m[1m[2m  1.56 kB[22m[1m[22m[2m │ gzip:   0.84 kB[22m[2m │ map:     3.11 kB[22m
+[2mdist/[22m[36massets/ModalAnagrafica-CKex3buI.js                   [39m[1m[2m  1.98 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m[2m │ map:     7.22 kB[22m
+[2mdist/[22m[36massets/richiami.service-DMB2blxy.js                  [39m[1m[2m  2.08 kB[22m[1m[22m[2m │ gzip:   0.65 kB[22m[2m │ map:     8.23 kB[22m
+[2mdist/[22m[36massets/SottocontiSelect-VkqJDAU7.js                  [39m[1m[2m  2.11 kB[22m[1m[22m[2m │ gzip:   0.71 kB[22m[2m │ map:     8.13 kB[22m
+[2mdist/[22m[36massets/ConfirmDeleteModal-CJBdRGrl.js                [39m[1m[2m  2.11 kB[22m[1m[22m[2m │ gzip:   0.87 kB[22m[2m │ map:     6.64 kB[22m
+[2mdist/[22m[36massets/materiali-classification.service-BCRL62mX.js  [39m[1m[2m  2.15 kB[22m[1m[22m[2m │ gzip:   0.56 kB[22m[2m │ map:     9.16 kB[22m
+[2mdist/[22m[36massets/user.store-C0FjBNly.js                        [39m[1m[2m  2.25 kB[22m[1m[22m[2m │ gzip:   0.78 kB[22m[2m │ map:     7.88 kB[22m
+[2mdist/[22m[36massets/fornitori.store-O-ofmIXV.js                   [39m[1m[2m  2.39 kB[22m[1m[22m[2m │ gzip:   0.96 kB[22m[2m │ map:    10.78 kB[22m
+[2mdist/[22m[36massets/AutomationPage-8GtbbuS0.js                    [39m[1m[2m  2.41 kB[22m[1m[22m[2m │ gzip:   1.11 kB[22m[2m │ map:     8.50 kB[22m
+[2mdist/[22m[36massets/UserListPage-JAv1sBsH.js                      [39m[1m[2m  2.49 kB[22m[1m[22m[2m │ gzip:   1.19 kB[22m[2m │ map:     7.53 kB[22m
+[2mdist/[22m[36massets/RegisterPage-DXhqL2nh.js                      [39m[1m[2m  2.60 kB[22m[1m[22m[2m │ gzip:   1.01 kB[22m[2m │ map:     5.79 kB[22m
+[2mdist/[22m[36massets/economics.service-1Gq8ssJd.js                 [39m[1m[2m  3.06 kB[22m[1m[22m[2m │ gzip:   0.83 kB[22m[2m │ map:     9.60 kB[22m
+[2mdist/[22m[36massets/spese.service-Xbj4QURj.js                     [39m[1m[2m  3.32 kB[22m[1m[22m[2m │ gzip:   0.84 kB[22m[2m │ map:    11.33 kB[22m
+[2mdist/[22m[36massets/pazienti.store-CICqW0rV.js                    [39m[1m[2m  3.35 kB[22m[1m[22m[2m │ gzip:   1.24 kB[22m[2m │ map:    14.76 kB[22m
+[2mdist/[22m[36massets/PazientiSelect-DQ17FDgu.js                    [39m[1m[2m  3.69 kB[22m[1m[22m[2m │ gzip:   1.55 kB[22m[2m │ map:    12.34 kB[22m
+[2mdist/[22m[36massets/FornitoriSelect-DnQaokoK.js                   [39m[1m[2m  3.80 kB[22m[1m[22m[2m │ gzip:   1.72 kB[22m[2m │ map:    15.34 kB[22m
+[2mdist/[22m[36massets/CollaboratoriPage-kxv5jwtr.js                 [39m[1m[2m  3.92 kB[22m[1m[22m[2m │ gzip:   1.57 kB[22m[2m │ map:    14.35 kB[22m
+[2mdist/[22m[36massets/UserForm-eWkrPGyJ.js                          [39m[1m[2m  3.99 kB[22m[1m[22m[2m │ gzip:   1.81 kB[22m[2m │ map:    10.64 kB[22m
+[2mdist/[22m[36massets/ProvidersPage-DjOd3MZt.js                     [39m[1m[2m  4.10 kB[22m[1m[22m[2m │ gzip:   1.58 kB[22m[2m │ map:    16.23 kB[22m
+[2mdist/[22m[36massets/WorkDetailsPage-DSbX5w0x.js                   [39m[1m[2m  4.28 kB[22m[1m[22m[2m │ gzip:   1.72 kB[22m[2m │ map:    14.75 kB[22m
+[2mdist/[22m[36massets/CallbackCard-BkXLiGmq.js                      [39m[1m[2m  4.29 kB[22m[1m[22m[2m │ gzip:   1.57 kB[22m[2m │ map:    17.67 kB[22m
+[2mdist/[22m[36massets/materiali.store-DiFPGzLK.js                   [39m[1m[2m  4.37 kB[22m[1m[22m[2m │ gzip:   1.35 kB[22m[2m │ map:    17.67 kB[22m
+[2mdist/[22m[36massets/TodoModal-DAqpPJf5.js                         [39m[1m[2m  4.59 kB[22m[1m[22m[2m │ gzip:   1.68 kB[22m[2m │ map:    20.41 kB[22m
+[2mdist/[22m[36massets/environment.service-DeVmjzDZ.js               [39m[1m[2m  4.69 kB[22m[1m[22m[2m │ gzip:   1.48 kB[22m[2m │ map:    17.85 kB[22m
+[2mdist/[22m[36massets/ModalFatturaDetail-BzbGVOBG.js                [39m[1m[2m  5.34 kB[22m[1m[22m[2m │ gzip:   1.72 kB[22m[2m │ map:    16.70 kB[22m
+[2mdist/[22m[36massets/SlotLiberiPage-BU81W4bg.js                    [39m[1m[2m  6.29 kB[22m[1m[22m[2m │ gzip:   2.49 kB[22m[2m │ map:    19.90 kB[22m
+[2mdist/[22m[36massets/TodosPage-fVPgmzwo.js                         [39m[1m[2m  7.78 kB[22m[1m[22m[2m │ gzip:   2.71 kB[22m[2m │ map:    34.12 kB[22m
+[2mdist/[22m[36massets/DataTable-DoQvVa92.js                         [39m[1m[2m  8.30 kB[22m[1m[22m[2m │ gzip:   3.42 kB[22m[2m │ map:    46.33 kB[22m
+[2mdist/[22m[36massets/ricette_ts.service-C11U0w1P.js                [39m[1m[2m  8.41 kB[22m[1m[22m[2m │ gzip:   1.99 kB[22m[2m │ map:    28.97 kB[22m
+[2mdist/[22m[36massets/CentroCostoPage-COVXlKQy.js                   [39m[1m[2m  8.97 kB[22m[1m[22m[2m │ gzip:   2.76 kB[22m[2m │ map:    28.97 kB[22m
+[2mdist/[22m[36massets/RichiamiPage-DLM8P_xU.js                      [39m[1m[2m  9.67 kB[22m[1m[22m[2m │ gzip:   3.12 kB[22m[2m │ map:    34.62 kB[22m
+[2mdist/[22m[36massets/TemplatesPage-BY2gEwm9.js                     [39m[1m[2m  9.85 kB[22m[1m[22m[2m │ gzip:   3.31 kB[22m[2m │ map:    34.75 kB[22m
+[2mdist/[22m[36massets/TempoPage-DWZwzve-.js                         [39m[1m[2m 10.29 kB[22m[1m[22m[2m │ gzip:   3.88 kB[22m[2m │ map:    36.68 kB[22m
+[2mdist/[22m[36massets/ContiPage-CWlT8tew.js                         [39m[1m[2m 10.60 kB[22m[1m[22m[2m │ gzip:   2.86 kB[22m[2m │ map:    51.58 kB[22m
+[2mdist/[22m[36massets/TestSelectPage-B-4yh0Pl.js                    [39m[1m[2m 11.04 kB[22m[1m[22m[2m │ gzip:   3.64 kB[22m[2m │ map:    39.48 kB[22m
+[2mdist/[22m[36massets/SchedulerPage-C8GUo_cc.js                     [39m[1m[2m 11.26 kB[22m[1m[22m[2m │ gzip:   3.29 kB[22m[2m │ map:    53.06 kB[22m
+[2mdist/[22m[36massets/SeoPage-DQ_by8Wf.js                           [39m[1m[2m 11.55 kB[22m[1m[22m[2m │ gzip:   3.44 kB[22m[2m │ map:    40.91 kB[22m
+[2mdist/[22m[36massets/TasksPage-C8gx9ZJB.js                         [39m[1m[2m 11.88 kB[22m[1m[22m[2m │ gzip:   3.87 kB[22m[2m │ map:    45.42 kB[22m
+[2mdist/[22m[36massets/MaterialiPage-Uw5VlMQE.js                     [39m[1m[2m 12.00 kB[22m[1m[22m[2m │ gzip:   4.12 kB[22m[2m │ map:    43.92 kB[22m
+[2mdist/[22m[36massets/conti.store-Bu8jIrMC.js                       [39m[1m[2m 12.51 kB[22m[1m[22m[2m │ gzip:   2.61 kB[22m[2m │ map:    48.14 kB[22m
+[2mdist/[22m[36massets/RNETestPage-BMjWlGiA.js                       [39m[1m[2m 12.56 kB[22m[1m[22m[2m │ gzip:   4.21 kB[22m[2m │ map:    41.00 kB[22m
+[2mdist/[22m[36massets/FornitoriClassificazione-BDRyO1hR.js          [39m[1m[2m 12.64 kB[22m[1m[22m[2m │ gzip:   4.09 kB[22m[2m │ map:    45.61 kB[22m
+[2mdist/[22m[36massets/SpesePage-CQM8jluf.js                         [39m[1m[2m 13.98 kB[22m[1m[22m[2m │ gzip:   3.62 kB[22m[2m │ map:    55.58 kB[22m
+[2mdist/[22m[36massets/RicercaArticoli-CyIfIOpW.js                   [39m[1m[2m 15.05 kB[22m[1m[22m[2m │ gzip:   4.63 kB[22m[2m │ map:    60.07 kB[22m
+[2mdist/[22m[36massets/PazientiPage-BXxHlqDU.js                      [39m[1m[2m 15.09 kB[22m[1m[22m[2m │ gzip:   4.38 kB[22m[2m │ map:    53.63 kB[22m
+[2mdist/[22m[36massets/CalendarSettings-CY49cvzi.js                  [39m[1m[2m 16.20 kB[22m[1m[22m[2m │ gzip:   4.70 kB[22m[2m │ map:    56.03 kB[22m
+[2mdist/[22m[36massets/MaterialiMigrazione-p8EVOiJi.js               [39m[1m[2m 16.69 kB[22m[1m[22m[2m │ gzip:   5.02 kB[22m[2m │ map:    66.01 kB[22m
+[2mdist/[22m[36massets/Dashboard-njljLH5O.js                         [39m[1m[2m 21.98 kB[22m[1m[22m[2m │ gzip:   6.46 kB[22m[2m │ map:    84.05 kB[22m
+[2mdist/[22m[36massets/FornitoriPage-o2u1FjZQ.js                     [39m[1m[2m 22.00 kB[22m[1m[22m[2m │ gzip:   6.43 kB[22m[2m │ map:    80.89 kB[22m
+[2mdist/[22m[36massets/MonitorPrestazioniStandalonePage-DKmpfAos.js  [39m[1m[2m 22.74 kB[22m[1m[22m[2m │ gzip:   6.93 kB[22m[2m │ map:    95.98 kB[22m
+[2mdist/[22m[36massets/BotPage-CkR7YaG2.js                           [39m[1m[2m 24.11 kB[22m[1m[22m[2m │ gzip:   6.86 kB[22m[2m │ map:    75.40 kB[22m
+[2mdist/[22m[36massets/LoginPage-CM1mzWZD.js                         [39m[1m[2m 27.12 kB[22m[1m[22m[2m │ gzip:  10.45 kB[22m[2m │ map:   164.67 kB[22m
+[2mdist/[22m[36massets/RicettaElettronicaPage-BjJwXeC1.js            [39m[1m[2m 28.00 kB[22m[1m[22m[2m │ gzip:   8.46 kB[22m[2m │ map:   102.35 kB[22m
+[2mdist/[22m[36massets/AnalisiComparativaPage-BZSGoSKR.js            [39m[1m[2m 30.72 kB[22m[1m[22m[2m │ gzip:   9.40 kB[22m[2m │ map:   114.16 kB[22m
+[2mdist/[22m[36massets/EmailPage-CKD7WCaS.js                         [39m[1m[2m 35.46 kB[22m[1m[22m[2m │ gzip:  10.19 kB[22m[2m │ map:   130.82 kB[22m
+[2mdist/[22m[36massets/CalendarPage-DhMIzIa2.js                      [39m[1m[2m 36.01 kB[22m[1m[22m[2m │ gzip:   9.07 kB[22m[2m │ map:   123.73 kB[22m
 [2mdist/[22m[36massets/slimselect-BlWzLcjj.js                        [39m[1m[2m 47.10 kB[22m[1m[22m[2m │ gzip:  11.10 kB[22m[2m │ map:   108.30 kB[22m
-[2mdist/[22m[36massets/WorksPage-D05VobMd.js                         [39m[1m[2m 55.19 kB[22m[1m[22m[2m │ gzip:  18.54 kB[22m[2m │ map:   258.61 kB[22m
-[2mdist/[22m[36massets/EconomicsPage-CjYSaV2u.js                     [39m[1m[2m 73.30 kB[22m[1m[22m[2m │ gzip:  18.56 kB[22m[2m │ map:   300.11 kB[22m
-[2mdist/[22m[36massets/react-select.esm-BGFHhF6d.js                  [39m[1m[2m 85.35 kB[22m[1m[22m[2m │ gzip:  30.68 kB[22m[2m │ map:   431.22 kB[22m
-[2mdist/[22m[36massets/utils-Cxn89fKV.js                             [39m[1m[2m 89.23 kB[22m[1m[22m[2m │ gzip:  26.29 kB[22m[2m │ map:   393.30 kB[22m
-[2mdist/[22m[36massets/coreui-Dyzyx4tS.js                            [39m[1m[2m 95.05 kB[22m[1m[22m[2m │ gzip:  27.38 kB[22m[2m │ map:   484.02 kB[22m
-[2mdist/[22m[36massets/index-cmyG1ifV.js                             [39m[1m[2m151.23 kB[22m[1m[22m[2m │ gzip:  49.69 kB[22m[2m │ map:   549.07 kB[22m
-[2mdist/[22m[36massets/vendor-D4XL6Uff.js                            [39m[1m[2m163.89 kB[22m[1m[22m[2m │ gzip:  53.48 kB[22m[2m │ map:   705.46 kB[22m
-[2mdist/[22m[36massets/CartesianChart-Bdq6pxIm.js                    [39m[1m[2m328.71 kB[22m[1m[22m[2m │ gzip:  98.69 kB[22m[2m │ map: 1,665.20 kB[22m
-[32m✓ built in 8.96s[39m
+[2mdist/[22m[36massets/WorksPage-C6BBNIAA.js                         [39m[1m[2m 55.19 kB[22m[1m[22m[2m │ gzip:  18.54 kB[22m[2m │ map:   258.61 kB[22m
+[2mdist/[22m[36massets/EconomicsPage-BzaUtbS3.js                     [39m[1m[2m 73.30 kB[22m[1m[22m[2m │ gzip:  18.56 kB[22m[2m │ map:   300.11 kB[22m
+[2mdist/[22m[36massets/react-select.esm-CzD2QdDt.js                  [39m[1m[2m 85.35 kB[22m[1m[22m[2m │ gzip:  30.68 kB[22m[2m │ map:   431.22 kB[22m
+[2mdist/[22m[36massets/utils-BjssfJ7O.js                             [39m[1m[2m 89.23 kB[22m[1m[22m[2m │ gzip:  26.29 kB[22m[2m │ map:   393.30 kB[22m
+[2mdist/[22m[36massets/coreui-CqPmVcdZ.js                            [39m[1m[2m 95.05 kB[22m[1m[22m[2m │ gzip:  27.38 kB[22m[2m │ map:   484.02 kB[22m
+[2mdist/[22m[36massets/index-CKRFkbHG.js                             [39m[1m[2m152.33 kB[22m[1m[22m[2m │ gzip:  50.10 kB[22m[2m │ map:   550.73 kB[22m
+[2mdist/[22m[36massets/vendor-BQq5jxG1.js                            [39m[1m[2m164.48 kB[22m[1m[22m[2m │ gzip:  53.70 kB[22m[2m │ map:   706.86 kB[22m
+[2mdist/[22m[36massets/CartesianChart-Cl7Qn8Io.js                    [39m[1m[2m328.71 kB[22m[1m[22m[2m │ gzip:  98.70 kB[22m[2m │ map: 1,665.20 kB[22m
+[32m✓ built in 6.70s[39m
   [OK] Build completata. 
 [5/7] Deploy frontend in static... 
 
@@ -414,7 +428,7 @@ computing gzip size...
    ROBOCOPY     ::     Copia di file efficace per Windows                              
 -------------------------------------------------------------------------------
 
-  Avviato: luned� 27 aprile 2026 18:13:14
+  Avviato: mercoled� 29 aprile 2026 18:44:19
       Origine : C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\dist\
  Destinazione : \\SERVERDIMA\StudioDimaAI\static\
 
@@ -428,27 +442,27 @@ computing gzip size...
 	    Nuovo file		     792	index.html
 	    Nuovo file		    2733	service-worker.js
 	    Nuovo file		    1497	vite.svg
-	Nuova directory     186	C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\dist\assets\
-	    Nuovo file		   30724	AnalisiComparativaPage-C0bUHWWA.js
-	    Nuovo file		  114160	AnalisiComparativaPage-C0bUHWWA.js.map
-	    Nuovo file		     982	automation.service-FxzO5UV2.js
-	    Nuovo file		    4865	automation.service-FxzO5UV2.js.map
-	    Nuovo file		    2414	AutomationPage-P18VkA2p.js
-	    Nuovo file		    8497	AutomationPage-P18VkA2p.js.map
-	    Nuovo file		   20948	BotPage-B-O3QLxk.js
-	    Nuovo file		   63798	BotPage-B-O3QLxk.js.map
-	    Nuovo file		     678	calendarHealthCheck-CuJR0XOf.js
-	    Nuovo file		    3733	calendarHealthCheck-CuJR0XOf.js.map
-	    Nuovo file		   36039	CalendarPage-AMn8ALCF.js
-	    Nuovo file		  123762	CalendarPage-AMn8ALCF.js.map
-	    Nuovo file		   16220	CalendarSettings-Dx3AHcJI.js
-	    Nuovo file		   56051	CalendarSettings-Dx3AHcJI.js.map
-	    Nuovo file		    4287	CallbackCard-CAeYCoJG.js
-	    Nuovo file		   17667	CallbackCard-CAeYCoJG.js.map
-	    Nuovo file		  328719	CartesianChart-Bdq6pxIm.js
-	    Nuovo file		   1.5 m	CartesianChart-Bdq6pxIm.js.map
-	    Nuovo file		    8971	CentroCostoPage-CCNaf4qk.js
-	    Nuovo file		   28974	CentroCostoPage-CCNaf4qk.js.map
+	Nuova directory     192	C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\dist\assets\
+	    Nuovo file		   30724	AnalisiComparativaPage-BZSGoSKR.js
+	    Nuovo file		  114160	AnalisiComparativaPage-BZSGoSKR.js.map
+	    Nuovo file		     982	automation.service-Dj_oMwyB.js
+	    Nuovo file		    4865	automation.service-Dj_oMwyB.js.map
+	    Nuovo file		    2414	AutomationPage-8GtbbuS0.js
+	    Nuovo file		    8497	AutomationPage-8GtbbuS0.js.map
+	    Nuovo file		   24164	BotPage-CkR7YaG2.js
+	    Nuovo file		   75454	BotPage-CkR7YaG2.js.map
+	    Nuovo file		     678	calendarHealthCheck-ClyAAevc.js
+	    Nuovo file		    3733	calendarHealthCheck-ClyAAevc.js.map
+	    Nuovo file		   36039	CalendarPage-DhMIzIa2.js
+	    Nuovo file		  123762	CalendarPage-DhMIzIa2.js.map
+	    Nuovo file		   16220	CalendarSettings-CY49cvzi.js
+	    Nuovo file		   56051	CalendarSettings-CY49cvzi.js.map
+	    Nuovo file		    4287	CallbackCard-BkXLiGmq.js
+	    Nuovo file		   17667	CallbackCard-BkXLiGmq.js.map
+	    Nuovo file		  328719	CartesianChart-Cl7Qn8Io.js
+	    Nuovo file		   1.5 m	CartesianChart-Cl7Qn8Io.js.map
+	    Nuovo file		    8971	CentroCostoPage-COVXlKQy.js
+	    Nuovo file		   28974	CentroCostoPage-COVXlKQy.js.map
 	    Nuovo file		     322	cil-arrow-left-D66Kb3Zq.js
 	    Nuovo file		     593	cil-arrow-left-D66Kb3Zq.js.map
 	    Nuovo file		     456	cil-chevron-bottom-C8eOormY.js
@@ -477,157 +491,163 @@ computing gzip size...
 	    Nuovo file		    1023	cil-trash-CBbKHhHb.js.map
 	    Nuovo file		     623	cil-x-circle-Bi9E-sdv.js
 	    Nuovo file		     886	cil-x-circle-Bi9E-sdv.js.map
-	    Nuovo file		    1101	classificazioni.service-CQ8vc3qh.js
-	    Nuovo file		    4175	classificazioni.service-CQ8vc3qh.js.map
-	    Nuovo file		    3922	CollaboratoriPage-CsJNwYHY.js
-	    Nuovo file		   14353	CollaboratoriPage-CsJNwYHY.js.map
-	    Nuovo file		    2110	ConfirmDeleteModal-C8Ty9CZd.js
-	    Nuovo file		    6638	ConfirmDeleteModal-C8Ty9CZd.js.map
-	    Nuovo file		   12511	conti.store-CTVyeG5c.js
-	    Nuovo file		   48145	conti.store-CTVyeG5c.js.map
-	    Nuovo file		   10600	ContiPage-CkxFrBD0.js
-	    Nuovo file		   51586	ContiPage-CkxFrBD0.js.map
-	    Nuovo file		   95054	coreui-Dyzyx4tS.js
-	    Nuovo file		  484025	coreui-Dyzyx4tS.js.map
+	    Nuovo file		    1101	classificazioni.service-WAgS-A_4.js
+	    Nuovo file		    4175	classificazioni.service-WAgS-A_4.js.map
+	    Nuovo file		    3922	CollaboratoriPage-kxv5jwtr.js
+	    Nuovo file		   14353	CollaboratoriPage-kxv5jwtr.js.map
+	    Nuovo file		    2110	ConfirmDeleteModal-CJBdRGrl.js
+	    Nuovo file		    6638	ConfirmDeleteModal-CJBdRGrl.js.map
+	    Nuovo file		   12511	conti.store-Bu8jIrMC.js
+	    Nuovo file		   48145	conti.store-Bu8jIrMC.js.map
+	    Nuovo file		   10600	ContiPage-CWlT8tew.js
+	    Nuovo file		   51586	ContiPage-CWlT8tew.js.map
+	    Nuovo file		   95054	coreui-CqPmVcdZ.js
+	    Nuovo file		  484025	coreui-CqPmVcdZ.js.map
 	    Nuovo file		   78996	CoreUI-Icons-Free-6fr294fT.woff
 	    Nuovo file		  146944	CoreUI-Icons-Free-BUWU6kzH.eot
 	    Nuovo file		  146740	CoreUI-Icons-Free-Bzz1TPaB.ttf
 	    Nuovo file		  560248	CoreUI-Icons-Free-DXXkrSta.svg
-	    Nuovo file		   21985	Dashboard-B4MGJx50.js
-	    Nuovo file		   84064	Dashboard-B4MGJx50.js.map
-	    Nuovo file		    8330	DataTable-C4sI-beE.js
-	    Nuovo file		   46376	DataTable-C4sI-beE.js.map
+	    Nuovo file		   21985	Dashboard-njljLH5O.js
+	    Nuovo file		   84064	Dashboard-njljLH5O.js.map
+	    Nuovo file		    8330	DataTable-DoQvVa92.js
+	    Nuovo file		   46376	DataTable-DoQvVa92.js.map
 	    Nuovo file		    2015	DataTable-q9BskI5o.css
-	    Nuovo file		    3057	economics.service-cneIb4vB.js
-	    Nuovo file		    9601	economics.service-cneIb4vB.js.map
-	    Nuovo file		   73301	EconomicsPage-CjYSaV2u.js
-	    Nuovo file		  300106	EconomicsPage-CjYSaV2u.js.map
-	    Nuovo file		   35458	EmailPage-DwTxPdXN.js
-	    Nuovo file		  130819	EmailPage-DwTxPdXN.js.map
-	    Nuovo file		    4689	environment.service-BAlr6D8Q.js
-	    Nuovo file		   17847	environment.service-BAlr6D8Q.js.map
-	    Nuovo file		    2389	fornitori.store-CXKyxzgc.js
-	    Nuovo file		   10785	fornitori.store-CXKyxzgc.js.map
-	    Nuovo file		   12648	FornitoriClassificazione-CAEQvPK7.js
-	    Nuovo file		   45611	FornitoriClassificazione-CAEQvPK7.js.map
-	    Nuovo file		   22025	FornitoriPage-BbF3JPQ_.js
-	    Nuovo file		   80921	FornitoriPage-BbF3JPQ_.js.map
-	    Nuovo file		    3801	FornitoriSelect-B3n0XLGt.js
-	    Nuovo file		   15342	FornitoriSelect-B3n0XLGt.js.map
+	    Nuovo file		    3057	economics.service-1Gq8ssJd.js
+	    Nuovo file		    9601	economics.service-1Gq8ssJd.js.map
+	    Nuovo file		   73301	EconomicsPage-BzaUtbS3.js
+	    Nuovo file		  300106	EconomicsPage-BzaUtbS3.js.map
+	    Nuovo file		   35458	EmailPage-CKD7WCaS.js
+	    Nuovo file		  130819	EmailPage-CKD7WCaS.js.map
+	    Nuovo file		    4689	environment.service-DeVmjzDZ.js
+	    Nuovo file		   17847	environment.service-DeVmjzDZ.js.map
+	    Nuovo file		    2389	fornitori.store-O-ofmIXV.js
+	    Nuovo file		   10785	fornitori.store-O-ofmIXV.js.map
+	    Nuovo file		   12648	FornitoriClassificazione-BDRyO1hR.js
+	    Nuovo file		   45611	FornitoriClassificazione-BDRyO1hR.js.map
+	    Nuovo file		   22025	FornitoriPage-o2u1FjZQ.js
+	    Nuovo file		   80921	FornitoriPage-o2u1FjZQ.js.map
+	    Nuovo file		    3801	FornitoriSelect-DnQaokoK.js
+	    Nuovo file		   15342	FornitoriSelect-DnQaokoK.js.map
 	    Nuovo file		  336907	index-BBDfkehP.css
-	    Nuovo file		  151250	index-cmyG1ifV.js
-	    Nuovo file		  549091	index-cmyG1ifV.js.map
-	    Nuovo file		   27124	LoginPage-BAAzqHjC.js
-	    Nuovo file		  164705	LoginPage-BAAzqHjC.js.map
-	    Nuovo file		    2153	materiali-classification.service-CgX_Obw8.js
-	    Nuovo file		    9161	materiali-classification.service-CgX_Obw8.js.map
-	    Nuovo file		    4392	materiali.store-CuR1_w_i.js
-	    Nuovo file		   17704	materiali.store-CuR1_w_i.js.map
-	    Nuovo file		   16696	MaterialiMigrazione-CfmwSHFo.js
-	    Nuovo file		   66022	MaterialiMigrazione-CfmwSHFo.js.map
-	    Nuovo file		   12020	MaterialiPage-bYDcjG9y.js
-	    Nuovo file		   43947	MaterialiPage-bYDcjG9y.js.map
-	    Nuovo file		    1976	ModalAnagrafica-BhSRe1ac.js
-	    Nuovo file		    7222	ModalAnagrafica-BhSRe1ac.js.map
-	    Nuovo file		    5342	ModalFatturaDetail-BCoxVCvG.js
-	    Nuovo file		   16700	ModalFatturaDetail-BCoxVCvG.js.map
+	    Nuovo file		  152351	index-CKRFkbHG.js
+	    Nuovo file		  550756	index-CKRFkbHG.js.map
+	    Nuovo file		   27124	LoginPage-CM1mzWZD.js
+	    Nuovo file		  164705	LoginPage-CM1mzWZD.js.map
+	    Nuovo file		    2153	materiali-classification.service-BCRL62mX.js
+	    Nuovo file		    9161	materiali-classification.service-BCRL62mX.js.map
+	    Nuovo file		    4392	materiali.store-DiFPGzLK.js
+	    Nuovo file		   17704	materiali.store-DiFPGzLK.js.map
+	    Nuovo file		   16696	MaterialiMigrazione-p8EVOiJi.js
+	    Nuovo file		   66022	MaterialiMigrazione-p8EVOiJi.js.map
+	    Nuovo file		   12020	MaterialiPage-Uw5VlMQE.js
+	    Nuovo file		   43947	MaterialiPage-Uw5VlMQE.js.map
+	    Nuovo file		    1976	ModalAnagrafica-CKex3buI.js
+	    Nuovo file		    7222	ModalAnagrafica-CKex3buI.js.map
+	    Nuovo file		    5342	ModalFatturaDetail-BzbGVOBG.js
+	    Nuovo file		   16700	ModalFatturaDetail-BzbGVOBG.js.map
 	    Nuovo file		    2691	modals-DzMO3UFJ.css
-	    Nuovo file		    1304	MonitoringSettings-DJWbfPtF.js
-	    Nuovo file		    5107	MonitoringSettings-DJWbfPtF.js.map
-	    Nuovo file		   22745	MonitorPrestazioniStandalonePage-SJCNtmbZ.js
-	    Nuovo file		   96002	MonitorPrestazioniStandalonePage-SJCNtmbZ.js.map
-	    Nuovo file		    1551	MonitorRules-Br_WxEFk.js
-	    Nuovo file		    7491	MonitorRules-Br_WxEFk.js.map
-	    Nuovo file		    1557	NotFoundPage-BFxkR5oK.js
-	    Nuovo file		    3107	NotFoundPage-BFxkR5oK.js.map
-	    Nuovo file		     947	PageLayout-CqwdiLhl.js
-	    Nuovo file		    2895	PageLayout-CqwdiLhl.js.map
-	    Nuovo file		    3352	pazienti.store-CtKx3gz_.js
-	    Nuovo file		   14761	pazienti.store-CtKx3gz_.js.map
-	    Nuovo file		   16512	PazientiPage-bpZzyB3V.js
-	    Nuovo file		   59190	PazientiPage-bpZzyB3V.js.map
-	    Nuovo file		    3685	PazientiSelect-CrScxtNL.js
-	    Nuovo file		   12335	PazientiSelect-CrScxtNL.js.map
-	    Nuovo file		    1304	provider.store-BwU9sxVu.js
-	    Nuovo file		    4792	provider.store-BwU9sxVu.js.map
-	    Nuovo file		    4104	ProvidersPage--bNSW0mR.js
-	    Nuovo file		   16230	ProvidersPage--bNSW0mR.js.map
-	    Nuovo file		   86622	react-select.esm-BGFHhF6d.js
-	    Nuovo file		  431230	react-select.esm-BGFHhF6d.js.map
-	    Nuovo file		    2604	RegisterPage-D83l4XHh.js
-	    Nuovo file		    5794	RegisterPage-D83l4XHh.js.map
-	    Nuovo file		     827	remindersService-_IMpADlR.js
-	    Nuovo file		    3704	remindersService-_IMpADlR.js.map
-	    Nuovo file		   15110	RicercaArticoli-TY8ekOeC.js
-	    Nuovo file		   60130	RicercaArticoli-TY8ekOeC.js.map
-	    Nuovo file		   28124	RicettaElettronicaPage-DLqsr8-R.js
-	    Nuovo file		  102481	RicettaElettronicaPage-DLqsr8-R.js.map
-	    Nuovo file		    8408	ricette_ts.service-DTIk7KHv.js
-	    Nuovo file		   28973	ricette_ts.service-DTIk7KHv.js.map
-	    Nuovo file		   12603	RNETestPage-BKz96kpr.js
-	    Nuovo file		   41046	RNETestPage-BKz96kpr.js.map
-	    Nuovo file		   11269	SchedulerPage-Bq2wzebd.js
-	    Nuovo file		   53062	SchedulerPage-Bq2wzebd.js.map
-	    Nuovo file		    1134	schedulerService-SfGHvS7t.js
-	    Nuovo file		    4921	schedulerService-SfGHvS7t.js.map
-	    Nuovo file		   11549	SeoPage-D9dmeIHI.js
-	    Nuovo file		   40910	SeoPage-D9dmeIHI.js.map
+	    Nuovo file		    1304	MonitoringSettings-DYGvtRUo.js
+	    Nuovo file		    5107	MonitoringSettings-DYGvtRUo.js.map
+	    Nuovo file		   22745	MonitorPrestazioniStandalonePage-DKmpfAos.js
+	    Nuovo file		   96002	MonitorPrestazioniStandalonePage-DKmpfAos.js.map
+	    Nuovo file		    1551	MonitorRules-6IepGJq2.js
+	    Nuovo file		    7491	MonitorRules-6IepGJq2.js.map
+	    Nuovo file		    1557	NotFoundPage-ZDNMpIbv.js
+	    Nuovo file		    3107	NotFoundPage-ZDNMpIbv.js.map
+	    Nuovo file		     947	PageLayout-B3FhiX5S.js
+	    Nuovo file		    2895	PageLayout-B3FhiX5S.js.map
+	    Nuovo file		    3352	pazienti.store-CICqW0rV.js
+	    Nuovo file		   14761	pazienti.store-CICqW0rV.js.map
+	    Nuovo file		   15088	PazientiPage-BXxHlqDU.js
+	    Nuovo file		   53632	PazientiPage-BXxHlqDU.js.map
+	    Nuovo file		    3685	PazientiSelect-DQ17FDgu.js
+	    Nuovo file		   12335	PazientiSelect-DQ17FDgu.js.map
+	    Nuovo file		    1304	provider.store-CZHLSiJd.js
+	    Nuovo file		    4792	provider.store-CZHLSiJd.js.map
+	    Nuovo file		    4104	ProvidersPage-DjOd3MZt.js
+	    Nuovo file		   16230	ProvidersPage-DjOd3MZt.js.map
+	    Nuovo file		   86622	react-select.esm-CzD2QdDt.js
+	    Nuovo file		  431230	react-select.esm-CzD2QdDt.js.map
+	    Nuovo file		    2604	RegisterPage-DXhqL2nh.js
+	    Nuovo file		    5794	RegisterPage-DXhqL2nh.js.map
+	    Nuovo file		     958	remindersService-CyCQwDgu.js
+	    Nuovo file		    4469	remindersService-CyCQwDgu.js.map
+	    Nuovo file		   15110	RicercaArticoli-CyIfIOpW.js
+	    Nuovo file		   60130	RicercaArticoli-CyIfIOpW.js.map
+	    Nuovo file		   28124	RicettaElettronicaPage-BjJwXeC1.js
+	    Nuovo file		  102481	RicettaElettronicaPage-BjJwXeC1.js.map
+	    Nuovo file		    8408	ricette_ts.service-C11U0w1P.js
+	    Nuovo file		   28973	ricette_ts.service-C11U0w1P.js.map
+	    Nuovo file		    2076	richiami.service-DMB2blxy.js
+	    Nuovo file		    8231	richiami.service-DMB2blxy.js.map
+	    Nuovo file		    9692	RichiamiPage-DLM8P_xU.js
+	    Nuovo file		   34649	RichiamiPage-DLM8P_xU.js.map
+	    Nuovo file		   12603	RNETestPage-BMjWlGiA.js
+	    Nuovo file		   41046	RNETestPage-BMjWlGiA.js.map
+	    Nuovo file		   11269	SchedulerPage-C8GUo_cc.js
+	    Nuovo file		   53062	SchedulerPage-C8GUo_cc.js.map
+	    Nuovo file		    1134	schedulerService-D1UVw5m-.js
+	    Nuovo file		    4921	schedulerService-D1UVw5m-.js.map
+	    Nuovo file		   11549	SeoPage-DQ_by8Wf.js
+	    Nuovo file		   40910	SeoPage-DQ_by8Wf.js.map
 	    Nuovo file		   47100	slimselect-BlWzLcjj.js
 	    Nuovo file		  108299	slimselect-BlWzLcjj.js.map
 	    Nuovo file		   10864	slimselect-KZ7ZrbRL.css
-	    Nuovo file		    2105	SottocontiSelect-BKk8g-1k.js
-	    Nuovo file		    8131	SottocontiSelect-BKk8g-1k.js.map
-	    Nuovo file		    3317	spese.service-DhSVWi6W.js
-	    Nuovo file		   11327	spese.service-DhSVWi6W.js.map
-	    Nuovo file		   13987	SpesePage-DrOnMQBo.js
-	    Nuovo file		   55584	SpesePage-DrOnMQBo.js.map
-	    Nuovo file		     713	StepsPage-D_d7Ryfy.js
-	    Nuovo file		    2088	StepsPage-D_d7Ryfy.js.map
-	    Nuovo file		   11882	TasksPage-BYSQtr5A.js
-	    Nuovo file		   45422	TasksPage-BYSQtr5A.js.map
-	    Nuovo file		    9856	TemplatesPage-CZti9EcR.js
-	    Nuovo file		   34762	TemplatesPage-CZti9EcR.js.map
-	    Nuovo file		   10312	TempoPage-D3rc8gfj.js
-	    Nuovo file		   36700	TempoPage-D3rc8gfj.js.map
-	    Nuovo file		   11050	TestSelectPage-Bi5ISNEn.js
-	    Nuovo file		   39495	TestSelectPage-Bi5ISNEn.js.map
-	    Nuovo file		    4589	TodoModal-qLQAN9vF.js
-	    Nuovo file		   20406	TodoModal-qLQAN9vF.js.map
-	    Nuovo file		    7777	TodosPage-B56U7QXb.js
-	    Nuovo file		   34124	TodosPage-B56U7QXb.js.map
-	    Nuovo file		     425	user.service-BthLojNQ.js
-	    Nuovo file		    2198	user.service-BthLojNQ.js.map
-	    Nuovo file		    2254	user.store-BCBByIKG.js
-	    Nuovo file		    7880	user.store-BCBByIKG.js.map
-	    Nuovo file		    3994	UserForm-bLQzpV7u.js
-	    Nuovo file		   10645	UserForm-bLQzpV7u.js.map
-	    Nuovo file		    2488	UserListPage-DixNSDxR.js
-	    Nuovo file		    7532	UserListPage-DixNSDxR.js.map
-	    Nuovo file		   89230	utils-Cxn89fKV.js
-	    Nuovo file		  393301	utils-Cxn89fKV.js.map
-	    Nuovo file		  163888	vendor-D4XL6Uff.js
-	    Nuovo file		  705455	vendor-D4XL6Uff.js.map
-	    Nuovo file		    4283	WorkDetailsPage-BpBPa5ci.js
-	    Nuovo file		   14747	WorkDetailsPage-BpBPa5ci.js.map
-	    Nuovo file		    1150	works.service-CbMTESro.js
-	    Nuovo file		    4926	works.service-CbMTESro.js.map
+	    Nuovo file		    6307	SlotLiberiPage-BU81W4bg.js
+	    Nuovo file		   19918	SlotLiberiPage-BU81W4bg.js.map
+	    Nuovo file		    2105	SottocontiSelect-VkqJDAU7.js
+	    Nuovo file		    8131	SottocontiSelect-VkqJDAU7.js.map
+	    Nuovo file		    3317	spese.service-Xbj4QURj.js
+	    Nuovo file		   11327	spese.service-Xbj4QURj.js.map
+	    Nuovo file		   13987	SpesePage-CQM8jluf.js
+	    Nuovo file		   55584	SpesePage-CQM8jluf.js.map
+	    Nuovo file		     713	StepsPage-BfcNb_qP.js
+	    Nuovo file		    2088	StepsPage-BfcNb_qP.js.map
+	    Nuovo file		   11882	TasksPage-C8gx9ZJB.js
+	    Nuovo file		   45422	TasksPage-C8gx9ZJB.js.map
+	    Nuovo file		    9856	TemplatesPage-BY2gEwm9.js
+	    Nuovo file		   34762	TemplatesPage-BY2gEwm9.js.map
+	    Nuovo file		   10312	TempoPage-DWZwzve-.js
+	    Nuovo file		   36700	TempoPage-DWZwzve-.js.map
+	    Nuovo file		   11050	TestSelectPage-B-4yh0Pl.js
+	    Nuovo file		   39495	TestSelectPage-B-4yh0Pl.js.map
+	    Nuovo file		    4589	TodoModal-DAqpPJf5.js
+	    Nuovo file		   20406	TodoModal-DAqpPJf5.js.map
+	    Nuovo file		    7777	TodosPage-fVPgmzwo.js
+	    Nuovo file		   34124	TodosPage-fVPgmzwo.js.map
+	    Nuovo file		     425	user.service-CQB12Iz2.js
+	    Nuovo file		    2198	user.service-CQB12Iz2.js.map
+	    Nuovo file		    2254	user.store-C0FjBNly.js
+	    Nuovo file		    7880	user.store-C0FjBNly.js.map
+	    Nuovo file		    3994	UserForm-eWkrPGyJ.js
+	    Nuovo file		   10645	UserForm-eWkrPGyJ.js.map
+	    Nuovo file		    2488	UserListPage-JAv1sBsH.js
+	    Nuovo file		    7532	UserListPage-JAv1sBsH.js.map
+	    Nuovo file		   89230	utils-BjssfJ7O.js
+	    Nuovo file		  393301	utils-BjssfJ7O.js.map
+	    Nuovo file		  164482	vendor-BQq5jxG1.js
+	    Nuovo file		  706857	vendor-BQq5jxG1.js.map
+	    Nuovo file		    4283	WorkDetailsPage-DSbX5w0x.js
+	    Nuovo file		   14747	WorkDetailsPage-DSbX5w0x.js.map
+	    Nuovo file		    1150	works.service-DKY4iW_s.js
+	    Nuovo file		    4926	works.service-DKY4iW_s.js.map
 	    Nuovo file		     460	works.types-DhAvz77K.js
 	    Nuovo file		    3220	works.types-DhAvz77K.js.map
-	    Nuovo file		   55196	WorksPage-D05VobMd.js
-	    Nuovo file		  258615	WorksPage-D05VobMd.js.map
+	    Nuovo file		   55196	WorksPage-C6BBNIAA.js
+	    Nuovo file		  258615	WorksPage-C6BBNIAA.js.map
 
 -------------------------------------------------------------------------------
 
               Totale   Copiato  IgnorateNon corrispondentiNon riuscitaSupplementari
 Directory:         2         2         0         0         0         0
-     File:       189       189         0         0         0         0
-     Byte:    9.61 m    9.61 m         0         0         0         0
-   Durata:   0:00:08   0:00:07                       0:00:00   0:00:00
+     File:       195       195         0         0         0         0
+     Byte:    9.70 m    9.70 m         0         0         0         0
+   Durata:   0:00:09   0:00:08                       0:00:00   0:00:00
 
 
- Velocit�:           1.282.152 Byte/sec.
- Velocit�:              73,365 MB/min.
-   Terminato: luned� 27 aprile 2026 18:13:22
+ Velocit�:           1.143.769 Byte/sec.
+ Velocit�:              65,447 MB/min.
+   Terminato: mercoled� 29 aprile 2026 18:44:28
 
 Robocopy frontend exit code: 1 
   [OK] Frontend deployato. 

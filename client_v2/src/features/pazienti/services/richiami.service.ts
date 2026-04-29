@@ -1,5 +1,33 @@
 import apiClient from '@/services/api/client';
 
+export interface PazienteCandidato {
+  id: string;
+  nome: string;
+  cellulare: string;
+  tipo_richiamo: string;
+  tipo_richiamo_nomi: string[];
+  scaduto: boolean;
+  giorni_ritardo: number;
+  ultima_visita: string | null;
+}
+
+export interface SlotLibero {
+  data: string;
+  giorno_nome: string;
+  inizio: string;
+  fine: string;
+  operatore: string;
+  operatore_id: number;
+}
+
+export interface SlotPerPaziente {
+  paziente: { db_code: string; nome: string; tipo_richiamo: string };
+  tipo: string;
+  operatore_suggerito: string;
+  ultima_igiene: { operatore_id: number | null; data: string | null } | null;
+  slots: SlotLibero[];
+}
+
 interface RichiamoStatusRequest {
   paziente_id: string;
   da_richiamare: string; // S, N, R
@@ -107,6 +135,32 @@ const richiami = {
         error: error.response?.data?.error || 'Errore caricamento pazienti da richiamare',
         state: 'error'
       };
+    }
+  },
+
+  // Candidati per slot libero (scaduti con cellulare)
+  apiGetCandidatiSlot: async (limit = 10): Promise<{ success: boolean; pazienti?: PazienteCandidato[]; error?: string }> => {
+    try {
+      const response = await apiClient.get('/richiami/pazienti-da-richiamare', {
+        params: { scaduti_solo: true, solo_cellulare: true, limit },
+      });
+      return response.data;
+    } catch (error: any) {
+      return { success: false, error: error.response?.data?.error || 'Errore caricamento candidati' };
+    }
+  },
+
+  // Slot liberi per un paziente specifico
+  apiGetSlotPerPaziente: async (dbCode: string, giorniAvanti = 14, maxSlot = 5): Promise<{ success: boolean; data?: SlotPerPaziente; error?: string }> => {
+    try {
+      const response = await apiClient.get(`/richiami/slot-per-paziente/${dbCode}`, {
+        params: { giorni_avanti: giorniAvanti, max_slot: maxSlot },
+      });
+      const raw = response.data;
+      // il backend restituisce i campi direttamente nel body (non in data)
+      return { success: true, data: raw as SlotPerPaziente };
+    } catch (error: any) {
+      return { success: false, error: error.response?.data?.error || 'Errore caricamento slot' };
     }
   },
 

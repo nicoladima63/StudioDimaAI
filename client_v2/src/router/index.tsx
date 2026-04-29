@@ -16,6 +16,7 @@ const RicercaArticoli = React.lazy(() => import('@/features/materiali/pages/Rice
 const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
 const PazientiPage = React.lazy(() => import('@/features/pazienti/pages/PazientiPage'))
 const RichiamiPage = React.lazy(() => import('@/features/pazienti/pages/RichiamiPage'))
+const SlotLiberiPage = React.lazy(() => import('@/features/pazienti/pages/SlotLiberiPage'))
 const RicettaElettronicaPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RicettaElettronicaPage'))
 const CalendarPage = React.lazy(() => import('@/features/calendar/pages/CalendarPage'))
 const ContiPage = React.lazy(() => import('@/features/conti/pages/ContiPage'))
@@ -93,6 +94,7 @@ const AppRouter: React.FC = () => {
           <Route path='fornitori/classificazione' element={<FornitoriClassificazione />} />
           <Route path='pazienti' element={<PazientiPage />} />
           <Route path='pazienti/richiami' element={<RichiamiPage />} />
+          <Route path='richiami/slot-liberi' element={<SlotLiberiPage />} />
           <Route path='conti' element={<ContiPage />} />
           <Route path='ricetta' element={<RicettaElettronicaPage />} />
           <Route path='calendar' element={<CalendarPage />} />

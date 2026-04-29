@@ -25,6 +25,22 @@ export interface TriggerResult {
   dry_run: boolean
 }
 
+export interface CommunicationItem {
+  id: number
+  patient_id: string
+  patient_name: string
+  phone: string
+  channel: 'whatsapp' | 'sms'
+  tipo: string
+  stato: string
+  testo: string
+  scheduled_at: string | null
+  sent_at: string | null
+  response: string | null
+  communication_id: string | null
+  created_at: string
+}
+
 export interface ReminderReply {
   id: number
   patient_name: string
@@ -83,6 +99,11 @@ const remindersService = {
     const params: Record<string, string | number> = { days }
     if (date) params.date = date
     const res = await apiClient.get('/reminders/replies', { params })
+    return res.data.data
+  },
+
+  async apiGetCommunications(page = 1, perPage = 20): Promise<{ items: CommunicationItem[]; total: number; pages: number }> {
+    const res = await apiClient.get('/reminders/communications', { params: { page, per_page: perPage } })
     return res.data.data
   },
 }

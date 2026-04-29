@@ -5,6 +5,7 @@ import ServiziTab from '../components/ServiziTab'
 import StudioInfoTab from '../components/StudioInfoTab'
 import ConversazioniTab from '../components/ConversazioniTab'
 import ReminderRepliesTab from '../components/ReminderRepliesTab'
+import StoricoComunicazioniTab from '../components/StoricoComunicazioniTab'
 
 type ToastState = 'success' | 'warning' | 'error'
 
@@ -55,6 +56,11 @@ const BotPage: React.FC = () => {
               Risposte Reminder
             </CNavLink>
           </CNavItem>
+          <CNavItem>
+            <CNavLink active={activeTab === 4} onClick={() => setActiveTab(4)} style={{ cursor: 'pointer' }}>
+              Storico Invii
+            </CNavLink>
+          </CNavItem>
         </CNav>
 
         <CTabContent>
@@ -69,6 +75,9 @@ const BotPage: React.FC = () => {
           </CTabPane>
           <CTabPane visible={activeTab === 3}>
             {activeTab === 3 && <ReminderRepliesTab />}
+          </CTabPane>
+          <CTabPane visible={activeTab === 4}>
+            {activeTab === 4 && <StoricoComunicazioniTab />}
           </CTabPane>
         </CTabContent>
       </PageLayout.ContentBody>

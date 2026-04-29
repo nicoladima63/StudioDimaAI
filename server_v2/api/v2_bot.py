@@ -701,16 +701,18 @@ def receive_appointment_confirmation():
         conn.commit()
         conn.close()
 
-        # Se cancellato: notifica push alla segreteria
+        # Se cancellato: notifica urgente a CristinaB con link ai candidati per lo slot
         if response_val == 'cancelled':
             try:
                 from app_v2 import push_service
                 if push_service:
-                    push_service.send_notification_to_all(
+                    slot_url = f"/richiami/slot-liberi?data={ap_date}&ora={ap_time}"
+                    push_service.send_notification(
+                        user_id=3,  # CristinaB
                         title="Appuntamento cancellato",
-                        body=f"{patient_name} ha cancellato l'appuntamento del {ap_date} ore {ap_time}.",
-                        data={'type': 'appointment_cancelled', 'patient_id': patient_id,
-                              'appointment_date': ap_date, 'appointment_time': ap_time}
+                        body=f"{patient_name} ha cancellato: {ap_date} ore {ap_time}. Clicca per trovare un sostituto.",
+                        url=slot_url,
+                        urgency='high',
                     )
             except Exception as e:
                 logger.warning(f"Errore notifica cancellazione: {e}")

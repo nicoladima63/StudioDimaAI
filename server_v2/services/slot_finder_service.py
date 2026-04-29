@@ -18,6 +18,171 @@ from core.config_manager import get_config
 
 logger = logging.getLogger(__name__)
 
+# ID igieniste (Lara=2, Anet=5) — usato per filtrare PREVENT.DBF
+_IGIENISTI_IDS: set[int] = {2, 5}
+
+
+def _get_elenco_path() -> str:
+    return get_config().get_dbf_path('elenco')
+
+
+def _get_prevent_path() -> str:
+    return get_config().get_dbf_path('preventivi')
+
+
+def build_last_igiene_lookup() -> dict[str, tuple[date, int]]:
+    """
+    Legge ELENCO.DBF e PREVENT.DBF una sola volta e restituisce un dizionario
+    {patient_db_code: (last_igiene_date, medico_id)} per tutti i pazienti con
+    almeno una prestazione igiene eseguita (stato=3, lavor='ig'), indipendentemente
+    da quale medico l'ha eseguita.
+
+    Nota: filtra per lavor='ig' e non per medico perché le igieni possono essere
+    registrate sotto qualunque operatore (es. Nicola medico=1 invece di Lara=2/Anet=5).
+    Il medico_id viene comunque restituito per uso opzionale (es. slot suggestion).
+
+    Usato per calcoli bulk nell'endpoint pazienti-da-richiamare, evitando N letture DBF.
+    """
+    col_el = COLONNE['elenco']
+    f_el_id  = col_el['id'].lower()
+    f_el_paz = col_el['id_paziente'].lower()
+
+    # piano_id → patient_db_code
+    piano_to_patient: dict[str, str] = {}
+    try:
+        with dbf.Table(_get_elenco_path(), codepage='cp1252') as table:
+            for record in table:
+                try:
+                    paz = str(getattr(record, f_el_paz, '') or '').strip()
+                    pid = str(getattr(record, f_el_id, '') or '').strip()
+                    if paz and pid:
+                        piano_to_patient[pid] = paz
+                except Exception:
+                    continue
+    except Exception as e:
+        logger.error(f"build_last_igiene_lookup: errore ELENCO.DBF: {e}")
+        return {}
+
+    col_pr = COLONNE['preventivi']
+    f_pr_piano  = col_pr['id_piano'].lower()
+    f_pr_medico = col_pr['medico'].lower()
+    f_pr_lavor  = col_pr['codice_prestazione'].lower()   # DB_PRLAVOR
+    f_pr_data   = col_pr['data_prestazione'].lower()
+    f_pr_stato  = col_pr['stato_prestazione'].lower()
+
+    # patient_db_code → (best_date, medico_id)
+    result: dict[str, tuple[date, int]] = {}
+
+    try:
+        with dbf.Table(_get_prevent_path(), codepage='cp1252') as table:
+            for record in table:
+                try:
+                    stato = int(getattr(record, f_pr_stato, 0) or 0)
+                    if stato != 3:  # 3 = Eseguito
+                        continue
+                    lavor = str(getattr(record, f_pr_lavor, '') or '').strip().lower()
+                    if lavor != 'ig':
+                        continue
+                    piano = str(getattr(record, f_pr_piano, '') or '').strip()
+                    patient_id = piano_to_patient.get(piano)
+                    if not patient_id:
+                        continue
+                    pdata = getattr(record, f_pr_data, None)
+                    if not pdata:
+                        continue
+                    try:
+                        medico_id = int(getattr(record, f_pr_medico, None) or 0)
+                    except (TypeError, ValueError):
+                        medico_id = 0
+                    existing = result.get(patient_id)
+                    if existing is None or pdata > existing[0]:
+                        result[patient_id] = (pdata, medico_id)
+                except Exception:
+                    continue
+    except Exception as e:
+        logger.error(f"build_last_igiene_lookup: errore PREVENT.DBF: {e}")
+
+    return result
+
+
+def trova_ultimo_igienista(db_code: str) -> tuple[int | None, str | None]:
+    """
+    Cerca in ELENCO.DBF + PREVENT.DBF l'ultima prestazione eseguita da un'igienista
+    per il paziente db_code.
+
+    Returns:
+        (operatore_id, last_date_iso) — operatore_id è 2 (Lara) o 5 (Anet).
+        (None, None) se il paziente non ha mai avuto un'igiene registrata.
+    """
+    col_el = COLONNE['elenco']
+    f_el_id  = col_el['id'].lower()
+    f_el_paz = col_el['id_paziente'].lower()
+
+    db_code_stripped = db_code.strip()
+    piano_ids: set[str] = set()
+
+    try:
+        with dbf.Table(_get_elenco_path(), codepage='cp1252') as table:
+            for record in table:
+                try:
+                    paz = str(getattr(record, f_el_paz, '') or '').strip()
+                    if paz == db_code_stripped:
+                        pid = str(getattr(record, f_el_id, '') or '').strip()
+                        if pid:
+                            piano_ids.add(pid)
+                except Exception:
+                    continue
+    except Exception as e:
+        logger.error(f"Errore lettura ELENCO.DBF per paziente {db_code}: {e}")
+        return None, None
+
+    if not piano_ids:
+        return None, None
+
+    col_pr = COLONNE['preventivi']
+    f_pr_piano  = col_pr['id_piano'].lower()
+    f_pr_medico = col_pr['medico'].lower()
+    f_pr_data   = col_pr['data_prestazione'].lower()
+    f_pr_stato  = col_pr['stato_prestazione'].lower()
+
+    best_date = None
+    best_medico_id = None
+
+    try:
+        with dbf.Table(_get_prevent_path(), codepage='cp1252') as table:
+            for record in table:
+                try:
+                    stato = int(getattr(record, f_pr_stato, 0) or 0)
+                    if stato != 3:  # 3 = Eseguito (GUARDIA_MAP)
+                        continue
+                    piano = str(getattr(record, f_pr_piano, '') or '').strip()
+                    if piano not in piano_ids:
+                        continue
+                    try:
+                        medico_id = int(getattr(record, f_pr_medico, None) or 0)
+                    except (TypeError, ValueError):
+                        continue
+                    if medico_id not in _IGIENISTI_IDS:
+                        continue
+                    pdata = getattr(record, f_pr_data, None)
+                    if not pdata:
+                        continue
+                    if best_date is None or pdata > best_date:
+                        best_date = pdata
+                        best_medico_id = medico_id
+                except Exception:
+                    continue
+    except Exception as e:
+        logger.error(f"Errore lettura PREVENT.DBF per paziente {db_code}: {e}")
+        return None, None
+
+    if best_medico_id is None:
+        return None, None
+
+    last_date_iso = best_date.strftime('%Y-%m-%d') if best_date else None
+    return best_medico_id, last_date_iso
+
+
 # Operatori che usano un appuntamento finto con "no" per segnalare assenza
 # (es. Lara a settimane alterne mette "lara no" a inizio giornata)
 OPERATORI_CON_ASSENZA_FINTA: set[int] = {2}
@@ -163,10 +328,6 @@ def _slot_liberi_in_finestra(
         else:
             slot.append((cursore, cursore + durata))
             cursore += passo
-
-    return slot
-    if cursore + durata <= finestra_fine:
-        slot.append((cursore, cursore + durata))
 
     return slot
 

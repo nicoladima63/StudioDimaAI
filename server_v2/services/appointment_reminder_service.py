@@ -43,7 +43,7 @@ REMINDER_MESSAGES = {
             "Promemoria: tra 2 ore ({ora}) hai il tuo appuntamento dal dentista "
             "(Studio Dr. Di Martino). A presto!"
         ),
-        'sms': "Studio Dr.Di Martino: promemoria visita oggi ore {ora}.",
+        'sms': "Studio Dr.Di Martino: promemoria visita oggi ore {ora}. Info: 0574712060",
     },
     'followup': {
         'wa': (
@@ -411,6 +411,25 @@ def send_sms_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str,
 # Log comunicazioni
 # ---------------------------------------------------------------------------
 
+def _already_confirmed(patient_id: str, ap_date: str, ap_time: str) -> bool:
+    """Restituisce True se il paziente ha già risposto SI per questo appuntamento."""
+    try:
+        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id FROM patient_communications
+            WHERE patient_id = ? AND appointment_date = ? AND appointment_time = ?
+            AND response = 'confirmed'
+            LIMIT 1
+        """, (patient_id, ap_date, ap_time))
+        found = cur.fetchone() is not None
+        conn.close()
+        return found
+    except Exception as e:
+        logger.warning(f"Errore check confirmed: {e}")
+        return False
+
+
 def _already_sent(patient_id: str, ap_date: str, ap_time: str, reminder_type: str) -> bool:
     """Verifica che non sia già stato inviato un reminder per questo appuntamento."""
     key = _session_key(patient_id, ap_date, ap_time, reminder_type)
@@ -577,6 +596,10 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
         if _already_sent(pid, ap_date, ap_time, reminder_type):
             continue
 
+        # Se ha già confermato (SI alla 24h), non disturbare con il 2h
+        if reminder_type == '2h' and _already_confirmed(pid, ap_date, ap_time):
+            continue
+
         # Classifica contatto
         if cell and _is_mobile(cell):
             phone = cell
@@ -651,8 +674,8 @@ def _write_log(reminder_type: str, stats: dict):
         'type': reminder_type,
         'sent_wa': stats['sent_wa'],
         'sent_sms': stats['sent_sms'],
-        'skipped_fisso': len(stats['skipped_fisso']),
-        'no_phone': len(stats['no_phone']),
+        'skipped_fisso': len(stats.get('skipped_fisso', [])),
+        'no_phone': len(stats.get('no_phone', [])),
         'errors': stats['errors'],
     }
     try:
