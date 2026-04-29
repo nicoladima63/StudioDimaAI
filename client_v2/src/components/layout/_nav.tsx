@@ -16,6 +16,7 @@ import {
   cilChartLine,
   cilEnvelopeClosed,
   cilChatBubble,
+  cilPhone,
 } from '@coreui/icons';
 import { CNavItem, CNavGroup } from '@coreui/react';
 
@@ -67,6 +68,12 @@ const _nav = [
         name: 'Pazienti',
         to: '/pazienti',
         icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Richiami',
+        to: '/pazienti/richiami',
+        icon: <CIcon icon={cilPhone} customClassName="nav-icon" />,
       },
       {
         component: CNavItem,

@@ -8,12 +8,14 @@ to the SQLite materiali table with intelligent filtering.
 import logging
 import os
 import re
+from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 
 from .base_service import BaseService
 from utils.dbf_utils import DBFOptimizedReader, clean_materiali_data, normalize_dbf_data
 from core.exceptions import ValidationError, DatabaseError, DbfProcessingError
+from core.paths import STUDIO_DIMA_DB_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -654,7 +656,7 @@ class MaterialiMigrationService(BaseService):
             import sqlite3
             stats = {'inserted': 0, 'updated': 0, 'errors': 0, 'errors_list': []}
             
-            conn = sqlite3.connect('instance/studio_dima.db')
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
             cursor = conn.cursor()
             
             for material in dental_materials:
@@ -788,7 +790,7 @@ class MaterialiMigrationService(BaseService):
         """Recupera la classificazione di un materiale già esistente nella tabella materiali."""
         try:
             import sqlite3
-            conn = sqlite3.connect('instance/studio_dima.db')
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
             cursor = conn.cursor()
             
             # Cerca il materiale esistente con la sua classificazione
@@ -834,7 +836,7 @@ class MaterialiMigrationService(BaseService):
         """Recupera i dati di classificazione per un fornitore dalla tabella classificazioni_costi."""
         try:
             import sqlite3
-            conn = sqlite3.connect('instance/studio_dima.db')
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
             cursor = conn.cursor()
             
             # Cerca per fornitore_id (codice_riferimento) con JOIN per recuperare i nomi
@@ -878,7 +880,7 @@ class MaterialiMigrationService(BaseService):
         """
         try:
             import sqlite3
-            conn = sqlite3.connect('instance/studio_dima.db')
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
             cursor = conn.cursor()
             
             # Carica materiali già classificati con i loro nomi e classificazioni

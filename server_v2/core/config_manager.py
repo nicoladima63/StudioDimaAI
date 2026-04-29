@@ -168,21 +168,15 @@ class ConfigManager:
         return self.config.get('APP_MODE', 'dev').lower()
     
     def _is_prod_reachable(self) -> bool:
-        """Verifica se l'ambiente prod è raggiungibile."""
+        """Verifica se l'ambiente prod è raggiungibile tramite ping."""
         try:
             import subprocess
-            # Test ping al server
-            result = subprocess.run(['ping', '-n', '1', 'SERVERDIMA'], 
-                                 capture_output=True, timeout=5)
-            if result.returncode != 0:
-                return False
-            
-            # Test accesso cartella condivisa
-            prod_path = r'\\serverdima\pixel\windent'
-            if not os.path.exists(prod_path):
-                return False
-                
-            return True
+            result = subprocess.run(
+                ['ping', '-n', '1', 'SERVERDIMA'],
+                capture_output=True,
+                timeout=5,
+            )
+            return result.returncode == 0
         except Exception as e:
             logger.debug(f"Test connettività PROD fallito: {e}")
             return False

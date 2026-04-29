@@ -10,18 +10,21 @@ import logging
 from typing import Optional, Dict, Any, List, Union
 from pathlib import Path
 
+# Absolute path to server_v2/ directory — independent of CWD
+_SERVER_V2_DIR = Path(__file__).resolve().parent.parent
+
 
 class Config:
     """
     Configuration class for StudioDimaAI Server V2.
-    
+
     Handles database paths, connection pool settings, logging configuration,
     and other system parameters with environment-specific overrides.
     """
-    
-    # Database Configuration
-    DEFAULT_DB_PATH = "studio_dima.db"
-    DEFAULT_INSTANCE_DB_PATH = "instance/studio_dima.db"
+
+    # Database Configuration — absolute paths anchored to server_v2/
+    DEFAULT_DB_PATH = str(_SERVER_V2_DIR / "studio_dima.db")
+    DEFAULT_INSTANCE_DB_PATH = str(_SERVER_V2_DIR / "instance" / "studio_dima.db")
     
     # Connection Pool Settings
     DEFAULT_POOL_SIZE = 10

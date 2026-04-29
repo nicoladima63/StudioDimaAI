@@ -5,16 +5,69 @@ Modern API endpoints for patient recall management.
 """
 
 import logging
+import os
+from datetime import date, datetime
 from flask import Blueprint, request, g
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, verify_jwt_in_request
+from jwt.exceptions import InvalidTokenError
 
 from services.pazienti_service import PazientiService
 from services.richiami_service import RichiamiService
 from app_v2 import format_response
 from core.exceptions import ValidationError, DatabaseError
+from core.constants_v2 import TIPO_RICHIAMI
 
 
 logger = logging.getLogger(__name__)
+
+# Mapping shorthand filtro → codice TIPO_RICHIAMI
+_FILTRO_TO_TIPO = {
+    'generico':    '1',
+    'igiene':      '2',
+    'rx_impianto': '3',
+    'controllo':   '4',
+    'impianti':    '5',
+    'ortodonzia':  '6',
+}
+
+
+def _check_auth():
+    """Accetta X-API-Key (per n8n) oppure JWT valido."""
+    api_key = request.headers.get('X-API-Key', '').strip()
+    automation_key = os.environ.get('BOT_API_KEY', '').strip()
+    if api_key and automation_key and api_key == automation_key:
+        return
+    try:
+        verify_jwt_in_request()
+    except Exception:
+        from flask_jwt_extended.exceptions import NoAuthorizationError
+        raise NoAuthorizationError('Autenticazione richiesta: JWT o X-API-Key valido')
+
+
+def _months_between(d1: date, d2: date) -> int:
+    return (d2.year - d1.year) * 12 + (d2.month - d1.month)
+
+
+def _add_months(d: date, months: int) -> date:
+    m = d.month - 1 + months
+    year = d.year + m // 12
+    month = m % 12 + 1
+    import calendar
+    day = min(d.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
+
+
+def _parse_date(value) -> date | None:
+    if not value:
+        return None
+    if isinstance(value, date):
+        return value
+    for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%Y%m%d'):
+        try:
+            return datetime.strptime(str(value), fmt).date()
+        except ValueError:
+            continue
+    return None
 
 # Create blueprint
 richiami_v2_bp = Blueprint('richiami_v2', __name__)
@@ -230,7 +283,7 @@ def migrate_richiami_from_dbf():
     """
     try:
         # Get all pazienti with richiami data from DBF
-        pazienti_service = PazientiService()
+        pazienti_service = PazientiService(g.database_manager)
         result = pazienti_service.get_pazienti_paginated(page=1, per_page=10000)
         
         if not result['success']:
@@ -488,6 +541,137 @@ def test_richiami():
         
     except Exception as e:
         return handle_error(e, "test_richiami")
+
+
+@richiami_v2_bp.route('/richiami/pazienti-da-richiamare', methods=['GET'])
+def get_pazienti_da_richiamare():
+    """
+    Restituisce l'elenco pazienti da richiamare, letto direttamente dal DBF Windent.
+
+    Query params:
+        filtro  : igiene | impianti | rx_impianto | controllo | ortodonzia | generico | bambini | donne
+        tipo    : codice numerico TIPO_RICHIAMI ('1'-'6'), sovrascrive filtro se specificato
+        eta_max : int — eta massima per il filtro bambini (default 16)
+        solo_cellulare : bool (default true) — escludi pazienti senza cellulare
+        scaduti_solo   : bool (default false) — solo pazienti il cui richiamo e scaduto
+        limit   : int — numero massimo di risultati
+
+    Auth: header X-API-Key (per n8n) oppure JWT.
+    """
+    _check_auth()
+
+    filtro = (request.args.get('filtro') or '').lower().strip()
+    tipo_override = (request.args.get('tipo') or '').strip()
+    eta_max = request.args.get('eta_max', 16, type=int)
+    solo_cellulare = request.args.get('solo_cellulare', 'true').lower() != 'false'
+    scaduti_solo = request.args.get('scaduti_solo', 'false').lower() == 'true'
+    limit = request.args.get('limit', type=int)
+
+    # Risolvi il codice tipo
+    tipo_filtro = tipo_override or _FILTRO_TO_TIPO.get(filtro)
+
+    try:
+        # Leggi tutti i pazienti dal DBF (merge SQLite disabilitato per velocita)
+        service = PazientiService(g.database_manager)
+        raw = service.get_pazienti_paginated(page=1, per_page=20000)
+        if not raw.get('success'):
+            return format_response({'success': False, 'error': 'Errore lettura DBF pazienti'}), 500
+
+        pazienti = raw['data']['pazienti']
+        today = date.today()
+        result = []
+
+        for p in pazienti:
+            # Solo quelli marcati da richiamare
+            if p.get('da_richiamare', '').strip().upper() != 'S':
+                continue
+
+            # Filtro per tipo richiamo (DB_PARIMOT è multi-carattere: "21" = igiene+generico)
+            tipo_paz = p.get('tipo_richiamo', '').strip()
+            if tipo_filtro and tipo_filtro not in tipo_paz:
+                continue
+
+            # Filtro donne
+            if filtro == 'donne' and p.get('sesso', '').strip().upper() != 'F':
+                continue
+
+            # Filtro bambini
+            if filtro == 'bambini':
+                dn = _parse_date(p.get('data_nascita'))
+                if not dn or _months_between(dn, today) // 12 > eta_max:
+                    continue
+
+            # Solo pazienti con cellulare (per WhatsApp)
+            cellulare = p.get('cellulare', '').strip()
+            if solo_cellulare and not cellulare:
+                continue
+
+            # Calcola scadenza richiamo
+            uv = _parse_date(p.get('ultima_visita'))
+            mesi = None
+            raw_mesi = p.get('tempo_richiamo') or p.get('mesi_richiamo')
+            if raw_mesi is not None:
+                try:
+                    mesi = int(raw_mesi)
+                except (TypeError, ValueError):
+                    mesi = None
+
+            data_richiamo_prevista = None
+            mesi_dalla_visita = None
+            scaduto = False
+            giorni_ritardo = 0
+
+            if uv and mesi:
+                data_richiamo_prevista = _add_months(uv, mesi)
+                mesi_dalla_visita = _months_between(uv, today)
+                scaduto = data_richiamo_prevista <= today
+                giorni_ritardo = (today - data_richiamo_prevista).days if scaduto else 0
+
+            if scaduti_solo and not scaduto:
+                continue
+
+            # Decodifica multi-carattere: "21" → ["Igiene", "Generico"]
+            tipi_nomi = [TIPO_RICHIAMI[c] for c in tipo_paz if c in TIPO_RICHIAMI]
+
+            result.append({
+                'id':                     p.get('id'),
+                'nome':                   p.get('nome', '').strip(),
+                'cellulare':              cellulare,
+                'telefono':               p.get('telefono', '').strip(),
+                'sesso':                  p.get('sesso', '').strip(),
+                'data_nascita':           p.get('data_nascita'),
+                'tipo_richiamo':          tipo_paz,
+                'tipo_richiamo_nomi':     tipi_nomi,
+                'mesi_richiamo':          mesi,
+                'ultima_visita':          p.get('ultima_visita'),
+                'data_richiamo_prevista': data_richiamo_prevista.isoformat() if data_richiamo_prevista else None,
+                'mesi_dalla_visita':      mesi_dalla_visita,
+                'scaduto':                scaduto,
+                'giorni_ritardo':         giorni_ritardo,
+            })
+
+        # Ordine: più in ritardo prima
+        result.sort(key=lambda x: x['giorni_ritardo'], reverse=True)
+
+        if limit:
+            result = result[:limit]
+
+        return format_response({
+            'pazienti': result,
+            'count': len(result),
+            'filtri': {
+                'filtro': filtro or None,
+                'tipo': tipo_filtro,
+                'tipo_nome': TIPO_RICHIAMI.get(tipo_filtro, None) if tipo_filtro else None,
+                'solo_cellulare': solo_cellulare,
+                'scaduti_solo': scaduti_solo,
+                'eta_max': eta_max if filtro == 'bambini' else None,
+            }
+        })
+
+    except Exception as e:
+        logger.error(f'Errore get_pazienti_da_richiamare: {e}', exc_info=True)
+        return format_response({'success': False, 'error': str(e)}), 500
 
 
 # Error handlers for the blueprint

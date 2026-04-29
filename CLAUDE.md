@@ -189,22 +189,23 @@ Se l'LLM non è disponibile, il sistema deve sempre restituire i dati del layer 
 
 ```
 StudioDimaAI/
-├── server_v2/          <-- BACKEND ATTIVO (Flask, Blueprints)
-│   └── app/
-│       ├── api/        <-- Blueprint routes (registrati in routes.py)
-│       ├── services/   <-- Logica business
-│       │   └── ai/     <-- Modulo AI (llm_client, agenda_analyzer, ecc.)
-│       ├── repositories/
-│       ├── models/
-│       └── core/       <-- Config, utils, data_normalizer
-├── client_v2/          <-- FRONTEND ATTIVO (React + Vite + CoreUI + Zustand)
+├── server_v2/              <-- BACKEND ATTIVO (Flask, Blueprints)
+│   ├── api/                <-- Blueprint routes (registrati in routes.py)
+│   ├── services/           <-- Logica business
+│   │   ├── actions/        <-- Azioni automazioni (system_actions.py)
+│   │   └── economics/      <-- Economics engine (kpi_engine, forecast, ecc.)
+│   ├── core/               <-- Config, utils, constants_v2, exceptions
+│   ├── repositories/       <-- Accesso dati DB
+│   ├── run_v2.py           <-- Entry point server
+│   └── config/             <-- Configurazioni ambiente
+├── client_v2/              <-- FRONTEND ATTIVO (React + Vite + CoreUI + Zustand)
 │   └── src/
-│       ├── api/        <-- apiClient.ts + services/
-│       ├── features/   <-- Una cartella per feature (ai/, economics/, comunicazioni/, ecc.)
-│       ├── components/ <-- Componenti UI riutilizzabili
-│       └── store/      <-- Store Zustand
-├── studio_dima.db      <-- Database SQLite attivo
-└── CLAUDE.md           <-- Questo file
+│       ├── services/api/   <-- apiClient.ts
+│       ├── features/       <-- Una cartella per feature (ai/, economics/, comunicazioni/, bot/, ecc.)
+│       ├── components/     <-- Componenti UI riutilizzabili
+│       └── store/          <-- Store Zustand
+├── studio_dima.db          <-- Database SQLite attivo
+└── CLAUDE.md               <-- Questo file
 ```
 
 Le cartelle `server/` e `client/` (senza _v2) sono la versione precedente. Non modificarle.
@@ -215,20 +216,24 @@ Le cartelle `server/` e `client/` (senza _v2) sono la versione precedente. Non m
 - Parsing DBF Windent (appuntamenti, pazienti, prestazioni)
 - Google Calendar sync
 - Autenticazione JWT con ruoli
-- Notifiche e APScheduler
+- Notifiche push e APScheduler
 - Sistema classificazione fornitori (conto/branca/sottoconto)
 - Test strutturati in server_v2/tests/
+- Sistema reminder appuntamenti (SMS Brevo, 3h prima + follow-up 24h, deduplicazione in-memory + DB)
+- Bot WhatsApp (Evolution API, webhook, tab conversazioni + tab risposte reminder)
+- Sistema automazioni prestazioni (FileWatcher → PREVENT.DBF → trigger → 4 azioni: SMS, task, notifica)
+- Economics engine parziale (kpi_engine, forecast_engine, monthly_aggregator in services/economics/)
 
 ### Moduli progettati ma da completare (priorità alta)
 
 **AI Agenda (AREA A1+A2)**
-File da creare in `server_v2/app/services/ai/`:
+File da creare in `server_v2/services/ai/` (cartella non ancora esistente):
 - `agenda_analyzer.py` — calcolo gap, efficiency score, saturazione per poltrona
 - `recall_matcher.py` — match pazienti candidati per gap fillable
 - `llm_client.py` — client Claude/OpenAI/Ollama con fallback
 - `ai_suggestion_service.py` — pipeline layer1 → layer2 con fallback graceful
 - `ai_log_repository.py` — log suggerimenti e feedback loop
-Route in `server_v2/app/api/v2_ai.py` (blueprint `ai_bp`):
+Route in `server_v2/api/v2_ai.py` (blueprint `ai_bp`):
 - `GET /api/v2/ai/agenda/analyze?date=YYYY-MM-DD`
 - `GET /api/v2/ai/agenda/candidates?date=YYYY-MM-DD`
 - `GET /api/v2/ai/agenda/suggestions?date=YYYY-MM-DD`
@@ -238,39 +243,29 @@ Frontend in `client_v2/src/features/ai/`:
 - `ai.service.ts`, `ai.store.ts` (cache 5 min, invalidazione su feedback)
 
 **Vittor.ia — Economics engine (AREA A3+A4)**
-File da creare in `server_v2/app/core/`:
-- `data_normalizer.py` — normalizza df_production, df_appointments, df_costs, df_payments
-- `monthly_aggregator.py` — tabella mensile aggregata
-- `kpi_engine.py` — KPI YTD, per operatore, per categoria, confronto anno precedente
-- `seasonality_model.py` — indice stagionale medio per mese
-- `trend_model.py` — regressione lineare su produzione
-- `forecast_engine.py` — scenari conservativo/realistico/ottimistico
-- `scenario_engine.py` — simulatore decisionale
-- `kpi_interpreter.py` — interpretazione KPI via Claude (output JSON strutturato)
-Route: `GET /api/kpi/current|monthly|by-operator|by-category`, `GET /api/v2/ai/kpi/interpret`
-Frontend in `client_v2/src/features/economics/`:
+Backend parzialmente implementato in `server_v2/services/economics/`:
+- [x] `data_normalizer.py`, `monthly_aggregator.py`, `kpi_engine.py`
+- [x] `seasonality_model.py`, `trend_model.py`, `forecast_engine.py`, `scenario_engine.py`
+- [x] `collaboratori_engine.py`, `comparison_engine.py`, `prestazioni_engine.py`
+- [ ] `kpi_interpreter.py` — interpretazione KPI via Claude (da creare)
+Route esistente: `server_v2/api/v2_economics.py`
+Route da aggiungere: `GET /api/v2/ai/kpi/interpret`
+Frontend in `client_v2/src/features/economics/`: da completare
 - Dashboard KPI, grafici produzione, forecast view, simulatore, chat dati in linguaggio naturale
-- Sezione perdite nascoste (sconti/rifacimenti), confronto benchmark di settore
 
-**Claud.ia — Comunicazioni pazienti (AREA B4 + IntelFriends)**
-File da creare in `server_v2/app/services/`:
-- `communication_service.py` — orchestratore invio messaggi (WhatsApp, email, SMS)
-Tabelle nuove in `studio_dima.db`:
-- `patient_communications` (tipo, canale, stato, timestamp, patient_id)
-Funzionalità:
-- Promemoria pre-visita automatico (APScheduler, 24h prima)
-- Istruzioni post-visita personalizzate per trattamento (Claude genera il testo)
-- Follow-up a 3/7 giorni per trattamenti con guarigione
-- Richiesta recensione automatica N giorni dopo visita (configurabile)
-- Recall intelligente: usa recall_matcher + Claude per testo personalizzato
-- Generatore relazioni prima visita: form → Claude → output copiabile/stampabile
-- Integrazione WhatsApp Business API (Twilio o Meta) per invio out
-- Gestione opt-out: flag `do_not_contact` su paziente, rispettato da tutti i servizi
-Route in blueprint `communications_bp`:
-- `POST /api/v2/communications/send`
-- `GET /api/v2/communications/log?patient_id=X`
-Frontend in `client_v2/src/features/comunicazioni/`:
-- Lista comunicazioni con stato, filtri, configurazione template e timing
+**Claud.ia — Comunicazioni pazienti (AREA B4)**
+Parzialmente implementato:
+- [x] `patient_communications` tabella in studio_dima.db (schema con `response`, `communication_id`)
+- [x] `appointment_confirmations` tabella per risposte WhatsApp
+- [x] `appointment_reminder_service.py` — SMS Brevo 3h prima + follow-up 24h
+- [x] Deduplicazione robusta: DB + in-memory set `_sent_this_session`
+- [x] Route `GET /reminders/replies` — lista risposte con stato conferma
+- [ ] `communication_service.py` — orchestratore multi-canale (da creare)
+- [ ] Istruzioni post-visita personalizzate via Claude
+- [ ] Recall intelligente con testo personalizzato
+- [ ] Richiesta recensione automatica
+- [ ] Gestione opt-out (`do_not_contact` flag paziente)
+Frontend in `client_v2/src/features/bot/components/ReminderRepliesTab.tsx` (implementato)
 
 ### Moduli da creare (priorità media)
 - B1 Protocolli: CRUD + AI generation + versionamento + ricerca full-text
@@ -278,7 +273,7 @@ Frontend in `client_v2/src/features/comunicazioni/`:
 - B3 Magazzino: inventario + soglie + alert + ordini suggeriti
 
 ### Segnaposto futuri (non iniziare)
-- Matt.ia: chatbot WhatsApp multi-turno per prenotazioni (richiede infrastruttura conversazionale)
+- Matt.ia: chatbot WhatsApp multi-turno per prenotazioni — bot base già funzionante (Evolution API + webhook), manca il layer conversazionale AI per prenotazioni. Richiede macchina dedicata always-on (non Acer Nitro 5).
 - Lil.ia: trascrizione audio visita con Whisper + note cliniche
 - Dal.ia: voice AI telefonica con VoIP (Twilio Voice + ElevenLabs)
 - SaaS: migrazione PostgreSQL, multi-tenancy, Docker, billing Stripe
@@ -336,19 +331,11 @@ CREATE TABLE ai_suggestions_log (
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     resolved_at TEXT
 );
-
-CREATE TABLE patient_communications (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    patient_id TEXT NOT NULL,
-    tipo TEXT NOT NULL,
-    canale TEXT NOT NULL,
-    stato TEXT DEFAULT 'pending',
-    testo TEXT,
-    scheduled_at TEXT,
-    sent_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
 ```
+
+Tabelle già esistenti (non ricreare):
+- `patient_communications` — reminder SMS con schema: id, patient_id, patient_name, tipo, canale, stato, testo, scheduled_at, sent_at, response, communication_id, created_at
+- `appointment_confirmations` — risposte WhatsApp ai reminder con schema: id, patient_id, appointment_date, response_type, message_text, received_at, processed
 
 ## Costi LLM stimati (da tenere sotto controllo)
 
