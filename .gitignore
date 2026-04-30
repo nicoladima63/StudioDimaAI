@@ -122,3 +122,6 @@ studio-analytics/
 
 # Prompt e appunti
 prompt.md
+
+# Deploy log (generato automaticamente, inutile nel repo)
+deploy_log.txt
