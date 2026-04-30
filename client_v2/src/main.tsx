@@ -49,6 +49,12 @@ if ('serviceWorker' in navigator) {
   })
 }
 
+// Applica il tema salvato (o sistema) prima del render per evitare flash
+const _savedTheme = localStorage.getItem('studio-dima-theme')
+const _initTheme = _savedTheme ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+document.documentElement.setAttribute('data-bs-theme', _initTheme)
+document.documentElement.setAttribute('data-coreui-theme', _initTheme)
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(

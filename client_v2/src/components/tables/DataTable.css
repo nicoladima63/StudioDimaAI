@@ -59,12 +59,12 @@
 /* Column resize styles - Specifico per sovrascrivere Bootstrap */
 .data-table .table > thead > tr > th {
   position: relative !important;
-  border-right: 1px solid #dee2e6 !important; /* Separatori visibili */
+  border-right: 1px solid var(--cui-border-color) !important; /* Separatori visibili */
   min-width: 50px !important;
 }
 
 .data-table .table > tbody > tr > td {
-  border-right: 1px solid #dee2e6 !important; /* Separatori visibili */
+  border-right: 1px solid var(--cui-border-color) !important; /* Separatori visibili */
   min-width: 50px !important;
 }
 

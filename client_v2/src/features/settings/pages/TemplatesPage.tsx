@@ -8,6 +8,10 @@ import {
   CFormInput,
   CFormTextarea,
   CFormLabel,
+  CFormSelect,
+  CNav,
+  CNavItem,
+  CNavLink,
   CRow,
   CCol,
   CCard,
@@ -20,12 +24,15 @@ import {
   CTableBody,
   CTableDataCell,
   CBadge,
+  CTabContent,
+  CTabPane,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilPlus, cilPencil, cilTrash, cilReload, cilWarning } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
-import apiClient from '@/services/api/client'; // Assuming apiClient is configured for /api/v2
-import SmsSettingsCard from '../components/SmsSettingsCard'; // <-- IMPORT NUOVO COMPONENTE
+import apiClient from '@/services/api/client';
+import SmsSettingsCard from '../components/SmsSettingsCard';
+import { marketingService, type MarketingTemplate } from '@/features/pazienti/services/marketing.service';
 
 interface SmsTemplate {
   id: number;
@@ -46,7 +53,10 @@ const PLACEHOLDERS = [
   '{tempo_richiamo}',
 ];
 
-const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
+const TemplatesPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'sms' | 'marketing'>('sms');
+
+  // ── SMS templates ──────────────────────────────────────────────────────
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -213,29 +223,122 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
     }
   };
 
+  // ── Marketing templates ────────────────────────────────────────────────
+  const [mktTemplates, setMktTemplates] = useState<MarketingTemplate[]>([]);
+  const [mktLoading, setMktLoading] = useState(false);
+  const [mktError, setMktError] = useState<string | null>(null);
+  const [mktSuccess, setMktSuccess] = useState<string | null>(null);
+  const [mktShowModal, setMktShowModal] = useState(false);
+  const [mktEditing, setMktEditing] = useState(false);
+  const [mktCurrent, setMktCurrent] = useState<Partial<MarketingTemplate>>({});
+  const [mktDeleteTarget, setMktDeleteTarget] = useState<MarketingTemplate | null>(null);
+
+  const loadMktTemplates = useCallback(async () => {
+    setMktLoading(true);
+    setMktError(null);
+    try {
+      const data = await marketingService.apiGetTemplates();
+      setMktTemplates(data);
+    } catch {
+      setMktError('Errore caricamento template marketing');
+    } finally {
+      setMktLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'marketing') loadMktTemplates();
+  }, [activeTab, loadMktTemplates]);
+
+  const handleMktSave = async () => {
+    setMktLoading(true);
+    setMktError(null);
+    setMktSuccess(null);
+    try {
+      if (mktEditing && mktCurrent.id) {
+        await marketingService.apiUpdateTemplate(mktCurrent.id, mktCurrent);
+      } else {
+        await marketingService.apiCreateTemplate({
+          nome: mktCurrent.nome || '',
+          testo: mktCurrent.testo || '',
+          note: mktCurrent.note || '',
+          canale: mktCurrent.canale || 'whatsapp',
+        });
+      }
+      setMktSuccess(mktEditing ? 'Template aggiornato' : 'Template creato');
+      setMktShowModal(false);
+      loadMktTemplates();
+    } catch {
+      setMktError('Errore salvataggio template');
+    } finally {
+      setMktLoading(false);
+    }
+  };
+
+  const handleMktDelete = async () => {
+    if (!mktDeleteTarget) return;
+    setMktLoading(true);
+    try {
+      await marketingService.apiDeleteTemplate(mktDeleteTarget.id);
+      setMktSuccess('Template eliminato');
+      setMktDeleteTarget(null);
+      loadMktTemplates();
+    } catch {
+      setMktError('Errore eliminazione template');
+    } finally {
+      setMktLoading(false);
+    }
+  };
+
   return (
     <PageLayout>
       <PageLayout.Header
-        title='Gestione Template SMS'
+        title='Gestione Template'
         headerAction={
           <div className='d-flex gap-2'>
-            <CButton color='primary' onClick={() => handleCreateEditClick()} disabled={loading}>
-              <CIcon icon={cilPlus} className='me-1' />
-              Nuovo Template
-            </CButton>
-            <CButton color='info' onClick={loadTemplates} disabled={loading}>
-              <CIcon icon={cilReload} className='me-1' />
-              Aggiorna Lista
-            </CButton>
+            {activeTab === 'sms' && (
+              <>
+                <CButton color='primary' onClick={() => handleCreateEditClick()} disabled={loading}>
+                  <CIcon icon={cilPlus} className='me-1' />Nuovo Template SMS
+                </CButton>
+                <CButton color='info' onClick={loadTemplates} disabled={loading}>
+                  <CIcon icon={cilReload} className='me-1' />Aggiorna
+                </CButton>
+              </>
+            )}
+            {activeTab === 'marketing' && (
+              <>
+                <CButton color='primary' onClick={() => { setMktEditing(false); setMktCurrent({ canale: 'whatsapp' }); setMktShowModal(true); }} disabled={mktLoading}>
+                  <CIcon icon={cilPlus} className='me-1' />Nuovo Template Marketing
+                </CButton>
+                <CButton color='info' onClick={loadMktTemplates} disabled={mktLoading}>
+                  <CIcon icon={cilReload} className='me-1' />Aggiorna
+                </CButton>
+              </>
+            )}
           </div>
         }
       />
 
       <PageLayout.ContentBody>
+        <CNav variant='tabs' className='mb-3'>
+          <CNavItem>
+            <CNavLink active={activeTab === 'sms'} onClick={() => setActiveTab('sms')} style={{ cursor: 'pointer' }}>
+              Template SMS Reminder
+            </CNavLink>
+          </CNavItem>
+          <CNavItem>
+            <CNavLink active={activeTab === 'marketing'} onClick={() => setActiveTab('marketing')} style={{ cursor: 'pointer' }}>
+              Template Marketing WhatsApp
+            </CNavLink>
+          </CNavItem>
+        </CNav>
+
+        <CTabContent>
+        <CTabPane visible={activeTab === 'sms'}>
         {error && <CBadge color='danger' className='mb-3 p-2'>{error}</CBadge>}
         {success && <CBadge color='success' className='mb-3 p-2'>{success}</CBadge>}
 
-        {/* CARD IMPOSTAZIONI MITTENTE SMS */}
         <SmsSettingsCard />
 
         <CCard className='mb-4'>
@@ -276,9 +379,113 @@ const TemplatesPage: React.FC = () => { // Renamed component to TemplatesPage
             )}
           </CCardBody>
         </CCard>
+        </CTabPane>
+
+        {/* ── Tab Marketing ── */}
+        <CTabPane visible={activeTab === 'marketing'}>
+          {mktError && <CBadge color='danger' className='mb-3 p-2'>{mktError}</CBadge>}
+          {mktSuccess && <CBadge color='success' className='mb-3 p-2'>{mktSuccess}</CBadge>}
+          <CCard>
+            <CCardHeader><h5 className='mb-0'>Template Marketing WhatsApp</h5></CCardHeader>
+            <CCardBody>
+              {mktLoading && <p>Caricamento...</p>}
+              {!mktLoading && mktTemplates.length === 0 && <p>Nessun template marketing. Creane uno con il pulsante in alto.</p>}
+              {!mktLoading && mktTemplates.length > 0 && (
+                <CTable hover responsive striped>
+                  <CTableHead>
+                    <CTableRow>
+                      <CTableHeaderCell>Nome</CTableHeaderCell>
+                      <CTableHeaderCell>Testo</CTableHeaderCell>
+                      <CTableHeaderCell>Note</CTableHeaderCell>
+                      <CTableHeaderCell>Azioni</CTableHeaderCell>
+                    </CTableRow>
+                  </CTableHead>
+                  <CTableBody>
+                    {mktTemplates.map((t) => (
+                      <CTableRow key={t.id}>
+                        <CTableDataCell>{t.nome}</CTableDataCell>
+                        <CTableDataCell className='text-truncate' style={{ maxWidth: 320 }}>{t.testo}</CTableDataCell>
+                        <CTableDataCell>{t.note || '-'}</CTableDataCell>
+                        <CTableDataCell>
+                          <CButton color='info' size='sm' className='me-2' onClick={() => { setMktEditing(true); setMktCurrent(t); setMktShowModal(true); }}>
+                            <CIcon icon={cilPencil} />
+                          </CButton>
+                          <CButton color='danger' size='sm' onClick={() => setMktDeleteTarget(t)}>
+                            <CIcon icon={cilTrash} />
+                          </CButton>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              )}
+            </CCardBody>
+          </CCard>
+          <p className='text-muted small mt-2'>
+            Variabili disponibili nel testo: <code>{'{nome}'}</code> (primo nome del paziente)
+          </p>
+        </CTabPane>
+        </CTabContent>
+
       </PageLayout.ContentBody>
 
-      {/* Modal Creazione/Modifica Template */}
+      {/* Modal Creazione/Modifica Template Marketing */}
+      <CModal visible={mktShowModal} onClose={() => setMktShowModal(false)} backdrop='static' size='lg'>
+        <CModalHeader>{mktEditing ? 'Modifica Template Marketing' : 'Nuovo Template Marketing'}</CModalHeader>
+        <CModalBody>
+          <CRow className='mb-3'>
+            <CCol>
+              <CFormLabel>Nome template</CFormLabel>
+              <CFormInput value={mktCurrent.nome || ''} onChange={(e) => setMktCurrent({ ...mktCurrent, nome: e.target.value })} placeholder='Es. 8 Marzo - Festa della donna' />
+            </CCol>
+          </CRow>
+          <CRow className='mb-3'>
+            <CCol>
+              <CFormLabel>Testo messaggio <small className='text-muted'>({'{nome}'} = nome paziente)</small></CFormLabel>
+              <CFormTextarea rows={6} value={mktCurrent.testo || ''} onChange={(e) => setMktCurrent({ ...mktCurrent, testo: e.target.value })} placeholder='Ciao {nome}, in occasione dell&apos;8 marzo...' />
+              <small className='text-muted'>{(mktCurrent.testo || '').length} caratteri</small>
+            </CCol>
+          </CRow>
+          <CRow className='mb-3'>
+            <CCol md={6}>
+              <CFormLabel>Note interne</CFormLabel>
+              <CFormInput value={mktCurrent.note || ''} onChange={(e) => setMktCurrent({ ...mktCurrent, note: e.target.value })} placeholder='Uso previsto, target...' />
+            </CCol>
+            <CCol md={6}>
+              <CFormLabel>Canale</CFormLabel>
+              <CFormSelect value={mktCurrent.canale || 'whatsapp'} onChange={(e) => setMktCurrent({ ...mktCurrent, canale: e.target.value })}>
+                <option value='whatsapp'>WhatsApp</option>
+              </CFormSelect>
+            </CCol>
+          </CRow>
+          {mktCurrent.testo && (
+            <div className='p-3 rounded bg-body-tertiary text-body border border-secondary-subtle'>
+              <small className='text-body-secondary fw-semibold d-block mb-1'>Anteprima</small>
+              <span style={{ whiteSpace: 'pre-wrap' }}>{(mktCurrent.testo || '').replace('{nome}', 'Mario')}</span>
+            </div>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color='secondary' onClick={() => setMktShowModal(false)} disabled={mktLoading}>Annulla</CButton>
+          <CButton color='primary' onClick={handleMktSave} disabled={mktLoading || !mktCurrent.nome || !mktCurrent.testo}>
+            {mktEditing ? 'Salva modifiche' : 'Crea template'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Conferma eliminazione template marketing */}
+      <CModal visible={!!mktDeleteTarget} onClose={() => setMktDeleteTarget(null)} backdrop='static'>
+        <CModalHeader>Conferma eliminazione</CModalHeader>
+        <CModalBody>Eliminare il template <strong>{mktDeleteTarget?.nome}</strong>?</CModalBody>
+        <CModalFooter>
+          <CButton color='secondary' onClick={() => setMktDeleteTarget(null)}>Annulla</CButton>
+          <CButton color='danger' onClick={handleMktDelete} disabled={mktLoading}>
+            <CIcon icon={cilTrash} className='me-1' />Elimina
+          </CButton>
+        </CModalFooter>
+      </CModal>
+
+      {/* Modal Creazione/Modifica Template SMS */}
       <CModal visible={showModal} onClose={() => setShowModal(false)} backdrop='static' size='xl'>
         <CModalHeader>Modifica Template SMS</CModalHeader>
         <CModalBody>

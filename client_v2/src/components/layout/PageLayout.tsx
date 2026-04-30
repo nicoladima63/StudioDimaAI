@@ -37,14 +37,14 @@ PageLayout.Header = ({ title, headerAction, children }) => (
 // ContentHeader: sezione opzionale sopra il body
 PageLayout.ContentHeader = ({ children }) => (
   <div className="card-body">
-    <div className="p-3 border rounded bg-light">{children}</div>
+    <div className="p-3 border rounded bg-body-tertiary">{children}</div>
   </div>
 );
 
 // ContentBody: sezione principale del content
 PageLayout.ContentBody = ({ children }) => (
-  <div className="card-body ">
-    <div className="mb-4 p-3 border rounded bg-light">{children}</div>
+  <div className="card-body">
+    <div className="mb-4 p-3 border rounded bg-body-tertiary">{children}</div>
   </div>
 );
 

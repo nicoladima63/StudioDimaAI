@@ -17,8 +17,8 @@ body {
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #212529;
-  background-color: #f8f9fa;
+  color: var(--cui-body-color);
+  background-color: var(--cui-body-bg);
 }
 
 /* CoreUI customizations */
@@ -93,8 +93,8 @@ body {
 .table th {
   border-top: none;
   font-weight: 600;
-  background-color: #f8f9fa;
-  color: #495057;
+  background-color: var(--cui-tertiary-bg);
+  color: var(--cui-body-color);
 }
 
 /* Form improvements */
@@ -150,10 +150,4 @@ body {
   margin-bottom: 0;
 }
 
-/* Dark theme compatibility */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --cui-body-bg: #1a1a1a;
-    --cui-body-color: #ffffff;
-  }
-}
+/* Le variabili tema sono gestite tramite data-bs-theme in main.tsx */

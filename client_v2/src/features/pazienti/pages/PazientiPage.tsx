@@ -5,27 +5,31 @@ import PageLayout from '@/components/layout/PageLayout';
 import PazientiTable from '@/features/pazienti/components/PazientiTable';
 import { ModalAnagrafica } from '@/components/modals';
 import { usePazienti, usePazientiStore, type Paziente } from '@/store/pazienti.store';
+import FiltriPazienti, {
+  FILTRI_DEFAULT,
+  applicaFiltri,
+  type FiltriState,
+} from '../components/FiltriPazienti';
+import BroadcastModal from '../components/BroadcastModal';
 
 const PazientiPage: React.FC = () => {
   const { pazienti, isLoading, error, loadAll } = usePazienti();
   const { invalidateCache } = usePazientiStore();
 
-  // Stati per modal anagrafica
   const [anagraficaModalVisible, setAnagraficaModalVisible] = React.useState(false);
   const [selectedPaziente, setSelectedPaziente] = React.useState<Paziente | null>(null);
+  const [filtri, setFiltri] = React.useState<FiltriState>(FILTRI_DEFAULT);
+  const [broadcastVisible, setBroadcastVisible] = React.useState(false);
 
-  // Carica pazienti all'avvio
   React.useEffect(() => {
     loadAll();
   }, []);
-  
-  // Handler per aggiornamento forzato
+
   const handleForceRefresh = () => {
     invalidateCache();
     loadAll();
   };
 
-  // Gestori azioni tabella
   const handleView = (paziente: Paziente) => {
     setSelectedPaziente(paziente);
     setAnagraficaModalVisible(true);
@@ -36,30 +40,39 @@ const PazientiPage: React.FC = () => {
     setSelectedPaziente(null);
   };
 
-  // Configurazione campi anagrafica paziente
+  const pazientiMostra  = applicaFiltri(pazienti, filtri);
+  const pazientiWa      = pazientiMostra.filter((p) => !!p.cellulare);
+  const filtriAttivi    = JSON.stringify(filtri) !== JSON.stringify(FILTRI_DEFAULT);
+
   const getCampiAnagrafica = (paziente: Paziente) => [
     { label: 'Nome', value: paziente.nome || '-' },
-    { label: 'Cognome', value: paziente.cognome || '-' },
     { label: 'Codice Fiscale', value: paziente.codice_fiscale || '-' },
     { label: 'Data di Nascita', value: paziente.data_nascita || '-' },
     { label: 'Luogo di Nascita', value: paziente.luogo_nascita || '-' },
     { label: 'Sesso', value: paziente.sesso || '-' },
     { label: 'Indirizzo', value: paziente.indirizzo || '-' },
-    { label: 'Città', value: paziente.citta || '-' },
+    { label: 'Citta', value: paziente.citta || '-' },
     { label: 'CAP', value: paziente.cap || '-' },
     { label: 'Provincia', value: paziente.provincia || '-' },
     { label: 'Telefono', value: paziente.telefono || '-' },
     { label: 'Email', value: paziente.email || '-' },
     { label: 'Tessera Sanitaria', value: paziente.tessera_sanitaria || '-' },
-    { label: 'Note', value: paziente.note || '-' }
+    { label: 'Note', value: paziente.note || '-' },
   ];
 
   return (
     <PageLayout>
-      <PageLayout.Header 
+      <PageLayout.Header
         title="Gestione Pazienti"
         headerAction={
           <div className="d-flex gap-2">
+            <CButton
+              color="success"
+              disabled={pazientiWa.length === 0}
+              onClick={() => setBroadcastVisible(true)}
+            >
+              Invia WhatsApp ({pazientiWa.length})
+            </CButton>
             <CButton color="primary" onClick={handleForceRefresh} disabled={isLoading}>
               {isLoading ? 'Caricamento...' : 'Aggiorna'}
             </CButton>
@@ -68,58 +81,52 @@ const PazientiPage: React.FC = () => {
       />
 
       <PageLayout.ContentHeader>
-        <div className="row">
-          <div className="col-md-10">
-            <h5 className="mb-3">Filtri e Ricerca</h5>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label fw-bold">Filtri</label>
-                <p className="text-muted mb-0 small">
-                  Prossimamente: nome, cognome, codice fiscale, data nascita
-                </p>
-              </div>
-            </div>
+        <FiltriPazienti
+          filtri={filtri}
+          onChange={setFiltri}
+          totale={pazienti.length}
+          filtrati={pazientiMostra.length}
+          conCellulare={pazientiWa.length}
+        />
+        {filtriAttivi && (
+          <div className="text-end mb-2">
+            <CButton color="link" size="sm" onClick={() => setFiltri(FILTRI_DEFAULT)}>
+              Azzera filtri
+            </CButton>
           </div>
-          <div className="col-md-2">
-            <h5 className="mb-3">Statistiche</h5>
-            <div className="row g-2">
-              <div className="col-12">
-                <div className="d-flex justify-content-between">
-                  <span>Totale pazienti:</span>
-                  <strong>{pazienti.length}</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </PageLayout.ContentHeader>
 
       <PageLayout.ContentBody>
         <PazientiTable
-          pazienti={pazienti}
+          pazienti={pazientiMostra}
           loading={isLoading}
           error={error}
           onView={handleView}
           onRichiamoChange={(pazienteId, status, dataRichiamo) => {
-            // Aggiorna lo store locale
             usePazientiStore.getState().updateRichiamoStatus(pazienteId, status, dataRichiamo);
           }}
         />
       </PageLayout.ContentBody>
 
       <PageLayout.Footer text="Gestione pazienti dello studio" />
-      
-      {/* Modal Anagrafica Paziente */}
+
       {selectedPaziente && (
         <ModalAnagrafica
           visible={anagraficaModalVisible}
           onClose={closeAnagraficaModal}
-          title={`Anagrafica Paziente: ${selectedPaziente.nome} ${selectedPaziente.cognome}`}
+          title={`Anagrafica Paziente: ${selectedPaziente.nome}`}
           subtitle={`CF: ${selectedPaziente.codice_fiscale}`}
           campi={getCampiAnagrafica(selectedPaziente)}
           showFattureButton={false}
         />
       )}
+
+      <BroadcastModal
+        visible={broadcastVisible}
+        onClose={() => setBroadcastVisible(false)}
+        pazienti={pazientiWa}
+      />
     </PageLayout>
   );
 };
