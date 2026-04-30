@@ -40,6 +40,12 @@ const PazientiPage: React.FC = () => {
     setSelectedPaziente(null);
   };
 
+  const comuni = React.useMemo(() => {
+    const set = new Set<string>();
+    pazienti.forEach((p) => { if (p.citta?.trim()) set.add(p.citta.trim()); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'it'));
+  }, [pazienti]);
+
   const pazientiMostra  = applicaFiltri(pazienti, filtri);
   const pazientiWa      = pazientiMostra.filter((p) => !!p.cellulare);
   const filtriAttivi    = JSON.stringify(filtri) !== JSON.stringify(FILTRI_DEFAULT);
@@ -87,6 +93,7 @@ const PazientiPage: React.FC = () => {
           totale={pazienti.length}
           filtrati={pazientiMostra.length}
           conCellulare={pazientiWa.length}
+          comuni={comuni}
         />
         {filtriAttivi && (
           <div className="text-end mb-2">

@@ -10,6 +10,7 @@ import {
   CRow,
 } from '@coreui/react';
 import type { Paziente } from '@/store/pazienti.store';
+import SlimSelectComponent from '@/components/selects/SlimSelect';
 
 export type EtaTipo = 'qualsiasi' | 'fino_a' | 'da' | 'tra';
 
@@ -42,9 +43,8 @@ export function calcolaEta(dataNascita?: string): number | null {
 export function applicaFiltri(pazienti: Paziente[], filtri: FiltriState): Paziente[] {
   return pazienti.filter((p) => {
     if (filtri.sesso && (p.sesso || '').toUpperCase() !== filtri.sesso) return false;
-    if (filtri.comune.trim()) {
-      const citta = (p.citta || '').toLowerCase();
-      if (!citta.includes(filtri.comune.toLowerCase().trim())) return false;
+    if (filtri.comune) {
+      if ((p.citta || '').trim().toLowerCase() !== filtri.comune.toLowerCase()) return false;
     }
     if (filtri.soloCellulare && !p.cellulare) return false;
     if (filtri.etaTipo !== 'qualsiasi') {
@@ -67,6 +67,7 @@ interface FiltriPazientiProps {
   totale: number;
   filtrati: number;
   conCellulare: number;
+  comuni: string[];
 }
 
 const FiltriPazienti: React.FC<FiltriPazientiProps> = ({
@@ -75,8 +76,14 @@ const FiltriPazienti: React.FC<FiltriPazientiProps> = ({
   totale,
   filtrati,
   conCellulare,
+  comuni,
 }) => {
   const set = (partial: Partial<FiltriState>) => onChange({ ...filtri, ...partial });
+
+  const comuniOptions = React.useMemo(() => [
+    { value: '', text: 'Tutti i comuni', placeholder: true },
+    ...comuni.map((c) => ({ value: c, text: c })),
+  ], [comuni]);
 
   return (
     <CCard className="mb-3">
@@ -94,10 +101,11 @@ const FiltriPazienti: React.FC<FiltriPazientiProps> = ({
 
           <CCol md={2}>
             <CFormLabel className="fw-semibold">Comune</CFormLabel>
-            <CFormInput
-              placeholder="Es. Firenze"
-              value={filtri.comune}
-              onChange={(e) => set({ comune: e.target.value })}
+            <SlimSelectComponent
+              options={comuniOptions}
+              selected={filtri.comune}
+              onChange={(v) => set({ comune: v as string })}
+              settings={{ searchPlaceholder: 'Cerca comune...' } as any}
             />
           </CCol>
 

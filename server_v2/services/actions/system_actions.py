@@ -365,3 +365,65 @@ def impl_send_system_notification(context_data: Dict[str, Any], **params):
         logger.error(f"Impossibile aggiornare UI logs: {e}")
     
     return {'status': 'success', 'message': f'Notifica inviata a user {user_id}'}
+
+
+from services.richiami_service import RichiamiService
+from datetime import datetime as _datetime
+
+@register_action(
+    name='mark_richiamo_ok',
+    description="Marca il paziente come richiamato quando viene registrata la prestazione RIOK.",
+    parameters=[]
+)
+def impl_mark_richiamo_ok(context_data: Dict[str, Any], **params):
+    """
+    Scatta quando DB_PRLAVOR == 'riok' transisce a DB_GUARDIA == 3.
+    Aggiorna la tabella richiami di studio_dima.db impostando da_richiamare='R'.
+    """
+    # Filtra: agisce solo sulla prestazione RIOK
+    lavor = str(context_data.get('DB_PRLAVOR', '')).strip().lower()
+    if lavor != 'riok':
+        return {'status': 'skipped', 'message': f'Prestazione ignorata (DB_PRLAVOR={lavor})'}
+
+    # Recupera patient_id — stesso pattern di create_task_from_work
+    patient_id = None
+
+    if 'id_paziente' in context_data and context_data['id_paziente']:
+        patient_id = str(context_data['id_paziente']).strip()
+    else:
+        for table, cols in COLONNE.items():
+            k = cols.get('id_paziente')
+            if k and k in context_data and str(context_data[k]).strip():
+                patient_id = str(context_data[k]).strip()
+                break
+
+    if not patient_id and context_data.get('DB_PRELCOD'):
+        piano_id = str(context_data['DB_PRELCOD']).strip()
+        if piano_id:
+            patient_id = get_dbf_data_service().get_patient_id_from_piano(piano_id)
+
+    if not patient_id:
+        raise ValidationError(
+            f"mark_richiamo_ok: impossibile determinare patient_id. "
+            f"Context keys: {list(context_data.keys())}"
+        )
+
+    # Data prestazione (DB_PRDATA) o oggi come fallback
+    raw_date = context_data.get('DB_PRDATA')
+    try:
+        if raw_date:
+            data_richiamo = str(raw_date)[:10]
+        else:
+            data_richiamo = _datetime.now().strftime('%Y-%m-%d')
+    except Exception:
+        data_richiamo = _datetime.now().strftime('%Y-%m-%d')
+
+    # Aggiorna (o crea) il record in richiami
+    service = RichiamiService()
+    result = service.update_richiamo_status(patient_id, 'R', data_richiamo)
+
+    if result.get('success'):
+        logger.info(f"mark_richiamo_ok: paziente {patient_id} segnato come richiamato il {data_richiamo}")
+        return {'status': 'success', 'patient_id': patient_id, 'data_richiamo': data_richiamo}
+    else:
+        raise ValidationError(f"mark_richiamo_ok: errore aggiornamento richiami — {result.get('error')}")

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import SlimSelect from 'slim-select';
-import 'slim-select/styles' // optional css import method
-
+import 'slim-select/styles';
 
 interface Option {
   value: string;
@@ -10,9 +9,7 @@ interface Option {
   display?: boolean;
   disabled?: boolean;
   placeholder?: boolean;
-  data?: {
-    [key: string]: string;
-  };
+  data?: { [key: string]: string };
 }
 
 interface SlimSelectProps {
@@ -20,7 +17,7 @@ interface SlimSelectProps {
   placeholder?: string;
   onChange?: (selected: string | string[]) => void;
   selected?: string | string[];
-  settings?: Partial<SlimSelect['config']>;
+  settings?: object;
 }
 
 const SlimSelectComponent: React.FC<SlimSelectProps> = ({
@@ -31,43 +28,50 @@ const SlimSelectComponent: React.FC<SlimSelectProps> = ({
   settings,
 }) => {
   const selectRef = useRef<HTMLSelectElement>(null);
-  const slimSelectInstance = useRef<SlimSelect | null>(null);
+  const instanceRef = useRef<SlimSelect | null>(null);
+  const onChangeRef = useRef(onChange);
 
   useEffect(() => {
-    if (selectRef.current) {
-      slimSelectInstance.current = new SlimSelect({
-        select: selectRef.current,
-        placeholder: placeholder,
-        data: options,
-        onChange: (info) => {
-          if (onChange) {
-            const selectedValues = Array.isArray(info)
-              ? info.map((item) => item.value)
-              : info.value;
-            onChange(selectedValues);
-          }
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (!selectRef.current) return;
+
+    instanceRef.current = new SlimSelect({
+      select: selectRef.current,
+      settings: {
+        placeholderText: placeholder ?? '',
+        ...(settings ?? {}),
+      },
+      events: {
+        afterChange: (newVal) => {
+          if (!onChangeRef.current) return;
+          const values = newVal.map((item) => item.value);
+          onChangeRef.current(values.length === 1 ? values[0] : values);
         },
-        ...settings,
-      });
-    }
+      },
+    });
 
     return () => {
-      if (slimSelectInstance.current) {
-        slimSelectInstance.current.destroy();
-      }
+      instanceRef.current?.destroy();
+      instanceRef.current = null;
     };
-  }, [placeholder, onChange, settings]);
+  }, []);
 
   useEffect(() => {
-    if (slimSelectInstance.current) {
-      slimSelectInstance.current.setData(options);
-      if (selected !== undefined) {
-        slimSelectInstance.current.setSelected(selected);
-      }
+    if (instanceRef.current) {
+      instanceRef.current.setData(options);
     }
-  }, [options, selected]);
+  }, [options]);
 
-  return <select ref={selectRef}></select>;
+  useEffect(() => {
+    if (instanceRef.current && selected !== undefined) {
+      instanceRef.current.setSelected(selected as string | string[]);
+    }
+  }, [selected]);
+
+  return <select ref={selectRef} />;
 };
 
 export default SlimSelectComponent;
