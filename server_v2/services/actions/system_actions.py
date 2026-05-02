@@ -72,22 +72,26 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
         else:
             enriched_context['nome_completo'] = 'Gentile Paziente'
 
-        # Estrai telefono dalla prima riga di DB_NOTE
+        # Scansiona tutte le righe di DB_NOTE alla ricerca del numero di telefono
         note_key = COLONNE.get('appuntamenti', {}).get('note', 'DB_NOTE')
+        phone_pattern = re.compile(r'(?:\+39)?[\s-]?3\d[\d\s-]{7,9}')
         if note_key in enriched_context and enriched_context[note_key]:
             notes_content = str(enriched_context[note_key]).strip()
-            first_line = notes_content.split('\n')[0].strip()
-            # FIX REGEX: Matcha numeri italiani (10 cifre) con o senza prefisso +39
-            # Supporta formati: 3755445058, +393755445058, 375 544 5058, 375-544-5058
-            phone_match = re.search(r'(?:\+39)?[\s-]?3\d[\d\s-]{7,9}', first_line)
-            if phone_match:
-                enriched_context['telefono'] = phone_match.group(0).strip()
+            for line in notes_content.splitlines():
+                phone_match = phone_pattern.search(line.strip())
+                if phone_match:
+                    enriched_context['telefono'] = phone_match.group(0).strip()
+                    break
 
-        # Se dopo questi tentativi non abbiamo un telefono, solleva errore
+        # Nessun telefono trovato in nessuna riga: skip senza errore
         if 'telefono' not in enriched_context or not enriched_context['telefono']:
-            raise ValidationError("Arricchimento fallito: Impossibile determinare un numero di telefono valido per il nuovo paziente.")
+            logger.warning(
+                f"Nuovo paziente '{enriched_context.get('nome_completo', '?')}' "
+                f"senza telefono in DB_NOTE: azione saltata."
+            )
+            return None
 
-        return enriched_context # Abbiamo nome e telefono, possiamo procedere
+        return enriched_context
 
     # Caso 3: ID paziente trovato - recupera dati dal DB
     patient_data = dbf_data_service.get_patient_by_id(patient_id)
@@ -128,10 +132,10 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
 )
 def impl_send_sms_link(context_data: Dict[str, Any], **params):
     """Implementazione REALE per inviare un SMS con link."""
-    #logger.debug(f"[AZIONE REALE] Esecuzione send_sms_link... Dati grezzi ricevuti: {context_data}")
-    
     # 1. Arricchisci il contesto per ottenere i dati del paziente
     full_context = _enrich_context_with_patient_data(context_data)
+    if full_context is None:
+        return {'status': 'skipped', 'message': 'Telefono non trovato, SMS non inviato.'}
     full_context.update(params)
 
     # 2. Estrai i dati necessari
@@ -178,10 +182,10 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
 )
 def impl_send_appointment_sms(context_data: Dict[str, Any], **params):
     """Implementazione REALE per inviare un SMS di appuntamento."""
-    #logger.debug("[AZIONE REALE] Esecuzione send_appointment_sms...")
-
     # 1. Arricchisci il contesto
     full_context = _enrich_context_with_patient_data(context_data)
+    if full_context is None:
+        return {'status': 'skipped', 'message': 'Telefono non trovato, SMS non inviato.'}
     full_context.update(params)
 
     # 2. Estrai dati
