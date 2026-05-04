@@ -15,9 +15,9 @@ from io import StringIO
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import test modules
-from . import test_database_manager
-from . import test_dbf_utils  
-from . import test_base_repository
+import test_database_manager
+import test_dbf_utils  
+import test_base_repository
 
 
 class TestResult(unittest.TestResult):
