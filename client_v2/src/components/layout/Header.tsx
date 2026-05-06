@@ -18,6 +18,7 @@ import { useState } from 'react'
 import { CToast, CToastBody, CToastClose, CToaster, CButton, CTooltip } from '@coreui/react'
 import pushService from '@/services/pushService'
 import { cilPaperPlane } from '@coreui/icons'
+import TheoreticalModeToggle from '@/components/TheoreticalModeToggle'
 
 const Header: React.FC = () => {
   const { user, logout } = useAuthStore()
@@ -48,6 +49,7 @@ const Header: React.FC = () => {
   return (
     <>
       <div className="d-flex align-items-center">
+        <TheoreticalModeToggle />
         <div className="me-3">
           <PushNotificationToggle
             showLabel={false}

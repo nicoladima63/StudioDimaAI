@@ -1,4 +1,5 @@
-import { baseService } from './base.service';
+import apiClient from '@/services/api/client';
+
 
 export interface SimulatedAction {
   patient_id?: string;
@@ -33,13 +34,13 @@ export interface SimulationResults {
 
 class SimulationService {
   async runSimulation(): Promise<SimulationResults> {
-    const response = await baseService.post<SimulationResults>('/simulation/run', {});
-    return response.data;
+    const response = await apiClient.post<{ data: SimulationResults }>('/simulation/run', {});
+    return response.data.data;
   }
 
   async getResults(): Promise<SimulationResults> {
-    const response = await baseService.get<SimulationResults>('/simulation/results');
-    return response.data;
+    const response = await apiClient.get<{ data: SimulationResults }>('/simulation/results');
+    return response.data.data;
   }
 }
 

@@ -55,6 +55,7 @@ const FornitoriClassificazione = React.lazy(() => import('@/features/fornitori/p
 const EmailPage = React.lazy(() => import('@/features/email/pages/EmailPage'))
 const SeoPage = React.lazy(() => import('@/features/seo/pages/SeoPage'))
 const BotPage = React.lazy(() => import('@/features/bot/pages/BotPage'))
+const SimulationDashboard = React.lazy(() => import('@/features/simulation/pages/SimulationDashboard'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -137,6 +138,9 @@ const AppRouter: React.FC = () => {
 
           {/* Bot WhatsApp */}
           <Route path='bot' element={<BotPage />} />
+
+          {/* Simulation (Theoretical Flow) */}
+          <Route path='simulation' element={<SimulationDashboard />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}

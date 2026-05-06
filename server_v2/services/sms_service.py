@@ -140,6 +140,17 @@ class SMSService:
         Returns:
             Risultato invio con dettagli
         """
+        from core.automation_config import get_automation_settings
+        settings = get_automation_settings()
+        if settings.get('theoretical_mode_enabled'):
+            logger.info(f"[THEORETICAL SMS] To: {recipient}, Message: {message[:50]}...")
+            return {
+                'success': True,
+                'message': 'SMS simulato (modalità teorica attiva)',
+                'message_id': 'SIMULATED',
+                'theoretical': True
+            }
+
         try:
             if not self.is_enabled():
                 return {
@@ -439,9 +450,10 @@ class SMSService:
                 }
             
             # Usa template manager per preview completo
-            preview_result = template_manager.preview_template(
-                tipo='richiamo',
-                data=richiamo_data
+            template_data = self._prepare_recall_template_data(richiamo_data)
+            preview_result = self.template_manager.preview_template(
+                name='recall_reminder',
+                data=template_data
             )
             
             if preview_result['success']:
@@ -475,6 +487,40 @@ class SMSService:
                 'message': f'Errore generazione anteprima: {str(e)}'
             }
     
+    def _prepare_recall_template_data(self, richiamo_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepara i dati per il template di richiamo."""
+        tipo_map = {
+            '1': 'controllo periodico',
+            '2': 'richiamo igiene', 
+            '3': 'controllo post-trattamento',
+            '4': 'controllo ortodontico',
+            '5': 'visita di follow-up',
+            '21': 'controllo + igiene',
+            '12': 'igiene + controllo'
+        }
+        
+        nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
+        tipo_richiamo_code = str(richiamo_data.get('tipo_richiamo', '1'))
+        tipo_richiamo = tipo_map.get(tipo_richiamo_code, 'controllo')
+        
+        data_richiamo = richiamo_data.get('data_richiamo', 'da concordare')
+        if data_richiamo and isinstance(data_richiamo, str) and len(data_richiamo) >= 10:
+            try:
+                from datetime import datetime
+                dt = datetime.fromisoformat(data_richiamo[:10])
+                data_richiamo = dt.strftime('%d/%m/%Y')
+            except:
+                data_richiamo = 'da concordare'
+        else:
+            data_richiamo = 'da concordare'
+        
+        return {
+            'nome_completo': nome,
+            'tipo_richiamo': tipo_richiamo,
+            'data_richiamo': data_richiamo,
+            'tempo_richiamo': str(richiamo_data.get('tempo_richiamo', '')),  # numero di mesi dal record paziente
+        }
+
     def _generate_recall_message(self, richiamo_data: Dict[str, Any]) -> str:
         """
         Genera messaggio di richiamo usando template manager V2
@@ -486,43 +532,10 @@ class SMSService:
             Messaggio formattato
         """
         try:
-            # Mappa tipo richiamo da codice a testo leggibile
-            tipo_map = {
-                '1': 'controllo periodico',
-                '2': 'richiamo igiene', 
-                '3': 'controllo post-trattamento',
-                '4': 'controllo ortodontico',
-                '5': 'visita di follow-up',
-                '21': 'controllo + igiene',
-                '12': 'igiene + controllo'
-            }
-            
-            nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
-            tipo_richiamo_code = str(richiamo_data.get('tipo_richiamo', '1'))
-            tipo_richiamo = tipo_map.get(tipo_richiamo_code, 'controllo')
-            
-            # Calcola data richiamo se non presente
-            data_richiamo = richiamo_data.get('data_richiamo', 'da concordare')
-            if data_richiamo and isinstance(data_richiamo, str) and len(data_richiamo) >= 10:
-                # Format date from YYYY-MM-DD to DD/MM/YYYY
-                try:
-                    from datetime import datetime
-                    dt = datetime.fromisoformat(data_richiamo[:10])
-                    data_richiamo = dt.strftime('%d/%m/%Y')
-                except:
-                    data_richiamo = 'da concordare'
-            else:
-                data_richiamo = 'da concordare'
-            
-            # Prepara dati per template
-            template_data = {
-                'nome_completo': nome,
-                'tipo_richiamo': tipo_richiamo,
-                'data_richiamo': data_richiamo
-            }
+            template_data = self._prepare_recall_template_data(richiamo_data)
             
             # Usa template manager per generare messaggio
-            return self.template_manager.render_template('recall_reminder', template_data) # Usa la key del template
+            return self.template_manager.render_template('recall_reminder', template_data)
             
         except (TemplateNotFoundError, TemplateRenderError) as e:
             logger.error(f"Errore generazione messaggio richiamo con template: {e}")
@@ -539,28 +552,33 @@ class SMSService:
     # Template integration methods
     def get_template(self, tipo: str) -> Optional[Dict[str, Any]]:
         """Get SMS template via template manager"""
-        return template_manager.get_template(tipo)
+        return self.template_manager.get_template_by_name(tipo)
     
     def get_all_templates(self) -> Dict[str, Any]:
         """Get all SMS templates via template manager"""
-        return template_manager.get_all_templates()
+        return self.template_manager.get_all_templates()
     
     def update_template(self, tipo: str, content: str, description: str = None) -> bool:
         """Update SMS template via template manager"""
-        return template_manager.update_template(tipo, content, description)
+        return self.template_manager.update_template(tipo, content, description)
     
     def reset_template(self, tipo: str) -> bool:
-        """Reset SMS template to default via template manager"""
-        return template_manager.reset_template(tipo)
+        """Reset SMS template to default via template manager (Not supported in DB version yet)"""
+        return False
     
     def validate_template(self, content: str) -> Dict[str, Any]:
         """Validate template content via template manager"""
-        return template_manager.validate_template(content)
+        # A mock validation since it was removed
+        try:
+            content.format(nome_completo="Test", data_richiamo="01/01/2026", tipo_richiamo="Controllo")
+            return {'success': True, 'valid': True}
+        except Exception as e:
+            return {'success': False, 'valid': False, 'message': str(e)}
     
     def preview_template(self, tipo: str, data: Dict[str, Any] = None, 
                         custom_content: str = None) -> Dict[str, Any]:
         """Preview template with data via template manager"""
-        return template_manager.preview_template(tipo, data, custom_content)
+        return self.template_manager.preview_template(name=tipo, data=data, custom_content=custom_content)
     
     def send_appointment_reminder_sms(self, appuntamento_data: Dict[str, Any], 
                                     custom_message: Optional[str] = None) -> Dict[str, Any]:

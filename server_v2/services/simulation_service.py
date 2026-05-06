@@ -101,6 +101,7 @@ class SimulationService:
                         'nome': p.get('nome', '').strip(),
                         'telefono': p.get('cellulare', '').strip() or p.get('telefono', '').strip(),
                         'tipo_richiamo': tipo_paz,
+                        'tempo_richiamo': mesi,  # numero di mesi (es. 6)
                         'data_richiamo': data_richiamo_prevista.isoformat()
                     }
                     

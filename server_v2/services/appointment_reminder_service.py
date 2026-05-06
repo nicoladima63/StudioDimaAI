@@ -371,6 +371,12 @@ def send_whatsapp_reminder(phone: str, patient_name: str, ap_date: str, ap_time:
     tpl = REMINDER_MESSAGES[reminder_type]['wa']
     text = tpl.format(nome=nome, data=data_fmt, ora=ap_time)
 
+    from core.automation_config import get_automation_settings
+    settings = get_automation_settings()
+    if settings.get('theoretical_mode_enabled'):
+        logger.info(f"[THEORETICAL WA] To: {phone_norm}, Message: {text[:50]}...")
+        return {'success': True, 'message_id': 'SIMULATED', 'channel': 'whatsapp', 'theoretical': True}
+
     try:
         r = requests.post(
             f"{EVOLUTION_BASE_URL}/message/sendText/{EVOLUTION_INSTANCE}",
