@@ -419,7 +419,7 @@ def _already_confirmed(patient_id: str, ap_date: str, ap_time: str) -> bool:
         cur.execute("""
             SELECT id FROM patient_communications
             WHERE patient_id = ? AND appointment_date = ? AND appointment_time = ?
-            AND response = 'confirmed'
+            AND stato = 'confirmed'
             LIMIT 1
         """, (patient_id, ap_date, ap_time))
         found = cur.fetchone() is not None
@@ -525,7 +525,7 @@ def run_followup_reminders(hours_before: int = 3, dry_run: bool = False) -> dict
     """
     _ensure_reminder_tables()
     appointments = get_appointments_pending_followup(hours_before)
-    stats = {'sent_wa': 0, 'sent_sms': 0, 'errors': [], 'dry_run': dry_run, 'hours_before': hours_before}
+    stats = {'sent_wa': 0, 'sent_sms': 0, 'errors': [], 'dry_run': dry_run, 'hours_before': hours_before, 'simulated_actions': []}
 
     for ap in appointments:
         pid = ap['patient_id']
@@ -536,11 +536,25 @@ def run_followup_reminders(hours_before: int = 3, dry_run: bool = False) -> dict
         channel = ap['channel']
 
         if dry_run:
-            logger.info(f"[DRY RUN FOLLOWUP] {name} → {channel} ({phone}) ore {ap_time}")
             if channel == 'whatsapp':
                 stats['sent_wa'] += 1
             else:
                 stats['sent_sms'] += 1
+            
+            # Record simulated action
+            stats['simulated_actions'].append({
+                'patient_id': pid,
+                'patient_name': name,
+                'phone': phone,
+                'channel': channel,
+                'type': 'followup',
+                'appointment_date': ap_date,
+                'appointment_time': ap_time,
+                'message': REMINDER_MESSAGES['followup'][channel == 'whatsapp' and 'wa' or 'sms'].format(
+                    data=datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m'), 
+                    ora=ap_time
+                )
+            })
             continue
 
         if channel == 'whatsapp':
@@ -582,7 +596,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
         appointments = [a for a in appointments if a['patient_id'] == patient_filter]
 
     stats = {'sent_wa': 0, 'sent_sms': 0, 'skipped_fisso': [], 'errors': [], 'no_phone': [],
-             'dry_run': dry_run}
+             'dry_run': dry_run, 'simulated_actions': []}
 
     for ap in appointments:
         pid = ap['patient_id']
@@ -611,6 +625,25 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
                     stats['sent_wa'] += 1
                 else:
                     stats['sent_sms'] += 1
+                
+                # Record simulated action
+                tpl = REMINDER_MESSAGES[reminder_type][channel == 'whatsapp' and 'wa' or 'sms']
+                data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
+                if channel == 'whatsapp':
+                    text = tpl.format(nome=name.split()[0], data=data_fmt, ora=ap_time)
+                else:
+                    text = tpl.format(data=data_fmt, ora=ap_time)
+                
+                stats['simulated_actions'].append({
+                    'patient_id': pid,
+                    'patient_name': name,
+                    'phone': phone,
+                    'channel': channel,
+                    'type': reminder_type,
+                    'appointment_date': ap_date,
+                    'appointment_time': ap_time,
+                    'message': text
+                })
             else:
                 if has_wa:
                     result = send_whatsapp_reminder(phone, name, ap_date, ap_time, reminder_type)
