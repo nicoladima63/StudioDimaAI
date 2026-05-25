@@ -18,44 +18,13 @@ from functools import wraps
 
 from app_v2 import format_response
 from core.paths import STUDIO_DIMA_DB_PATH
+from core.reminder_db import ensure_reminder_tables, get_bot_db_conn
 
 logger = logging.getLogger(__name__)
 
 bot_v2_bp = Blueprint('bot_v2', __name__)
 
 BOT_API_KEY = os.getenv('BOT_API_KEY', '')
-
-_SQLITE_TABLES_READY = False
-
-def _ensure_sqlite_tables():
-    global _SQLITE_TABLES_READY
-    if _SQLITE_TABLES_READY:
-        return
-    try:
-        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS patient_communications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                patient_id TEXT NOT NULL, patient_name TEXT, phone TEXT,
-                channel TEXT NOT NULL, type TEXT NOT NULL,
-                appointment_date TEXT, appointment_time TEXT,
-                stato TEXT DEFAULT 'sent', message_id TEXT,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE TABLE IF NOT EXISTS appointment_confirmations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                patient_id TEXT, phone TEXT NOT NULL,
-                appointment_date TEXT, appointment_time TEXT,
-                response TEXT, communication_id INTEGER,
-                received_at TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-        conn.commit()
-        conn.close()
-        _SQLITE_TABLES_READY = True
-    except Exception as e:
-        logger.error(f"Errore auto-creazione tabelle SQLite: {e}")
-
 
 def _require_bot_key(f):
     @wraps(f)
@@ -82,17 +51,6 @@ BOT_SERVICES = [
 ]
 
 
-def _get_bot_db_conn():
-    return psycopg2.connect(
-        host=os.getenv('BOT_DB_HOST', '127.0.0.1'),
-        port=int(os.getenv('BOT_DB_PORT', '5432')),
-        database=os.getenv('BOT_DB_NAME', 'studiobot'),
-        user=os.getenv('BOT_DB_USER', 'studiobot'),
-        password=os.getenv('BOT_DB_PASSWORD', ''),
-        connect_timeout=5,
-    )
-
-
 @bot_v2_bp.route('/bot/status', methods=['GET'])
 @jwt_required()
 def get_bot_status():
@@ -114,7 +72,7 @@ def get_bot_status():
 def get_studio_info():
     """Get all key/value pairs from studiobot_studio_info."""
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute('SELECT chiave, valore FROM studiobot_studio_info')
@@ -136,7 +94,7 @@ def create_studio_info():
     if not chiave:
         return format_response(success=False, error='chiave obbligatoria'), 400
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -159,7 +117,7 @@ def update_studio_info(chiave: str):
     data = request.get_json() or {}
     valore = data.get('valore', '')
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor() as cur:
                 cur.execute(
@@ -180,7 +138,7 @@ def update_studio_info(chiave: str):
 def delete_studio_info(chiave: str):
     """Delete a key from studiobot_studio_info."""
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor() as cur:
                 cur.execute('DELETE FROM studiobot_studio_info WHERE chiave = %s', (chiave,))
@@ -253,7 +211,7 @@ def logout_whatsapp():
 def delete_conversazione(conv_id: int):
     """Delete a conversation and all its messages."""
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor() as cur:
                 cur.execute('DELETE FROM studiobot_escalazioni WHERE conversazione_id = %s', (conv_id,))
@@ -296,7 +254,7 @@ def get_conversazioni():
     per_page = int(request.args.get('per_page', 20))
     offset = (page - 1) * per_page
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute('SELECT COUNT(*) FROM studiobot_conversazioni')
@@ -323,7 +281,7 @@ def get_conversazioni():
 def get_messaggi(conv_id: int):
     """Get all messages for a conversation."""
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute('''
@@ -532,7 +490,7 @@ def get_available_slots_visita():
 def get_triage_config():
     """Return triage keywords and ordered questions from DB."""
     try:
-        conn = _get_bot_db_conn()
+        conn = get_bot_db_conn()
         with conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute("SELECT keyword FROM studiobot_triage_keywords WHERE attivo = true ORDER BY keyword")
@@ -643,7 +601,7 @@ def receive_appointment_confirmation():
         "appointment_date": "YYYY-MM-DD"  (opzionale)
     }
     """
-    _ensure_sqlite_tables()
+    ensure_reminder_tables()
     data = request.get_json() or {}
     phone = data.get('phone', '').strip()
     response_val = data.get('response', '').strip().lower()
@@ -739,7 +697,7 @@ def get_pending_reminder():
     Query: ?phone=393xxxxxxxxx
     Risposta: {has_pending: bool, communication_id, appointment_date, appointment_time, patient_name}
     """
-    _ensure_sqlite_tables()
+    ensure_reminder_tables()
     phone = request.args.get('phone', '').strip()
     if not phone:
         return format_response(success=False, error='phone richiesto'), 400

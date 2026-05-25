@@ -22,6 +22,7 @@ from typing import Optional
 from core.config_manager import get_config
 from core.paths import STUDIO_DIMA_DB_PATH
 from core.constants_v2 import TIPI_APPUNTAMENTO
+from core.reminder_db import ensure_reminder_tables, is_appointment_confirmed, get_bot_db_conn
 
 ROME_TZ = pytz.timezone('Europe/Rome')
 
@@ -55,65 +56,11 @@ REMINDER_MESSAGES = {
 }
 
 
-# ---------------------------------------------------------------------------
-# Auto-migration: crea le tabelle se mancanti
-# ---------------------------------------------------------------------------
-
-_TABLES_ENSURED = False
 _sent_this_session: set[str] = set()  # chiave: "patient_id|ap_date|ap_time|type"
 
 
 def _session_key(patient_id: str, ap_date: str, ap_time: str, reminder_type: str) -> str:
     return f"{patient_id}|{ap_date}|{ap_time}|{reminder_type}"
-
-def _ensure_reminder_tables():
-    global _TABLES_ENSURED
-    if _TABLES_ENSURED:
-        return
-    try:
-        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS patient_communications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                patient_id TEXT NOT NULL,
-                patient_name TEXT,
-                phone TEXT,
-                channel TEXT NOT NULL,
-                type TEXT NOT NULL,
-                appointment_date TEXT,
-                appointment_time TEXT,
-                stato TEXT DEFAULT 'sent',
-                message_id TEXT,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE INDEX IF NOT EXISTS idx_pc_patient_date
-                ON patient_communications(patient_id, appointment_date, appointment_time, type);
-            CREATE INDEX IF NOT EXISTS idx_pc_phone
-                ON patient_communications(phone, appointment_date);
-            CREATE TABLE IF NOT EXISTS pazienti_wa_cache (
-                patient_id TEXT PRIMARY KEY,
-                phone TEXT NOT NULL,
-                has_whatsapp INTEGER DEFAULT NULL,
-                wa_jid TEXT,
-                checked_at TEXT
-            );
-            CREATE TABLE IF NOT EXISTS appointment_confirmations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                patient_id TEXT,
-                phone TEXT NOT NULL,
-                appointment_date TEXT,
-                appointment_time TEXT,
-                response TEXT,
-                communication_id INTEGER,
-                received_at TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-        conn.commit()
-        conn.close()
-        _TABLES_ENSURED = True
-        logger.info("Tabelle reminder verificate.")
-    except Exception as e:
-        logger.error(f"Errore creazione tabelle reminder: {e}")
 
 
 # ---------------------------------------------------------------------------
@@ -257,18 +204,6 @@ def get_upcoming_appointments(reminder_type: str) -> list[dict]:
 # Check WhatsApp
 # ---------------------------------------------------------------------------
 
-def _get_bot_db_conn():
-    import psycopg2
-    return psycopg2.connect(
-        host=os.getenv('BOT_DB_HOST', '127.0.0.1'),
-        port=int(os.getenv('BOT_DB_PORT', '5432')),
-        database=os.getenv('BOT_DB_NAME', 'studiobot'),
-        user=os.getenv('BOT_DB_USER', 'studiobot'),
-        password=os.getenv('BOT_DB_PASSWORD', ''),
-        connect_timeout=3,
-    )
-
-
 def _evo_headers() -> dict:
     return {'apikey': os.getenv('EVOLUTION_API_KEY', ''), 'Content-Type': 'application/json'}
 
@@ -301,7 +236,7 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
     # 2. studiobot_pazienti (PostgreSQL)
     jid = None
     try:
-        conn_pg = _get_bot_db_conn()
+        conn_pg = get_bot_db_conn()
         with conn_pg:
             with conn_pg.cursor() as cur:
                 cur.execute(
@@ -327,7 +262,11 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
             timeout=5,
         )
         if r.status_code == 200:
-            data = r.json()
+            try:
+                data = r.json() if r.text.strip() else {}
+            except ValueError:
+                logger.warning(f"Evolution API risposta non JSON: {r.text[:200]}")
+                return False, None
             results = data if isinstance(data, list) else data.get('data', [])
             for item in results:
                 if item.get('exists'):
@@ -384,9 +323,18 @@ def send_whatsapp_reminder(phone: str, patient_name: str, ap_date: str, ap_time:
             json={'number': phone_norm, 'text': text},
             timeout=10,
         )
-        data = r.json()
+        try:
+            data = r.json() if r.text.strip() else {}
+        except ValueError:
+            snippet = (r.text or '')[:200]
+            logger.warning(f"Evolution sendText non JSON ({r.status_code}): {snippet}")
+            return {'success': False, 'error': f'HTTP {r.status_code}: risposta non JSON'}
         if r.status_code in (200, 201):
-            return {'success': True, 'message_id': data.get('key', {}).get('id', ''), 'channel': 'whatsapp'}
+            msg_id = ''
+            if isinstance(data, dict):
+                key = data.get('key') or {}
+                msg_id = key.get('id', '') if isinstance(key, dict) else str(key or '')
+            return {'success': True, 'message_id': msg_id, 'channel': 'whatsapp'}
         logger.warning(f"Evolution API error {r.status_code}: {data}")
         return {'success': False, 'error': str(data)}
     except Exception as e:
@@ -416,25 +364,6 @@ def send_sms_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str,
 # ---------------------------------------------------------------------------
 # Log comunicazioni
 # ---------------------------------------------------------------------------
-
-def _already_confirmed(patient_id: str, ap_date: str, ap_time: str) -> bool:
-    """Restituisce True se il paziente ha già risposto SI per questo appuntamento."""
-    try:
-        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT id FROM patient_communications
-            WHERE patient_id = ? AND appointment_date = ? AND appointment_time = ?
-            AND stato = 'confirmed'
-            LIMIT 1
-        """, (patient_id, ap_date, ap_time))
-        found = cur.fetchone() is not None
-        conn.close()
-        return found
-    except Exception as e:
-        logger.warning(f"Errore check confirmed: {e}")
-        return False
-
 
 def _already_sent(patient_id: str, ap_date: str, ap_time: str, reminder_type: str) -> bool:
     """Verifica che non sia già stato inviato un reminder per questo appuntamento."""
@@ -529,7 +458,7 @@ def run_followup_reminders(hours_before: int = 3, dry_run: bool = False) -> dict
     Invia follow-up reminder per appuntamenti di oggi senza risposta.
     Riusa il canale originale (WA o SMS) già registrato in patient_communications.
     """
-    _ensure_reminder_tables()
+    ensure_reminder_tables()
     appointments = get_appointments_pending_followup(hours_before)
     stats = {'sent_wa': 0, 'sent_sms': 0, 'errors': [], 'dry_run': dry_run, 'hours_before': hours_before, 'simulated_actions': []}
 
@@ -596,7 +525,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
     patient_filter:  se valorizzato, processa solo il paziente con questo patient_id
     Ritorna statistiche: {sent_wa, sent_sms, skipped_fisso, errors, no_phone}
     """
-    _ensure_reminder_tables()
+    ensure_reminder_tables()
     appointments = get_upcoming_appointments(reminder_type)
     if patient_filter:
         appointments = [a for a in appointments if a['patient_id'] == patient_filter]
@@ -617,7 +546,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
             continue
 
         # Se ha già confermato (SI alla 24h), non disturbare con il 2h
-        if reminder_type == '2h' and _already_confirmed(pid, ap_date, ap_time):
+        if reminder_type == '2h' and is_appointment_confirmed(pid, ap_date, ap_time):
             continue
 
         # Classifica contatto

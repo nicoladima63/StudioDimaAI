@@ -25,11 +25,13 @@ Il bot stack richiede servizi sempre accesi. Girare su un notebook (Acer-Nitro-5
 Tutto il bot stack (Evolution, n8n, PostgreSQL, Ollama) gira sulla **macchina dedicata locale**.
 `serverdima` punta alla macchina dedicata invece che ad `Acer-Nitro-5`.
 
-Cambio da fare in `.env` su serverdima:
+Cambio da fare in `.env` su serverdima (usare **IP LAN**, non hostname Windows):
 ```
-BOT_DB_HOST=<IP-macchina-dedicata>
-EVOLUTION_BASE_URL=http://<IP-macchina-dedicata>:8080
+BOT_DB_HOST=192.168.1.57
+BOT_DB_HOST_FALLBACK=127.0.0.1
+EVOLUTION_BASE_URL=https://wa.valorian.it
 ```
+`postgres` in docker-compose dentalai deve esporre `5432:5432` e il firewall del PC bot deve consentire connessioni dalla LAN.
 
 ---
 

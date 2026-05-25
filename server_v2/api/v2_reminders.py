@@ -11,62 +11,11 @@ from flask_jwt_extended import jwt_required
 
 from app_v2 import format_response
 from core.paths import STUDIO_DIMA_DB_PATH
+from core.reminder_db import ensure_reminder_tables
 
 logger = logging.getLogger(__name__)
 
 reminders_v2_bp = Blueprint('reminders_v2', __name__)
-
-_TABLES_READY = False
-
-def _ensure_tables():
-    """Crea le tabelle reminder se non esistono. Chiamata automatica da ogni endpoint."""
-    global _TABLES_READY
-    if _TABLES_READY:
-        return
-    try:
-        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS patient_communications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                patient_id TEXT NOT NULL,
-                patient_name TEXT,
-                phone TEXT,
-                channel TEXT NOT NULL,
-                type TEXT NOT NULL,
-                appointment_date TEXT,
-                appointment_time TEXT,
-                stato TEXT DEFAULT 'sent',
-                message_id TEXT,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE INDEX IF NOT EXISTS idx_pc_patient_date
-                ON patient_communications(patient_id, appointment_date, appointment_time, type);
-            CREATE INDEX IF NOT EXISTS idx_pc_phone
-                ON patient_communications(phone, appointment_date);
-            CREATE TABLE IF NOT EXISTS pazienti_wa_cache (
-                patient_id TEXT PRIMARY KEY,
-                phone TEXT NOT NULL,
-                has_whatsapp INTEGER DEFAULT NULL,
-                wa_jid TEXT,
-                checked_at TEXT
-            );
-            CREATE TABLE IF NOT EXISTS appointment_confirmations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                patient_id TEXT,
-                phone TEXT NOT NULL,
-                appointment_date TEXT,
-                appointment_time TEXT,
-                response TEXT,
-                communication_id INTEGER,
-                received_at TEXT DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-        conn.commit()
-        conn.close()
-        _TABLES_READY = True
-    except Exception as e:
-        logger.error(f"Errore auto-creazione tabelle reminder: {e}")
-
 
 @reminders_v2_bp.route('/reminders/settings', methods=['GET'])
 @jwt_required()
@@ -168,7 +117,7 @@ def trigger_2h():
 @jwt_required()
 def get_communications():
     """Lista patient_communications con paginazione."""
-    _ensure_tables()
+    ensure_reminder_tables()
     page = int(request.args.get('page', 1))
     per_page = min(int(request.args.get('per_page', 20)), 100)
     offset = (page - 1) * per_page
@@ -220,7 +169,7 @@ def get_reminder_replies():
     Lista reminder inviati con stato risposta (confermato/cancellato/nessuna risposta).
     Parametri: days (default 7), date (YYYY-MM-DD specifico)
     """
-    _ensure_tables()
+    ensure_reminder_tables()
     days = int(request.args.get('days', 7))
     date_filter = request.args.get('date')
 
@@ -268,7 +217,7 @@ def get_reminder_replies():
 @jwt_required()
 def get_wa_cache():
     """Stato cache WhatsApp pazienti."""
-    _ensure_tables()
+    ensure_reminder_tables()
     try:
         conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
         conn.row_factory = sqlite3.Row

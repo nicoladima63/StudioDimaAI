@@ -16,6 +16,34 @@ class DbfDataService:
     def __init__(self, reader: Optional[DBFOptimizedReader] = None):
         self.reader = reader or get_optimized_reader()
 
+    def get_patient_by_name(self, nome: str) -> Optional[Dict[str, Any]]:
+        """Cerca un paziente per nome (DB_PANOME), match case-insensitive."""
+        nome_norm = (nome or '').strip().lower()
+        if not nome_norm:
+            return None
+        try:
+            patients_path = self.reader._get_dbf_path('PAZIENTI.DBF')
+            col_paz = COLONNE['pazienti']
+            nome_field = col_paz['nome']
+            with dbf.Table(patients_path, codepage='cp1252') as table:
+                for record in table:
+                    current_nome = clean_dbf_value(getattr(record, nome_field, ''))
+                    if str(current_nome).strip().lower() == nome_norm:
+                        patient_data = {}
+                        for logical_name, dbf_field in col_paz.items():
+                            patient_data[logical_name] = clean_dbf_value(
+                                getattr(record, dbf_field, '')
+                            )
+                        for field_name in table.field_names:
+                            patient_data[field_name] = clean_dbf_value(
+                                getattr(record, field_name, '')
+                            )
+                        return patient_data
+            return None
+        except Exception as e:
+            logger.error(f"Errore ricerca paziente per nome '{nome}': {e}", exc_info=True)
+            return None
+
     def get_patient_by_id(self, patient_id: str) -> Optional[Dict[str, Any]]:
         """
         Recupera i dati di un singolo paziente tramite ID.

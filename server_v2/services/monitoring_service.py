@@ -334,8 +334,11 @@ class MonitoringService:
                     logger.error(error_msg, exc_info=True)
                     self.logs.append({'timestamp': datetime.now().isoformat(), 'message': error_msg, 'type': 'error'})
 
-        # Logica per altre tabelle (es. 'appunta') rimane invariata
+        # Appuntamenti: solo nuovi record (evita ri-esecuzione ad ogni poll del monitor)
         elif logical_table_name.lower() == 'appunta':
+            if change_obj.get('type') != 'new':
+                return
+
             trigger_type, trigger_id_column = 'appuntamento_tipo', 'DB_GUARDIA'
             trigger_id = new_data.get(trigger_id_column)
 

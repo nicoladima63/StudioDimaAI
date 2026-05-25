@@ -11,7 +11,8 @@ Version: 1.2.0
 
 import logging
 import re
-from typing import Dict, Any
+import time
+from typing import Dict, Any, Optional
 from urllib.parse import urlencode
 
 from core.action_registry import register_action
@@ -23,6 +24,32 @@ from services.link_tracker_service import link_tracker_service # 1. Importa il s
 from core.constants_v2 import COLONNE
 
 logger = logging.getLogger(__name__)
+
+# Evita log ripetuti per lo stesso paziente senza telefono (monitor ogni 30s)
+_SKIP_WARN_CACHE: dict[str, float] = {}
+_SKIP_WARN_TTL_SEC = 6 * 3600
+
+
+def _log_skip_no_phone_once(nome: str):
+    key = (nome or '?').strip().lower()
+    now = time.time()
+    if key in _SKIP_WARN_CACHE and now - _SKIP_WARN_CACHE[key] < _SKIP_WARN_TTL_SEC:
+        return
+    _SKIP_WARN_CACHE[key] = now
+    logger.warning(
+        f"Nuovo paziente '{nome}' senza telefono in DB_NOTE: azione saltata."
+    )
+
+
+def _phone_from_patient_record(patient_data: Dict[str, Any]) -> Optional[str]:
+    mobile_key = COLONNE.get('pazienti', {}).get('cellulare', 'DB_PACELLU')
+    tel_key = COLONNE.get('pazienti', {}).get('telefono', 'DB_PATELEF')
+    for key in (mobile_key, tel_key, 'DB_PACELLU', 'DB_PATELEF'):
+        val = str(patient_data.get(key, '')).strip()
+        if val:
+            return val
+    return None
+
 
 def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -83,12 +110,21 @@ def _enrich_context_with_patient_data(context: Dict[str, Any]) -> Dict[str, Any]
                     enriched_context['telefono'] = phone_match.group(0).strip()
                     break
 
-        # Nessun telefono trovato in nessuna riga: skip senza errore
+        # Fallback: cerca il paziente in PAZIENTI.DBF per nome (es. già anagrafato)
+        if ('telefono' not in enriched_context or not enriched_context['telefono']) and enriched_context.get('nome_completo'):
+            paz = dbf_data_service.get_patient_by_name(enriched_context['nome_completo'])
+            if paz:
+                phone = _phone_from_patient_record(paz)
+                if phone:
+                    enriched_context['telefono'] = phone
+                    pid_key = COLONNE.get('pazienti', {}).get('id', 'DB_CODE')
+                    if paz.get(pid_key):
+                        enriched_context[pid_key] = str(paz[pid_key]).strip()
+                    return enriched_context
+
+        # Nessun telefono trovato: skip senza errore (log al massimo una volta ogni 6h)
         if 'telefono' not in enriched_context or not enriched_context['telefono']:
-            logger.warning(
-                f"Nuovo paziente '{enriched_context.get('nome_completo', '?')}' "
-                f"senza telefono in DB_NOTE: azione saltata."
-            )
+            _log_skip_no_phone_once(enriched_context.get('nome_completo', '?'))
             return None
 
         return enriched_context
