@@ -11,6 +11,7 @@ from datetime import datetime
 from core.environment_manager import environment_manager, ServiceType, Environment
 from core.database_manager import DatabaseManager
 from core.exceptions import ValidationError, DatabaseError
+from core.paths import STUDIO_DIMA_DB_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -28,15 +29,15 @@ class DatabaseService:
         """Ricarica configurazione basata su ambiente corrente"""
         self._current_environment = environment_manager.get_environment(self.service_type)
         self._current_config = environment_manager.get_service_config(self.service_type)
-        
+
         # Ricrea database manager con nuova configurazione
         if self._current_environment == Environment.PROD:
             # Database rete studio
             db_path = self._current_config.get('path', '')
         else:
-            # Database locale
-            db_path = self._current_config.get('path', 'studio_dima.db')
-        
+            # Database locale — fallback a instance/studio_dima.db
+            db_path = self._current_config.get('path', str(STUDIO_DIMA_DB_PATH))
+
         self._db_manager = DatabaseManager()
         logger.info(f"Database Service configurato per ambiente: {self._current_environment.value}")
     

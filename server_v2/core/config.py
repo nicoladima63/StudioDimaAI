@@ -22,8 +22,7 @@ class Config:
     and other system parameters with environment-specific overrides.
     """
 
-    # Database Configuration — absolute paths anchored to server_v2/
-    DEFAULT_DB_PATH = str(_SERVER_V2_DIR / "studio_dima.db")
+    # Database Configuration — absolute paths anchored to server_v2/instance/
     DEFAULT_INSTANCE_DB_PATH = str(_SERVER_V2_DIR / "instance" / "studio_dima.db")
     
     # Connection Pool Settings
@@ -61,22 +60,12 @@ class Config:
         self._setup_performance()
     
     def _setup_database_path(self, db_path: Optional[str]) -> None:
-        """Setup database path with fallback logic."""
+        """Setup database path — always in instance/ directory."""
         if db_path:
             self.db_path = db_path
         else:
-            # Try instance path first, then root path
-            instance_path = Path(self.DEFAULT_INSTANCE_DB_PATH)
-            root_path = Path(self.DEFAULT_DB_PATH)
-            
-            if instance_path.exists():
-                self.db_path = str(instance_path)
-            elif root_path.exists():
-                self.db_path = str(root_path)
-            else:
-                # Default to instance path for new installations
-                self.db_path = self.DEFAULT_INSTANCE_DB_PATH
-        
+            self.db_path = self.DEFAULT_INSTANCE_DB_PATH
+
         # Ensure parent directory exists
         db_dir = Path(self.db_path).parent
         db_dir.mkdir(parents=True, exist_ok=True)

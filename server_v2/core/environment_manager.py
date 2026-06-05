@@ -203,15 +203,13 @@ class EnvironmentManager:
             if written_content != environment.value:
                 logger.error(f"Contenuto file non corrisponde: atteso '{environment.value}', ottenuto '{written_content}'")
                 return False
-            
+
             # Verifica permessi (opzionale)
             if not mode_file.is_file():
                 logger.error(f"{mode_file} non è un file regolare")
                 return False
-                
-            # Log con ambiente effettivamente letto dal file
-            read_back = mode_file.read_text().strip()
-            logger.info(f"Cambio modalità {service.value}: ora in ambiente '{read_back}'")
+
+            logger.debug(f"Ambiente {service.value} salvato su file: {environment.value}")
             return True
             
         except PermissionError as e:
@@ -298,32 +296,36 @@ class EnvironmentManager:
             if service not in self._services:
                 logger.error(f"Servizio {service} non supportato")
                 return False
-                
+
             service_config = self._services[service]
             if environment not in service_config.available_environments:
                 logger.error(f"Ambiente {environment} non supportato per {service}")
                 return False
-            
+
+            # Skip se ambiente è già quello desiderato
+            if service_config.current_environment == environment:
+                return True
+
             # Salva su file
             file_saved = self._save_environment_to_file(service, environment)
             if not file_saved:
                 logger.error(f"Salvataggio file fallito per {service}")
                 return False
-            
+
             # Verifica aggiuntiva: controlla che il valore sia effettivamente cambiato
             current_env = self._load_environment_from_file(service)
             if current_env != environment:
                 logger.error(f"Disallineamento: ambiente impostato a {environment} ma file contiene {current_env}")
                 return False
-            
+
             # Aggiorna configurazione in memoria
             service_config.current_environment = environment
-            
+
             # Invalida cache correlate
             self._invalidate_service_cache(service)
             logger.info(f"Ambiente {service} cambiato a {environment}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Errore in set_environment per {service}: {e}")
             return False

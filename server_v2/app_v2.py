@@ -179,17 +179,17 @@ def init_extensions(app: Flask) -> None:
     # JWT Error Handlers
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
-        logger.warning(f"JWT token expired: {jwt_payload}")
+        logger.debug(f"JWT token expired, initiating refresh: {jwt_payload}")
         return jsonify({'error': 'Token expired', 'message': 'Please login again'}), 401
-    
+
     @jwt.invalid_token_loader
     def invalid_token_callback(error):
-        logger.warning(f"JWT invalid token: {error}")
+        logger.debug(f"JWT invalid token: {error}")
         return jsonify({'error': 'Invalid token', 'message': 'Please provide a valid token'}), 422
-    
+
     @jwt.unauthorized_loader
     def missing_token_callback(error):
-        logger.warning(f"JWT missing token: {error}")
+        logger.debug(f"JWT missing token: {error}")
         return jsonify({'error': 'Token required', 'message': 'Authorization token is required'}), 401
 
 
