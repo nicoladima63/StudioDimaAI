@@ -1,0 +1,740 @@
+Logging level set to: WARNING
+2026-06-03 17:33:50 - app_v2 - INFO - WebSocket service initialized
+2026-06-03 17:33:50,323 INFO [app_v2] WebSocket service initialized
+2026-06-03 17:33:50 - app_v2 - INFO - Push notification service initialized successfully
+2026-06-03 17:33:50,334 INFO [app_v2] Push notification service initialized successfully
+2026-06-03 17:33:50 - core.database_manager - INFO - DatabaseManager initialized with pool_size=10
+2026-06-03 17:33:50,357 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2026-06-03 17:33:50 - __main__ - INFO - ==================================================
+2026-06-03 17:33:50,675 INFO [__main__] ==================================================
+2026-06-03 17:33:50 - __main__ - INFO - STARTUP HEALTH CHECK
+2026-06-03 17:33:50,676 INFO [__main__] STARTUP HEALTH CHECK
+2026-06-03 17:33:50 - __main__ - INFO - ==================================================
+2026-06-03 17:33:50,676 INFO [__main__] ==================================================
+2026-06-03 17:33:51 - __main__ - INFO - Google Calendar: CONNECTED
+2026-06-03 17:33:51,336 INFO [__main__] Google Calendar: CONNECTED
+2026-06-03 17:33:51 - __main__ - INFO - ==================================================
+2026-06-03 17:33:51,336 INFO [__main__] ==================================================
+Avvio scheduler...
+2026-06-03 17:33:51 - scheduler_v2 - INFO - Automazione escalation todo schedulata alle 09:00.
+2026-06-03 17:33:51,338 INFO [scheduler_v2] Automazione escalation todo schedulata alle 09:00.
+Scheduler avviato
+Inizializzazione servizio di monitoraggio...
+DEBUG: MonitoringService.__init__ started
+2026-06-03 17:33:51 - core.config_manager - INFO - Configuration loaded: mode=prod
+2026-06-03 17:33:51,385 INFO [core.config_manager] Configuration loaded: mode=prod
+DEBUG: Initializing AutomationService...
+DEBUG: Initializing SnapshotManager...
+2026-06-03 17:33:51 - services.snapshot_manager - INFO - SnapshotManager initialized: dir=data\snapshots
+2026-06-03 17:33:51,385 INFO [services.snapshot_manager] SnapshotManager initialized: dir=data\snapshots
+DEBUG: Initializing FileWatcher...
+DEBUG: Initializing DbfReader...
+DEBUG: Initializing DbfDataService...
+DEBUG: Initializing TriggerConfigManager...
+2026-06-03 17:33:51 - services.trigger_config - INFO - Loaded 2 trigger configurations from config\trigger_configs.json
+2026-06-03 17:33:51,388 INFO [services.trigger_config] Loaded 2 trigger configurations from config\trigger_configs.json
+DEBUG: Loading settings...
+DEBUG: Loading saved configs...
+DEBUG: MonitoringService.__init__ finished
+Servizio di monitoraggio pronto (avvio manuale via API).
+Server con WebSocket avviato su http://0.0.0.0:5001
+Press Ctrl+C to stop the server
+
+ * Serving Flask app 'app_v2'
+ * Debug mode: off
+2026-06-03 17:34:01 - app_v2 - WARNING - JWT token expired: {'fresh': False, 'iat': 1778828364, 'jti': '1af7bcd5-9f93-4ea8-9127-cd9f2c41417f', 'type': 'access', 'sub': {'id': 2, 'username': 'Nicola', 'role': 'user'}, 'nbf': 1778828364, 'exp': 1778914764}
+2026-06-03 17:34:01,077 WARNING [app_v2] JWT token expired: {'fresh': False, 'iat': 1778828364, 'jti': '1af7bcd5-9f93-4ea8-9127-cd9f2c41417f', 'type': 'access', 'sub': {'id': 2, 'username': 'Nicola', 'role': 'user'}, 'nbf': 1778828364, 'exp': 1778914764}
+2026-06-03 17:34:01 - app_v2 - WARNING - JWT token expired: {'fresh': False, 'iat': 1778828364, 'jti': '1af7bcd5-9f93-4ea8-9127-cd9f2c41417f', 'type': 'access', 'sub': {'id': 2, 'username': 'Nicola', 'role': 'user'}, 'nbf': 1778828364, 'exp': 1778914764}
+2026-06-03 17:34:01,100 WARNING [app_v2] JWT token expired: {'fresh': False, 'iat': 1778828364, 'jti': '1af7bcd5-9f93-4ea8-9127-cd9f2c41417f', 'type': 'access', 'sub': {'id': 2, 'username': 'Nicola', 'role': 'user'}, 'nbf': 1778828364, 'exp': 1778914764}
+2026-06-03 17:34:01 - api.v2_auth - INFO - Token refreshed for user: Nicola
+2026-06-03 17:34:01,172 INFO [api.v2_auth] Token refreshed for user: Nicola
+2026-06-03 17:34:01 - api.v2_auth - INFO - Token refreshed for user: Nicola
+2026-06-03 17:34:01,174 INFO [api.v2_auth] Token refreshed for user: Nicola
+2026-06-03 17:34:01 - services.monitoring_service - INFO - get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:34:01,496 INFO [services.monitoring_service] get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:34:01 - services.websocket_service - INFO - Client connected: rJwPRhtvqos0_QY2AAAC
+2026-06-03 17:34:01,535 INFO [services.websocket_service] Client connected: rJwPRhtvqos0_QY2AAAC
+2026-06-03 17:34:01 - services.websocket_service - INFO - User 2 (session rJwPRhtvqos0_QY2AAAC) joined room user_2
+2026-06-03 17:34:01,711 INFO [services.websocket_service] User 2 (session rJwPRhtvqos0_QY2AAAC) joined room user_2
+2026-06-03 17:34:16 - app_v2 - WARNING - JWT token expired: {'fresh': False, 'iat': 1780125830, 'jti': '01b549d5-1c72-412c-a56c-9d71a899990d', 'type': 'access', 'sub': {'id': 1, 'username': 'admin', 'role': 'admin'}, 'nbf': 1780125830, 'exp': 1780212230}
+2026-06-03 17:34:16,463 WARNING [app_v2] JWT token expired: {'fresh': False, 'iat': 1780125830, 'jti': '01b549d5-1c72-412c-a56c-9d71a899990d', 'type': 'access', 'sub': {'id': 1, 'username': 'admin', 'role': 'admin'}, 'nbf': 1780125830, 'exp': 1780212230}
+2026-06-03 17:34:16 - app_v2 - WARNING - JWT token expired: {'fresh': False, 'iat': 1780125830, 'jti': '01b549d5-1c72-412c-a56c-9d71a899990d', 'type': 'access', 'sub': {'id': 1, 'username': 'admin', 'role': 'admin'}, 'nbf': 1780125830, 'exp': 1780212230}
+2026-06-03 17:34:16,467 WARNING [app_v2] JWT token expired: {'fresh': False, 'iat': 1780125830, 'jti': '01b549d5-1c72-412c-a56c-9d71a899990d', 'type': 'access', 'sub': {'id': 1, 'username': 'admin', 'role': 'admin'}, 'nbf': 1780125830, 'exp': 1780212230}
+2026-06-03 17:34:16 - api.v2_auth - INFO - Token refreshed for user: admin
+2026-06-03 17:34:16 - api.v2_auth - INFO - Token refreshed for user: admin
+2026-06-03 17:34:16,485 INFO [api.v2_auth] Token refreshed for user: admin
+2026-06-03 17:34:16,486 INFO [api.v2_auth] Token refreshed for user: admin
+2026-06-03 17:34:16 - services.monitoring_service - INFO - get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:34:16,569 INFO [services.monitoring_service] get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:34:16 - services.websocket_service - INFO - Client connected: NnqgX3tiacOH0wAFAAAF
+2026-06-03 17:34:16,571 INFO [services.websocket_service] Client connected: NnqgX3tiacOH0wAFAAAF
+2026-06-03 17:34:16 - services.websocket_service - INFO - User 1 (session NnqgX3tiacOH0wAFAAAF) joined room user_1
+2026-06-03 17:34:16,628 INFO [services.websocket_service] User 1 (session NnqgX3tiacOH0wAFAAAF) joined room user_1
+2026-06-03 17:34:20 - api.v2_calendar - INFO - list_calendars called by user: {'id': 1, 'username': 'admin', 'role': 'admin'} - attempting to retrieve calendars
+2026-06-03 17:34:20,125 INFO [api.v2_calendar] list_calendars called by user: {'id': 1, 'username': 'admin', 'role': 'admin'} - attempting to retrieve calendars
+2026-06-03 17:34:21 - api.v2_calendar - INFO - Successfully retrieved 2 calendars
+2026-06-03 17:34:21,418 INFO [api.v2_calendar] Successfully retrieved 2 calendars
+2026-06-03 17:34:26 - api.v2_calendar - INFO - list_calendars called by user: {'id': 1, 'username': 'admin', 'role': 'admin'} - attempting to retrieve calendars
+2026-06-03 17:34:26,383 INFO [api.v2_calendar] list_calendars called by user: {'id': 1, 'username': 'admin', 'role': 'admin'} - attempting to retrieve calendars
+2026-06-03 17:34:27 - api.v2_calendar - INFO - Successfully retrieved 2 calendars
+2026-06-03 17:34:27,375 INFO [api.v2_calendar] Successfully retrieved 2 calendars
+2026-06-03 17:34:31 - services.calendar_service - INFO - === Avvio sincronizzazione Google Calendar ===
+2026-06-03 17:34:31,082 INFO [services.calendar_service] === Avvio sincronizzazione Google Calendar ===
+2026-06-03 17:34:31 - services.calendar_service - INFO - Normalizzati: 57 | Anomalie: 0
+2026-06-03 17:34:31,083 INFO [services.calendar_service] Normalizzati: 57 | Anomalie: 0
+2026-06-03 17:34:31 - services.calendar_service - INFO - === Avvio sincronizzazione Google Calendar ===
+2026-06-03 17:34:31,091 INFO [services.calendar_service] === Avvio sincronizzazione Google Calendar ===
+2026-06-03 17:34:31 - services.calendar_service - INFO - Normalizzati: 73 | Anomalie: 0
+2026-06-03 17:34:31,092 INFO [services.calendar_service] Normalizzati: 73 | Anomalie: 0
+2026-06-03 17:34:31 - services.monitoring_service - INFO - get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:34:31,855 INFO [services.monitoring_service] get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:34:31 - api.v2_prestazioni - INFO - Caricate 392 prestazioni da 9 categorie
+2026-06-03 17:34:31,909 INFO [api.v2_prestazioni] Caricate 392 prestazioni da 9 categorie
+2026-06-03 17:34:32 - services.calendar_service - INFO - Eventi Google indicizzati: uid=1176 fingerprint=1
+2026-06-03 17:34:32,949 INFO [services.calendar_service] Eventi Google indicizzati: uid=1176 fingerprint=1
+2026-06-03 17:34:33 - services.calendar_service - INFO - Eventi Google indicizzati: uid=1176 fingerprint=1
+2026-06-03 17:34:33,927 INFO [services.calendar_service] Eventi Google indicizzati: uid=1176 fingerprint=1
+2026-06-03 17:34:36 - services.monitoring_service - INFO - get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:34:36,158 INFO [services.monitoring_service] get_monitor_status: Returning summary of 2 monitors.
+2026-06-03 17:35:08 - api.v2_calendar - INFO - list_calendars called by user: {'id': 1, 'username': 'admin', 'role': 'admin'} - attempting to retrieve calendars
+2026-06-03 17:35:08,595 INFO [api.v2_calendar] list_calendars called by user: {'id': 1, 'username': 'admin', 'role': 'admin'} - attempting to retrieve calendars
+2026-06-03 17:35:09 - api.v2_calendar - INFO - Successfully retrieved 2 calendars
+2026-06-03 17:35:09,779 INFO [api.v2_calendar] Successfully retrieved 2 calendars
+2026-06-03 17:35:19 - services.calendar_service - INFO - Sync completata | inserted=2 updated=55 skipped=0 pruned=0 errors=0
+2026-06-03 17:35:19,962 INFO [services.calendar_service] Sync completata | inserted=2 updated=55 skipped=0 pruned=0 errors=0
+2026-06-03 17:35:20 - services.calendar_sync_engine - INFO - PRUNE orphan uid=8468d1cf4fe68285d784c3116492776ed40add83 date=2026-06-03
+2026-06-03 17:35:20,289 INFO [services.calendar_sync_engine] PRUNE orphan uid=8468d1cf4fe68285d784c3116492776ed40add83 date=2026-06-03
+2026-06-03 17:35:20 - services.calendar_sync_engine - INFO - PRUNE orphan uid=1d1cf518986be66b1fdf6877f14e97bcc45118a5 date=2026-06-09
+2026-06-03 17:35:20,774 INFO [services.calendar_sync_engine] PRUNE orphan uid=1d1cf518986be66b1fdf6877f14e97bcc45118a5 date=2026-06-09
+2026-06-03 17:35:21 - services.calendar_sync_engine - INFO - PRUNE orphan uid=d4e24c480845084cd86dec92c9fe2d05eb799eca date=2026-06-09
+2026-06-03 17:35:21,315 INFO [services.calendar_sync_engine] PRUNE orphan uid=d4e24c480845084cd86dec92c9fe2d05eb799eca date=2026-06-09
+2026-06-03 17:35:21 - services.calendar_sync_engine - INFO - PRUNE orphan uid=3e1dae0559c29249d94dabd8082566d498ab871a date=2026-06-03
+2026-06-03 17:35:21,842 INFO [services.calendar_sync_engine] PRUNE orphan uid=3e1dae0559c29249d94dabd8082566d498ab871a date=2026-06-03
+2026-06-03 17:35:22 - services.calendar_sync_engine - INFO - PRUNE orphan uid=9d51cbb20f3996736d41e31daa94875dd88db444 date=2026-06-04
+2026-06-03 17:35:22,261 INFO [services.calendar_sync_engine] PRUNE orphan uid=9d51cbb20f3996736d41e31daa94875dd88db444 date=2026-06-04
+2026-06-03 17:35:22 - services.calendar_sync_engine - INFO - PRUNE orphan uid=5a00dc35fed19ea6907543fb8327bd6825195610 date=2026-06-04
+2026-06-03 17:35:22,700 INFO [services.calendar_sync_engine] PRUNE orphan uid=5a00dc35fed19ea6907543fb8327bd6825195610 date=2026-06-04
+2026-06-03 17:35:23 - services.calendar_sync_engine - INFO - PRUNE orphan uid=7a47248b2e5f2c3856e6b21b290a8bf0c04dadaf date=2026-06-04
+2026-06-03 17:35:23,461 INFO [services.calendar_sync_engine] PRUNE orphan uid=7a47248b2e5f2c3856e6b21b290a8bf0c04dadaf date=2026-06-04
+2026-06-03 17:35:24 - services.calendar_sync_engine - INFO - PRUNE orphan uid=01ca4ff5faaa1e0fa3ea94c7463cf1eef1a83a09 date=2026-06-03
+2026-06-03 17:35:24,179 INFO [services.calendar_sync_engine] PRUNE orphan uid=01ca4ff5faaa1e0fa3ea94c7463cf1eef1a83a09 date=2026-06-03
+2026-06-03 17:35:24 - services.calendar_sync_engine - INFO - PRUNE orphan uid=fb06eed8514037d3a12063fb663df8c85c47493a date=2026-06-08
+2026-06-03 17:35:24,823 INFO [services.calendar_sync_engine] PRUNE orphan uid=fb06eed8514037d3a12063fb663df8c85c47493a date=2026-06-08
+2026-06-03 17:35:25 - services.calendar_sync_engine - INFO - PRUNE orphan uid=47910491f5201edb53104e19d9e618aba6f21a13 date=2026-06-03
+2026-06-03 17:35:25,481 INFO [services.calendar_sync_engine] PRUNE orphan uid=47910491f5201edb53104e19d9e618aba6f21a13 date=2026-06-03
+2026-06-03 17:35:26 - services.calendar_sync_engine - INFO - PRUNE orphan uid=d741bda9a4f72629fcd4012a2958fb39bf67a01a date=2026-06-08
+2026-06-03 17:35:26,224 INFO [services.calendar_sync_engine] PRUNE orphan uid=d741bda9a4f72629fcd4012a2958fb39bf67a01a date=2026-06-08
+2026-06-03 17:35:26 - services.calendar_sync_engine - INFO - PRUNE orphan uid=1b67c14142c94674ad19623f4d24b8477c1e30c0 date=2026-06-03
+2026-06-03 17:35:26,933 INFO [services.calendar_sync_engine] PRUNE orphan uid=1b67c14142c94674ad19623f4d24b8477c1e30c0 date=2026-06-03
+2026-06-03 17:35:27 - services.calendar_sync_engine - INFO - PRUNE orphan uid=2b77241c53a5f56946a6346ffa219f6cf30ccf27 date=2026-06-03
+2026-06-03 17:35:27,580 INFO [services.calendar_sync_engine] PRUNE orphan uid=2b77241c53a5f56946a6346ffa219f6cf30ccf27 date=2026-06-03
+2026-06-03 17:35:28 - services.calendar_sync_engine - INFO - PRUNE orphan uid=39459ce4e102235e62e75eeccfbe37be6a10956d date=2026-06-05
+2026-06-03 17:35:28,097 INFO [services.calendar_sync_engine] PRUNE orphan uid=39459ce4e102235e62e75eeccfbe37be6a10956d date=2026-06-05
+2026-06-03 17:35:28 - services.calendar_sync_engine - INFO - PRUNE orphan uid=c6774dd21db5303da4cc620c2102111526a15ad3 date=2026-06-03
+2026-06-03 17:35:28,912 INFO [services.calendar_sync_engine] PRUNE orphan uid=c6774dd21db5303da4cc620c2102111526a15ad3 date=2026-06-03
+2026-06-03 17:35:29 - services.calendar_sync_engine - INFO - PRUNE orphan uid=879e4c61828db5f09e2d76427dc1642ae74c62a5 date=2026-06-03
+2026-06-03 17:35:29,568 INFO [services.calendar_sync_engine] PRUNE orphan uid=879e4c61828db5f09e2d76427dc1642ae74c62a5 date=2026-06-03
+2026-06-03 17:35:30 - services.calendar_sync_engine - INFO - PRUNE orphan uid=ea27322e6fe1b3b74838a99683942afaa035f7f7 date=2026-06-03
+2026-06-03 17:35:30,267 INFO [services.calendar_sync_engine] PRUNE orphan uid=ea27322e6fe1b3b74838a99683942afaa035f7f7 date=2026-06-03
+2026-06-03 17:35:30 - services.calendar_service - INFO - Sync completata | inserted=29 updated=44 skipped=0 pruned=17 errors=0
+2026-06-03 17:35:30,792 INFO [services.calendar_service] Sync completata | inserted=29 updated=44 skipped=0 pruned=17 errors=0
+2026-06-03 17:35:45 - services.websocket_service - INFO - Client disconnected: rJwPRhtvqos0_QY2AAAC
+2026-06-03 17:35:45,446 INFO [services.websocket_service] Client disconnected: rJwPRhtvqos0_QY2AAAC
+2026-06-03 17:39:57 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-03 17:39:57,242 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-03 17:48:54 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-03 17:48:54,068 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-03 17:53:39 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-03 17:53:39,902 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-03 17:53:39 - services.actions.system_actions - INFO - Invio SMS a 3388216077 con messaggio: 'Ciao Intrieri Lorenzo,
+al seguente link troverai i...'
+2026-06-03 17:53:39,915 INFO [services.actions.system_actions] Invio SMS a 3388216077 con messaggio: 'Ciao Intrieri Lorenzo,
+al seguente link troverai i...'
+2026-06-03 17:53:40 - services.automation_service - INFO - Eseguite 1 regole per trigger appuntamento_tipo:V
+2026-06-03 17:53:40,110 INFO [services.automation_service] Eseguite 1 regole per trigger appuntamento_tipo:V
+2026-06-03 17:55:48 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-03 17:55:48,753 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-03 18:03:16 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-03 18:03:16,640 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-03 18:03:26 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-03 18:03:26,053 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-03 18:04:49 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-03 18:04:49,073 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-03 19:30:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-03 19:30:01,101 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-03 20:30:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-03 20:30:01,102 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-03 21:00:00 - scheduler_v2 - INFO - [CALENDAR SYNC] Avvio sincronizzazione automatica per 3 settimane.
+2026-06-03 21:00:00,012 INFO [scheduler_v2] [CALENDAR SYNC] Avvio sincronizzazione automatica per 3 settimane.
+2026-06-03 21:00:00 - scheduler_v2 - INFO - [CALENDAR SYNC] Sincronizzazione mese 06/2026 (intervallo dal 2026-06-03 al 2026-06-24)
+2026-06-03 21:00:00,013 INFO [scheduler_v2] [CALENDAR SYNC] Sincronizzazione mese 06/2026 (intervallo dal 2026-06-03 al 2026-06-24)
+2026-06-03 21:00:01 - services.calendar_service - INFO - === Avvio sincronizzazione Google Calendar ===
+2026-06-03 21:00:01,694 INFO [services.calendar_service] === Avvio sincronizzazione Google Calendar ===
+2026-06-03 21:00:01 - services.calendar_service - INFO - Normalizzati: 70 | Anomalie: 0
+2026-06-03 21:00:01,695 INFO [services.calendar_service] Normalizzati: 70 | Anomalie: 0
+2026-06-03 21:00:01 - core.google_calendar_client - INFO - Refreshing Google token
+2026-06-03 21:00:01,696 INFO [core.google_calendar_client] Refreshing Google token
+2026-06-03 21:00:03 - services.calendar_service - INFO - Eventi Google indicizzati: uid=1190 fingerprint=1
+2026-06-03 21:00:03,874 INFO [services.calendar_service] Eventi Google indicizzati: uid=1190 fingerprint=1
+2026-06-03 21:00:45 - services.calendar_service - INFO - Sync completata | inserted=1 updated=69 skipped=0 pruned=0 errors=0
+2026-06-03 21:00:45,471 INFO [services.calendar_service] Sync completata | inserted=1 updated=69 skipped=0 pruned=0 errors=0
+2026-06-03 21:00:45 - services.calendar_service - INFO - === Avvio sincronizzazione Google Calendar ===
+2026-06-03 21:00:45,472 INFO [services.calendar_service] === Avvio sincronizzazione Google Calendar ===
+2026-06-03 21:00:45 - services.calendar_service - INFO - Normalizzati: 38 | Anomalie: 0
+2026-06-03 21:00:45,473 INFO [services.calendar_service] Normalizzati: 38 | Anomalie: 0
+2026-06-03 21:00:47 - services.calendar_service - INFO - Eventi Google indicizzati: uid=1191 fingerprint=1
+2026-06-03 21:00:47,351 INFO [services.calendar_service] Eventi Google indicizzati: uid=1191 fingerprint=1
+2026-06-03 21:01:18 - services.calendar_service - INFO - Sync completata | inserted=0 updated=38 skipped=0 pruned=0 errors=0
+2026-06-03 21:01:18,622 INFO [services.calendar_service] Sync completata | inserted=0 updated=38 skipped=0 pruned=0 errors=0
+2026-06-04 07:00:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 07:00:01,170 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 07:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 07:00:06,252 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 07:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 07:00:06,427 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 07:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 07:00:06,428 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 07:30:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 07:30:05,636 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 07:30:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 07:30:05,764 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 07:30:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 07:30:05,764 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 08:00:03 - apscheduler.executors.default - WARNING - Run time of job "SchedulerService.schedule_appointment_reminders.<locals>.job_24h (trigger: cron[hour='8', minute='0'], next run at: 2026-06-05 08:00:00 CEST)" was missed by 0:00:03.283019
+2026-06-04 08:00:03 - apscheduler.executors.default - WARNING - Run time of job "SchedulerService.schedule_appointment_reminders.<locals>.job_2h (trigger: cron[hour='7-20', minute='0,30'], next run at: 2026-06-04 08:30:00 CEST)" was missed by 0:00:03.283227
+2026-06-04 08:00:03,283 WARNING [apscheduler.executors.default] Run time of job "SchedulerService.schedule_appointment_reminders.<locals>.job_24h (trigger: cron[hour='8', minute='0'], next run at: 2026-06-05 08:00:00 CEST)" was missed by 0:00:03.283019
+2026-06-04 08:00:03,283 WARNING [apscheduler.executors.default] Run time of job "SchedulerService.schedule_appointment_reminders.<locals>.job_2h (trigger: cron[hour='7-20', minute='0,30'], next run at: 2026-06-04 08:30:00 CEST)" was missed by 0:00:03.283227
+2026-06-04 08:30:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 08:30:01,168 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 08:30:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 08:30:06,224 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 08:30:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 08:30:06,389 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 08:30:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 08:30:06,389 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 08:30:06 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 08:30:06,528 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 08:30:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 08:30:06,535 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 08:30:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 08:30:06,624 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 08:30:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 08:30:06,625 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 08:45:53 - services.snapshot_manager - INFO - Detected 19 changes for table APPUNTA.
+2026-06-04 08:45:53,580 INFO [services.snapshot_manager] Detected 19 changes for table APPUNTA.
+2026-06-04 08:59:19 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 08:59:19,442 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 09:00:00 - scheduler_v2 - INFO - [TODO ESCALATION] Avvio controllo todo scaduti.
+2026-06-04 09:00:00,003 INFO [scheduler_v2] [TODO ESCALATION] Avvio controllo todo scaduti.
+2026-06-04 09:00:00 - services.todo_escalation_job - INFO - Starting todo escalation check...
+2026-06-04 09:00:00,029 INFO [services.todo_escalation_job] Starting todo escalation check...
+2026-06-04 09:00:00 - services.todo_escalation_job - INFO - Found 2 overdue todos
+2026-06-04 09:00:00,029 INFO [services.todo_escalation_job] Found 2 overdue todos
+2026-06-04 09:00:00 - services.todo_escalation_job - INFO - Escalation check complete: 0/2 todos escalated
+2026-06-04 09:00:00,029 INFO [services.todo_escalation_job] Escalation check complete: 0/2 todos escalated
+2026-06-04 09:00:00 - scheduler_v2 - INFO - [TODO ESCALATION] Completato: 0/2 todo escalati
+2026-06-04 09:00:00,030 INFO [scheduler_v2] [TODO ESCALATION] Completato: 0/2 todo escalati
+2026-06-04 09:00:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 09:00:05,639 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 09:00:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 09:00:05,773 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 09:00:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 09:00:05,774 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 09:00:05 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 09:00:05,898 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 09:01:46 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 09:01:46,440 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 09:09:24 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 09:09:24,504 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 09:13:00 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 09:13:00,333 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 09:30:00 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 09:30:00,772 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 09:34:54 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 09:34:54,355 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 09:38:18 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 09:38:18,890 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 09:38:41 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 09:38:41,409 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 09:40:17 - services.snapshot_manager - INFO - Detected 19 changes for table APPUNTA.
+2026-06-04 09:40:17,876 INFO [services.snapshot_manager] Detected 19 changes for table APPUNTA.
+2026-06-04 09:54:24 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 09:54:24,184 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:00:00 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 10:00:00,792 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 10:21:42 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:21:42,853 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:22:39 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:22:39,359 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:22:55 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:22:55,595 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:32:50 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:32:50,842 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:35:18 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 10:35:18,227 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 10:44:27 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:44:27,921 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:44:45 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:44:45,416 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:45:11 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:45:11,862 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:53:27 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 10:53:27,695 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 10:55:34 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:55:34,166 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 10:55:56 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 10:55:56,857 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 11:02:55 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 11:02:55,935 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 11:14:29 - services.snapshot_manager - INFO - Detected 7 changes for table preventivi.
+2026-06-04 11:14:29,428 INFO [services.snapshot_manager] Detected 7 changes for table preventivi.
+2026-06-04 11:14:29 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:29,602 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:29 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:29,746 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:29 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:29,888 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30,032 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30,175 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30,318 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:14:30,461 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZY6X'.
+2026-06-04 11:15:49 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 11:15:49,345 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 11:17:42 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 11:17:42,506 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 11:17:50 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 11:17:50,476 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 11:20:58 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 11:20:58,380 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 11:32:42 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 11:32:42,793 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 11:33:15 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 11:33:15,751 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 11:39:50 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 11:39:50,334 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 12:03:52 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 12:03:52,515 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 12:30:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 12:30:05,606 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 12:30:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 12:30:05,803 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 12:30:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 12:30:05,803 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 13:00:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 13:00:05,642 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 13:00:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 13:00:05,783 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 13:00:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 13:00:05,783 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 13:30:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 13:30:01,179 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 13:30:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 13:30:06,272 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 13:30:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 13:30:06,525 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 13:30:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 13:30:06,526 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 14:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 14:00:06,251 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 14:00:06,251 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 14:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06,516 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06,517 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06,537 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06,537 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:06,701 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:06,761 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06,790 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06,791 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06,854 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:06,855 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:07 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:07,040 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:07 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:07,166 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:07 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:07,167 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:07 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:07,341 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-04 14:00:07 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:07,425 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:00:07 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:00:07,425 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:08:36 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 14:08:36,661 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 14:30:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 14:30:05,625 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 14:30:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:30:05,778 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 14:30:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 14:30:05,778 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 15:00:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 15:00:05,658 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 15:00:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 15:00:05,783 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 15:00:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 15:00:05,784 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 15:11:15 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 15:11:15,811 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 15:30:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 15:30:05,660 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-04 15:30:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 15:30:05,847 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-04 15:30:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 15:30:05,847 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-04 15:31:18 - services.snapshot_manager - INFO - Detected 21 changes for table APPUNTA.
+2026-06-04 15:31:18,224 INFO [services.snapshot_manager] Detected 21 changes for table APPUNTA.
+2026-06-04 15:39:15 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 15:39:15,473 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 15:49:09 - services.snapshot_manager - INFO - Detected 1 changes for table preventivi.
+2026-06-04 15:49:09,280 INFO [services.snapshot_manager] Detected 1 changes for table preventivi.
+2026-06-04 15:49:09 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZTTJ'.
+2026-06-04 15:49:09,442 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZTTJ'.
+2026-06-04 15:53:22 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 15:53:22,999 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 15:59:32 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 15:59:32,089 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 16:00:00 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 16:00:00,751 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 16:04:31 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 16:04:31,255 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 16:12:21 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 16:12:21,005 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 16:14:57 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 16:14:57,800 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 16:18:44 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 16:18:44,084 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 16:30:00 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 16:30:00,766 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-04 16:44:22 - services.snapshot_manager - INFO - Detected 19 changes for table APPUNTA.
+2026-06-04 16:44:22,521 INFO [services.snapshot_manager] Detected 19 changes for table APPUNTA.
+2026-06-04 16:47:16 - services.snapshot_manager - INFO - Detected 19 changes for table APPUNTA.
+2026-06-04 16:47:16,476 INFO [services.snapshot_manager] Detected 19 changes for table APPUNTA.
+2026-06-04 17:01:49 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 17:01:49,788 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 17:08:14 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 17:08:14,473 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 17:35:03 - app_v2 - WARNING - JWT token expired: {'fresh': False, 'iat': 1780500856, 'jti': '61124590-8180-4708-9877-a72e2efcaaf1', 'type': 'access', 'sub': {'id': 1, 'username': 'admin', 'role': 'admin'}, 'nbf': 1780500856, 'exp': 1780587256}
+2026-06-04 17:35:03,535 WARNING [app_v2] JWT token expired: {'fresh': False, 'iat': 1780500856, 'jti': '61124590-8180-4708-9877-a72e2efcaaf1', 'type': 'access', 'sub': {'id': 1, 'username': 'admin', 'role': 'admin'}, 'nbf': 1780500856, 'exp': 1780587256}
+2026-06-04 17:35:03 - api.v2_auth - INFO - Token refreshed for user: admin
+2026-06-04 17:35:03,539 INFO [api.v2_auth] Token refreshed for user: admin
+2026-06-04 17:41:34 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 17:41:34,262 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 17:51:17 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 17:51:17,417 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 17:52:09 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 17:52:09,414 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 18:22:10 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 18:22:10,570 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 18:24:14 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 18:24:14,111 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 18:24:17 - services.snapshot_manager - INFO - Detected 2 changes for table preventivi.
+2026-06-04 18:24:17,845 INFO [services.snapshot_manager] Detected 2 changes for table preventivi.
+2026-06-04 18:24:18 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:18,011 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:18 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:18,119 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:24 - services.snapshot_manager - INFO - Detected 2 changes for table preventivi.
+2026-06-04 18:24:24,944 INFO [services.snapshot_manager] Detected 2 changes for table preventivi.
+2026-06-04 18:24:25 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:25,068 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:25 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:25,175 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:39 - services.snapshot_manager - INFO - Detected 2 changes for table preventivi.
+2026-06-04 18:24:39,805 INFO [services.snapshot_manager] Detected 2 changes for table preventivi.
+2026-06-04 18:24:39 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:39,929 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:40 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:40,036 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:54 - services.snapshot_manager - INFO - Detected 1 changes for table preventivi.
+2026-06-04 18:24:54,100 INFO [services.snapshot_manager] Detected 1 changes for table preventivi.
+2026-06-04 18:24:54 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:24:54,225 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:29:32 - services.snapshot_manager - INFO - Detected 1 changes for table preventivi.
+2026-06-04 18:29:32,811 INFO [services.snapshot_manager] Detected 1 changes for table preventivi.
+2026-06-04 18:29:32 - services.dbf_data_service - INFO - Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:29:32,932 INFO [services.dbf_data_service] Record arricchito con successo: 'id_paziente' = 'ZZZXVB'.
+2026-06-04 18:36:02 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 18:36:02,112 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 18:37:42 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 18:37:42,495 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 18:40:05 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-04 18:40:05,143 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-04 20:00:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 20:00:01,110 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 21:00:00 - scheduler_v2 - INFO - [CALENDAR SYNC] Avvio sincronizzazione automatica per 3 settimane.
+2026-06-04 21:00:00,015 INFO [scheduler_v2] [CALENDAR SYNC] Avvio sincronizzazione automatica per 3 settimane.
+2026-06-04 21:00:00 - scheduler_v2 - INFO - [CALENDAR SYNC] Sincronizzazione mese 06/2026 (intervallo dal 2026-06-04 al 2026-06-25)
+2026-06-04 21:00:00,016 INFO [scheduler_v2] [CALENDAR SYNC] Sincronizzazione mese 06/2026 (intervallo dal 2026-06-04 al 2026-06-25)
+2026-06-04 21:00:02 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-04 21:00:02,014 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-04 21:00:02 - services.calendar_service - INFO - === Avvio sincronizzazione Google Calendar ===
+2026-06-04 21:00:02,374 INFO [services.calendar_service] === Avvio sincronizzazione Google Calendar ===
+2026-06-04 21:00:02 - services.calendar_service - INFO - Normalizzati: 69 | Anomalie: 0
+2026-06-04 21:00:02,375 INFO [services.calendar_service] Normalizzati: 69 | Anomalie: 0
+2026-06-04 21:00:02 - core.google_calendar_client - INFO - Refreshing Google token
+2026-06-04 21:00:02,376 INFO [core.google_calendar_client] Refreshing Google token
+2026-06-04 21:00:05 - services.calendar_service - INFO - Eventi Google indicizzati: uid=1191 fingerprint=1
+2026-06-04 21:00:05,065 INFO [services.calendar_service] Eventi Google indicizzati: uid=1191 fingerprint=1
+2026-06-04 21:00:43 - services.calendar_sync_engine - INFO - PRUNE orphan uid=0a00f95bff7a05d0d66171acda708c01437d7935 date=2026-06-10
+2026-06-04 21:00:43,281 INFO [services.calendar_sync_engine] PRUNE orphan uid=0a00f95bff7a05d0d66171acda708c01437d7935 date=2026-06-10
+2026-06-04 21:00:43 - services.calendar_sync_engine - INFO - PRUNE orphan uid=844252e978da1309dc99c97c641026a004423acc date=2026-06-04
+2026-06-04 21:00:43,736 INFO [services.calendar_sync_engine] PRUNE orphan uid=844252e978da1309dc99c97c641026a004423acc date=2026-06-04
+2026-06-04 21:00:44 - services.calendar_sync_engine - INFO - PRUNE orphan uid=ea1a01621ac6528833598dd340a6e963aa77b854 date=2026-06-04
+2026-06-04 21:00:44,447 INFO [services.calendar_sync_engine] PRUNE orphan uid=ea1a01621ac6528833598dd340a6e963aa77b854 date=2026-06-04
+2026-06-04 21:00:45 - services.calendar_sync_engine - INFO - PRUNE orphan uid=927c2098633e32bbbbaef5f306bec7f476a6ae8a date=2026-06-06
+2026-06-04 21:00:45,142 INFO [services.calendar_sync_engine] PRUNE orphan uid=927c2098633e32bbbbaef5f306bec7f476a6ae8a date=2026-06-06
+2026-06-04 21:00:45 - services.calendar_sync_engine - INFO - PRUNE orphan uid=c8eb889a9eceafe768b173c0e8749b7b7583ae94 date=2026-06-09
+2026-06-04 21:00:45,793 INFO [services.calendar_sync_engine] PRUNE orphan uid=c8eb889a9eceafe768b173c0e8749b7b7583ae94 date=2026-06-09
+2026-06-04 21:00:46 - services.calendar_sync_engine - INFO - PRUNE orphan uid=d68177205d8aa6271c7778b7a84273820858704a date=2026-06-10
+2026-06-04 21:00:46,224 INFO [services.calendar_sync_engine] PRUNE orphan uid=d68177205d8aa6271c7778b7a84273820858704a date=2026-06-10
+2026-06-04 21:00:46 - services.calendar_service - INFO - Sync completata | inserted=14 updated=55 skipped=0 pruned=6 errors=0
+2026-06-04 21:00:46,945 INFO [services.calendar_service] Sync completata | inserted=14 updated=55 skipped=0 pruned=6 errors=0
+2026-06-04 21:00:46 - services.calendar_service - INFO - === Avvio sincronizzazione Google Calendar ===
+2026-06-04 21:00:46,947 INFO [services.calendar_service] === Avvio sincronizzazione Google Calendar ===
+2026-06-04 21:00:46 - services.calendar_service - INFO - Normalizzati: 49 | Anomalie: 0
+2026-06-04 21:00:46,948 INFO [services.calendar_service] Normalizzati: 49 | Anomalie: 0
+2026-06-04 21:00:49 - services.calendar_service - INFO - Eventi Google indicizzati: uid=1199 fingerprint=1
+2026-06-04 21:00:49,063 INFO [services.calendar_service] Eventi Google indicizzati: uid=1199 fingerprint=1
+2026-06-04 21:01:24 - services.calendar_sync_engine - INFO - PRUNE orphan uid=040c67480812219811f818ba54dcd9a9ff31a2dc date=2026-06-08
+2026-06-04 21:01:24,854 INFO [services.calendar_sync_engine] PRUNE orphan uid=040c67480812219811f818ba54dcd9a9ff31a2dc date=2026-06-08
+2026-06-04 21:01:25 - services.calendar_service - INFO - Sync completata | inserted=3 updated=46 skipped=0 pruned=1 errors=0
+2026-06-04 21:01:25,637 INFO [services.calendar_service] Sync completata | inserted=3 updated=46 skipped=0 pruned=1 errors=0
+2026-06-05 07:00:03 - apscheduler.executors.default - WARNING - Run time of job "SchedulerService.schedule_appointment_reminders.<locals>.job_2h (trigger: cron[hour='7-20', minute='0,30'], next run at: 2026-06-05 07:30:00 CEST)" was missed by 0:00:03.127140
+2026-06-05 07:00:03,127 WARNING [apscheduler.executors.default] Run time of job "SchedulerService.schedule_appointment_reminders.<locals>.job_2h (trigger: cron[hour='7-20', minute='0,30'], next run at: 2026-06-05 07:30:00 CEST)" was missed by 0:00:03.127140
+2026-06-05 07:30:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-05 07:30:01,235 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-05 07:30:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 07:30:06,406 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 07:30:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 07:30:06,570 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 07:30:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 07:30:06,571 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 08:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 08:00:06,280 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 08:00:06,280 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 08:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06,425 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06,426 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06,428 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06,428 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:06,620 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06,700 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06,700 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-05 08:00:06,715 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-05 08:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:06,721 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06,819 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:06,820 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:07 - services.appointment_reminder_service - WARNING - Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-05 08:00:07,094 WARNING [services.appointment_reminder_service] Evolution sendText non JSON (530): <!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+<!--[if IE 8]>    <html class="no-
+2026-06-05 08:00:07 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:07,101 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:07 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:07,194 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:07 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:07,195 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:07 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:07,388 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:00:07 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:07,498 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:00:07 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:00:07,499 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:30:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 08:30:05,632 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 08:30:05 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:30:05,799 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:30:05 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:30:05,800 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:30:05 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:30:05,998 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 08:30:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:30:06,094 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 08:30:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 08:30:06,095 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:00:00 - scheduler_v2 - INFO - [TODO ESCALATION] Avvio controllo todo scaduti.
+2026-06-05 09:00:00,012 INFO [scheduler_v2] [TODO ESCALATION] Avvio controllo todo scaduti.
+2026-06-05 09:00:00 - services.todo_escalation_job - INFO - Starting todo escalation check...
+2026-06-05 09:00:00,013 INFO [services.todo_escalation_job] Starting todo escalation check...
+2026-06-05 09:00:00 - services.todo_escalation_job - INFO - Found 2 overdue todos
+2026-06-05 09:00:00,013 INFO [services.todo_escalation_job] Found 2 overdue todos
+2026-06-05 09:00:00 - services.todo_escalation_job - INFO - Escalation check complete: 0/2 todos escalated
+2026-06-05 09:00:00,013 INFO [services.todo_escalation_job] Escalation check complete: 0/2 todos escalated
+2026-06-05 09:00:00 - scheduler_v2 - INFO - [TODO ESCALATION] Completato: 0/2 todo escalati
+2026-06-05 09:00:00,014 INFO [scheduler_v2] [TODO ESCALATION] Completato: 0/2 todo escalati
+2026-06-05 09:00:01 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-05 09:00:01,185 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-05 09:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 09:00:06,239 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 09:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:00:06,373 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:00:06,373 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:00:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 09:00:06,578 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 09:00:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:00:06,685 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:00:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:00:06,685 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:30:06 - services.appointment_reminder_service - WARNING - Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 09:30:06,128 WARNING [services.appointment_reminder_service] Errore check bot DB: connection to server at "127.0.0.1", port 5432 failed: Connection refused (0x0000274D/10061)
+        Is the server running on that host and accepting TCP/IP connections?
+
+2026-06-05 09:30:06 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:30:06,855 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:30:06 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:30:06,856 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:30:07 - services.appointment_reminder_service - WARNING - Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 09:30:07,164 WARNING [services.appointment_reminder_service] Errore check bot DB: BOT DB in cooldown (connessione recente fallita)
+2026-06-05 09:30:07 - core.environment_manager - INFO - Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:30:07,280 INFO [core.environment_manager] Cambio modalità sms: ora in ambiente 'prod'
+2026-06-05 09:30:07 - core.environment_manager - INFO - Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:30:07,283 INFO [core.environment_manager] Ambiente ServiceType.SMS cambiato a Environment.PROD
+2026-06-05 09:46:40 - services.snapshot_manager - INFO - Detected 18 changes for table APPUNTA.
+2026-06-05 09:46:40,624 INFO [services.snapshot_manager] Detected 18 changes for table APPUNTA.
+2026-06-05 09:52:48 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-05 09:52:48,951 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
+2026-06-05 09:52:55 - services.snapshot_manager - INFO - Detected 17 changes for table APPUNTA.
+2026-06-05 09:52:55,428 INFO [services.snapshot_manager] Detected 17 changes for table APPUNTA.
