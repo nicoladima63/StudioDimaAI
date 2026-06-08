@@ -6,7 +6,7 @@
     "monitor_type": "file_watcher",
     "interval_seconds": 30,
     "enabled": true,
-    "auto_start": false,
+    "auto_start": true,
     "metadata": {},
     "trigger_filters": {}
   },
