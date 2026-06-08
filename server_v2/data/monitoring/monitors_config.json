@@ -2,7 +2,7 @@
   "APPUNTA_file_watcher_1760365287": {
     "monitor_id": "APPUNTA_file_watcher_1760365287",
     "table_name": "APPUNTA",
-    "file_path": "\\\\serverdima\\pixel\\windent\\USER\\APPUNTA.DBF",
+    "file_path": "",
     "monitor_type": "file_watcher",
     "interval_seconds": 30,
     "enabled": true,
@@ -13,7 +13,7 @@
   "preventivi_file_watcher_1769698863": {
     "monitor_id": "preventivi_file_watcher_1769698863",
     "table_name": "preventivi",
-    "file_path": "C:\\pixel\\windent\\DATI\\PREVENT.DBF",
+    "file_path": "",
     "monitor_type": "file_watcher",
     "interval_seconds": 30,
     "enabled": true,
