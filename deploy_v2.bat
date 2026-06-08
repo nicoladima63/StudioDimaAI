@@ -370,6 +370,39 @@ if not exist "%DEPLOY_PATH%\start_server_v2.bat" (
 )
 
 :: ============================================================================
+:: [6.5/7] Deploy Auto-Start Scripts (Task Scheduler)
+:: ============================================================================
+echo [6.5/7] Deploy auto-start scripts...
+echo [6.5/7] Deploy auto-start scripts... >> "%LOGFILE%"
+
+if exist "start_server.ps1" (
+    copy "start_server.ps1" "%DEPLOY_PATH%\start_server.ps1" /Y >nul 2>&1
+    echo   [OK] start_server.ps1 deployato
+    echo   [OK] start_server.ps1 deployato >> "%LOGFILE%"
+) else (
+    echo   [WARN] start_server.ps1 non trovato nel repo
+    echo   [WARN] start_server.ps1 non trovato nel repo >> "%LOGFILE%"
+)
+
+if exist "start_server.bat" (
+    copy "start_server.bat" "%DEPLOY_PATH%\start_server.bat" /Y >nul 2>&1
+    echo   [OK] start_server.bat deployato
+    echo   [OK] start_server.bat deployato >> "%LOGFILE%"
+) else (
+    echo   [WARN] start_server.bat non trovato nel repo
+    echo   [WARN] start_server.bat non trovato nel repo >> "%LOGFILE%"
+)
+
+if exist "AUTOSTART_SETUP.md" (
+    copy "AUTOSTART_SETUP.md" "%DEPLOY_PATH%\AUTOSTART_SETUP.md" /Y >nul 2>&1
+    echo   [OK] AUTOSTART_SETUP.md deployato
+    echo   [OK] AUTOSTART_SETUP.md deployato >> "%LOGFILE%"
+) else (
+    echo   [WARN] AUTOSTART_SETUP.md non trovato nel repo
+    echo   [WARN] AUTOSTART_SETUP.md non trovato nel repo >> "%LOGFILE%"
+)
+
+:: ============================================================================
 :: [7/7] Utility Script
 :: ============================================================================
 echo [7/7] Generazione utility reset...
