@@ -544,6 +544,55 @@ def test_richiami():
         return handle_error(e, "test_richiami")
 
 
+@richiami_v2_bp.route('/richiami/anteprima-messaggio', methods=['GET'])
+def get_anteprima_messaggio():
+    """
+    Genera anteprima del messaggio di richiamo per un paziente.
+
+    Query params:
+        patient_id: ID paziente (obbligatorio)
+
+    Auth: header X-API-Key (per n8n) oppure JWT.
+    """
+    _check_auth()
+
+    patient_id = request.args.get('patient_id', '').strip()
+    if not patient_id:
+        return format_response({'success': False, 'error': 'patient_id obbligatorio'}), 400
+
+    try:
+        # Leggi paziente da DBF
+        service = PazientiService(g.database_manager)
+        paziente_result = service.get_paziente_by_id(patient_id)
+
+        if not paziente_result.get('success'):
+            return format_response({'success': False, 'error': 'Paziente non trovato'}), 404
+
+        paziente = paziente_result['data']
+
+        # Prepara dati per preview messaggio
+        richiamo_data = {
+            'nome': paziente.get('nome', '').strip(),
+            'nome_completo': paziente.get('nome', '').strip(),
+            'tipo_richiamo': paziente.get('tipo_richiamo', '1').strip(),
+            'tempo_richiamo': paziente.get('mesi_richiamo') or paziente.get('tempo_richiamo'),
+            'telefono': paziente.get('cellulare') or paziente.get('telefono', '').strip(),
+            'data_richiamo': paziente.get('data_richiamo_prevista'),
+            'ultima_visita': paziente.get('ultima_visita'),
+        }
+
+        # Genera preview messaggio
+        from services.sms_service import SMSService
+        sms_service = SMSService()
+        preview_result = sms_service.preview_recall_message(richiamo_data)
+
+        return format_response(preview_result)
+
+    except Exception as e:
+        logger.error(f'Errore anteprima messaggio paziente {patient_id}: {e}', exc_info=True)
+        return format_response({'success': False, 'error': str(e)}), 500
+
+
 @richiami_v2_bp.route('/richiami/pazienti-da-richiamare', methods=['GET'])
 def get_pazienti_da_richiamare():
     """

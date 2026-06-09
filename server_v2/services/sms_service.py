@@ -489,19 +489,14 @@ class SMSService:
     
     def _prepare_recall_template_data(self, richiamo_data: Dict[str, Any]) -> Dict[str, Any]:
         """Prepara i dati per il template di richiamo."""
-        tipo_map = {
-            '1': 'controllo periodico',
-            '2': 'richiamo igiene', 
-            '3': 'controllo post-trattamento',
-            '4': 'controllo ortodontico',
-            '5': 'visita di follow-up',
-            '21': 'controllo + igiene',
-            '12': 'igiene + controllo'
-        }
-        
         nome = richiamo_data.get('nome') or richiamo_data.get('nome_completo', 'Gentile paziente')
         tipo_richiamo_code = str(richiamo_data.get('tipo_richiamo', '1'))
-        tipo_richiamo = tipo_map.get(tipo_richiamo_code, 'controllo')
+
+        # Se igiene e' presente nel richiamo (codice '2'), priorità a igiene, altrimenti controllo
+        if '2' in tipo_richiamo_code:
+            tipo_richiamo = 'igiene'
+        else:
+            tipo_richiamo = 'controllo'
         
         data_richiamo = richiamo_data.get('data_richiamo', 'da concordare')
         if data_richiamo and isinstance(data_richiamo, str) and len(data_richiamo) >= 10:

@@ -5,11 +5,13 @@ import {
   CBadge, CButton, CFormSelect, CFormCheck, CFormSwitch, CRow, CCol,
   CInputGroup, CFormInput, CFormLabel,
   CSpinner, CPagination, CPaginationItem,
+  CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPhone, cilClock, cilX } from '@coreui/icons';
+import { cilPhone, cilClock, cilX, cilEnvelopeOpen } from '@coreui/icons';
 import PageLayout from '@/components/layout/PageLayout';
 import apiClient from '@/services/api/client';
+import richiami from '@/features/pazienti/services/richiami.service';
 
 interface PazienteDaRichiamare {
   id: string;
@@ -80,6 +82,12 @@ const RichiamiPage: React.FC = () => {
   const [sortCol, setSortCol] = useState<'nome' | 'giorni_ritardo' | 'ultima_visita'>('giorni_ritardo');
   const [sortAsc, setSortAsc] = useState(false);
 
+  // Modale anteprima messaggio
+  const [showModalMessaggio, setShowModalMessaggio] = useState(false);
+  const [loadingMessaggio, setLoadingMessaggio] = useState(false);
+  const [anteprimaMessaggio, setAnteprimaMessaggio] = useState<any>(null);
+  const [pazienteSelezionato, setPazienteSelezionato] = useState<PazienteDaRichiamare | null>(null);
+
   const carica = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -113,6 +121,24 @@ const RichiamiPage: React.FC = () => {
     setCerca('');
     setPagina(1);
   };
+
+  const apriModalMessaggio = useCallback(async (paziente: PazienteDaRichiamare) => {
+    setPazienteSelezionato(paziente);
+    setShowModalMessaggio(true);
+    setLoadingMessaggio(true);
+    setAnteprimaMessaggio(null);
+    try {
+      const result = await richiami.apiGetAnteprimaMessaggio(paziente.id);
+      setAnteprimaMessaggio(result);
+    } catch (e: any) {
+      setAnteprimaMessaggio({
+        success: false,
+        error: e?.message || 'Errore caricamento anteprima'
+      });
+    } finally {
+      setLoadingMessaggio(false);
+    }
+  }, []);
 
   const filtriAttivi = [tipoOn, sessoOn, scadutiOn, visitaOn, ritardoOn].filter(Boolean).length;
 
@@ -400,12 +426,13 @@ const RichiamiPage: React.FC = () => {
                           Ritardo{sortIcon('giorni_ritardo')}
                         </CTableHeaderCell>
                         <CTableHeaderCell>Stato</CTableHeaderCell>
+                        <CTableHeaderCell style={{ width: '100px' }}>Azioni</CTableHeaderCell>
                       </CTableRow>
                     </CTableHead>
                     <CTableBody>
                       {slice.length === 0 ? (
                         <CTableRow>
-                          <CTableDataCell colSpan={8} className="text-center text-muted py-4">
+                          <CTableDataCell colSpan={9} className="text-center text-muted py-4">
                             Nessun paziente trovato
                           </CTableDataCell>
                         </CTableRow>
@@ -467,6 +494,17 @@ const RichiamiPage: React.FC = () => {
                                 <CBadge color="warning">Da richiamare</CBadge>
                               )}
                             </CTableDataCell>
+                            <CTableDataCell>
+                              <CButton
+                                color="info"
+                                size="sm"
+                                variant="ghost"
+                                title="Anteprima messaggio"
+                                onClick={() => apriModalMessaggio(p)}
+                              >
+                                <CIcon icon={cilEnvelopeOpen} size="sm" />
+                              </CButton>
+                            </CTableDataCell>
                           </CTableRow>
                         ))
                       )}
@@ -488,6 +526,62 @@ const RichiamiPage: React.FC = () => {
           </CCol>
 
         </CRow>
+
+        {/* Modale anteprima messaggio */}
+        <CModal visible={showModalMessaggio} onClose={() => setShowModalMessaggio(false)} size="lg">
+          <CModalHeader onClose={() => setShowModalMessaggio(false)}>
+            <CModalTitle>
+              Anteprima Messaggio
+              {pazienteSelezionato && (
+                <span className="text-muted ms-2" style={{ fontSize: '0.85rem' }}>
+                  — {pazienteSelezionato.nome}
+                </span>
+              )}
+            </CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            {loadingMessaggio ? (
+              <div className="text-center py-5">
+                <CSpinner color="primary" />
+                <p className="text-muted mt-2">Caricamento anteprima...</p>
+              </div>
+            ) : anteprimaMessaggio?.success ? (
+              <div>
+                <div className="mb-3">
+                  <small className="text-muted">Messaggio:</small>
+                  <div className="p-3 bg-light rounded mt-2 border">
+                    <p className="mb-0 font-monospace" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {anteprimaMessaggio.data?.message || anteprimaMessaggio.message}
+                    </p>
+                  </div>
+                </div>
+                {(anteprimaMessaggio.data?.estimated_sms_parts || anteprimaMessaggio.estimated_sms_parts) && (
+                  <small className="text-muted">
+                    Lunghezza: {anteprimaMessaggio.data?.length || anteprimaMessaggio.length} caratteri
+                    <span> • Parti SMS: {anteprimaMessaggio.data?.estimated_sms_parts || anteprimaMessaggio.estimated_sms_parts}</span>
+                  </small>
+                )}
+                {(anteprimaMessaggio.data?.recipient || anteprimaMessaggio.recipient) && (
+                  <div className="mt-3">
+                    <small className="text-muted">
+                      Destinatario: <strong>{anteprimaMessaggio.data?.recipient_name || anteprimaMessaggio.recipient_name || anteprimaMessaggio.data?.recipient || anteprimaMessaggio.recipient}</strong>
+                    </small>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-danger">
+                <p><strong>Errore</strong></p>
+                <p>{anteprimaMessaggio?.data?.message || anteprimaMessaggio?.message || anteprimaMessaggio?.error || 'Errore caricamento anteprima'}</p>
+              </div>
+            )}
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="secondary" onClick={() => setShowModalMessaggio(false)}>
+              Chiudi
+            </CButton>
+          </CModalFooter>
+        </CModal>
       </PageLayout.ContentBody>
     </PageLayout>
   );

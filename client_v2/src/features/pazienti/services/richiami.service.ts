@@ -182,6 +182,22 @@ const richiami = {
         state: 'error'
       };
     }
+  },
+
+  // Ottieni anteprima messaggio di richiamo per un paziente
+  apiGetAnteprimaMessaggio: async (patientId: string): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiClient.get('/richiami/anteprima-messaggio', {
+        params: { patient_id: patientId },
+      });
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Errore caricamento anteprima messaggio',
+        state: 'error'
+      };
+    }
   }
 };
 

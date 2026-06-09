@@ -305,7 +305,8 @@ def _save_wa_cache(patient_id: str, phone: str, has_wa: bool, jid: Optional[str]
 def send_whatsapp_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str, reminder_type: str) -> dict:
     """Invia reminder via Evolution API WhatsApp."""
     phone_norm = _normalize_phone(phone)
-    nome = patient_name.split()[0] if patient_name else 'paziente'
+    parts = patient_name.split() if patient_name else []
+    nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
     data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
     tpl = REMINDER_MESSAGES[reminder_type]['wa']
     text = tpl.format(nome=nome, data=data_fmt, ora=ap_time)
@@ -565,7 +566,9 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
                 tpl = REMINDER_MESSAGES[reminder_type][channel == 'whatsapp' and 'wa' or 'sms']
                 data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
                 if channel == 'whatsapp':
-                    text = tpl.format(nome=name.split()[0], data=data_fmt, ora=ap_time)
+                    parts = name.split() if name else []
+                    nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
+                    text = tpl.format(nome=nome, data=data_fmt, ora=ap_time)
                 else:
                     text = tpl.format(data=data_fmt, ora=ap_time)
                 
