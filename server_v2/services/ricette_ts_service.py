@@ -1287,9 +1287,10 @@ class RicetteTsService:
                         pdf_promemoria_b64 = pdf_match.group(1)
                 
                 # === RETURN IDENTICO V1 ===
-                # success solo se il Sistema TS ha effettivamente accettato la ricetta:
-                # codEsitoInserimento 0000 = ok; un errore (es. 1140 Utente non autorizzato) e' un rifiuto, non un successo
-                esito_ok = cod_esito in (None, '0000') and not errore_cod
+                # success solo se codEsitoInserimento e' 0000. NB: il tag <erroreRicetta> e' presente
+                # anche sulle risposte di successo (con codEsito=0000, "Operazione eseguita correttamente"),
+                # quindi non basta controllare che errore_cod sia "presente": va confrontato col valore.
+                esito_ok = cod_esito == '0000'
                 return {
                     'success': esito_ok,
                     'http_status': response.status_code,
@@ -1300,7 +1301,7 @@ class RicetteTsService:
                     'cod_esito_inserimento': cod_esito,
                     'errore_codice': errore_cod,
                     'errore_descrizione': errore_desc,
-                    'has_errors': bool(errore_cod),
+                    'has_errors': not esito_ok,
                     'response_xml': response.text,
                     'timestamp': datetime.now().isoformat(),
                     'pdf_promemoria_b64': pdf_promemoria_b64,
