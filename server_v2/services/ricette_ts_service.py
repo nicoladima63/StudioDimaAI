@@ -172,20 +172,32 @@ class RicetteTsService:
                 'cognome_medico': root.find('.//ns2:cognomeMedico', ns).text if root.find('.//ns2:cognomeMedico', ns) is not None else None,
                 'cod_esito': root.find('.//ns2:codEsitoVisualizzazione', ns).text if root.find('.//ns2:codEsitoVisualizzazione', ns) is not None else None,
                 'protocollo_transazione': root.find('.//ns2:protocolloTransazione', ns).text if root.find('.//ns2:protocolloTransazione', ns) is not None else None,
-                'data_ricezione': root.find('.//ns2:dataRicezione', ns).text if root.find('.//ns2:dataRicezione', ns) is not None else None
+                'data_ricezione': root.find('.//ns2:dataRicezione', ns).text if root.find('.//ns2:dataRicezione', ns) is not None else None,
+                'num_iscrizione_albo': root.find('.//ns2:numIscrizAlbo', ns).text if root.find('.//ns2:numIscrizAlbo', ns) is not None else None,
+                'cod_specializzazione': root.find('.//ns2:codSpecializzazione', ns).text if root.find('.//ns2:codSpecializzazione', ns) is not None else None,
+                'cf_assistito': root.find('.//ns2:codicePaziente', ns).text if root.find('.//ns2:codicePaziente', ns) is not None else None,
+                'cogn_nome_assistito': root.find('.//ns2:cognNome', ns).text if root.find('.//ns2:cognNome', ns) is not None else None,
+                'cod_diagnosi': root.find('.//ns2:codDiagnosi', ns).text if root.find('.//ns2:codDiagnosi', ns) is not None else None,
+                'descr_diagnosi': root.find('.//ns2:descrDiagnosi', ns).text if root.find('.//ns2:descrDiagnosi', ns) is not None else None,
             }
-            
+
             # Estrai dettagli prescrizione
             dettaglio = root.find('.//ns2:dettaglioPrescrizioneRicettaBianca', ns)
             if dettaglio is not None:
+                def _dt(tag):
+                    el = dettaglio.find(f'.//tip:{tag}', ns)
+                    return el.text if el is not None else None
+
                 ricetta_data.update({
-                    'cod_gruppo_equival': dettaglio.find('.//codGruppoEquival').text if dettaglio.find('.//codGruppoEquival') is not None else None,
-                    'descr_gruppo_equival': dettaglio.find('.//descrGruppoEquival').text if dettaglio.find('.//descrGruppoEquival') is not None else None,
-                    'quantita': dettaglio.find('.//quantita').text if dettaglio.find('.//quantita') is not None else None,
-                    'posologia': dettaglio.find('.//posologia').text if dettaglio.find('.//posologia') is not None else None,
-                    'durata_trattamento': dettaglio.find('.//durataTrattamento').text if dettaglio.find('.//durataTrattamento') is not None else None,
-                    'num_ripetibilita': dettaglio.find('.//numRipetibilita').text if dettaglio.find('.//numRipetibilita') is not None else None,
-                    'validita_farm': dettaglio.find('.//validitaFarm').text if dettaglio.find('.//validitaFarm') is not None else None
+                    'cod_prod_prest': _dt('codProdPrest'),
+                    'descr_prod_prest': _dt('descrProdPrest'),
+                    'cod_gruppo_equival': _dt('codGruppoEquival'),
+                    'descr_gruppo_equival': _dt('descrGruppoEquival'),
+                    'quantita': _dt('quantita'),
+                    'posologia': _dt('posologia'),
+                    'durata_trattamento': _dt('durataTrattamento'),
+                    'num_ripetibilita': _dt('numRipetibilita'),
+                    'validita_farm': _dt('validitaFarm')
                 })
             
             # Estrai errori se presenti
@@ -196,7 +208,11 @@ class RicetteTsService:
                     'errore_messaggio': errore.find('.//esito').text if errore.find('.//esito') is not None else None,
                     'errore_tipo': errore.find('.//tipoErrore').text if errore.find('.//tipoErrore') is not None else None
                 })
-            
+
+            # PDF promemoria (per ristampe future)
+            pdf_el = root.find('.//ns2:pdfPromemoria', ns)
+            ricetta_data['pdf_promemoria_b64'] = pdf_el.text if pdf_el is not None else None
+
             return ricetta_data
             
         except Exception as e:
@@ -714,32 +730,22 @@ class RicetteTsService:
             </soapenv:Envelope>
             '''
             
-            # Headers IDENTICI al ricetta_tester.py
+            # Headers: stesso schema di autenticazione usato per l'invio (Basic Auth + Authorization2F)
             headers = {
                 'Content-Type': 'text/xml; charset=utf-8',
                 'Authorization': f"Basic {base64.b64encode(f'{self.cf_medico}:{self.password}'.encode()).decode()}",
-                'Authorization2F': f"Bearer {self.id_sessione}",
+                'Authorization2F': f"Bearer {self._genera_token_2fa()}",
                 'SOAPAction': "http://visualizzaprescrittoricettabianca.wsdl.dem.sanita.finanze.it/VisualizzaPrescrittoRicettaBianca"
             }
-            
-            # Endpoint IDENTICO al ricetta_tester.py
-            url = "https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca"
-            
-            #self.logger.info(f"URL: {url}")
-            #self.logger.info(f"Headers: {headers}")
-            
-            # Chiamata HTTP IDENTICA al ricetta_tester.py
-            response = requests.post(url, data=soap_body.strip(), headers=headers)
-            
-            self.logger.info(f"Status Code: {response.status_code}")
-            self.logger.info(f"Response: {response.text[:500]}...")
-            
-            # Salva XML per debug
-            xml_file = f"response_xml_get_ricetta_{nrbe}.xml"
-            with open(xml_file, 'w', encoding='utf-8') as f:
-                f.write(response.text)
-            self.logger.info(f"XML salvato: {xml_file}")
-            
+
+            # Endpoint corretto per l'ambiente attivo (test/prod) - non hardcoded a produzione
+            url = self.endpoint_visualizza
+
+            session = self._create_session()
+            response = session.post(url, data=soap_body.strip(), headers=headers, timeout=60, verify=False)
+
+            self.logger.info(f"get_ricetta NRE={nrbe} - Status Code: {response.status_code}")
+
             if response.status_code == 200:
                 # Parsing della risposta XML
                 try:

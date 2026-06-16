@@ -7,14 +7,6 @@ import {
 import ricettaApi, { saveRicetta } from "@/services/ricette_ts.service";
 import type { RicettaPayload } from '@/types/ricetta.types';
 
-// Tipo per EmailRicettaPayload (da definire meglio in types)
-interface EmailRicettaPayload {
-  email_paziente: string;
-  nome_paziente: string;
-  ricetta_data: any;
-  pdf_base64: string;
-}
-
 const TestInvioRicetta: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<any>(null);
@@ -212,17 +204,21 @@ const TestInvioRicetta: React.FC = () => {
     }
 
     setEmailLoading(true);
-    
+
     try {
-      const emailPayload: EmailRicettaPayload = {
+      const result = await ricettaApi.inviaRicettaEmail({
         email_paziente: emailData.email,
         nome_paziente: emailData.nome,
-        ricetta_data: response.data,
-        pdf_base64: response.data.pdf_promemoria_b64
-      };
+        pdf_base64: response.data.pdf_promemoria_b64,
+        nre: response.data.nre
+      });
 
-      alert('Funzione email da implementare');
-      setShowEmailModal(false);
+      if (result.success) {
+        alert(`✅ Email inviata a ${emailData.email}`);
+        setShowEmailModal(false);
+      } else {
+        alert(`❌ Invio email fallito: ${result.message || result.error}`);
+      }
 
     } catch (error: any) {
       console.error('Errore invio email:', error);

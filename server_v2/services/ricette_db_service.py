@@ -152,13 +152,16 @@ class RicetteDbService(BaseService):
         """
         try:
             # Validazione campi obbligatori - come V1
+            # NB: gruppo_equivalenza_farmaco e response_xml sono intenzionalmente vuoti in alcuni casi
+            # (farmaci classe C senza gruppo equivalenza; XML non salvato per risparmiare spazio,
+            # la ricetta resta recuperabile dal Sistema TS tramite NRE) - non vanno tra gli obbligatori.
+            # codice_diagnosi/descrizione_diagnosi: il Sistema TS non richiede la diagnosi (vedi invio),
+            # quindi una ricetta reale puo' non averla - non e' obbligatoria nemmeno qui.
             required_fields = [
                 'nre', 'codice_pin', 'cf_medico', 'medico_cognome', 'medico_nome',
-                'specializzazione', 'nr_iscrizione_albo', 'cf_assistito', 
+                'specializzazione', 'nr_iscrizione_albo', 'cf_assistito',
                 'paziente_cognome', 'paziente_nome', 'data_compilazione',
-                'codice_diagnosi', 'descrizione_diagnosi', 'gruppo_equivalenza_farmaco',
                 'prodotto_aic', 'codice_farmaco', 'posologia', 'durata_trattamento',
-                'response_xml'
             ]
             self.validate_required_fields(ricetta_data, required_fields)
             

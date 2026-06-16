@@ -20,7 +20,8 @@ import {
   cilMedicalCross,
   cilClock,
   cilWarning,
-  cilCheckCircle
+  cilCheckCircle,
+  cilReload
 } from '@coreui/icons';
 import { 
   useRicette,
@@ -184,10 +185,16 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
       {/* Lista ricette */}
       {cfPaziente && ricette.length > 0 && (
         <>
-          <h5 className="mb-3">
-            Ricette Trovate ({ricette.length})
-          </h5>
-          
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <h5 className="mb-0">
+              Ricette Trovate ({ricette.length})
+            </h5>
+            <CButton color="outline-secondary" size="sm" onClick={cercaRicette} disabled={loading}>
+              {loading ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilReload} className="me-1" />}
+              Aggiorna
+            </CButton>
+          </div>
+
           {ricette.map((ricetta) => (
             <CCard key={ricetta.id} className="mb-3">
               <CCardHeader>
@@ -285,6 +292,10 @@ export default function RicettePaziente({ cfPazienteIniziale = '' }: RicettePazi
             <p className="text-muted">
               Nessuna ricetta trovata per il paziente {cfPaziente}
             </p>
+            <CButton color="outline-secondary" size="sm" onClick={cercaRicette}>
+              <CIcon icon={cilReload} className="me-1" />
+              Aggiorna
+            </CButton>
           </CCardBody>
         </CCard>
       )}

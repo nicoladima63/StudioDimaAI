@@ -3,9 +3,9 @@ import {
   CCard, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell, CButton, CBadge, CSpinner, CAlert,
   CInputGroup, CInputGroupText, CFormInput, CFormTextarea, CRow, CCol, CForm, CFormLabel,
-  CFormSelect
+  CFormSelect, CModal, CModalHeader, CModalBody, CModalFooter, CModalTitle
 } from '@coreui/react';
-import { getRicetteFromTS, downloadRicettaPDFByNre } from '@/services/ricette_ts.service';
+import { getRicetteFromTS, saveRicetta, ricettaApi } from '@/services/ricette_ts.service';
 import type { Paziente } from '@/store/pazienti.store';
 
 // Tipo per le ricette dal Sistema TS (aggiornato con i campi del tracciato ufficiale)
@@ -13,16 +13,25 @@ interface RicettaTS {
   id?: number;
   nre?: string;
   codice_pin?: string;
+  pin_nrbe?: string;
+  protocollo_transazione?: string;
   stato?: string;
   cf_assistito?: string;
+  cogn_nome_assistito?: string;
   paziente_nome?: string;
   paziente_cognome?: string;
   data_compilazione?: string;
   prodotto_aic?: string;
+  cod_prod_prest?: string;
+  descr_prod_prest?: string;
   denominazione_farmaco?: string;
   posologia?: string;
   durata_trattamento?: string;
   note?: string;
+  pdf_promemoria_b64?: string;
+  num_iscrizione_albo?: string;
+  cod_specializzazione?: string;
+  cod_gruppo_equival?: string;
   // Nuovi campi dal tracciato ufficiale
   cf_medico?: string;
   nome_medico?: string;
@@ -152,7 +161,13 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
   const [serverResponse, setServerResponse] = useState<string>('');
   const [errorAnalysis, setErrorAnalysis] = useState<ErrorAnalysis | null>(null);
   const [metadatiRisposta, setMetadatiRisposta] = useState<MetadatiRisposta | null>(null);
-  
+
+  // Salvataggio nel DB locale e invio email
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [emailModalRicetta, setEmailModalRicetta] = useState<RicettaTS | null>(null);
+  const [emailDestinatario, setEmailDestinatario] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
+
   // Filtri di ricerca
   const [filtri, setFiltri] = useState({
     dataDa: '',
@@ -225,13 +240,20 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
     }
   };
 
-  const handleStampaPDF = async (ricetta: RicettaTS) => {
-    if (!ricetta.nre) return;
-    
+  const handleStampaPDF = (ricetta: RicettaTS) => {
+    if (!ricetta.pdf_promemoria_b64) {
+      alert('❌ PDF non disponibile per questa ricetta');
+      return;
+    }
+
     try {
-      const blob = await downloadRicettaPDFByNre(ricetta.nre);
-      
-      // Crea URL temporaneo e avvia download
+      const byteCharacters = atob(ricetta.pdf_promemoria_b64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const blob = new Blob([new Uint8Array(byteNumbers)], { type: 'application/pdf' });
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -240,10 +262,86 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
     } catch (error: any) {
       console.error('Errore stampa PDF:', error);
       alert(`❌ Errore durante la stampa del PDF: ${error.message || 'Errore sconosciuto'}`);
+    }
+  };
+
+  const handleSalvaRicetta = async (ricetta: RicettaTS) => {
+    if (!ricetta.nre || !pazienteSelezionato) return;
+    setSavingId(ricetta.nre);
+    try {
+      const cognomeNomeParts = (ricetta.cogn_nome_assistito || '').trim().split(' ');
+      const result = await saveRicetta({
+        nre: ricetta.nre,
+        codice_pin: ricetta.pin_nrbe || '',
+        cf_medico: ricetta.cf_medico || '',
+        medico_cognome: ricetta.cognome_medico || '',
+        medico_nome: ricetta.nome_medico || '',
+        specializzazione: ricetta.cod_specializzazione || '',
+        nr_iscrizione_albo: ricetta.num_iscrizione_albo || '',
+        cf_assistito: pazienteSelezionato.codice_fiscale || ricetta.cf_assistito || '',
+        paziente_cognome: cognomeNomeParts[0] || pazienteSelezionato.nome,
+        paziente_nome: cognomeNomeParts.slice(1).join(' ') || pazienteSelezionato.nome,
+        data_compilazione: ricetta.data_compilazione || new Date().toISOString(),
+        codice_diagnosi: ricetta.cod_diagnosi || '',
+        descrizione_diagnosi: ricetta.descr_diagnosi || '',
+        gruppo_equivalenza_farmaco: ricetta.cod_gruppo_equival || '',
+        prodotto_aic: ricetta.cod_prod_prest || '',
+        codice_farmaco: ricetta.cod_prod_prest || '',
+        denominazione_farmaco: ricetta.descr_prod_prest || '',
+        principio_attivo: ricetta.descr_prod_prest || '',
+        posologia: ricetta.posologia || '',
+        durata_trattamento: ricetta.durata_trattamento || '',
+        response_xml: '',
+        protocollo_transazione: ricetta.protocollo_transazione,
+        pdf_base64: ricetta.pdf_promemoria_b64
+      });
+
+      if (result.success) {
+        alert(`✅ Ricetta salvata nel database locale (ID: ${result.data?.ricetta_id})`);
+      } else {
+        alert(`❌ Salvataggio fallito: ${result.message}`);
+      }
+    } catch (error: any) {
+      alert(`❌ Errore durante il salvataggio: ${error.message || 'Errore sconosciuto'}`);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const handleApriEmailModal = (ricetta: RicettaTS) => {
+    setEmailModalRicetta(ricetta);
+    setEmailDestinatario(pazienteSelezionato?.email || '');
+  };
+
+  const handleInviaEmail = async () => {
+    if (!emailModalRicetta || !emailDestinatario) {
+      alert('Inserire un indirizzo email');
+      return;
+    }
+
+    setEmailLoading(true);
+    try {
+      const result = await ricettaApi.inviaRicettaEmail({
+        email_paziente: emailDestinatario,
+        nome_paziente: pazienteSelezionato?.nome || 'Paziente',
+        pdf_base64: emailModalRicetta.pdf_promemoria_b64 || '',
+        nre: emailModalRicetta.nre
+      });
+
+      if (result.success) {
+        alert(`✅ Email inviata a ${emailDestinatario}`);
+        setEmailModalRicetta(null);
+      } else {
+        alert(`❌ Invio email fallito: ${result.message || result.error}`);
+      }
+    } catch (error: any) {
+      alert(`❌ Errore durante l'invio dell'email: ${error.message || 'Errore sconosciuto'}`);
+    } finally {
+      setEmailLoading(false);
     }
   };
 
@@ -560,14 +658,35 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                         </CTableDataCell>
                         <CTableDataCell>
                           <div className="d-flex flex-column gap-1">
-                            {ricetta.nre && (
-                              <CButton 
-                                color="info" 
+                            {ricetta.pdf_promemoria_b64 && (
+                              <CButton
+                                color="info"
                                 size="sm"
                                 onClick={() => handleStampaPDF(ricetta)}
-                                title="Stampa PDF"
+                                title="Scarica PDF"
                               >
                                 🖨️
+                              </CButton>
+                            )}
+                            {ricetta.nre && (
+                              <CButton
+                                color="warning"
+                                size="sm"
+                                onClick={() => handleSalvaRicetta(ricetta)}
+                                disabled={savingId === ricetta.nre}
+                                title="Salva nel database locale"
+                              >
+                                {savingId === ricetta.nre ? <CSpinner size="sm" /> : '💾'}
+                              </CButton>
+                            )}
+                            {ricetta.pdf_promemoria_b64 && (
+                              <CButton
+                                color="primary"
+                                size="sm"
+                                onClick={() => handleApriEmailModal(ricetta)}
+                                title="Invia via email"
+                              >
+                                📧
                               </CButton>
                             )}
                             {ricetta.dettagli_prescrizione && ricetta.dettagli_prescrizione.length > 0 && (
@@ -657,6 +776,46 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
           )}
         </CCardBody>
       </CCard>
+
+      {/* Modal invio email */}
+      <CModal visible={!!emailModalRicetta} onClose={() => setEmailModalRicetta(null)}>
+        <CModalHeader>
+          <CModalTitle>📧 Invia ricetta via email</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <CForm>
+            <div className="mb-3">
+              <CFormLabel>Email paziente</CFormLabel>
+              <CFormInput
+                type="email"
+                value={emailDestinatario}
+                onChange={(e) => setEmailDestinatario(e.target.value)}
+                placeholder="email@esempio.com"
+              />
+              {!pazienteSelezionato?.email && (
+                <small className="text-muted">
+                  Il paziente non ha un'email in archivio: inseriscila manualmente.
+                </small>
+              )}
+            </div>
+            {emailModalRicetta && (
+              <CAlert color="info">
+                <strong>Ricetta:</strong> NRE {emailModalRicetta.nre}<br/>
+                PIN: {emailModalRicetta.pin_nrbe}
+              </CAlert>
+            )}
+          </CForm>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setEmailModalRicetta(null)}>
+            Annulla
+          </CButton>
+          <CButton color="primary" onClick={handleInviaEmail} disabled={emailLoading || !emailDestinatario}>
+            {emailLoading ? <CSpinner size="sm" className="me-2" /> : '📧'}
+            Invia Email
+          </CButton>
+        </CModalFooter>
+      </CModal>
     </div>
   );
 };

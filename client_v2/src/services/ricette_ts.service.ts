@@ -367,8 +367,8 @@ class RicettaApiService {
   async inviaRicettaEmail(emailPayload: {
     email_paziente: string;
     nome_paziente: string;
-    ricetta_data: any;
     pdf_base64: string;
+    nre?: string;
   }): Promise<ApiResponse<any>> {
     try {
       const response = await apiClient.post(`/ricetta/invio/email`, emailPayload);
