@@ -5,7 +5,7 @@ import TestInvioRicetta from '../components/TestInvioRicetta';
 import ListaRicetteTest from '../components/ListaRicetteTest';
 
 const RNETestPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'test' | 'lista' | 'ts-raw'>('test');
+  const [activeTab, setActiveTab] = useState<'test' | 'lista'>('test');
 
   return (
     <PageLayout>

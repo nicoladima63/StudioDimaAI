@@ -21,7 +21,7 @@ class RicettaConfig:
             return self._current_env
             
         # 1. File mode specifico per ricetta
-        mode_file = self.project_root / "server" / "instance" / "ricetta_mode.txt"
+        mode_file = self.project_root / "server_v2" / "instance" / "ricetta_mode.txt"
         if mode_file.exists():
             try:
                 env = mode_file.read_text().strip().lower()
@@ -56,7 +56,7 @@ class RicettaConfig:
         self._config_cache.clear()
         
         # Salva su file per persistenza
-        mode_file = self.project_root / "server" / "instance" / "ricetta_mode.txt"
+        mode_file = self.project_root / "server_v2" / "instance" / "ricetta_mode.txt"
         try:
             mode_file.parent.mkdir(parents=True, exist_ok=True)
             mode_file.write_text(env)
@@ -77,8 +77,8 @@ class RicettaConfig:
         
         if env == 'test':
             config = {
-                'client_cert': certs_dir / "test" / "client_cert.pem",
-                'client_key': certs_dir / "test" / "client_key.pem",
+                'client_cert': certs_dir / "test" / "256client_cert.pem",
+                'client_key': certs_dir / "test" / "256client_key.pem",
                 'ca_cert': certs_dir / "test" / "ActalisCA.crt",
                 'sanitel_cert': certs_dir / "test" / "SanitelCF-2024-2027.cer",
                 'p12_cert': certs_dir / "test" / "TestSanitaMir.p12",

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   CCard, CCardBody, CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell, CButton, CBadge, CSpinner, CAlert,
-  CInputGroup, CInputGroupText, CFormInput, CRow, CCol, CForm, CFormLabel,
-  CFormSelect, CCol as CColForm
+  CInputGroup, CInputGroupText, CFormInput, CFormTextarea, CRow, CCol, CForm, CFormLabel,
+  CFormSelect
 } from '@coreui/react';
 import { getRicetteFromTS, downloadRicettaPDFByNre } from '@/services/ricette_ts.service';
 import type { Paziente } from '@/store/pazienti.store';
@@ -163,12 +163,12 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
   // Filtra ricette lato frontend solo per ricerca locale
   const ricetteFiltrate = ricette.filter(ricetta => {
     if (!searchTerm.trim()) return true;
-    
     const searchLower = searchTerm.toLowerCase();
-    return 
+    return (
       ricetta.nre?.toLowerCase().includes(searchLower) ||
       ricetta.prodotto_aic?.toLowerCase().includes(searchLower) ||
-      ricetta.denominazione_farmaco?.toLowerCase().includes(searchLower);
+      ricetta.denominazione_farmaco?.toLowerCase().includes(searchLower)
+    );
   });
 
   // Rimuove trigger automatico - solo pulsante "Cerca"
@@ -196,8 +196,6 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
       // Carica dal Sistema TS con CF paziente e filtri
       const params: any = {
         cf_assistito: pazienteSelezionato.codice_fiscale,
-        use_production: true,  // Usa ambiente di produzione
-        cf_medico_reale: 'DMRNCL63S21D612I'  // Il tuo CF medico reale
       };
       
       if (filtri.dataDa) params.data_da = filtri.dataDa;
@@ -207,38 +205,15 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
         params.test_ricerca_specifica = true;  // Attiva ricerca specifica per NRE
       }
       
-      console.log('🔍 Ricerca ricette TS con parametri:', params);
-      
       const response = await getRicetteFromTS(params);
-      
-      // Salva XML del Sistema TS per debug - FORMATTATO
+
       const xmlResponse = response.ts_response?.response_xml || 'Nessun XML disponibile';
-      const formattedXml = formatXmlForDisplay(xmlResponse);
-      setServerResponse(formattedXml);
-      
-      // Salva metadati e analisi errori
+      setServerResponse(formatXmlForDisplay(xmlResponse));
       setMetadatiRisposta(response.ts_response?.metadati_risposta || null);
       setErrorAnalysis(response.ts_response?.error_analysis || null);
-      
+
       if (response.success) {
         setRicette(response.data || []);
-        console.log(`✅ Trovate ${response.data?.length || 0} ricette per CF: ${pazienteSelezionato.codice_fiscale}`);
-        
-        // Log dettagliato per debug
-        if (response.ts_response) {
-          console.log('📋 Dettagli risposta Sistema TS:', {
-            environment: response.ts_response.environment,
-            nre_ricercato: response.ts_response.nre_ricercato,
-            cf_assistito: response.ts_response.cf_assistito,
-            http_status: response.ts_response.http_status
-          });
-        }
-        
-        // Mostra eventuali errori o comunicazioni
-        if (response.ts_response?.error_analysis?.has_errors) {
-          const errorMessages = response.ts_response.error_analysis.error_messages.join('; ');
-          console.warn(`⚠️ Avvisi dal Sistema TS: ${errorMessages}`);
-        }
       } else {
         setError(response.message || 'Errore nel caricamento delle ricette dal Sistema TS');
       }
@@ -436,31 +411,31 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
               {/* Filtri di ricerca avanzata */}
               <CForm className="mb-4">
                 <CRow className="mb-3">
-                  <CColForm md={3}>
+                  <CCol md={3}>
                     <CFormLabel>📅 Data da</CFormLabel>
                     <CFormInput
                       type="date"
                       value={filtri.dataDa}
                       onChange={(e) => handleFiltriChange('dataDa', e.target.value)}
                     />
-                  </CColForm>
-                  <CColForm md={3}>
+                  </CCol>
+                  <CCol md={3}>
                     <CFormLabel>📅 Data a</CFormLabel>
                     <CFormInput
                       type="date"
                       value={filtri.dataA}
                       onChange={(e) => handleFiltriChange('dataA', e.target.value)}
                     />
-                  </CColForm>
-                  <CColForm md={3}>
+                  </CCol>
+                  <CCol md={3}>
                     <CFormLabel>🏷️ NRE specifico</CFormLabel>
                     <CFormInput
                       placeholder="Inserisci NRE..."
                       value={filtri.nre}
                       onChange={(e) => handleFiltriChange('nre', e.target.value)}
                     />
-                  </CColForm>
-                  <CColForm md={3} className="d-flex align-items-end">
+                  </CCol>
+                  <CCol md={3} className="d-flex align-items-end">
                     <div>
                       <CButton color="primary" size="sm" onClick={handleCerca} className="me-2">
                         🔍 Cerca
@@ -469,7 +444,7 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                         🔄 Reset
                       </CButton>
                     </div>
-                  </CColForm>
+                  </CCol>
                 </CRow>
               </CForm>
 
@@ -600,8 +575,7 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                                 color="secondary" 
                                 size="sm"
                                 onClick={() => {
-                                  // Toggle dettagli - implementare se necessario
-                                  console.log('Dettagli ricetta:', ricetta.dettagli_prescrizione);
+                                  // toggle dettagli: da implementare
                                 }}
                                 title="Mostra dettagli"
                               >
@@ -661,16 +635,13 @@ const RicetteTSPaziente: React.FC<RicetteTSPazienteProps> = ({ pazienteSeleziona
                     <CAlert color="info">
                       <strong>📋 XML Sistema TS (Debug)</strong>
                     </CAlert>
-                    <textarea
-                      className="form-control"
+                    <CFormTextarea
                       rows={25}
                       value={serverResponse}
                       readOnly
                       style={{
                         fontFamily: 'monospace',
                         fontSize: '10px',
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #dee2e6',
                         whiteSpace: 'pre-wrap',
                         lineHeight: '1.2'
                       }}

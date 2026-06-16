@@ -556,7 +556,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
             has_wa, _ = check_whatsapp(pid, phone)
             if dry_run:
                 channel = 'whatsapp' if has_wa else 'sms'
-                logger.info(f"[DRY RUN] {name} → {channel} ({phone})")
+                logger.info(f"[DRY RUN] {name} -> {channel} ({phone})")
                 if has_wa:
                     stats['sent_wa'] += 1
                 else:

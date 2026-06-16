@@ -1,0 +1,14 @@
+{
+  "Amoxicillina + Acido clavulanico": {
+    "farmaci": [
+      {
+        "aic": "042918060",
+        "nome_commerciale": "AUGMENTIN*12CPR RIV875MG+125MG",
+        "classe": "A",
+        "ripetibilita": "RR | RIPETIBILE 10V IN 6MESI",
+        "gruppo_equivalenza_codice": "CJA",
+        "gruppo_equivalenza_descrizione": "AMOXICILLINA+ACIDO CLAVULANICO 875+125MG 12 UNITA' USO ORALE"
+      }
+    ]
+  }
+}

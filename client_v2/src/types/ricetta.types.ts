@@ -14,6 +14,8 @@ export interface Farmaco {
   codice: string;
   descrizione: string;
   principio_attivo: string;
+  gruppo_equivalenza_codice?: string;
+  gruppo_equivalenza_descrizione?: string;
 }
 
 export interface Paziente {

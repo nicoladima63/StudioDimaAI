@@ -30,13 +30,24 @@ export interface FarmacoProtocollo {
   posologie_alternative: any[];
 }
 
+// Prodotto commerciale (AIC) associato a un principio attivo
+export interface ProdottoCommerciale {
+  id: number;
+  aic: string;
+  nome_commerciale: string;
+  classe: string | null;
+  ripetibilita: string | null;
+  gruppo_equivalenza_codice: string | null;
+  gruppo_equivalenza_descrizione: string | null;
+}
+
 class RicettaApiService {
   private readonly basePath = "/ricetta";
 
   // === Health e configurazione ===
   async healthCheck(): Promise<ApiResponse> {
     try {
-      const response = await apiClient.get(`${this.basePath}/health`);
+      const response = await apiClient.get(`/ricetta/health`);
       return response.data;
     } catch (error: any) {
       return {
@@ -49,7 +60,7 @@ class RicettaApiService {
 
   async testConnection(): Promise<ApiResponse<ConnectionTestResult>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/test-connection`);
+      const response = await apiClient.get(`/ricetta/test-connection`);
       return response.data;
     } catch (error: any) {
       return {
@@ -69,7 +80,7 @@ class RicettaApiService {
 
   async getEnvironmentInfo(): Promise<ApiResponse<EnvironmentConfig>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/environment`);
+      const response = await apiClient.get(`/ricetta/environment`);
       return response.data;
     } catch (error: any) {
       return {
@@ -131,6 +142,24 @@ class RicettaApiService {
     }
   }
 
+  async getFarmaciCommerciali(farmacoId: number): Promise<ApiResponse<ProdottoCommerciale[]>> {
+    try {
+      const response = await apiClient.get(`/ricetta/farmaci-commerciali/${farmacoId}`);
+      return {
+        success: true,
+        data: response.data.data.prodotti || [],
+        message: 'Prodotti commerciali caricati'
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'PRODOTTI_LOAD_FAILED',
+        message: error.message || 'Errore caricamento prodotti commerciali',
+        data: []
+      };
+    }
+  }
+
   async getDurateStandard(): Promise<ApiResponse<string[]>> {
     try {
       const response = await apiClient.get('/ricetta/suggestions/durate');
@@ -170,7 +199,7 @@ class RicettaApiService {
   // === Sistema TS - Ricerca diagnosi e farmaci ===
   async searchDiagnosi(query: string, limit: number = 20): Promise<DiagnosiSearchResponse> {
     try {
-      const response = await apiClient.get(`${this.basePath}/diagnosi`, {
+      const response = await apiClient.get(`/ricetta/diagnosi`, {
         params: { q: query, limit }
       });
       return response.data;
@@ -188,7 +217,7 @@ class RicettaApiService {
 
   async searchFarmaci(query: string, limit: number = 20): Promise<FarmaciSearchResponse> {
     try {
-      const response = await apiClient.get(`${this.basePath}/farmaci`, {
+      const response = await apiClient.get(`/ricetta/farmaci`, {
         params: { q: query, limit }
       });
       return response.data;
@@ -208,7 +237,7 @@ class RicettaApiService {
   // === Protocolli terapeutici ===
   async getProtocolli(): Promise<ApiResponse<ProtocolloTerapeutico[]>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/protocolli`);
+      const response = await apiClient.get(`/ricetta/protocolli`);
       return response.data;
     } catch (error: any) {
       return {
@@ -222,7 +251,7 @@ class RicettaApiService {
 
   async getProtocolloById(protocolloId: string): Promise<ApiResponse<ProtocolloTerapeutico>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/protocolli/${protocolloId}`);
+      const response = await apiClient.get(`/ricetta/protocolli/${protocolloId}`);
       return response.data;
     } catch (error: any) {
       return {
@@ -236,7 +265,7 @@ class RicettaApiService {
   // === Suggerimenti ===
   async getPosologieSuggestions(): Promise<ApiResponse<string[]>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/suggestions/posologie`);
+      const response = await apiClient.get(`/ricetta/suggestions/posologie`);
       return response.data;
     } catch (error: any) {
       return {
@@ -250,7 +279,7 @@ class RicettaApiService {
 
   async getDurateSuggestions(): Promise<ApiResponse<string[]>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/suggestions/durate`);
+      const response = await apiClient.get(`/ricetta/suggestions/durate`);
       return response.data;
     } catch (error: any) {
       return {
@@ -264,7 +293,7 @@ class RicettaApiService {
 
   async getNoteSuggestions(): Promise<ApiResponse<string[]>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/suggestions/note`);
+      const response = await apiClient.get(`/ricetta/suggestions/note`);
       return response.data;
     } catch (error: any) {
       return {
@@ -321,7 +350,7 @@ class RicettaApiService {
   // === Invio ricetta ===
   async inviaRicetta(payload: RicettaPayload): Promise<RicettaResponse> {
     try {
-      const response = await apiClient.post(`${this.basePath}/invio`, payload);
+      const response = await apiClient.post('/ricetta/invio', payload, { timeout: 200000 });
       return response.data;
     } catch (error: any) {
       const errorData = error.response?.data;
@@ -342,7 +371,7 @@ class RicettaApiService {
     pdf_base64: string;
   }): Promise<ApiResponse<any>> {
     try {
-      const response = await apiClient.post(`${this.basePath}/invio/email`, emailPayload);
+      const response = await apiClient.post(`/ricetta/invio/email`, emailPayload);
       return response.data;
     } catch (error: any) {
       const errorData = error.response?.data;
@@ -359,7 +388,7 @@ class RicettaApiService {
   // === Test e sviluppo ===
   async getFarmaciTestSicuri(): Promise<ApiResponse<FarmacoTestSicuro[]>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/test/farmaci-sicuri`);
+      const response = await apiClient.get(`/ricetta/test/farmaci-sicuri`);
       return response.data;
     } catch (error: any) {
       return {
@@ -373,7 +402,7 @@ class RicettaApiService {
 
   async getRicetteTestFunzionanti(): Promise<ApiResponse<RicettaTestFunzionante[]>> {
     try {
-      const response = await apiClient.get(`${this.basePath}/test/ricette-funzionanti`);
+      const response = await apiClient.get(`/ricetta/test/ricette-funzionanti`);
       return response.data;
     } catch (error: any) {
       return {
@@ -400,7 +429,7 @@ class RicettaApiService {
       if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
       if (params?.force_local) queryParams.append('force_local', 'true');
       
-      const url = `/api/ricetta/db/list${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const url = `/ricetta/db/list${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       const response = await apiClient.get(url);
       return response.data;
     } catch (error: any) {
@@ -458,7 +487,7 @@ class RicettaApiService {
   // === Download PDF ===
   async downloadRicettaPDFByNre(nre: string): Promise<Blob> {
     try {
-      const response = await apiClient.get(`${this.basePath}/ts/download/${nre}`, {
+      const response = await apiClient.get(`/ricetta/ts/download/${nre}`, {
         responseType: 'blob'
       });
       return response.data;
@@ -481,7 +510,7 @@ class RicettaApiService {
       if (params?.cf_assistito) queryParams.append('cf_assistito', params.cf_assistito);
       
       const queryString = queryParams.toString();
-      const url = `${this.basePath}/database/list${queryString ? `?${queryString}` : ''}`;
+      const url = `/ricetta/database/list${queryString ? `?${queryString}` : ''}`;
       
       const response = await apiClient.get(url);
       return response.data;
@@ -575,6 +604,7 @@ export const {
   getEnvironmentInfo,
   getDiagnosiDisponibili,
   getFarmaciPerDiagnosi,
+  getFarmaciCommerciali,
   getDurateStandard,
   getNoteFrequenti,
   saveRicetta,

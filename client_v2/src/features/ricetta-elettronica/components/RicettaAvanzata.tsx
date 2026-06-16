@@ -6,12 +6,14 @@ import {
 } from '@coreui/react';
 import {
   getDiagnosiDisponibili,
-  getFarmaciPerDiagnosi, 
+  getFarmaciPerDiagnosi,
+  getFarmaciCommerciali,
   getDurateStandard,
   getNoteFrequenti,
   inviaRicetta,
   saveRicetta,
-  type FarmacoProtocollo} from '@/services/ricette_ts.service';
+  type FarmacoProtocollo,
+  type ProdottoCommerciale} from '@/services/ricette_ts.service';
 import  type {Diagnosi, RicettaPayload}  from '@/types/ricetta.types';
 import type { Paziente } from '@/store/pazienti.store';
 
@@ -43,12 +45,21 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
   const [farmaciDisponibili, setFarmaciDisponibili] = useState<FarmacoProtocollo[]>([]);
   const [farmacoSelezionato, setFarmacoSelezionato] = useState<FarmacoProtocollo | null>(null);
 
+  // Prodotti commerciali (AIC) per il principio attivo selezionato
+  const [prodottiCommerciali, setProdottiCommerciali] = useState<ProdottoCommerciale[]>([]);
+  const [prodottoSelezionato, setProdottoSelezionato] = useState<ProdottoCommerciale | null>(null);
+
   // Posologie e durate
   const [posologia, setPosologia] = useState("");
   const [durateStandard, setDurateStandard] = useState<string[]>([]);
   const [durata, setDurata] = useState("");
+  const [quantita, setQuantita] = useState(1);
   const [noteFrequenti, setNoteFrequenti] = useState<string[]>([]);
   const [note, setNote] = useState("");
+
+  // Gruppo di equivalenza AIFA (richiesto dal Sistema TS per farmaci di classe A)
+  const [gruppoEquivalenzaCodice, setGruppoEquivalenzaCodice] = useState("");
+  const [gruppoEquivalenzaDescrizione, setGruppoEquivalenzaDescrizione] = useState("");
 
   // UI states
   const [loading, setLoading] = useState(false);
@@ -104,12 +115,34 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
     }
   }, [diagnosiSelezionata, autoMode]);
 
-
+  // Quando cambia il principio attivo, carica i prodotti commerciali (AIC) disponibili
+  useEffect(() => {
+    if (farmacoSelezionato) {
+      const loadProdotti = async () => {
+        try {
+          const response = await getFarmaciCommerciali(parseInt(farmacoSelezionato.codice));
+          const prodotti = response.data || [];
+          setProdottiCommerciali(prodotti);
+          setProdottoSelezionato(null);
+          setGruppoEquivalenzaCodice("");
+          setGruppoEquivalenzaDescrizione("");
+        } catch (error) {
+          console.error('Errore caricamento prodotti commerciali:', error);
+        }
+      };
+      loadProdotti();
+    } else {
+      setProdottiCommerciali([]);
+      setProdottoSelezionato(null);
+      setGruppoEquivalenzaCodice("");
+      setGruppoEquivalenzaDescrizione("");
+    }
+  }, [farmacoSelezionato]);
 
   const handleDiagnosiChange = (diagnosiId: string) => {
     const diagnosi = diagnosiDisponibili.find(d => d.id === parseInt(diagnosiId));
     setDiagnosiSelezionata(diagnosi || null);
-    
+
     // Reset farmaco
     setFarmacoSelezionato(null);
     setFarmaciDisponibili([]);
@@ -121,7 +154,7 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
   const handleFarmacoChange = (farmacoId: string) => {
     const farmaco = farmaciDisponibili.find(f => f.codice === farmacoId);
     setFarmacoSelezionato(farmaco || null);
-    
+
     if (farmaco && autoMode) {
       setPosologia(farmaco.posologia_default);
       setDurata(farmaco.durata_default);
@@ -129,16 +162,23 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
     }
   };
 
+  const handleProdottoChange = (aic: string) => {
+    const prodotto = prodottiCommerciali.find(p => p.aic === aic);
+    setProdottoSelezionato(prodotto || null);
+    setGruppoEquivalenzaCodice(prodotto?.gruppo_equivalenza_codice || "");
+    setGruppoEquivalenzaDescrizione(prodotto?.gruppo_equivalenza_descrizione || "");
+  };
+
   const handleInvia = () => {
-    if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato || !posologia || !durata) {
-      alert("Compila tutti i campi obbligatori.");
+    if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato || !prodottoSelezionato || !posologia || !durata) {
+      alert("Compila tutti i campi obbligatori (incluso il nome commerciale del farmaco).");
       return;
     }
     setShowConferma(true);
   };
 
   const confermaInvio = async () => {
-    if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato) {
+    if (!pazienteSelezionato || !diagnosiSelezionata || !farmacoSelezionato || !prodottoSelezionato) {
       alert("Dati mancanti per l'invio della ricetta.");
       return;
     }
@@ -172,13 +212,16 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
         descrizione: diagnosiSelezionata.descrizione
       },
       farmaco: {
-        codice: farmacoSelezionato.codice,
+        codice: prodottoSelezionato.aic,
         principio_attivo: farmacoSelezionato.principio_attivo,
-        descrizione: farmacoSelezionato.nome
+        descrizione: prodottoSelezionato.nome_commerciale,
+        gruppo_equivalenza_codice: gruppoEquivalenzaCodice || undefined,
+        gruppo_equivalenza_descrizione: gruppoEquivalenzaDescrizione || undefined
       },
       posologia,
       durata,
       note,
+      quantita,
     };
 
     try {
@@ -203,10 +246,10 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
             data_compilazione: data_inserimento || new Date().toISOString(),
             codice_diagnosi: diagnosiSelezionata.codice,
             descrizione_diagnosi: diagnosiSelezionata.descrizione,
-            gruppo_equivalenza_farmaco: 'EQUIVALENTE_01', // Campo obbligatorio
-            prodotto_aic: farmacoSelezionato.codice, // Usa codice farmaco come AIC
-            codice_farmaco: farmacoSelezionato.codice,
-            denominazione_farmaco: farmacoSelezionato.nome,
+            gruppo_equivalenza_farmaco: gruppoEquivalenzaCodice || '',
+            prodotto_aic: prodottoSelezionato.aic,
+            codice_farmaco: prodottoSelezionato.aic,
+            denominazione_farmaco: prodottoSelezionato.nome_commerciale,
             principio_attivo: farmacoSelezionato.principio_attivo,
             posologia: posologia,
             durata_trattamento: durata,
@@ -231,22 +274,24 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
         } else {
           alert("✅ Ricetta inviata e salvata con successo al Sistema TS.");
         }
+
+        setShowConferma(false);
+
+        // Reset form dopo invio riuscito
+        setDiagnosiSelezionata(null);
+        setFarmacoSelezionato(null);
+        setPosologia("");
+        setDurata("");
+        setNote("");
       } else {
-        alert("✅ Ricetta inviata con successo.");
+        // Invio fallito: mostra l'errore reale, NON chiudere il modal né svuotare il form
+        const erroreMsg = response.message || response.error || 'Errore sconosciuto dal Sistema TS';
+        alert(`❌ Invio ricetta fallito:\n\n${erroreMsg}`);
       }
-      
-      setShowConferma(false);
-      
-      // Reset form dopo invio riuscito
-      setDiagnosiSelezionata(null);
-      setFarmacoSelezionato(null);
-      setPosologia("");
-      setDurata("");
-      setNote("");
-      
-    } catch (err) {
+
+    } catch (err: any) {
       console.error("Errore invio ricetta:", err);
-      alert("❌ Errore durante l'invio della ricetta.");
+      alert(`❌ Errore durante l'invio della ricetta: ${err?.message || 'Errore sconosciuto'}`);
     }
   };
 
@@ -310,18 +355,18 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
                   </CFormSelect>
                 </div>
 
-                {/* Farmaco */}
+                {/* Principio attivo */}
                 <div className="mb-3">
-                  <CFormLabel>💊 Farmaco</CFormLabel>
+                  <CFormLabel>💊 Principio attivo</CFormLabel>
                   <CFormSelect
                     value={farmacoSelezionato?.codice || ''}
                     onChange={(e) => handleFarmacoChange(e.target.value)}
                     disabled={!diagnosiSelezionata || farmaciDisponibili.length === 0}
                   >
                     <option value="">
-                      {!diagnosiSelezionata ? "Prima seleziona una diagnosi" : 
-                       farmaciDisponibili.length === 0 ? "Nessun farmaco disponibile" : 
-                       "Seleziona farmaco..."}
+                      {!diagnosiSelezionata ? "Prima seleziona una diagnosi" :
+                       farmaciDisponibili.length === 0 ? "Nessun farmaco disponibile" :
+                       "Seleziona principio attivo..."}
                     </option>
                     {farmaciDisponibili.map(f => (
                       <option key={f.codice} value={f.codice}>
@@ -329,12 +374,69 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
                       </option>
                     ))}
                   </CFormSelect>
-                  
-                  {farmacoSelezionato && (
-                    <small className="text-muted d-block mt-1">
-                      Codice: {farmacoSelezionato.codice} | Classe: {farmacoSelezionato.classe}
-                    </small>
-                  )}
+                </div>
+
+                {/* Nome commerciale (AIC) - dipende dal principio attivo selezionato */}
+                {farmacoSelezionato && (
+                  <div className="mb-3">
+                    <CFormLabel>🏪 Nome commerciale</CFormLabel>
+                    <CFormSelect
+                      value={prodottoSelezionato?.aic || ''}
+                      onChange={(e) => handleProdottoChange(e.target.value)}
+                      disabled={prodottiCommerciali.length === 0}
+                    >
+                      <option value="">
+                        {prodottiCommerciali.length === 0
+                          ? "Nessun prodotto commerciale configurato per questo principio attivo"
+                          : "Seleziona nome commerciale..."}
+                      </option>
+                      {prodottiCommerciali.map(p => (
+                        <option key={p.aic} value={p.aic}>
+                          {p.nome_commerciale} - AIC {p.aic} ({p.classe})
+                        </option>
+                      ))}
+                    </CFormSelect>
+                    {prodottiCommerciali.length === 0 && (
+                      <small className="text-danger d-block mt-1">
+                        Nessun prodotto commerciale in archivio per questo principio attivo: impossibile inviare la ricetta finché non viene configurato.
+                      </small>
+                    )}
+                  </div>
+                )}
+
+                {/* Gruppo di equivalenza AIFA - obbligatorio dal Sistema TS solo per farmaci di classe A */}
+                {farmacoSelezionato && (
+                  <div className="mb-3">
+                    <CFormLabel>🏷️ Gruppo equivalenza AIFA (solo se farmaco classe A)</CFormLabel>
+                    <CRow>
+                      <CCol md={4}>
+                        <CFormInput
+                          value={gruppoEquivalenzaCodice}
+                          onChange={(e) => setGruppoEquivalenzaCodice(e.target.value)}
+                          placeholder="es. CJA"
+                        />
+                      </CCol>
+                      <CCol md={8}>
+                        <CFormInput
+                          value={gruppoEquivalenzaDescrizione}
+                          onChange={(e) => setGruppoEquivalenzaDescrizione(e.target.value)}
+                          placeholder="Descrizione gruppo equivalenza (dal portale Sistema TS)"
+                        />
+                      </CCol>
+                    </CRow>
+                  </div>
+                )}
+
+                {/* Quantita confezioni */}
+                <div className="mb-3">
+                  <CFormLabel>📦 Quantità confezioni</CFormLabel>
+                  <CFormInput
+                    type="number"
+                    min={1}
+                    value={quantita}
+                    onChange={(e) => setQuantita(Number(e.target.value) || 1)}
+                    disabled={!farmacoSelezionato}
+                  />
                 </div>
 
                 {/* Posologia */}
@@ -412,10 +514,10 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
                   )}
                 </div>
 
-                <CButton 
-                  color="primary" 
+                <CButton
+                  color="primary"
                   onClick={handleInvia}
-                  disabled={!diagnosiSelezionata || !farmacoSelezionato || !posologia || !durata}
+                  disabled={!diagnosiSelezionata || !farmacoSelezionato || !prodottoSelezionato || !posologia || !durata}
                 >
                   📤 Invia Ricetta
                 </CButton>
@@ -444,13 +546,14 @@ export default function RicettaAvanzata({ datiMedico, pazienteSelezionato }: Ric
             </div>
             <div className="col-md-6">
               <h6>💊 Farmaco</h6>
-              <p><strong>{farmacoSelezionato?.nome}</strong><br/>
+              <p><strong>{prodottoSelezionato?.nome_commerciale}</strong><br/>
               {farmacoSelezionato?.principio_attivo}<br/>
-              <small>Codice: {farmacoSelezionato?.codice}</small></p>
-              
+              <small>AIC: {prodottoSelezionato?.aic}</small></p>
+
               <h6>⏰ Terapia</h6>
               <p><strong>Posologia:</strong> {posologia}<br/>
-              <strong>Durata:</strong> {durata}</p>
+              <strong>Durata:</strong> {durata}<br/>
+              <strong>Quantità:</strong> {quantita}</p>
             </div>
           </div>
           

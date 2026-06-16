@@ -6,6 +6,8 @@ StudioDimaAI server with improved architecture, performance, and maintainability
 """
 
 import os
+import sys
+import io
 import logging
 from datetime import datetime
 from flask import Flask, jsonify, request, g, send_from_directory
@@ -139,13 +141,14 @@ def setup_logging(app: Flask) -> None:
         '%(asctime)s %(levelname)s [%(name)s] %(message)s'
     )
     
-    # File handler
-    file_handler = logging.FileHandler(os.path.join(log_dir, 'server_v2.log'))
+    # File handler - encoding esplicito per evitare UnicodeEncodeError su caratteri non-ASCII nei dati
+    file_handler = logging.FileHandler(os.path.join(log_dir, 'server_v2.log'), encoding='utf-8')
     file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
-    
-    # Console handler
-    console_handler = logging.StreamHandler()
+
+    # Console handler - stream UTF-8 per evitare crash con la codepage cp1252 di Windows
+    console_stream = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+    console_handler = logging.StreamHandler(console_stream)
     console_handler.setLevel(log_level)
     console_handler.setFormatter(formatter)
     

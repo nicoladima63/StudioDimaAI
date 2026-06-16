@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  CCard,
-  CCardBody,
   CNav,
   CNavItem,
   CNavLink,
   CTabContent,
   CTabPane,
-  CRow,
-  CCol,
 } from '@coreui/react';
 import PageLayout from '@/components/layout/PageLayout';
-import RicettaAuthStatus from '../components/RicettaAuthStatus';
 import RicettePaziente from '../components/RicettePaziente';
 import RicettaAvanzata from '../components/RicettaAvanzata';
 import RicetteTSPaziente from '../components/RicetteTSPaziente';

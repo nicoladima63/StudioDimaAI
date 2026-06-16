@@ -43,55 +43,75 @@ class RicetteTsService:
         self._load_configuration()
         
     def _load_configuration(self):
-        """Carica configurazione dinamica da variabili d'ambiente"""
-        self.env = 'prod'  # SEMPRE PRODUZIONE per visualizzazione
-        
-        # Path dinamico - usa la stessa logica del caricamento .env
+        """Carica configurazione dinamica da variabili d'ambiente, rispettando RICETTA_ENV"""
+        self.env = os.getenv('RICETTA_ENV', 'prod').lower()
+
+        # StudioDimaAI/ — due livelli sopra services/
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-        
-        # === CONFIGURAZIONE DINAMICA - Tutti i dati da env ===
-        self.cf_medico = os.getenv('CF_MEDICO_PROD')
-        self.password = os.getenv('PASSWORD_PROD')
-        self.pincode = os.getenv('PINCODE_PROD')
-        self.regione = os.getenv('REGIONE_PROD')
-        self.asl = os.getenv('ASL_PROD')
-        self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD')
-        
-        # Endpoint dinamici da env - PRODUZIONE
-        self.endpoint_visualizza = os.getenv('ENDPOINT_VISUALIZZA_PROD', 
-            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
-        self.endpoint_invio = os.getenv('ENDPOINT_INVIO_PROD',
-            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca')
-        self.endpoint_annulla = os.getenv('ENDPOINT_ANNULLA_PROD',
-            'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
-        
-        # Certificati dinamici da env - path relativo a server_v2/certs/prod
-        server_v2_dir = os.path.dirname(os.path.dirname(__file__))  # server_v2/
-        certs_dir = os.getenv('CERTS_DIR_PROD', os.path.join(server_v2_dir, 'certs', 'prod'))
-        self.client_cert = os.getenv('CLIENT_CERT_PATH', os.path.join(certs_dir, 'client_cert.pem'))
-        self.client_key = os.getenv('CLIENT_KEY_PATH', os.path.join(certs_dir, 'client_key.pem'))
-        self.sanitel_cert = os.getenv('SANITEL_CERT_PATH', os.path.join(certs_dir, 'SanitelCF-2024-2027.cer'))
-        
-        # Validazione configurazione obbligatoria
-        required_vars = ['CF_MEDICO_PROD', 'PASSWORD_PROD', 'PINCODE_PROD', 'REGIONE_PROD', 'ASL_PROD']
-        missing_vars = [var for var in required_vars if not os.getenv(var)]
-        
-        if missing_vars:
-            self.logger.error(f"Variabili d'ambiente mancanti: {missing_vars}")
-            self.logger.error(f"File .env cercato in: {os.path.join(project_root, '.env')}")
-            raise ValueError(f"Configurazione incompleta: mancano {missing_vars}")
-        
-        # ID-SESSIONE per autenticazione (hardcodato per ora)
-        self.id_sessione = os.getenv('ID_SESSIONE_PROD', 'b1391aeb-12b9-44a2-a99d-1eb105b9a92c')
-        
-        self.logger.info(f"RicetteTsService configurato dinamicamente")
-        self.logger.info(f"Project root: {project_root}")
-        self.logger.info(f"CF Medico: {self.cf_medico}")
-        self.logger.info(f"Regione: {self.regione}, ASL: {self.asl}")
-        self.logger.info(f"ID-SESSIONE: {self.id_sessione[:20]}...")
-        self.logger.info(f"Endpoint visualizzazione: {self.endpoint_visualizza}")
-        self.logger.info(f"Certificati: {self.client_cert}")
-        self.logger.info(f"SanitelCF certificato: {self.sanitel_cert} (esiste: {os.path.exists(self.sanitel_cert)})")
+
+        if self.env == 'test':
+            # Credenziali TEST ufficiali (kit Sogei, utenze.txt) - NON le credenziali reali del medico.
+            # Il token 2FA test e' deterministico (vedi _genera_token_2fa), non un ID-SESSIONE da portale.
+            self.cf_medico = os.getenv('CF_MEDICO_TEST', 'PROVAX00X00X000Y')
+            self.password = os.getenv('PASSWORD_TEST', 'Salve123')
+            self.pincode = os.getenv('PINCODE_TEST', '1234567890')
+            self.regione = os.getenv('REGIONE_TEST', '020')
+            self.asl = os.getenv('ASL_TEST', '101')
+            self.specializzazione = os.getenv('SPECIALIZZAZIONE_TEST', 'F')
+
+            # Endpoint TEST
+            _base = 'https://ricettabiancaservicetest.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services'
+            self.endpoint_visualizza = f'{_base}/demVisualizzaPrescrittoRicettaBianca'
+            self.endpoint_invio = f'{_base}/demInvioPrescrittoRicettaBianca'
+            self.endpoint_annulla = f'{_base}/demAnnullaPrescrittoRicettaBianca'
+
+            # Certificati TEST — 256client_cert.pem valido (client_cert.pem scaduto 2018)
+            _certs_test = os.path.join(project_root, 'certs', 'test')
+            self.client_cert = os.path.join(_certs_test, '256client_cert.pem')
+            self.client_key = os.path.join(_certs_test, '256client_key.pem')
+            self.sanitel_cert = os.path.join(_certs_test, 'SanitelCF-2024-2027.cer')
+
+            self.id_sessione = os.getenv('ID_SESSIONE_TEST', '')
+
+        else:  # prod
+            # Credenziali PROD
+            self.cf_medico = os.getenv('CF_MEDICO_PROD')
+            self.password = os.getenv('PASSWORD_PROD')
+            self.pincode = os.getenv('PINCODE_PROD')
+            self.regione = os.getenv('REGIONE_PROD')
+            self.asl = os.getenv('ASL_PROD')
+            self.specializzazione = os.getenv('SPECIALIZZAZIONE_PROD', 'F')
+
+            # Endpoint PROD
+            self.endpoint_visualizza = os.getenv('ENDPOINT_VISUALIZZA_PROD',
+                'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demVisualizzaPrescrittoRicettaBianca')
+            self.endpoint_invio = os.getenv('ENDPOINT_INVIO_PROD',
+                'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demInvioPrescrittoRicettaBianca')
+            self.endpoint_annulla = os.getenv('ENDPOINT_ANNULLA_PROD',
+                'https://ricettabiancaservice.sanita.finanze.it/RicettaBiancaDemPrescrittoServicesWeb/services/demAnnullaPrescrittoRicettaBianca')
+
+            # Certificati PROD — path assoluto, rende assoluti i relativi
+            # SanitelCF e' la chiave pubblica TS per cifrare CF/PIN: stessa per test e prod
+            def _abs(env_key, default):
+                v = os.getenv(env_key, default)
+                return v if os.path.isabs(v) else os.path.join(project_root, v)
+
+            self.sanitel_cert = _abs('SANITEL_CERT_PATH', os.path.join('certs', 'test', 'SanitelCF-2024-2027.cer'))
+            self.client_cert = _abs('CLIENT_CERT_PATH', os.path.join('certs', 'prod', 'client_cert.pem'))
+            self.client_key = _abs('CLIENT_KEY_PATH', os.path.join('certs', 'prod', 'client_key.pem'))
+
+            # ID sessione PROD (scade, aggiornare manualmente in .env)
+            self.id_sessione = os.getenv('ID_SESSIONE_PROD', '')
+
+            # Validazione credenziali PROD obbligatorie
+            required_vars = ['CF_MEDICO_PROD', 'PASSWORD_PROD', 'PINCODE_PROD', 'REGIONE_PROD', 'ASL_PROD']
+            missing_vars = [var for var in required_vars if not os.getenv(var)]
+            if missing_vars:
+                self.logger.error(f"Variabili d'ambiente mancanti: {missing_vars}")
+                raise ValueError(f"Configurazione incompleta: mancano {missing_vars}")
+
+        self.logger.info(f"RicetteTsService: env={self.env}, cf_medico={self.cf_medico}, regione={self.regione}, asl={self.asl}")
+        self.logger.info(f"SanitelCF: {self.sanitel_cert} (esiste: {os.path.exists(self.sanitel_cert)})")
     
     def get_environment_info(self) -> Dict[str, Any]:
         """Informazioni ambiente corrente"""
@@ -109,7 +129,9 @@ class RicetteTsService:
                 'client_key': os.path.exists(self.client_key) if hasattr(self, 'client_key') else False,
                 'sanitel_cert': os.path.exists(self.sanitel_cert) if hasattr(self, 'sanitel_cert') else False
             },
-            'credentials_configured': bool(self.cf_medico and self.password)
+            'credentials_configured': bool(self.cf_medico and self.password),
+            'id_sessione_set': bool(self.id_sessione),
+            'id_sessione_preview': self.id_sessione[:8] + '...' if self.id_sessione else None
         }
             
     def test_connection(self) -> Dict[str, Any]:
@@ -192,42 +214,40 @@ class RicetteTsService:
     
     def _genera_token_2fa(self) -> str:
         """
-        Ottiene l'ID-SESSIONE per il Sistema TS - OBBLIGATORIO
+        Ottiene il token Authorization2F per il Sistema TS.
+        In TEST e' deterministico (kit Sogei, TokenA2F.txt): userID-yyyy-MM,
+        dove userID e' il CF medico usato in Basic Auth. Si rinnova ad ogni inizio mese.
+        In PROD e' un ID-SESSIONE ottenuto via 2FA SPID/CIE dal portale Gestione ID-SESSIONE.
         """
-        id_sessione = os.getenv('ID_SESSIONE_PROD')
-        
+        if self.env == 'test':
+            now = datetime.now()
+            return f"{self.cf_medico}-{now.year}-{now.month:02d}"
+
+        id_sessione = self.id_sessione
         if not id_sessione:
             raise ValueError("ID_SESSIONE_PROD deve essere configurato nel file .env")
-        
-        self.logger.info("Usando ID-SESSIONE da variabile d'ambiente")
+
+        self.logger.info(f"Usando ID-SESSIONE env={self.env}")
         return id_sessione
     
+    def _encrypt_with_sanitel(self, data: str) -> str:
+        """Cifra una stringa con la chiave pubblica del certificato SanitelCF (PKCS1v15)."""
+        from cryptography import x509
+        from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
+        with open(self.sanitel_cert, 'rb') as f:
+            cert_data = f.read()
+        if cert_data.startswith(b'-----BEGIN'):
+            cert = x509.load_pem_x509_certificate(cert_data)
+        else:
+            cert = x509.load_der_x509_certificate(cert_data)
+        encrypted = cert.public_key().encrypt(data.encode('utf-8'), asym_padding.PKCS1v15())
+        return base64.b64encode(encrypted).decode('utf-8')
+
     def _encrypt_cf_assistito(self, cf_assistito: str) -> str:
-        """
-        Cifra il CF dell'assistito usando l'endpoint di cifratura dinamico
-        """
         try:
-            # Endpoint di cifratura dinamico da env
-            cifra_endpoint = os.getenv('CIFRA_CF_ENDPOINT', 'http://localhost:5001/api/v2/ricetta/cifra-cf')
-            
-            import requests
-            
-            response = requests.post(
-                cifra_endpoint,
-                json={'cf_assistito': cf_assistito},
-                headers={'Content-Type': 'application/json'},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                cf_cifrato = response.json().get('cf_cifrato')
-                return cf_cifrato
-            else:
-                return cf_assistito
-                
+            return self._encrypt_with_sanitel(cf_assistito)
         except Exception as e:
             self.logger.error(f"Errore cifratura CF assistito: {e}")
-            # Fallback: ritorna in chiaro se cifratura fallisce
             return cf_assistito
     
     def _create_session(self) -> requests.Session:
@@ -282,31 +302,10 @@ class RicetteTsService:
     
     
     def _encrypt_pincode(self, pincode: str) -> str:
-        """
-        Cifra il pincode usando l'endpoint di cifratura dinamico
-        """
         try:
-            # Endpoint di cifratura pincode dinamico da env
-            cifra_pincode_endpoint = os.getenv('CIFRA_PINCODE_ENDPOINT', 'http://localhost:5001/api/v2/ricetta/cifra-pincode')
-            
-            import requests
-            
-            response = requests.post(
-                cifra_pincode_endpoint,
-                json={'pincode': pincode},
-                headers={'Content-Type': 'application/json'},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                pincode_cifrato = response.json().get('pincode_cifrato')
-                return pincode_cifrato
-            else:
-                return pincode
-                
+            return self._encrypt_with_sanitel(pincode)
         except Exception as e:
             self.logger.error(f"Errore cifratura pincode: {e}")
-            # Fallback: ritorna il pincode originale se cifratura fallisce
             return pincode
     
     def _extract_response_metadata(self, root, namespaces: dict) -> dict:
@@ -1049,12 +1048,36 @@ class RicetteTsService:
             }
 
     
+    # Caratteri tipografici Unicode senza significato aggiunto per l'umano, normalizzati al loro
+    # equivalente ASCII: evita crash di logging su console cp1252 e mantiene i dati puliti per il SOAP.
+    _UNICODE_REPLACEMENTS = {
+        ' ': ' ',  # narrow no-break space
+        ' ': ' ',  # non-breaking space
+        ' ': ' ',  # thin space
+        '–': '-',  # en dash
+        '—': '-',  # em dash
+        '‘': "'", '’': "'",  # smart single quotes
+        '“': '"', '”': '"',  # smart double quotes
+        '…': '...',  # ellipsis
+    }
+
+    def _sanitize_text(self, value: Optional[str]) -> Optional[str]:
+        if not value:
+            return value
+        for char, replacement in self._UNICODE_REPLACEMENTS.items():
+            value = value.replace(char, replacement)
+        return value
+
     #sezione invio ricetta
     def _create_invio_soap_request(self, dati_ricetta: Dict[str, Any]) -> str:
         """
         Crea richiesta SOAP per invio ricetta - DINAMICA
         """
-        
+        dati_ricetta = {
+            k: (self._sanitize_text(v) if isinstance(v, str) else v)
+            for k, v in dati_ricetta.items()
+        }
+
         # PinCode cifrato dinamico
         pincode_cifrato = os.getenv('PINCODE_CIFRATO_PROD')
         if not pincode_cifrato and self.pincode:
@@ -1074,9 +1097,51 @@ class RicetteTsService:
             else:
                 raise ValueError("CF_ASSISTITO_DEFAULT_CIFRATO deve essere configurato se non viene fornito CF assistito")
         
+        # Campi obbligatori per una prescrizione reale: nessun fallback, errore esplicito se mancanti
+        # (un default silenzioso significherebbe inviare dati medici inventati al Sistema TS)
+        required = [
+            'num_iscrizione', 'indirizzo_medico', 'telefono_medico',
+            'codice_farmaco', 'denominazione_farmaco', 'quantita', 'posologia', 'durata',
+        ]
+        missing = [campo for campo in required if not dati_ricetta.get(campo)]
+        if missing:
+            raise ValueError(f"Campi obbligatori mancanti per l'invio della ricetta: {', '.join(missing)}")
+
+        # codDiagnosi/descrDiagnosi: campo opzionale (minOccurs=0) e non richiesto dal portale Sistema TS.
+        # I codici del nostro DB locale (es. "K02.x") sono etichette di categoria, non codici diagnosi
+        # validi per il Sistema TS (causano errore 1039) - quindi il tag viene omesso, mai inviato.
+        diagnosi_tag = ''
+        if dati_ricetta.get('codice_diagnosi_ts_valido'):
+            diagnosi_tag = (
+                f"<inv:codDiagnosi>{dati_ricetta['codice_diagnosi_ts_valido']}</inv:codDiagnosi>\n"
+                f"                <inv:descrDiagnosi>{dati_ricetta.get('descrizione_diagnosi', '')}</inv:descrDiagnosi>"
+            )
+
         # Timestamp dinamico
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
+
+        # cognNome: cognome+nome se entrambi disponibili, altrimenti solo il campo nome
+        # (il dato paziente in archivio e' spesso un unico campo "nome" combinato)
+        cognome_assistito = (dati_ricetta.get('cognome_assistito') or '').strip()
+        nome_assistito = (dati_ricetta.get('nome_assistito') or '').strip()
+        cogn_nome = f"{cognome_assistito} {nome_assistito}".strip()
+        if not cogn_nome:
+            raise ValueError("Campo obbligatorio mancante per l'invio della ricetta: nome/cognome assistito")
+
+        # indirizzo paziente: campo opzionale, omesso se non abbiamo dati reali (mai inventato)
+        indirizzo_paziente_tag = ''
+        if dati_ricetta.get('indirizzo_paziente'):
+            indirizzo_paziente_tag = f"<inv:indirizzo>{dati_ricetta['indirizzo_paziente']}</inv:indirizzo>"
+
+        # Gruppo di equivalenza AIFA: richiesto dal Sistema TS per farmaci di classe A.
+        # Va tra descrProdPrest e tdl per rispettare l'ordine della sequenza XSD.
+        gruppo_equivalenza_tag = ''
+        if dati_ricetta.get('cod_gruppo_equival'):
+            gruppo_equivalenza_tag = (
+                f"<tip:codGruppoEquival>{dati_ricetta['cod_gruppo_equival']}</tip:codGruppoEquival>\n"
+                f"                    <tip:descrGruppoEquival>{dati_ricetta.get('descr_gruppo_equival', '')}</tip:descrGruppoEquival>"
+            )
+
         # Template SOAP IDENTICO V1 - che funziona
         soap_xml = f"""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
                         xmlns:inv="http://invioprescrittoricettabiancarichiesta.xsd.dem.sanita.finanze.it"
@@ -1089,28 +1154,29 @@ class RicetteTsService:
                 <inv:codRegione>{self.regione}</inv:codRegione>
                 <inv:codASLAo>{self.asl}</inv:codASLAo>
                 <inv:codSpecializzazione>{self.specializzazione}</inv:codSpecializzazione>
-                <inv:numIscrizAlbo>{dati_ricetta.get('num_iscrizione', '12345')}</inv:numIscrizAlbo>
-                <inv:indirMedico>{dati_ricetta.get('indirizzo_medico', 'Via Roma, 1|00100|Roma|RM')}</inv:indirMedico>
-                <inv:telefMedico>{dati_ricetta.get('telefono_medico', '+39|0612345678')}</inv:telefMedico>
+                <inv:numIscrizAlbo>{dati_ricetta['num_iscrizione']}</inv:numIscrizAlbo>
+                <inv:indirMedico>{dati_ricetta['indirizzo_medico']}</inv:indirMedico>
+                <inv:telefMedico>{dati_ricetta['telefono_medico']}</inv:telefMedico>
                 <inv:codicePaziente>{cf_assistito_cifrato}</inv:codicePaziente>
-                <inv:cognNome>{dati_ricetta.get('nome_paziente', 'ROSSI MARIO')}</inv:cognNome>
-                <inv:indirizzo>{dati_ricetta.get('indirizzo_paziente', 'Via Garibaldi, 10|00100|Roma|RM')}</inv:indirizzo>
+                <inv:cognNome>{cogn_nome}</inv:cognNome>
+                {indirizzo_paziente_tag}
                 <inv:tipoPrescrizione>F</inv:tipoPrescrizione>
-                <inv:codDiagnosi>{dati_ricetta.get('codice_diagnosi', 'Z01.8')}</inv:codDiagnosi>
-                <inv:descrDiagnosi>{dati_ricetta.get('descrizione_diagnosi', 'Altro esame generale e screening')}</inv:descrDiagnosi>
+                {diagnosi_tag}
                 <inv:dataCompilazione>{timestamp}</inv:dataCompilazione>
                 <inv:dettaglioPrescrizioneRicettaBianca>
-                    <tip:codProdPrest>{dati_ricetta.get('codice_farmaco', '000123456')}</tip:codProdPrest>
-                    <tip:descrProdPrest>{dati_ricetta.get('denominazione_farmaco', 'TACHIPIRINA 500 mg compresse')}</tip:descrProdPrest>
+                    <tip:codProdPrest>{dati_ricetta['codice_farmaco']}</tip:codProdPrest>
+                    <tip:descrProdPrest>{dati_ricetta['denominazione_farmaco']}</tip:descrProdPrest>
+                    {gruppo_equivalenza_tag}
                     <tip:tdl>0</tip:tdl>
-                    <tip:descrTestoLiberoNote>{dati_ricetta.get('note', 'Assumere al bisogno per dolore o febbre')}</tip:descrTestoLiberoNote>
-                    <tip:quantita>{dati_ricetta.get('quantita', '1')}</tip:quantita>
-                    <tip:posologia>{dati_ricetta.get('posologia', '1 compressa ogni 6 ore al bisogno')}</tip:posologia>
+                    <tip:descrTestoLiberoNote>{dati_ricetta.get('note', '')}</tip:descrTestoLiberoNote>
+                    <tip:quantita>{dati_ricetta['quantita']}</tip:quantita>
+                    <tip:posologia>{dati_ricetta['posologia']}</tip:posologia>
+                    <tip:durataTrattamento>{dati_ricetta['durata']}</tip:durataTrattamento>
                 </inv:dettaglioPrescrizioneRicettaBianca>
             </inv:InvioPrescrittoRicettaBiancaRichiesta>
         </soapenv:Body>
         </soapenv:Envelope>"""
-        
+
         return soap_xml
             
     def _parse_invio_response(self, response: requests.Response, dati_ricetta: Dict[str, Any]) -> Dict[str, Any]:
@@ -1221,8 +1287,11 @@ class RicetteTsService:
                         pdf_promemoria_b64 = pdf_match.group(1)
                 
                 # === RETURN IDENTICO V1 ===
+                # success solo se il Sistema TS ha effettivamente accettato la ricetta:
+                # codEsitoInserimento 0000 = ok; un errore (es. 1140 Utente non autorizzato) e' un rifiuto, non un successo
+                esito_ok = cod_esito in (None, '0000') and not errore_cod
                 return {
-                    'success': True,
+                    'success': esito_ok,
                     'http_status': response.status_code,
                     'nre': nre,
                     'pin_ricetta': pin_ricetta,
@@ -1295,15 +1364,16 @@ class RicetteTsService:
             }
             
             self.logger.info(f"Invio richiesta ricetta a: {self.endpoint_invio}")
-            
+            self.logger.info(f"SOAP invio:\n{soap_request}")
+
             response = session.post(
                 self.endpoint_invio,
                 data=soap_request,
                 headers=headers,
-                timeout=60,  # Timeout maggiore per nuovo endpoint
+                timeout=180,
                 verify=False
             )
-            
+
             self.logger.info(f"Risposta invio ricevuta - Status: {response.status_code}")
             
             # Debug: Log completo della risposta per capire l'errore

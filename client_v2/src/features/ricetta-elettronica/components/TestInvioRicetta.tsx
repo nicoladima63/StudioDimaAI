@@ -57,22 +57,22 @@ const TestInvioRicetta: React.FC = () => {
     // Payload test con dati ufficiali ambiente test
     const payload: RicettaPayload = {
       medico: {
-        cfMedico: 'PROVAX00X00X000Y',  // CF medico test ufficiale
-        regione: '020',
-        asl: '201', 
+        cf_medico: 'DMRNCL63S21D612I',
+        regione: '090',
+        asl: '109',
         specializzazione: 'F',
         iscrizione: '591',
-        indirizzo: 'Via Test 123',
-        telefono: '0123456789',
-        cap: '00100',
-        citta: 'Roma',
-        provincia: 'RM'
+        indirizzo: 'Via Michelangelo Buonarroti,15',
+        telefono: '0574712060',
+        cap: '51031',
+        citta: 'Agliana',
+        provincia: 'PT'
       },
       paziente: {
         id: 'test_paziente',
         nome: datiTest.nomeAssistito,
         cognome: datiTest.cognomeAssistito,
-        codiceFiscale: datiTest.cfAssistito,
+        codice_fiscale: datiTest.cfAssistito,
         indirizzo: 'Via Prova 456',
         cap: '00100',
         citta: 'Roma',
@@ -89,7 +89,8 @@ const TestInvioRicetta: React.FC = () => {
       },
       posologia: datiTest.posologia,
       durata: datiTest.durata,
-      note: datiTest.note
+      note: datiTest.note,
+      quantita: 1
     };
 
     try {
@@ -220,8 +221,6 @@ const TestInvioRicetta: React.FC = () => {
         pdf_base64: response.data.pdf_promemoria_b64
       };
 
-      // TODO: Implementare inviaRicettaEmail nel service
-      console.log('Email payload:', emailPayload);
       alert('Funzione email da implementare');
       setShowEmailModal(false);
 

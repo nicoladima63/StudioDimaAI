@@ -17,13 +17,41 @@ from utils.ricetta_utils import ricetta_data_manager
 # Database path per protocolli
 INSTANCE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance')
 PROTOCOLLI_DB_PATH = os.path.join(INSTANCE_DIR, 'protocolli.db')
-PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))  # server_V2
-CERTS_DIR = os.path.join(PROJECT_ROOT, 'certs', 'test')
-SANITEL_CERT_PATH = os.path.join(CERTS_DIR, 'SanitelCF-2024-2027.cer')
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))  # server_v2/
+_PROJ_ROOT = os.path.dirname(PROJECT_ROOT)  # StudioDimaAI/
+_sanitel_env = os.getenv('SANITEL_CERT_PATH', os.path.join('certs', 'test', 'SanitelCF-2024-2027.cer'))
+SANITEL_CERT_PATH = _sanitel_env if os.path.isabs(_sanitel_env) else os.path.join(_PROJ_ROOT, _sanitel_env)
 
 logger = logging.getLogger(__name__)
 
 ricetta_bp = Blueprint("ricetta_bp", __name__)
+
+_TABLES_READY = False
+
+
+def _ensure_tables():
+    """Crea le tabelle proprie di questo blueprint se non esistono (auto-migrazione)."""
+    global _TABLES_READY
+    if _TABLES_READY:
+        return
+    with sqlite3.connect(PROTOCOLLI_DB_PATH) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS farmaci_commerciali (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                farmaco_id INTEGER NOT NULL,
+                aic TEXT NOT NULL,
+                nome_commerciale TEXT NOT NULL,
+                classe TEXT,
+                ripetibilita TEXT,
+                gruppo_equivalenza_codice TEXT,
+                gruppo_equivalenza_descrizione TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(farmaco_id, aic),
+                FOREIGN KEY (farmaco_id) REFERENCES farmaci(id)
+            )
+        """)
+        conn.commit()
+    _TABLES_READY = True
 
 
 @ricetta_bp.route("/ricetta/diagnosi-all", methods=['GET'])
@@ -148,6 +176,89 @@ def get_farmaci_per_diagnosi(codice_diagnosi: str):
             'success': False,
             'error': 'LOOKUP_FAILED',
             'message': f'Errore durante la ricerca: {e}'
+        }), 500
+
+@ricetta_bp.route("/ricetta/farmaci-commerciali/<int:farmaco_id>", methods=['GET'])
+@jwt_required()
+def get_farmaci_commerciali(farmaco_id):
+    """Elenco dei prodotti commerciali (AIC) disponibili per un principio attivo"""
+    try:
+        _ensure_tables()
+        with sqlite3.connect(PROTOCOLLI_DB_PATH) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, aic, nome_commerciale, classe, ripetibilita,
+                       gruppo_equivalenza_codice, gruppo_equivalenza_descrizione
+                FROM farmaci_commerciali
+                WHERE farmaco_id = ?
+                ORDER BY nome_commerciale
+            """, (farmaco_id,))
+            rows = cursor.fetchall()
+
+            prodotti = [{
+                'id': row[0],
+                'aic': row[1],
+                'nome_commerciale': row[2],
+                'classe': row[3],
+                'ripetibilita': row[4],
+                'gruppo_equivalenza_codice': row[5],
+                'gruppo_equivalenza_descrizione': row[6],
+            } for row in rows]
+
+            return jsonify({
+                'success': True,
+                'data': {'prodotti': prodotti, 'count': len(prodotti), 'farmaco_id': farmaco_id}
+            })
+    except Exception as e:
+        logger.error(f"Errore farmaci commerciali per farmaco_id {farmaco_id}: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Database error retrieving farmaci commerciali'
+        }), 500
+
+@ricetta_bp.route("/ricetta/farmaci-commerciali", methods=['POST'])
+@jwt_required()
+def add_farmaci_commerciali():
+    """Inserisce/aggiorna prodotti commerciali (AIC) per un principio attivo (upsert per aic)"""
+    try:
+        _ensure_tables()
+        dati = request.get_json()
+        farmaco_id = dati.get('farmaco_id')
+        prodotti = dati.get('prodotti', [])
+        if not farmaco_id or not prodotti:
+            return jsonify({
+                'success': False,
+                'error': 'MISSING_PARAMETER',
+                'message': 'farmaco_id e prodotti sono obbligatori'
+            }), 400
+
+        with sqlite3.connect(PROTOCOLLI_DB_PATH) as conn:
+            for p in prodotti:
+                conn.execute("""
+                    INSERT INTO farmaci_commerciali
+                        (farmaco_id, aic, nome_commerciale, classe, ripetibilita,
+                         gruppo_equivalenza_codice, gruppo_equivalenza_descrizione)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(farmaco_id, aic) DO UPDATE SET
+                        nome_commerciale=excluded.nome_commerciale,
+                        classe=excluded.classe,
+                        ripetibilita=excluded.ripetibilita,
+                        gruppo_equivalenza_codice=excluded.gruppo_equivalenza_codice,
+                        gruppo_equivalenza_descrizione=excluded.gruppo_equivalenza_descrizione
+                """, (
+                    farmaco_id, p['aic'], p['nome_commerciale'], p.get('classe'),
+                    p.get('ripetibilita'), p.get('gruppo_equivalenza_codice'),
+                    p.get('gruppo_equivalenza_descrizione'),
+                ))
+            conn.commit()
+
+        return jsonify({'success': True, 'message': f'{len(prodotti)} prodotti salvati'})
+    except Exception as e:
+        logger.error(f"Errore inserimento farmaci commerciali: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'INSERT_FAILED',
+            'message': str(e)
         }), 500
 
 @ricetta_bp.route("/ricetta/protocolli-per-diagnosi/<int:diagnosi_id>", methods=['GET'])
@@ -297,10 +408,11 @@ def invia_ricetta():
 
         # --- MAPPING COME V1: payload -> formato interno ---
         # V1 mappa payload a formato flat con cf_assistito
+        paziente = dati['paziente']
         dati_ricetta = {
-            'cf_assistito': dati['paziente']['codiceFiscale'],
-            'nome_assistito': dati['paziente']['nome'],
-            'cognome_assistito': dati['paziente']['cognome'],
+            'cf_assistito': paziente.get('codice_fiscale') or paziente.get('codiceFiscale', ''),
+            'nome_assistito': paziente.get('nome', ''),
+            'cognome_assistito': paziente.get('cognome', ''),
             'codice_diagnosi': dati['diagnosi']['codice'],
             'descrizione_diagnosi': dati['diagnosi']['descrizione'],
             'codice_farmaco': dati['farmaco']['codice'],
@@ -309,19 +421,44 @@ def invia_ricetta():
             'posologia': dati['posologia'],
             'durata': dati['durata'],
             'note': dati.get('note', ''),
-            'num_iscrizione': dati.get('medico', {}).get('iscrizione', '591')
+            'quantita': dati.get('quantita'),
+            'num_iscrizione': dati.get('medico', {}).get('iscrizione'),
+            'cod_gruppo_equival': dati['farmaco'].get('gruppo_equivalenza_codice'),
+            'descr_gruppo_equival': dati['farmaco'].get('gruppo_equivalenza_descrizione'),
         }
 
-        # Validazione base come V1
-        required_fields = ['cf_assistito', 'codice_diagnosi', 'descrizione_diagnosi', 
+        # indirMedico/telefMedico Sistema TS: formato pipe-delimited "via|cap|citta|prov" e "prefisso|numero".
+        # Nessun fallback: se i dati medico non sono stati inviati dal FE, l'errore deve emergere subito.
+        medico = dati.get('medico', {})
+        if all(medico.get(k) for k in ('indirizzo', 'cap', 'citta', 'provincia', 'telefono')):
+            dati_ricetta['indirizzo_medico'] = '|'.join([
+                medico['indirizzo'], medico['cap'], medico['citta'], medico['provincia'],
+            ])
+            dati_ricetta['telefono_medico'] = f"+39|{medico['telefono']}"
+
+        # indirizzo paziente Sistema TS: stesso formato "via|cap|citta|prov".
+        # Campo opzionale nello schema: lo includiamo solo se abbiamo dati reali del paziente,
+        # mai un indirizzo inventato per non inviare dati falsi al Sistema TS.
+        if paziente.get('indirizzo') and paziente.get('citta') and paziente.get('provincia'):
+            dati_ricetta['indirizzo_paziente'] = '|'.join([
+                paziente['indirizzo'],
+                paziente.get('cap', ''),
+                paziente['citta'],
+                paziente['provincia'],
+            ])
+
+        # Validazione base come V1 - controlla anche che il valore non sia vuoto, non solo presente.
+        # codice_diagnosi/descrizione_diagnosi NON sono richiesti: il Sistema TS rifiuta (errore 1039)
+        # i codici di categoria del nostro DB locale (es. "K02.x"), e il portale stesso non li richiede.
+        required_fields = ['cf_assistito',
                           'codice_farmaco', 'denominazione_farmaco', 'principio_attivo',
-                          'posologia', 'durata']
-        
+                          'posologia', 'durata', 'quantita', 'num_iscrizione']
+
         for field in required_fields:
-            if field not in dati_ricetta:
+            if not dati_ricetta.get(field):
                 return jsonify({
                     'success': False,
-                    'error': f'Campo obbligatorio mancante: {field}'
+                    'error': f'Campo obbligatorio mancante o vuoto: {field}'
                 }), 400
         
         logger.info(f"Invio ricetta per CF: {dati_ricetta['cf_assistito']}")
@@ -340,9 +477,10 @@ def invia_ricetta():
         else:
             return jsonify({
                 'success': False,
-                'error': 'Errore invio ricetta al Sistema TS', 
-                'details': result
-            }), 400
+                'error': result.get('error', 'INVIO_FAILED'),
+                'message': result.get('errore_descrizione') or result.get('response_text', '')[:300],
+                'data': result
+            }), 200
     except Exception as e:
         logger.error(f"Errore invio ricetta: {e}")
         return jsonify({
@@ -581,13 +719,17 @@ def list_ricette_from_db():
 def health_check():
     """Health check per il servizio ricetta"""
     try:
+        from services.ricette_ts_service import ricette_ts_service
         info = ricette_ts_service.get_environment_info()
         return jsonify({
             'success': True,
             'service': 'ricetta_elettronica_v2',
             'environment': info['environment'],
+            'cf_medico': info['cf_medico'],
             'certificates_valid': all(info['certificates'].values()),
-            'credentials_configured': info['credentials_configured']
+            'credentials_configured': info['credentials_configured'],
+            'id_sessione_set': info.get('id_sessione_set', False),
+            'id_sessione_preview': info.get('id_sessione_preview')
         }), 200
     except Exception as e:
         logger.error(f"Errore health check: {e}")
@@ -602,6 +744,7 @@ def health_check():
 def test_connection():
     """Testa la connessione al Sistema Tessera Sanitaria"""
     try:
+        from services.ricette_ts_service import ricette_ts_service
         result = ricette_ts_service.test_connection()
         
         status_code = 200 if result['success'] else 502

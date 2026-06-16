@@ -68,7 +68,13 @@ class RicettaDataManager:
                 with open(ricette_test_path, 'r', encoding='utf-8') as f:
                     self._cache['ricette_test'] = json.load(f)
                 # Ricette test caricate
-                    
+
+            # Carica farmaci commerciali (AIC) raggruppati per principio attivo
+            farmaci_principio_path = self.data_dir / "farmaci_per_principio_attivo.json"
+            if farmaci_principio_path.exists():
+                with open(farmaci_principio_path, 'r', encoding='utf-8') as f:
+                    self._cache['farmaci_per_principio'] = json.load(f)
+
         except Exception as e:
             logger.error(f"Errore caricamento dati ricetta: {e}")
     
