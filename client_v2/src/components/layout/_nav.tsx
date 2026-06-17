@@ -132,12 +132,6 @@ const _nav = [
         to: '/ricetta/test',
         icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
       },
-      {
-        component: CNavItem,
-        name: 'Protocolli',
-        to: '/ricetta/setting',
-        icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
-      },
     ]
   },
   {
@@ -212,12 +206,6 @@ const _nav = [
     to: '/analytics',
     icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
     items: [
-      {
-        component: CNavItem,
-        name: 'Statistiche',
-        to: '/statistiche',
-        icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
-      },
       {
         component: CNavItem,
         name: 'Economics',

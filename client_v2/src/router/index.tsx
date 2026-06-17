@@ -132,6 +132,7 @@ const AppRouter: React.FC = () => {
           <Route path='todos' element={<TodosPage />} />
 
           {/* Economics */}
+          <Route path='statistiche' element={<Navigate to='/economics' replace />} />
           <Route path='economics' element={<EconomicsPage />} />
           <Route path='economics/comparativa' element={<AnalisiComparativaPage />} />
           <Route path='economics/centro-costo' element={<CentroCostoPage />} />

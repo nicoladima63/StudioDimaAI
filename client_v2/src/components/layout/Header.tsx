@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   CDropdown,
   CDropdownToggle,
@@ -22,6 +23,7 @@ import TheoreticalModeToggle from '@/components/TheoreticalModeToggle'
 
 const Header: React.FC = () => {
   const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
   const [toast, setToast] = useState<{ message: string; color: string } | null>(null)
 
   const showToast = (message: string, color: 'success' | 'danger') => {
@@ -103,12 +105,12 @@ const Header: React.FC = () => {
               </div>
             </div>
 
-            <CDropdownItem href='#/profile'>
+            <CDropdownItem onClick={() => navigate(user?.id ? `/users/edit/${user.id}` : '/users')}>
               <CIcon icon={cilUser} className='me-2' />
               Profilo
             </CDropdownItem>
 
-            <CDropdownItem href='#/settings'>
+            <CDropdownItem onClick={() => navigate('/settings')}>
               <CIcon icon={cilSettings} className='me-2' />
               Impostazioni
             </CDropdownItem>
