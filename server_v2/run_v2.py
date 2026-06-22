@@ -305,11 +305,11 @@ def main():
             run_with_waitress(app, args)
             
     except KeyboardInterrupt:
-        print("\n Startup interrupted by user")
+        sys.stderr.write("\nStartup interrupted by user\n")
         sys.exit(0)
     except Exception as e:
         logging.error(f"Failed to start server: {e}", exc_info=True)
-        print(f"ERROR Failed to start server: {e}")
+        sys.stderr.write(f"ERROR Failed to start server: {e}\n")
         sys.exit(1)
 
 

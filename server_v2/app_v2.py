@@ -146,22 +146,22 @@ def setup_logging(app: Flask) -> None:
     file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
 
-    # Console handler - stream UTF-8 per evitare crash con la codepage cp1252 di Windows
-    console_stream = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
-    console_handler = logging.StreamHandler(console_stream)
-    console_handler.setLevel(log_level)
-    console_handler.setFormatter(formatter)
-    
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
     root_logger.addHandler(file_handler)
-    
+
     # Disabilita completamente log delle richieste HTTP
     logging.getLogger('werkzeug').disabled = True
     logging.getLogger('request').disabled = True
-    
+
     if app.config.get('LOG_TO_STDOUT', False) or app.debug:
+        # Console handler creato solo se necessario: se creato e non aggiunto,
+        # il GC chiude sys.stdout.buffer rendendo print() inutilizzabile.
+        console_stream = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+        console_handler = logging.StreamHandler(console_stream)
+        console_handler.setLevel(log_level)
+        console_handler.setFormatter(formatter)
         root_logger.addHandler(console_handler)
 
 
