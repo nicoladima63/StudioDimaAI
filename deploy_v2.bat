@@ -121,6 +121,39 @@ echo Backup completato in: %BACKUP_DIR%
 echo Backup completato in: %BACKUP_DIR% >> "%LOGFILE%"
 
 :: ============================================================================
+:: [0.5/7] Sovrascrittura DB produzione (opzionale)
+:: ============================================================================
+set "DEV_DB=%~dp0server_v2\instance\studio_dima.db"
+set "PROD_DB=%DEPLOY_PATH%\instance\studio_dima.db"
+
+if exist "%DEV_DB%" (
+    echo.
+    echo *** ATTENZIONE - DATABASE ***
+    echo DB sviluppo: %DEV_DB%
+    echo DB produzione: %PROD_DB%
+    echo.
+    set /p COPY_DB="Vuoi sovrascrivere il DB di produzione con quello di sviluppo? [S/N]: "
+    if /i "!COPY_DB!"=="S" (
+        if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
+        copy "%DEV_DB%" "%PROD_DB%" /Y >nul 2>&1
+        if errorlevel 1 (
+            echo   [ERRORE] Copia DB fallita.
+            echo   [ERRORE] Copia DB fallita. >> "%LOGFILE%"
+        ) else (
+            echo   [OK] DB produzione aggiornato con DB sviluppo.
+            echo   [OK] DB produzione aggiornato con DB sviluppo. >> "%LOGFILE%"
+        )
+    ) else (
+        echo   [SKIP] DB produzione non modificato.
+        echo   [SKIP] DB produzione non modificato. >> "%LOGFILE%"
+    )
+) else (
+    echo   [SKIP] DB sviluppo non trovato in server_v2\instance\, skip.
+    echo   [SKIP] DB sviluppo non trovato, skip. >> "%LOGFILE%"
+)
+echo.
+
+:: ============================================================================
 :: [1/7] Preparazione cartelle server
 :: ============================================================================
 echo [1/7] Verifica cartelle server...

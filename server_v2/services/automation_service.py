@@ -24,24 +24,66 @@ from services.actions import system_actions
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 class AutomationService(BaseService):
     """
     Servizio per la gestione del motore di automazione (v2).
     Utilizza un registro dinamico per caricare le azioni disponibili.
     """
-    
+
     def __init__(self, database_manager=None):
         from core.database_manager import get_database_manager
         super().__init__(database_manager or get_database_manager())
-        
+
+        self._ensure_tables()
+
         # Il registro è ora popolato dinamicamente all'import dei moduli delle azioni
         self.action_definitions = ACTION_REGISTRY
         self.action_implementation_registry = {
-            name: definition['function'] 
+            name: definition['function']
             for name, definition in self.action_definitions.items()
         }
-        
+
         self._sync_registry_with_db()
+
+    def _ensure_tables(self):
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS actions (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL UNIQUE,
+                        description TEXT DEFAULT '',
+                        parameters_json TEXT DEFAULT '[]',
+                        is_system_action INTEGER DEFAULT 0
+                    )
+                ''')
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS automation_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL,
+                        description TEXT DEFAULT '',
+                        trigger_type TEXT NOT NULL,
+                        trigger_id TEXT NOT NULL,
+                        action_id INTEGER NOT NULL,
+                        action_params_json TEXT DEFAULT '{}',
+                        attiva INTEGER DEFAULT 1,
+                        priorita INTEGER DEFAULT 100,
+                        monitor_id TEXT,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (action_id) REFERENCES actions(id)
+                    )
+                ''')
+            _TABLES_READY = True
+            logger.debug("AutomationService: tabelle actions e automation_rules verificate.")
+        except Exception as e:
+            logger.error(f"AutomationService: errore creazione tabelle: {e}")
     
     def _sync_registry_with_db(self):
         """Assicura che tutte le azioni registrate nel codice esistano nel DB (logica upsert)."""
