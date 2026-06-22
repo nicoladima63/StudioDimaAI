@@ -13,17 +13,49 @@ from core.exceptions import DatabaseError, ValidationError
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 class RichiamiService:
     """Service for managing patient recalls."""
-    
+
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.db_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 
-            'instance', 
+            os.path.dirname(os.path.dirname(__file__)),
+            'instance',
             'studio_dima.db'
         )
-    
+        self._ensure_tables()
+
+    def _ensure_tables(self):
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
+        try:
+            conn = sqlite3.connect(self.db_path)
+            conn.execute('''
+                CREATE TABLE IF NOT EXISTS richiami (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    paziente_id TEXT NOT NULL,
+                    nome TEXT NOT NULL,
+                    data_ultima_visita TEXT,
+                    data_richiamo TEXT,
+                    richiamato_il TEXT,
+                    tipo_richiamo TEXT,
+                    tempo_richiamo INTEGER,
+                    da_richiamare TEXT CHECK(da_richiamare IN ('S', 'N', 'R')) DEFAULT 'S',
+                    sms_sent BOOLEAN DEFAULT 0,
+                    note TEXT,
+                    created_at TEXT DEFAULT (datetime('now')),
+                    updated_at TEXT DEFAULT (datetime('now'))
+                )
+            ''')
+            conn.commit()
+            conn.close()
+            _TABLES_READY = True
+        except Exception as e:
+            self.logger.error(f"RichiamiService: errore creazione tabella richiami: {e}")
+
     def _get_connection(self) -> sqlite3.Connection:
         """Get database connection."""
         if not os.path.exists(self.db_path):
