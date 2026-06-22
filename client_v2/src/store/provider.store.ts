@@ -64,7 +64,7 @@ export const useProviderStore = create<ProviderState & ProviderActions>()(
     },
 
     deleteProvider: async (id) => {
-      set(state => { loading: 'loading'; state.error = null; });
+      set(state => { state.loading = 'loading'; state.error = null; });
       try {
         await worksService.deleteProvider(id);
         set(state => {

@@ -106,7 +106,7 @@ const ProvidersPage: React.FC = () => {
                         </CButton>
                     </CCardHeader>
                     <CCardBody>
-                        {loading ? (
+                        {loading === 'loading' ? (
                             <div className="text-center">
                                 <CSpinner color="primary" />
                             </div>

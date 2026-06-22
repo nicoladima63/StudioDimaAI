@@ -4,9 +4,10 @@ import automationApi, { type AutomationRule } from '@/features/settings/services
 
 interface MonitorRulesProps {
   monitorId: string;
+  refreshToken?: number;
 }
 
-const MonitorRules: React.FC<MonitorRulesProps> = ({ monitorId }) => {
+const MonitorRules: React.FC<MonitorRulesProps> = ({ monitorId, refreshToken }) => {
   const [rules, setRules] = useState<AutomationRule[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +26,7 @@ const MonitorRules: React.FC<MonitorRulesProps> = ({ monitorId }) => {
     };
 
     fetchRules();
-  }, [monitorId]);
+  }, [monitorId, refreshToken]);
 
   if (loading) {
     return <CSpinner size="sm" />;

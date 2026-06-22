@@ -73,6 +73,7 @@ const WorkDetailsPage: React.FC = () => {
 
     const getUserName = (userId?: string | number) => {
         if (!userId) return null;
+        if (userId.toString() === 'tutti') return 'Tutti';
         const u = users.find(user => user.id.toString() === userId.toString());
         return u ? u.username : userId;
     };
@@ -154,12 +155,18 @@ const WorkDetailsPage: React.FC = () => {
                                                 <div>
                                                     <h6 className={`mb-0 ${isCompleted ? 'text-decoration-line-through text-muted' : ''}`}>{step.name}</h6>
                                                     {step.description && <small className="text-muted">{step.description}</small>}
-                                                    {step.user_id && <div className="small text-info">Utente assegnato: {getUserName(step.user_id)}</div>}
+                                                    {step.user_id && (
+                                                        <div className="small text-info">
+                                                            {step.user_id === 'tutti'
+                                                                ? 'Chiunque puo completare questa fase'
+                                                                : `Utente assegnato: ${getUserName(step.user_id)}`}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             <div>
-                                                {isActive && step.user_id && currentUser && step.user_id.toString() === currentUser.id.toString() && (
+                                                {isActive && (step.user_id === 'tutti' || (step.user_id && currentUser && step.user_id.toString() === currentUser.id.toString())) && (
                                                     <CButton
                                                         color="success"
                                                         className="text-white"
@@ -169,7 +176,7 @@ const WorkDetailsPage: React.FC = () => {
                                                         Fatto
                                                     </CButton>
                                                 )}
-                                                {isActive && (!step.user_id || !currentUser || step.user_id.toString() !== currentUser.id.toString()) && (
+                                                {isActive && step.user_id !== 'tutti' && (!step.user_id || !currentUser || step.user_id.toString() !== currentUser.id.toString()) && (
                                                     <span className="text-muted small">Assegnato a: {getUserName(step.user_id)}</span>
                                                 )}
                                                 {isCompleted && (

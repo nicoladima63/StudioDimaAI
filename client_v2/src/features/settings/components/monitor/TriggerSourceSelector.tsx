@@ -13,12 +13,21 @@ export interface Trigger {
 interface TriggerSourceSelectorProps {
   onChange: (trigger: Trigger | null) => void;
   disabled?: boolean;
+  initialPrestazione?: Prestazione | null;
 }
 
-const TriggerSourceSelector: React.FC<TriggerSourceSelectorProps> = ({ onChange, disabled }) => {
+const TriggerSourceSelector: React.FC<TriggerSourceSelectorProps> = ({ onChange, disabled, initialPrestazione }) => {
   const [source, setSource] = useState('prestazione');
   const [selectedPrestazione, setSelectedPrestazione] = useState<Prestazione | null>(null);
   const [selectedTipoApp, setSelectedTipoApp] = useState('');
+
+  // Pre-popola quando viene passata una prestazione iniziale (es. da MappingPrestazioniCard)
+  useEffect(() => {
+    if (initialPrestazione) {
+      setSource('prestazione');
+      setSelectedPrestazione(initialPrestazione);
+    }
+  }, [initialPrestazione]);
 
   useEffect(() => {
     if (source === 'prestazione') {

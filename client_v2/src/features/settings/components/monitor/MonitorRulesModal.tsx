@@ -16,12 +16,16 @@ import MonitorPrestazioniService from '@/services/api/monitorPrestazioni';
 import ListaRegole from './ListaRegole';
 import CallbackCard from './CallbackCard';
 import TriggerSourceSelector, { Trigger } from './TriggerSourceSelector';
+import type { Prestazione } from '@/store/prestazioni.store';
 
 interface MonitorRulesModalProps {
     visible: boolean;
     onClose: () => void;
     monitorId: string | null;
     monitorName: string;
+    initialPrestazione?: Prestazione | null;
+    initialActionName?: string;
+    onRuleSaved?: () => void;
 }
 
 const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
@@ -29,6 +33,9 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
     onClose,
     monitorId,
     monitorName,
+    initialPrestazione,
+    initialActionName,
+    onRuleSaved,
 }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -53,7 +60,6 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
         if (visible && monitorId) {
             loadMonitorDetails(monitorId);
         } else {
-            // Reset state on close
             setRules([]);
             setActions([]);
             setError(null);
@@ -61,6 +67,25 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
             handleCancelEdit();
         }
     }, [visible, monitorId]);
+
+    // Pre-popola trigger da mapping (quando aperto da MappingPrestazioniCard)
+    useEffect(() => {
+        if (visible && initialPrestazione) {
+            setTrigger({
+                type: 'prestazione',
+                id: String(initialPrestazione.id),
+                name: initialPrestazione.nome,
+            });
+        }
+    }, [visible, initialPrestazione]);
+
+    // Pre-seleziona azione quando le azioni sono caricate
+    useEffect(() => {
+        if (visible && initialActionName && actions.length > 0) {
+            const action = actions.find(a => a.name === initialActionName);
+            if (action) setSelectedActionId(action.id);
+        }
+    }, [visible, initialActionName, actions]);
 
     const loadMonitorDetails = async (id: string) => {
         try {
@@ -144,6 +169,7 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
                 setSelectedActionParams(null);
 
                 if (monitorId) await loadMonitorDetails(monitorId);
+                onRuleSaved?.();
             } catch (e: any) {
                 setError(e?.message || 'Errore aggiornamento regola');
             } finally {
@@ -177,6 +203,7 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
                 setSelectedActionParams(null);
 
                 await loadMonitorDetails(monitorId);
+                onRuleSaved?.();
             } catch (e: any) {
                 setError(e?.message || 'Errore creazione regola');
             } finally {
@@ -217,7 +244,7 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
                     <CCol md={4} className="border-end">
                         <h6 className="mb-3 fw-bold">{editingRule ? 'Modifica Regola' : 'Crea Nuova Regola'}</h6>
 
-                        <TriggerSourceSelector onChange={setTrigger} />
+                        <TriggerSourceSelector onChange={setTrigger} initialPrestazione={initialPrestazione} />
 
                         <div className="mt-3">
                             <CallbackCard
@@ -228,6 +255,7 @@ const MonitorRulesModal: React.FC<MonitorRulesModalProps> = ({
                                 onParamsChange={setSelectedActionParams}
                                 isModalOpen={isParamsModalOpen}
                                 setIsModalOpen={setIsParamsModalOpen}
+                                trigger={trigger}
                                 {...(editingRule ? { onDirectSave: handleDirectSaveParams } : {})}
                             />
                         </div>

@@ -20,14 +20,18 @@ import {
   CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilSettings, cilTrash, cilPlus } from '@coreui/icons'
+import { cilSettings, cilTrash, cilPlus, cilTask } from '@coreui/icons'
 import prestazioneWorkMappingService, { PrestazioneWorkMapping } from '@/services/api/prestazioneWorkMapping.service'
 import { usePrestazioniStore, Prestazione } from '@/store/prestazioni.store'
 import worksService, { Work } from '@/services/api/works.service'
 import Select from 'react-select'
 import toast from 'react-hot-toast'
 
-const MappingPrestazioniCard: React.FC = () => {
+interface MappingPrestazioniCardProps {
+  onCreateRule?: (mapping: PrestazioneWorkMapping, prestazione: Prestazione | null) => void
+}
+
+const MappingPrestazioniCard: React.FC<MappingPrestazioniCardProps> = ({ onCreateRule }) => {
   const [mappings, setMappings] = useState<PrestazioneWorkMapping[]>([])
   const [works, setWorks] = useState<Work[]>([])
   const [loading, setLoading] = useState(false)
@@ -169,6 +173,7 @@ const MappingPrestazioniCard: React.FC = () => {
                   <CTableHeaderCell>Nome Prestazione</CTableHeaderCell>
                   <CTableHeaderCell>Work Template</CTableHeaderCell>
                   <CTableHeaderCell>Azioni</CTableHeaderCell>
+                  {onCreateRule && <CTableHeaderCell title="Crea regola automazione">Regola</CTableHeaderCell>}
                 </CTableRow>
               </CTableHead>
               <CTableBody>
@@ -199,6 +204,19 @@ const MappingPrestazioniCard: React.FC = () => {
                           <CIcon icon={cilTrash} />
                         </CButton>
                       </CTableDataCell>
+                      {onCreateRule && (
+                        <CTableDataCell>
+                          <CButton
+                            color="primary"
+                            size="sm"
+                            variant="ghost"
+                            title="Crea regola automazione da questo mapping"
+                            onClick={() => onCreateRule(mapping, prestazione)}
+                          >
+                            <CIcon icon={cilTask} />
+                          </CButton>
+                        </CTableDataCell>
+                      )}
                     </CTableRow>
                   )
                 })}

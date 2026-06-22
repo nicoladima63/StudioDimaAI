@@ -99,7 +99,7 @@ class WorkService(BaseService):
                 self.task_repository.update_step_status(first_step['id'], 'active')
                 task['steps'][0]['status'] = 'active' # Update local object to reflect
 
-                # 6. Send notification to first user AND create todo
+                # 6. Send notification to first user(s) AND create todo
                 first_user_id = first_step.get('user_id')
                 if first_user_id:
                     try:
@@ -107,48 +107,43 @@ class WorkService(BaseService):
                         from services.todo_service import TodoService
                         from repositories.user_repository import UserRepository
                         from services.dbf_data_service import get_dbf_data_service
-                        
+
                         notification_service = NotificationService(self.db_manager)
                         todo_service = TodoService(self.db_manager)
                         user_repository = UserRepository()
                         dbf_service = get_dbf_data_service()
 
-                        try:
-                            user_id_int = int(first_user_id)
-                        except (ValueError, TypeError):
-                            logger.warning(f"Invalid user_id format for first step notification: {first_user_id}")
-                            user_id_int = None
+                        patient_name = "un nuovo paziente"
+                        patient_data = dbf_service.get_patient_by_id(patient_id)
+                        if patient_data and patient_data.get('nome'):
+                            patient_name = patient_data['nome']
+                        link = f"/works/{task['id']}"
 
-                        if user_id_int:
-                            # Recupera nome paziente
-                            patient_name = "un nuovo paziente"
-                            patient_data = dbf_service.get_patient_by_id(patient_id)
-                            if patient_data and patient_data.get('nome'):
-                                patient_name = patient_data['nome']
-                            
-                            # Recupera nome utente
-                            user = user_repository.find_by_id(user_id_int)
-                            username = user.get('username', 'tu') if user else 'tu'
-                            
-                            message = f"{username}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
-                            link = f"/works/{task['id']}"
+                        if first_user_id == 'tutti':
+                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
+                            for u in all_users:
+                                msg = f"{u['username']}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
+                                notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
+                                todo_service.create_todo_from_step(
+                                    step={**first_step, 'user_id': str(u['id'])},
+                                    task=task,
+                                    sender_id=1
+                                )
+                            logger.info(f"Notifiche inviate a tutti gli utenti per nuovo task {task['id']}")
+                        else:
+                            try:
+                                user_id_int = int(first_user_id)
+                            except (ValueError, TypeError):
+                                logger.warning(f"Invalid user_id format for first step notification: {first_user_id}")
+                                user_id_int = None
 
-                            # Send push notification
-                            notification_service.notify_user(
-                                user_id=user_id_int,
-                                message=message,
-                                type='info',
-                                link=link
-                            )
-
-                            # Create persistent todo
-                            todo_service.create_todo_from_step(
-                                step=first_step,
-                                task=task,
-                                sender_id=1  # System user
-                            )
-
-                            logger.info(f"Notification and todo sent to user {user_id_int} for new task {task['id']}")
+                            if user_id_int:
+                                user = user_repository.find_by_id(user_id_int)
+                                username = user.get('username', 'tu') if user else 'tu'
+                                message = f"{username}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
+                                notification_service.notify_user(user_id=user_id_int, message=message, type='info', link=link)
+                                todo_service.create_todo_from_step(step=first_step, task=task, sender_id=1)
+                                logger.info(f"Notifica e todo inviati all'utente {user_id_int} per nuovo task {task['id']}")
 
                     except Exception as e:
                         logger.error(f"Failed to send notification/todo for new task: {e}")
@@ -207,10 +202,9 @@ class WorkService(BaseService):
                 self.task_repository.update_step_status(next_step['id'], 'active')
                 logger.info(f"Activated next step {next_step['id']} for task {task_id}")
 
-                # 5. Send notification if operator changes, but ALWAYS create todo
+                # 5. Send notification and create todo for next step assignee(s)
                 next_user_id = next_step.get('user_id')
                 current_user_id = updated_step.get('user_id')
-                operator_changed = (next_user_id and current_user_id and str(next_user_id) != str(current_user_id))
 
                 if next_user_id:
                     try:
@@ -218,57 +212,71 @@ class WorkService(BaseService):
                         from services.todo_service import TodoService
                         from repositories.user_repository import UserRepository
                         from services.dbf_data_service import get_dbf_data_service
-                        
+
                         notification_service = NotificationService(self.db_manager)
                         todo_service = TodoService(self.db_manager)
                         user_repository = UserRepository()
                         dbf_service = get_dbf_data_service()
 
-                        try:
-                            next_user_id_int = int(next_user_id)
-                        except (ValueError, TypeError):
-                            logger.warning(f"Invalid user_id format for notification: {next_user_id}")
-                            next_user_id_int = None
+                        # Recupera nome paziente e dati contestuali
+                        task = self.get_task_details(task_id)
+                        patient_name = "il paziente"
+                        if task and task.get('patient_id'):
+                            patient_data = dbf_service.get_patient_by_id(task['patient_id'])
+                            if patient_data and patient_data.get('nome'):
+                                patient_name = patient_data['nome']
 
-                        if next_user_id_int:
-                            # Recupera nomi utenti
-                            current_user = user_repository.find_by_id(int(current_user_id)) if current_user_id else None
-                            next_user = user_repository.find_by_id(next_user_id_int)
-                            
-                            current_username = current_user.get('username', 'Un collega') if current_user else 'Un collega'
-                            next_username = next_user.get('username', 'tu') if next_user else 'tu'
-                            
-                            # Recupera nome paziente
-                            task = self.get_task_details(task_id)
-                            patient_name = "il paziente"
-                            if task and task.get('patient_id'):
-                                patient_data = dbf_service.get_patient_by_id(task['patient_id'])
-                                if patient_data and patient_data.get('nome'):
-                                    patient_name = patient_data['nome']
-                            
-                            # Send push notification ONLY if operator changed
-                            if operator_changed:
-                                message = f"{current_username} ha completato la sua fase per {patient_name}. {next_username}, hai la tua fase da completare: '{next_step['name']}'"
-                                link = f"/works/{task_id}"
+                        # Chi ha completato lo step corrente
+                        effective_current_id = None
+                        if current_user_id and current_user_id != 'tutti':
+                            try:
+                                effective_current_id = int(current_user_id)
+                            except (ValueError, TypeError):
+                                pass
+                        if not effective_current_id and user_id:
+                            try:
+                                effective_current_id = int(user_id)
+                            except (ValueError, TypeError):
+                                pass
 
-                                notification_service.notify_user(
-                                    user_id=next_user_id_int,
-                                    message=message,
-                                    type='info',
-                                    link=link
+                        current_user_obj = user_repository.find_by_id(effective_current_id) if effective_current_id else None
+                        current_username = current_user_obj.get('username', 'Un collega') if current_user_obj else 'Un collega'
+                        link = f"/works/{task_id}"
+                        sender_id = effective_current_id or 1
+
+                        if next_user_id == 'tutti':
+                            # Notifica tutti gli utenti non-admin
+                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
+                            for u in all_users:
+                                msg = f"{current_username} ha completato la sua fase per {patient_name}. {u['username']}, hai la tua fase da completare: '{next_step['name']}'"
+                                notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
+                                todo_service.create_todo_from_step(
+                                    step={**next_step, 'user_id': str(u['id'])},
+                                    task=task,
+                                    sender_id=sender_id
                                 )
-                                logger.info(f"Notification sent to user {next_user_id_int} for step {next_step['id']}")
-                            
-                            # ALWAYS create todo (even if same operator)
-                            todo_service.create_todo_from_step(
-                                step=next_step,
-                                task=task,
-                                sender_id=int(current_user_id) if current_user_id else 1
-                            )
-                            logger.info(f"Todo created for user {next_user_id_int} for step {next_step['id']}")
+                            logger.info(f"Notifiche inviate a tutti gli utenti per step {next_step['id']}")
+                        else:
+                            try:
+                                next_user_id_int = int(next_user_id)
+                            except (ValueError, TypeError):
+                                logger.warning(f"Invalid user_id format for notification: {next_user_id}")
+                                next_user_id_int = None
+
+                            if next_user_id_int:
+                                next_user = user_repository.find_by_id(next_user_id_int)
+                                next_username = next_user.get('username', 'tu') if next_user else 'tu'
+                                operator_changed = str(next_user_id) != str(current_user_id) if current_user_id else True
+
+                                if operator_changed:
+                                    message = f"{current_username} ha completato la sua fase per {patient_name}. {next_username}, hai la tua fase da completare: '{next_step['name']}'"
+                                    notification_service.notify_user(user_id=next_user_id_int, message=message, type='info', link=link)
+                                    logger.info(f"Notifica inviata all'utente {next_user_id_int} per step {next_step['id']}")
+
+                                todo_service.create_todo_from_step(step=next_step, task=task, sender_id=sender_id)
+                                logger.info(f"Todo creato per utente {next_user_id_int} per step {next_step['id']}")
 
                     except Exception as notif_error:
-                        # Non-critical error, log and continue
                         logger.error(f"Failed to send notification/todo: {notif_error}")
             else:
                 # No more steps, complete the task

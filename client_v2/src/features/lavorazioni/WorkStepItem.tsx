@@ -109,6 +109,7 @@ export const WorkStepItem: React.FC<WorkStepItemProps> = ({
                                 onChange={(e) => updateStep(index, 'user_id', e.target.value)}
                             >
                                 <option value="">Seleziona</option>
+                                <option value="tutti">Tutti (chiunque)</option>
                                 {users.filter((u: any) => u.role !== 'admin').map((u: any) => (
                                     <option key={u.id} value={u.id}>{u.username}</option>
                                 ))}

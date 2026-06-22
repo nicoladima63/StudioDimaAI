@@ -26,7 +26,7 @@ export const useWebSocket = () => {
 
     // Initialize socket connection
     const socket = io(SOCKET_URL, {
-      transports: ['polling', 'websocket'], // Try polling first, then upgrade to WebSocket
+      transports: ['websocket', 'polling'], // Prefer WebSocket, fall back to polling
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,

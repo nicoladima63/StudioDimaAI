@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   CAlert,
   CButton,
+  CListGroup,
+  CListGroupItem,
   CModal,
   CModalHeader,
+  CModalTitle,
   CModalBody,
   CModalFooter,
   CRow,
@@ -29,6 +32,8 @@ import MonitorRulesModal from '@/features/settings/components/monitor/MonitorRul
 import MonitorRules from '@/features/dashboard/components/MonitorRules';
 
 import MonitorPrestazioniService, { MonitorSummary } from '@/services/api/monitorPrestazioni';
+import type { PrestazioneWorkMapping } from '@/services/api/prestazioneWorkMapping.service';
+import type { Prestazione } from '@/store/prestazioni.store';
 
 
 const getBadgeColor = (status: string) => {
@@ -57,6 +62,13 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   // Delete Confirmation
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteMonitorId, setPendingDeleteMonitorId] = useState<string | null>(null);
+
+  // Crea regola da mapping
+  const [showMonitorPickModal, setShowMonitorPickModal] = useState(false);
+  const [ruleInitialPrestazione, setRuleInitialPrestazione] = useState<Prestazione | null>(null);
+
+  // Incrementato ad ogni regola salvata per forzare il refresh di MonitorRules nelle card
+  const [rulesVersion, setRulesVersion] = useState(0);
 
   // Static Data
   const [monitorableTables, setMonitorableTables] = useState<{ name: string, description: string }[]>([]);
@@ -176,6 +188,33 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
   };
 
   const openRulesForMonitor = (monitorId: string) => {
+    setRuleInitialPrestazione(null);
+    setSelectedMonitorId(monitorId);
+    setIsRulesModalOpen(true);
+  };
+
+  const handleCreateRuleFromMapping = (_mapping: PrestazioneWorkMapping, prestazione: Prestazione | null) => {
+    if (!prestazione) {
+      setError('Prestazione non trovata per questo mapping.');
+      return;
+    }
+    const monitors = monitorSummary?.monitors ?? {};
+    const ids = Object.keys(monitors);
+    if (ids.length === 0) {
+      setError('Nessun monitor configurato. Crea prima un monitor DBF.');
+      return;
+    }
+    setRuleInitialPrestazione(prestazione);
+    if (ids.length === 1) {
+      setSelectedMonitorId(ids[0]);
+      setIsRulesModalOpen(true);
+    } else {
+      setShowMonitorPickModal(true);
+    }
+  };
+
+  const handlePickMonitor = (monitorId: string) => {
+    setShowMonitorPickModal(false);
     setSelectedMonitorId(monitorId);
     setIsRulesModalOpen(true);
   };
@@ -221,7 +260,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
                       <div className="mt-2 p-2 bg-light rounded bg-opacity-50 border small">
                         <strong>Regole Attive:</strong>
                         <div className="mt-1">
-                          <MonitorRules monitorId={monitorId} />
+                          <MonitorRules monitorId={monitorId} refreshToken={rulesVersion} />
                         </div>
                       </div>
 
@@ -299,7 +338,7 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         <h5 className="mb-3 d-flex align-items-center">
           <CIcon icon={cilList} className="me-2" /> Mappatura Prestazioni
         </h5>
-        <MappingPrestazioniCard />
+        <MappingPrestazioniCard onCreateRule={handleCreateRuleFromMapping} />
       </PageLayout.ContentBody>
 
 
@@ -319,10 +358,42 @@ const MonitorPrestazioniStandalonePage: React.FC = () => {
         onClose={() => {
           setIsRulesModalOpen(false);
           setSelectedMonitorId(null);
+          setRuleInitialPrestazione(null);
         }}
         monitorId={selectedMonitorId}
         monitorName={selectedMonitorId && monitorSummary?.monitors[selectedMonitorId] ? monitorSummary.monitors[selectedMonitorId].table_name : ''}
+        initialPrestazione={ruleInitialPrestazione}
+        initialActionName={ruleInitialPrestazione ? 'create_task_from_work' : undefined}
+        onRuleSaved={() => setRulesVersion(v => v + 1)}
       />
+
+      {/* Monitor picker — compare solo se ci sono più monitor */}
+      <CModal visible={showMonitorPickModal} onClose={() => setShowMonitorPickModal(false)}>
+        <CModalHeader>
+          <CModalTitle>Seleziona Monitor</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          <p className="text-muted small mb-3">
+            Scegli il monitor DBF a cui aggiungere la regola per la prestazione <strong>{ruleInitialPrestazione?.nome}</strong>:
+          </p>
+          <CListGroup>
+            {monitorSummary && Object.entries(monitorSummary.monitors).map(([id, monitor]) => (
+              <CListGroupItem
+                key={id}
+                as="button"
+                className="d-flex justify-content-between align-items-center"
+                onClick={() => handlePickMonitor(id)}
+              >
+                <span>{monitor.table_name}</span>
+                <CBadge color={getBadgeColor(monitor.status)}>{monitor.status}</CBadge>
+              </CListGroupItem>
+            ))}
+          </CListGroup>
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" variant="ghost" onClick={() => setShowMonitorPickModal(false)}>Annulla</CButton>
+        </CModalFooter>
+      </CModal>
 
       <CModal visible={showDeleteModal} onClose={() => setShowDeleteModal(false)} backdrop="static">
         <CModalHeader>Conferma eliminazione</CModalHeader>
