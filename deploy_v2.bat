@@ -301,7 +301,7 @@ if exist ".env" (
         echo   [ERRORE] Copia .env Docker fallita.
         echo   [ERRORE] Copia .env Docker fallita. >> "%LOGFILE%"
     ) else (
-        echo   [OK] .env.docker aggiornato (EVOLUTION_API_KEY, WEBHOOK_URL, DB_PASSWORD).
+        echo   [OK] .env.docker aggiornato - EVOLUTION_API_KEY, WEBHOOK_URL, DB_PASSWORD.
         echo   [OK] .env.docker aggiornato. >> "%LOGFILE%"
     )
 ) else (
