@@ -18,6 +18,7 @@ import os
 import sys
 import argparse
 import logging
+import subprocess
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
@@ -96,7 +97,14 @@ def parse_arguments():
         action='store_true',
         help='Enable quiet mode (ERROR level only)'
     )
-    
+
+    parser.add_argument(
+        '--skip-evolution',
+        action='store_true',
+        default=os.environ.get('SKIP_EVOLUTION_CHECK', '').lower() in ('1', 'true', 'yes'),
+        help='Non avviare Evolution API via Docker (utile se il container gira altrove)'
+    )
+
     return parser.parse_args()
 
 
@@ -154,6 +162,56 @@ def validate_configuration(config_class):
 
 
 from collections import defaultdict
+
+
+def ensure_evolution_running():
+    """
+    Avvia Evolution API via docker compose se non e gia in esecuzione.
+    Chiamato all'avvio del server. Silenzioso se Docker non e disponibile.
+    """
+    compose_file = Path(__file__).parent.parent / 'docker-compose.yml'
+    if not compose_file.exists():
+        return
+
+    # shell=True: usa cmd.exe su Windows, che ha il PATH di Docker Desktop corretto
+    try:
+        probe = subprocess.run(
+            'docker ps -q', shell=True,
+            capture_output=True, timeout=5
+        )
+        if probe.returncode != 0:
+            print("Evolution API: Docker non disponibile, skip")
+            return
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        print("Evolution API: Docker non trovato, skip")
+        return
+
+    # Controlla se il container e gia su
+    try:
+        check = subprocess.run(
+            'docker ps --filter name=studiodima-evolution --filter status=running -q',
+            shell=True, capture_output=True, text=True, timeout=5
+        )
+        if check.stdout.strip():
+            print("Evolution API: container gia in esecuzione")
+            return
+    except Exception:
+        pass
+
+    # Avvia con docker compose in background — non bloccante.
+    # La prima volta scarica l'immagine (~200MB), il server parte comunque subito.
+    print("Evolution API: avvio container in background...")
+    try:
+        subprocess.Popen(
+            'docker compose up -d',
+            shell=True,
+            cwd=str(compose_file.parent),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        print("Evolution API: avvio lanciato (verifica stato tra 30-60 secondi)")
+    except Exception as e:
+        print(f"Evolution API: errore ({e}), continuo senza")
 
 
 def run_with_waitress(app, args):
@@ -263,10 +321,14 @@ def main():
         
         # Parse command line arguments
         args = parse_arguments()
-        
+
+        # Avvia Evolution API via Docker se necessario
+        if not args.skip_evolution:
+            ensure_evolution_running()
+
         # Setup logging first
         setup_logging(args)
-        
+
         # Import modules AFTER logging is configured
         from app_v2 import create_app_v2
         from config.flask_config import get_config

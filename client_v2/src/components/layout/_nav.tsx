@@ -258,6 +258,12 @@ const _nav = [
       },
       {
         component: CNavItem,
+        name: 'WhatsApp Reminder',
+        to: '/settings/evolution',
+        icon: <CIcon icon={cilPhone} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
         name: 'SEO',
         to: '/settings/seo',
         icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
