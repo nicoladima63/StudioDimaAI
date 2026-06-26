@@ -9,6 +9,7 @@ const MAX_RETRIES = 3;
 export interface Paziente {
   id: string;
   nome: string;
+  cognome?: string;
   codice_fiscale?: string;
   data_nascita?: string; // ISO date string
   luogo_nascita?: string;
@@ -133,6 +134,10 @@ export const usePazientiStore = create<PazientiState>()(
 
       // Carica tutti i pazienti - Pattern da FornitoriStore
       loadAllPazienti: async () => {
+        const state = get();
+        if (state.pazienti.length > 0 && Date.now() - state.lastUpdated < CACHE_DURATION) {
+          return;
+        }
         set({ isLoading: true, error: null });
         
         let retry = 0;

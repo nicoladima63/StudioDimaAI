@@ -10,6 +10,7 @@ interface PazientiSelectProps {
   clearable?: boolean;
   className?: string;
   hideDetails?: boolean;
+  maxDisplay?: number;
 }
 
 const PazientiSelect: React.FC<PazientiSelectProps> = ({
@@ -20,7 +21,8 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
   searchable = true,
   clearable = false,
   className = "",
-  hideDetails = false
+  hideDetails = false,
+  maxDisplay = 50,
 }) => {
 
 
@@ -171,7 +173,7 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
               </div>
             )}
 
-            {filteredPazienti.map((paziente) => (
+            {filteredPazienti.slice(0, maxDisplay).map((paziente) => (
               <div
                 key={paziente.id}
                 className={`px-3 py-2 cursor-pointer hover-bg-light ${value === paziente.id ? 'bg-primary text-white' : ''}`}
@@ -210,6 +212,11 @@ const PazientiSelect: React.FC<PazientiSelectProps> = ({
                 )}
               </div>
             ))}
+            {filteredPazienti.length > maxDisplay && (
+              <div className="px-3 py-2 text-muted small text-center border-top">
+                Altri {filteredPazienti.length - maxDisplay} risultati — digita per filtrare
+              </div>
+            )}
           </div>
         </div>
       )}
