@@ -107,11 +107,14 @@ def _normalize_phone(phone: str) -> str:
 # Lettura appuntamenti e pazienti
 # ---------------------------------------------------------------------------
 
-def get_upcoming_appointments(reminder_type: str) -> list[dict]:
+def get_upcoming_appointments(reminder_type: str, slot: str = 'all') -> list[dict]:
     """
     Legge APPUNTA.DBF e restituisce gli appuntamenti da notificare.
 
     reminder_type '24h': appuntamenti di DOMANI (data == domani)
+      slot='morning'   -> ore < 13:00
+      slot='afternoon' -> ore >= 13:00
+      slot='all'       -> tutti (fallback)
     reminder_type '2h':  appuntamenti tra 90 e 150 minuti da adesso
     """
     now = datetime.now(ROME_TZ).replace(tzinfo=None)  # ora legale corretta per Roma
@@ -140,8 +143,14 @@ def get_upcoming_appointments(reminder_type: str) -> list[dict]:
                 ap_dt = datetime.combine(ap_date, datetime.strptime(ora_fmt, '%H:%M').time())
 
                 if reminder_type == '24h':
-                    # Solo appuntamenti di domani
-                    match = (ap_date == tomorrow)
+                    if ap_date != tomorrow:
+                        continue
+                    if slot == 'morning':
+                        match = (ap_dt.hour < 13)
+                    elif slot == 'afternoon':
+                        match = (ap_dt.hour >= 13)
+                    else:
+                        match = True
                 else:
                     # Appuntamenti tra 90 e 150 minuti da adesso
                     delta = (ap_dt - now).total_seconds() / 60
@@ -445,6 +454,12 @@ def get_appointments_pending_followup(hours_before: int = 3) -> list[dict]:
                   AND f.appointment_time = patient_communications.appointment_time
                   AND f.type = 'followup'
               )
+              AND NOT EXISTS (
+                SELECT 1 FROM appointment_confirmations ac
+                WHERE ac.patient_id = patient_communications.patient_id
+                  AND ac.appointment_date = patient_communications.appointment_date
+                  AND ac.response_type = 'confirmed'
+              )
         """, (today, current_time, cutoff_time))
         rows = [dict(r) for r in cur.fetchall()]
         conn.close()
@@ -517,17 +532,18 @@ def run_followup_reminders(hours_before: int = 3, dry_run: bool = False) -> dict
 # Job principale
 # ---------------------------------------------------------------------------
 
-def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str = None) -> dict:
+def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str = None, slot: str = 'all') -> dict:
     """
     Funzione chiamata dallo scheduler.
 
     reminder_type:   '24h' o '2h'
+    slot:            'morning' | 'afternoon' | 'all' (usato solo per 24h)
     dry_run:         se True, simula senza inviare nulla
     patient_filter:  se valorizzato, processa solo il paziente con questo patient_id
     Ritorna statistiche: {sent_wa, sent_sms, skipped_fisso, errors, no_phone}
     """
     ensure_reminder_tables()
-    appointments = get_upcoming_appointments(reminder_type)
+    appointments = get_upcoming_appointments(reminder_type, slot=slot)
     if patient_filter:
         appointments = [a for a in appointments if a['patient_id'] == patient_filter]
 

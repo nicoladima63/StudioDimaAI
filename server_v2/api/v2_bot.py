@@ -8,6 +8,7 @@ directly from StudioDimaAI without going through n8n UI.
 import os
 import logging
 import sqlite3
+import subprocess
 import requests
 import psycopg2
 import psycopg2.extras
@@ -168,33 +169,56 @@ def get_whatsapp_status():
         return format_response(success=False, error='Evolution API non raggiungibile'), 500
 
 
+def _extract_qr_from_body(data: dict) -> str | None:
+    """Estrae il base64 QR da una risposta Evolution in qualsiasi formato noto."""
+    if not isinstance(data, dict):
+        return None
+    return (data.get('base64')
+            or (data.get('qrcode') or {}).get('base64')
+            or data.get('code')
+            or data.get('qr')
+            or None)
+
+
+def _fetch_qr() -> str | None:
+    """
+    Recupera il QR WhatsApp da Evolution tramite /instance/connect/{instance}.
+    Restituisce il base64 del QR se disponibile, None se non ancora pronto.
+    """
+    headers = _evo_headers()
+    try:
+        r = requests.get(f'{EVOLUTION_BASE_URL}/instance/connect/{EVOLUTION_INSTANCE}',
+                         headers=headers, timeout=10)
+        logger.info(f'Evolution connect/{EVOLUTION_INSTANCE}: status={r.status_code} body={r.text[:400]}')
+        if r.status_code == 200:
+            qr = _extract_qr_from_body(r.json())
+            if qr:
+                return qr
+        else:
+            logger.warning(f'Evolution connect/{EVOLUTION_INSTANCE} returned {r.status_code}: {r.text[:200]}')
+    except Exception as e:
+        logger.warning(f'Evolution connect error: {e}')
+    return None
+
+
 @bot_v2_bp.route('/bot/whatsapp/qr', methods=['GET'])
 @jwt_required()
 def get_whatsapp_qr():
-    """Get QR code for WhatsApp reconnection."""
+    """Genera il QR WhatsApp. Ritorna not_ready=True se Evolution non è ancora pronto."""
     try:
-        r = requests.get(
-            f'{EVOLUTION_BASE_URL}/instance/connect/{EVOLUTION_INSTANCE}',
-            headers=_evo_headers(), timeout=10
-        )
-        data = r.json()
-        logger.info(f'Evolution /connect response: {data}')
-        qr = (data.get('base64')
-              or data.get('qrcode', {}).get('base64')
-              or data.get('code')
-              or data.get('qr'))
+        qr = _fetch_qr()
         if not qr:
-            return format_response(success=False, error=f'QR non disponibile: {data}'), 400
-        return format_response({'qr': qr})
+            return format_response({'qr': None, 'not_ready': True}), 202
+        return format_response({'qr': qr, 'not_ready': False})
     except Exception as e:
         logger.error(f'Error fetching WA QR: {e}')
-        return format_response(success=False, error='Errore recupero QR'), 500
+        return format_response(success=False, error=str(e)), 500
 
 
 @bot_v2_bp.route('/bot/whatsapp/logout', methods=['POST'])
 @jwt_required()
 def logout_whatsapp():
-    """Logout WhatsApp instance (forces QR re-scan)."""
+    """Logout WhatsApp (disconnette il telefono, istanza resta)."""
     try:
         r = requests.delete(
             f'{EVOLUTION_BASE_URL}/instance/logout/{EVOLUTION_INSTANCE}',
@@ -204,6 +228,23 @@ def logout_whatsapp():
     except Exception as e:
         logger.error(f'Error WA logout: {e}')
         return format_response(success=False, error='Errore logout'), 500
+
+
+@bot_v2_bp.route('/bot/whatsapp/instance', methods=['DELETE'])
+@jwt_required()
+def delete_whatsapp_instance():
+    """Elimina l'istanza WhatsApp da Evolution (richiede ricreazione)."""
+    try:
+        r = requests.delete(
+            f'{EVOLUTION_BASE_URL}/instance/delete/{EVOLUTION_INSTANCE}',
+            headers=_evo_headers(), timeout=10
+        )
+        if r.status_code in (200, 204):
+            return format_response({'deleted': True})
+        return format_response(success=False, error=f'Evolution {r.status_code}: {r.text[:200]}'), 400
+    except Exception as e:
+        logger.error(f'Error deleting WA instance: {e}')
+        return format_response(success=False, error=str(e)), 500
 
 
 @bot_v2_bp.route('/bot/conversazioni/<int:conv_id>', methods=['DELETE'])
@@ -589,6 +630,79 @@ def get_last_igienista(db_code: str):
         return format_response(success=False, error='Errore recupero igienista'), 500
 
 
+def _do_confirmation(phone: str, response_val: str, appointment_date: str = '') -> dict:
+    """Logica condivisa tra /bot/appointment-confirmation e /bot/whatsapp-webhook."""
+    phone_suffix = phone[-9:]
+    conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    if appointment_date:
+        cur.execute("""
+            SELECT id, patient_id, patient_name, appointment_date, appointment_time
+            FROM patient_communications
+            WHERE phone LIKE ? AND appointment_date = ? AND stato NOT IN ('confirmed', 'cancelled')
+            ORDER BY created_at DESC LIMIT 1
+        """, ('%' + phone_suffix, appointment_date))
+    else:
+        cur.execute("""
+            SELECT id, patient_id, patient_name, appointment_date, appointment_time
+            FROM patient_communications
+            WHERE phone LIKE ? AND stato NOT IN ('confirmed', 'cancelled')
+            ORDER BY created_at DESC LIMIT 1
+        """, ('%' + phone_suffix,))
+
+    comm = cur.fetchone()
+    comm_id = None
+    patient_id = None
+    patient_name = 'Paziente'
+    ap_date = appointment_date
+    ap_time = ''
+
+    if comm:
+        comm_id = comm['id']
+        patient_id = comm['patient_id']
+        patient_name = comm['patient_name'] or 'Paziente'
+        ap_date = comm['appointment_date']
+        ap_time = comm['appointment_time']
+        cur.execute(
+            "UPDATE patient_communications SET stato = ? WHERE id = ?",
+            (response_val, comm_id)
+        )
+
+    cur.execute("""
+        INSERT INTO appointment_confirmations
+            (patient_id, phone, appointment_date, appointment_time, response, communication_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (patient_id, phone, ap_date, ap_time, response_val, comm_id))
+
+    conn.commit()
+    conn.close()
+
+    if response_val == 'cancelled':
+        try:
+            from app_v2 import push_service
+            if push_service:
+                slot_url = f"/richiami/slot-liberi?data={ap_date}&ora={ap_time}"
+                push_service.send_notification(
+                    user_id=3,  # CristinaB
+                    title="Appuntamento cancellato",
+                    body=f"{patient_name} ha cancellato: {ap_date} ore {ap_time}. Clicca per trovare un sostituto.",
+                    url=slot_url,
+                    urgency='high',
+                )
+        except Exception as e:
+            logger.warning(f"Errore notifica cancellazione: {e}")
+
+    return {
+        'response': response_val,
+        'patient_name': patient_name,
+        'appointment_date': ap_date,
+        'appointment_time': ap_time,
+        'communication_id': comm_id,
+    }
+
+
 @bot_v2_bp.route('/bot/appointment-confirmation', methods=['POST'])
 @_require_bot_key
 def receive_appointment_confirmation():
@@ -611,79 +725,72 @@ def receive_appointment_confirmation():
         return format_response(success=False, error='phone e response (confirmed|cancelled) richiesti'), 400
 
     try:
-        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-
-        # Trova l'ultima comunicazione per questo numero (con o senza data specifica)
-        if appointment_date:
-            cur.execute("""
-                SELECT id, patient_id, patient_name, appointment_date, appointment_time
-                FROM patient_communications
-                WHERE phone LIKE ? AND appointment_date = ? AND stato NOT IN ('confirmed', 'cancelled')
-                ORDER BY created_at DESC LIMIT 1
-            """, ('%' + phone[-9:], appointment_date))
-        else:
-            cur.execute("""
-                SELECT id, patient_id, patient_name, appointment_date, appointment_time
-                FROM patient_communications
-                WHERE phone LIKE ? AND stato NOT IN ('confirmed', 'cancelled')
-                ORDER BY created_at DESC LIMIT 1
-            """, ('%' + phone[-9:],))
-
-        comm = cur.fetchone()
-        comm_id = None
-        patient_id = None
-        patient_name = 'Paziente'
-        ap_date = appointment_date
-        ap_time = ''
-
-        if comm:
-            comm_id = comm['id']
-            patient_id = comm['patient_id']
-            patient_name = comm['patient_name'] or 'Paziente'
-            ap_date = comm['appointment_date']
-            ap_time = comm['appointment_time']
-            cur.execute(
-                "UPDATE patient_communications SET stato = ? WHERE id = ?",
-                (response_val, comm_id)
-            )
-
-        # Inserisce in appointment_confirmations
-        cur.execute("""
-            INSERT INTO appointment_confirmations
-                (patient_id, phone, appointment_date, appointment_time, response, communication_id)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (patient_id, phone, ap_date, ap_time, response_val, comm_id))
-
-        conn.commit()
-        conn.close()
-
-        # Se cancellato: notifica urgente a CristinaB con link ai candidati per lo slot
-        if response_val == 'cancelled':
-            try:
-                from app_v2 import push_service
-                if push_service:
-                    slot_url = f"/richiami/slot-liberi?data={ap_date}&ora={ap_time}"
-                    push_service.send_notification(
-                        user_id=3,  # CristinaB
-                        title="Appuntamento cancellato",
-                        body=f"{patient_name} ha cancellato: {ap_date} ore {ap_time}. Clicca per trovare un sostituto.",
-                        url=slot_url,
-                        urgency='high',
-                    )
-            except Exception as e:
-                logger.warning(f"Errore notifica cancellazione: {e}")
-
-        return format_response({
-            'response': response_val,
-            'patient_name': patient_name,
-            'appointment_date': ap_date,
-            'appointment_time': ap_time,
-            'communication_id': comm_id,
-        })
+        result = _do_confirmation(phone, response_val, appointment_date)
+        return format_response(result)
     except Exception as e:
         logger.error(f"Errore appointment-confirmation: {e}")
+        return format_response(success=False, error=str(e)), 500
+
+
+# ---------------------------------------------------------------------------
+# Testi positivi/negativi riconosciuti nel webhook Evolution
+# ---------------------------------------------------------------------------
+_EVO_POSITIVE = {'SI', 'SÌ', 'SÍ', 'YES', 'OK', 'CONFERMO', 'CONFERMATO', '1'}
+_EVO_NEGATIVE = {'NO', 'CANCELLO', 'ANNULLO', 'ANNULLA', 'DISDICO', 'DISDETTA', 'CANCELLA', '0'}
+
+
+@bot_v2_bp.route('/bot/whatsapp-webhook', methods=['POST'])
+def evolution_webhook():
+    """
+    Riceve eventi da Evolution API (diretto, senza n8n).
+    Accessibile solo da host.docker.internal — nessun JWT richiesto.
+    Gestisce messages.upsert per SI/NO dei pazienti sui reminder.
+    """
+    payload = request.get_json(silent=True) or {}
+    event = payload.get('event', '')
+
+    if event != 'messages.upsert':
+        return format_response({'ignored': True})
+
+    data = payload.get('data', {})
+    key = data.get('key', {})
+
+    if key.get('fromMe'):
+        return format_response({'ignored': True})
+
+    remote_jid = key.get('remoteJid', '')
+    if '@g.us' in remote_jid:
+        return format_response({'ignored': True})
+
+    phone = remote_jid.split('@')[0]
+
+    message = data.get('message', {})
+    text = (
+        message.get('conversation')
+        or (message.get('extendedTextMessage') or {}).get('text')
+        or ''
+    ).strip().upper()
+
+    if not text:
+        return format_response({'ignored': True})
+
+    if text in _EVO_POSITIVE:
+        response_val = 'confirmed'
+    elif text in _EVO_NEGATIVE:
+        response_val = 'cancelled'
+    else:
+        return format_response({'ignored': True, 'reason': 'not a reminder response'})
+
+    ensure_reminder_tables()
+    try:
+        result = _do_confirmation(phone, response_val)
+        if result.get('communication_id'):
+            logger.info(f"WA conferma da {phone}: {response_val} per appuntamento {result.get('appointment_date')}")
+        else:
+            logger.debug(f"WA messaggio da {phone} ({response_val}): nessun reminder in attesa")
+        return format_response(result)
+    except Exception as e:
+        logger.error(f"Errore Evolution webhook: {e}")
         return format_response(success=False, error=str(e)), 500
 
 
@@ -740,4 +847,215 @@ def get_pending_reminder():
 
     except Exception as e:
         logger.error(f"Errore pending-reminder: {e}")
+        return format_response(success=False, error=str(e)), 500
+
+
+# ---------------------------------------------------------------------------
+# Evolution dashboard status
+# ---------------------------------------------------------------------------
+
+@bot_v2_bp.route('/bot/evolution/status', methods=['GET'])
+@jwt_required()
+def get_evolution_dashboard_status():
+    """
+    Stato aggregato del sistema reminder: Docker, Evolution API, WhatsApp, Scheduler.
+    Usato dalla pagina EvolutionSettings nel frontend.
+    """
+    ensure_reminder_tables()
+    status: dict = {
+        'docker_daemon_running': False,   # Docker Desktop aperto e daemon attivo
+        'docker_running': False,          # container studiodima-evolution in esecuzione
+        'evolution_reachable': False,
+        'wa_state': 'unknown',
+        'instance_exists': False,
+        'webhook_url': os.getenv('EVOLUTION_WEBHOOK_URL', ''),
+        'webhook_configured': bool(os.getenv('EVOLUTION_WEBHOOK_URL', '')),
+        'reminder_24h_enabled': False,
+        'reminder_2h_enabled': False,
+        'followup_enabled': False,
+        'recent_communications': [],
+    }
+
+    # 1a. Verifica daemon Docker (docker ps ritorna 0 solo se il daemon risponde)
+    try:
+        daemon_probe = subprocess.run(
+            'docker ps -q', shell=True, capture_output=True, timeout=5
+        )
+        status['docker_daemon_running'] = daemon_probe.returncode == 0
+    except Exception:
+        pass
+
+    # 1b. Verifica container solo se il daemon risponde
+    if status['docker_daemon_running']:
+        try:
+            result = subprocess.run(
+                'docker ps --filter name=studiodima-evolution --filter status=running -q',
+                shell=True, capture_output=True, text=True, timeout=5
+            )
+            status['docker_running'] = bool(result.stdout.strip())
+        except Exception:
+            pass
+
+    # 2. Evolution API raggiungibile (fetchInstances serve solo per questo)
+    try:
+        r = requests.get(
+            f'{EVOLUTION_BASE_URL}/instance/fetchInstances',
+            headers=_evo_headers(), timeout=5
+        )
+        status['evolution_reachable'] = r.status_code < 500
+    except Exception:
+        pass
+
+    # 3. Istanza presente + stato WhatsApp via connectionState
+    # Restituisce 200+state se esiste, 404 se non esiste — più affidabile di parsare fetchInstances
+    if status['evolution_reachable']:
+        try:
+            r = requests.get(
+                f'{EVOLUTION_BASE_URL}/instance/connectionState/{EVOLUTION_INSTANCE}',
+                headers=_evo_headers(), timeout=5
+            )
+            if r.status_code == 200:
+                status['instance_exists'] = True
+                status['wa_state'] = r.json().get('instance', {}).get('state', 'unknown')
+            # 404 = istanza non esiste, instance_exists rimane False
+        except Exception:
+            pass
+
+    # 4. Impostazioni scheduler
+    try:
+        from core.automation_config import get_automation_settings
+        s = get_automation_settings()
+        status['reminder_24h_enabled'] = bool(s.get('appointment_reminder_24h_enabled', False))
+        status['reminder_2h_enabled'] = bool(s.get('appointment_reminder_2h_enabled', True))
+        status['followup_enabled'] = bool(s.get('appointment_followup_enabled', False))
+    except Exception:
+        pass
+
+    # 5. Ultime comunicazioni
+    try:
+        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT id, patient_name, phone, channel, type, stato,
+                   appointment_date, appointment_time, created_at
+            FROM patient_communications
+            ORDER BY created_at DESC LIMIT 10
+        """)
+        status['recent_communications'] = [dict(r) for r in cur.fetchall()]
+        conn.close()
+    except Exception:
+        pass
+
+    return format_response(status)
+
+
+def _compose_dir() -> 'Path | None':
+    """Ritorna la directory del docker-compose.yml o None se non trovato."""
+    from pathlib import Path
+    p = Path(__file__).parent.parent.parent / 'docker-compose.yml'
+    return p.parent if p.exists() else None
+
+
+def _run_docker(cmd: str, timeout: int = 60) -> tuple[bool, str]:
+    """Esegue un comando docker via shell e ritorna (ok, output)."""
+    cwd = _compose_dir()
+    if cwd is None:
+        return False, 'docker-compose.yml non trovato nella root del progetto'
+    try:
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True,
+            timeout=timeout, cwd=str(cwd)
+        )
+        output = (result.stdout or result.stderr or '').strip()
+        return result.returncode == 0, output
+    except subprocess.TimeoutExpired:
+        return False, f'Timeout ({timeout}s): operazione non completata'
+    except Exception as e:
+        return False, str(e)
+
+
+_DOCKER_DESKTOP_PATHS = [
+    r'C:\Program Files\Docker\Docker\Docker Desktop.exe',
+    os.path.expandvars(r'%LOCALAPPDATA%\Programs\Docker\Docker\Docker Desktop.exe'),
+    os.path.expandvars(r'%PROGRAMFILES%\Docker\Docker\Docker Desktop.exe'),
+]
+
+
+@bot_v2_bp.route('/bot/evolution/start-docker-desktop', methods=['POST'])
+@jwt_required()
+def start_docker_desktop():
+    """Lancia Docker Desktop.exe (non bloccante). L'utente deve attendere ~30s poi ricaricare."""
+    from pathlib import Path as _Path
+    for path in _DOCKER_DESKTOP_PATHS:
+        if _Path(path).exists():
+            try:
+                subprocess.Popen([path])
+                return format_response({'launched': True, 'path': path})
+            except Exception as e:
+                return format_response(success=False, error=f'Impossibile avviare Docker Desktop: {e}'), 500
+    return format_response(success=False, error='Docker Desktop non trovato nei percorsi standard'), 404
+
+
+@bot_v2_bp.route('/bot/evolution/start', methods=['POST'])
+@jwt_required()
+def start_evolution():
+    """Avvia il container Evolution via docker compose up -d."""
+    ok, output = _run_docker('docker compose up -d', timeout=120)
+    if ok:
+        return format_response({'started': True, 'output': output})
+    logger.error(f'Evolution start fallito: {output}')
+    return format_response(success=False, error=output), 500
+
+
+@bot_v2_bp.route('/bot/evolution/stop', methods=['POST'])
+@jwt_required()
+def stop_evolution():
+    """Ferma il container Evolution via docker compose stop."""
+    ok, output = _run_docker('docker compose stop evolution', timeout=30)
+    if ok:
+        return format_response({'stopped': True, 'output': output})
+    logger.error(f'Evolution stop fallito: {output}')
+    return format_response(success=False, error=output), 500
+
+
+@bot_v2_bp.route('/bot/evolution/create-instance', methods=['POST'])
+@jwt_required()
+def create_evolution_instance():
+    """Crea l'istanza WhatsApp su Evolution API (da chiamare una volta sola)."""
+    try:
+        r = requests.post(
+            f'{EVOLUTION_BASE_URL}/instance/create',
+            headers=_evo_headers(),
+            json={
+                'instanceName': EVOLUTION_INSTANCE,
+                'integration': 'WHATSAPP-BAILEYS',
+                'qrcode': True,
+            },
+            timeout=10
+        )
+        if r.status_code in (200, 201):
+            body = r.json() if r.text else {}
+            # Evolution restituisce il QR direttamente nella risposta di creazione quando qrcode: True
+            qr_section = body.get('qrcode') or {}
+            qr_data = (qr_section.get('base64')
+                       or body.get('base64')
+                       or qr_section.get('code')
+                       or body.get('code')
+                       or None)
+            logger.debug(f'create-instance response keys: {list(body.keys())} qr_found={bool(qr_data)}')
+            return format_response({
+                'created': True,
+                'already_exists': False,
+                'instance': EVOLUTION_INSTANCE,
+                'qr': qr_data,
+            })
+        if r.status_code == 403:
+            body = r.json()
+            msgs = body.get('response', {}).get('message', [])
+            if any('already in use' in m for m in msgs):
+                return format_response({'created': False, 'already_exists': True, 'instance': EVOLUTION_INSTANCE})
+        return format_response(success=False, error=f'Evolution API {r.status_code}: {r.text[:200]}'), 400
+    except Exception as e:
+        logger.error(f'Errore creazione istanza Evolution: {e}')
         return format_response(success=False, error=str(e)), 500

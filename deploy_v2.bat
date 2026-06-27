@@ -276,6 +276,62 @@ echo   [OK] .env aggiornato (da server_v2).
 echo   [OK] .env aggiornato (da server_v2). >> "%LOGFILE%"
 
 :: ============================================================================
+:: [3.5/7] File Docker (docker-compose.yml + .env root)
+:: ============================================================================
+echo [3.5/7] Copia file Docker...
+echo [3.5/7] Copia file Docker... >> "%LOGFILE%"
+
+if exist "docker-compose.yml" (
+    copy "docker-compose.yml" "%DEPLOY_PATH%\docker-compose.yml" /Y >nul 2>&1
+    if errorlevel 1 (
+        echo   [ERRORE] Copia docker-compose.yml fallita.
+        echo   [ERRORE] Copia docker-compose.yml fallita. >> "%LOGFILE%"
+    ) else (
+        echo   [OK] docker-compose.yml aggiornato.
+        echo   [OK] docker-compose.yml aggiornato. >> "%LOGFILE%"
+    )
+) else (
+    echo   [SKIP] docker-compose.yml non trovato nella root.
+    echo   [SKIP] docker-compose.yml non trovato. >> "%LOGFILE%"
+)
+
+if exist ".env" (
+    copy ".env" "%DEPLOY_PATH%\.env.docker" /Y >nul 2>&1
+    if errorlevel 1 (
+        echo   [ERRORE] Copia .env Docker fallita.
+        echo   [ERRORE] Copia .env Docker fallita. >> "%LOGFILE%"
+    ) else (
+        echo   [OK] .env.docker aggiornato - EVOLUTION_API_KEY, WEBHOOK_URL, DB_PASSWORD.
+        echo   [OK] .env.docker aggiornato. >> "%LOGFILE%"
+    )
+) else (
+    echo   [SKIP] .env root non trovato.
+    echo   [SKIP] .env root non trovato. >> "%LOGFILE%"
+)
+
+echo   [INFO] Generazione restart_docker.bat su server...
+echo   [INFO] Generazione restart_docker.bat su server... >> "%LOGFILE%"
+(
+echo @echo off
+echo cd /d "%%~dp0"
+echo echo.
+echo echo ==========================================
+echo echo  STUDIODIMA - Restart container Docker
+echo echo ==========================================
+echo echo.
+echo echo [1/2] Fermo i container...
+echo docker-compose --env-file .env.docker down
+echo echo.
+echo echo [2/2] Avvio i container...
+echo docker-compose --env-file .env.docker up -d
+echo echo.
+echo echo Fatto. Premi un tasto per chiudere.
+echo pause
+) > "%DEPLOY_PATH%\restart_docker.bat"
+echo   [OK] restart_docker.bat generato.
+echo   [OK] restart_docker.bat generato. >> "%LOGFILE%"
+
+:: ============================================================================
 :: [4/7] Build Frontend React V2
 :: ============================================================================
 echo [4/7] Build frontend React V2...
@@ -464,6 +520,14 @@ echo.
 echo Server: %DEPLOY_PATH%
 echo Backup: %BACKUP_DIR%
 echo Log: %LOGFILE%
+echo.
+echo ----------------------------------------
+echo  PROSSIMI PASSI SU SERVERDIMA:
+echo ----------------------------------------
+echo  1. Riavvia il server Flask (se non si riavvia da solo)
+echo  2. Se hai modificato docker-compose.yml:
+echo     esegui  restart_docker.bat  nella cartella deployata
+echo ----------------------------------------
 echo.
 echo DEPLOYMENT COMPLETATO CON SUCCESSO! >> "%LOGFILE%"
 pause

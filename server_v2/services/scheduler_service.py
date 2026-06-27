@@ -370,19 +370,28 @@ class SchedulerService:
                 setattr(self, attr, None)
 
         if enabled_24h:
-            def job_24h():
+            def job_24h_morning():
                 from services.appointment_reminder_service import run_reminders
                 try:
-                    run_reminders('24h')
+                    run_reminders('24h', slot='morning')
                 except Exception as e:
-                    logger.error(f"[REMINDER 24h] Errore: {e}")
+                    logger.error(f"[REMINDER 24h morning] Errore: {e}")
 
+            def job_24h_afternoon():
+                from services.appointment_reminder_service import run_reminders
+                try:
+                    run_reminders('24h', slot='afternoon')
+                except Exception as e:
+                    logger.error(f"[REMINDER 24h afternoon] Errore: {e}")
+
+            # ore 8: appuntamenti di domani mattina (< 13:00)
             self._current_reminder_24h_morning_job = self.scheduler.add_job(
-                job_24h, CronTrigger(hour=8, minute=0),
+                job_24h_morning, CronTrigger(hour=8, minute=0),
                 id='appt_reminder_24h_morning', replace_existing=True
             )
+            # ore 14: appuntamenti di domani pomeriggio (>= 13:00)
             self._current_reminder_24h_afternoon_job = self.scheduler.add_job(
-                job_24h, CronTrigger(hour=14, minute=0),
+                job_24h_afternoon, CronTrigger(hour=14, minute=0),
                 id='appt_reminder_24h_afternoon', replace_existing=True
             )
 
@@ -394,9 +403,9 @@ class SchedulerService:
                 except Exception as e:
                     logger.error(f"[REMINDER 2h] Errore: {e}")
 
-            # Ogni 30 min dalle 7 alle 20
+            # Ogni 30 min dalle 7 alle 19:30 (copre appuntamenti fino alle ~21:00)
             self._current_reminder_2h_job = self.scheduler.add_job(
-                job_2h, CronTrigger(hour='7-20', minute='0,30'),
+                job_2h, CronTrigger(hour='7-19', minute='0,30'),
                 id='appt_reminder_2h', replace_existing=True
             )
 

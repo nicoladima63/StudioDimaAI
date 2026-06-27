@@ -105,16 +105,19 @@ class MonitoringService:
         
         self.saved_configs: Dict[str, MonitorConfig] = {}
         self.logs: List[Dict[str, Any]] = []
+
+        # Deve essere inizializzato PRIMA di _load_saved_configs, che può avviare
+        # monitor con auto_start e innescare il file watcher su thread separato.
+        self._dbf_filename_to_logical_name = {
+            info['file'].split('.')[0].lower(): logical_name
+            for logical_name, info in DBF_TABLES.items()
+        }
+
         print("DEBUG: Loading settings...")
         self.settings = self._load_settings()
         print("DEBUG: Loading saved configs...")
         self._load_saved_configs()
         print("DEBUG: MonitoringService.__init__ finished")
-
-        self._dbf_filename_to_logical_name = {
-            info['file'].split('.')[0].lower(): logical_name
-            for logical_name, info in DBF_TABLES.items()
-        }
     
     
     def _is_path_reachable(self, path_str: str) -> bool:
