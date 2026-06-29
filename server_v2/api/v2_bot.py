@@ -45,10 +45,6 @@ def _evo_headers():
 
 BOT_SERVICES = [
     {'id': 'whatsapp', 'name': 'WhatsApp Bot', 'url': 'https://wa.valorian.it'},
-    {'id': 'n8n',      'name': 'n8n Workflows', 'url': 'https://n8n.valorian.it'},
-    {'id': 'chat',     'name': 'Chat LLM',      'url': 'https://chat.valorian.it'},
-    {'id': 'ntfy',     'name': 'Notifiche',      'url': 'https://ntfy.valorian.it'},
-    {'id': 'status',   'name': 'Status',         'url': 'https://status.valorian.it'},
 ]
 
 

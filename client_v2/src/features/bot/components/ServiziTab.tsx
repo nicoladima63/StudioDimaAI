@@ -1,47 +1,35 @@
 import React, { useEffect, useState } from 'react'
 import {
-  CRow, CCol, CCard, CCardBody, CBadge, CButton, CSpinner,
+  CCard, CCardBody, CButton, CBadge, CSpinner,
   CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter,
+  CRow, CCol,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilReload, cilExternalLink, cilQrCode, cilLockLocked } from '@coreui/icons'
-import type { BotService, WaState } from '../types/bot.types'
+import { cilReload, cilQrCode, cilLockLocked, cilCheckCircle, cilXCircle } from '@coreui/icons'
+import type { WaState } from '../types/bot.types'
 import botService from '../services/botService'
 
-const ICONS: Record<string, string> = {
-  whatsapp: '📱',
-  n8n:      '⚙️',
-  chat:     '💬',
-  ntfy:     '🔔',
-  status:   '📊',
-}
-
-const WA_STATE_BADGE: Record<WaState, { color: string; label: string }> = {
+const WA_BADGE: Record<WaState, { color: string; label: string }> = {
   open:       { color: 'success', label: 'CONNESSO' },
-  connecting: { color: 'warning', label: 'CONNESSIONE...' },
+  connecting: { color: 'warning', label: 'CONNESSIONE IN CORSO...' },
   close:      { color: 'danger',  label: 'DISCONNESSO' },
   unknown:    { color: 'secondary', label: 'SCONOSCIUTO' },
 }
 
 const ServiziTab: React.FC = () => {
-  const [services, setServices] = useState<BotService[]>([])
-  const [loading, setLoading] = useState(true)
-  const [waState, setWaState] = useState<WaState>('unknown')
-  const [qrCode, setQrCode] = useState<string | null>(null)
-  const [qrLoading, setQrLoading] = useState(false)
+  const [waState, setWaState]       = useState<WaState>('unknown')
+  const [loading, setLoading]       = useState(true)
+  const [qrCode, setQrCode]         = useState<string | null>(null)
+  const [qrLoading, setQrLoading]   = useState(false)
   const [showQrModal, setShowQrModal] = useState(false)
 
-  const loadStatus = async () => {
+  const load = async () => {
     setLoading(true)
     try {
-      const [svcRes, waRes] = await Promise.all([
-        botService.apiGetStatus(),
-        botService.apiGetWaStatus(),
-      ])
-      if (svcRes.success) setServices(svcRes.data.services)
-      if (waRes.success) setWaState(waRes.data.state)
+      const res = await botService.apiGetWaStatus()
+      if (res.success) setWaState(res.data.state)
     } catch {
-      // silenzioso
+      setWaState('unknown')
     } finally {
       setLoading(false)
     }
@@ -50,11 +38,10 @@ const ServiziTab: React.FC = () => {
   const handleShowQr = async () => {
     setQrLoading(true)
     setShowQrModal(true)
+    setQrCode(null)
     try {
       const res = await botService.apiGetWaQr()
       if (res.success) setQrCode(res.data.qr)
-    } catch {
-      setQrCode(null)
     } finally {
       setQrLoading(false)
     }
@@ -66,81 +53,68 @@ const ServiziTab: React.FC = () => {
     setWaState('close')
   }
 
-  useEffect(() => { loadStatus() }, [])
+  useEffect(() => { load() }, [])
 
-  if (loading) return (
-    <div className="d-flex justify-content-center py-5">
-      <CSpinner color="primary" />
-    </div>
-  )
-
-  const waBadge = WA_STATE_BADGE[waState]
+  const badge = WA_BADGE[waState]
 
   return (
     <>
-      <div className="d-flex justify-content-end mb-3">
-        <CButton color="secondary" size="sm" onClick={loadStatus} disabled={loading}>
-          <CIcon icon={cilReload} className="me-1" />
-          Aggiorna stato
-        </CButton>
-      </div>
+      <CRow className="g-3">
+        {/* Card stato WhatsApp */}
+        <CCol md={6} lg={4}>
+          <CCard className="h-100 shadow-sm">
+            <CCardBody>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="mb-0">WhatsApp Evolution</h5>
+                <CBadge color={badge.color} shape="rounded" className="px-3 py-2">
+                  {badge.label}
+                </CBadge>
+              </div>
 
-      <CRow className="g-4">
-        {services.map((svc) => (
-          <CCol md={6} lg={4} xl={2} key={svc.id}>
-            <CCard className="h-100 shadow-sm border-top-primary border-top-3">
-              <CCardBody className="d-flex flex-column">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="mb-0">
-                    <span className="me-2">{ICONS[svc.id] ?? '🔗'}</span>
-                    {svc.name}
-                  </h5>
-                  <CBadge color={svc.online ? 'success' : 'danger'} shape="rounded" className="p-2">
-                    {svc.online ? 'ONLINE' : 'OFFLINE'}
-                  </CBadge>
-                </div>
+              <p className="small text-muted mb-1">
+                Istanza: <code>{import.meta.env.VITE_EVOLUTION_INSTANCE ?? 'studio-instance'}</code>
+              </p>
+              <p className="small text-muted mb-3">
+                URL: <code>https://wa.valorian.it</code>
+              </p>
 
-                <p className="small text-muted font-monospace mb-0">{svc.url}</p>
+              <div className="d-flex gap-2 mt-auto">
+                <CButton color="secondary" size="sm" onClick={load} disabled={loading}>
+                  <CIcon icon={cilReload} className="me-1" />
+                  {loading ? <CSpinner size="sm" /> : 'Aggiorna'}
+                </CButton>
 
-                {/* Pannello extra solo per la card WhatsApp */}
-                {svc.id === 'whatsapp' && (
-                  <div className="mt-3 p-2 bg-light rounded border small">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-muted">Connessione WA:</span>
-                      <CBadge color={waBadge.color} shape="rounded">
-                        {waBadge.label}
-                      </CBadge>
-                    </div>
-                  </div>
+                {waState !== 'open' && (
+                  <CButton color="success" size="sm" onClick={handleShowQr}>
+                    <CIcon icon={cilQrCode} className="me-1" />
+                    Scansiona QR
+                  </CButton>
                 )}
 
-                <div className="flex-grow-1" />
+                {waState === 'open' && (
+                  <CButton color="danger" variant="outline" size="sm" onClick={handleLogout}>
+                    <CIcon icon={cilLockLocked} className="me-1" />
+                    Disconnetti
+                  </CButton>
+                )}
+              </div>
+            </CCardBody>
+          </CCard>
+        </CCol>
 
-                <div className="d-flex justify-content-between align-items-center pt-3 border-top">
-                  <div className="d-flex gap-1">
-                    {svc.id === 'whatsapp' && waState !== 'open' && (
-                      <CButton color="success" variant="ghost" size="sm" onClick={handleShowQr} title="Mostra QR">
-                        <CIcon icon={cilQrCode} />
-                      </CButton>
-                    )}
-                    {svc.id === 'whatsapp' && waState === 'open' && (
-                      <CButton color="danger" variant="ghost" size="sm" onClick={handleLogout} title="Disconnetti">
-                        <CIcon icon={cilLockLocked} />
-                      </CButton>
-                    )}
-                  </div>
-                  <a href={svc.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-primary btn-sm">
-                    <CIcon icon={cilExternalLink} className="me-1" />
-                    Apri
-                  </a>
-                </div>
-              </CCardBody>
-            </CCard>
-          </CCol>
-        ))}
+        {/* Card riepilogo stato sistema */}
+        <CCol md={6} lg={4}>
+          <CCard className="h-100 shadow-sm">
+            <CCardBody>
+              <h5 className="mb-3">Stato sistema</h5>
+              <StatusRow label="Evolution API" ok={waState !== 'unknown'} />
+              <StatusRow label="Cloudflare Tunnel" ok={window.location.protocol === 'https:'} />
+              <StatusRow label="Push Notifications" ok={window.location.protocol === 'https:'} note={window.location.protocol !== 'https:' ? 'Richiede HTTPS' : undefined} />
+            </CCardBody>
+          </CCard>
+        </CCol>
       </CRow>
 
-      {/* QR Modal */}
       <CModal visible={showQrModal} onClose={() => setShowQrModal(false)}>
         <CModalHeader>
           <CModalTitle>Scansiona QR WhatsApp</CModalTitle>
@@ -155,10 +129,10 @@ const ServiziTab: React.FC = () => {
             />
           )}
           {!qrLoading && !qrCode && (
-            <p className="text-muted">QR non disponibile. L'istanza potrebbe essere già connessa.</p>
+            <p className="text-muted">QR non disponibile — istanza gia connessa o Evolution non raggiungibile.</p>
           )}
           <p className="text-muted small mt-2">
-            Apri WhatsApp → Impostazioni → Dispositivi collegati → Collega dispositivo
+            WhatsApp → Impostazioni → Dispositivi collegati → Collega dispositivo
           </p>
         </CModalBody>
         <CModalFooter>
@@ -172,5 +146,12 @@ const ServiziTab: React.FC = () => {
     </>
   )
 }
+
+const StatusRow: React.FC<{ label: string; ok: boolean; note?: string }> = ({ label, ok, note }) => (
+  <div className="d-flex align-items-center justify-content-between mb-2">
+    <span className="small">{label}{note && <span className="text-muted ms-1">({note})</span>}</span>
+    <CIcon icon={ok ? cilCheckCircle : cilXCircle} className={ok ? 'text-success' : 'text-danger'} />
+  </div>
+)
 
 export default ServiziTab

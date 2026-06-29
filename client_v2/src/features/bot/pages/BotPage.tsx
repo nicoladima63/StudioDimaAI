@@ -2,8 +2,7 @@ import React, { useState } from 'react'
 import { CNav, CNavItem, CNavLink, CTabContent, CTabPane, CToast, CToastBody, CToaster } from '@coreui/react'
 import PageLayout from '@/components/layout/PageLayout'
 import ServiziTab from '../components/ServiziTab'
-import StudioInfoTab from '../components/StudioInfoTab'
-import ConversazioniTab from '../components/ConversazioniTab'
+import SimulazioneTab from '../components/SimulazioneTab'
 import ReminderRepliesTab from '../components/ReminderRepliesTab'
 import StoricoComunicazioniTab from '../components/StoricoComunicazioniTab'
 
@@ -21,6 +20,13 @@ const COLOR: Record<ToastState, string> = {
   error: 'danger',
 }
 
+const TABS = [
+  { label: 'WhatsApp' },
+  { label: 'Simulazione' },
+  { label: 'Risposte Reminder' },
+  { label: 'Storico Invii' },
+]
+
 const BotPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0)
   const [toasts, setToasts] = useState<ToastMsg[]>([])
@@ -36,31 +42,13 @@ const BotPage: React.FC = () => {
       <PageLayout.Header title="Bot WhatsApp" />
       <PageLayout.ContentBody>
         <CNav variant="tabs" className="mb-3">
-          <CNavItem>
-            <CNavLink active={activeTab === 0} onClick={() => setActiveTab(0)} style={{ cursor: 'pointer' }}>
-              Servizi
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink active={activeTab === 1} onClick={() => setActiveTab(1)} style={{ cursor: 'pointer' }}>
-              Studio Info
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink active={activeTab === 2} onClick={() => setActiveTab(2)} style={{ cursor: 'pointer' }}>
-              Conversazioni
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink active={activeTab === 3} onClick={() => setActiveTab(3)} style={{ cursor: 'pointer' }}>
-              Risposte Reminder
-            </CNavLink>
-          </CNavItem>
-          <CNavItem>
-            <CNavLink active={activeTab === 4} onClick={() => setActiveTab(4)} style={{ cursor: 'pointer' }}>
-              Storico Invii
-            </CNavLink>
-          </CNavItem>
+          {TABS.map((tab, i) => (
+            <CNavItem key={i}>
+              <CNavLink active={activeTab === i} onClick={() => setActiveTab(i)} style={{ cursor: 'pointer' }}>
+                {tab.label}
+              </CNavLink>
+            </CNavItem>
+          ))}
         </CNav>
 
         <CTabContent>
@@ -68,16 +56,13 @@ const BotPage: React.FC = () => {
             <ServiziTab />
           </CTabPane>
           <CTabPane visible={activeTab === 1}>
-            {activeTab === 1 && <StudioInfoTab onToast={showToast} />}
+            {activeTab === 1 && <SimulazioneTab />}
           </CTabPane>
           <CTabPane visible={activeTab === 2}>
-            {activeTab === 2 && <ConversazioniTab />}
+            {activeTab === 2 && <ReminderRepliesTab />}
           </CTabPane>
           <CTabPane visible={activeTab === 3}>
-            {activeTab === 3 && <ReminderRepliesTab />}
-          </CTabPane>
-          <CTabPane visible={activeTab === 4}>
-            {activeTab === 4 && <StoricoComunicazioniTab />}
+            {activeTab === 3 && <StoricoComunicazioniTab />}
           </CTabPane>
         </CTabContent>
       </PageLayout.ContentBody>
