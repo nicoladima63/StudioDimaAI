@@ -169,7 +169,11 @@ def ensure_evolution_running():
     Avvia Evolution API via docker compose se non e gia in esecuzione.
     Chiamato all'avvio del server. Silenzioso se Docker non e disponibile.
     """
-    compose_file = Path(__file__).parent.parent / 'docker-compose.yml'
+    # In dev: server_v2/../docker-compose.yml; in prod: stessa dir di run_v2.py
+    _here = Path(__file__).parent
+    compose_file = _here.parent / 'docker-compose.yml'
+    if not compose_file.exists():
+        compose_file = _here / 'docker-compose.yml'
     if not compose_file.exists():
         return
 
