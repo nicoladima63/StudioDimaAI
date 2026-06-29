@@ -10,8 +10,6 @@ import logging
 import sqlite3
 import subprocess
 import requests
-import psycopg2
-import psycopg2.extras
 from datetime import datetime, timedelta, timezone, time as dtime
 from flask import Blueprint, request, g
 from flask_jwt_extended import jwt_required
@@ -19,7 +17,9 @@ from functools import wraps
 
 from app_v2 import format_response
 from core.paths import STUDIO_DIMA_DB_PATH
-from core.reminder_db import ensure_reminder_tables, get_bot_db_conn
+from core.reminder_db import ensure_reminder_tables
+
+_BOT_DB_UNAVAILABLE = 'Bot database non disponibile (dentalai non attivo)'
 
 logger = logging.getLogger(__name__)
 
@@ -71,85 +71,25 @@ def get_bot_status():
 @bot_v2_bp.route('/bot/studio-info', methods=['GET'])
 @jwt_required()
 def get_studio_info():
-    """Get all key/value pairs from studiobot_studio_info."""
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute('SELECT chiave, valore FROM studiobot_studio_info')
-                rows = cur.fetchall()
-        conn.close()
-        return format_response({'items': [dict(r) for r in rows]})
-    except Exception as e:
-        logger.error(f'Error fetching studio_info: {e}')
-        return format_response(success=False, error='Impossibile connettersi al database del bot'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 @bot_v2_bp.route('/bot/studio-info', methods=['POST'])
 @jwt_required()
 def create_studio_info():
-    """Create a new key in studiobot_studio_info."""
-    data = request.get_json() or {}
-    chiave = (data.get('chiave') or '').strip()
-    valore = (data.get('valore') or '').strip()
-    if not chiave:
-        return format_response(success=False, error='chiave obbligatoria'), 400
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    'INSERT INTO studiobot_studio_info (chiave, valore) VALUES (%s, %s)',
-                    (chiave, valore)
-                )
-        conn.close()
-        return format_response({'chiave': chiave, 'valore': valore})
-    except psycopg2.errors.UniqueViolation:
-        return format_response(success=False, error='Chiave gia esistente'), 409
-    except Exception as e:
-        logger.error(f'Error creating studio_info: {e}')
-        return format_response(success=False, error='Errore salvataggio'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 @bot_v2_bp.route('/bot/studio-info/<chiave>', methods=['PUT'])
 @jwt_required()
 def update_studio_info(chiave: str):
-    """Update value for a key in studiobot_studio_info."""
-    data = request.get_json() or {}
-    valore = data.get('valore', '')
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    'UPDATE studiobot_studio_info SET valore = %s WHERE chiave = %s',
-                    (valore, chiave)
-                )
-                if cur.rowcount == 0:
-                    return format_response(success=False, error='Chiave non trovata'), 404
-        conn.close()
-        return format_response({'chiave': chiave, 'valore': valore})
-    except Exception as e:
-        logger.error(f'Error updating studio_info {chiave}: {e}')
-        return format_response(success=False, error='Errore aggiornamento'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 @bot_v2_bp.route('/bot/studio-info/<chiave>', methods=['DELETE'])
 @jwt_required()
 def delete_studio_info(chiave: str):
-    """Delete a key from studiobot_studio_info."""
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute('DELETE FROM studiobot_studio_info WHERE chiave = %s', (chiave,))
-                if cur.rowcount == 0:
-                    return format_response(success=False, error='Chiave non trovata'), 404
-        conn.close()
-        return format_response({'deleted': chiave})
-    except Exception as e:
-        logger.error(f'Error deleting studio_info {chiave}: {e}')
-        return format_response(success=False, error='Errore eliminazione'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 @bot_v2_bp.route('/bot/whatsapp/status', methods=['GET'])
@@ -250,21 +190,7 @@ def delete_whatsapp_instance():
 @bot_v2_bp.route('/bot/conversazioni/<int:conv_id>', methods=['DELETE'])
 @jwt_required()
 def delete_conversazione(conv_id: int):
-    """Delete a conversation and all its messages."""
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor() as cur:
-                cur.execute('DELETE FROM studiobot_escalazioni WHERE conversazione_id = %s', (conv_id,))
-                cur.execute('DELETE FROM studiobot_messaggi WHERE conversazione_id = %s', (conv_id,))
-                cur.execute('DELETE FROM studiobot_conversazioni WHERE id = %s', (conv_id,))
-                if cur.rowcount == 0:
-                    return format_response(success=False, error='Conversazione non trovata'), 404
-        conn.close()
-        return format_response({'deleted': conv_id})
-    except Exception as e:
-        logger.error(f'Error deleting conversazione {conv_id}: {e}')
-        return format_response(success=False, error='Errore eliminazione'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 @bot_v2_bp.route('/bot/paziente-by-phone', methods=['GET'])
@@ -290,53 +216,13 @@ def get_paziente_by_phone():
 @bot_v2_bp.route('/bot/conversazioni', methods=['GET'])
 @jwt_required()
 def get_conversazioni():
-    """List conversations with patient info, paginated."""
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 20))
-    offset = (page - 1) * per_page
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute('SELECT COUNT(*) FROM studiobot_conversazioni')
-                total = cur.fetchone()['count']
-                cur.execute('''
-                    SELECT c.id, c.iniziata_at, c.ultima_attivita, c.aperta,
-                           c.escalata_at, c.motivo_escalation,
-                           p.wa_nome, p.wa_jid, p.db_panome
-                    FROM studiobot_conversazioni c
-                    JOIN studiobot_pazienti p ON p.id = c.paziente_id
-                    ORDER BY c.ultima_attivita DESC
-                    LIMIT %s OFFSET %s
-                ''', (per_page, offset))
-                rows = [dict(r) for r in cur.fetchall()]
-        conn.close()
-        return format_response({'conversazioni': rows, 'total': total, 'page': page, 'per_page': per_page})
-    except Exception as e:
-        logger.error(f'Error fetching conversazioni: {e}')
-        return format_response(success=False, error='Errore recupero conversazioni'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 @bot_v2_bp.route('/bot/conversazioni/<int:conv_id>/messaggi', methods=['GET'])
 @jwt_required()
 def get_messaggi(conv_id: int):
-    """Get all messages for a conversation."""
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute('''
-                    SELECT id, ruolo, contenuto, classificazione, created_at
-                    FROM studiobot_messaggi
-                    WHERE conversazione_id = %s
-                    ORDER BY created_at ASC
-                ''', (conv_id,))
-                rows = [dict(r) for r in cur.fetchall()]
-        conn.close()
-        return format_response({'messaggi': rows})
-    except Exception as e:
-        logger.error(f'Error fetching messaggi for conv {conv_id}: {e}')
-        return format_response(success=False, error='Errore recupero messaggi'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 # ---------------------------------------------------------------------------
@@ -529,20 +415,7 @@ def get_available_slots_visita():
 @bot_v2_bp.route('/bot/triage-config', methods=['GET'])
 @_require_bot_key
 def get_triage_config():
-    """Return triage keywords and ordered questions from DB."""
-    try:
-        conn = get_bot_db_conn()
-        with conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute("SELECT keyword FROM studiobot_triage_keywords WHERE attivo = true ORDER BY keyword")
-                keywords = [r['keyword'] for r in cur.fetchall()]
-                cur.execute("SELECT id, domanda, ordine, urgency_if_yes FROM studiobot_triage_domande WHERE attivo = true ORDER BY ordine")
-                domande = [dict(r) for r in cur.fetchall()]
-        conn.close()
-        return format_response({'keywords': keywords, 'domande': domande})
-    except Exception as e:
-        logger.error(f'Error fetching triage config: {e}')
-        return format_response(success=False, error='Errore recupero triage config'), 500
+    return format_response(success=False, error=_BOT_DB_UNAVAILABLE, state='warning'), 503
 
 
 # MEDICI da constants_v2: 5=Anet, 2=Lara
