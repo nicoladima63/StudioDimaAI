@@ -15,7 +15,7 @@ import { cilReload, cilX } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 
 import { AppSidebarNav } from './AppSidebarNav'
-import navigation from './_nav.02'
+import navigation from './_nav'
 import adminService from '@/features/admin/services/adminService'
 import type { BuildInfo } from '@/features/admin/services/adminService'
 

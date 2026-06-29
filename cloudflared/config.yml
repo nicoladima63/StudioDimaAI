@@ -2,9 +2,9 @@ tunnel: 0d1c9be7-29ee-4256-866e-c8a366056cf3
 credentials-file: /etc/cloudflared/credentials.json
 
 ingress:
-  # Flask su serverdima porta 5001 — serve sia frontend (static/) che API (/api/v2)
+  # nginx su serverdima porta 8000 — serve frontend e proxia /api a Flask:5001
   - hostname: app.valorian.it
-    service: http://host.docker.internal:5001
+    service: http://host.docker.internal:8000
 
   # Evolution API WhatsApp (container in questo stesso docker-compose)
   - hostname: wa.valorian.it
