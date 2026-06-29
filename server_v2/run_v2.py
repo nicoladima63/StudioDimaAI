@@ -204,10 +204,13 @@ def ensure_evolution_running():
 
     # Avvia con docker compose in background — non bloccante.
     # La prima volta scarica l'immagine (~200MB), il server parte comunque subito.
+    # Usa --env-file .env.docker se presente (prod), altrimenti docker compose legge .env (dev).
+    env_docker = compose_file.parent / '.env.docker'
+    env_flag = f'--env-file .env.docker ' if env_docker.exists() else ''
     print("Evolution API: avvio container in background...")
     try:
         subprocess.Popen(
-            'docker compose up -d',
+            f'docker compose {env_flag}up -d',
             shell=True,
             cwd=str(compose_file.parent),
             stdout=subprocess.DEVNULL,
