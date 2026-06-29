@@ -1,11 +1,9 @@
 """
-SQLite schema e connessione PostgreSQL bot per reminder / conferme appuntamenti.
+SQLite schema e helpers per reminder / conferme appuntamenti.
 """
 
 import logging
-import os
 import sqlite3
-import time
 from pathlib import Path
 
 from core.paths import STUDIO_DIMA_DB_PATH
@@ -13,7 +11,6 @@ from core.paths import STUDIO_DIMA_DB_PATH
 logger = logging.getLogger(__name__)
 
 _TABLES_ENSURED = False
-_bot_db_cooldown_until = 0.0
 
 _REMINDER_SCHEMA_SQL = """
     CREATE TABLE IF NOT EXISTS patient_communications (
@@ -149,42 +146,3 @@ def is_appointment_confirmed(
         return False
 
 
-def get_bot_db_conn():
-    """Connessione PostgreSQL studiobot con host primario + fallback e cooldown su errore."""
-    import psycopg2
-
-    global _bot_db_cooldown_until
-    if time.time() < _bot_db_cooldown_until:
-        raise psycopg2.OperationalError("BOT DB in cooldown (connessione recente fallita)")
-
-    hosts: list[str] = []
-    for key in ("BOT_DB_HOST", "BOT_DB_HOST_FALLBACK"):
-        host = os.getenv(key, "").strip()
-        if host and host not in hosts:
-            hosts.append(host)
-    if not hosts:
-        hosts.append("127.0.0.1")
-
-    port = int(os.getenv("BOT_DB_PORT", "5432"))
-    database = os.getenv("BOT_DB_NAME", "studiobot")
-    user = os.getenv("BOT_DB_USER", "studiobot")
-    password = os.getenv("BOT_DB_PASSWORD", "")
-    timeout = int(os.getenv("BOT_DB_CONNECT_TIMEOUT", "3"))
-
-    last_err = None
-    for host in hosts:
-        try:
-            return psycopg2.connect(
-                host=host,
-                port=port,
-                database=database,
-                user=user,
-                password=password,
-                connect_timeout=timeout,
-            )
-        except Exception as e:
-            last_err = e
-            logger.debug(f"BOT DB non raggiungibile su {host}: {e}")
-
-    _bot_db_cooldown_until = time.time() + int(os.getenv("BOT_DB_COOLDOWN_SEC", "300"))
-    raise last_err

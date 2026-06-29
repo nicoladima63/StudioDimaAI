@@ -33,6 +33,7 @@ server/instance/
 # Credenziali e token sensibili
 server/credentials.json
 server/token.json
+cloudflared/credential.json
 
 # Database DBF files
 server/windent/

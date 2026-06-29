@@ -22,7 +22,7 @@ from typing import Optional
 from core.config_manager import get_config
 from core.paths import STUDIO_DIMA_DB_PATH
 from core.constants_v2 import TIPI_APPUNTAMENTO
-from core.reminder_db import ensure_reminder_tables, is_appointment_confirmed, get_bot_db_conn
+from core.reminder_db import ensure_reminder_tables, is_appointment_confirmed
 
 ROME_TZ = pytz.timezone('Europe/Rome')
 
@@ -242,27 +242,7 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
     except Exception as e:
         logger.warning(f"Errore lettura wa_cache: {e}")
 
-    # 2. studiobot_pazienti (PostgreSQL)
-    jid = None
-    try:
-        conn_pg = get_bot_db_conn()
-        with conn_pg:
-            with conn_pg.cursor() as cur:
-                cur.execute(
-                    "SELECT wa_jid FROM studiobot_pazienti WHERE wa_jid LIKE %s LIMIT 1",
-                    (phone_norm[:10] + '%',)
-                )
-                r = cur.fetchone()
-                if r:
-                    jid = r[0]
-        conn_pg.close()
-        if jid:
-            _save_wa_cache(patient_id, phone, True, jid)
-            return True, jid
-    except Exception as e:
-        logger.warning(f"Errore check bot DB: {e}")
-
-    # 3. Evolution API
+    # 2. Evolution API
     try:
         r = requests.post(
             f"{EVOLUTION_BASE_URL}/chat/whatsappNumbers/{EVOLUTION_INSTANCE}",

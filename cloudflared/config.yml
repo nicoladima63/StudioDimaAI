@@ -1,0 +1,18 @@
+tunnel: 0d1c9be7-29ee-4256-866e-c8a366056cf3
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  # Flask su serverdima porta 5001 — serve sia frontend (static/) che API (/api/v2)
+  - hostname: app.valorian.it
+    service: http://host.docker.internal:5001
+
+  # Evolution API WhatsApp (container in questo stesso docker-compose)
+  - hostname: wa.valorian.it
+    service: http://evolution:8080
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+      keepAliveTimeout: 90s
+
+  # Catch-all obbligatorio
+  - service: http_status:404

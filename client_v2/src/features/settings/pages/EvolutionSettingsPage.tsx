@@ -55,7 +55,7 @@ function statoBadge(stato: string) {
 interface StatusCardProps {
   label: string
   color?: TrafficLight
-  detail: string
+  detail?: string
   icon: string[]
   action?: React.ReactNode
 }
@@ -66,7 +66,7 @@ function StatusCard({ label, color = 'secondary', detail, icon, action }: Status
       <CCardBody className="py-3 d-flex flex-column align-items-center gap-2">
         <CIcon icon={icon} size="xl" className={`text-${color}`} />
         <div className="fw-semibold small">{label}</div>
-        <CBadge color={color} className="px-2 py-1">{detail}</CBadge>
+        {detail && <CBadge color={color} className="px-2 py-1">{detail}</CBadge>}
         {action && <div className="mt-1 w-100">{action}</div>}
       </CCardBody>
     </CCard>
@@ -299,14 +299,12 @@ const EvolutionSettingsPage: React.FC = () => {
                 [
                   {
                     label: 'Docker',
-                    //color: (status.docker_running ? 'success' : 'danger') as TrafficLight,
-                    detail: status.docker_running ? 'In esecuzione' : 'Fermo',
+                    color: (status.docker_running ? 'success' : 'danger') as TrafficLight,
                     icon: cilSettings, action: dockerAction,
                   },
                   {
                     label: 'Evolution API',
-                    //color: statusColor(status.evolution_reachable),
-                    detail: status.evolution_reachable ? 'Raggiungibile' : 'Non raggiungibile',
+                    color: statusColor(status.evolution_reachable),
                     icon: cilLink, action: evolutionAction,
                   },
                   {

@@ -46,6 +46,17 @@ services:
       - evolution_data:/evolution/instances
     restart: unless-stopped
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ./cloudflared/credential.json:/etc/cloudflared/credentials.json:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on: [evolution]
+
 volumes:
   postgres_data:
   evolution_data:
