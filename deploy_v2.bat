@@ -309,6 +309,15 @@ if exist ".env" (
     echo   [SKIP] .env root non trovato. >> "%LOGFILE%"
 )
 
+if exist "cloudflared" (
+    robocopy "cloudflared" "%DEPLOY_PATH%\cloudflared" /MIR /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
+    echo   [OK] cloudflared/ sincronizzato.
+    echo   [OK] cloudflared/ sincronizzato. >> "%LOGFILE%"
+) else (
+    echo   [SKIP] cartella cloudflared/ non trovata.
+    echo   [SKIP] cloudflared/ non trovata. >> "%LOGFILE%"
+)
+
 echo   [INFO] Generazione restart_docker.bat su server...
 echo   [INFO] Generazione restart_docker.bat su server... >> "%LOGFILE%"
 (
