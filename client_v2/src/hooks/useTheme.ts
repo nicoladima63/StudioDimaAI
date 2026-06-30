@@ -11,8 +11,16 @@ function getInitialTheme(): Theme {
 }
 
 function applyTheme(theme: Theme) {
-  document.documentElement.setAttribute('data-bs-theme', theme)
-  document.documentElement.setAttribute('data-coreui-theme', theme)
+  const root = document.documentElement
+  // Tailwind dark mode
+  if (theme === 'dark') {
+    root.classList.add('dark')
+  } else {
+    root.classList.remove('dark')
+  }
+  // CoreUI / Bootstrap dark mode (per componenti non ancora migrati)
+  root.setAttribute('data-bs-theme', theme)
+  root.setAttribute('data-coreui-theme', theme)
   localStorage.setItem(STORAGE_KEY, theme)
 }
 

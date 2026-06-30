@@ -15,7 +15,8 @@ export default defineConfig({
       '@/types': resolve(__dirname, './src/types'),
       '@/utils': resolve(__dirname, './src/utils'),
       '@/hooks': resolve(__dirname, './src/hooks'),
-      '@/styles': resolve(__dirname, './src/styles')
+      '@/styles': resolve(__dirname, './src/styles'),
+      '@/lib': resolve(__dirname, './src/lib'),
     }
   },
   server: {
@@ -37,7 +38,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          coreui: ['@coreui/react', '@coreui/coreui', '@coreui/icons-react'],
+          ui: ['lucide-react', 'class-variance-authority', 'clsx', 'tailwind-merge'],
           utils: ['axios', 'zustand', 'date-fns', 'zod']
         }
       }
@@ -49,6 +50,6 @@ export default defineConfig({
     __DEV__: JSON.stringify(process.env.NODE_ENV === 'development')
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@coreui/react', '@coreui/coreui']
+    include: ['react', 'react-dom', 'lucide-react']
   }
 })

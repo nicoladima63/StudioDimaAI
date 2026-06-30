@@ -1,79 +1,55 @@
 import React, { useState } from 'react'
-import { CNav, CNavItem, CNavLink, CTabContent, CTabPane, CToast, CToastBody, CToaster } from '@coreui/react'
 import PageLayout from '@/components/layout/PageLayout'
 import ServiziTab from '../components/ServiziTab'
 import SimulazioneTab from '../components/SimulazioneTab'
 import ReminderRepliesTab from '../components/ReminderRepliesTab'
 import StoricoComunicazioniTab from '../components/StoricoComunicazioniTab'
-
-type ToastState = 'success' | 'warning' | 'error'
-
-interface ToastMsg {
-  id: number
-  msg: string
-  state: ToastState
-}
-
-const COLOR: Record<ToastState, string> = {
-  success: 'success',
-  warning: 'warning',
-  error: 'danger',
-}
+import { cn } from '@/lib/utils'
 
 const TABS = [
   { label: 'WhatsApp' },
   { label: 'Simulazione' },
-  { label: 'Risposte Reminder' },
-  { label: 'Storico Invii' },
+  { label: 'Risposte' },
+  { label: 'Storico' },
 ]
 
 const BotPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0)
-  const [toasts, setToasts] = useState<ToastMsg[]>([])
-
-  const showToast = (msg: string, state: ToastState) => {
-    const id = Date.now()
-    setToasts(prev => [...prev, { id, msg, state }])
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500)
-  }
 
   return (
     <PageLayout>
       <PageLayout.Header title="Bot WhatsApp" />
-      <PageLayout.ContentBody>
-        <CNav variant="tabs" className="mb-3">
+
+      {/* Tab bar — scroll orizzontale su mobile */}
+      <div className="border-b border-border bg-background overflow-x-auto scroll-x-hidden">
+        <div className="flex min-w-max px-1">
           {TABS.map((tab, i) => (
-            <CNavItem key={i}>
-              <CNavLink active={activeTab === i} onClick={() => setActiveTab(i)} style={{ cursor: 'pointer' }}>
-                {tab.label}
-              </CNavLink>
-            </CNavItem>
+            <button
+              key={i}
+              onClick={() => setActiveTab(i)}
+              className={cn(
+                'relative px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors',
+                activeTab === i
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {tab.label}
+              {activeTab === i && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-primary" />
+              )}
+            </button>
           ))}
-        </CNav>
+        </div>
+      </div>
 
-        <CTabContent>
-          <CTabPane visible={activeTab === 0}>
-            <ServiziTab />
-          </CTabPane>
-          <CTabPane visible={activeTab === 1}>
-            {activeTab === 1 && <SimulazioneTab />}
-          </CTabPane>
-          <CTabPane visible={activeTab === 2}>
-            {activeTab === 2 && <ReminderRepliesTab />}
-          </CTabPane>
-          <CTabPane visible={activeTab === 3}>
-            {activeTab === 3 && <StoricoComunicazioniTab />}
-          </CTabPane>
-        </CTabContent>
-      </PageLayout.ContentBody>
-
-      <CToaster placement="top-end">
-        {toasts.map(t => (
-          <CToast key={t.id} autohide visible color={COLOR[t.state]}>
-            <CToastBody className="text-white">{t.msg}</CToastBody>
-          </CToast>
-        ))}
-      </CToaster>
+      {/* Tab content */}
+      <div className="p-0">
+        {activeTab === 0 && <ServiziTab />}
+        {activeTab === 1 && <SimulazioneTab />}
+        {activeTab === 2 && <ReminderRepliesTab />}
+        {activeTab === 3 && <StoricoComunicazioniTab />}
+      </div>
     </PageLayout>
   )
 }

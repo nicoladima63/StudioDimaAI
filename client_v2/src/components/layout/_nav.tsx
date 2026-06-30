@@ -1,295 +1,100 @@
-import CIcon from '@coreui/icons-react';
-import {
-  cilSpeedometer,
-  cilPeople,
-  cilLayers,
-  cilChart,
-  cilMoney,
-  cilSettings,
-  cilList,
-  cilDescription,
-  cilUser,
-  cilCalendar,
-  cilSearch,
-  cilTask,
-  cilChartPie,
-  cilChartLine,
-  cilEnvelopeClosed,
-  cilChatBubble,
-  cilPhone,
-  cilMediaPlay,
-} from '@coreui/icons';
-import { CNavItem, CNavGroup } from '@coreui/react';
+export interface NavItem {
+  name: string
+  to?: string
+  iconName: string
+  items?: NavItem[]
+}
 
-const _nav = [
+const navigation: NavItem[] = [
+  { name: 'Dashboard', to: '/dashboard', iconName: 'LayoutDashboard' },
+  { name: 'Simulazione Flussi', to: '/simulation', iconName: 'Play' },
+  { name: 'Eisenhower', to: '/eisenhower', iconName: 'Grid2x2' },
+  { name: 'Email', to: '/email', iconName: 'Mail' },
+  { name: 'Bot WhatsApp', to: '/bot', iconName: 'MessageCircle' },
   {
-    component: CNavItem,
-    name: 'Dashboard',
-    to: '/dashboard',
-    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Simulazione Flussi',
-    to: '/simulation',
-    icon: <CIcon icon={cilMediaPlay} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Matrice di Eisenhower',
-    to: '/eisenhower',
-    icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Email',
-    to: '/email',
-    icon: <CIcon icon={cilEnvelopeClosed} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Bot WhatsApp',
-    to: '/bot',
-    icon: <CIcon icon={cilChatBubble} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavGroup,
     name: 'Gestione',
-    to: '/gestione',
-    icon: <CIcon icon={cilLayers} customClassName="nav-icon" />,
+    iconName: 'Layers',
     items: [
-      {
-        component: CNavItem,
-        name: 'Fornitori',
-        to: '/fornitori',
-        icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Classifica Fornitori',
-        to: '/fornitori/classificazione',
-        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Pazienti',
-        to: '/pazienti',
-        icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Richiami',
-        to: '/pazienti/richiami',
-        icon: <CIcon icon={cilPhone} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Materiali',
-        to: '/materiali',
-        icon: <CIcon icon={cilLayers} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Conti',
-        to: '/conti',
-        icon: <CIcon icon={cilMoney} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Spese',
-        to: '/spese',
-        icon: <CIcon icon={cilMoney} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Collaboratori',
-        to: '/collaboratori',
-        icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Utenti',
-        to: '/users',
-        icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'Fornitori', to: '/fornitori', iconName: 'Building2' },
+      { name: 'Classifica Fornitori', to: '/fornitori/classificazione', iconName: 'ListOrdered' },
+      { name: 'Pazienti', to: '/pazienti', iconName: 'Users' },
+      { name: 'Richiami', to: '/pazienti/richiami', iconName: 'Phone' },
+      { name: 'Materiali', to: '/materiali', iconName: 'Package' },
+      { name: 'Conti', to: '/conti', iconName: 'Wallet' },
+      { name: 'Spese', to: '/spese', iconName: 'Receipt' },
+      { name: 'Collaboratori', to: '/collaboratori', iconName: 'UserCheck' },
+      { name: 'Utenti', to: '/users', iconName: 'UserCog' },
+    ],
   },
   {
-    component: CNavGroup,
-    name: 'Ricetta elettronica',
-    to: '/ricetta-elettronica',
-    icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+    name: 'Ricetta Elettronica',
+    iconName: 'FileText',
     items: [
-      {
-        component: CNavItem,
-        name: 'NRE',
-        to: '/ricetta',
-        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Test Ricette',
-        to: '/ricetta/test',
-        icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'NRE', to: '/ricetta', iconName: 'FileText' },
+      { name: 'Test Ricette', to: '/ricetta/test', iconName: 'TestTube' },
+    ],
   },
   {
-    component: CNavGroup,
     name: 'Agenda',
-    to: '/agenda',
-    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
+    iconName: 'Calendar',
     items: [
-      {
-        component: CNavItem,
-        name: 'Calendario',
-        to: '/calendar',
-        icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Calendar Settings',
-        to: '/settings/calendar',
-        icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'Calendario', to: '/calendar', iconName: 'Calendar' },
+      { name: 'Impostazioni', to: '/settings/calendar', iconName: 'Settings' },
+    ],
   },
   {
-    component: CNavGroup,
     name: 'Monitoraggi',
-    to: '/monitoraggi',
-    icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+    iconName: 'Activity',
     items: [
-      {
-        component: CNavItem,
-        name: 'Monitor Quaderno',
-        to: '/settings/monitor-prestazioni',
-        icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'Monitor Quaderno', to: '/settings/monitor-prestazioni', iconName: 'BarChart2' },
+    ],
   },
   {
-    component: CNavGroup,
     name: 'Lavorazioni',
-    to: '/lavorazioni',
-    icon: <CIcon icon={cilLayers} customClassName="nav-icon" />,
+    iconName: 'Layers',
     items: [
-      {
-        component: CNavItem,
-        name: 'Tasks',
-        to: '/tasks',
-        icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Works',
-        to: '/works',
-        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Providers',
-        to: '/providers',
-        icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Steps Template',
-        to: '/steps',
-        icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'Tasks', to: '/tasks', iconName: 'CheckSquare' },
+      { name: 'Works', to: '/works', iconName: 'Briefcase' },
+      { name: 'Providers', to: '/providers', iconName: 'Users' },
+      { name: 'Steps Template', to: '/steps', iconName: 'ListChecks' },
+    ],
   },
   {
-    component: CNavGroup,
     name: 'Analytics',
-    to: '/analytics',
-    icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+    iconName: 'TrendingUp',
     items: [
-      {
-        component: CNavItem,
-        name: 'Economics',
-        to: '/economics',
-        icon: <CIcon icon={cilChartPie} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Analisi Comparativa',
-        to: '/economics/comparativa',
-        icon: <CIcon icon={cilChartLine} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Centro di Costo',
-        to: '/economics/centro-costo',
-        icon: <CIcon icon={cilChatBubble} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'Economics', to: '/economics', iconName: 'PieChart' },
+      { name: 'Analisi Comparativa', to: '/economics/comparativa', iconName: 'BarChart' },
+      { name: 'Centro di Costo', to: '/economics/centro-costo', iconName: 'Target' },
+    ],
   },
   {
-    component: CNavGroup,
     name: 'Sistema',
-    to: '/sistema',
-    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+    iconName: 'Settings',
     items: [
-      {
-        component: CNavItem,
-        name: 'Impostazioni',
-        to: '/settings',
-        icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Gestione Template SMS',
-        to: '/settings/template',
-        icon: <CIcon icon={cilDescription} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Automazioni',
-        to: '/settings/automazioni',
-        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Scheduler',
-        to: '/settings/scheduler',
-        icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'WhatsApp Reminder',
-        to: '/settings/evolution',
-        icon: <CIcon icon={cilPhone} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'SEO',
-        to: '/settings/seo',
-        icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'Scheduler', to: '/settings/scheduler', iconName: 'Clock' },
+      { name: 'Template SMS', to: '/settings/template', iconName: 'MessageSquare' },
+      { name: 'Automazioni', to: '/settings/automazioni', iconName: 'Zap' },
+      { name: 'WhatsApp Reminder', to: '/settings/evolution', iconName: 'Phone' },
+      { name: 'SEO', to: '/settings/seo', iconName: 'Search' },
+    ],
   },
   {
-    component: CNavGroup,
     name: 'Materiali Utils',
-    to: '/materiali-utils',
-    icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
+    iconName: 'Wrench',
     items: [
-      {
-        component: CNavItem,
-        name: 'Migrazione Materiali',
-        to: '/materiali/migrazione',
-        icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
-      },
-      {
-        component: CNavItem,
-        name: 'Classifica Materiali',
-        to: '/materiali/ricerca',
-        icon: <CIcon icon={cilSearch} customClassName="nav-icon" />,
-      },
-    ]
+      { name: 'Migrazione', to: '/materiali/migrazione', iconName: 'Upload' },
+      { name: 'Classifica', to: '/materiali/ricerca', iconName: 'Search' },
+    ],
   },
-];
+]
 
-export default _nav;
+export const bottomNavItems = [
+  { name: 'Home', to: '/dashboard', iconName: 'LayoutDashboard' },
+  { name: 'Pazienti', to: '/pazienti', iconName: 'Users' },
+  { name: 'Bot', to: '/bot', iconName: 'MessageCircle' },
+  { name: 'Automazioni', to: '/settings/automazioni', iconName: 'Zap' },
+  { name: 'Menu', to: null, iconName: 'Grid3x3' },
+]
+
+export default navigation

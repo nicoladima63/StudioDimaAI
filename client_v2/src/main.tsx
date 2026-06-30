@@ -4,9 +4,8 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 
-// CoreUI CSS
+// CoreUI CSS — mantenuto per le pagine non ancora migrate a Tailwind
 import '@coreui/coreui/dist/css/coreui.min.css'
-import '@coreui/icons/css/free.min.css'
 
 // App imports
 import App from './App'
@@ -30,12 +29,10 @@ const queryClient = new QueryClient({
   },
 })
 
-// Disable console.log in production
 if (config.app.environment === 'production') {
   console.log = () => {}
 }
 
-// Register service worker for push notifications
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
@@ -49,9 +46,12 @@ if ('serviceWorker' in navigator) {
   })
 }
 
-// Applica il tema salvato (o sistema) prima del render per evitare flash
+// Applica il tema prima del render per evitare flash
 const _savedTheme = localStorage.getItem('studio-dima-theme')
 const _initTheme = _savedTheme ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+if (_initTheme === 'dark') {
+  document.documentElement.classList.add('dark')
+}
 document.documentElement.setAttribute('data-bs-theme', _initTheme)
 document.documentElement.setAttribute('data-coreui-theme', _initTheme)
 
@@ -63,23 +63,20 @@ root.render(
       <QueryClientProvider client={queryClient}>
         <App />
         <Toaster
-          position='top-right'
+          position="top-right"
           toastOptions={{
             duration: config.ui.toastDuration,
             style: {
               borderRadius: '8px',
               background: '#363636',
               color: '#fff',
+              fontSize: '14px',
             },
             success: {
-              style: {
-                background: '#10b981',
-              },
+              style: { background: '#10b981' },
             },
             error: {
-              style: {
-                background: '#ef4444',
-              },
+              style: { background: '#ef4444' },
             },
           }}
         />

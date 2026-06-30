@@ -1,23 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
-import {
-  CBadge,
-  CButton,
-  CSidebar,
-  CSidebarBrand,
-  CSidebarFooter,
-  CSpinner,
-  CToast,
-  CToastBody,
-  CToastClose,
-  CToaster,
-} from '@coreui/react'
-import { cilReload, cilX } from '@coreui/icons'
-import CIcon from '@coreui/icons-react'
-
+import { Link } from 'react-router-dom'
+import { X, RefreshCw, Loader2 } from 'lucide-react'
 import { AppSidebarNav } from './AppSidebarNav'
 import navigation from './_nav'
 import adminService from '@/features/admin/services/adminService'
 import type { BuildInfo } from '@/features/admin/services/adminService'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
+import toast from 'react-hot-toast'
 
 interface AppSidebarProps {
   visible: boolean
@@ -25,25 +16,19 @@ interface AppSidebarProps {
 }
 
 const POLL_INTERVAL_MS = 3000
-const MAX_POLL_FAILURES = 40  // 40 × 3s = 2 minuti prima di arrendersi
+const MAX_POLL_FAILURES = 40
 
 const AppSidebar: React.FC<AppSidebarProps> = ({ visible, onVisibleChange }) => {
   const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null)
   const [restarting, setRestarting] = useState(false)
-  const [toast, setToast] = useState<{ message: string; color: string } | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const restartBuildRef = useRef<number | null>(null)
   const pollFailuresRef = useRef(0)
   const isRestartingRef = useRef(false)
 
   useEffect(() => {
-    adminService.apiBuildInfo().then(setBuildInfo).catch(() => { })
+    adminService.apiBuildInfo().then(setBuildInfo).catch(() => {})
   }, [])
-
-  const showToast = (message: string, color: string) => {
-    setToast({ message, color })
-    setTimeout(() => setToast(null), 4000)
-  }
 
   const stopPolling = () => {
     if (pollRef.current) {
@@ -61,19 +46,18 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ visible, onVisibleChange }) => 
     pollRef.current = setInterval(async () => {
       try {
         const info = await adminService.apiBuildInfo()
-        // successo: reset contatore errori
         pollFailuresRef.current = 0
         if (info.build !== restartBuildRef.current) {
           stopPolling()
           setBuildInfo(info)
-          showToast(`Build #${info.build} attiva — ricarico...`, 'success')
+          toast.success(`Build #${info.build} attiva — ricarico...`)
           setTimeout(() => window.location.reload(), 1500)
         }
       } catch {
         pollFailuresRef.current += 1
         if (pollFailuresRef.current >= MAX_POLL_FAILURES) {
           stopPolling()
-          showToast('Riavvio non rilevato: server non risponde. Riavvialo manualmente.', 'danger')
+          toast.error('Riavvio non rilevato: server non risponde.')
         }
       }
     }, POLL_INTERVAL_MS)
@@ -84,7 +68,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ visible, onVisibleChange }) => 
     isRestartingRef.current = true
     setRestarting(true)
     const previousBuild = buildInfo?.build ?? 0
-    showToast('Riavvio in corso — attendi...', 'warning')
+    toast('Riavvio in corso — attendi...', { icon: '⏳' })
     try {
       await adminService.apiRestartServer()
     } catch {
@@ -95,92 +79,78 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ visible, onVisibleChange }) => 
 
   useEffect(() => () => stopPolling(), [])
 
-  const envColor = buildInfo?.env === 'production' ? 'success' : 'warning'
-  const envLabel = buildInfo?.env === 'production' ? 'PROD' : 'DEV'
   const builtDate = buildInfo?.built_at
     ? buildInfo.built_at.replace('T', ' ').slice(0, 16)
     : ''
 
   return (
     <>
-      <CSidebar
-        className="border-end sidebar sidebar-dark sidebar-fixed"
-        position="fixed"
-        visible={visible}
-        onVisibleChange={onVisibleChange}
-      >
-        <CSidebarBrand href="/" className="border-bottom" style={{ minHeight: '76px' }}>
-          <div className="sidebar-brand-full">
-            <h5 className="mb-0">Studio Dima V2</h5>
-          </div>
-          <div className="sidebar-brand-minimized">
-            <strong>SD</strong>
-          </div>
-        </CSidebarBrand>
+      {/* Overlay per chiudere la sidebar su tablet */}
+      {visible && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => onVisibleChange(false)}
+        />
+      )}
 
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-40 flex w-60 flex-col bg-zinc-900 dark:bg-zinc-950 text-white transition-transform duration-200 ease-in-out',
+          visible ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {/* Brand */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
+          <Link to="/dashboard" className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center text-white text-xs font-bold">
+              SD
+            </div>
+            <span className="font-semibold text-sm tracking-wide">Studio Dima</span>
+          </Link>
+          <button
+            onClick={() => onVisibleChange(false)}
+            className="p-1 rounded hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Navigation */}
         <AppSidebarNav items={navigation} />
 
-        <CSidebarFooter className="border-top d-none d-lg-flex flex-column gap-2 py-2 px-2">
+        {/* Footer */}
+        <div className="border-t border-white/10 px-3 py-3 space-y-2">
           {buildInfo && (
-            <div className="d-flex align-items-center gap-2">
-              <div style={{ fontSize: '0.72rem', lineHeight: 1.3, color: 'rgba(255,255,255,0.55)' }}>
-                <span>v{buildInfo.version} #{buildInfo.build}</span>
-                <br />
-                <span style={{ fontSize: '0.65rem' }}>{builtDate}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 text-[11px] text-white/40 leading-tight">
+                <div>v{buildInfo.version} #{buildInfo.build}</div>
+                <div className="text-[10px]">{builtDate}</div>
               </div>
-              <CBadge
-                color={envColor}
-                style={{ fontSize: '0.75rem', padding: '6px 8px', letterSpacing: '0.05em' }}
+              <Badge
+                variant={buildInfo.env === 'production' ? 'success' : 'warning'}
+                className="text-[10px] px-1.5 py-0"
               >
-                {envLabel}
-              </CBadge>
-
+                {buildInfo.env === 'production' ? 'PROD' : 'DEV'}
+              </Badge>
             </div>
           )}
-          <div className="d-flex justify-content-between gap-2">
-            <CButton
-              color="danger"
+          {buildInfo?.env === 'production' && (
+            <Button
               variant="outline"
               size="sm"
-              className="flex-fill"
-              title="Nascondi sidebar"
-              onClick={() => onVisibleChange(false)}
+              className="w-full border-white/20 text-white/70 hover:text-white hover:bg-white/10 hover:border-white/40 bg-transparent"
+              disabled={restarting}
+              onClick={handleRestart}
             >
-              <CIcon icon={cilX} size="sm" className="me-1" />
-              Esci
-            </CButton>
-            {buildInfo?.env === 'production' && (
-              <CButton
-                color="primary"
-                variant="outline"
-                size="sm"
-                className="flex-fill"
-                title="Riavvia server"
-                disabled={restarting}
-                onClick={handleRestart}
-              >
-                {restarting ? (
-                  <CSpinner size="sm" className="me-1" />
-                ) : (
-                  <CIcon icon={cilReload} size="sm" className="me-1" />
-                )}
-                Riavvia
-              </CButton>
-            )}
-          </div>
-        </CSidebarFooter>
-      </CSidebar>
-
-      {toast && (
-        <CToaster placement="bottom-end" className="p-3">
-          <CToast autohide visible color={toast.color}>
-            <CToastBody>
-              {toast.message}
-              <CToastClose className="me-2 m-auto" />
-            </CToastBody>
-          </CToast>
-        </CToaster>
-      )}
+              {restarting
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              }
+              {restarting ? 'Riavvio...' : 'Riavvia server'}
+            </Button>
+          )}
+        </div>
+      </aside>
     </>
   )
 }
