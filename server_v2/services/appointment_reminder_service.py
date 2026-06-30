@@ -438,7 +438,7 @@ def get_appointments_pending_followup(hours_before: int = 3) -> list[dict]:
                 SELECT 1 FROM appointment_confirmations ac
                 WHERE ac.patient_id = patient_communications.patient_id
                   AND ac.appointment_date = patient_communications.appointment_date
-                  AND ac.response_type = 'confirmed'
+                  AND ac.response = 'confirmed'
               )
         """, (today, current_time, cutoff_time))
         rows = [dict(r) for r in cur.fetchall()]
