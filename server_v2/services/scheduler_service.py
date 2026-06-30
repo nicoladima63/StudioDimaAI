@@ -161,12 +161,22 @@ class SchedulerService:
     def schedule_calendar_sync_job(self):
         """Schedula job sincronizzazione calendario"""
         settings = get_automation_settings()
-        hour = int(settings.get("calendar_sync_hour", 21))
-        minute = int(settings.get("calendar_sync_minute", 0))
         weeks_to_sync = int(settings.get("calendar_sync_weeks_to_sync", 3))
         enabled = settings.get("calendar_sync_enabled", True)
-        
-        # Rimuovi job precedente se esiste
+        multi_time_enabled = settings.get("calendar_sync_multi_time_enabled", False)
+        sync_times = settings.get("calendar_sync_times", [])
+        fallback_time = settings.get("calendar_sync_fallback_time", "21:00")
+
+        # Rimuovi tutti i job calendario precedenti
+        if not hasattr(self, '_calendar_sync_job_ids'):
+            self._calendar_sync_job_ids = []
+        for job_id in self._calendar_sync_job_ids:
+            try:
+                self.scheduler.remove_job(job_id)
+            except Exception:
+                pass
+        self._calendar_sync_job_ids = []
+        # Compatibilità con vecchio attributo singolo
         if self._current_calendar_sync_job:
             try:
                 self.scheduler.remove_job(self._current_calendar_sync_job.id)
@@ -181,106 +191,106 @@ class SchedulerService:
         def job():
             """Job di sincronizzazione automatica calendario"""
             now = datetime.now()
-            
-            # Controlla se è weekend (sabato=5, domenica=6)
-            if now.weekday() >= 5:
-                logger.info(f"[CALENDAR SYNC] Saltato: è weekend ({now.strftime('%A')})")
-                return
-                
-            logger.info(f"[CALENDAR SYNC] Avvio sincronizzazione automatica per {weeks_to_sync} settimane.")
-            
-            # Ottieni ID calendari dalla configurazione
-            # The calendar_ids are now configured in calendar_service.py itself and are not passed.
-            # We still check for their existence as a guard clause for overall config validity.
-            studio_blu_calendar = settings.get("calendar_studio_blu_id")
-            studio_giallo_calendar = settings.get("calendar_studio_giallo_id")
-            
-            if not studio_blu_calendar or not studio_giallo_calendar:
-                logger.error("[CALENDAR SYNC] ID calendari non configurati in automation_settings.json")
-                return
-                
-            # Calcola l'intervallo di date esatto
-            start_date = now.date()
-            end_date = start_date + timedelta(days=(weeks_to_sync * 7))
-            
-            # Determina i mesi coinvolti per l'iterazione
-            months_to_sync_set = set()
-            current_date_iter = start_date # Use a separate iterator for clarity
-            while current_date_iter < end_date:
-                months_to_sync_set.add((current_date_iter.month, current_date_iter.year))
-                current_date_iter += timedelta(days=1)
-            
-            months_to_sync = sorted(list(months_to_sync_set)) # Sorted list of (month, year) tuples
-            
             total_synced = 0
             total_errors = 0
+            months_processed = 0
 
-            # Instantiate DBF reader
-            dbf_reader = get_optimized_reader()
-            
-            for month, year in months_to_sync:
-                logger.info(f"[CALENDAR SYNC] Sincronizzazione mese {month:02d}/{year} (intervallo dal {start_date} al {end_date})")
-                
-                # Get all appointments for the month/year range from DBF
-                all_appointments_raw_for_month = dbf_reader.get_appointments_optimized(month, year)
-
-                # Filter by exact date range (start_date to end_date)
-                filtered_by_date_range = []
-                for app in all_appointments_raw_for_month:
-                    app_date_str = app.get('DATA') # 'DATA' field is expected to be ISO format string
-                    if app_date_str:
-                        try:
-                            app_date = datetime.fromisoformat(app_date_str).date()
-                            if start_date <= app_date < end_date: 
-                                filtered_by_date_range.append(app)
-                        except ValueError:
-                            logger.warning(f"Invalid date format in appointment record: {app_date_str}")
-                
-                # Sincronizza Studio Blu (studio_id=1)
-                try:
-                    studio_blu_appointments = [app for app in filtered_by_date_range if int(app.get('STUDIO', 0)) == 1]
-                    # The sync_calendar_from_records takes a list of raw appointments.
-                    # It will internally handle normalization, Google Client setup, and actual sync.
-                    result_blu = calendar_service_module.sync_calendar_from_records(
-                        records=studio_blu_appointments
-                    )
-                    total_synced += result_blu['sync'].get('inserted', 0) + result_blu['sync'].get('updated', 0)
-                    total_errors += result_blu['sync'].get('errors', 0)
-                except Exception as e:
-                    logger.error(f"[CALENDAR SYNC] Errore Studio Blu {month:02d}/{year}: {e}", exc_info=True)
-                    total_errors += 1
-                    
-                # Sincronizza Studio Giallo (studio_id=2)  
-                try:
-                    studio_giallo_appointments = [app for app in filtered_by_date_range if int(app.get('STUDIO', 0)) == 2]
-                    result_giallo = calendar_service_module.sync_calendar_from_records(
-                        records=studio_giallo_appointments
-                    )
-                    total_synced += result_giallo['sync'].get('inserted', 0) + result_giallo['sync'].get('updated', 0)
-                    total_errors += result_giallo['sync'].get('errors', 0)
-                except Exception as e:
-                    logger.error(f"[CALENDAR SYNC] Errore Studio Giallo {month:02d}/{year}: {e}", exc_info=True)
-                    total_errors += 1
-                    
-            # Log finale
-            log_entry = {
-                'timestamp': now.strftime('%Y-%m-%dT%H:%M:%S'),
-                'total_synced': total_synced,
-                'total_errors': total_errors,
-                'months_processed': len(months_to_sync)
-            }
-            
             try:
-                with open('automation_calendar_sync.log', 'a', encoding='utf-8') as f:
-                    f.write(json.dumps(log_entry, ensure_ascii=False) + '\n')
-            except Exception as e:
-                logger.error(f"[CALENDAR SYNC] Errore scrittura log: {e}")
+                # Controlla se è weekend (sabato=5, domenica=6)
+                if now.weekday() >= 5:
+                    logger.info(f"[CALENDAR SYNC] Saltato: e weekend ({now.strftime('%A')})")
+                    return
 
-        # Programma il job
-        trigger = CronTrigger(hour=hour, minute=minute)
-        self._current_calendar_sync_job = self.scheduler.add_job(
-            job, trigger, id="calendar_sync_job_v2", replace_existing=True
-        )
+                logger.info(f"[CALENDAR SYNC] Avvio sincronizzazione automatica per {weeks_to_sync} settimane.")
+
+                studio_blu_calendar = settings.get("calendar_studio_blu_id")
+                studio_giallo_calendar = settings.get("calendar_studio_giallo_id")
+
+                if not studio_blu_calendar or not studio_giallo_calendar:
+                    logger.error("[CALENDAR SYNC] ID calendari non configurati in automation_settings.json")
+                    total_errors += 1
+                    return
+
+                start_date = now.date()
+                end_date = start_date + timedelta(days=(weeks_to_sync * 7))
+
+                months_to_sync_set = set()
+                current_date_iter = start_date
+                while current_date_iter < end_date:
+                    months_to_sync_set.add((current_date_iter.month, current_date_iter.year))
+                    current_date_iter += timedelta(days=1)
+
+                months_list = sorted(list(months_to_sync_set))
+                months_processed = len(months_list)
+
+                dbf_reader = get_optimized_reader()
+
+                for month, year in months_list:
+                    logger.info(f"[CALENDAR SYNC] Sincronizzazione mese {month:02d}/{year}")
+
+                    all_appointments_raw_for_month = dbf_reader.get_appointments_optimized(month, year)
+
+                    filtered_by_date_range = []
+                    for app in all_appointments_raw_for_month:
+                        app_date_str = app.get('DATA')
+                        if app_date_str:
+                            try:
+                                app_date = datetime.fromisoformat(app_date_str).date()
+                                if start_date <= app_date < end_date:
+                                    filtered_by_date_range.append(app)
+                            except ValueError:
+                                logger.warning(f"Invalid date format: {app_date_str}")
+
+                    try:
+                        studio_blu_appointments = [app for app in filtered_by_date_range if int(app.get('STUDIO', 0)) == 1]
+                        result_blu = calendar_service_module.sync_calendar_from_records(records=studio_blu_appointments)
+                        total_synced += result_blu['sync'].get('inserted', 0) + result_blu['sync'].get('updated', 0)
+                        total_errors += result_blu['sync'].get('errors', 0)
+                    except Exception as e:
+                        logger.error(f"[CALENDAR SYNC] Errore Studio Blu {month:02d}/{year}: {e}", exc_info=True)
+                        total_errors += 1
+
+                    try:
+                        studio_giallo_appointments = [app for app in filtered_by_date_range if int(app.get('STUDIO', 0)) == 2]
+                        result_giallo = calendar_service_module.sync_calendar_from_records(records=studio_giallo_appointments)
+                        total_synced += result_giallo['sync'].get('inserted', 0) + result_giallo['sync'].get('updated', 0)
+                        total_errors += result_giallo['sync'].get('errors', 0)
+                    except Exception as e:
+                        logger.error(f"[CALENDAR SYNC] Errore Studio Giallo {month:02d}/{year}: {e}", exc_info=True)
+                        total_errors += 1
+
+            except Exception as e:
+                logger.error(f"[CALENDAR SYNC] Errore inaspettato: {e}", exc_info=True)
+                total_errors += 1
+
+            finally:
+                log_entry = {
+                    'timestamp': now.strftime('%Y-%m-%dT%H:%M:%S'),
+                    'total_synced': total_synced,
+                    'total_errors': total_errors,
+                    'months_processed': months_processed
+                }
+                try:
+                    with open('automation_calendar_sync.log', 'a', encoding='utf-8') as f:
+                        f.write(json.dumps(log_entry, ensure_ascii=False) + '\n')
+                except Exception as e:
+                    logger.error(f"[CALENDAR SYNC] Errore scrittura log: {e}")
+
+        # Determina i tempi di esecuzione
+        if multi_time_enabled and sync_times:
+            times_to_schedule = sync_times
+        else:
+            times_to_schedule = [fallback_time]
+
+        for i, time_str in enumerate(times_to_schedule):
+            try:
+                h, m = map(int, time_str.split(":"))
+                job_id = f"calendar_sync_job_v2_{i}"
+                self.scheduler.add_job(job, CronTrigger(hour=h, minute=m), id=job_id, replace_existing=True)
+                self._calendar_sync_job_ids.append(job_id)
+                logger.info(f"[CALENDAR SYNC] Job schedulato alle {h:02d}:{m:02d} (id={job_id})")
+            except Exception as e:
+                logger.error(f"[CALENDAR SYNC] Errore scheduling orario '{time_str}': {e}")
 
     def reschedule_recall_job(self):
         """Riprogramma job richiami quando cambia la configurazione"""

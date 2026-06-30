@@ -16,10 +16,6 @@ def get_scheduler_status():
         status = scheduler_service.get_scheduler_status()
         settings = get_automation_settings()
         
-        # Rimuovi le vecchie chiavi se esistono per pulizia
-        settings.pop('calendar_sync_hour', None)
-        settings.pop('calendar_sync_minute', None)
-
         return jsonify({
             'state': 'success',
             'data': {
@@ -152,10 +148,6 @@ def update_calendar_sync_settings():
         if 'calendar_studio_giallo_id' in data:
             settings['calendar_studio_giallo_id'] = data['calendar_studio_giallo_id']
             
-        # Rimuovi le vecchie chiavi per pulizia
-        settings.pop('calendar_sync_hour', None)
-        settings.pop('calendar_sync_minute', None)
-
         # Salva settings
         save_automation_settings(settings)
         
