@@ -13,7 +13,7 @@ const WA_BADGE: Record<WaState, { color: string; label: string }> = {
   open:       { color: 'success', label: 'CONNESSO' },
   connecting: { color: 'warning', label: 'CONNESSIONE IN CORSO...' },
   close:      { color: 'danger',  label: 'DISCONNESSO' },
-  unknown:    { color: 'secondary', label: 'SCONOSCIUTO' },
+  unknown:    { color: 'warning', label: 'NON DISPONIBILE' },
 }
 
 const ServiziTab: React.FC = () => {
@@ -147,7 +147,7 @@ const ServiziTab: React.FC = () => {
   )
 }
 
-const StatusRow: React.FC<{ label: string; ok: boolean; note?: string }> = ({ label, ok, note }) => (
+const StatusRow: React.FC<{ label: string; ok: boolean; note?: string | undefined }> = ({ label, ok, note }) => (
   <div className="d-flex align-items-center justify-content-between mb-2">
     <span className="small">{label}{note && <span className="text-muted ms-1">({note})</span>}</span>
     <CIcon icon={ok ? cilCheckCircle : cilXCircle} className={ok ? 'text-success' : 'text-danger'} />
