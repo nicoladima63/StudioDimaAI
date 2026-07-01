@@ -188,7 +188,7 @@ const TodoWidget: React.FC = () => {
                             return (
                             <div
                                 key={todo.id}
-                                className={`p-3 rounded border border-${getUrgencyColor(effectiveUrgency)} bg-light`}
+                                className={`p-3 rounded border border-${getUrgencyColor(effectiveUrgency)} bg-body-secondary`}
                                 style={{
                                     borderWidth: effectiveUrgency === 'critical' ? '3px' : '1px',
                                     animation: effectiveUrgency === 'critical' ? 'pulse 2s infinite' : 'none'
@@ -200,7 +200,8 @@ const TodoWidget: React.FC = () => {
                                         {getUrgencyIcon(effectiveUrgency)} {getUrgencyLabel(effectiveUrgency)}
                                     </CBadge>
                                     <CButton
-                                        color="light"
+                                        color="secondary"
+                                        variant="ghost"
                                         size="sm"
                                         className="p-1"
                                         style={{ lineHeight: 1 }}

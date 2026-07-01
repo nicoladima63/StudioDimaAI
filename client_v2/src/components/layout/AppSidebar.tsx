@@ -4,6 +4,7 @@ import { X, RefreshCw, Loader2 } from 'lucide-react'
 import { AppSidebarNav } from './AppSidebarNav'
 import navigation from './_nav'
 import adminService from '@/features/admin/services/adminService'
+import { useAuthStore } from '@/store/auth.store'
 import type { BuildInfo } from '@/features/admin/services/adminService'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +20,7 @@ const POLL_INTERVAL_MS = 3000
 const MAX_POLL_FAILURES = 40
 
 const AppSidebar: React.FC<AppSidebarProps> = ({ visible, onVisibleChange }) => {
+  const { user } = useAuthStore()
   const [buildInfo, setBuildInfo] = useState<BuildInfo | null>(null)
   const [restarting, setRestarting] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -134,7 +136,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ visible, onVisibleChange }) => 
               </Badge>
             </div>
           )}
-          {buildInfo?.env === 'production' && (
+          {buildInfo?.env === 'production' && user?.role === 'admin' && (
             <Button
               variant="outline"
               size="sm"

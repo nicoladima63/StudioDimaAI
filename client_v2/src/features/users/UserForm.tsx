@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/user.store';
 import { toast } from 'react-hot-toast';
-import type { User } from '@/types';
+import type { User, UserRole } from '@/types';
 import { CButton, CCol, CForm, CFormInput, CFormLabel, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilSave, cilActionUndo } from '@coreui/icons';
@@ -20,7 +20,7 @@ const UserForm: React.FC<UserFormProps> = ({ userToEdit, onClose }) => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'admin' | 'user' | 'segreteria'>('user');
+  const [role, setRole] = useState<UserRole>('user');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
@@ -66,7 +66,7 @@ const UserForm: React.FC<UserFormProps> = ({ userToEdit, onClose }) => {
       const payload: {
         username?: string;
         password?: string;
-        role?: 'admin' | 'user' | 'segreteria';
+        role?: UserRole;
       } = { role };
       if (username !== userToEdit.username) {
         payload.username = username;
@@ -154,13 +154,15 @@ const UserForm: React.FC<UserFormProps> = ({ userToEdit, onClose }) => {
               id='role'
               className='shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
               value={role}
-              onChange={e => setRole(e.target.value as 'admin' | 'user' | 'segreteria')}
+              onChange={e => setRole(e.target.value as UserRole)}
               required
               disabled={loading === 'loading'}
             >
               <option value='user'>Utente</option>
-              <option value='admin'>Amministratore</option>
               <option value='segreteria'>Segreteria</option>
+              <option value='aso'>ASO</option>
+              <option value='dottore'>Dottore</option>
+              <option value='admin'>Amministratore</option>
             </select>
           </div>
         </CCol>

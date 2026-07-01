@@ -6,6 +6,8 @@ from functools import wraps
 from flask_jwt_extended import get_jwt
 from app_v2 import format_response
 
+VALID_ROLES = ('admin', 'segreteria', 'aso', 'dottore', 'user')
+
 def roles_required(*required_roles):
     """
     Decorator to ensure a user has at least one of the required roles.

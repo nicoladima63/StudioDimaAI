@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { userService } from '@/services/api/user.service'
-import type { User } from '@/types'
+import type { User, UserRole } from '@/types'
 import { LoadingState } from '@/types'
 
 interface UserState {
@@ -13,8 +13,8 @@ interface UserState {
 
 interface UserActions {
   loadUsers: () => Promise<void>
-  createUser: (username: string, password: string, role: 'admin' | 'user') => Promise<User | null>
-  updateUser: (userId: number, payload: { username?: string; password?: string; role?: 'admin' | 'user' }) => Promise<User | null>
+  createUser: (username: string, password: string, role: UserRole) => Promise<User | null>
+  updateUser: (userId: number, payload: { username?: string; password?: string; role?: UserRole }) => Promise<User | null>
   deleteUser: (userId: number) => Promise<boolean>
   selectUser: (userId: number | null) => Promise<void>
   clearSelectedUser: () => void

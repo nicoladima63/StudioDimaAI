@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 
 from app_v2 import format_response
 from repositories.user_repository import UserRepository
-from utils.auth_utils import roles_required
+from utils.auth_utils import roles_required, VALID_ROLES
 
 logger = logging.getLogger(__name__)
 users_v2_bp = Blueprint('users_v2', __name__)
@@ -48,8 +48,8 @@ def create_user():
     if not username or not password:
         return format_response(success=False, error="Username and password are required"), 400
     
-    if role not in ['admin', 'user']:
-        return format_response(success=False, error="Invalid role specified"), 400
+    if role not in VALID_ROLES:
+        return format_response(success=False, error=f"Ruolo non valido. Valori ammessi: {', '.join(VALID_ROLES)}"), 400
 
     try:
         existing_user = user_repo.find_by_username(username)
@@ -100,8 +100,8 @@ def update_user(user_id):
     password = data.get('password')
     role = data.get('role')
 
-    if role and role not in ['admin', 'user']:
-        return format_response(success=False, error="Invalid role specified"), 400
+    if role and role not in VALID_ROLES:
+        return format_response(success=False, error=f"Ruolo non valido. Valori ammessi: {', '.join(VALID_ROLES)}"), 400
 
     try:
         # Check if user exists

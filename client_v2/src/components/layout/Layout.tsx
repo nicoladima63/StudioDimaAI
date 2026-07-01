@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { Menu, Sun, Moon, LogOut } from 'lucide-react'
+import { Menu, Sun, Moon, LogOut, Badge } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useTheme } from '@/hooks/useTheme'
 import AppSidebar from './AppSidebar'
@@ -9,8 +9,16 @@ import MobileDrawer from './MobileDrawer'
 import NotificationBell from '@/components/ui/NotificationBell'
 import PushNotificationToggle from '@/components/PushNotificationToggle'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { Button } from '../ui/button'
+import { Label } from '../ui/label'
 
 const Layout: React.FC = () => {
   const [sidebarVisible, setSidebarVisible] = useState(false)
@@ -98,7 +106,46 @@ const Layout: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-1">
-            {/* Theme toggle */}
+
+            {isAuthenticated && user && (
+              <>
+                {/* Avatar con menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ml-1">
+                      <Avatar className="h-7 w-7">
+                        <AvatarFallback className="text-[10px] font-bold bg-primary text-primary-foreground">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5">
+                      <p className="text-sm font-medium">{user.username} - 
+                        <Label  color="primary" className="ml-2">
+                        {user.role}
+                      </Label>
+                      </p>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <div className="px-2 py-1">
+                      <PushNotificationToggle showLabel={true} size="sm" onSuccess={() => {}} onError={() => {}} />
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Esci
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                                {/* Notification bell */}
+                <NotificationBell />
+
+              </>
+            )}
+
+                        {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               className="p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
@@ -110,42 +157,6 @@ const Layout: React.FC = () => {
               }
             </button>
 
-            {isAuthenticated && user && (
-              <>
-                {/* Push notifications */}
-                <div className="hidden sm:block">
-                  <PushNotificationToggle showLabel={false} size="sm" onSuccess={() => {}} onError={() => {}} />
-                </div>
-
-                {/* Notification bell */}
-                <NotificationBell />
-
-                {/* User info — solo desktop */}
-                <div className="hidden md:flex items-center gap-2 ml-1 pl-2 border-l border-border">
-                  <Avatar className="h-7 w-7">
-                    <AvatarFallback className="text-[10px] font-bold bg-primary text-primary-foreground">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium leading-none">{user.username}</span>
-                    <Badge
-                      variant={user.role === 'admin' ? 'success' : 'teal'}
-                      className="mt-0.5 text-[9px] px-1 py-0 h-4"
-                    >
-                      {user.role}
-                    </Badge>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground ml-1"
-                    title="Esci"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </button>
-                </div>
-              </>
-            )}
           </div>
         </header>
 

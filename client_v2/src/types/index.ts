@@ -1,9 +1,11 @@
 // Core types per l'applicazione Studio Dima V2
 
+export type UserRole = 'admin' | 'segreteria' | 'aso' | 'dottore' | 'user'
+
 export interface User {
   id: number
   username: string
-  role: 'admin' | 'user'
+  role: UserRole
   created_at: string
 }
 

@@ -12,6 +12,7 @@ from flask import Blueprint
 from flask_jwt_extended import jwt_required
 
 from app_v2 import format_response
+from utils.auth_utils import roles_required
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ def get_build_info():
 
 @admin_v2_bp.route('/admin/restart', methods=['POST'])
 @jwt_required()
+@roles_required('admin')
 def restart_server():
     """
     Riavvia il server con exit code 75.

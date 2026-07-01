@@ -35,8 +35,7 @@ class NotificationService:
             logger.error(f"Failed to broadcast notification via WebSocket: {e}")
 
         # 2. Send browser push notification (works even if browser is closed)
-        # Only send push for warning/error (urgent notifications)
-        if type in ['warning', 'error']:
+        if type in ['info', 'warning', 'error']:
             try:
                 from app_v2 import push_service
                 if push_service:

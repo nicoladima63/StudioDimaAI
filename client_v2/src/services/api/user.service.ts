@@ -1,17 +1,17 @@
 import { BaseService } from './base.service'
-import type { ApiResponse, PaginatedResponse, PaginationParams } from '@/types'
-import type { User } from '@/types/user' // Assuming User type is defined here
+import type { ApiResponse, UserRole } from '@/types'
+import type { User } from '@/types'
 
 interface CreateUserPayload {
   username: string
   password: string
-  role: 'admin' | 'user'
+  role: UserRole
 }
 
 interface UpdateUserPayload {
   username?: string
   password?: string
-  role?: 'admin' | 'user'
+  role?: UserRole
 }
 
 /**

@@ -11,6 +11,8 @@ import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type NavItem } from './_nav'
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible'
+import { useAuthStore } from '@/store/auth.store'
+import type { UserRole } from '@/types'
 
 const iconMap: Record<string, LucideIcon> = {
   LayoutDashboard, Play, Grid2x2, Mail, MessageCircle, Building2, ListOrdered,
@@ -90,10 +92,23 @@ interface AppSidebarNavProps {
   items: NavItem[]
 }
 
+function filterByRole(items: NavItem[], role: UserRole | undefined): NavItem[] {
+  return items
+    .filter(item => !item.allowedRoles || (role && item.allowedRoles.includes(role)))
+    .map(item => item.items
+      ? { ...item, items: filterByRole(item.items, role) }
+      : item
+    )
+    .filter(item => !item.items || item.items.length > 0)
+}
+
 const AppSidebarNav: React.FC<AppSidebarNavProps> = ({ items }) => {
+  const { user } = useAuthStore()
+  const visibleItems = filterByRole(items, user?.role as UserRole | undefined)
+
   return (
     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-      {items.map((item) => (
+      {visibleItems.map((item) => (
         <NavGroupItem key={item.name} item={item} />
       ))}
     </nav>

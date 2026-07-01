@@ -13,6 +13,9 @@ import ActiveWorkCard from '../components/ActiveWorkCard';
 import TodoWidget from '../components/TodoWidget';
 import { AutoSyncModal } from '@/features/calendar/components/AutoSyncModal';
 import { calendarHealthService } from '@/features/calendar/services/calendarHealthCheck';
+import { usePermissions } from '@/hooks/usePermissions'
+import KpiCard from '@/features/economics/components/KpiCard';
+
 
 
 
@@ -26,6 +29,8 @@ const Dashboard: React.FC = () => {
   // Auto-sync state
   const [showAutoSyncModal, setShowAutoSyncModal] = useState(false);
   const [autoSyncJobId, setAutoSyncJobId] = useState<string | null>(null);
+
+  const { hasRole } = usePermissions()
 
   useEffect(() => {
     loadStatus();
@@ -175,30 +180,25 @@ const Dashboard: React.FC = () => {
       {/* Welcome header */}
       <CRow className='mb-4'>
         <CCol>
-          <h1 className='h2 mb-2'>Benvenuto, {user?.username}!</h1>
-          <p className='text-muted mb-0'>
-            Panoramica del sistema Studio Dima V2 - Ultima connessione oggi
-          </p>
+          <h1 className='h2 mb-2'>Ciao {user?.username}!</h1>
         </CCol>
       </CRow>
 
-      {/* Main Content - 2 Columns */}
-      <CRow>
-        {/* Left Column - Todo Widget */}
-        <CCol lg={4}>
+      {/* Main Content  */}
+      <CRow className="g-3">
+        {/* Todo Widget — sempre visibile */}
+        <CCol xs={12} md={3}>
           <TodoWidget />
         </CCol>
 
-        {/* Right Column - Active Works, Monitor, Automations */}
-        <CCol lg={8}>
-          {/* Active Works */}
-          <CRow className="mb-4">
-            <CCol>
-              <ActiveWorkCard />
-            </CCol>
-          </CRow>
+        {/* Active Works — sempre visibile */}
+        <CCol xs={12} md={true}>
+          <ActiveWorkCard />
+        </CCol>
 
-          {/* Monitor */}
+        {/* Monitor — solo admin/dottore */}
+        {hasRole('admin','dottore') && (
+        <CCol xs={12} md={4}>
           <CRow className="mb-4">
             <CCol>
               {monitorSummary && (
@@ -278,41 +278,42 @@ const Dashboard: React.FC = () => {
               )}
             </CCol>
           </CRow>
-
-          {/* Automations */}
-          <CRow>
-            <CCol>
-              <CCard>
-                <CCardHeader>
-                  <CRow>
-                    <CCol md={6}>
-                      <h5 className='mb-0'>
-                        <CIcon icon={cilList} className='me-2' />
-                        Automazioni Configurate
-                      </h5>
-                    </CCol>
-                  </CRow>
-                </CCardHeader>
-                <CCardBody>
-                  <CRow>
-                    <CCol md={6}>
-                      <h6 className='mb-0'>Sincro Calendario</h6>
-                      <CalendarAutomation />
-                    </CCol>
-                    <CCol md={3}>
-                      <h6 className='mb-0'>Richiami</h6>
-                      <RecallAutomationCard />
-                    </CCol>
-                    <CCol md={3}>
-                      <h6 className='mb-0'>Promemoria</h6>
-                      <ReminderAutomationCard />
-                    </CCol>
-                  </CRow>
-                </CCardBody>
-              </CCard>
-            </CCol>
-          </CRow>
         </CCol>
+        )}
+
+        {/* Automazioni — solo admin/dottore */}
+        {hasRole('admin','dottore') && (
+        <CCol xs={12} md={true}>
+          <CCard>
+            <CCardHeader>
+              <CRow>
+                <CCol md={6}>
+                  <h5 className='mb-0'>
+                    <CIcon icon={cilList} className='me-2' />
+                    Automazioni Configurate
+                  </h5>
+                </CCol>
+              </CRow>
+            </CCardHeader>
+            <CCardBody>
+              <CRow>
+                <CCol md={6}>
+                  <h6 className='mb-0'>Sincro Calendario</h6>
+                  <CalendarAutomation />
+                </CCol>
+                <CCol md={3}>
+                  <h6 className='mb-0'>Richiami</h6>
+                  <RecallAutomationCard />
+                </CCol>
+                <CCol md={3}>
+                  <h6 className='mb-0'>Promemoria</h6>
+                  <ReminderAutomationCard />
+                </CCol>
+              </CRow>
+            </CCardBody>
+          </CCard>
+        </CCol>
+        )}
       </CRow>
 
       {/* Auto-Sync Modal */}
