@@ -267,8 +267,9 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
     except Exception as e:
         logger.warning(f"Errore Evolution API check WA: {e}")
 
-    # Fallback: non riusciamo a verificare, trattiamo come SMS
-    return False, None
+    # Fallback: Evolution non raggiungibile e nessuna cache → assume WA per numeri mobili
+    phone_norm_jid = phone_norm + '@s.whatsapp.net'
+    return True, phone_norm_jid
 
 
 def _save_wa_cache(patient_id: str, phone: str, has_wa: bool, jid: Optional[str]):

@@ -56,6 +56,7 @@ class TaskRepository(BaseRepository):
                         description TEXT,
                         status TEXT DEFAULT 'pending', -- pending, active, completed, skipped
                         order_index INTEGER DEFAULT 0,
+                        user_id TEXT,
                         provider_id TEXT,
                         completed_at TIMESTAMP,
                         completed_by TEXT, -- User ID

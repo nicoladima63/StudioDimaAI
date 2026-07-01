@@ -65,7 +65,8 @@ class WorkRepository(BaseRepository):
                         name TEXT NOT NULL,
                         description TEXT,
                         order_index INTEGER DEFAULT 0,
-                        provider_id TEXT, -- Specific provider for this step
+                        user_id TEXT,
+                        provider_id TEXT,
                         metadata TEXT DEFAULT '{}',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
