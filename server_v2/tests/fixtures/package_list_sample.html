@@ -1,0 +1,69 @@
+<div class="table-container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th class="orderable"><a href="?sort=patientID">Cod.</a></th>
+            <th class="orderable"><a href="?sort=patientName">Nome</a></th>
+            <th class="orderable"><a href="?sort=patientBirthDate">Data Nascita</a></th>
+            <th class="orderable"><a href="?sort=accessionNumber">Acc. Num.</a></th>
+            <th class="orderable"><a href="?sort=studyDate">Data Studio</a></th>
+            <th class="orderable"><a href="?sort=studyDescription">Descrizione</a></th>
+            <th class="orderable"><a href="?sort=assignedTo">Dentista</a></th>
+            <th class="orderable"><a href="?sort=downloadNumber">N.</a></th>
+            <th class="orderable"><a href="?sort=availableTill">Fino al</a></th>
+            <th class="orderable"><a href="?sort=imaging_center">Imaging center</a></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="even">
+            <td>111111</td>
+            <td>ROSSI^MARIO</td>
+            <td>13/08/2004</td>
+            <td>PO000001/2026T2</td>
+            <td>03/07/2026</td>
+            <td>TC DENTALE SETTORIALE (DENTALSCAN) CONE-BEAM</td>
+            <td>DI MARTINO NICOLA</td>
+            <td>1</td>
+            <td>12/08/2026</td>
+            <td>Centro Diagnostico ipr</td>
+            <td>
+<!--
+<a class="btn btn-primary" style="width:80px" onclick="scarica('aaaaaaaa-11111111-bbbbbbbb-22222222-cccccccc')">Scarica</a>
+-->
+<a class="btn btn-primary" style="width:80px" onclick="downloadUrl('aaaaaaaa-11111111-bbbbbbbb-22222222-cccccccc')">Scarica</a>
+<script>
+    function downloadUrl(studyID){
+        url = '/download/' + studyID;
+        window.open(url, '_blank');
+    }
+</script>
+</td>
+        </tr>
+        <tr class="odd">
+            <td>222222</td>
+            <td>VERDI^ANNA</td>
+            <td>13/11/1970</td>
+            <td>PO000002/2026T2</td>
+            <td>01/07/2026</td>
+            <td>RX ORTOPANTOMOGRAFICA ARCATE DENTARIE</td>
+            <td>DI MARTINO NICOLA</td>
+            <td>0</td>
+            <td>10/08/2026</td>
+            <td>Centro Diagnostico ipr</td>
+            <td>
+<!--
+<a class="btn btn-primary" style="width:80px" onclick="scarica('dddddddd-33333333-eeeeeeee-44444444-ffffffff')">Scarica</a>
+-->
+<a class="btn btn-primary" style="width:80px" onclick="downloadUrl('dddddddd-33333333-eeeeeeee-44444444-ffffffff')">Scarica</a>
+<script>
+    function downloadUrl(studyID){
+        url = '/download/' + studyID;
+        window.open(url, '_blank');
+    }
+</script>
+</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
