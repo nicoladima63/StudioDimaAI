@@ -12,6 +12,7 @@ Obiettivo: sostituire questo flusso manuale con una pagina dedicata in StudioDim
 
 `https://portaledentisti.alliancemedical.it/accounts/login/` — applicazione Django server-rendered ("myDentalShare"), non una SPA:
 - Login: form HTML standard con `csrfmiddlewaretoken` nascosto + campi `username`/`password`, POST su `/accounts/login/`
+- Dopo il login, il portale reindirizza a `/?next=/package-list/` → la pagina lista esami è `/package-list/`
 - Nessun JavaScript pesante lato client: automatizzabile con richieste HTTP dirette (`requests` + `BeautifulSoup`), senza browser headless
 
 ## Flusso end-to-end
@@ -108,7 +109,7 @@ Il progetto sta migrando da CoreUI a shadcn/ui (Radix + Tailwind) per le nuove f
 
 ## Rischi aperti / da validare in implementazione
 
-- Struttura HTML esatta della pagina lista-esami (nomi campi, formato data, URL di download, eventuale paginazione lato portale) non ancora ispezionata con un login autenticato reale — da verificare con credenziali di test durante l'implementazione
+- URL lista esami confermato: `/package-list/` (redirect post-login `/?next=/package-list/`). Struttura HTML esatta della pagina (nomi campi, formato data, URL di download, eventuale paginazione lato portale) non ancora ispezionata con un login autenticato reale — da verificare con credenziali di test durante l'implementazione
 - Da verificare se il link di download è diretto o richiede un passaggio intermedio (es. generazione asincrona del file)
 - Comportamento esatto in caso di ri-download di un esame già scaricato (warning vs blocco) da decidere durante i test
 
