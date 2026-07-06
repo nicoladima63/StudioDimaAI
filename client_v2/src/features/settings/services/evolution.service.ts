@@ -12,6 +12,13 @@ export interface RecentComm {
   created_at: string
 }
 
+export interface EvoMessage {
+  id: string
+  fromMe: boolean
+  text: string
+  timestamp: number
+}
+
 export interface EvolutionStatus {
   docker_daemon_running: boolean
   docker_running: boolean
@@ -68,6 +75,14 @@ const evolutionService = {
 
   async apiDeleteInstance(): Promise<void> {
     await apiClient.delete('/bot/whatsapp/instance')
+  },
+
+  async apiGetConversation(phone: string): Promise<{ messages: EvoMessage[]; jid: string }> {
+    const { data } = await apiClient.get('/bot/evolution/conversation', { params: { phone } })
+    if (!data.success) {
+      throw new Error(data.error || 'Errore recupero conversazione')
+    }
+    return data.data
   },
 }
 

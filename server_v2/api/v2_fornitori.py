@@ -12,6 +12,7 @@ from flask_jwt_extended import jwt_required
 from services.fornitori_service import FornitoriService
 from app_v2 import require_auth, format_response, handle_dbf_data
 from core.exceptions import ValidationError, DatabaseError
+from core.config_manager import get_config
 
 
 logger = logging.getLogger(__name__)
@@ -341,10 +342,9 @@ def get_spese_fornitore(fornitore_id):
         per_page = min(request.args.get('per_page', 10, type=int), 100)
         
         # Read directly from SPESAFOR.DBF
-        import os
         from dbfread import DBF
-        
-        spesafo_path = os.path.join('..', 'windent', 'DATI', 'SPESAFOR.DBF')
+
+        spesafo_path = get_config().get_dbf_path('spese')
         
         # Read all records from DBF
         fornitore_materials = []
@@ -453,10 +453,9 @@ def get_dettagli_fattura(fattura_id):
         # user_id = require_auth()
         
         # Read dettagli from VOCISPES.DBF only
-        import os
         from dbfread import DBF
-        
-        vocispes_path = os.path.join('..', 'windent', 'DATI', 'VOCISPES.DBF')
+
+        vocispes_path = get_config().get_dbf_path('voci_spese')
         
         # Get dettagli from VOCISPES.DBF
         dettagli = []

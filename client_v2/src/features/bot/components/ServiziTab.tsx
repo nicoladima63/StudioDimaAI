@@ -71,13 +71,6 @@ const ServiziTab: React.FC = () => {
                 </CBadge>
               </div>
 
-              <p className="small text-muted mb-1">
-                Istanza: <code>{import.meta.env.VITE_EVOLUTION_INSTANCE ?? 'studio-instance'}</code>
-              </p>
-              <p className="small text-muted mb-3">
-                URL: <code>https://wa.valorian.it</code>
-              </p>
-
               <div className="d-flex gap-2 mt-auto">
                 <CButton color="secondary" size="sm" onClick={load} disabled={loading}>
                   <CIcon icon={cilReload} className="me-1" />

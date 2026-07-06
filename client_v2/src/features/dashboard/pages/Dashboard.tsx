@@ -11,6 +11,7 @@ import MonitorPrestazioniService, { MonitorSummary, } from '@/services/api/monit
 import MonitorRules from '../components/MonitorRules';
 import ActiveWorkCard from '../components/ActiveWorkCard';
 import TodoWidget from '../components/TodoWidget';
+import WhatsAppStatusWidget from '../components/WhatsAppStatusWidget';
 import { AutoSyncModal } from '@/features/calendar/components/AutoSyncModal';
 import { calendarHealthService } from '@/features/calendar/services/calendarHealthCheck';
 import { usePermissions } from '@/hooks/usePermissions'
@@ -189,6 +190,11 @@ const Dashboard: React.FC = () => {
         {/* Todo Widget — sempre visibile */}
         <CCol xs={12} md={3}>
           <TodoWidget />
+        </CCol>
+
+        {/* Stato WhatsApp — sempre visibile */}
+        <CCol xs={12} md={1}>
+          <WhatsAppStatusWidget />
         </CCol>
 
         {/* Active Works — sempre visibile */}

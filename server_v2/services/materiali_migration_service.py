@@ -16,6 +16,7 @@ from .base_service import BaseService
 from utils.dbf_utils import DBFOptimizedReader, clean_materiali_data, normalize_dbf_data
 from core.exceptions import ValidationError, DatabaseError, DbfProcessingError
 from core.paths import STUDIO_DIMA_DB_PATH
+from core.config_manager import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -345,12 +346,13 @@ class MaterialiMigrationService(BaseService):
         """
         try:
             from dbfread import DBF
-            
-            # Percorsi dei file DBF
-            spesafo_path = os.path.join('..', 'windent', 'DATI', 'SPESAFOR.DBF')
-            fornitor_path = os.path.join('..', 'windent', 'DATI', 'FORNITOR.DBF')
-            vocispes_path = os.path.join('..', 'windent', 'DATI', 'VOCISPES.DBF')
-            
+
+            # Percorsi dei file DBF (risolti dal config manager, dev/prod-aware)
+            config = get_config()
+            spesafo_path = config.get_dbf_path('spese')
+            fornitor_path = config.get_dbf_path('fornitori')
+            vocispes_path = config.get_dbf_path('voci_spese')
+
             logger.info(f"Reading SPESAFOR.DBF from: {spesafo_path}")
             
             # Carica FORNITOR per i nomi fornitori
@@ -1274,12 +1276,13 @@ class MaterialiMigrationService(BaseService):
         """
         try:
             from dbfread import DBF
-            
-            # Percorsi dei file DBF
-            spesafo_path = os.path.join('..', 'windent', 'DATI', 'SPESAFOR.DBF')
-            fornitor_path = os.path.join('..', 'windent', 'DATI', 'FORNITOR.DBF')
-            vocispes_path = os.path.join('..', 'windent', 'DATI', 'VOCISPES.DBF')
-            
+
+            # Percorsi dei file DBF (risolti dal config manager, dev/prod-aware)
+            config = get_config()
+            spesafo_path = config.get_dbf_path('spese')
+            fornitor_path = config.get_dbf_path('fornitori')
+            vocispes_path = config.get_dbf_path('voci_spese')
+
             logger.info(f"Searching articles in SPESAFOR.DBF with query: {query}")
             
             # Carica FORNITOR per i nomi fornitori

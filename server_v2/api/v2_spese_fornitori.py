@@ -8,6 +8,7 @@ import os
 from dbfread import DBF
 from app_v2 import require_auth, format_response, handle_dbf_data
 from core.exceptions import ValidationError, DatabaseError
+from core.config_manager import get_config
 from services.materiali_migration_service import MaterialiMigrationService
 from services.spese_fornitori_service import spese_fornitori_service
 from services.fornitori_service import FornitoriService
@@ -413,8 +414,9 @@ def get_fattura_completa(fattura_id):
     try:
         # user_id = require_auth() # Uncomment if auth is fully enabled
         
-        spesafo_path = os.path.join('..', 'windent', 'DATI', 'SPESAFOR.DBF')
-        vocispes_path = os.path.join('..', 'windent', 'DATI', 'VOCISPES.DBF')
+        config = get_config()
+        spesafo_path = config.get_dbf_path('spese')
+        vocispes_path = config.get_dbf_path('voci_spese')
 
         invoice_header = None
         total_net_cost = 0.0
@@ -547,8 +549,8 @@ def get_dettagli_fattura(fattura_id):
         # Temporarily disable auth for testing
         # user_id = require_auth()
 
-        vocispes_path = os.path.join('..', 'windent', 'DATI', 'VOCISPES.DBF')
-        
+        vocispes_path = get_config().get_dbf_path('voci_spese')
+
         # Get dettagli from VOCISPES.DBF
         dettagli = []
         with DBF(vocispes_path, encoding='latin-1') as vocispes_table:

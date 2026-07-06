@@ -5,15 +5,16 @@ import {
   CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell,
   CRow, CCol,
+  CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
   cilReload, cilCheckCircle, cilWarning,
   cilPhone, cilBell, cilSettings, cilLink,
-  cilMediaPlay, cilMediaStop,
+  cilMediaPlay, cilMediaStop, cilChatBubble,
 } from '@coreui/icons'
 import PageLayout from '@/components/layout/PageLayout'
-import evolutionService, { type EvolutionStatus } from '../services/evolution.service'
+import evolutionService, { type EvolutionStatus, type RecentComm, type EvoMessage } from '../services/evolution.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -25,13 +26,6 @@ function statusColor(ok: boolean | undefined): TrafficLight {
   return ok ? 'success' : 'danger'
 }
 
-
-function waStateLabel(state: string): string {
-  const map: Record<string, string> = {
-    open: 'Connesso', close: 'Disconnesso', connecting: 'In connessione', unknown: 'Sconosciuto',
-  }
-  return map[state] ?? state
-}
 
 function channelBadge(channel: string) {
   return (
@@ -62,12 +56,14 @@ interface StatusCardProps {
 
 function StatusCard({ label, color = 'secondary', detail, icon, action }: StatusCardProps) {
   return (
-    <CCard className="text-center h-100">
-      <CCardBody className="py-3 d-flex flex-column align-items-center gap-2">
-        <CIcon icon={icon} size="xl" className={`text-${color}`} />
-        <div className="fw-semibold small">{label}</div>
-        {detail && <CBadge color={color} className="px-2 py-1">{detail}</CBadge>}
-        {action && <div className="mt-1 w-100">{action}</div>}
+    <CCard className="text-center">
+      <CCardBody className="py-2 d-flex flex-column gap-2">
+        <div className="d-flex align-items-center gap-2">
+          <CIcon icon={icon} size="lg" className={`text-${color} flex-shrink-0`} />
+          <div className="fw-semibold small text-truncate">{label}</div>
+          {detail && <CBadge color={color} className="px-2 py-1 ms-auto">{detail}</CBadge>}
+        </div>
+        {action && <div className="text-nowrap">{action}</div>}
       </CCardBody>
     </CCard>
   )
@@ -89,6 +85,25 @@ const EvolutionSettingsPage: React.FC = () => {
   const [launchingDesktop, setLaunchingDesktop] = useState(false)
   const [cmdOutput, setCmdOutput] = useState<{ text: string; ok: boolean } | null>(null)
   const [alert, setAlert] = useState<{ color: string; msg: string } | null>(null)
+  const [selectedComm, setSelectedComm] = useState<RecentComm | null>(null)
+  const [convMessages, setConvMessages] = useState<EvoMessage[]>([])
+  const [convLoading, setConvLoading] = useState(false)
+  const [convError, setConvError] = useState<string | null>(null)
+
+  const handleOpenConversation = async (c: RecentComm) => {
+    setSelectedComm(c)
+    setConvMessages([])
+    setConvError(null)
+    setConvLoading(true)
+    try {
+      const { messages } = await evolutionService.apiGetConversation(c.phone)
+      setConvMessages(messages)
+    } catch (err: unknown) {
+      setConvError(err instanceof Error ? err.message : 'Errore recupero conversazione')
+    } finally {
+      setConvLoading(false)
+    }
+  }
 
   const loadStatus = useCallback(async () => {
     setLoading(true)
@@ -260,13 +275,13 @@ const EvolutionSettingsPage: React.FC = () => {
       <CButton size="sm" color="primary" className="w-50" onClick={handleCreateInstance}
         disabled={creating || !status.evolution_reachable}>
         {creating ? <CSpinner size="sm" className="me-1" /> : null}
-        Crea istanza
+        Connetti
       </CButton>
     ) : (
       <CButton size="sm" color="danger" className="w-50" onClick={handleTerminateInstance}
         disabled={terminating}>
         {terminating ? <CSpinner size="sm" className="me-1" /> : null}
-        Termina istanza
+        Disconnesso
       </CButton>
     )
   ) : undefined
@@ -310,7 +325,6 @@ const EvolutionSettingsPage: React.FC = () => {
                   {
                     label: 'WhatsApp',
                     color: (status.wa_state === 'open' ? 'success' : status.wa_state === 'connecting' ? 'warning' : status.wa_state === 'close' ? 'danger' : 'secondary') as TrafficLight,
-                    detail: waStateLabel(status.wa_state),
                     icon: cilPhone, action: waAction,
                   },
                   {
@@ -349,22 +363,24 @@ const EvolutionSettingsPage: React.FC = () => {
             )}
 
             {/* Log reminder + QR affiancati */}
-            <CRow className="g-3">
+            <CRow className="g-3 align-items-start">
               <CCol xs={12} md={8}>
-                <CCard className="h-100">
-                  <CCardHeader><strong>Ultimi 10 reminder inviati</strong></CCardHeader>
+                <CCard>
+                  <CCardHeader><strong>Reminder inviati</strong></CCardHeader>
                   <CCardBody className="p-0">
                     {status.recent_communications.length === 0 ? (
                       <div className="text-muted text-center py-4">Nessuna comunicazione registrata</div>
                     ) : (
+                      <div style={{ maxHeight: 500, overflowY: 'auto' }}>
                       <CTable hover responsive small className="mb-0">
-                        <CTableHead>
+                        <CTableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                           <CTableRow>
                             <CTableHeaderCell>Paziente</CTableHeaderCell>
                             <CTableHeaderCell>Appuntamento</CTableHeaderCell>
                             <CTableHeaderCell>Canale</CTableHeaderCell>
                             <CTableHeaderCell>Stato</CTableHeaderCell>
                             <CTableHeaderCell>Inviato</CTableHeaderCell>
+                            <CTableHeaderCell></CTableHeaderCell>
                           </CTableRow>
                         </CTableHead>
                         <CTableBody>
@@ -377,10 +393,19 @@ const EvolutionSettingsPage: React.FC = () => {
                               <CTableDataCell className="text-muted small text-nowrap">
                                 {c.created_at?.slice(0, 16).replace('T', ' ')}
                               </CTableDataCell>
+                              <CTableDataCell>
+                                {c.channel === 'whatsapp' && (
+                                  <CButton color="success" variant="outline" size="sm"
+                                    onClick={() => handleOpenConversation(c)} title="Vedi conversazione">
+                                    <CIcon icon={cilChatBubble} />
+                                  </CButton>
+                                )}
+                              </CTableDataCell>
                             </CTableRow>
                           ))}
                         </CTableBody>
                       </CTable>
+                      </div>
                     )}
                   </CCardBody>
                 </CCard>
@@ -389,7 +414,7 @@ const EvolutionSettingsPage: React.FC = () => {
               {/* QR card: visibile solo se istanza esiste e non ancora connessa */}
               {status.instance_exists && status.wa_state !== 'open' && (
               <CCol xs={12} md={4}>
-                <CCard className="h-100">
+                <CCard>
                   <CCardHeader><strong>QR WhatsApp</strong></CCardHeader>
                   <CCardBody className="d-flex flex-column align-items-center gap-3">
                     {qr ? (
@@ -431,6 +456,47 @@ const EvolutionSettingsPage: React.FC = () => {
             </CRow>
           </>
         ) : null}
+
+        <CModal visible={!!selectedComm} onClose={() => setSelectedComm(null)} size="lg">
+          <CModalHeader>
+            <CModalTitle>{selectedComm?.patient_name} — chat WhatsApp</CModalTitle>
+          </CModalHeader>
+          <CModalBody style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+            {convLoading && <div className="text-center"><CSpinner color="primary" /></div>}
+            {!convLoading && convError && (
+              <CAlert color="warning" className="mb-0">{convError}</CAlert>
+            )}
+            {!convLoading && !convError && convMessages.map(m => (
+              <div
+                key={m.id}
+                className={`d-flex mb-3 ${m.fromMe ? 'justify-content-end' : 'justify-content-start'}`}
+              >
+                <div
+                  style={{
+                    maxWidth: '75%',
+                    padding: '8px 12px',
+                    borderRadius: '12px',
+                    backgroundColor: m.fromMe ? '#0d6efd' : '#e9ecef',
+                    color: m.fromMe ? '#fff' : '#212529',
+                    fontSize: '0.875rem',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {m.text}
+                  <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '4px', textAlign: 'right' }}>
+                    {m.timestamp ? new Date(m.timestamp * 1000).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {!convLoading && !convError && convMessages.length === 0 && (
+              <p className="text-muted text-center">Nessun messaggio</p>
+            )}
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="secondary" onClick={() => setSelectedComm(null)}>Chiudi</CButton>
+          </CModalFooter>
+        </CModal>
       </PageLayout.ContentBody>
     </PageLayout>
   )

@@ -809,7 +809,7 @@ def get_evolution_dashboard_status():
             SELECT id, patient_name, phone, channel, type, stato,
                    appointment_date, appointment_time, created_at
             FROM patient_communications
-            ORDER BY created_at DESC LIMIT 10
+            ORDER BY created_at DESC LIMIT 50
         """)
         status['recent_communications'] = [dict(r) for r in cur.fetchall()]
         conn.close()
@@ -817,6 +817,84 @@ def get_evolution_dashboard_status():
         pass
 
     return format_response(status)
+
+
+def _normalize_phone_to_jid(phone: str) -> str:
+    """Normalizza un numero italiano al JID WhatsApp (39xxxxxxxxxx@s.whatsapp.net)."""
+    phone = phone.strip().replace(' ', '').replace('-', '')
+    if phone.startswith('+39'):
+        phone = phone[1:]
+    elif phone.startswith('3') and len(phone) == 10:
+        phone = '39' + phone
+    return f'{phone}@s.whatsapp.net'
+
+
+def _extract_evo_text(message: dict) -> str:
+    """Estrae il testo da un oggetto message di Evolution/Baileys, qualunque sia il tipo."""
+    if not isinstance(message, dict):
+        return '[messaggio non supportato]'
+    return (
+        message.get('conversation')
+        or (message.get('extendedTextMessage') or {}).get('text')
+        or (message.get('imageMessage') or {}).get('caption')
+        or (message.get('videoMessage') or {}).get('caption')
+        or '[messaggio non supportato]'
+    )
+
+
+def _parse_evo_messages(raw) -> list:
+    """
+    Normalizza la risposta di Evolution POST /chat/findMessages/{instance} in una lista
+    ordinata cronologicamente di {id, fromMe, text, timestamp}.
+    La forma della risposta varia tra versioni Evolution: puo' essere un array diretto
+    oppure annidata sotto messages.records.
+    """
+    if isinstance(raw, dict):
+        records = raw.get('messages', {}).get('records') if isinstance(raw.get('messages'), dict) else raw.get('records')
+        records = records if isinstance(records, list) else []
+    elif isinstance(raw, list):
+        records = raw
+    else:
+        records = []
+
+    parsed = []
+    for r in records:
+        if not isinstance(r, dict):
+            continue
+        key = r.get('key', {})
+        parsed.append({
+            'id': key.get('id', ''),
+            'fromMe': bool(key.get('fromMe')),
+            'text': _extract_evo_text(r.get('message', {})),
+            'timestamp': r.get('messageTimestamp', 0),
+        })
+    parsed.sort(key=lambda m: m['timestamp'])
+    return parsed
+
+
+@bot_v2_bp.route('/bot/evolution/conversation', methods=['GET'])
+@jwt_required()
+def get_evolution_conversation():
+    """Recupera la cronologia messaggi WhatsApp live da Evolution per un numero di telefono."""
+    phone = request.args.get('phone', '').strip()
+    if not phone:
+        return format_response(success=False, error='phone richiesto'), 400
+
+    jid = _normalize_phone_to_jid(phone)
+    try:
+        r = requests.post(
+            f'{EVOLUTION_BASE_URL}/chat/findMessages/{EVOLUTION_INSTANCE}',
+            headers=_evo_headers(),
+            json={'where': {'key': {'remoteJid': jid}}, 'limit': 50},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            return format_response(success=False, error=f'Evolution API {r.status_code}', state='warning')
+        messages = _parse_evo_messages(r.json())
+        return format_response({'messages': messages, 'jid': jid})
+    except Exception as e:
+        logger.warning(f'Errore recupero conversazione Evolution ({jid}): {e}')
+        return format_response(success=False, error='Evolution non raggiungibile', state='warning')
 
 
 def _compose_dir() -> 'Path | None':
