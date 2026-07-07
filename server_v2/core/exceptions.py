@@ -326,3 +326,13 @@ class GmailApiError(StudioDimaError):
     Eccezione per errori durante le chiamate alle Gmail API.
     """
     pass
+
+
+# =============================================================================
+# CBCT / TAC EXCEPTIONS
+# =============================================================================
+
+
+class CbctError(StudioDimaError):
+    """Errore nel flusso di download/estrazione TAC dal portale Alliance Medical."""
+    pass
