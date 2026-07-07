@@ -22,16 +22,28 @@ export interface RisultatoDownload {
 
 export const cbctService = {
   async getListaEsami(): Promise<EsameCbct[]> {
-    const response = await apiClient.get('cbct/esami')
-    return response.data.data || []
+    try {
+      const response = await apiClient.get('cbct/esami')
+      return response.data.data || []
+    } catch (err: any) {
+      throw new Error(err.response?.data?.error || 'Errore caricamento lista esami dal portale')
+    }
   },
 
   async scaricaEsame(esame: EsameCbct): Promise<RisultatoDownload> {
-    const response = await apiClient.post(`cbct/esami/${esame.portal_exam_id}/scarica`, {
-      paziente_raw: esame.paziente_raw,
-      data_esame: esame.data_esame,
-    })
-    return response.data.data
+    try {
+      const response = await apiClient.post(
+        `cbct/esami/${esame.portal_exam_id}/scarica`,
+        {
+          paziente_raw: esame.paziente_raw,
+          data_esame: esame.data_esame,
+        },
+        { timeout: 300000 }
+      )
+      return response.data.data
+    } catch (err: any) {
+      throw new Error(err.response?.data?.error || 'Errore durante il download dell\'esame')
+    }
   },
 }
 

@@ -161,9 +161,12 @@ class CbctService(BaseService):
     def __init__(self, database_manager):
         super().__init__(database_manager)
         self._ensure_tables()
-        self.username = os.environ["ALLIANCE_USERNAME"]
-        self.password = os.environ["ALLIANCE_PASSWORD"]
-        self.archive_password = os.environ["ALLIANCE_ARCHIVE_PASSWORD"]
+        try:
+            self.username = os.environ["ALLIANCE_USERNAME"]
+            self.password = os.environ["ALLIANCE_PASSWORD"]
+            self.archive_password = os.environ["ALLIANCE_ARCHIVE_PASSWORD"]
+        except KeyError as e:
+            raise CbctError(f"Variabile di configurazione mancante: {e}. Verifica il file .env.")
         self.nas_path = os.environ.get("CBCT_NAS_PATH", r"\\servernas\cbct")
         self.sevenzip_path = os.environ.get("SEVENZIP_PATH", r"C:\Program Files\7-Zip\7z.exe")
 
@@ -203,7 +206,10 @@ class CbctService(BaseService):
         cognome, nome = parse_nome_paziente(paziente_raw)
         cartella_nome = build_cartella_nas(nome=nome, cognome=cognome, data_esame=data_esame)
         cartella_destinazione = Path(self.nas_path) / cartella_nome
-        cartella_destinazione.mkdir(parents=True, exist_ok=True)
+        try:
+            cartella_destinazione.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            raise CbctError(f"Impossibile creare la cartella su NAS ({cartella_destinazione}): {e}")
 
         client = AllianceMedicalClient(self.username, self.password)
         client.login()
@@ -236,7 +242,11 @@ class CbctService(BaseService):
             f"-o{cartella_destinazione}",
             str(archivio_path),
         ]
-        risultato = subprocess.run(comando, capture_output=True, text=True)
+        try:
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+        except FileNotFoundError:
+            raise CbctError(f"7-Zip non trovato al percorso configurato: {self.sevenzip_path}")
+
         if risultato.returncode != 0:
             raise CbctError(
                 f"Estrazione archivio fallita (7-Zip exit code {risultato.returncode}): {risultato.stderr.strip()}"
