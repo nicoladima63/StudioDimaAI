@@ -48,12 +48,14 @@ def test_parse_lista_esami_html_estrae_tutte_le_righe():
     assert secondo["download_count_portale"] == 0
 
 
-def test_merge_stato_esami_marca_gia_scaricato():
+def test_merge_stato_esami_marca_gia_scaricato_e_cartella():
     esami = [
         {"portal_exam_id": "aaa"},
         {"portal_exam_id": "bbb"},
     ]
-    risultato = merge_stato_esami(esami, id_scaricati={"aaa"})
+    risultato = merge_stato_esami(esami, download_di={"aaa": "BOTTA_NICCOLO__20260703"})
 
     assert risultato[0]["gia_scaricato"] is True
+    assert risultato[0]["cartella_nas"] == "BOTTA_NICCOLO__20260703"
     assert risultato[1]["gia_scaricato"] is False
+    assert risultato[1]["cartella_nas"] is None

@@ -76,10 +76,15 @@ def parse_lista_esami_html(html: str) -> list[dict]:
     return esami
 
 
-def merge_stato_esami(esami: list[dict], id_scaricati: set[str]) -> list[dict]:
-    """Aggiunge il flag gia_scaricato a ogni esame in base agli id già presenti in DB."""
+def merge_stato_esami(esami: list[dict], download_di: dict[str, str]) -> list[dict]:
+    """Aggiunge gia_scaricato e cartella_nas a ogni esame in base ai download già presenti in DB.
+
+    download_di: mappa portal_exam_id -> nome cartella NAS già scaricata.
+    """
     for esame in esami:
-        esame["gia_scaricato"] = esame["portal_exam_id"] in id_scaricati
+        cartella = download_di.get(esame["portal_exam_id"])
+        esame["gia_scaricato"] = cartella is not None
+        esame["cartella_nas"] = cartella
     return esami
 
 
@@ -195,43 +200,92 @@ class CbctService(BaseService):
         html = client.get_lista_esami_html()
         esami = parse_lista_esami_html(html)
 
-        righe = self.execute_query("SELECT portal_exam_id FROM cbct_downloads")
-        id_scaricati = {r["portal_exam_id"] for r in righe}
+        righe = self.execute_query("SELECT portal_exam_id, cartella_nas FROM cbct_downloads")
+        download_di = {r["portal_exam_id"]: r["cartella_nas"] for r in righe}
 
-        return merge_stato_esami(esami, id_scaricati)
+        esami = merge_stato_esami(esami, download_di)
+        for esame in esami:
+            if esame["cartella_nas"]:
+                esame["percorso_nas"] = str(Path(self.nas_path) / esame["cartella_nas"])
+            else:
+                esame["percorso_nas"] = None
+        return esami
 
     def scarica_ed_estrai(
         self, portal_exam_id: str, paziente_raw: str, data_esame: str, user_id: int | None = None
     ) -> dict:
         cognome, nome = parse_nome_paziente(paziente_raw)
-        cartella_nome = build_cartella_nas(nome=nome, cognome=cognome, data_esame=data_esame)
+        cartella_base = build_cartella_nas(nome=nome, cognome=cognome, data_esame=data_esame)
+        cartella_nome = self._cartella_nas_univoca(cartella_base, portal_exam_id)
         cartella_destinazione = Path(self.nas_path) / cartella_nome
+
         try:
-            cartella_destinazione.mkdir(parents=True, exist_ok=True)
-        except OSError as e:
-            raise CbctError(f"Impossibile creare la cartella su NAS ({cartella_destinazione}): {e}")
+            try:
+                cartella_destinazione.mkdir(parents=True, exist_ok=True)
+            except OSError as e:
+                raise CbctError(f"Impossibile creare la cartella su NAS ({cartella_destinazione}): {e}")
 
-        client = AllianceMedicalClient(self.username, self.password)
-        client.login()
+            client = AllianceMedicalClient(self.username, self.password)
+            client.login()
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            archivio_path = Path(tmp_dir) / f"{portal_exam_id}.rar"
-            client.scarica_archivio(portal_exam_id, archivio_path)
-            self._estrai_rar(archivio_path, cartella_destinazione)
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                archivio_path = Path(tmp_dir) / f"{portal_exam_id}.rar"
+                client.scarica_archivio(portal_exam_id, archivio_path)
+                self._estrai_rar(archivio_path, cartella_destinazione)
 
-        self.execute_command(
-            '''
-            INSERT INTO cbct_downloads (portal_exam_id, paziente, data_esame, cartella_nas, downloaded_by)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(portal_exam_id) DO UPDATE SET
-                cartella_nas = excluded.cartella_nas,
-                downloaded_at = CURRENT_TIMESTAMP,
-                downloaded_by = excluded.downloaded_by
-            ''',
-            (portal_exam_id, f"{nome} {cognome}", data_esame, cartella_nome, user_id),
+            self.execute_command(
+                '''
+                INSERT INTO cbct_downloads (portal_exam_id, paziente, data_esame, cartella_nas, downloaded_by)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(portal_exam_id) DO UPDATE SET
+                    cartella_nas = excluded.cartella_nas,
+                    downloaded_at = CURRENT_TIMESTAMP,
+                    downloaded_by = excluded.downloaded_by
+                ''',
+                (portal_exam_id, f"{nome} {cognome}", data_esame, cartella_nome, user_id),
+            )
+        except CbctError as e:
+            self._notifica_utente(
+                user_id, "Download TAC non riuscito", f"{nome} {cognome}: {e}"
+            )
+            raise
+
+        self._notifica_utente(
+            user_id, "Download TAC completato", f"Esame di {nome} {cognome} salvato in {cartella_nome}"
         )
+        return {
+            "portal_exam_id": portal_exam_id,
+            "cartella_nas": cartella_nome,
+            "percorso_nas": str(cartella_destinazione),
+        }
 
-        return {"portal_exam_id": portal_exam_id, "cartella_nas": cartella_nome}
+    def _cartella_nas_univoca(self, cartella_base: str, portal_exam_id: str) -> str:
+        """Se cartella_base e' gia' usata da un esame DIVERSO, aggiunge un suffisso numerico.
+
+        Serve per il caso di un paziente con piu' esami nello stesso giorno
+        (es. arcata superiore e arcata inferiore): stesso cognome/nome/data,
+        ma sono studi diversi e non devono finire nella stessa cartella.
+        """
+        candidata = cartella_base
+        suffisso = 2
+        while True:
+            riga = self.execute_single_query(
+                "SELECT portal_exam_id FROM cbct_downloads WHERE cartella_nas = ?", (candidata,)
+            )
+            if riga is None or riga["portal_exam_id"] == portal_exam_id:
+                return candidata
+            candidata = f"{cartella_base}_{suffisso}"
+            suffisso += 1
+
+    def _notifica_utente(self, user_id: int | None, titolo: str, corpo: str) -> None:
+        if not user_id:
+            return
+        try:
+            from app_v2 import push_service
+            if push_service:
+                push_service.send_notification(user_id=user_id, title=titolo, body=corpo, url="/cbct")
+        except Exception as e:
+            self.logger.error(f"Impossibile inviare notifica push per download CBCT: {e}")
 
     def _estrai_rar(self, archivio_path: Path, cartella_destinazione: Path) -> None:
         comando = [

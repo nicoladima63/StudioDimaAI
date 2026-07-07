@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
-import { RefreshCw, Loader2, Download, CheckCircle } from 'lucide-react'
+import { RefreshCw, Loader2, Download, CheckCircle, FolderOpen } from 'lucide-react'
 import PageLayout from '@/components/layout/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
-import cbctService, { type EsameCbct } from '@/features/cbct/services/cbct.service'
+import cbctService, { type EsameCbct, percorsoNasToFileUrl } from '@/features/cbct/services/cbct.service'
 
 const DownloadTacPage: React.FC = () => {
   const [esami, setEsami] = useState<EsameCbct[]>([])
@@ -123,16 +123,26 @@ const DownloadTacPage: React.FC = () => {
                         <p className="text-xs text-muted-foreground mt-0.5">{e.descrizione}</p>
                         <p className="text-xs text-muted-foreground">{e.data_esame}</p>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={busyIds.has(e.portal_exam_id) || loading}
-                        onClick={() => handleScarica(e)}
-                      >
-                        {busyIds.has(e.portal_exam_id)
-                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          : 'Scarica'}
-                      </Button>
+                      <div className="flex flex-col gap-1.5 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={busyIds.has(e.portal_exam_id) || loading}
+                          onClick={() => handleScarica(e)}
+                        >
+                          {busyIds.has(e.portal_exam_id)
+                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            : 'Scarica'}
+                        </Button>
+                        {e.percorso_nas && (
+                          <Button variant="ghost" size="sm" asChild>
+                            <a href={percorsoNasToFileUrl(e.percorso_nas)}>
+                              <FolderOpen className="h-3.5 w-3.5" />
+                              Apri
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -163,18 +173,28 @@ const DownloadTacPage: React.FC = () => {
                         </Badge>
                       </td>
                       <td className="px-3 py-2.5 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1"
-                          disabled={busyIds.has(e.portal_exam_id) || loading}
-                          onClick={() => handleScarica(e)}
-                        >
-                          {busyIds.has(e.portal_exam_id)
-                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            : <Download className="h-3.5 w-3.5" />}
-                          Scarica
-                        </Button>
+                        <div className="flex justify-end gap-1.5">
+                          {e.percorso_nas && (
+                            <Button variant="ghost" size="sm" className="gap-1" asChild>
+                              <a href={percorsoNasToFileUrl(e.percorso_nas)}>
+                                <FolderOpen className="h-3.5 w-3.5" />
+                                Apri
+                              </a>
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1"
+                            disabled={busyIds.has(e.portal_exam_id) || loading}
+                            onClick={() => handleScarica(e)}
+                          >
+                            {busyIds.has(e.portal_exam_id)
+                              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              : <Download className="h-3.5 w-3.5" />}
+                            Scarica
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}

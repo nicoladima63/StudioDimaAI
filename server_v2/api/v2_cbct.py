@@ -5,7 +5,7 @@ API endpoints per il download automatico delle TAC/CBCT dal portale Alliance Med
 import logging
 
 from flask import Blueprint, request, g
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from services.cbct_service import CbctService
 from app_v2 import format_response
@@ -43,8 +43,11 @@ def scarica_esame(portal_exam_id):
         if not paziente_raw or not data_esame:
             raise ValidationError("paziente_raw e data_esame sono obbligatori")
 
+        user = get_jwt_identity()
+        user_id = user['id'] if isinstance(user, dict) else user
+
         service = CbctService(g.database_manager)
-        risultato = service.scarica_ed_estrai(portal_exam_id, paziente_raw, data_esame)
+        risultato = service.scarica_ed_estrai(portal_exam_id, paziente_raw, data_esame, user_id=user_id)
         return format_response(
             data=risultato,
             message=f"Esame scaricato in {risultato['cartella_nas']}",

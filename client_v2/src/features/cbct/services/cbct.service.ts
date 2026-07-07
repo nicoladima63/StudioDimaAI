@@ -13,11 +13,19 @@ export interface EsameCbct {
   disponibile_fino_al: string
   imaging_center: string
   gia_scaricato: boolean
+  cartella_nas: string | null
+  percorso_nas: string | null
 }
 
 export interface RisultatoDownload {
   portal_exam_id: string
   cartella_nas: string
+  percorso_nas: string
+}
+
+/** Converte un percorso UNC (\\servernas\CBTC\CARTELLA) in un link file:// */
+export function percorsoNasToFileUrl(percorsoNas: string): string {
+  return 'file://' + percorsoNas.replace(/^\\\\/, '').replace(/\\/g, '/')
 }
 
 export const cbctService = {
