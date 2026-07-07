@@ -24,9 +24,9 @@ def test_parse_nome_paziente_senza_separatore_solleva_errore():
         parse_nome_paziente("BOTTA NICCOLO")
 
 
-def test_build_cartella_nas_formatta_nome_cognome_data():
+def test_build_cartella_nas_formatta_cognome_nome_data():
     cartella = build_cartella_nas(nome="NICCOLO'", cognome="BOTTA", data_esame="03/07/2026")
-    assert cartella == "NICCOLO_BOTTA__20260703"
+    assert cartella == "BOTTA_NICCOLO__20260703"
 
 
 def test_parse_lista_esami_html_estrae_tutte_le_righe():

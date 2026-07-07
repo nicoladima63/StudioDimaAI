@@ -30,9 +30,9 @@ def _sanitizza_componente_cartella(testo: str) -> str:
 
 
 def build_cartella_nas(nome: str, cognome: str, data_esame: str) -> str:
-    """Costruisce il nome cartella NOME_COGNOME__YYYYMMDD dalla data DD/MM/YYYY."""
+    """Costruisce il nome cartella COGNOME_NOME__YYYYMMDD dalla data DD/MM/YYYY."""
     data_dt = datetime.strptime(data_esame, "%d/%m/%Y")
-    return f"{_sanitizza_componente_cartella(nome)}_{_sanitizza_componente_cartella(cognome)}__{data_dt.strftime('%Y%m%d')}"
+    return f"{_sanitizza_componente_cartella(cognome)}_{_sanitizza_componente_cartella(nome)}__{data_dt.strftime('%Y%m%d')}"
 
 
 def parse_lista_esami_html(html: str) -> list[dict]:
@@ -167,7 +167,7 @@ class CbctService(BaseService):
             self.archive_password = os.environ["ALLIANCE_ARCHIVE_PASSWORD"]
         except KeyError as e:
             raise CbctError(f"Variabile di configurazione mancante: {e}. Verifica il file .env.")
-        self.nas_path = os.environ.get("CBCT_NAS_PATH", r"\\servernas\cbct")
+        self.nas_path = os.environ.get("CBCT_NAS_PATH", r"\\servernas\CBCT")
         self.sevenzip_path = os.environ.get("SEVENZIP_PATH", r"C:\Program Files\7-Zip\7z.exe")
 
     def _ensure_tables(self) -> None:
