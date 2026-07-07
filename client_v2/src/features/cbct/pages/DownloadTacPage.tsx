@@ -13,7 +13,7 @@ const DownloadTacPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [ricerca, setRicerca] = useState('')
-  const [busyId, setBusyId] = useState<string | null>(null)
+  const [busyIds, setBusyIds] = useState<Set<string>>(new Set())
 
   const loadEsami = useCallback(async () => {
     setLoading(true)
@@ -34,15 +34,19 @@ const DownloadTacPage: React.FC = () => {
   }, [loadEsami])
 
   const handleScarica = async (esame: EsameCbct) => {
+    setBusyIds((prev) => new Set(prev).add(esame.portal_exam_id))
+    setError(null)
     try {
-      setBusyId(esame.portal_exam_id)
-      setError(null)
       await cbctService.scaricaEsame(esame)
       await loadEsami()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Errore durante il download')
     } finally {
-      setBusyId(null)
+      setBusyIds((prev) => {
+        const next = new Set(prev)
+        next.delete(esame.portal_exam_id)
+        return next
+      })
     }
   }
 
@@ -122,10 +126,10 @@ const DownloadTacPage: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={busyId === e.portal_exam_id || loading}
+                        disabled={busyIds.has(e.portal_exam_id) || loading}
                         onClick={() => handleScarica(e)}
                       >
-                        {busyId === e.portal_exam_id
+                        {busyIds.has(e.portal_exam_id)
                           ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           : 'Scarica'}
                       </Button>
@@ -163,10 +167,10 @@ const DownloadTacPage: React.FC = () => {
                           variant="outline"
                           size="sm"
                           className="gap-1"
-                          disabled={busyId === e.portal_exam_id || loading}
+                          disabled={busyIds.has(e.portal_exam_id) || loading}
                           onClick={() => handleScarica(e)}
                         >
-                          {busyId === e.portal_exam_id
+                          {busyIds.has(e.portal_exam_id)
                             ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             : <Download className="h-3.5 w-3.5" />}
                           Scarica
