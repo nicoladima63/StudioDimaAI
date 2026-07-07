@@ -134,7 +134,7 @@ apiClient.interceptors.response.use(
     }
 
     // Handle other errors
-    const errorMessage = error.response?.data?.message || error.message || 'Errore sconosciuto'
+    const errorMessage = error.response?.data?.error || error.response?.data?.message || error.message || 'Errore sconosciuto'
     
     // Don't show toast for auth errors (handled by redirect)
     if (error.response?.status !== 401) {

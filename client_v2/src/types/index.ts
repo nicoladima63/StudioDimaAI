@@ -24,6 +24,7 @@ export interface ApiSuccessResponse<T> extends Omit<ApiResponse<T>, 'data' | 'su
 
 export interface ApiError {
   message: string
+  error?: string
   status: number
   code?: string
 }

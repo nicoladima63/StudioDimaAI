@@ -26,7 +26,7 @@ export const cbctService = {
       const response = await apiClient.get('cbct/esami')
       return response.data.data || []
     } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Errore caricamento lista esami dal portale')
+      throw new Error(err.message || 'Errore caricamento lista esami dal portale')
     }
   },
 
@@ -42,7 +42,7 @@ export const cbctService = {
       )
       return response.data.data
     } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Errore durante il download dell\'esame')
+      throw new Error(err.message || 'Errore durante il download dell\'esame')
     }
   },
 }
