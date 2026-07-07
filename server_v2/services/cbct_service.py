@@ -167,7 +167,7 @@ class CbctService(BaseService):
             self.archive_password = os.environ["ALLIANCE_ARCHIVE_PASSWORD"]
         except KeyError as e:
             raise CbctError(f"Variabile di configurazione mancante: {e}. Verifica il file .env.")
-        self.nas_path = os.environ.get("CBCT_NAS_PATH", r"\\servernas\CBCT")
+        self.nas_path = os.environ.get("CBCT_NAS_PATH", r"\\servernas\CBTC")
         self.sevenzip_path = os.environ.get("SEVENZIP_PATH", r"C:\Program Files\7-Zip\7z.exe")
 
     def _ensure_tables(self) -> None:
