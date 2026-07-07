@@ -5,7 +5,7 @@ import {
   Users, Phone, Package, Wallet, Receipt, UserCheck, UserCog, FileText,
   TestTube, Calendar, Settings, Activity, BarChart2, Layers, CheckSquare,
   Briefcase, ListChecks, TrendingUp, PieChart, BarChart, Target, Clock,
-  MessageSquare, Zap, Search, Wrench, Upload, ChevronDown,
+  MessageSquare, Zap, Search, Wrench, Upload, ChevronDown, ScanLine,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -19,7 +19,7 @@ const iconMap: Record<string, LucideIcon> = {
   Users, Phone, Package, Wallet, Receipt, UserCheck, UserCog, FileText,
   TestTube, Calendar, Settings, Activity, BarChart2, Layers, CheckSquare,
   Briefcase, ListChecks, TrendingUp, PieChart, BarChart, Target, Clock,
-  MessageSquare, Zap, Search, Wrench, Upload,
+  MessageSquare, Zap, Search, Wrench, Upload, ScanLine,
 }
 
 interface NavGroupProps {

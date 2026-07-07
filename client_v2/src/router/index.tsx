@@ -57,6 +57,7 @@ const EmailPage = React.lazy(() => import('@/features/email/pages/EmailPage'))
 const SeoPage = React.lazy(() => import('@/features/seo/pages/SeoPage'))
 const BotPage = React.lazy(() => import('@/features/bot/pages/BotPage'))
 const SimulationDashboard = React.lazy(() => import('@/features/simulation/pages/SimulationDashboard'))
+const DownloadTacPage = React.lazy(() => import('@/features/cbct/pages/DownloadTacPage'))
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -144,6 +145,9 @@ const AppRouter: React.FC = () => {
 
           {/* Simulation (Theoretical Flow) */}
           <Route path='simulation' element={<SimulationDashboard />} />
+
+          {/* CBCT / TAC */}
+          <Route path='cbct' element={<DownloadTacPage />} />
 
           {/* Catch-all for 404 */}
           {/* Future feature routes will be added here */}

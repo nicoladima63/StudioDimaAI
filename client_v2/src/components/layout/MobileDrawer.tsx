@@ -6,7 +6,7 @@ import {
   TestTube, Calendar, Settings, Activity, BarChart2, Layers, CheckSquare,
   Briefcase, ListChecks, TrendingUp, PieChart, BarChart, Target, Clock,
   MessageSquare, Zap, Search, Wrench, Upload, ChevronDown, ChevronRight,
-  LogOut, Sun, Moon,
+  LogOut, Sun, Moon, ScanLine,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -24,7 +24,7 @@ const iconMap: Record<string, LucideIcon> = {
   Users, Phone, Package, Wallet, Receipt, UserCheck, UserCog, FileText,
   TestTube, Calendar, Settings, Activity, BarChart2, Layers, CheckSquare,
   Briefcase, ListChecks, TrendingUp, PieChart, BarChart, Target, Clock,
-  MessageSquare, Zap, Search, Wrench, Upload,
+  MessageSquare, Zap, Search, Wrench, Upload, ScanLine,
 }
 
 interface MobileDrawerProps {

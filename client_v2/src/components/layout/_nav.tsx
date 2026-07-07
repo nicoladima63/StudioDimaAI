@@ -14,6 +14,7 @@ const navigation: NavItem[] = [
   { name: 'Eisenhower', to: '/eisenhower', iconName: 'Grid2x2', allowedRoles: ['admin', 'dottore', 'segreteria'] },
   { name: 'Email', to: '/email', iconName: 'Mail', allowedRoles: ['admin', 'dottore', 'segreteria'] },
   { name: 'Bot WhatsApp', to: '/bot', iconName: 'MessageCircle', allowedRoles: ['admin', 'segreteria'] },
+  { name: 'Download TAC', to: '/cbct', iconName: 'ScanLine' },
   {
     name: 'Gestione',
     iconName: 'Layers',
