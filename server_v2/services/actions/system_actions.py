@@ -186,7 +186,7 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
 
     # 3. Costruisci l'URL finale
     rendered_params = {k: str(v).format(**full_context) for k, v in url_params.items()}
-    base_url = f'https://studiodimartino.eu/#/{page_slug.lstrip("/")}'
+    base_url = f'https://studiodimartino.eu/{page_slug.lstrip("/")}'
     query = urlencode(rendered_params) if rendered_params else ''
     original_url = f"{base_url}?{query}" if query else base_url
 
