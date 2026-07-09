@@ -202,11 +202,29 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
     template_data = {'url': original_url, **full_context} # Usa original_url
     message = template_manager.render_template_by_id(template_id, template_data)
 
-    # 5. Invia l'SMS
-    logger.info(f"Invio SMS a {phone} con messaggio: '{message[:50]}...'")
-    result = sms_service.send_sms(phone, message, tag='auto_link')
-    
-    return {**result, 'final_url': original_url, 'original_url': original_url} # Usa original_url
+    # 5. Invia il messaggio: WhatsApp se il numero ce l'ha, altrimenti SMS
+    from services.appointment_reminder_service import check_whatsapp, send_whatsapp_text
+
+    id_key = COLONNE.get('pazienti', {}).get('id', 'DB_CODE')
+    patient_id = str(full_context.get(id_key, '')).strip()
+
+    result = None
+    channel = 'sms'
+    has_wa, _jid = check_whatsapp(patient_id, phone)
+    if has_wa:
+        wa_result = send_whatsapp_text(phone, message)
+        if wa_result.get('success'):
+            result = wa_result
+            channel = 'whatsapp'
+            logger.info(f"Invio WA a {phone} con messaggio: '{message[:50]}...'")
+        else:
+            logger.warning(f"Invio WA fallito per {phone} ({wa_result.get('error')}), fallback su SMS.")
+
+    if result is None:
+        logger.info(f"Invio SMS a {phone} con messaggio: '{message[:50]}...'")
+        result = sms_service.send_sms(phone, message, tag='auto_link')
+
+    return {**result, 'channel': channel, 'final_url': original_url, 'original_url': original_url} # Usa original_url
 
 @register_action(
     name='send_appointment_sms',

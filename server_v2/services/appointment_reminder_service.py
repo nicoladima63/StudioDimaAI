@@ -292,14 +292,9 @@ def _save_wa_cache(patient_id: str, phone: str, has_wa: bool, jid: Optional[str]
 # Invio messaggi
 # ---------------------------------------------------------------------------
 
-def send_whatsapp_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str, reminder_type: str) -> dict:
-    """Invia reminder via Evolution API WhatsApp."""
+def send_whatsapp_text(phone: str, text: str) -> dict:
+    """Invia un messaggio WhatsApp con testo libero via Evolution API."""
     phone_norm = _normalize_phone(phone)
-    parts = patient_name.split() if patient_name else []
-    nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
-    data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
-    tpl = REMINDER_MESSAGES[reminder_type]['wa']
-    text = tpl.format(nome=nome, data=data_fmt, ora=ap_time)
 
     from core.automation_config import get_automation_settings
     settings = get_automation_settings()
@@ -329,8 +324,18 @@ def send_whatsapp_reminder(phone: str, patient_name: str, ap_date: str, ap_time:
         logger.warning(f"Evolution API error {r.status_code}: {data}")
         return {'success': False, 'error': str(data)}
     except Exception as e:
-        logger.error(f"Errore invio WA reminder: {e}")
+        logger.error(f"Errore invio WA: {e}")
         return {'success': False, 'error': str(e)}
+
+
+def send_whatsapp_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str, reminder_type: str) -> dict:
+    """Invia reminder via Evolution API WhatsApp."""
+    parts = patient_name.split() if patient_name else []
+    nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
+    data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
+    tpl = REMINDER_MESSAGES[reminder_type]['wa']
+    text = tpl.format(nome=nome, data=data_fmt, ora=ap_time)
+    return send_whatsapp_text(phone, text)
 
 
 def send_sms_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str, reminder_type: str) -> dict:
