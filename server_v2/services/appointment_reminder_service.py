@@ -138,6 +138,9 @@ def get_upcoming_appointments(reminder_type: str, slot: str = 'all') -> list[dic
                 paz_id = str(record['DB_APPACOD']).strip()
                 if not paz_id:
                     continue
+                if ap_date.weekday() == 5:  # sabato: niente reminder (spesso appuntamenti rimandati)
+                    continue
+
                 ora_raw = str(record['DB_APOREIN']).strip()
                 ora_fmt = _ora_fmt(ora_raw)
                 ap_dt = datetime.combine(ap_date, datetime.strptime(ora_fmt, '%H:%M').time())
