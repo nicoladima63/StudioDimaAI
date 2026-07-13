@@ -81,6 +81,7 @@ const navigation: NavItem[] = [
       { name: 'Automazioni', to: '/settings/automazioni', iconName: 'Zap', allowedRoles: ['admin'] },
       { name: 'WhatsApp Reminder', to: '/settings/evolution', iconName: 'Phone'},
       { name: 'SEO', to: '/settings/seo', iconName: 'Search', allowedRoles: ['admin','dottore'] },
+      { name: 'Day Reminder', to: '/settings/day-reminder', iconName: 'CalendarCheck', allowedRoles: ['admin','dottore'] },
     ],
   },
   {

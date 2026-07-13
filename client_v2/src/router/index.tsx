@@ -37,6 +37,7 @@ const MonitorPrestazioniStandalonePage = React.lazy(() => import('@/features/set
 const AutomationPage = React.lazy(() => import('@/features/settings/pages/AutomationPage'))
 const SchedulerPage = React.lazy(() => import('@/features/scheduler/pages/SchedulerPage'))
 const EvolutionSettingsPage = React.lazy(() => import('@/features/settings/pages/EvolutionSettingsPage'))
+const DayReminderSettingsPage = React.lazy(() => import('@/features/settings/pages/DayReminderSettings'))
 
 // User Management
 const UserListPage = React.lazy(() => import('@/features/users/UserListPage'))
@@ -118,7 +119,8 @@ const AppRouter: React.FC = () => {
           <Route path='settings/scheduler' element={<SchedulerPage />} />
           <Route path='settings/seo' element={<SeoPage />} />
           <Route path='settings/evolution' element={<EvolutionSettingsPage />} />
-
+          <Route path='settings/day-reminder' element={<DayReminderSettingsPage />} />
+          
           {/* User Management Routes */}
           <Route path='users' element={<UserListPage />} />
           <Route path='users/new' element={<UserForm />} />
