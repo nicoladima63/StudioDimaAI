@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { 
   CFormSwitch, 
-  CButton, 
   CBadge, 
   CSpinner,
   CTooltip 
 } from '@coreui/react';
 import type { 
   EnvironmentSwitchProps, 
-  Environment, 
-  ServiceType,
+  Environment
+} from '../../../types/environment.types';
+import {
   ENVIRONMENT_DISPLAY_NAMES,
   ENVIRONMENT_COLORS 
 } from '../../../types/environment.types';

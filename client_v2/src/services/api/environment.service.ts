@@ -11,13 +11,24 @@ import type {
   SwitchEnvironmentResponse,
   BulkSwitchRequest,
   BulkSwitchResponse,
-  ValidationTestRequest,
-  TestConnectionRequest,
   ConnectionTestResult,
-  EnvironmentValidation,
+  EnvironmentValidation
+} from "../../types/environment.types";
+import {
   ServiceType,
   Environment
 } from "../../types/environment.types";
+
+const connectionFailure = (
+  environment: Environment,
+  message: string,
+  error?: string
+): ConnectionTestResult => ({
+  success: false,
+  environment,
+  message,
+  ...(error ? { error } : {})
+});
 
 class EnvironmentApiService {
   private readonly basePath = "/environment";
@@ -158,7 +169,7 @@ class EnvironmentApiService {
             success: false,
             environment: environment || Environment.DEV,
             message: 'Test fallito',
-            error: error.message
+            ...(error.message ? { error: error.message } : {})
           },
           message: 'Test fallito'
         }
@@ -177,12 +188,11 @@ class EnvironmentApiService {
         if (result.success && result.data) {
           testResults[service] = result.data.test_result;
         } else {
-          testResults[service] = {
-            success: false,
-            environment: Environment.DEV,
-            message: result.message || 'Test fallito',
-            error: result.error
-          };
+          testResults[service] = connectionFailure(
+            Environment.DEV,
+            result.message || 'Test fallito',
+            result.error
+          );
         }
       });
 
@@ -229,7 +239,7 @@ class EnvironmentApiService {
   }
 
   // === Utilities ===
-  async getServiceConfiguration(service: ServiceType, environment?: Environment): Promise<ApiResponse<Record<string, any>>> {
+  async getServiceConfiguration(service: ServiceType, _environment?: Environment): Promise<ApiResponse<Record<string, any>>> {
     try {
       const serviceResponse = await this.getServiceEnvironment(service);
       
@@ -319,90 +329,30 @@ class EnvironmentApiService {
     }
   }
 
-  // === Error handling helpers ===
-  private handleApiError(error: any, defaultMessage: string) {
-    const errorData = error.response?.data;
-    
-    return {
-      success: false,
-      error: errorData?.error || 'API_ERROR',
-      message: errorData?.message || error.message || defaultMessage,
-      status_code: error.response?.status
-    };
-  }
-
-  // === Retry mechanism ===
-  private async withRetry<T>(
-    operation: () => Promise<T>,
-    maxRetries: number = 3,
-    delay: number = 1000
-  ): Promise<T> {
-    let lastError: any;
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        return await operation();
-      } catch (error) {
-        lastError = error;
-        
-        // Non ritentare per errori client (4xx)
-        if (error.response?.status >= 400 && error.response?.status < 500) {
-          throw error;
-        }
-        
-        if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, delay * attempt));
-        }
-      }
-    }
-    
-    throw lastError;
-  }
-
   // === Specialized service methods ===
   
   // Database specific
   async testDatabaseConnection(environment?: Environment): Promise<ConnectionTestResult> {
     const result = await this.testServiceConnection(ServiceType.DATABASE, environment);
-    return result.data?.test_result || {
-      success: false,
-      environment: environment || Environment.DEV,
-      message: 'Test fallito',
-      error: result.error
-    };
+    return result.data?.test_result || connectionFailure(environment || Environment.DEV, 'Test fallito', result.error);
   }
 
   // SMS specific
   async testSMSConnection(environment?: Environment): Promise<ConnectionTestResult> {
     const result = await this.testServiceConnection(ServiceType.SMS, environment);
-    return result.data?.test_result || {
-      success: false,
-      environment: environment || Environment.TEST,
-      message: 'Test fallito',
-      error: result.error
-    };
+    return result.data?.test_result || connectionFailure(environment || Environment.TEST, 'Test fallito', result.error);
   }
 
   // Ricetta specific
   async testRicettaConnection(environment?: Environment): Promise<ConnectionTestResult> {
     const result = await this.testServiceConnection(ServiceType.RICETTA, environment);
-    return result.data?.test_result || {
-      success: false,
-      environment: environment || Environment.TEST,
-      message: 'Test fallito',
-      error: result.error
-    };
+    return result.data?.test_result || connectionFailure(environment || Environment.TEST, 'Test fallito', result.error);
   }
 
   // Rentri specific
   async testRentriConnection(environment?: Environment): Promise<ConnectionTestResult> {
     const result = await this.testServiceConnection(ServiceType.RENTRI, environment);
-    return result.data?.test_result || {
-      success: false,
-      environment: environment || Environment.DEV,
-      message: 'Test fallito',
-      error: result.error
-    };
+    return result.data?.test_result || connectionFailure(environment || Environment.DEV, 'Test fallito', result.error);
   }
 }
 
@@ -413,20 +363,20 @@ class EnvironmentApiService {
 export const getDatabaseStatus = async () => {
   const res = await environmentApi.getEnvironmentStatus();
   if (!res.success || !res.data) return { status: 'unknown' };
-  return res.data.services?.database || { status: 'unknown' };
+  return res.data.services?.[ServiceType.DATABASE] || { status: 'unknown' };
 };
 
 /**
  * Inverte l’ambiente del database (DEV <-> PROD o simile)
  */
 export const toggleDatabaseMode = async () => {
-  const current = await environmentApi.getServiceEnvironment('database');
+  const current = await environmentApi.getServiceEnvironment(ServiceType.DATABASE);
   if (!current.success || !current.data) throw new Error('Ambiente database non disponibile');
 
   const curr = current.data.current_environment?.toLowerCase();
-  const nextEnv = curr === 'dev' ? 'prod' : 'dev';
+  const nextEnv = curr === Environment.DEV ? Environment.PROD : Environment.DEV;
 
-  return environmentApi.switchServiceEnvironment('database', nextEnv as any);
+  return environmentApi.switchServiceEnvironment(ServiceType.DATABASE, nextEnv);
 };
 
 

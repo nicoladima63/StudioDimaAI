@@ -15,7 +15,6 @@ import WhatsAppStatusWidget from '../components/WhatsAppStatusWidget';
 import { AutoSyncModal } from '@/features/calendar/components/AutoSyncModal';
 import { calendarHealthService } from '@/features/calendar/services/calendarHealthCheck';
 import { usePermissions } from '@/hooks/usePermissions'
-import KpiCard from '@/features/economics/components/KpiCard';
 
 
 

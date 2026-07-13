@@ -12,8 +12,8 @@ const navigation: NavItem[] = [
   { name: 'Dashboard', to: '/dashboard', iconName: 'LayoutDashboard' },
   { name: 'Simulazione Flussi', to: '/simulation', iconName: 'Play', allowedRoles: ['admin', 'dottore'] },
   { name: 'Eisenhower', to: '/eisenhower', iconName: 'Grid2x2', allowedRoles: ['admin', 'dottore', 'segreteria'] },
-  { name: 'Email', to: '/email', iconName: 'Mail', allowedRoles: ['admin', 'dottore', 'segreteria'] },
-  { name: 'Bot WhatsApp', to: '/bot', iconName: 'MessageCircle', allowedRoles: ['admin', 'segreteria'] },
+  { name: 'Email', to: '/email', iconName: 'Mail' },
+  { name: 'Bot WhatsApp', to: '/bot', iconName: 'MessageCircle' },
   { name: 'Download TAC', to: '/cbct', iconName: 'ScanLine' },
   {
     name: 'Gestione',
@@ -22,10 +22,10 @@ const navigation: NavItem[] = [
       { name: 'Fornitori', to: '/fornitori', iconName: 'Building2', allowedRoles: ['admin'] },
       { name: 'Classifica Fornitori', to: '/fornitori/classificazione', iconName: 'ListOrdered', allowedRoles: ['admin'] },
       { name: 'Pazienti', to: '/pazienti', iconName: 'Users' },
-      { name: 'Richiami', to: '/pazienti/richiami', iconName: 'Phone', allowedRoles: ['admin', 'dottore', 'segreteria'] },
-      { name: 'Materiali', to: '/materiali', iconName: 'Package', allowedRoles: ['admin', 'aso', 'user'] },
-      { name: 'Conti', to: '/conti', iconName: 'Wallet', allowedRoles: ['admin'] },
-      { name: 'Spese', to: '/spese', iconName: 'Receipt', allowedRoles: ['admin'] },
+      { name: 'Richiami', to: '/pazienti/richiami', iconName: 'Phone' },
+      { name: 'Materiali', to: '/materiali', iconName: 'Package' },
+      { name: 'Conti', to: '/conti', iconName: 'Wallet' },
+      { name: 'Spese', to: '/spese', iconName: 'Receipt' },
       { name: 'Collaboratori', to: '/collaboratori', iconName: 'UserCheck', allowedRoles: ['admin'] },
       { name: 'Utenti', to: '/users', iconName: 'UserCog', allowedRoles: ['admin'] },
     ],
@@ -34,7 +34,7 @@ const navigation: NavItem[] = [
     name: 'Ricetta Elettronica',
     iconName: 'FileText',
     items: [
-      { name: 'NRE', to: '/ricetta', iconName: 'FileText', allowedRoles: ['admin', 'dottore'] },
+      { name: 'NRE', to: '/ricetta', iconName: 'FileText' },
       { name: 'Test Ricette', to: '/ricetta/test', iconName: 'TestTube', allowedRoles: ['admin', 'dottore'] },
     ],
   },
@@ -76,11 +76,11 @@ const navigation: NavItem[] = [
     name: 'Sistema',
     iconName: 'Settings',
     items: [
-      { name: 'Scheduler', to: '/settings/scheduler', iconName: 'Clock', allowedRoles: ['admin'] },
+      { name: 'Scheduler', to: '/settings/scheduler', iconName: 'Clock', allowedRoles: ['admin', 'dottore'] },
       { name: 'Template SMS', to: '/settings/template', iconName: 'MessageSquare', allowedRoles: ['admin'] },
       { name: 'Automazioni', to: '/settings/automazioni', iconName: 'Zap', allowedRoles: ['admin'] },
-      { name: 'WhatsApp Reminder', to: '/settings/evolution', iconName: 'Phone', allowedRoles: ['admin'] },
-      { name: 'SEO', to: '/settings/seo', iconName: 'Search', allowedRoles: ['admin'] },
+      { name: 'WhatsApp Reminder', to: '/settings/evolution', iconName: 'Phone'},
+      { name: 'SEO', to: '/settings/seo', iconName: 'Search', allowedRoles: ['admin','dottore'] },
     ],
   },
   {
@@ -88,7 +88,7 @@ const navigation: NavItem[] = [
     iconName: 'Wrench',
     items: [
       { name: 'Migrazione', to: '/materiali/migrazione', iconName: 'Upload', allowedRoles: ['admin'] },
-      { name: 'Classifica', to: '/materiali/ricerca', iconName: 'Search', allowedRoles: ['admin'] },
+      { name: 'Classifica', to: '/materiali/ricerca', iconName: 'Search'},
     ],
   },
 ]

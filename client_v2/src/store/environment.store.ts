@@ -1,21 +1,23 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  Environment,
+  ServiceType,
+} from "../types/environment.types";
 import type {
   EnvironmentStoreState,
   EnvironmentStoreActions,
-  Environment,
-  ServiceType,
   EnvironmentValidation,
   ConnectionTestResult,
-  ServiceStatus,
-  DEFAULT_ENVIRONMENT_CONFIG
+  ServiceStatus
 } from "../types/environment.types";
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minuti
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
 
-interface EnvironmentStore extends EnvironmentStoreState, EnvironmentStoreActions {}
+interface EnvironmentStore extends EnvironmentStoreState, EnvironmentStoreActions {
+  _isCacheValid: (cacheKey: string) => boolean;
+  _setCache: (cacheKey: string, value: any) => void;
+}
 
 export const useEnvironmentStore = create<EnvironmentStore>()(
   persist(
@@ -191,19 +193,20 @@ export const useEnvironmentStore = create<EnvironmentStore>()(
           const response = await environmentApi.getServiceEnvironment(service);
 
           if (response.success && response.data) {
+            const data = response.data;
             set(state => ({
               configurations: {
                 ...state.configurations,
-                [service]: response.data.configuration
+                [service]: data.configuration
               },
               validations: {
                 ...state.validations,
-                [service]: response.data.validation
+                [service]: data.validation
               }
             }));
 
             // Aggiorna cache
-            get()._setCache(cacheKey, response.data.configuration);
+            get()._setCache(cacheKey, data.configuration);
           }
         } catch (error: any) {
           console.error(`Errore caricamento config ${service}:`, error);
@@ -286,11 +289,11 @@ export const useEnvironmentStore = create<EnvironmentStore>()(
           const { environmentApi } = await import("../services/api/environment.service");
           const response = await environmentApi.testServiceConnection(service, environment);
 
-          const testResult = response.data?.test_result || {
+          const testResult: ConnectionTestResult = response.data?.test_result || {
             success: false,
             environment: environment || get().getEnvironment(service),
             message: response.message || 'Test fallito',
-            error: response.error
+            ...(response.error ? { error: response.error } : {})
           };
 
           set(state => ({
@@ -557,7 +560,7 @@ export const useEnvironmentTest = () => {
   const store = useEnvironmentStore();
   
   return {
-    testResult: null,
+    testResult: null as ConnectionTestResult | null,
     isTesting: store.isLoading,
     test: store.testConnection,
     isConnected: (service: ServiceType) => store.connectionTests[service]?.success || false,

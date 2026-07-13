@@ -54,7 +54,7 @@ export interface ApiResponse<T = any> {
 }
 
 export interface EnvironmentStatusResponse extends ApiResponse {
-  data: {
+  data?: {
     services: Record<string, ServiceStatus>;
     system_info: {
       instance_dir: string;
@@ -65,7 +65,7 @@ export interface EnvironmentStatusResponse extends ApiResponse {
 }
 
 export interface ServiceEnvironmentResponse extends ApiResponse {
-  data: {
+  data?: {
     service: string;
     current_environment: string;
     available_environments: string[];
@@ -79,7 +79,7 @@ export interface SwitchEnvironmentRequest {
 }
 
 export interface SwitchEnvironmentResponse extends ApiResponse {
-  data: {
+  data?: {
     service: string;
     previous_environment: string;
     current_environment: string;
@@ -93,7 +93,7 @@ export interface BulkSwitchRequest {
 }
 
 export interface BulkSwitchResponse extends ApiResponse {
-  data: {
+  data?: {
     total_changes: number;
     successful_changes: number;
     failed_changes: number;

@@ -15,6 +15,8 @@ import {
 import type { 
   EnvironmentPanelProps,
   ServiceType,
+} from '../../../types/environment.types';
+import {
   Environment
 } from '../../../types/environment.types';
 import { useEnvironmentBulk, useEnvironmentStatus } from '../../../store/environment.store';
@@ -45,7 +47,6 @@ const EnvironmentPanel: React.FC<EnvironmentPanelProps> = ({
   } = useEnvironmentBulk();
 
   const {
-    environments,
     validations,
     connectionTests,
     error
@@ -62,7 +63,7 @@ const EnvironmentPanel: React.FC<EnvironmentPanelProps> = ({
   };
 
   const handleBulkEnvironmentSwitch = async (targetEnvironment: Environment) => {
-    const changes: Record<ServiceType, Environment> = {};
+    const changes: Partial<Record<ServiceType, Environment>> = {};
     
     // Se nessun servizio selezionato, applica a tutti
     const servicesToChange = selectedServices.size > 0 
@@ -74,10 +75,10 @@ const EnvironmentPanel: React.FC<EnvironmentPanelProps> = ({
     });
 
     try {
-      const results = await bulkSwitch(changes);
+      await bulkSwitch(changes as Record<ServiceType, Environment>);
       
       if (onBulkChange) {
-        onBulkChange(changes);
+        onBulkChange(changes as Record<ServiceType, Environment>);
       }
 
       // Reset selezione dopo cambio
@@ -89,16 +90,7 @@ const EnvironmentPanel: React.FC<EnvironmentPanelProps> = ({
 
   const handleTestAll = async () => {
     try {
-      const servicesToTest = selectedServices.size > 0 
-        ? Array.from(selectedServices)
-        : services.map(s => s.service);
-
-      const testResults: Record<ServiceType, any> = {};
-      
-      for (const service of servicesToTest) {
-        const result = await bulkTest([service]);
-        Object.assign(testResults, result);
-      }
+      await bulkTest();
 
       if (onTestAll) {
         onTestAll();
@@ -276,12 +268,12 @@ const EnvironmentPanel: React.FC<EnvironmentPanelProps> = ({
                   <EnvironmentCard
                     service={serviceConfig.service}
                     title={serviceConfig.title}
-                    description={serviceConfig.description}
-                    badge={serviceConfig.badge}
+                    {...(serviceConfig.description ? { description: serviceConfig.description } : {})}
+                    {...(serviceConfig.badge ? { badge: serviceConfig.badge } : {})}
                     showTestButton={true}
                     showStatus={true}
                     compact={layout === 'horizontal'}
-                    onEnvironmentChange={(env) => {
+                    onEnvironmentChange={() => {
                       // Auto-selezione se cambio individuale
                       if (!selectedServices.has(serviceConfig.service)) {
                         setSelectedServices(new Set([serviceConfig.service]));

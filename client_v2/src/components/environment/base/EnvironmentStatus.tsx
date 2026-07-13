@@ -1,9 +1,10 @@
 import React from 'react';
 import { CBadge, CTooltip } from '@coreui/react';
 import type { 
-  EnvironmentStatusProps,
+  EnvironmentStatusProps
+} from '../../../types/environment.types';
+import {
   ENVIRONMENT_DISPLAY_NAMES,
-  ENVIRONMENT_COLORS,
   SERVICE_DISPLAY_NAMES
 } from '../../../types/environment.types';
 import { useEnvironmentSwitch, useEnvironmentTest } from '../../../store/environment.store';

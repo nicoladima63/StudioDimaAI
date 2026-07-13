@@ -13,8 +13,9 @@ import {
 } from '@coreui/react';
 import type { 
   EnvironmentCardProps, 
-  Environment,
-  SERVICE_DISPLAY_NAMES,
+  Environment
+} from '../../../types/environment.types';
+import {
   ENVIRONMENT_DISPLAY_NAMES,
   ENVIRONMENT_COLORS
 } from '../../../types/environment.types';
@@ -60,7 +61,7 @@ const EnvironmentCard: React.FC<EnvironmentCardProps> = ({
 
   const handleTest = async () => {
     try {
-      const result = await test(service);
+      await test(service);
       if (onTest) {
         onTest();
       }

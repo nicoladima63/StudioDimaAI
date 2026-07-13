@@ -1,0 +1,412 @@
+
+> studio-dima-client-v2@2.0.0 type-check
+> tsc --noEmit
+
+src/App.tsx(17,19): error TS6133: 'clearAuth' is declared but its value is never read.
+src/components/layout/_nav.01.tsx(22,3): error TS6133: 'cilMedicalCross' is declared but its value is never read.
+src/components/layout/_nav.01.tsx(23,3): error TS6133: 'cilFactory' is declared but its value is never read.
+src/components/layout/Header.tsx(19,53): error TS6133: 'CButton' is declared but its value is never read.
+src/components/layout/Header.tsx(19,62): error TS6133: 'CTooltip' is declared but its value is never read.
+src/components/layout/Header.tsx(20,1): error TS6133: 'pushService' is declared but its value is never read.
+src/components/layout/Header.tsx(21,1): error TS6133: 'cilPaperPlane' is declared but its value is never read.
+src/components/layout/Layout.tsx(3,35): error TS6133: 'Badge' is declared but its value is never read.
+src/components/layout/Layout.tsx(20,1): error TS6133: 'Button' is declared but its value is never read.
+src/components/modals/ConfirmDeleteModal.tsx(54,7): error TS2322: Type '"md"' is not assignable to type '"sm" | "lg" | "xl"'.
+src/components/modals/EditModal.tsx(68,9): error TS2862: Type 'T' is generic and can only be indexed for reading.
+src/components/modals/index.ts(14,40): error TS2614: Module '"./ModalFatturaDetail"' has no exported member 'FatturaDetail'. Did you mean to use 'import FatturaDetail from "./ModalFatturaDetail"' instead?
+src/components/modals/index.ts(14,55): error TS2614: Module '"./ModalFatturaDetail"' has no exported member 'DettaglioRigaFattura'. Did you mean to use 'import DettaglioRigaFattura from "./ModalFatturaDetail"' instead?
+src/components/modals/ModalFatturaDetail.tsx(237,39): error TS2339: Property 'id' does not exist on type 'DettaglioRigaFattura'.
+src/components/modals/ModalFatturaDetail.tsx(262,39): error TS2322: Type '"2xl"' is not assignable to type '"sm" | "lg" | "xl" | "custom" | "custom-size" | "xxl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl" | "8xl" | "9xl"'.
+src/components/selects/FornitoriSelect.tsx(30,9): error TS6133: 'store' is declared but its value is never read.
+src/components/selects/MaterialiSelect.tsx(29,73): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string | null'.
+  Type 'undefined' is not assignable to type 'string | null'.
+src/components/selects/PazientiSelect.tsx(32,9): error TS6133: 'store' is declared but its value is never read.
+src/components/selects/PrestazioniSelect.tsx(23,3): error TS6133: 'searchable' is declared but its value is never read.
+src/components/tables/DataTable.tsx(14,3): error TS6133: 'CDropdown' is declared but its value is never read.
+src/components/tables/DataTable.tsx(15,3): error TS6133: 'CDropdownToggle' is declared but its value is never read.
+src/components/tables/DataTable.tsx(16,3): error TS6133: 'CDropdownMenu' is declared but its value is never read.
+src/components/tables/DataTable.tsx(17,3): error TS6133: 'CDropdownItem' is declared but its value is never read.
+src/components/tables/DataTable.tsx(176,24): error TS6133: 'setColumnConfig' is declared but its value is never read.
+src/components/tables/DataTable.tsx(548,9): error TS6133: 'ColumnSelectorComponent' is declared but its value is never read.
+src/components/tables/DataTable.tsx(803,25): error TS6133: 'isActionsColumn' is declared but its value is never read.
+src/components/tables/DataTable.tsx(804,25): error TS6133: 'isLastColumn' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(10,3): error TS6133: 'CFormSelect' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(14,3): error TS6133: 'CFormCheck' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(17,54): error TS2724: '"@coreui/icons"' has no exported member named 'cilArrowRightLeft'. Did you mean 'cilArrowRight'?
+src/components/tables/DataTable2.tsx(17,54): error TS6133: 'cilArrowRightLeft' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(17,72): error TS6133: 'cilArrowCircleRight' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(55,3): error TS6133: 'pageSizeOptions' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(57,3): error TS6133: 'tableId' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(63,24): error TS6133: 'setItemsPerPage' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(90,26): error TS6133: 'setVisibleColumns' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(95,26): error TS6133: 'setOrderedColumns' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(103,10): error TS6133: 'justResized' is declared but its value is never read.
+src/components/tables/DataTable2.tsx(214,46): error TS6133: 'index' is declared but its value is never read.
+src/components/toggle/databaseToggle.tsx(19,13): error TS2322: Type 'ServiceStatus | { status: string; }' is not assignable to type 'DbResponse'.
+  Type 'ServiceStatus' is not assignable to type 'DbResponse'.
+src/components/toggle/databaseToggle.tsx(63,22): error TS6133: 'newStatus' is declared but its value is never read.
+src/components/toggle/databaseToggle.tsx(79,9): error TS2322: Type '{ id: string; color: string; checked: boolean; onChange: () => Promise<void>; disabled: boolean; shape: string; }' is not assignable to type 'IntrinsicAttributes & CFormSwitchProps & RefAttributes<HTMLInputElement>'.
+  Property 'shape' does not exist on type 'IntrinsicAttributes & CFormSwitchProps & RefAttributes<HTMLInputElement>'.
+src/components/ui/NotificationBell.tsx(16,10): error TS6133: 'hasError' is declared but its value is never read.
+src/components/ui/NotificationBell.tsx(19,9): error TS6133: 'isConnected' is declared but its value is never read.
+src/features/bot/components/ConversazioniTab.tsx(39,26): error TS2339: Property 'error' does not exist on type 'ConversazioniResponse'.
+src/features/bot/components/SimulazioneTab.tsx(4,66): error TS6133: 'CCardHeader' is declared but its value is never read.
+src/features/calendar/components/CalendarMainContent.tsx(44,66): error TS6133: 'setDbStatus' is declared but its value is never read.
+src/features/calendar/components/CalendarMainContent.tsx(374,55): error TS6133: 'message' is declared but its value is never read.
+src/features/calendar/components/CalendarMainContent.tsx(471,9): error TS2322: Type 'Element' is not assignable to type 'string'.
+src/features/calendar/components/CalendarSettingsContent.tsx(21,1): error TS6133: 'environmentApi' is declared but its value is never read.
+src/features/calendar/components/CalendarSettingsContent.tsx(22,33): error TS6133: 'SchedulerSettings' is declared but its value is never read.
+src/features/calendar/components/CalendarSettingsContent.tsx(62,10): error TS6133: 'showForceSyncConfirm' is declared but its value is never read.
+src/features/calendar/components/CalendarSettingsContent.tsx(133,85): error TS2339: Property 'synced' does not exist on type 'ClearJob'.
+src/features/calendar/components/CalendarSettingsContent.tsx(335,46): error TS2339: Property 'job_id' does not exist on type 'ApiResponse<{ job_id: string; }>'.
+src/features/calendar/components/CalendarSettingsContent.tsx(336,41): error TS2339: Property 'job_id' does not exist on type 'ApiResponse<{ job_id: string; }>'.
+src/features/calendar/components/CalendarSettingsContent.tsx(415,13): error TS2554: Expected 4-6 arguments, but got 8.
+src/features/calendar/components/CalendarSettingsContent.tsx(432,88): error TS2339: Property 'error' does not exist on type '{ job_id: string; }'.
+src/features/calendar/components/CalendarSettingsContent.tsx(454,9): error TS6133: 'handleForceResync' is declared but its value is never read.
+src/features/calendar/components/CalendarSettingsContent.tsx(489,39): error TS2304: Cannot find name 'calendarService'.
+src/features/calendar/components/CalendarSettingsContent.tsx(522,9): error TS2322: Type 'Element' is not assignable to type 'string'.
+src/features/conti/components/ContiTable.tsx(16,3): error TS6133: 'useBranche' is declared but its value is never read.
+src/features/conti/components/ContiTable.tsx(17,3): error TS6133: 'useSottoconti' is declared but its value is never read.
+src/features/conti/components/ContiTable.tsx(69,57): error TS6133: 'contoId' is declared but its value is never read.
+src/features/conti/components/ContiTable.tsx(158,29): error TS2322: Type '{ children: Element[]; size: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CTableProps & RefAttributes<HTMLTableElement>'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & CTableProps & RefAttributes<HTMLTableElement>'.
+src/features/conti/components/ContiTable.tsx(162,45): error TS2322: Type '{ children: string; width: string; }' is not assignable to type 'IntrinsicAttributes & CTableHeaderCellProps & RefAttributes<HTMLTableCellElement>'.
+  Property 'width' does not exist on type 'IntrinsicAttributes & CTableHeaderCellProps & RefAttributes<HTMLTableCellElement>'.
+src/features/conti/components/ContiTable.tsx(265,45): error TS2322: Type '{ children: Element[]; size: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CTableProps & RefAttributes<HTMLTableElement>'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & CTableProps & RefAttributes<HTMLTableElement>'.
+src/features/conti/components/ContiTable.tsx(269,61): error TS2322: Type '{ children: string; width: string; }' is not assignable to type 'IntrinsicAttributes & CTableHeaderCellProps & RefAttributes<HTMLTableCellElement>'.
+  Property 'width' does not exist on type 'IntrinsicAttributes & CTableHeaderCellProps & RefAttributes<HTMLTableCellElement>'.
+src/features/conti/pages/ContiPage.tsx(10,8): error TS6133: 'SearchResult' is declared but its value is never read.
+src/features/dashboard/components/CalendarAutomation.tsx(4,3): error TS6133: 'CFormLabel' is declared but its value is never read.
+src/features/dashboard/components/NewTodoModal.tsx(93,55): error TS2379: Argument of type '{ sender_id: number; recipient_id: number; subject: string; message: string | undefined; priority: string; due_date: string | undefined; type: string; }' is not assignable to parameter of type '{ sender_id: number; recipient_id: number; subject: string; message?: string; priority?: string; due_date?: string; type?: string; related_task_id?: number; related_step_id?: number; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'message' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/dashboard/components/RecallAutomationCard.tsx(2,53): error TS6133: 'CSpinner' is declared but its value is never read.
+src/features/dashboard/components/RecallAutomationCard.tsx(10,10): error TS6133: 'loading' is declared but its value is never read.
+src/features/dashboard/components/RecallAutomationCard.tsx(19,20): error TS2345: Argument of type 'boolean | undefined' is not assignable to parameter of type 'SetStateAction<boolean>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<boolean>'.
+src/features/dashboard/components/RecallAutomationCard.tsx(62,25): error TS6133: 'e' is declared but its value is never read.
+src/features/dashboard/components/ReminderAutomationCard.tsx(16,10): error TS6133: 'loading' is declared but its value is never read.
+src/features/dashboard/components/ReminderAutomationCard.tsx(25,20): error TS2345: Argument of type 'boolean | undefined' is not assignable to parameter of type 'SetStateAction<boolean>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<boolean>'.
+src/features/dashboard/components/ReminderAutomationCard.tsx(68,25): error TS6133: 'e' is declared but its value is never read.
+src/features/dashboard/components/ServicesStatusSection.tsx(86,70): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ServiceType'.
+src/features/dashboard/components/TodoModal.tsx(112,66): error TS2379: Argument of type '{ subject: string; message: string | undefined; priority: Todo["priority"]; due_date: string | undefined; }' is not assignable to parameter of type 'Partial<Todo>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'message' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/dashboard/components/TodoModal.tsx(120,53): error TS2379: Argument of type '{ sender_id: number; recipient_id: number; subject: string; message: string | undefined; priority: string; due_date: string | undefined; type: string; }' is not assignable to parameter of type '{ sender_id: number; recipient_id: number; subject: string; message?: string; priority?: string; due_date?: string; type?: string; related_task_id?: number; related_step_id?: number; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'message' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/economics/components/ComparisonChart.tsx(32,22): error TS2322: Type '(value: number) => string' is not assignable to type 'Formatter<number, NameType>'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/economics/components/ForecastChart.tsx(32,22): error TS2322: Type '(value: number) => string' is not assignable to type 'Formatter<number, NameType>'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/economics/components/MonthlyChart.tsx(33,22): error TS2322: Type '(value: number) => string' is not assignable to type 'Formatter<number, NameType>'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/economics/components/MultiYearChart.tsx(80,22): error TS2322: Type '(value: number) => string' is not assignable to type 'Formatter<number, NameType>'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/economics/components/ReportAppuntamenti.tsx(157,67): error TS18048: 'percent' is possibly 'undefined'.
+src/features/economics/components/ReportPrestazioni.tsx(8,77): error TS6133: 'Legend' is declared but its value is never read.
+src/features/economics/components/ReportPrestazioni.tsx(158,67): error TS18048: 'percent' is possibly 'undefined'.
+src/features/economics/components/ReportPrestazioni.tsx(162,32): error TS2322: Type '(v: number) => string' is not assignable to type 'Formatter<number, NameType>'.
+  Types of parameters 'v' and 'value' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/economics/components/ReportPrestazioni.tsx(205,28): error TS2322: Type '(v: number) => string' is not assignable to type 'Formatter<number, NameType>'.
+  Types of parameters 'v' and 'value' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/email/components/EmailRulesManager.tsx(167,69): error TS2345: Argument of type '{ scope_id: number; field: string; operator: string; value: string; priority: number; active: number; }' is not assignable to parameter of type 'Partial<EmailFilterRule>'.
+  Types of property 'field' are incompatible.
+    Type 'string' is not assignable to type '"body" | "subject" | "to" | "from" | "snippet"'.
+src/features/email/components/EmailRulesManager.tsx(196,76): error TS2345: Argument of type '{ value: string; scope_id: number; field: string; operator: string; priority: number; active: number; }' is not assignable to parameter of type 'Partial<EmailFilterRule>'.
+  Types of property 'field' are incompatible.
+    Type 'string' is not assignable to type '"body" | "subject" | "to" | "from" | "snippet"'.
+src/features/email/components/EmailRulesManager.tsx(206,59): error TS2345: Argument of type '{ scope_id: number; field: string; operator: string; value: string; priority: number; active: number; }' is not assignable to parameter of type 'Partial<EmailFilterRule>'.
+  Types of property 'field' are incompatible.
+    Type 'string' is not assignable to type '"body" | "subject" | "to" | "from" | "snippet"'.
+src/features/fornitori/components/ClassificazioneGerarchica.tsx(2,10): error TS6133: 'CRow' is declared but its value is never read.
+src/features/fornitori/components/ClassificazioneGerarchica.tsx(2,16): error TS6133: 'CCol' is declared but its value is never read.
+src/features/fornitori/components/ClassificazioneStatus.tsx(1,27): error TS6133: 'useEffect' is declared but its value is never read.
+src/features/fornitori/components/ClassificazioneStatus.tsx(93,9): error TS2554: Expected 3 arguments, but got 1.
+src/features/fornitori/components/ClassificazioneStatus.tsx(106,10): error TS2375: Type '{ fornitoreId: string; fornitoreNome: string | undefined; classificazione: ClassificazioneCosto | null; onClassificazioneChange: (nuova: ClassificazioneCosto | null) => void; }' is not assignable to type 'ClassificazioneGerarchicaProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'fornitoreNome' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/fornitori/components/ClassificazioneStatus.tsx(111,13): error TS2554: Expected 3 arguments, but got 1.
+src/features/fornitori/components/FornitoriTable.tsx(1,38): error TS6133: 'useMemo' is declared but its value is never read.
+src/features/fornitori/components/FornitoriTable.tsx(2,19): error TS6133: 'CBadge' is declared but its value is never read.
+src/features/fornitori/components/FornitoriTable.tsx(42,24): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/features/fornitori/components/FornitoriTable.tsx(93,7): error TS2820: Type '"classificazione_toggle"' is not assignable to type 'keyof Fornitore'. Did you mean '"classificazione"'?
+src/features/fornitori/components/FornitoriTable.tsx(99,16): error TS6133: 'value' is declared but its value is never read.
+src/features/fornitori/components/FornitoriTable.tsx(101,12): error TS2375: Type '{ fornitoreId: string; classificazioneIniziale: ClassificazioneCosto | undefined; onClassificazioneChange: (nuovaClassificazione: ClassificazioneCosto | null) => void; }' is not assignable to type 'ClassificazioneToggleProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'classificazioneIniziale' are incompatible.
+    Type 'ClassificazioneCosto | undefined' is not assignable to type 'ClassificazioneCosto | null'.
+      Type 'undefined' is not assignable to type 'ClassificazioneCosto | null'.
+src/features/fornitori/components/FornitoriTable.tsx(118,7): error TS2322: Type '"classificazione_gerarchica"' is not assignable to type 'keyof Fornitore'.
+src/features/fornitori/components/FornitoriTable.tsx(124,16): error TS6133: 'value' is declared but its value is never read.
+src/features/fornitori/components/FornitoriTable.tsx(133,37): error TS2559: Type 'number' has no properties in common with type 'ClassificazioneCosto'.
+src/features/fornitori/components/FornitoriTable.tsx(151,16): error TS6133: 'value' is declared but its value is never read.
+src/features/fornitori/pages/FornitoriClassificazione.tsx(192,14): error TS2375: Type '{ children: number; key: number; size: "sm"; color: string; variant: "outline" | undefined; onClick: () => void; }' is not assignable to type 'CButtonProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'variant' are incompatible.
+    Type '"outline" | undefined' is not assignable to type '"outline" | "ghost"'.
+      Type 'undefined' is not assignable to type '"outline" | "ghost"'.
+src/features/fornitori/pages/FornitoriPage.tsx(287,9): error TS2322: Type '{ visible: boolean; onClose: () => void; fatturaId: string | null; entitaType: string; onFetchFatturaDetail: (fatturaId: string) => Promise<FatturaDetail>; onFetchDettagliRighe: (fatturaId: string) => Promise<...>; }' is not assignable to type 'IntrinsicAttributes & ModalFatturaDetailProps'.
+  Property 'entitaType' does not exist on type 'IntrinsicAttributes & ModalFatturaDetailProps'.
+src/features/lavorazioni/TasksPage.tsx(14,5): error TS6133: 'CDropdown' is declared but its value is never read.
+src/features/lavorazioni/TasksPage.tsx(15,5): error TS6133: 'CDropdownToggle' is declared but its value is never read.
+src/features/lavorazioni/TasksPage.tsx(16,5): error TS6133: 'CDropdownMenu' is declared but its value is never read.
+src/features/lavorazioni/TasksPage.tsx(17,5): error TS6133: 'CDropdownItem' is declared but its value is never read.
+src/features/lavorazioni/TasksPage.tsx(28,35): error TS6133: 'cilOptions' is declared but its value is never read.
+src/features/lavorazioni/TasksPage.tsx(28,86): error TS6133: 'cilDeaf' is declared but its value is never read.
+src/features/lavorazioni/TasksPage.tsx(28,95): error TS6133: 'cilDelete' is declared but its value is never read.
+src/features/lavorazioni/TasksPage.tsx(193,11): error TS6133: 'handleCancelTask' is declared but its value is never read.
+src/features/lavorazioni/WorkDetailsPage.tsx(17,49): error TS6133: 'cilUser' is declared but its value is never read.
+src/features/lavorazioni/WorksPage.tsx(30,49): error TS6133: 'cilChevronTop' is declared but its value is never read.
+src/features/lavorazioni/WorksPage.tsx(30,64): error TS6133: 'cilChevronBottom' is declared but its value is never read.
+src/features/lavorazioni/WorksPage.tsx(31,30): error TS6133: 'Provider' is declared but its value is never read.
+src/features/materiali/components/ClassificazioneMaterialeModal.tsx(98,27): error TS2322: Type '{ value: number | null; onChange: (newContoId: number | null) => void; clearable: true; }' is not assignable to type 'IntrinsicAttributes & ContiSelectProps'.
+  Property 'clearable' does not exist on type 'IntrinsicAttributes & ContiSelectProps'.
+src/features/materiali/components/ClassificazioneMaterialeModal.tsx(111,27): error TS2322: Type '{ contoId: number | null; value: number | null; onChange: (newBrancaId: number | null) => void; clearable: true; }' is not assignable to type 'IntrinsicAttributes & BrancheSelectProps'.
+  Property 'clearable' does not exist on type 'IntrinsicAttributes & BrancheSelectProps'.
+src/features/materiali/components/ClassificazioneMaterialeModal.tsx(120,27): error TS2322: Type '{ brancaId: number | null; value: number | null; onChange: (newSottocontoId: number | null) => void; clearable: true; }' is not assignable to type 'IntrinsicAttributes & SottocontiSelectProps'.
+  Property 'clearable' does not exist on type 'IntrinsicAttributes & SottocontiSelectProps'.
+src/features/materiali/components/MaterialiAccordion.tsx(108,38): error TS2322: Type '{ children: Element[]; hover: true; responsive: true; size: string; }' is not assignable to type 'IntrinsicAttributes & CTableProps & RefAttributes<HTMLTableElement>'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & CTableProps & RefAttributes<HTMLTableElement>'.
+src/features/materiali/components/MaterialiTable.tsx(121,16): error TS6133: 'value' is declared but its value is never read.
+src/features/materiali/pages/MaterialiPage.tsx(16,63): error TS6133: 'updateMateriale' is declared but its value is never read.
+src/features/materiali/pages/RicercaArticoli.tsx(91,10): error TS6133: 'fornitori' is declared but its value is never read.
+src/features/materiali/pages/RicercaArticoli.tsx(93,10): error TS6133: 'risultatiFiltrati' is declared but its value is never read.
+src/features/materiali/pages/RicercaArticoli.tsx(328,68): error TS2339: Property 'materiale_id' does not exist on type '{ id: string; codice_articolo: string; classificazione: ClassificazioneMateriale; created_at: string; }'.
+src/features/materiali/pages/RicercaArticoli.tsx(570,43): error TS2339: Property 'target' does not exist on type 'string | string[]'.
+  Property 'target' does not exist on type 'string'.
+src/features/materiali/pages/RicercaArticoli.tsx(572,17): error TS2322: Type '{ options: never[]; placeholder: string; onChange: (e: string | string[]) => void; selected: string; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & SlimSelectProps'.
+  Property 'disabled' does not exist on type 'IntrinsicAttributes & SlimSelectProps'.
+src/features/materiali/pages/RicercaArticoli.tsx(640,44): error TS6133: 'index' is declared but its value is never read.
+src/features/pazienti/components/ModalRichiamoGestione.tsx(22,19): error TS6133: 'cilCalendar' is declared but its value is never read.
+src/features/pazienti/components/ModalRichiamoGestione.tsx(22,32): error TS6133: 'cilCheckCircle' is declared but its value is never read.
+src/features/pazienti/components/ModalRichiamoGestione.tsx(22,58): error TS6133: 'cilX' is declared but its value is never read.
+src/features/pazienti/components/ModalRichiamoGestione.tsx(96,67): error TS2379: Argument of type '{ paziente_id: string; da_richiamare: string; data_richiamo: string | undefined; }' is not assignable to parameter of type 'RichiamoStatusRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'data_richiamo' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/pazienti/components/ModalRichiamoGestione.tsx(157,9): error TS6133: 'getStatusBadge' is declared but its value is never read.
+src/features/pazienti/components/PazientiTable.tsx(76,7): error TS2820: Type '"stato_richiamo"' is not assignable to type 'keyof Paziente'. Did you mean '"tipo_richiamo"'?
+src/features/pazienti/components/PazientiTable.tsx(82,16): error TS6133: 'value' is declared but its value is never read.
+src/features/pazienti/components/PazientiTable.tsx(103,16): error TS6133: 'value' is declared but its value is never read.
+src/features/pazienti/components/RichiamoStatus.tsx(1,27): error TS6133: 'useEffect' is declared but its value is never read.
+src/features/pazienti/components/RichiamoStatus.tsx(27,22): error TS2339: Property 'is_in_richiami_table' does not exist on type 'Paziente'.
+src/features/pazienti/components/RichiamoStatus.tsx(27,57): error TS2339: Property 'tipo_richiamo_gestionale' does not exist on type 'Paziente'.
+src/features/pazienti/components/RichiamoStatus.tsx(39,19): error TS2339: Property 'is_in_richiami_table' does not exist on type 'Paziente'.
+src/features/pazienti/components/RichiamoStatus.tsx(39,52): error TS2339: Property 'tipo_richiamo_gestionale' does not exist on type 'Paziente'.
+src/features/pazienti/components/RichiamoStatus.tsx(42,39): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number | Date'.
+      Type 'undefined' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.
+src/features/pazienti/components/RichiamoStatus.tsx(44,49): error TS18048: 'paziente.tempo_richiamo' is possibly 'undefined'.
+src/features/pazienti/components/RichiamoStatus.tsx(57,39): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number | Date'.
+      Type 'undefined' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.
+src/features/pazienti/components/RichiamoStatus.tsx(59,49): error TS18048: 'paziente.tempo_richiamo' is possibly 'undefined'.
+src/features/pazienti/components/RichiamoStatus.tsx(124,33): error TS2339: Property 'tipo_richiamo_gestionale' does not exist on type 'Paziente'.
+src/features/pazienti/pages/PazientiPage.tsx(65,51): error TS2339: Property 'tessera_sanitaria' does not exist on type 'Paziente'.
+src/features/pazienti/pages/PazientiPage.tsx(127,11): error TS2322: Type '{ label: string; value: any; }[]' is not assignable to type 'CampoAnagrafica[]'.
+  Property 'key' is missing in type '{ label: string; value: any; }' but required in type 'CampoAnagrafica'.
+src/features/pazienti/pages/RichiamiPage.tsx(532,25): error TS2322: Type '{ children: Element; onClose: () => void; }' is not assignable to type 'IntrinsicAttributes & CModalHeaderProps & RefAttributes<HTMLDivElement>'.
+  Property 'onClose' does not exist on type 'IntrinsicAttributes & CModalHeaderProps & RefAttributes<HTMLDivElement>'.
+src/features/ricetta-elettronica/components/RicettaAvanzata.tsx(214,7): error TS2375: Type '{ codice: string; principio_attivo: string; descrizione: string; gruppo_equivalenza_codice: string | undefined; gruppo_equivalenza_descrizione: string | undefined; }' is not assignable to type 'Farmaco' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'gruppo_equivalenza_codice' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/ricetta-elettronica/components/RicettaAvanzata.tsx(262,48): error TS2379: Argument of type '{ nre: any; codice_pin: any; cf_medico: string; medico_cognome: any; medico_nome: any; specializzazione: string; nr_iscrizione_albo: string; cf_assistito: string; paziente_cognome: string; paziente_nome: string; ... 13 more ...; pdf_base64: any; }' is not assignable to parameter of type '{ nre: string; codice_pin: string; cf_medico: string; medico_cognome: string; medico_nome: string; specializzazione: string; nr_iscrizione_albo: string; cf_assistito: string; paziente_cognome: string; ... 14 more ...; pdf_base64?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'note' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/ricetta-elettronica/components/RicettaAvanzata.tsx(352,58): error TS2339: Property 'num_farmaci' does not exist on type 'Diagnosi'.
+src/features/ricetta-elettronica/components/RicettePaziente.tsx(28,8): error TS6133: 'RicettaPaziente' is declared but its value is never read.
+src/features/ricetta-elettronica/components/RicettePaziente.tsx(29,8): error TS6133: 'StatistichePaziente' is declared but its value is never read.
+src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx(6,3): error TS6133: 'CFormSelect' is declared but its value is never read.
+src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx(225,36): error TS2339: Property 'ts_response' does not exist on type 'ApiResponse<any[]>'.
+src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx(227,36): error TS2339: Property 'ts_response' does not exist on type 'ApiResponse<any[]>'.
+src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx(228,33): error TS2339: Property 'ts_response' does not exist on type 'ApiResponse<any[]>'.
+src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx(277,40): error TS2379: Argument of type '{ nre: string; codice_pin: string; cf_medico: string; medico_cognome: string; medico_nome: string; specializzazione: string; nr_iscrizione_albo: string; cf_assistito: string; paziente_cognome: string; ... 13 more ...; pdf_base64: string | undefined; }' is not assignable to parameter of type '{ nre: string; codice_pin: string; cf_medico: string; medico_cognome: string; medico_nome: string; specializzazione: string; nr_iscrizione_albo: string; cf_assistito: string; paziente_cognome: string; ... 14 more ...; pdf_base64?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'protocollo_transazione' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx(328,57): error TS2379: Argument of type '{ email_paziente: string; nome_paziente: string; pdf_base64: string; nre: string | undefined; }' is not assignable to parameter of type '{ email_paziente: string; nome_paziente: string; pdf_base64: string; nre?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'nre' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx(398,9): error TS6133: 'renderDettagliRicetta' is declared but its value is never read.
+src/features/ricetta-elettronica/components/TestInvioRicetta.tsx(73,7): error TS2741: Property 'id' is missing in type '{ codice: string; descrizione: string; }' but required in type 'Diagnosi'.
+src/features/ricetta-elettronica/hooks/usePazienteModals.ts(4,23): error TS2307: Cannot find module '@/api/client' or its corresponding type declarations.
+src/features/ricetta-elettronica/hooks/usePazienteModals.ts(38,69): error TS2339: Property 'mesi_richiamo' does not exist on type 'Paziente'.
+src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx(86,11): error TS2375: Type '{ id: string; nome: string; cognome: string; codice_fiscale: string; data_nascita: string | undefined; sesso: "M" | "F" | "N"; indirizzo: string | undefined; citta: string | undefined; ... 4 more ...; email: string | undefined; }' is not assignable to type 'Paziente' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'data_nascita' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/settings/components/monitor/MonitorRulesModal.tsx(184,19): error TS6133: 'selectedAction' is declared but its value is never read.
+src/features/settings/components/monitor/MonitorRulesModal.tsx(247,26): error TS2375: Type '{ onChange: Dispatch<SetStateAction<Trigger | null>>; initialPrestazione: Prestazione | null | undefined; }' is not assignable to type 'TriggerSourceSelectorProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'initialPrestazione' are incompatible.
+    Type 'Prestazione | null | undefined' is not assignable to type 'Prestazione | null'.
+      Type 'undefined' is not assignable to type 'Prestazione | null'.
+src/features/settings/components/monitor/TipiAppuntamentoSelect.tsx(2,53): error TS6133: 'CSpinner' is declared but its value is never read.
+src/features/settings/components/monitor/TriggerSourceSelector.tsx(80,11): error TS2322: Type '{ selectedPrestazione: Prestazione | null; onPrestazioneChange: Dispatch<SetStateAction<Prestazione | null>>; disabled: boolean | undefined; }' is not assignable to type 'IntrinsicAttributes & GestioneRegoleCardProps'.
+  Property 'disabled' does not exist on type 'IntrinsicAttributes & GestioneRegoleCardProps'.
+src/features/settings/components/monitor/TriggerSourceSelector.tsx(85,10): error TS2375: Type '{ value: string; onChange: Dispatch<SetStateAction<string>>; disabled: boolean | undefined; }' is not assignable to type 'TipiAppuntamentoSelectProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'disabled' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+src/features/settings/components/TemplateEditor.tsx(21,8): error TS2614: Module '"../services/templates.service"' has no exported member 'Template'. Did you mean to use 'import Template from "../services/templates.service"' instead?
+src/features/settings/components/TemplateEditor.tsx(22,8): error TS2614: Module '"../services/templates.service"' has no exported member 'TemplateValidation'. Did you mean to use 'import TemplateValidation from "../services/templates.service"' instead?
+src/features/settings/components/TemplateEditor.tsx(23,8): error TS2614: Module '"../services/templates.service"' has no exported member 'TemplatePreviewResult'. Did you mean to use 'import TemplatePreviewResult from "../services/templates.service"' instead?
+src/features/settings/components/TemplateEditor.tsx(23,8): error TS6133: 'TemplatePreviewResult' is declared but its value is never read.
+src/features/settings/components/TemplateEditor.tsx(83,45): error TS2339: Property 'apiGetTemplate' does not exist on type '{ getSmsTemplates(): Promise<SmsTemplate[]>; }'.
+src/features/settings/components/TemplateEditor.tsx(104,45): error TS2339: Property 'apiUpdateTemplate' does not exist on type '{ getSmsTemplates(): Promise<SmsTemplate[]>; }'.
+src/features/settings/components/TemplateEditor.tsx(135,45): error TS2339: Property 'apiResetTemplate' does not exist on type '{ getSmsTemplates(): Promise<SmsTemplate[]>; }'.
+src/features/settings/components/TemplateEditor.tsx(158,45): error TS2339: Property 'apiPreviewTemplate' does not exist on type '{ getSmsTemplates(): Promise<SmsTemplate[]>; }'.
+src/features/settings/components/TemplateEditor.tsx(280,49): error TS7006: Parameter 'warning' implicitly has an 'any' type.
+src/features/settings/components/TemplateEditor.tsx(280,58): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/features/settings/components/TemplateEditor.tsx(291,47): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/features/settings/components/TemplateEditor.tsx(291,54): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/features/settings/pages/CalendarSettings.tsx(21,33): error TS6133: 'SchedulerSettings' is declared but its value is never read.
+src/features/settings/pages/CalendarSettings.tsx(132,85): error TS2339: Property 'synced' does not exist on type 'ClearJob'.
+src/features/settings/pages/CalendarSettings.tsx(357,46): error TS2339: Property 'job_id' does not exist on type 'ApiResponse<{ job_id: string; }>'.
+src/features/settings/pages/CalendarSettings.tsx(358,41): error TS2339: Property 'job_id' does not exist on type 'ApiResponse<{ job_id: string; }>'.
+src/features/settings/pages/CalendarSettings.tsx(449,88): error TS2339: Property 'error' does not exist on type '{ job_id: string; }'.
+src/features/settings/pages/CalendarSettings.tsx(474,9): error TS2322: Type 'Element' is not assignable to type 'string'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(45,19): error TS2345: Argument of type 'MonitorSummary' is not assignable to parameter of type 'SetStateAction<MonitorStatus | null>'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(67,69): error TS2345: Argument of type '{ prevent_path: string; }' is not assignable to parameter of type 'string'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(89,56): error TS2554: Expected 1 arguments, but got 0.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(125,9): error TS6133: 'addLog' is declared but its value is never read.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(148,9): error TS6133: 'getLogBadgeColor' is declared but its value is never read.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(183,39): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(189,29): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(236,27): error TS2322: Type 'Dispatch<SetStateAction<Prestazione | null>>' is not assignable to type '(prestazioneId: string | null) => void'.
+  Types of parameters 'value' and 'prestazioneId' are incompatible.
+    Type 'string | null' is not assignable to type 'SetStateAction<Prestazione | null>'.
+      Type 'string' is not assignable to type 'SetStateAction<Prestazione | null>'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(238,45): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(266,37): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(269,53): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(270,29): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(274,62): error TS2339: Property 'prevent_path' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(276,69): error TS2339: Property 'cached_records' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(281,41): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniPage.tsx(282,29): error TS2339: Property 'is_running' does not exist on type 'MonitorStatus'.
+src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx(356,8): error TS2375: Type '{ visible: boolean; onClose: () => void; monitorId: string | null; monitorName: string; initialPrestazione: Prestazione | null; initialActionName: string | undefined; onRuleSaved: () => void; }' is not assignable to type 'MonitorRulesModalProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'initialActionName' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/settings/services/monitoring.service.ts(160,13): error TS6133: 'response' is declared but its value is never read.
+src/features/settings/services/monitoring.service.ts(179,13): error TS6133: 'response' is declared but its value is never read.
+src/features/settings/services/monitoring.service.ts(198,13): error TS6133: 'response' is declared but its value is never read.
+src/features/settings/services/monitoring.service.ts(217,13): error TS6133: 'response' is declared but its value is never read.
+src/features/settings/services/monitoring.service.ts(256,13): error TS6133: 'response' is declared but its value is never read.
+src/features/simulation/components/EmailSimulationTab.tsx(2,96): error TS6133: 'CTooltip' is declared but its value is never read.
+src/features/simulation/components/EmailSimulationTab.tsx(4,30): error TS6133: 'cilDescription' is declared but its value is never read.
+src/features/simulation/components/PreviewDialog.tsx(31,21): error TS2322: Type '{ children: Element; onClose: () => void; }' is not assignable to type 'IntrinsicAttributes & CModalHeaderProps & RefAttributes<HTMLDivElement>'.
+  Property 'onClose' does not exist on type 'IntrinsicAttributes & CModalHeaderProps & RefAttributes<HTMLDivElement>'.
+src/features/spese/components/RiepilogoSpeseTab.tsx(8,5): error TS6133: 'CFormInput' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(9,5): error TS6133: 'CButton' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(18,5): error TS6133: 'CNav' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(19,5): error TS6133: 'CNavItem' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(20,5): error TS6133: 'CNavLink' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(21,5): error TS6133: 'CTabContent' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(22,5): error TS6133: 'CTabPane' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(23,5): error TS6133: 'CBadge' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(25,1): error TS6133: 'CIcon' is declared but its value is never read.
+src/features/spese/components/RiepilogoSpeseTab.tsx(26,1): error TS6192: All imports in import declaration are unused.
+src/features/spese/components/RiepilogoSpeseTab.tsx(28,35): error TS6196: 'ProduzioneOperatore' is declared but never used.
+src/features/spese/components/RiepilogoSpeseTab.tsx(44,77): error TS2345: Argument of type 'number' is not assignable to parameter of type 'FiltriSpese'.
+src/features/spese/components/SpeseFilters.tsx(29,12): error TS6133: 'fornitori' is declared but its value is never read.
+src/features/spese/components/SpeseStats.tsx(2,40): error TS6133: 'CWidgetStatsA' is declared but its value is never read.
+src/features/spese/components/SpeseTable.tsx(2,87): error TS6133: 'CBadge' is declared but its value is never read.
+src/features/spese/index.ts(5,49): error TS2307: Cannot find module './components/FiltriSpese' or its corresponding type declarations.
+src/features/spese/pages/SpesePage.tsx(75,13): error TS2375: Type '{ codice_fornitore: string; page: number | undefined; limit: number; anno: number; mese?: number; data_inizio?: string; data_fine?: string; numero_documento?: string; fattura_id?: string; conto_id?: string | number; branca_id?: string | number; sottoconto_id?: string | number; }' is not assignable to type 'FiltriSpese' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'page' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/features/spese/services/spese.service.ts(4,3): error TS6196: 'RiepilogoSpeseFornitioriResponse' is declared but never used.
+src/features/spese/services/spese.service.ts(119,21): error TS6133: 'filtri' is declared but its value is never read.
+src/features/spese/utils/autoCategorization.ts(86,11): error TS2375: Type '{ contoid: number | null | undefined; contonome: string | null | undefined; brancaid: number | null | undefined; brancanome: string | null | undefined; sottocontoid: number | null | undefined; sottocontonome: string | ... 1 more ... | undefined; confidence: number; motivo: string; algoritmo: string; }' is not assignable to type 'ClassificazioneResult' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'contoid' are incompatible.
+    Type 'number | null | undefined' is not assignable to type 'number | null'.
+      Type 'undefined' is not assignable to type 'number | null'.
+src/features/spese/utils/studioClassification.ts(238,3): error TS2375: Type '{ sottoconto: StudioSottoconto; sottoconto_nome: string; confidence: number; motivo: string; pattern_utilizzato: string; suggerimenti: string[] | undefined; }' is not assignable to type 'StudioClassificazioneResult' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'suggerimenti' are incompatible.
+    Type 'string[] | undefined' is not assignable to type 'string[]'.
+      Type 'undefined' is not assignable to type 'string[]'.
+src/features/spese/utils/testCategorization.ts(7,10): error TS2305: Module '"./autoCategorization"' has no exported member 'categorizzaSpesaFornitoreSync'.
+src/features/spese/utils/testCategorization.ts(7,70): error TS2305: Module '"./autoCategorization"' has no exported member 'getStatisticheCategorizzazione'.
+src/features/spese/utils/testCategorization.ts(7,102): error TS2305: Module '"./autoCategorization"' has no exported member 'CategoriaSpesa'.
+src/features/spese/utils/testCategorization.ts(386,41): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/features/spese/utils/testCategorization.ts(451,41): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/features/tempo/pages/TempoPage.tsx(34,3): error TS6133: 'cilFilter' is declared but its value is never read.
+src/features/tempo/pages/TempoPage.tsx(38,3): error TS6133: 'cilChart' is declared but its value is never read.
+src/features/test/TestSelectPage.tsx(155,16): error TS2375: Type '{ fornitoreId: string | undefined; value: string | null; onChange: (selectedMateriale: Materiale | null) => void; }' is not assignable to type 'MaterialiSelectProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'fornitoreId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/features/users/UserListPage.tsx(15,18): error TS6133: 'loading' is declared but its value is never read.
+src/features/users/UserListPage.tsx(62,16): error TS6133: 'value' is declared but its value is never read.
+src/features/users/UserListPage.tsx(153,23): error TS2322: Type '{ children: Element; onClose: () => void; }' is not assignable to type 'IntrinsicAttributes & CModalHeaderProps & RefAttributes<HTMLDivElement>'.
+  Property 'onClose' does not exist on type 'IntrinsicAttributes & CModalHeaderProps & RefAttributes<HTMLDivElement>'.
+src/router/index.tsx(18,46): error TS1261: Already included file name 'C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/pazienti/pages/RichiamiPage.tsx' differs from file name 'C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/features/pazienti/pages/richiamiPage.tsx' only in casing.
+  The file is in the program because:
+    Imported via '@/features/pazienti/pages/RichiamiPage' from file 'C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/router/index.tsx'
+    Matched by include pattern 'src' in 'C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/tsconfig.json'
+src/router/index.tsx(124,45): error TS2739: Type '{}' is missing the following properties from type 'UserFormProps': userToEdit, onClose
+src/router/index.tsx(125,54): error TS2739: Type '{}' is missing the following properties from type 'UserFormProps': userToEdit, onClose
+src/services/api/services-status.service.ts(2,28): error TS6196: 'Environment' is declared but never used.
+src/services/api/services-status.service.ts(78,54): error TS2339: Property 'status' does not exist on type '{ instance_dir: string; cache_size: number; initialized: boolean; }'.
+src/services/pushService.ts(19,10): error TS6133: 'urlBase64ToUint8Array' is declared but its value is never read.
+src/services/pushService.ts(37,10): error TS6133: 'extractBase64FromPEM' is declared but its value is never read.
+src/services/ricette_ts.service.ts(15,3): error TS6196: 'Diagnosi' is declared but never used.
+src/services/ricette_ts.service.ts(16,3): error TS6196: 'Farmaco' is declared but never used.
+src/services/ricette_ts.service.ts(45,20): error TS6133: 'basePath' is declared but its value is never read.
+src/services/ricette_ts.service.ts(532,14): error TS18048: 'response.data' is possibly 'undefined'.
+src/services/ricette_ts.service.ts(542,14): error TS18048: 'response.data' is possibly 'undefined'.
+src/store/auth.store.ts(112,44): error TS2339: Property 'user' does not exist on type 'User'.
+src/store/conti.store.ts(318,43): error TS2551: Property 'contoid' does not exist on type 'Omit<Branca, "id">'. Did you mean 'contoId'?
+src/store/conti.store.ts(525,45): error TS2551: Property 'brancaid' does not exist on type 'Omit<Sottoconto, "id">'. Did you mean 'brancaId'?
+src/store/fake.ricetta.store.ts(15,3): error TS6196: 'EnvironmentConfig' is declared but never used.
+src/store/fake.ricetta.store.ts(16,3): error TS6196: 'RICETTA_FORM_DEFAULTS' is declared but never used.
+src/store/fake.ricetta.store.ts(20,7): error TS6133: 'SEARCH_DEBOUNCE' is declared but its value is never read.
+src/store/fake.ricetta.store.ts(95,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fake.ricetta.store.ts(118,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fake.ricetta.store.ts(253,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fake.ricetta.store.ts(303,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fake.ricetta.store.ts(334,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fake.ricetta.store.ts(362,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fake.ricetta.store.ts(408,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fake.ricetta.store.ts(472,19): error TS2339: Property 'ricettaApi' does not exist on type 'typeof import("C:/Users/NICOLA/Desktop/StudioDimaAI/client_v2/src/services/api/ricetta.service")'.
+src/store/fornitori.store.ts(136,17): error TS6133: 'total' is declared but its value is never read.
+src/store/prestazioni.store.ts(94,15): error TS2322: Type 'unknown[]' is not assignable to type 'CategoriaPrestazioni[]'.
+  Type 'unknown' is not assignable to type 'CategoriaPrestazioni'.
+src/store/prestazioni.store.ts(163,20): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/store/provider.store.ts(21,15): error TS6133: 'get' is declared but its value is never read.
+src/store/ricette.store.ts(5,7): error TS6133: 'CACHE_DURATION' is declared but its value is never read.
+src/store/user.store.ts(24,15): error TS6133: 'get' is declared but its value is never read.
+src/store/user.store.ts(72,15): error TS2322: Type 'User | undefined' is not assignable to type 'WritableDraft<User> | null'.
+  Type 'undefined' is not assignable to type 'WritableDraft<User> | null'.
+src/store/works.store.ts(21,15): error TS6133: 'get' is declared but its value is never read.
