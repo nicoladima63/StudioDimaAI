@@ -47,6 +47,19 @@ _REMINDER_SCHEMA_SQL = """
         communication_id INTEGER,
         received_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE TABLE IF NOT EXISTS studio_opening_hours (
+        day_of_week INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        enabled INTEGER DEFAULT 1,
+        continuous_hours INTEGER DEFAULT 0,
+        morning_start TEXT,
+        morning_end TEXT,
+        afternoon_start TEXT,
+        afternoon_end TEXT,
+        fascia_unica_start TEXT,
+        fascia_unica_end TEXT,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
 """
 
 
@@ -85,14 +98,79 @@ def _migrate_sqlite(conn: sqlite3.Connection):
         _add_column_if_missing(conn, "appointment_confirmations", "received_at", "received_at TEXT")
 
 
+def _insert_default_studio_hours(conn: sqlite3.Connection):
+    """Inserisce i dati di default per orari studio se tabella è vuota."""
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM studio_opening_hours")
+        if cur.fetchone()[0] > 0:
+            return  # Dati già presenti
+        
+        # Inserisci i tuoi orari
+        default_hours = [
+            (1, 'Lunedì',    1, 0, '09:00', '13:00', '15:00', '19:00', None, None),
+            (2, 'Martedì',   1, 1, None, None, None, None, '09:00', '16:00'),
+            (3, 'Mercoledì', 1, 0, '09:00', '13:00', '15:00', '19:00', None, None),
+            (4, 'Giovedì',   1, 0, '09:00', '13:00', '15:00', '19:00', None, None),
+            (5, 'Venerdì',   1, 1, None, None, None, None, '09:00', '16:00'),
+            (6, 'Sabato',    0, 0, '09:00', '13:00', None, None, None, None),
+            (7, 'Domenica',  0, 0, None, None, None, None, None, None),
+        ]
+        
+        cur.executemany("""
+            INSERT OR IGNORE INTO studio_opening_hours 
+            (day_of_week, name, enabled, continuous_hours, morning_start, morning_end, 
+             afternoon_start, afternoon_end, fascia_unica_start, fascia_unica_end)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, default_hours)
+        conn.commit()
+    except Exception as e:
+        logger.warning(f"Errore inserimento default studio hours: {e}")
+
+
 def ensure_reminder_tables() -> None:
     global _TABLES_ENSURED
     if _TABLES_ENSURED:
+        # Anche se già assicurato, verifica che studio_opening_hours esista
+        try:
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+            existing_tables = {
+                r[0] for r in conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                ).fetchall()
+            }
+            conn.close()
+            
+            if "studio_opening_hours" not in existing_tables:
+                # Tabella manca, creala e popola
+                conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS studio_opening_hours (
+                        day_of_week INTEGER PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        enabled INTEGER DEFAULT 1,
+                        continuous_hours INTEGER DEFAULT 0,
+                        morning_start TEXT,
+                        morning_end TEXT,
+                        afternoon_start TEXT,
+                        afternoon_end TEXT,
+                        fascia_unica_start TEXT,
+                        fascia_unica_end TEXT,
+                        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+                _insert_default_studio_hours(conn)
+                conn.commit()
+                conn.close()
+        except Exception as e:
+            logger.warning(f"Errore verifica tabella studio_opening_hours: {e}")
         return
+    
     try:
         conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
         conn.executescript(_REMINDER_SCHEMA_SQL)
         _migrate_sqlite(conn)
+        _insert_default_studio_hours(conn)
         conn.commit()
         conn.close()
         _TABLES_ENSURED = True

@@ -234,3 +234,72 @@ def get_wa_cache():
     except Exception as e:
         logger.error(f"Errore lettura wa_cache: {e}")
         return format_response(success=False, error=str(e)), 500
+
+
+@reminders_v2_bp.route('/settings/reminder-schedule', methods=['GET'])
+@jwt_required()
+def get_reminder_schedule():
+    """Legge configurazione orari studio per tutti i 7 giorni."""
+    from services.reminder_dispatch_engine import get_dispatch_engine
+    try:
+        engine = get_dispatch_engine()
+        config = engine.get_all_config()
+        
+        if not config:
+            return format_response(success=False, error="Nessuna configurazione trovata"), 404
+        
+        # Converti in lista ordinata per giorno
+        items = [config.get(i) for i in range(1, 8)]
+        return format_response({'items': items, 'total': 7})
+    except Exception as e:
+        logger.error(f"Errore lettura reminder schedule: {e}")
+        return format_response(success=False, error=str(e)), 500
+
+
+@reminders_v2_bp.route('/settings/reminder-schedule/<int:day_of_week>', methods=['PUT'])
+@jwt_required()
+def update_reminder_schedule(day_of_week: int):
+    """
+    Aggiorna configurazione orari per un giorno specifico.
+    
+    Body JSON:
+    {
+        "enabled": 1,
+        "continuous_hours": 0,
+        "morning_start": "09:00",
+        "morning_end": "13:00",
+        "afternoon_start": "15:00",
+        "afternoon_end": "19:00",
+        "fascia_unica_start": null,
+        "fascia_unica_end": null
+    }
+    """
+    from services.reminder_dispatch_engine import get_dispatch_engine
+    
+    if not (1 <= day_of_week <= 7):
+        return format_response(success=False, error="day_of_week deve essere tra 1 e 7"), 400
+    
+    body = request.get_json() or {}
+    
+    try:
+        engine = get_dispatch_engine()
+        success = engine.update_config(day_of_week, body)
+        
+        if not success:
+            return format_response(success=False, error="Nessun campo da aggiornare"), 400
+        
+        # Leggi config aggiornata
+        updated = engine.get_config(day_of_week)
+        
+        # Reschedula APScheduler job
+        try:
+            from services.scheduler_service import scheduler_service
+            if scheduler_service:
+                scheduler_service.schedule_appointment_reminders()
+        except Exception as e:
+            logger.warning(f"Errore reschedule job: {e}")
+        
+        return format_response(updated)
+    except Exception as e:
+        logger.error(f"Errore update reminder schedule: {e}")
+        return format_response(success=False, error=str(e)), 500

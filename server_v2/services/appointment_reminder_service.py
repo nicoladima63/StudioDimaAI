@@ -112,16 +112,34 @@ def get_upcoming_appointments(reminder_type: str, slot: str = 'all') -> list[dic
     Legge APPUNTA.DBF e restituisce gli appuntamenti da notificare.
 
     reminder_type '24h': appuntamenti di DOMANI (data == domani)
-      slot='morning'   -> ore < 13:00
-      slot='afternoon' -> ore >= 13:00
+      slot='morning'   -> ore < morning_end (da config DB)
+      slot='afternoon' -> ore >= morning_end (da config DB)
       slot='all'       -> tutti (fallback)
     reminder_type '2h':  appuntamenti tra 90 e 150 minuti da adesso
     """
+    from services.reminder_dispatch_engine import get_dispatch_engine
+    
     now = datetime.now(ROME_TZ).replace(tzinfo=None)  # ora legale corretta per Roma
     tomorrow = (now + timedelta(days=1)).date()
 
     ap_path = _dbf_path('APPUNTA')
     paz_path = _dbf_path('pazienti')
+
+    # --- Leggi config dispatch engine ---
+    engine = get_dispatch_engine()
+    
+    # Determina giorno di domani per check abilitazione
+    tomorrow_weekday = tomorrow.weekday()  # 0=Lun, ..., 6=Dom
+    tomorrow_day_of_week = (tomorrow_weekday + 1)  # Converti a nostro formato (1=Lun, ..., 7=Dom)
+    
+    # Se domani è disabilitato nel config, non mandare reminder
+    if not engine.should_send_today(tomorrow_weekday):
+        return []
+    
+    # Ottieni soglia mattina/pomeriggio per domani (usato solo in split mode)
+    morning_threshold = engine.get_morning_threshold_hour(tomorrow_day_of_week)
+    if morning_threshold is None:
+        morning_threshold = 13  # Default fallback
 
     # --- Appuntamenti ---
     rows = []
@@ -138,8 +156,6 @@ def get_upcoming_appointments(reminder_type: str, slot: str = 'all') -> list[dic
                 paz_id = str(record['DB_APPACOD']).strip()
                 if not paz_id:
                     continue
-                if ap_date.weekday() == 5:  # sabato: niente reminder (spesso appuntamenti rimandati)
-                    continue
 
                 ora_raw = str(record['DB_APOREIN']).strip()
                 ora_fmt = _ora_fmt(ora_raw)
@@ -149,9 +165,9 @@ def get_upcoming_appointments(reminder_type: str, slot: str = 'all') -> list[dic
                     if ap_date != tomorrow:
                         continue
                     if slot == 'morning':
-                        match = (ap_dt.hour < 13)
+                        match = (ap_dt.hour < morning_threshold)
                     elif slot == 'afternoon':
-                        match = (ap_dt.hour >= 13)
+                        match = (ap_dt.hour >= morning_threshold)
                     else:
                         match = True
                 else:

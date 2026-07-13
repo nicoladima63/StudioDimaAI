@@ -359,6 +359,8 @@ class SchedulerService:
         Schedula i job reminder appuntamenti.
 
         24h: due esecuzioni giornaliere (ore 8 per appuntamenti mattina, ore 14 per pomeriggio).
+             Il dispatch engine decide dinamicamente se mandare split (morning+afternoon) 
+             o continuous (tutto insieme nella mattina) basandosi su studio_opening_hours.
         2h:  ogni 30 minuti dalle 7 alle 20.
         """
         settings = get_automation_settings()
@@ -382,24 +384,47 @@ class SchedulerService:
         if enabled_24h:
             def job_24h_morning():
                 from services.appointment_reminder_service import run_reminders
+                from services.reminder_dispatch_engine import get_dispatch_engine
+                from datetime import datetime
+                
+                engine = get_dispatch_engine()
+                tomorrow_weekday = datetime.now().weekday()  # 0=Lun, ..., 6=Dom
+                tomorrow_day_of_week = ((tomorrow_weekday + 1) % 7) + 1  # Converti (1=Lun, ..., 7=Dom)
+                
+                # Se continuous, manda TUTTO al mattino; altrimenti solo mattina
+                dispatch_mode = engine.dispatch_mode(tomorrow_day_of_week)
+                slot = 'all' if dispatch_mode == 'continuous' else 'morning'
+                
                 try:
-                    run_reminders('24h', slot='morning')
+                    run_reminders('24h', slot=slot)
                 except Exception as e:
                     logger.error(f"[REMINDER 24h morning] Errore: {e}")
 
             def job_24h_afternoon():
                 from services.appointment_reminder_service import run_reminders
+                from services.reminder_dispatch_engine import get_dispatch_engine
+                from datetime import datetime
+                
+                engine = get_dispatch_engine()
+                tomorrow_weekday = datetime.now().weekday()
+                tomorrow_day_of_week = ((tomorrow_weekday + 1) % 7) + 1
+                
+                # Se continuous, salta (è stato mandato tutto al mattino); altrimenti manda pomeriggio
+                dispatch_mode = engine.dispatch_mode(tomorrow_day_of_week)
+                if dispatch_mode == 'continuous':
+                    return  # Niente da mandare
+                
                 try:
                     run_reminders('24h', slot='afternoon')
                 except Exception as e:
                     logger.error(f"[REMINDER 24h afternoon] Errore: {e}")
 
-            # ore 8: appuntamenti di domani mattina (< 13:00)
+            # ore 8: appuntamenti di domani (mattina oppure tutto a seconda di continuous_hours)
             self._current_reminder_24h_morning_job = self.scheduler.add_job(
                 job_24h_morning, CronTrigger(hour=8, minute=0),
                 id='appt_reminder_24h_morning', replace_existing=True
             )
-            # ore 14: appuntamenti di domani pomeriggio (>= 13:00)
+            # ore 14: appuntamenti di domani pomeriggio (solo se split mode)
             self._current_reminder_24h_afternoon_job = self.scheduler.add_job(
                 job_24h_afternoon, CronTrigger(hour=14, minute=0),
                 id='appt_reminder_24h_afternoon', replace_existing=True
