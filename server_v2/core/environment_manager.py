@@ -65,8 +65,8 @@ class EnvironmentManager:
         if hasattr(self, '_initialized'):
             return
 
-        self.project_root = Path(__file__).parent.parent.parent
-        self.instance_dir = self.project_root / "server_v2" / "instance"
+        self.project_root = Path(__file__).parent.parent
+        self.instance_dir = self.project_root / "instance"
         self.instance_dir.mkdir(parents=True, exist_ok=True)
 
         # Cache configurazioni con TTL
