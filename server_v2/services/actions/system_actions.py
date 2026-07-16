@@ -22,6 +22,7 @@ from core.template_manager import get_template_manager
 from services.dbf_data_service import get_dbf_data_service
 from services.link_tracker_service import link_tracker_service # 1. Importa il servizio di tracking
 from core.constants_v2 import COLONNE
+from services.automation_log_service import get_automation_log_service
 
 logger = logging.getLogger(__name__)
 
@@ -223,6 +224,22 @@ def impl_send_sms_link(context_data: Dict[str, Any], **params):
     if result is None:
         logger.info(f"Invio SMS a {phone} con messaggio: '{message[:50]}...'")
         result = sms_service.send_sms(phone, message, tag='auto_link')
+    # Log dell'invio (anche se fallito): persistiamo il tentativo per UI e audit
+    try:
+        log_srv = get_automation_log_service()
+        log_srv.log_message(
+            trigger_type=full_context.get('trigger_type'),
+            trigger_id=str(full_context.get('trigger_id') or ''),
+            monitor_id=full_context.get('monitor_id'),
+            rule_id=full_context.get('rule_id'),
+            action_name='send_sms_link',
+            channel=channel,
+            recipient=str(phone),
+            message_text=message,
+            result=result
+        )
+    except Exception:
+        logger.exception('Unable to persist automation message log')
 
     return {**result, 'channel': channel, 'final_url': original_url, 'original_url': original_url} # Usa original_url
 

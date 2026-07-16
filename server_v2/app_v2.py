@@ -291,6 +291,7 @@ def register_blueprints(app: Flask) -> None:
     from api.v2_tables import tables_bp
     from api.v2_tipi_messaggi import tipi_messaggi_bp
     from api.v2_sms_tracking import sms_tracking_bp
+    from api.v2_automation_logs import automation_logs_bp
     from api.v2_tracker import tracker_bp
     from api.v2_automation_settings import automation_settings_bp
     from api.v2_works import works_bp
@@ -334,6 +335,7 @@ def register_blueprints(app: Flask) -> None:
         templates_v2_bp,
         tipi_messaggi_bp,
         sms_tracking_bp,
+        automation_logs_bp,
         tracker_bp,
         automation_settings_bp,
         users_v2_bp,

@@ -23,6 +23,7 @@ const ContiPage = React.lazy(() => import('@/features/conti/pages/ContiPage'))
 const SpesePage = React.lazy(() => import('@/features/spese/pages/SpesePage'))
 const CollaboratoriPage = React.lazy(() => import('@/features/collaboratori/pages/CollaboratoriPage'))
 const EisenhowerMatrixPage = React.lazy(() => import('@/features/tempo/pages/TempoPage'))
+const PrimeVisitePage = React.lazy(() => import('@/features/automation/pages/AutomationMessages'))
 const NotFoundPage = React.lazy(() => import('@/components/ui/NotFoundPage'))
 
 //test page
@@ -93,7 +94,7 @@ const AppRouter: React.FC = () => {
           <Route path='materiali' element={<MaterialiPage />} />
           <Route path='materiali/migrazione' element={<MaterialiMigrazione />} />
           <Route path='materiali/ricerca' element={<RicercaArticoli />} />
-
+          <Route path='automation/primevisite' element={<PrimeVisitePage />} />
           <Route path='fornitori' element={<FornitoriPage />} />
           <Route path='fornitori/classificazione' element={<FornitoriClassificazione />} />
           <Route path='pazienti' element={<PazientiPage />} />

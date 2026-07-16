@@ -15,6 +15,7 @@ const navigation: NavItem[] = [
   { name: 'Email', to: '/email', iconName: 'Mail' },
   { name: 'Bot WhatsApp', to: '/bot', iconName: 'MessageCircle' },
   { name: 'Download TAC', to: '/cbct', iconName: 'ScanLine' },
+  { name: 'Prime visite' , to: '/automation/primevisite', iconName: 'Zap'},
   {
     name: 'Gestione',
     iconName: 'Layers',

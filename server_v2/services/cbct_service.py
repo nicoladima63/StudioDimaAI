@@ -174,6 +174,10 @@ class CbctService(BaseService):
             raise CbctError(f"Variabile di configurazione mancante: {e}. Verifica il file .env.")
         self.nas_path = os.environ.get("CBCT_NAS_PATH", r"\\servernas\CBTC")
         self.sevenzip_path = os.environ.get("SEVENZIP_PATH", r"C:\Program Files\7-Zip\7z.exe")
+        # Credenziali NAS per autenticazione Windows
+        self.nas_username = os.environ.get("NAS_USERNAME")
+        self.nas_password = os.environ.get("NAS_PASSWORD")
+        self.nas_domain = os.environ.get("NAS_DOMAIN", "")
 
     def _ensure_tables(self) -> None:
         global _TABLES_READY
@@ -211,6 +215,41 @@ class CbctService(BaseService):
                 esame["percorso_nas"] = None
         return esami
 
+    def _monta_nas(self) -> None:
+        """Monta il percorso NAS con credenziali Windows usando 'net use'.
+        
+        Richiede che NAS_USERNAME e NAS_PASSWORD siano configurati in .env
+        """
+        if not self.nas_username or not self.nas_password:
+            self.logger.warning("Credenziali NAS non configurate. Tentando l'accesso senza autenticazione.")
+            return
+        
+        # Estrae solo la radice UNC (es. \\servernas\CBTC -> \\servernas\CBTC)
+        nas_root = self.nas_path
+        
+        try:
+            # Comando: net use \\servernas\CBTC /user:DOMAIN\username password
+            username_completo = f"{self.nas_domain}\\{self.nas_username}" if self.nas_domain else self.nas_username
+            comando = ["net", "use", nas_root, f"/user:{username_completo}", self.nas_password]
+            
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode != 0:
+                self.logger.warning(f"net use fallito (exit code {risultato.returncode}): {risultato.stderr.strip()}")
+        except Exception as e:
+            self.logger.error(f"Errore durante il mount NAS: {e}")
+
+    def _smonta_nas(self) -> None:
+        """Smonta il percorso NAS usando 'net use /delete'."""
+        nas_root = self.nas_path
+        
+        try:
+            comando = ["net", "use", nas_root, "/delete", "/yes"]
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode != 0:
+                self.logger.debug(f"net use /delete: {risultato.stderr.strip()}")
+        except Exception as e:
+            self.logger.debug(f"Errore durante lo smount NAS: {e}")
+
     def scarica_ed_estrai(
         self, portal_exam_id: str, paziente_raw: str, data_esame: str, user_id: int | None = None
     ) -> dict:
@@ -219,6 +258,9 @@ class CbctService(BaseService):
         cartella_nome = self._cartella_nas_univoca(cartella_base, portal_exam_id)
         cartella_destinazione = Path(self.nas_path) / cartella_nome
 
+        # Monta il NAS con credenziali prima di tentare l'accesso
+        self._monta_nas()
+        
         try:
             try:
                 cartella_destinazione.mkdir(parents=True, exist_ok=True)
@@ -249,6 +291,9 @@ class CbctService(BaseService):
                 user_id, "Download TAC non riuscito", f"{nome} {cognome}: {e}"
             )
             raise
+        finally:
+            # Smonta sempre il NAS al termine, anche in caso di errore
+            self._smonta_nas()
 
         self._notifica_utente(
             user_id, "Download TAC completato", f"Esame di {nome} {cognome} salvato in {cartella_nome}"
