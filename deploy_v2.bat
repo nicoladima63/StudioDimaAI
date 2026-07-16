@@ -226,7 +226,15 @@ echo prod > "%DEPLOY_PATH%\instance\database_mode.txt"
 echo   [OK] database_mode.txt creato con modalità PROD
 echo   [OK] database_mode.txt creato con modalità PROD >> "%LOGFILE%"
 
-
+:: ============================================================================
+:: [2.7/7] Creazione sms_mode.txt per PROD (se assente)
+:: ============================================================================
+if not exist "%DEPLOY_PATH%\instance\sms_mode.txt" (
+    echo prod > "%DEPLOY_PATH%\instance\sms_mode.txt"
+    echo   [OK] sms_mode.txt creato con modalità PROD
+) else (
+    echo   [OK] sms_mode.txt gia' presente, skip
+)
 
 :: ============================================================================
 :: [3/7] Aggiornamento .env
