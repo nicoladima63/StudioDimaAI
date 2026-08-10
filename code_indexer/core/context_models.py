@@ -21,3 +21,5 @@ class QueryContext:
     support_symbols: list = field(default_factory=list)
 
     internal_symbols: list = field(default_factory=list)
+
+    code_slices: list = field(default_factory=list)

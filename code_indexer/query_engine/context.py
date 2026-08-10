@@ -1,6 +1,9 @@
 from collections import defaultdict
 from .scorer import score_file
-from .information_score import calculate_information_score
+from .information_score import (
+    calculate_information_score,
+    calculate_score_breakdown
+)
 from .symbol_score import calculate_symbol_score
 from .symbol_classifier import classify_symbol
 
@@ -225,12 +228,12 @@ def expand_context(
 
     for file in context["files"]:
 
-        file["information_score"] = calculate_information_score(
+        file.update(calculate_score_breakdown(
             file,
             context["connections"],
             context["symbols"],
             query
-        )
+        ))
 
 
     context["files"] = sorted(

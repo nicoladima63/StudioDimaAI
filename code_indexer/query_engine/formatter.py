@@ -1,5 +1,6 @@
 from collections import defaultdict
 from ..core.context_models import QueryContext
+from .code_extractor import extract_context_code
 
 
 def format_context(context):
@@ -62,8 +63,15 @@ def format_context(context):
         if s.get("category") == "internal"
     ]
 
+    result.code_slices = extract_context_code(
+        result.symbols
+    )
+
     result.connections = [
         {
+            "source": r["source"],
+            "target": r["target"],
+            "relation": r["relation"],
             "from": r["source"],
             "to": r["target"],
             "type": r["relation"]

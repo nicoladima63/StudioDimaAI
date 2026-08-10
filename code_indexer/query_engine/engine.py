@@ -44,7 +44,10 @@ def search_text(query, items, fields):
 
 
 
-def query(term):
+def query(
+    term,
+    debug=False
+):
 
     files = load_json(
         "files.json"
@@ -85,24 +88,26 @@ def query(term):
     )
 
 
-    print("\n=== FILES ===")
+    if debug:
 
-    for file in matched_files[:20]:
-        print(
-            file["path"],
-            "|",
-            file.get("role")
-        )
+        print("\n=== FILES ===")
+
+        for file in matched_files[:20]:
+            print(
+                file["path"],
+                "|",
+                file.get("role")
+            )
 
 
-    print("\n=== SYMBOLS ===")
+        print("\n=== SYMBOLS ===")
 
-    for entity in matched_entities[:20]:
-        print(
-            entity["name"],
-            "|",
-            entity["path"]
-        )
+        for entity in matched_entities[:20]:
+            print(
+                entity["name"],
+                "|",
+                entity["path"]
+            )
 
 
     context = expand_context(
@@ -114,32 +119,34 @@ def query(term):
     )
 
 
-    print("\n=== CONTEXT FILES ===")
+    if debug:
 
-    for file in context["files"][:30]:
-        print(
-            file["path"],
-            "|",
-            file.get("role")
-        )
+        print("\n=== CONTEXT FILES ===")
 
-
-    print("\n=== CONNECTIONS ===")
-
-    for relation in context["connections"][:30]:
-        print(
-            relation
-        )
+        for file in context["files"][:30]:
+            print(
+                file["path"],
+                "|",
+                file.get("role")
+            )
 
 
-    print("\n=== CONTEXT SYMBOLS ===")
+        print("\n=== CONNECTIONS ===")
 
-    for symbol in context["symbols"][:30]:
-        print(
-            symbol["name"],
-            "|",
-            symbol["path"]
-        )
+        for relation in context["connections"][:30]:
+            print(
+                relation
+            )
+
+
+        print("\n=== CONTEXT SYMBOLS ===")
+
+        for symbol in context["symbols"][:30]:
+            print(
+                symbol["name"],
+                "|",
+                symbol["path"]
+            )
 
 
     formatted = format_context(
@@ -148,36 +155,38 @@ def query(term):
 
     formatted.query = term
 
-    print("\n=== ARCHITECTURE ===")
+    if debug:
 
-    for role, files in formatted.architecture.items():
+        print("\n=== ARCHITECTURE ===")
 
-        print("\n", role)
+        for role, files in formatted.architecture.items():
 
-        for file in files[:10]:
-            print(" -", file)
+            print("\n", role)
 
-
-    print("\n=== CORE SYMBOLS ===")
-
-    for symbol in formatted.core_symbols[:10]:
-
-        print(
-            symbol["name"],
-            "|",
-            symbol["path"]
-        )
+            for file in files[:10]:
+                print(" -", file)
 
 
-    print("\n=== DOMAIN SYMBOLS ===")
+        print("\n=== CORE SYMBOLS ===")
 
-    for symbol in formatted.domain_symbols[:20]:
+        for symbol in formatted.core_symbols[:10]:
 
-        print(
-            symbol["name"],
-            "|",
-            symbol["path"]
-        )
+            print(
+                symbol["name"],
+                "|",
+                symbol["path"]
+            )
+
+
+        print("\n=== DOMAIN SYMBOLS ===")
+
+        for symbol in formatted.domain_symbols[:20]:
+
+            print(
+                symbol["name"],
+                "|",
+                symbol["path"]
+            )
 
 
     return formatted
@@ -189,5 +198,6 @@ if __name__ == "__main__":
     import sys
 
     query(
-        " ".join(sys.argv[1:])
+        " ".join(sys.argv[1:]),
+        debug=True
     )

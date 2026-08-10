@@ -18,6 +18,14 @@ ROLE_VALUE = {
 }
 
 
+def _query_words(query):
+    return [
+        word
+        for word in query.lower().split()
+        if len(word) > 2
+    ]
+
+
 
 def calculate_structural_score(
     file,
@@ -74,11 +82,7 @@ def calculate_query_relevance(
     query=""
 ):
 
-    query_words = [
-        word
-        for word in query.lower().split()
-        if len(word) > 2
-    ]
+    query_words = _query_words(query)
 
     if not query_words:
         return 0
@@ -119,7 +123,7 @@ def calculate_query_relevance(
     )
 
 
-def calculate_information_score(
+def calculate_score_breakdown(
     file,
     connections,
     symbols,
@@ -132,10 +136,55 @@ def calculate_information_score(
         symbols
     )
 
+    query_words = _query_words(query)
+    file_text = " ".join(
+        [
+            str(file.get("id", "")),
+            str(file.get("path", "")),
+            str(file.get("role", ""))
+        ]
+    ).lower()
+
+    file_symbols = [
+        symbol for symbol in symbols
+        if symbol.get("path") == file.get("path")
+    ]
+
+    symbol_text = " ".join(
+        str(symbol.get("name", ""))
+        for symbol in file_symbols
+    ).lower()
+
+    matched_query_terms = [
+        word for word in query_words
+        if word in file_text or word in symbol_text
+    ]
+
     query_relevance = calculate_query_relevance(
         file,
         symbols,
         query
     )
 
-    return structural_score + query_relevance
+    return {
+        "structural_score": structural_score,
+        "query_relevance": query_relevance,
+        "information_score": structural_score + query_relevance,
+        "matched_query_terms": matched_query_terms
+    }
+
+
+def calculate_information_score(
+    file,
+    connections,
+    symbols,
+    query=""
+):
+    breakdown = calculate_score_breakdown(
+        file,
+        connections,
+        symbols,
+        query
+    )
+
+    return breakdown["information_score"]
