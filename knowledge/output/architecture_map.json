@@ -1,0 +1,127 @@
+{
+  "roles": {
+    "component": 159,
+    "service": 97,
+    "api": 63,
+    "test": 51,
+    "script": 44,
+    "page": 38,
+    "unknown": 31,
+    "core_module": 19,
+    "state": 15,
+    "repository": 14,
+    "feature": 13,
+    "configuration": 11,
+    "utility": 11,
+    "types": 9,
+    "hook": 8,
+    "legacy": 4,
+    "certificate": 3,
+    "entry_point": 1
+  },
+  "central_files": [
+    {
+      "file": "file:client_v2/src/services/api/client.ts",
+      "imports": 52
+    },
+    {
+      "file": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "imports": 29
+    },
+    {
+      "file": "file:client_v2/src/types/index.ts",
+      "imports": 25
+    },
+    {
+      "file": "file:client_v2/src/lib/utils.ts",
+      "imports": 23
+    },
+    {
+      "file": "file:client_v2/src/store/auth.store.ts",
+      "imports": 18
+    },
+    {
+      "file": "file:client_v2/src/store/pazienti.store.tsx",
+      "imports": 13
+    },
+    {
+      "file": "file:client_v2/src/services/api/todos.ts",
+      "imports": 8
+    },
+    {
+      "file": "file:client_v2/src/store/prestazioni.store.ts",
+      "imports": 8
+    },
+    {
+      "file": "file:client_v2/src/store/conti.store.ts",
+      "imports": 7
+    },
+    {
+      "file": "file:client_v2/src/components/ui/button.tsx",
+      "imports": 6
+    },
+    {
+      "file": "file:client_v2/src/features/settings/services/automation.service.ts",
+      "imports": 6
+    },
+    {
+      "file": "file:client_v2/src/store/fornitori.store.ts",
+      "imports": 6
+    },
+    {
+      "file": "file:client_v2/src/services/api/environment.service.ts",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/services/ricette_ts.service.ts",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/components/selects/ContiSelect.tsx",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/components/selects/BrancheSelect.tsx",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/components/selects/SottocontiSelect.tsx",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/services/api/user.service.ts",
+      "imports": 4
+    },
+    {
+      "file": "file:client_v2/src/services/api/base.service.ts",
+      "imports": 4
+    }
+  ],
+  "entry_points": [
+    "server_v2/app_v2.py"
+  ],
+  "layers": {
+    "configuration": 11,
+    "unknown": 31,
+    "entry_point": 1,
+    "test": 51,
+    "api": 63,
+    "core_module": 19,
+    "legacy": 4,
+    "repository": 14,
+    "script": 44,
+    "service": 97,
+    "utility": 11,
+    "certificate": 3,
+    "component": 159,
+    "hook": 8,
+    "state": 15,
+    "types": 9,
+    "feature": 13,
+    "page": 38
+  }
+}

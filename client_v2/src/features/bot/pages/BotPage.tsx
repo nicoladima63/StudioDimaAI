@@ -44,12 +44,14 @@ const BotPage: React.FC = () => {
       </div>
 
       {/* Tab content */}
-      <div className="p-0">
-        {activeTab === 0 && <ServiziTab />}
-        {activeTab === 1 && <SimulazioneTab />}
-        {activeTab === 2 && <ReminderRepliesTab />}
-        {activeTab === 3 && <StoricoComunicazioniTab />}
-      </div>
+      <PageLayout.Content>
+        <div className="h-full overflow-y-auto">
+          {activeTab === 0 && <ServiziTab />}
+          {activeTab === 1 && <SimulazioneTab />}
+          {activeTab === 2 && <ReminderRepliesTab />}
+          {activeTab === 3 && <StoricoComunicazioniTab />}
+        </div>
+      </PageLayout.Content>
     </PageLayout>
   )
 }

@@ -1,0 +1,4139 @@
+[
+  {
+    "id": "file:client_v2/postcss.config.js",
+    "path": "client_v2/postcss.config.js",
+    "language": "typescript",
+    "role": "configuration",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/tailwind.config.ts",
+    "path": "client_v2/tailwind.config.ts",
+    "language": "typescript",
+    "role": "configuration",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/vite.config.ts",
+    "path": "client_v2/vite.config.ts",
+    "language": "typescript",
+    "role": "configuration",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/vitest.config.ts",
+    "path": "client_v2/vitest.config.ts",
+    "language": "typescript",
+    "role": "configuration",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:code_indexer/test_parser.py",
+    "path": "code_indexer/test_parser.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:code_indexer/__main__.py",
+    "path": "code_indexer/__main__.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/app_v2.py",
+    "path": "server_v2/app_v2.py",
+    "language": "python",
+    "role": "entry_point",
+    "symbols_count": 30
+  },
+  {
+    "id": "file:server_v2/convert_vapid_to_base64.py",
+    "path": "server_v2/convert_vapid_to_base64.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/convert_vapid_to_standard_base64.py",
+    "path": "server_v2/convert_vapid_to_standard_base64.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/debug_igiene_paziente.py",
+    "path": "server_v2/debug_igiene_paziente.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/generate_vapid_keys.py",
+    "path": "server_v2/generate_vapid_keys.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/genera_gmail_token.py",
+    "path": "server_v2/genera_gmail_token.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/run_v2.py",
+    "path": "server_v2/run_v2.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/__init__.py",
+    "path": "server_v2/__init__.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:tests/complete_oauth_flow.py",
+    "path": "tests/complete_oauth_flow.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:tests/debug_dbf_fields.py",
+    "path": "tests/debug_dbf_fields.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/debug_routes.py",
+    "path": "tests/debug_routes.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/demo.py",
+    "path": "tests/demo.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:tests/generate_auth_url.py",
+    "path": "tests/generate_auth_url.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/production_oauth_handler.py",
+    "path": "tests/production_oauth_handler.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:tests/run_tests.py",
+    "path": "tests/run_tests.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:tests/setup_calendar_auth.py",
+    "path": "tests/setup_calendar_auth.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:tests/simple_demo.py",
+    "path": "tests/simple_demo.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:tests/test_base_repository.py",
+    "path": "tests/test_base_repository.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 30
+  },
+  {
+    "id": "file:tests/test_calendar_auth.py",
+    "path": "tests/test_calendar_auth.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:tests/test_calendar_auth_simple.py",
+    "path": "tests/test_calendar_auth_simple.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:tests/test_calendar_event.py",
+    "path": "tests/test_calendar_event.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:tests/test_calendar_simple.py",
+    "path": "tests/test_calendar_simple.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:tests/test_calendar_v2.py",
+    "path": "tests/test_calendar_v2.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:tests/test_calendar_v2_complete.py",
+    "path": "tests/test_calendar_v2_complete.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:tests/test_calendar_with_data.py",
+    "path": "tests/test_calendar_with_data.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/test_check_id_sessione.py",
+    "path": "tests/test_check_id_sessione.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/test_chiamata_reale_ts.py",
+    "path": "tests/test_chiamata_reale_ts.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/test_cifratura_kit.py",
+    "path": "tests/test_cifratura_kit.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/test_compatibility_bridge.py",
+    "path": "tests/test_compatibility_bridge.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 33
+  },
+  {
+    "id": "file:tests/test_config_integration.py",
+    "path": "tests/test_config_integration.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:tests/test_crud.py",
+    "path": "tests/test_crud.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:tests/test_database_manager.py",
+    "path": "tests/test_database_manager.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 20
+  },
+  {
+    "id": "file:tests/test_dbf_utils.py",
+    "path": "tests/test_dbf_utils.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 30
+  },
+  {
+    "id": "file:tests/test_enriched_appointments.py",
+    "path": "tests/test_enriched_appointments.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/test_environment_manager_fixes.py",
+    "path": "tests/test_environment_manager_fixes.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:tests/test_event_format.py",
+    "path": "tests/test_event_format.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:tests/test_event_format_simple.py",
+    "path": "tests/test_event_format_simple.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:tests/test_event_safe.py",
+    "path": "tests/test_event_safe.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:tests/test_genera_id_sessione.py",
+    "path": "tests/test_genera_id_sessione.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:tests/test_integrated_calendar.py",
+    "path": "tests/test_integrated_calendar.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:tests/test_login.py",
+    "path": "tests/test_login.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:tests/test_login_simple.py",
+    "path": "tests/test_login_simple.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:tests/test_quick.py",
+    "path": "tests/test_quick.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:tests/test_regole.py",
+    "path": "tests/test_regole.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:tests/test_ricetta_integration.py",
+    "path": "tests/test_ricetta_integration.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 12
+  },
+  {
+    "id": "file:tests/test_service_layer.py",
+    "path": "tests/test_service_layer.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 37
+  },
+  {
+    "id": "file:tests/test_simple_calendar_v2.py",
+    "path": "tests/test_simple_calendar_v2.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:tests/test_sms_templates_integration.py",
+    "path": "tests/test_sms_templates_integration.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:tests/__init__.py",
+    "path": "tests/__init__.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/api/api_monitoring.py",
+    "path": "server_v2/api/api_monitoring.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/api/compatibility_bridge.py",
+    "path": "server_v2/api/compatibility_bridge.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 25
+  },
+  {
+    "id": "file:server_v2/api/v2_admin.py",
+    "path": "server_v2/api/v2_admin.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/api/v2_auth.py",
+    "path": "server_v2/api/v2_auth.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/api/v2_automation_logs.py",
+    "path": "server_v2/api/v2_automation_logs.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/api/v2_automation_rules.py",
+    "path": "server_v2/api/v2_automation_rules.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/api/v2_automation_settings.py",
+    "path": "server_v2/api/v2_automation_settings.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/api/v2_bot.py",
+    "path": "server_v2/api/v2_bot.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 41
+  },
+  {
+    "id": "file:server_v2/api/v2_calendar.py",
+    "path": "server_v2/api/v2_calendar.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 29
+  },
+  {
+    "id": "file:server_v2/api/v2_cbct.py",
+    "path": "server_v2/api/v2_cbct.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/api/v2_classificazioni.py",
+    "path": "server_v2/api/v2_classificazioni.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/api/v2_conti.py",
+    "path": "server_v2/api/v2_conti.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/api/v2_economics.py",
+    "path": "server_v2/api/v2_economics.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/api/v2_email.py",
+    "path": "server_v2/api/v2_email.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 18
+  },
+  {
+    "id": "file:server_v2/api/v2_endpoints.py",
+    "path": "server_v2/api/v2_endpoints.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:server_v2/api/v2_environment.py",
+    "path": "server_v2/api/v2_environment.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/api/v2_fornitori.py",
+    "path": "server_v2/api/v2_fornitori.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/api/v2_marketing.py",
+    "path": "server_v2/api/v2_marketing.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/api/v2_materiali.py",
+    "path": "server_v2/api/v2_materiali.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 17
+  },
+  {
+    "id": "file:server_v2/api/v2_monitoring_changes.py",
+    "path": "server_v2/api/v2_monitoring_changes.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/api/v2_notifications.py",
+    "path": "server_v2/api/v2_notifications.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/api/v2_pazienti.py",
+    "path": "server_v2/api/v2_pazienti.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/api/v2_piani_cura.py",
+    "path": "server_v2/api/v2_piani_cura.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/api/v2_prestazione_work_mapping.py",
+    "path": "server_v2/api/v2_prestazione_work_mapping.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/api/v2_prestazioni.py",
+    "path": "server_v2/api/v2_prestazioni.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/api/v2_providers.py",
+    "path": "server_v2/api/v2_providers.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/api/v2_push.py",
+    "path": "server_v2/api/v2_push.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/api/v2_reminders.py",
+    "path": "server_v2/api/v2_reminders.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/api/v2_ricetta.py",
+    "path": "server_v2/api/v2_ricetta.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 23
+  },
+  {
+    "id": "file:server_v2/api/v2_ricetta_admin.py",
+    "path": "server_v2/api/v2_ricetta_admin.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/api/v2_richiami.py",
+    "path": "server_v2/api/v2_richiami.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 22
+  },
+  {
+    "id": "file:server_v2/api/v2_scheduler.py",
+    "path": "server_v2/api/v2_scheduler.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/api/v2_seo.py",
+    "path": "server_v2/api/v2_seo.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/api/v2_simulation.py",
+    "path": "server_v2/api/v2_simulation.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/api/v2_sms.py",
+    "path": "server_v2/api/v2_sms.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/api/v2_sms_tracking.py",
+    "path": "server_v2/api/v2_sms_tracking.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/api/v2_spese_fornitori.py",
+    "path": "server_v2/api/v2_spese_fornitori.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 12
+  },
+  {
+    "id": "file:server_v2/api/v2_statistiche.py",
+    "path": "server_v2/api/v2_statistiche.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/api/v2_steps.py",
+    "path": "server_v2/api/v2_steps.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/api/v2_tables.py",
+    "path": "server_v2/api/v2_tables.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/api/v2_tasks.py",
+    "path": "server_v2/api/v2_tasks.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/api/v2_templates.py",
+    "path": "server_v2/api/v2_templates.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/api/v2_tipi_messaggi.py",
+    "path": "server_v2/api/v2_tipi_messaggi.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/api/v2_todos.py",
+    "path": "server_v2/api/v2_todos.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:server_v2/api/v2_tracker.py",
+    "path": "server_v2/api/v2_tracker.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/api/v2_users.py",
+    "path": "server_v2/api/v2_users.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/api/v2_works.py",
+    "path": "server_v2/api/v2_works.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/api/__init__.py",
+    "path": "server_v2/api/__init__.py",
+    "language": "python",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/config/flask_config.py",
+    "path": "server_v2/config/flask_config.py",
+    "language": "python",
+    "role": "configuration",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/config/__init__.py",
+    "path": "server_v2/config/__init__.py",
+    "language": "python",
+    "role": "configuration",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/core/action_registry.py",
+    "path": "server_v2/core/action_registry.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/core/appointment_normalizer.py",
+    "path": "server_v2/core/appointment_normalizer.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/core/automation_config.py",
+    "path": "server_v2/core/automation_config.py",
+    "language": "python",
+    "role": "configuration",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/core/base_repository.py",
+    "path": "server_v2/core/base_repository.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 20
+  },
+  {
+    "id": "file:server_v2/core/config.py",
+    "path": "server_v2/core/config.py",
+    "language": "python",
+    "role": "configuration",
+    "symbols_count": 25
+  },
+  {
+    "id": "file:server_v2/core/config_manager.py",
+    "path": "server_v2/core/config_manager.py",
+    "language": "python",
+    "role": "configuration",
+    "symbols_count": 23
+  },
+  {
+    "id": "file:server_v2/core/constants_v2.py",
+    "path": "server_v2/core/constants_v2.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 12
+  },
+  {
+    "id": "file:server_v2/core/database_manager.py",
+    "path": "server_v2/core/database_manager.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 21
+  },
+  {
+    "id": "file:server_v2/core/environment_manager.py",
+    "path": "server_v2/core/environment_manager.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 42
+  },
+  {
+    "id": "file:server_v2/core/exceptions.py",
+    "path": "server_v2/core/exceptions.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 34
+  },
+  {
+    "id": "file:server_v2/core/google_calendar_client.py",
+    "path": "server_v2/core/google_calendar_client.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:server_v2/core/google_event_factory.py",
+    "path": "server_v2/core/google_event_factory.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/core/google_gmail_client.py",
+    "path": "server_v2/core/google_gmail_client.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:server_v2/core/paths.py",
+    "path": "server_v2/core/paths.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/core/reminder_db.py",
+    "path": "server_v2/core/reminder_db.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/core/ricetta_config.py",
+    "path": "server_v2/core/ricetta_config.py",
+    "language": "python",
+    "role": "configuration",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/core/schemas.py",
+    "path": "server_v2/core/schemas.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/core/ssl_manager.py",
+    "path": "server_v2/core/ssl_manager.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/core/template_manager copy.py",
+    "path": "server_v2/core/template_manager copy.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 14
+  },
+  {
+    "id": "file:server_v2/core/template_manager.py",
+    "path": "server_v2/core/template_manager.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 14
+  },
+  {
+    "id": "file:server_v2/core/__init__.py",
+    "path": "server_v2/core/__init__.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/legacy_ricetta/ricetta_service.py",
+    "path": "server_v2/legacy_ricetta/ricetta_service.py",
+    "language": "python",
+    "role": "legacy",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/legacy_ricetta/ssl_legacy_helper.py",
+    "path": "server_v2/legacy_ricetta/ssl_legacy_helper.py",
+    "language": "python",
+    "role": "legacy",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/legacy_ricetta/utils.py",
+    "path": "server_v2/legacy_ricetta/utils.py",
+    "language": "python",
+    "role": "legacy",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/legacy_ricetta/__init__.py",
+    "path": "server_v2/legacy_ricetta/__init__.py",
+    "language": "python",
+    "role": "legacy",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/repositories/calendar_repository.py",
+    "path": "server_v2/repositories/calendar_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/repositories/email_repository.py",
+    "path": "server_v2/repositories/email_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 30
+  },
+  {
+    "id": "file:server_v2/repositories/fornitori_repository.py",
+    "path": "server_v2/repositories/fornitori_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/repositories/materiali_repository.py",
+    "path": "server_v2/repositories/materiali_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 17
+  },
+  {
+    "id": "file:server_v2/repositories/notification_repository.py",
+    "path": "server_v2/repositories/notification_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/repositories/piani_cura_repository.py",
+    "path": "server_v2/repositories/piani_cura_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/repositories/prestazione_work_mapping_repository.py",
+    "path": "server_v2/repositories/prestazione_work_mapping_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/repositories/provider_repository.py",
+    "path": "server_v2/repositories/provider_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/repositories/statistiche_repository.py",
+    "path": "server_v2/repositories/statistiche_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/repositories/task_repository.py",
+    "path": "server_v2/repositories/task_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/repositories/todo_repository.py",
+    "path": "server_v2/repositories/todo_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/repositories/user_repository.py",
+    "path": "server_v2/repositories/user_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/repositories/work_repository.py",
+    "path": "server_v2/repositories/work_repository.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/repositories/__init__.py",
+    "path": "server_v2/repositories/__init__.py",
+    "language": "python",
+    "role": "repository",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/scripts/add_user_id_to_steps.py",
+    "path": "server_v2/scripts/add_user_id_to_steps.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/analyze_2026_types.py",
+    "path": "server_v2/scripts/analyze_2026_types.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/analyze_deep_types.py",
+    "path": "server_v2/scripts/analyze_deep_types.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/check_field_values.py",
+    "path": "server_v2/scripts/check_field_values.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/compare_elenco.py",
+    "path": "server_v2/scripts/compare_elenco.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/compare_prevent_items.py",
+    "path": "server_v2/scripts/compare_prevent_items.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/debug_first_visits.py",
+    "path": "server_v2/scripts/debug_first_visits.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/debug_monitor_start.py",
+    "path": "server_v2/scripts/debug_monitor_start.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/find_link_in_prevent.py",
+    "path": "server_v2/scripts/find_link_in_prevent.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/hunt_link.py",
+    "path": "server_v2/scripts/hunt_link.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_candidates.py",
+    "path": "server_v2/scripts/inspect_candidates.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_dbf_guardia.py",
+    "path": "server_v2/scripts/inspect_dbf_guardia.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_elenco.py",
+    "path": "server_v2/scripts/inspect_elenco.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_planning_schema.py",
+    "path": "server_v2/scripts/inspect_planning_schema.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_planning_xx.py",
+    "path": "server_v2/scripts/inspect_planning_xx.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_plan_details.py",
+    "path": "server_v2/scripts/inspect_plan_details.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_prevent_columns.py",
+    "path": "server_v2/scripts/inspect_prevent_columns.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_prevent_links.py",
+    "path": "server_v2/scripts/inspect_prevent_links.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/inspect_social_db.py",
+    "path": "server_v2/scripts/inspect_social_db.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/scripts/migrate_legacy_data.py",
+    "path": "server_v2/scripts/migrate_legacy_data.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/scripts/migrate_richiami_batch.py",
+    "path": "server_v2/scripts/migrate_richiami_batch.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/scripts/reset_admin_password.py",
+    "path": "server_v2/scripts/reset_admin_password.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/reset_users.py",
+    "path": "server_v2/scripts/reset_users.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/scripts/run_user_query.py",
+    "path": "server_v2/scripts/run_user_query.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/search_elenco_data.py",
+    "path": "server_v2/scripts/search_elenco_data.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/seed_patient_education.py",
+    "path": "server_v2/scripts/seed_patient_education.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/seed_social_accounts.py",
+    "path": "server_v2/scripts/seed_social_accounts.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/test_calvisi_analysis.py",
+    "path": "server_v2/scripts/test_calvisi_analysis.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/test_materiali_migration.py",
+    "path": "server_v2/scripts/test_materiali_migration.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/scripts/verify_classification.py",
+    "path": "server_v2/scripts/verify_classification.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/verify_migration.py",
+    "path": "server_v2/scripts/verify_migration.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/verify_patient_plans.py",
+    "path": "server_v2/scripts/verify_patient_plans.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/verify_patient_preventivi.py",
+    "path": "server_v2/scripts/verify_patient_preventivi.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/verify_provider_automation.py",
+    "path": "server_v2/scripts/verify_provider_automation.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/scripts/verify_reminder_deploy.py",
+    "path": "server_v2/scripts/verify_reminder_deploy.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 12
+  },
+  {
+    "id": "file:server_v2/scripts/verify_scheduler_job.py",
+    "path": "server_v2/scripts/verify_scheduler_job.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/verify_stats_migration.py",
+    "path": "server_v2/scripts/verify_stats_migration.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/scripts/verify_user_notification.py",
+    "path": "server_v2/scripts/verify_user_notification.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/services/appointment_reminder_service.py",
+    "path": "server_v2/services/appointment_reminder_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 19
+  },
+  {
+    "id": "file:server_v2/services/automation_log_service.py",
+    "path": "server_v2/services/automation_log_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/services/automation_service.py",
+    "path": "server_v2/services/automation_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 14
+  },
+  {
+    "id": "file:server_v2/services/base_service.py",
+    "path": "server_v2/services/base_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/services/calendar_service.py",
+    "path": "server_v2/services/calendar_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/services/calendar_sync_engine.py",
+    "path": "server_v2/services/calendar_sync_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/services/calendar_sync_job.py",
+    "path": "server_v2/services/calendar_sync_job.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/services/callback_service.py",
+    "path": "server_v2/services/callback_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/services/cbct_service.py",
+    "path": "server_v2/services/cbct_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 20
+  },
+  {
+    "id": "file:server_v2/services/change_detector.py",
+    "path": "server_v2/services/change_detector.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/services/change_logger.py",
+    "path": "server_v2/services/change_logger.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/services/classificazioni_service.py",
+    "path": "server_v2/services/classificazioni_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/services/conti_service.py",
+    "path": "server_v2/services/conti_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 17
+  },
+  {
+    "id": "file:server_v2/services/database_service.py",
+    "path": "server_v2/services/database_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 20
+  },
+  {
+    "id": "file:server_v2/services/dbf_data_service.py",
+    "path": "server_v2/services/dbf_data_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/services/email_service.py",
+    "path": "server_v2/services/email_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 36
+  },
+  {
+    "id": "file:server_v2/services/file_watcher.py",
+    "path": "server_v2/services/file_watcher.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 12
+  },
+  {
+    "id": "file:server_v2/services/fornitori_service.py",
+    "path": "server_v2/services/fornitori_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/services/link_tracker_service.py",
+    "path": "server_v2/services/link_tracker_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/services/materiali_migration_service.py",
+    "path": "server_v2/services/materiali_migration_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 24
+  },
+  {
+    "id": "file:server_v2/services/materiali_service.py",
+    "path": "server_v2/services/materiali_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/services/monitoring_service.py",
+    "path": "server_v2/services/monitoring_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 23
+  },
+  {
+    "id": "file:server_v2/services/notification_service.py",
+    "path": "server_v2/services/notification_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/services/pazienti_service.py",
+    "path": "server_v2/services/pazienti_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/services/piani_cura_service.py",
+    "path": "server_v2/services/piani_cura_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/services/provider_automation_service.py",
+    "path": "server_v2/services/provider_automation_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/services/provider_service.py",
+    "path": "server_v2/services/provider_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/services/push_notification_service.py",
+    "path": "server_v2/services/push_notification_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/services/reminder_dispatch_engine.py",
+    "path": "server_v2/services/reminder_dispatch_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:server_v2/services/rentri_service.py",
+    "path": "server_v2/services/rentri_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/services/ricetta_email_service.py",
+    "path": "server_v2/services/ricetta_email_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/services/ricette_db_service.py",
+    "path": "server_v2/services/ricette_db_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:server_v2/services/ricette_ts_service.py",
+    "path": "server_v2/services/ricette_ts_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 34
+  },
+  {
+    "id": "file:server_v2/services/richiami_service.py",
+    "path": "server_v2/services/richiami_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 12
+  },
+  {
+    "id": "file:server_v2/services/scheduler_service.py",
+    "path": "server_v2/services/scheduler_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 22
+  },
+  {
+    "id": "file:server_v2/services/simulation_service.py",
+    "path": "server_v2/services/simulation_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/services/slot_finder_service.py",
+    "path": "server_v2/services/slot_finder_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/services/sms_service.py",
+    "path": "server_v2/services/sms_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 27
+  },
+  {
+    "id": "file:server_v2/services/snapshot_manager.py",
+    "path": "server_v2/services/snapshot_manager.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 24
+  },
+  {
+    "id": "file:server_v2/services/spese_fornitori_service.py",
+    "path": "server_v2/services/spese_fornitori_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 15
+  },
+  {
+    "id": "file:server_v2/services/statistiche_service.py",
+    "path": "server_v2/services/statistiche_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/services/sync_state_manager.py",
+    "path": "server_v2/services/sync_state_manager.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 17
+  },
+  {
+    "id": "file:server_v2/services/template_manager.py",
+    "path": "server_v2/services/template_manager.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/services/todo_escalation_job.py",
+    "path": "server_v2/services/todo_escalation_job.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/services/todo_service.py",
+    "path": "server_v2/services/todo_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 20
+  },
+  {
+    "id": "file:server_v2/services/trigger_config.py",
+    "path": "server_v2/services/trigger_config.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 14
+  },
+  {
+    "id": "file:server_v2/services/websocket_service.py",
+    "path": "server_v2/services/websocket_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/services/work_service.py",
+    "path": "server_v2/services/work_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:server_v2/services/__init__.py",
+    "path": "server_v2/services/__init__.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/tests/test_cbct_service.py",
+    "path": "server_v2/tests/test_cbct_service.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/tests/test_create_task_notification.py",
+    "path": "server_v2/tests/test_create_task_notification.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/tests/test_paz_da_richiamare.py",
+    "path": "server_v2/tests/test_paz_da_richiamare.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/tests/test_push_notification.py",
+    "path": "server_v2/tests/test_push_notification.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/tests/test_ricetta_fixes.py",
+    "path": "server_v2/tests/test_ricetta_fixes.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/tests/test_richiamo_ok.py",
+    "path": "server_v2/tests/test_richiamo_ok.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/tests/test_scraping.py",
+    "path": "server_v2/tests/test_scraping.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/tests/test_seo_service.py",
+    "path": "server_v2/tests/test_seo_service.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/tests/test_slot_finder.py",
+    "path": "server_v2/tests/test_slot_finder.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/tests/__init__.py",
+    "path": "server_v2/tests/__init__.py",
+    "language": "python",
+    "role": "test",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/utils/auth_utils.py",
+    "path": "server_v2/utils/auth_utils.py",
+    "language": "python",
+    "role": "utility",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/utils/dbf_utils.py",
+    "path": "server_v2/utils/dbf_utils.py",
+    "language": "python",
+    "role": "utility",
+    "symbols_count": 49
+  },
+  {
+    "id": "file:server_v2/utils/old_automation_service.py",
+    "path": "server_v2/utils/old_automation_service.py",
+    "language": "python",
+    "role": "utility",
+    "symbols_count": 21
+  },
+  {
+    "id": "file:server_v2/utils/ricetta_utils.py",
+    "path": "server_v2/utils/ricetta_utils.py",
+    "language": "python",
+    "role": "utility",
+    "symbols_count": 23
+  },
+  {
+    "id": "file:server_v2/utils/__init__.py",
+    "path": "server_v2/utils/__init__.py",
+    "language": "python",
+    "role": "utility",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/services/actions/system_actions.py",
+    "path": "server_v2/services/actions/system_actions.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/services/economics/collaboratori_engine.py",
+    "path": "server_v2/services/economics/collaboratori_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/services/economics/comparison_engine.py",
+    "path": "server_v2/services/economics/comparison_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/services/economics/data_normalizer.py",
+    "path": "server_v2/services/economics/data_normalizer.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:server_v2/services/economics/forecast_engine.py",
+    "path": "server_v2/services/economics/forecast_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:server_v2/services/economics/kpi_engine.py",
+    "path": "server_v2/services/economics/kpi_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/services/economics/monthly_aggregator.py",
+    "path": "server_v2/services/economics/monthly_aggregator.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:server_v2/services/economics/prestazioni_engine.py",
+    "path": "server_v2/services/economics/prestazioni_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:server_v2/services/economics/scenario_engine.py",
+    "path": "server_v2/services/economics/scenario_engine.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/services/economics/seasonality_model.py",
+    "path": "server_v2/services/economics/seasonality_model.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:server_v2/services/economics/trend_model.py",
+    "path": "server_v2/services/economics/trend_model.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/services/economics/__init__.py",
+    "path": "server_v2/services/economics/__init__.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/services/seo/competitor_analysis copy.py",
+    "path": "server_v2/services/seo/competitor_analysis copy.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/services/seo/competitor_analysis.py",
+    "path": "server_v2/services/seo/competitor_analysis.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:server_v2/services/seo/google_maps_competitors.py",
+    "path": "server_v2/services/seo/google_maps_competitors.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/services/seo/keyword_search copy.py",
+    "path": "server_v2/services/seo/keyword_search copy.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:server_v2/services/seo/keyword_search.py",
+    "path": "server_v2/services/seo/keyword_search.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:server_v2/services/seo/seo_service.py",
+    "path": "server_v2/services/seo/seo_service.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 12
+  },
+  {
+    "id": "file:server_v2/services/seo/__init__.py",
+    "path": "server_v2/services/seo/__init__.py",
+    "language": "python",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/certs/rentri/extract_cert.py",
+    "path": "server_v2/certs/rentri/extract_cert.py",
+    "language": "python",
+    "role": "certificate",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:server_v2/certs/rentri/rentri copy.py",
+    "path": "server_v2/certs/rentri/rentri copy.py",
+    "language": "python",
+    "role": "certificate",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:server_v2/certs/rentri/rentri.py",
+    "path": "server_v2/certs/rentri/rentri.py",
+    "language": "python",
+    "role": "certificate",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:code_indexer/index_engine/scanner.py",
+    "path": "code_indexer/index_engine/scanner.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:code_indexer/index_engine/__init__.py",
+    "path": "code_indexer/index_engine/__init__.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:code_indexer/index_engine/classifiers/file_classifier.py",
+    "path": "code_indexer/index_engine/classifiers/file_classifier.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/classifiers/symbol_classifier.py",
+    "path": "code_indexer/index_engine/classifiers/symbol_classifier.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/classifiers/__init__.py",
+    "path": "code_indexer/index_engine/classifiers/__init__.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:code_indexer/index_engine/core/models.py",
+    "path": "code_indexer/index_engine/core/models.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/core/path_utils.py",
+    "path": "code_indexer/index_engine/core/path_utils.py",
+    "language": "python",
+    "role": "core_module",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/parsers/python_parser.py",
+    "path": "code_indexer/index_engine/parsers/python_parser.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:code_indexer/index_engine/parsers/typescript_parser.py",
+    "path": "code_indexer/index_engine/parsers/typescript_parser.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:code_indexer/index_engine/parsers/__init__.py",
+    "path": "code_indexer/index_engine/parsers/__init__.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/architecture_builder.py",
+    "path": "code_indexer/index_engine/pipeline/architecture_builder.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/context_builder.py",
+    "path": "code_indexer/index_engine/pipeline/context_builder.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/entity_builder.py",
+    "path": "code_indexer/index_engine/pipeline/entity_builder.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/file_builder.py",
+    "path": "code_indexer/index_engine/pipeline/file_builder.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/graph_builder.py",
+    "path": "code_indexer/index_engine/pipeline/graph_builder.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/import_resolver.py",
+    "path": "code_indexer/index_engine/pipeline/import_resolver.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/relationship_builder.py",
+    "path": "code_indexer/index_engine/pipeline/relationship_builder.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:code_indexer/index_engine/pipeline/__init__.py",
+    "path": "code_indexer/index_engine/pipeline/__init__.py",
+    "language": "python",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/public/service-worker.js",
+    "path": "client_v2/public/service-worker.js",
+    "language": "typescript",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/App.tsx",
+    "path": "client_v2/src/App.tsx",
+    "language": "typescript",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/main.tsx",
+    "path": "client_v2/src/main.tsx",
+    "language": "typescript",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/vite-env.d.ts",
+    "path": "client_v2/src/vite-env.d.ts",
+    "language": "typescript",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/PushNotificationToggle.tsx",
+    "path": "client_v2/src/components/PushNotificationToggle.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/components/TheoreticalModeToggle.tsx",
+    "path": "client_v2/src/components/TheoreticalModeToggle.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/hooks/usePermissions.ts",
+    "path": "client_v2/src/hooks/usePermissions.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/hooks/usePushNotifications.ts",
+    "path": "client_v2/src/hooks/usePushNotifications.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/hooks/useRealtimeNotifications.ts",
+    "path": "client_v2/src/hooks/useRealtimeNotifications.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/hooks/useTheme.ts",
+    "path": "client_v2/src/hooks/useTheme.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/hooks/useWebSocket.ts",
+    "path": "client_v2/src/hooks/useWebSocket.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/lib/utils.ts",
+    "path": "client_v2/src/lib/utils.ts",
+    "language": "typescript",
+    "role": "utility",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/router/index.tsx",
+    "path": "client_v2/src/router/index.tsx",
+    "language": "typescript",
+    "role": "unknown",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/services/pushService.ts",
+    "path": "client_v2/src/services/pushService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/services/ricette_ts.service.ts",
+    "path": "client_v2/src/services/ricette_ts.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/services/works.service.ts",
+    "path": "client_v2/src/services/works.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/store/auth.store.ts",
+    "path": "client_v2/src/store/auth.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/store/classificazioni.store.ts",
+    "path": "client_v2/src/store/classificazioni.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/store/conti.store.ts",
+    "path": "client_v2/src/store/conti.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/store/environment.store.ts",
+    "path": "client_v2/src/store/environment.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/store/fake.ricetta.store.ts",
+    "path": "client_v2/src/store/fake.ricetta.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/store/fornitori.store.ts",
+    "path": "client_v2/src/store/fornitori.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/store/materiali.store.ts",
+    "path": "client_v2/src/store/materiali.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/store/notifications.store.ts",
+    "path": "client_v2/src/store/notifications.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/store/pazienti.store.tsx",
+    "path": "client_v2/src/store/pazienti.store.tsx",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/store/prestazioni.store.ts",
+    "path": "client_v2/src/store/prestazioni.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/store/provider.store.ts",
+    "path": "client_v2/src/store/provider.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/store/ricette.store.ts",
+    "path": "client_v2/src/store/ricette.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/store/user.store.ts",
+    "path": "client_v2/src/store/user.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/store/works.store.ts",
+    "path": "client_v2/src/store/works.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/test/setup.ts",
+    "path": "client_v2/src/test/setup.ts",
+    "language": "typescript",
+    "role": "unknown",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/types/classifcazioni.types.ts",
+    "path": "client_v2/src/types/classifcazioni.types.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/types/environment.types.ts",
+    "path": "client_v2/src/types/environment.types.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/types/fatture.ts",
+    "path": "client_v2/src/types/fatture.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/types/index.ts",
+    "path": "client_v2/src/types/index.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/types/ricetta.types.ts",
+    "path": "client_v2/src/types/ricetta.types.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/types/works.types.ts",
+    "path": "client_v2/src/types/works.types.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/utils/config.ts",
+    "path": "client_v2/src/utils/config.ts",
+    "language": "typescript",
+    "role": "configuration",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/utils/index.ts",
+    "path": "client_v2/src/utils/index.ts",
+    "language": "typescript",
+    "role": "utility",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:client_v2/src/services/api/auth.service.ts",
+    "path": "client_v2/src/services/api/auth.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/automation-settings.service.ts",
+    "path": "client_v2/src/services/api/automation-settings.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/services/api/base.service.ts",
+    "path": "client_v2/src/services/api/base.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/services/api/client.ts",
+    "path": "client_v2/src/services/api/client.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/services/api/environment.service.ts",
+    "path": "client_v2/src/services/api/environment.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/services/api/fattura.service.ts",
+    "path": "client_v2/src/services/api/fattura.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/index.ts",
+    "path": "client_v2/src/services/api/index.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+    "path": "client_v2/src/services/api/monitorPrestazioni.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/notifications.service.ts",
+    "path": "client_v2/src/services/api/notifications.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/prestazioneWorkMapping.service.ts",
+    "path": "client_v2/src/services/api/prestazioneWorkMapping.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/ricetta.service.ts",
+    "path": "client_v2/src/services/api/ricetta.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/services-status.service.ts",
+    "path": "client_v2/src/services/api/services-status.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/services/api/todos.ts",
+    "path": "client_v2/src/services/api/todos.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/user.service.ts",
+    "path": "client_v2/src/services/api/user.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/services/api/works.service.ts",
+    "path": "client_v2/src/services/api/works.service.ts",
+    "language": "typescript",
+    "role": "api",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/economics/types.ts",
+    "path": "client_v2/src/features/economics/types.ts",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/lavorazioni/ProvidersPage.tsx",
+    "path": "client_v2/src/features/lavorazioni/ProvidersPage.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/lavorazioni/StepsPage.tsx",
+    "path": "client_v2/src/features/lavorazioni/StepsPage.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/lavorazioni/TasksPage.tsx",
+    "path": "client_v2/src/features/lavorazioni/TasksPage.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+    "path": "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/lavorazioni/WorksPage.tsx",
+    "path": "client_v2/src/features/lavorazioni/WorksPage.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+    "path": "client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/spese/index.ts",
+    "path": "client_v2/src/features/spese/index.ts",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/spese/types.ts",
+    "path": "client_v2/src/features/spese/types.ts",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/test/TestSelectPage.tsx",
+    "path": "client_v2/src/features/test/TestSelectPage.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/users/UserForm.tsx",
+    "path": "client_v2/src/features/users/UserForm.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/users/UserListPage.tsx",
+    "path": "client_v2/src/features/users/UserListPage.tsx",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+    "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:client_v2/src/features/tempo/pages/TempoPage.tsx",
+    "path": "client_v2/src/features/tempo/pages/TempoPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 15
+  },
+  {
+    "id": "file:client_v2/src/features/spese/components/RiepilogoSpeseTab.tsx",
+    "path": "client_v2/src/features/spese/components/RiepilogoSpeseTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/spese/components/SpeseAggregatedTable.tsx",
+    "path": "client_v2/src/features/spese/components/SpeseAggregatedTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/spese/components/SpeseFilters.tsx",
+    "path": "client_v2/src/features/spese/components/SpeseFilters.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/spese/components/SpeseStats.tsx",
+    "path": "client_v2/src/features/spese/components/SpeseStats.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/spese/components/SpeseTable.tsx",
+    "path": "client_v2/src/features/spese/components/SpeseTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/spese/hooks/useAutoCategorization.ts",
+    "path": "client_v2/src/features/spese/hooks/useAutoCategorization.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/spese/pages/SpesePage.tsx",
+    "path": "client_v2/src/features/spese/pages/SpesePage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "path": "client_v2/src/features/spese/services/spese.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/spese/utils/autoCategorization.ts",
+    "path": "client_v2/src/features/spese/utils/autoCategorization.ts",
+    "language": "typescript",
+    "role": "utility",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/spese/utils/autoLearning.ts",
+    "path": "client_v2/src/features/spese/utils/autoLearning.ts",
+    "language": "typescript",
+    "role": "utility",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/spese/utils/studioClassification.ts",
+    "path": "client_v2/src/features/spese/utils/studioClassification.ts",
+    "language": "typescript",
+    "role": "utility",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/spese/utils/testCategorization.ts",
+    "path": "client_v2/src/features/spese/utils/testCategorization.ts",
+    "language": "typescript",
+    "role": "utility",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/simulation/components/EmailSimulationTab.tsx",
+    "path": "client_v2/src/features/simulation/components/EmailSimulationTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/simulation/components/PreviewDialog.tsx",
+    "path": "client_v2/src/features/simulation/components/PreviewDialog.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/simulation/components/RecallSimulationTab.tsx",
+    "path": "client_v2/src/features/simulation/components/RecallSimulationTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/simulation/components/ReminderSimulationTab.tsx",
+    "path": "client_v2/src/features/simulation/components/ReminderSimulationTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/simulation/pages/SimulationDashboard.tsx",
+    "path": "client_v2/src/features/simulation/pages/SimulationDashboard.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/simulation/services/simulation.service.ts",
+    "path": "client_v2/src/features/simulation/services/simulation.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/SmsSettingsCard.tsx",
+    "path": "client_v2/src/features/settings/components/SmsSettingsCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/TemplateEditor.tsx",
+    "path": "client_v2/src/features/settings/components/TemplateEditor.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/AutomationPage.tsx",
+    "path": "client_v2/src/features/settings/pages/AutomationPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/CalendarSettings.tsx",
+    "path": "client_v2/src/features/settings/pages/CalendarSettings.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/DayReminderSettings.tsx",
+    "path": "client_v2/src/features/settings/pages/DayReminderSettings.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/EvolutionSettingsPage.tsx",
+    "path": "client_v2/src/features/settings/pages/EvolutionSettingsPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/MonitoringSettings.tsx",
+    "path": "client_v2/src/features/settings/pages/MonitoringSettings.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx",
+    "path": "client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+    "path": "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/TemplatesPage copy.tsx",
+    "path": "client_v2/src/features/settings/pages/TemplatesPage copy.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/features/settings/pages/TemplatesPage.tsx",
+    "path": "client_v2/src/features/settings/pages/TemplatesPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/automation.service.ts",
+    "path": "client_v2/src/features/settings/services/automation.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/changes.service.ts",
+    "path": "client_v2/src/features/settings/services/changes.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/dayReminder.service.ts",
+    "path": "client_v2/src/features/settings/services/dayReminder.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/environment.service.ts",
+    "path": "client_v2/src/features/settings/services/environment.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "path": "client_v2/src/features/settings/services/evolution.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/monitoring.service.ts",
+    "path": "client_v2/src/features/settings/services/monitoring.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+    "path": "client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/services/templates.service.ts",
+    "path": "client_v2/src/features/settings/services/templates.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/CreateMonitorModal.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/CreateMonitorModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/ListaRegole.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/ListaRegole.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/LogMonitorCard.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/LogMonitorCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/StatoMonitorCard.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/StatoMonitorCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/TipiAppuntamentoSelect.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/TipiAppuntamentoSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx",
+    "path": "client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/seo/pages/SeoPage.tsx",
+    "path": "client_v2/src/features/seo/pages/SeoPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:client_v2/src/features/seo/services/seoService.ts",
+    "path": "client_v2/src/features/seo/services/seoService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/scheduler/pages/SchedulerPage.tsx",
+    "path": "client_v2/src/features/scheduler/pages/SchedulerPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "path": "client_v2/src/features/scheduler/services/remindersService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+    "path": "client_v2/src/features/scheduler/services/schedulerService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/components/ListaRicetteTest.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/components/ListaRicetteTest.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/components/RicettaAuthStatus.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicettaAuthStatus.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/components/RicettePaziente.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicettePaziente.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/components/TestInvioRicetta.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/components/TestInvioRicetta.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/components/TestSistemaTSRaw.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/components/TestSistemaTSRaw.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/hooks/usePazienteModals.ts",
+    "path": "client_v2/src/features/ricetta-elettronica/hooks/usePazienteModals.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/ricetta-elettronica/pages/RNETestPage.tsx",
+    "path": "client_v2/src/features/ricetta-elettronica/pages/RNETestPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+    "path": "client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+    "path": "client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+    "path": "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+    "path": "client_v2/src/features/pazienti/components/PazientiTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+    "path": "client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+    "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+    "path": "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+    "path": "client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+    "path": "client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+    "path": "client_v2/src/features/pazienti/services/marketing.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+    "path": "client_v2/src/features/pazienti/services/richiami.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+    "path": "client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+    "path": "client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/components/MaterialiTable.tsx",
+    "path": "client_v2/src/features/materiali/components/MaterialiTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+    "path": "client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+    "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/pages/RicercaArticoli.tsx",
+    "path": "client_v2/src/features/materiali/pages/RicercaArticoli.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 16
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+    "path": "client_v2/src/features/materiali/services/materiali-classification.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+    "path": "client_v2/src/features/materiali/services/materiali-migration.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/components/ClassificazioneCompleta.tsx",
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneCompleta.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/components/ClassificazioneGerarchica.tsx",
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneGerarchica.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/components/ClassificazioneStatus.tsx",
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneStatus.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/components/ClassificazioneToggle.tsx",
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneToggle.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/components/FornitoriTable.tsx",
+    "path": "client_v2/src/features/fornitori/components/FornitoriTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/hooks/useFornitoreModals.ts",
+    "path": "client_v2/src/features/fornitori/hooks/useFornitoreModals.ts",
+    "language": "typescript",
+    "role": "hook",
+    "symbols_count": 13
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/pages/FornitoriClassificazione.tsx",
+    "path": "client_v2/src/features/fornitori/pages/FornitoriClassificazione.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/pages/FornitoriPage.tsx",
+    "path": "client_v2/src/features/fornitori/pages/FornitoriPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/services/classificazioni.service.ts",
+    "path": "client_v2/src/features/fornitori/services/classificazioni.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/fornitori/types/index.ts",
+    "path": "client_v2/src/features/fornitori/types/index.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/EmailAiConfig.tsx",
+    "path": "client_v2/src/features/email/components/EmailAiConfig.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/EmailDetail.tsx",
+    "path": "client_v2/src/features/email/components/EmailDetail.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/EmailList.tsx",
+    "path": "client_v2/src/features/email/components/EmailList.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/EmailOAuthSetup.tsx",
+    "path": "client_v2/src/features/email/components/EmailOAuthSetup.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/EmailRulesManager.tsx",
+    "path": "client_v2/src/features/email/components/EmailRulesManager.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/EmailScopeFilter.tsx",
+    "path": "client_v2/src/features/email/components/EmailScopeFilter.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/EmailScopesManager.tsx",
+    "path": "client_v2/src/features/email/components/EmailScopesManager.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/email/components/TagInput.tsx",
+    "path": "client_v2/src/features/email/components/TagInput.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/email/pages/EmailPage.tsx",
+    "path": "client_v2/src/features/email/pages/EmailPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/email/services/emailService.ts",
+    "path": "client_v2/src/features/email/services/emailService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/email/store/email.store.ts",
+    "path": "client_v2/src/features/email/store/email.store.ts",
+    "language": "typescript",
+    "role": "state",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/email/types/email.types.ts",
+    "path": "client_v2/src/features/email/types/email.types.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/BreakEvenIndicator.tsx",
+    "path": "client_v2/src/features/economics/components/BreakEvenIndicator.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/CollaboratoriRedditivita.tsx",
+    "path": "client_v2/src/features/economics/components/CollaboratoriRedditivita.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/ComparisonChart.tsx",
+    "path": "client_v2/src/features/economics/components/ComparisonChart.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/DashboardTab.tsx",
+    "path": "client_v2/src/features/economics/components/DashboardTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/ForecastChart.tsx",
+    "path": "client_v2/src/features/economics/components/ForecastChart.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/ForecastTab.tsx",
+    "path": "client_v2/src/features/economics/components/ForecastTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/HealthPulse.tsx",
+    "path": "client_v2/src/features/economics/components/HealthPulse.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/KpiCard.tsx",
+    "path": "client_v2/src/features/economics/components/KpiCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/MonthlyChart.tsx",
+    "path": "client_v2/src/features/economics/components/MonthlyChart.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/MultiYearChart.tsx",
+    "path": "client_v2/src/features/economics/components/MultiYearChart.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/ReportAppuntamenti.tsx",
+    "path": "client_v2/src/features/economics/components/ReportAppuntamenti.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/ReportPrestazioni.tsx",
+    "path": "client_v2/src/features/economics/components/ReportPrestazioni.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/SimulatoreTab.tsx",
+    "path": "client_v2/src/features/economics/components/SimulatoreTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/components/TrimesterForecastCard.tsx",
+    "path": "client_v2/src/features/economics/components/TrimesterForecastCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/economics/pages/AnalisiComparativaPage.tsx",
+    "path": "client_v2/src/features/economics/pages/AnalisiComparativaPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/economics/pages/CentroCostoPage.tsx",
+    "path": "client_v2/src/features/economics/pages/CentroCostoPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/economics/pages/EconomicsPage.tsx",
+    "path": "client_v2/src/features/economics/pages/EconomicsPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/economics/services/economics.service.ts",
+    "path": "client_v2/src/features/economics/services/economics.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/ActiveWorkCard.tsx",
+    "path": "client_v2/src/features/dashboard/components/ActiveWorkCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/CalendarAutomation.tsx",
+    "path": "client_v2/src/features/dashboard/components/CalendarAutomation.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/DashboardStats.tsx",
+    "path": "client_v2/src/features/dashboard/components/DashboardStats.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/DatabaseStatusCard.tsx",
+    "path": "client_v2/src/features/dashboard/components/DatabaseStatusCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/MonitorRules.tsx",
+    "path": "client_v2/src/features/dashboard/components/MonitorRules.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+    "path": "client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/RecallAutomationCard.tsx",
+    "path": "client_v2/src/features/dashboard/components/RecallAutomationCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/ReminderAutomationCard.tsx",
+    "path": "client_v2/src/features/dashboard/components/ReminderAutomationCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/ServicesStatusSection.tsx",
+    "path": "client_v2/src/features/dashboard/components/ServicesStatusSection.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/ServiceStatusCard.tsx",
+    "path": "client_v2/src/features/dashboard/components/ServiceStatusCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+    "path": "client_v2/src/features/dashboard/components/TodoModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+    "path": "client_v2/src/features/dashboard/components/TodoWidget.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/components/WhatsAppStatusWidget.tsx",
+    "path": "client_v2/src/features/dashboard/components/WhatsAppStatusWidget.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/dashboard/pages/Dashboard.tsx",
+    "path": "client_v2/src/features/dashboard/pages/Dashboard.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/conti/components/ColumnDefinition.ts",
+    "path": "client_v2/src/features/conti/components/ColumnDefinition.ts",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/conti/components/ContiTable.tsx",
+    "path": "client_v2/src/features/conti/components/ContiTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/conti/components/SmartTable.tsx",
+    "path": "client_v2/src/features/conti/components/SmartTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/conti/pages/ContiPage.tsx",
+    "path": "client_v2/src/features/conti/pages/ContiPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+    "path": "client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+    "path": "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/cbct/pages/DownloadTacPage.tsx",
+    "path": "client_v2/src/features/cbct/pages/DownloadTacPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/cbct/services/cbct.service.ts",
+    "path": "client_v2/src/features/cbct/services/cbct.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/components/AutoSyncModal.tsx",
+    "path": "client_v2/src/features/calendar/components/AutoSyncModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+    "path": "client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+    "path": "client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 10
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+    "path": "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 11
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/hook/useCalendarHealth.ts",
+    "path": "client_v2/src/features/calendar/hook/useCalendarHealth.ts",
+    "language": "typescript",
+    "role": "feature",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/pages/CalendarPage.tsx",
+    "path": "client_v2/src/features/calendar/pages/CalendarPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "path": "client_v2/src/features/calendar/services/calendar.service.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+    "path": "client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/bot/components/ConversazioniTab.tsx",
+    "path": "client_v2/src/features/bot/components/ConversazioniTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/features/bot/components/ReminderRepliesTab.tsx",
+    "path": "client_v2/src/features/bot/components/ReminderRepliesTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/bot/components/ServiziTab.tsx",
+    "path": "client_v2/src/features/bot/components/ServiziTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/bot/components/SimulazioneTab.tsx",
+    "path": "client_v2/src/features/bot/components/SimulazioneTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/features/bot/components/StoricoComunicazioniTab.tsx",
+    "path": "client_v2/src/features/bot/components/StoricoComunicazioniTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/bot/components/StudioInfoTab.tsx",
+    "path": "client_v2/src/features/bot/components/StudioInfoTab.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/features/bot/pages/BotPage.tsx",
+    "path": "client_v2/src/features/bot/pages/BotPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/bot/services/botService.ts",
+    "path": "client_v2/src/features/bot/services/botService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/bot/types/bot.types.ts",
+    "path": "client_v2/src/features/bot/types/bot.types.ts",
+    "language": "typescript",
+    "role": "types",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/automation/pages/AutomationMessages.tsx",
+    "path": "client_v2/src/features/automation/pages/AutomationMessages.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/features/automation/services/automationMessagesService.ts",
+    "path": "client_v2/src/features/automation/services/automationMessagesService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/features/auth/pages/LoginPage.tsx",
+    "path": "client_v2/src/features/auth/pages/LoginPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/features/auth/pages/RegisterPage.tsx",
+    "path": "client_v2/src/features/auth/pages/RegisterPage.tsx",
+    "language": "typescript",
+    "role": "page",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/features/admin/services/adminService.ts",
+    "path": "client_v2/src/features/admin/services/adminService.ts",
+    "language": "typescript",
+    "role": "service",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+    "path": "client_v2/src/components/forms/MaterialClassificationForm.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/components/layout/AppSidebar.tsx",
+    "path": "client_v2/src/components/layout/AppSidebar.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/components/layout/AppSidebarNav.tsx",
+    "path": "client_v2/src/components/layout/AppSidebarNav.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/BottomNav.tsx",
+    "path": "client_v2/src/components/layout/BottomNav.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/Header.tsx",
+    "path": "client_v2/src/components/layout/Header.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/components/layout/Layout.tsx",
+    "path": "client_v2/src/components/layout/Layout.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/components/layout/MobileDrawer.tsx",
+    "path": "client_v2/src/components/layout/MobileDrawer.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/layout/PageLayout.tsx",
+    "path": "client_v2/src/components/layout/PageLayout.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/layout/PageTemplate.tsx",
+    "path": "client_v2/src/components/layout/PageTemplate.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/ProtectedRoute.tsx",
+    "path": "client_v2/src/components/layout/ProtectedRoute.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav-01.tsx",
+    "path": "client_v2/src/components/layout/_nav-01.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav-02.tsx",
+    "path": "client_v2/src/components/layout/_nav-02.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav-03.tsx",
+    "path": "client_v2/src/components/layout/_nav-03.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav-04.tsx",
+    "path": "client_v2/src/components/layout/_nav-04.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav.01.tsx",
+    "path": "client_v2/src/components/layout/_nav.01.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav.02.tsx",
+    "path": "client_v2/src/components/layout/_nav.02.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav.03.tsx",
+    "path": "client_v2/src/components/layout/_nav.03.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/layout/_nav.tsx",
+    "path": "client_v2/src/components/layout/_nav.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/modals/ConfirmActionModal.tsx",
+    "path": "client_v2/src/components/modals/ConfirmActionModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/components/modals/ConfirmDeleteModal.tsx",
+    "path": "client_v2/src/components/modals/ConfirmDeleteModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/modals/DetailViewModal.tsx",
+    "path": "client_v2/src/components/modals/DetailViewModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/components/modals/EditModal.tsx",
+    "path": "client_v2/src/components/modals/EditModal.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/components/modals/index.ts",
+    "path": "client_v2/src/components/modals/index.ts",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/modals/ModalAnagrafica.tsx",
+    "path": "client_v2/src/components/modals/ModalAnagrafica.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/modals/ModalFatturaDetail.tsx",
+    "path": "client_v2/src/components/modals/ModalFatturaDetail.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 6
+  },
+  {
+    "id": "file:client_v2/src/components/modals/ModalFattureElenco.tsx",
+    "path": "client_v2/src/components/modals/ModalFattureElenco.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:client_v2/src/components/selects/BrancheSelect.tsx",
+    "path": "client_v2/src/components/selects/BrancheSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/selects/ContiSelect.tsx",
+    "path": "client_v2/src/components/selects/ContiSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/selects/FornitoriSelect.tsx",
+    "path": "client_v2/src/components/selects/FornitoriSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/selects/MaterialiSelect.tsx",
+    "path": "client_v2/src/components/selects/MaterialiSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:client_v2/src/components/selects/PazientiSelect.tsx",
+    "path": "client_v2/src/components/selects/PazientiSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/selects/PeriodoSelect.tsx",
+    "path": "client_v2/src/components/selects/PeriodoSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/selects/PrestazioniSelect.tsx",
+    "path": "client_v2/src/components/selects/PrestazioniSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/components/selects/SlimSelect.tsx",
+    "path": "client_v2/src/components/selects/SlimSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/selects/SottocontiSelect.tsx",
+    "path": "client_v2/src/components/selects/SottocontiSelect.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/tables/DataTable.tsx",
+    "path": "client_v2/src/components/tables/DataTable.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 9
+  },
+  {
+    "id": "file:client_v2/src/components/tables/DataTable2.tsx",
+    "path": "client_v2/src/components/tables/DataTable2.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/components/toggle/databaseToggle.tsx",
+    "path": "client_v2/src/components/toggle/databaseToggle.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/components/ui/avatar.tsx",
+    "path": "client_v2/src/components/ui/avatar.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/badge.tsx",
+    "path": "client_v2/src/components/ui/badge.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/ui/button.tsx",
+    "path": "client_v2/src/components/ui/button.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/card.tsx",
+    "path": "client_v2/src/components/ui/card.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/dialog.tsx",
+    "path": "client_v2/src/components/ui/dialog.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/dropdown-menu.tsx",
+    "path": "client_v2/src/components/ui/dropdown-menu.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/ErrorFallback.tsx",
+    "path": "client_v2/src/components/ui/ErrorFallback.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/input.tsx",
+    "path": "client_v2/src/components/ui/input.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/label.tsx",
+    "path": "client_v2/src/components/ui/label.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/NotFoundPage.tsx",
+    "path": "client_v2/src/components/ui/NotFoundPage.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/NotificationBell.tsx",
+    "path": "client_v2/src/components/ui/NotificationBell.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/NotificationCenter.tsx",
+    "path": "client_v2/src/components/ui/NotificationCenter.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/components/ui/scroll-area.tsx",
+    "path": "client_v2/src/components/ui/scroll-area.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/separator.tsx",
+    "path": "client_v2/src/components/ui/separator.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/sheet.tsx",
+    "path": "client_v2/src/components/ui/sheet.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/skeleton.tsx",
+    "path": "client_v2/src/components/ui/skeleton.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:client_v2/src/components/ui/switch.tsx",
+    "path": "client_v2/src/components/ui/switch.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/ui/tabs.tsx",
+    "path": "client_v2/src/components/ui/tabs.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/environment/base/EnvironmentCard.tsx",
+    "path": "client_v2/src/components/environment/base/EnvironmentCard.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/components/environment/base/EnvironmentPanel.tsx",
+    "path": "client_v2/src/components/environment/base/EnvironmentPanel.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/components/environment/base/EnvironmentStatus.tsx",
+    "path": "client_v2/src/components/environment/base/EnvironmentStatus.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 3
+  },
+  {
+    "id": "file:client_v2/src/components/environment/base/EnvironmentSwitch.tsx",
+    "path": "client_v2/src/components/environment/base/EnvironmentSwitch.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/components/environment/base/index.ts",
+    "path": "client_v2/src/components/environment/base/index.ts",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/environment/specialized/DatabaseModeSwitch.tsx",
+    "path": "client_v2/src/components/environment/specialized/DatabaseModeSwitch.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:client_v2/src/components/environment/specialized/index.ts",
+    "path": "client_v2/src/components/environment/specialized/index.ts",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 0
+  },
+  {
+    "id": "file:client_v2/src/components/environment/specialized/RentriModeSwitch.tsx",
+    "path": "client_v2/src/components/environment/specialized/RentriModeSwitch.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 8
+  },
+  {
+    "id": "file:client_v2/src/components/environment/specialized/RicettaModeSwitch.tsx",
+    "path": "client_v2/src/components/environment/specialized/RicettaModeSwitch.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 5
+  },
+  {
+    "id": "file:client_v2/src/components/environment/specialized/SMSModeSwitch.tsx",
+    "path": "client_v2/src/components/environment/specialized/SMSModeSwitch.tsx",
+    "language": "typescript",
+    "role": "component",
+    "symbols_count": 4
+  },
+  {
+    "id": "file:.claude/skills/studio-analytics/scripts/compute_kpi.py",
+    "path": ".claude/skills/studio-analytics/scripts/compute_kpi.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:.claude/skills/studio-analytics/scripts/detect_inefficiencies.py",
+    "path": ".claude/skills/studio-analytics/scripts/detect_inefficiencies.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 7
+  },
+  {
+    "id": "file:.claude/skills/studio-analytics/scripts/export_dashboard_json.py",
+    "path": ".claude/skills/studio-analytics/scripts/export_dashboard_json.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 2
+  },
+  {
+    "id": "file:.claude/skills/studio-analytics/scripts/forecast.py",
+    "path": ".claude/skills/studio-analytics/scripts/forecast.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:.claude/skills/studio-analytics/scripts/read_agenda.py",
+    "path": ".claude/skills/studio-analytics/scripts/read_agenda.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 1
+  },
+  {
+    "id": "file:.claude/skills/studio-analytics/scripts/_utils.py",
+    "path": ".claude/skills/studio-analytics/scripts/_utils.py",
+    "language": "python",
+    "role": "script",
+    "symbols_count": 4
+  }
+]

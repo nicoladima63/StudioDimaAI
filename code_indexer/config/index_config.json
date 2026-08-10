@@ -1,0 +1,38 @@
+{
+  "workspaces": [
+    {
+      "name": "backend",
+      "path": "server_v2"
+    },
+    {
+      "name": "frontend",
+      "path": "client_v2"
+    },
+    {
+      "name": "tests",
+      "path": "tests"
+    }
+  ],
+  "excluded_dirs": [
+    ".git",
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    "__pycache__",
+    "venv",
+    ".venv",
+    "logs",
+    "coverage",
+    ".cache",
+    ".pytest_cache",
+    ".vscode"
+  ],
+  "extensions": [
+    ".py",
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx"
+  ]
+}

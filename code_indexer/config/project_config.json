@@ -1,0 +1,14 @@
+{
+  "aliases": {
+    "@": "client_v2/src",
+    "@/components": "client_v2/src/components",
+    "@/features": "client_v2/src/features",
+    "@/services": "client_v2/src/services",
+    "@/store": "client_v2/src/store",
+    "@/types": "client_v2/src/types",
+    "@/utils": "client_v2/src/utils",
+    "@/hooks": "client_v2/src/hooks",
+    "@/styles": "client_v2/src/styles",
+    "@/lib": "client_v2/src/lib"
+  }
+}

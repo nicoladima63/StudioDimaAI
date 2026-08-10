@@ -272,16 +272,16 @@ const EvolutionSettingsPage: React.FC = () => {
   // WhatsApp: 2 stati — Crea istanza / Termina istanza
   const waAction = status ? (
     !status.instance_exists ? (
-      <CButton size="sm" color="primary" className="w-50" onClick={handleCreateInstance}
+      <CButton size="sm" color="success" className="w-50" onClick={handleCreateInstance}
         disabled={creating || !status.evolution_reachable}>
-        {creating ? <CSpinner size="sm" className="me-1" /> : null}
-        Connetti
+        {creating ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaPlay} className="me-1" />}
+        Avvia
       </CButton>
     ) : (
-      <CButton size="sm" color="danger" className="w-50" onClick={handleTerminateInstance}
+      <CButton size="sm" color="success" className="w-50" onClick={handleTerminateInstance}
         disabled={terminating}>
-        {terminating ? <CSpinner size="sm" className="me-1" /> : null}
-        Disconnesso
+        {terminating ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
+        Ferma
       </CButton>
     )
   ) : undefined
@@ -314,7 +314,7 @@ const EvolutionSettingsPage: React.FC = () => {
                 [
                   {
                     label: 'Docker',
-                    color: (status.docker_running ? 'success' : 'danger') as TrafficLight,
+                    color: (status.docker_running ? 'success' : 'warning') as TrafficLight,
                     icon: cilSettings, action: dockerAction,
                   },
                   {
@@ -355,7 +355,7 @@ const EvolutionSettingsPage: React.FC = () => {
 
             {/* Output comando docker */}
             {cmdOutput && (
-              <CAlert color={cmdOutput.ok ? 'light' : 'danger'} className="mb-3 py-2">
+              <CAlert color={cmdOutput.ok ? 'primary' : 'danger'} className="mb-3 py-2">
                 <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap', maxHeight: 100, overflowY: 'auto' }}>
                   {cmdOutput.text}
                 </pre>
