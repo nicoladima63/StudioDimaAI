@@ -1,0 +1,3813 @@
+QUERY: materiali
+
+=== PRIORITY FILES ===
+- server_v2/services/materiali_migration_service.py | role=service | score=64 | structural=58 | query=6 | matched=materiali
+- server_v2/api/v2_materiali.py | role=api | score=51 | structural=41 | query=10 | matched=materiali
+- client_v2/src/features/materiali/pages/MaterialiPage.tsx | role=page | score=44 | structural=38 | query=6 | matched=materiali
+- server_v2/repositories/materiali_repository.py | role=repository | score=42 | structural=36 | query=6 | matched=materiali
+- client_v2/src/features/materiali/pages/RicercaArticoli.tsx | role=page | score=41 | structural=35 | query=6 | matched=materiali
+- client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx | role=page | score=39 | structural=33 | query=6 | matched=materiali
+- server_v2/services/materiali_service.py | role=service | score=38 | structural=28 | query=10 | matched=materiali
+- client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx | role=component | score=33 | structural=27 | query=6 | matched=materiali
+- client_v2/src/store/materiali.store.ts | role=state | score=31 | structural=25 | query=6 | matched=materiali
+- server_v2/scripts/test_materiali_migration.py | role=script | score=29 | structural=23 | query=6 | matched=materiali
+- client_v2/src/features/materiali/components/MaterialiTable.tsx | role=component | score=25 | structural=19 | query=6 | matched=materiali
+- client_v2/src/features/materiali/services/materiali-classification.service.ts | role=service | score=18 | structural=12 | query=6 | matched=materiali
+- client_v2/src/features/materiali/services/materiali-migration.service.ts | role=service | score=18 | structural=12 | query=6 | matched=materiali
+- client_v2/src/features/materiali/components/MaterialiAccordion.tsx | role=component | score=18 | structural=12 | query=6 | matched=materiali
+- client_v2/src/store/conti.store.ts | role=state | score=14 | structural=14 | query=0 | matched=none
+- client_v2/src/store/fornitori.store.ts | role=state | score=13 | structural=13 | query=0 | matched=none
+- client_v2/src/components/forms/MaterialClassificationForm.tsx | role=component | score=11 | structural=11 | query=0 | matched=none
+- client_v2/src/services/api/fattura.service.ts | role=api | score=11 | structural=11 | query=0 | matched=none
+
+=== ARCHITECTURE ===
+
+SERVICE
+- server_v2/services/materiali_migration_service.py
+- server_v2/services/materiali_service.py
+- client_v2/src/features/materiali/services/materiali-classification.service.ts
+- client_v2/src/features/materiali/services/materiali-migration.service.ts
+
+API
+- server_v2/api/v2_materiali.py
+- client_v2/src/services/api/fattura.service.ts
+
+PAGE
+- client_v2/src/features/materiali/pages/MaterialiPage.tsx
+- client_v2/src/features/materiali/pages/RicercaArticoli.tsx
+- client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx
+
+REPOSITORY
+- server_v2/repositories/materiali_repository.py
+
+COMPONENT
+- client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
+- client_v2/src/features/materiali/components/MaterialiTable.tsx
+- client_v2/src/features/materiali/components/MaterialiAccordion.tsx
+- client_v2/src/components/forms/MaterialClassificationForm.tsx
+
+STATE
+- client_v2/src/store/materiali.store.ts
+- client_v2/src/store/conti.store.ts
+- client_v2/src/store/fornitori.store.ts
+
+SCRIPT
+- server_v2/scripts/test_materiali_migration.py
+
+=== SYMBOLS ===
+- MaterialiMigrationService | server_v2/services/materiali_migration_service.py | kind=class | category=core | score=78
+- MaterialiRepository | server_v2/repositories/materiali_repository.py | kind=class | category=core | score=56
+- classify_material_type | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- is_dental_material | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- normalize_supplier_name | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- read_spesafo_data | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- filter_materials_by_classification | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- migrate_materials_to_db | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- run_full_migration | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- import_materials_for_supplier | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- search_articles_in_spesafo | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=56
+- get_materiali | server_v2/api/v2_materiali.py | kind=function | category=support | score=54
+- get_all_materiali | server_v2/api/v2_materiali.py | kind=function | category=support | score=54
+- search_materiali | server_v2/api/v2_materiali.py | kind=function | category=support | score=54
+- get_materiali_stats | server_v2/api/v2_materiali.py | kind=function | category=support | score=54
+- ricerca_materiali_classificati | server_v2/api/v2_materiali.py | kind=function | category=support | score=54
+- salva_classificazione_materiali_bulk | server_v2/api/v2_materiali.py | kind=function | category=support | score=54
+- MaterialiService | server_v2/services/materiali_service.py | kind=class | category=core | score=48
+- useMateriali | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=43
+- useMaterialiByFornitore | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=43
+- useMaterialiByConto | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=43
+- useMaterialiSearch | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=43
+- __init__ | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _compile_regex_patterns | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _initialize_supplier_mappings | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _manage_cache_size | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _is_material_useful | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _clean_dbf_value | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _safe_float | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _get_existing_material_classification | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _get_classification_data | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _load_existing_patterns | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _find_pattern_match | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _clean_material_name | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _calculate_similarity | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- _derive_category | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=41
+- get_all_materiali | server_v2/services/materiali_service.py | kind=function | category=support | score=41
+- get_materiali_paginated | server_v2/services/materiali_service.py | kind=function | category=support | score=41
+- get_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- create_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- update_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- update_materiale_conti | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- delete_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- get_classificazione_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- salva_classificazione_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- ricerca_articoli | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- preview_migration | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- import_supplier_materials | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- import_all_materials | server_v2/api/v2_materiali.py | kind=function | category=support | score=39
+- table_name | server_v2/repositories/materiali_repository.py | kind=function | category=support | score=34
+
+=== RELEVANT CODE ===
+
+--- server_v2\services\materiali_migration_service.py::MaterialiMigrationService (lines 24-1344) ---
+class MaterialiMigrationService(BaseService):
+    """Service for migrating materials from VOCISPES.DBF with intelligent filtering."""
+    
+    def __init__(self, db_manager):
+        super().__init__(db_manager)
+        self.dbf_reader = DBFOptimizedReader()
+        
+        # COSTANTI CONFIGURABILI (GPT suggestion)
+        self.CONFIDENCE_THRESHOLD_DENTAL = 15  # Era 40, abbassato per includere più materiali
+        self.CONFIDENCE_THRESHOLD_UNKNOWN = 10  # Era 30, abbassato per ridurre 'unknown'
+        self.MIN_PATTERN_MATCHES = 1  # Era 2, ridotto per essere più permissivo
+        self.MIN_PRICE = 0.01  # Era 0.10, abbassato
+        self.MAX_PRICE = 1000  # Era 500, aumentato
+        
+        # PESI CONFIGURABILI
+        self.WEIGHT_EXACT_MATCH = 100
+        self.WEIGHT_PARTIAL_MATCH = 80
+        self.WEIGHT_MULTIPLE_MATCHES = 15
+        self.WEIGHT_EXACT_BONUS = 25
+        self.WEIGHT_PHRASE_MATCH = 90
+        
+        # Parole chiave per identificare materiali dentali utili (migliorate)
+        self.dental_keywords = {
+            'conservativa': ['resina', 'composito', 'bonding', 'adhesive', 'etching', 'primer', 'liner', 'base', 'restorative', 'filling', 'flowable', 'bulk fill'],
+            'endodonzia': ['lima', 'file', 'guttaperca', 'sealer', 'irrigante', 'paper point', 'paperpoint', 'endodontic', 'root canal', 'obturation', 'apex locator'],
+            'protesi': ['corona', 'ponte', 'impianto', 'abutment', 'cemento', 'impression', 'bite', 'crown', 'bridge', 'prosthetic', 'denture', 'silicone', 'alginato'],
+            'ortodonzia': ['bracket', 'filo', 'elastico', 'banda', 'attacco', 'chain', 'ligature', 'orthodontic', 'wire', 'archwire', 'retainer'],
+            'chirurgia': ['bisturi', 'scalpel', 'sutura', 'anestesia', 'ago', 'siringa', 'dissezione', 'surgical', 'suture', 'anesthesia', 'elevator', 'sindesmotomo'],
+            'radiologia': ['pellicola', 'film', 'sensore', 'digital', 'panoramica', 'endorale', 'x-ray', 'radiographic', 'sensor', 'bite wing'],
+            'prevenzione': ['pasta', 'profilassi', 'fluoruro', 'sigillante', 'detartrasi', 'scaling', 'prophylaxis', 'fluoride', 'sealant', 'polish'],
+            'strumenti': ['trapano', 'fresa', 'bur', 'scalpel', 'pinza', 'speculum', 'mirror', 'explorer', 'handpiece', 'drill', 'probe'],
+            'materiali_base': ['gesso', 'cera', 'silicon', 'alginate', 'stone', 'die', 'articolatore', 'gypsum', 'wax', 'impression material'],
+            'igiene': ['spazzolino', 'dentifricio', 'collutorio', 'floss', 'toothbrush', 'mouthwash', 'interdental', 'oral hygiene'],
+            'anestesia': ['lidocaina', 'articaina', 'mepivacaina', 'lidocaine', 'anesthetic', 'local anesthesia', 'carpule', 'cartridge'],
+            'antibiotici': ['amoxicillina', 'clindamicina', 'azitromicina', 'amoxicillin', 'clindamycin', 'antibiotic', 'prescription'],
+            'disinfettanti': ['clorexidina', 'perossido', 'ipoclorito', 'disinfettante', 'chlorhexidine', 'peroxide', 'sterilizer'],
+            'strisce': ['striscia', 'strip', 'matrice', 'matrix', 'wedge', 'cuneo', 'spessore'],
+            'perni': ['perno', 'post', 'fiber', 'fibra', 'fiber post', 'metal post'],
+            'fili': ['filo', 'retraction', 'retrazione', 'gengival', 'retraction cord', 'gingival']
+        }
+        
+        # Parole da escludere (logica intelligente come backend v1)
+        self.exclude_keywords = [
+            # Voci secondarie fatture (come nel backend v1)
+            'iva', 'imposta', 'sconto', 'trasporto', 'spedizione', 'shipping',
+            'ritenuta', 'bollo', 'commissione', 'fee', 'tax', 'vat',
+            
+            # Materiali amministrativi/office
+            'busta', 'envelope', 'timbro', 'stamp', 'cartolina', 'postcard',
+            'penna', 'pen', 'matita', 'pencil', 'cancelleria', 'office supplies',
+            'telefono', 'phone', 'computer', 'software', 'licenza', 'license',
+            'stampante', 'printer', 'toner', 'cartuccia', 'ink',
+            
+            # Pulizia generale (non dentale)
+            'pulizia ufficio', 'cleaning', 'detergente casa', 'sapone mani',
+            'carta igienica', 'toilet paper', 'asciugamani', 'towels',
+            
+            # Consumabili generali
+            'caffè', 'coffee', 'acqua', 'water', 'bibite', 'drinks', 'snack',
+            'benzina', 'gasolio', 'carburante', 'fuel', 'auto', 'car', 'parcheggio',
+            
+            # Servizi amministrativi
+            'assicurazione', 'insurance', 'tasse', 'tax', 'consulenza', 'consulting',
+            'formazione', 'training', 'corso', 'course', 'abbonamento', 'subscription',
+            'ddt', 'fattura', 'rimessa', 'versione', 'team', 'gestione', 'management',
+            'contabilità', 'accounting', 'banca', 'bank', 'finanziario', 'financial'
+        ]
+        
+        # Soglie intelligenti (come backend v1)
+        self.min_price_threshold = 5.0  # Importo minimo significativo
+        self.min_quantity_threshold = 0.1  # Quantità minima
+        
+        # PRE-COMPILAZIONE REGEX (GPT suggestion)
+        self.compiled_patterns = self._compile_regex_patterns()
+        
+        # INIZIALIZZAZIONE MAPPING FORNITORI (GPT suggestion)
+        self._initialize_supplier_mappings()
+        
+        # CACHE LIMITATA (GPT suggestion)
+        self._classification_cache = {}
+        self._supplier_cache = {}
+        self._cache_max_size = 1000
+        
+    def _compile_regex_patterns(self):
+        """Pre-compila regex patterns per performance (GPT suggestion)."""
+        import re
+        return {
+            'medical_units': re.compile(r'\b(ml|cc|gr|mg)\b', re.IGNORECASE),
+            'percentages': re.compile(r'\b\d+%\b'),
+            'sterile': re.compile(r'\b(sterile|steril)\b', re.IGNORECASE),
+            'disposable': re.compile(r'\b(monouso|disposable)\b', re.IGNORECASE),
+            'dental_ref': re.compile(r'\b(dental|dent|tooth)\b', re.IGNORECASE),
+            'guanti': re.compile(r'\b(guanti|gloves)\b', re.IGNORECASE),
+            'mascherine': re.compile(r'\b(mascherina|mask|ffp2|kn95)\b', re.IGNORECASE),
+            'word_boundaries': re.compile(r'\b\w+\b')  # Per tokenizzazione
+        }
+        
+    def _initialize_supplier_mappings(self):
+        """Inizializza le mappe dei fornitori (GPT suggestion)."""
+        # Mappa fornitori simili per aggregazione intelligente
+        self.similar_suppliers = {
+            'dentsply': ['dentsply', 'sirona', 'dentsply sirona'],
+            '3m': ['3m', 'espe', '3m espe'],
+            'ivoclar': ['ivoclar', 'vivadent', 'ivoclar vivadent'],
+            'kerr': ['kerr', 'sybron', 'kerr sybron'],
+            'gc': ['gc', 'gc america', 'gc dental'],
+            'ultradent': ['ultradent', 'ultra dent'],
+            'coltene': ['coltene', 'whaledent', 'coltene whaledent'],
+            'henry schein': ['henry schein', 'schein', 'henry'],
+            'patterson': ['patterson', 'patterson dental'],
+            'enel': ['enel', 'enel energia', 'enel energia spa'],
+            'edison': ['edison', 'edison energia', 'edison energia spa']
+        }
+    
+    def classify_material_type(self, descrizione: str) -> Tuple[str, int]:
+        """
+        Classifica il tipo di materiale basandosi sulla descrizione con confidence scoring avanzato.
+        
+        Args:
+            descrizione: Descrizione del materiale
+            
+        Returns:
+            Tupla (tipo_materiale, confidence_score)
+        """
+        if not descrizione:
+            return 'unknown', 0
+        
+        # Cache per performance
+        cache_key = descrizione.lower().strip()
+        if cache_key in self._classification_cache:
+            return self._classification_cache[cache_key]
+        
+        descrizione_lower = descrizione.lower().strip()
+        
+        # Verifica se è un materiale da escludere (logica intelligente come backend v1)
+        for exclude_word in self.exclude_keywords:
+            if exclude_word in descrizione_lower:
+                result = ('non_dental', 0)
+                self._classification_cache[cache_key] = result
+                return result
+        
+        # Cerca corrispondenze con parole chiave dentali
+        best_match = ('unknown', 0)
+        category_scores = {}
+        
+        for categoria, keywords in self.dental_keywords.items():
+            confidence = 0
+            matches = 0
+            exact_matches = 0
+            partial_matches = 0
+            
+            for keyword in keywords:
+                if keyword in descrizione_lower:
+                    matches += 1
+                    
+                    # Peso maggiore per match esatti
+                    if keyword == descrizione_lower:
+                        confidence += self.WEIGHT_EXACT_MATCH
+                        exact_matches += 1
+                    # Match parziale con peso basato sulla lunghezza
+                    else:
+                        weight = min(self.WEIGHT_PARTIAL_MATCH, len(keyword) * 5)  # Peso proporzionale alla lunghezza
+                        confidence += weight
+                        partial_matches += 1
+                
+                # Controllo aggiuntivo per frasi composte (es. "lidocaina 2%")
+                elif ' ' in keyword:
+                    words = keyword.split()
+                    if all(word in descrizione_lower for word in words):
+                        matches += 1
+                        confidence += min(self.WEIGHT_PHRASE_MATCH, len(keyword) * 4)  # Peso leggermente inferiore per frasi
+                        partial_matches += 1
+            
+            # Bonus per multiple matches nella stessa categoria
+            if matches > 1:
+                confidence += matches * self.WEIGHT_MULTIPLE_MATCHES
+            
+            # Bonus per match esatti
+            if exact_matches > 0:
+                confidence += exact_matches * self.WEIGHT_EXACT_BONUS
+            
+            # Penalità per descrizioni troppo generiche
+            if len(descrizione_lower) < 5:
+                confidence *= 0.5
+            
+            category_scores[categoria] = confidence
+            
+            if confidence > best_match[1]:
+                best_match = (categoria, confidence)
+        
+        # Se la confidence è troppo bassa, classifica come unknown (CONSTANTE CONFIGURABILE)
+        if best_match[1] < self.CONFIDENCE_THRESHOLD_UNKNOWN:
+            best_match = ('unknown', best_match[1])
+        
+        # Cache del risultato con limite (GPT suggestion)
+        self._manage_cache_size()
+        self._classification_cache[cache_key] = best_match
+        return best_match
+    
+    def _manage_cache_size(self):
+        """Gestisce la dimensione della cache per evitare memory leak (GPT suggestion)."""
+        if len(self._classification_cache) >= self._cache_max_size:
+            # Rimuove i primi 100 elementi (FIFO)
+            keys_to_remove = list(self._classification_cache.keys())[:100]
+            for key in keys_to_remove:
+                del self._classification_cache[key]
+    
+    def is_dental_material(self, descrizione: str, prezzo: Optional[float] = None, quantita: Optional[float] = None) -> Tuple[bool, int]:
+        """
+        LOGICA DI ESCLUSIONE: Esclude solo materiali chiaramente non dentali.
+        Tutto il resto è considerato potenzialmente dentale.
+        
+        Args:
+            descrizione: Descrizione del materiale
+            prezzo: Prezzo del materiale (opzionale)
+            quantita: Quantità del materiale (opzionale)
+            
+        Returns:
+            Tupla (is_dental, confidence_score)
+        """
+        if not descrizione:
+            return False, 0
+        
+        descrizione_lower = descrizione.lower()
+        
+        # LISTA DI ESCLUSIONE: Solo parole chiaramente NON dentali
+        exclusion_keywords = [
+            # Voci amministrative/fatturazione
+            'iva', 'imposta', 'bollo', 'sconto', 'ritenuta', 'commissione', 'fee', 'tax', 'vat',
+            
+            # Trasporti e spedizioni
+            'trasporto', 'spedizione', 'shipping', 'spese di trasporto', 'spese di spedizione',
+            
+            # Imballaggi e packaging
+            'imballo', 'packaging', 'confezione vuota',
+            
+            # Ufficio e amministrazione
+            'telefono', 'phone', 'computer', 'software', 'licenza', 'license',
+            'stampante', 'printer', 'toner', 'cartuccia', 'ink',
+            'busta', 'envelope', 'timbro', 'stamp', 'cartolina', 'postcard',
+            'penna', 'pen', 'matita', 'pencil', 'cancelleria', 'office supplies',
+            
+            # Servizi amministrativi
+            'assicurazione', 'insurance', 'tasse', 'consulenza', 'consulting',
+            'formazione', 'training', 'corso', 'course', 'abbonamento', 'subscription',
+            'contabilità', 'accounting', 'banca', 'bank', 'finanziario', 'financial',
+            
+            # Carburanti e veicoli
+            'benzina', 'gasolio', 'carburante', 'fuel', 'auto', 'car', 'parcheggio',
+            
+            # Consumabili generali non dentali
+            'caffè', 'coffee', 'acqua', 'water', 'bibite', 'drinks', 'snack',
+            
+            # Pulizia generale non dentale
+            'pulizia ufficio', 'cleaning', 'detergente casa', 'sapone mani',
+            'carta igienica', 'toilet paper', 'asciugamani', 'towels'
+        ]
+        
+        # CONTROLLO ESCLUSIONE: Se contiene parole di esclusione → NON dentale
+        for exclude_word in exclusion_keywords:
+            if exclude_word in descrizione_lower:
+                return False, 0
+        
+        # TUTTO IL RESTO È CONSIDERATO POTENZIALMENTE DENTALE
+        # Assegna confidence basata su indicatori positivi
+        
+        confidence = 50  # Base confidence per materiali non esclusi
+        
+        # Bonus per indicatori dentali specifici
+        if self.compiled_patterns['medical_units'].search(descrizione_lower):
+            confidence += 20
+        if self.compiled_patterns['sterile'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['disposable'].search(descrizione_lower):
+            confidence += 20
+        if self.compiled_patterns['guanti'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['mascherine'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['dental_ref'].search(descrizione_lower):
+            confidence += 30
+        
+        return True, min(100, confidence)
+    
+    def normalize_supplier_name(self, supplier_name: str) -> str:
+        """
+        Normalizza il nome del fornitore per aggregazione intelligente.
+        
+        Args:
+            supplier_name: Nome originale del fornitore
+            
+        Returns:
+            Nome normalizzato del fornitore
+        """
+        if not supplier_name:
+            return supplier_name
+        
+        # Cache per performance
+        cache_key = supplier_name.lower().strip()
+        if cache_key in self._supplier_cache:
+            return self._supplier_cache[cache_key]
+        
+        supplier_lower = supplier_name.lower().strip()
+        
+        # Cerca corrispondenze con fornitori simili
+        for normalized_name, variations in self.similar_suppliers.items():
+            for variation in variations:
+                if variation in supplier_lower:
+                    self._supplier_cache[cache_key] = normalized_name.title()
+                    return normalized_name.title()
+        
+        # Se non trova corrispondenze, normalizza il nome originale
+        normalized = supplier_name.strip().title()
+        self._supplier_cache[cache_key] = normalized
+        return normalized
+    
+    def read_spesafo_data(self) -> List[Dict[str, Any]]:
+        """
+        Legge i dati dalla tabella SPESAFOR.DBF e li arricchisce con i dettagli da VOCISPES.DBF.
+        
+        Returns:
+            Lista di dizionari con i dati delle spese per fornitori e i loro dettagli
+        """
+        try:
+            from dbfread import DBF
+
+            # Percorsi dei file DBF (risolti dal config manager, dev/prod-aware)
+            config = get_config()
+            spesafo_path = config.get_dbf_path('spese')
+            fornitor_path = config.get_dbf_path('fornitori')
+            vocispes_path = config.get_dbf_path('voci_spese')
+
+            logger.info(f"Reading SPESAFOR.DBF from: {spesafo_path}")
+            
+            # Carica FORNITOR per i nomi fornitori
+            fornitor_map = {}
+            with DBF(fornitor_path, encoding='latin-1') as fornitor_table:
+                for record in fornitor_table:
+                    if record is None:
+                        continue
+                    code = self._clean_dbf_value(record.get('DB_CODE', ''))
+                    nome = self._clean_dbf_value(record.get('DB_FONOME', ''))
+                    if code and nome:
+                        fornitor_map[code] = nome
+            
+            logger.info(f"Loaded {len(fornitor_map)} fornitori from FORNITOR.DBF")
+            
+            # Leggi dettagli da VOCISPES.DBF
+            dettagli_dict = {}
+            with DBF(vocispes_path, encoding='latin-1') as vocispes_table:
+                for record in vocispes_table:
+                    if record is None:
+                        continue
+                    
+                    codice_fattura = self._clean_dbf_value(record.get('DB_VOSPCOD', ''))
+                    if not codice_fattura:
+                        continue
+                    
+                    # Estrai dettagli usando il mapping corretto
+                    codice_articolo = self._clean_dbf_value(record.get('DB_VOSOCOD', ''))
+                    descrizione = self._clean_dbf_value(record.get('DB_VODESCR', ''))
+                    quantita = self._safe_float(record.get('DB_VOQUANT', 0))
+                    prezzo_unitario = self._safe_float(record.get('DB_VOPREZZ', 0))
+                    sconto = self._safe_float(record.get('DB_VOSCONT', 0))
+                    aliquota_iva = self._safe_float(record.get('DB_VOIVA', 0))
+                    
+                    # Filtra solo i materiali utili (come fa la V1)
+                    if not self._is_material_useful(descrizione, quantita, prezzo_unitario):
+                        continue
+                    
+                    if codice_fattura not in dettagli_dict:
+                        dettagli_dict[codice_fattura] = []
+                    
+                    dettaglio = {
+                        'codice_articolo': codice_articolo,
+                        'descrizione': descrizione,
+                        'quantita': quantita,
+                        'prezzo_unitario': prezzo_unitario,
+                        'sconto': sconto,
+                        'aliquota_iva': aliquota_iva,
+                        'totale_riga': quantita * prezzo_unitario * (1 - sconto / 100) if quantita and prezzo_unitario else 0.0
+                    }
+                    
+                    dettagli_dict[codice_fattura].append(dettaglio)
+            
+            logger.info(f"Loaded details for {len(dettagli_dict)} invoices from VOCISPES.DBF")
+            
+            # Leggi SPESAFOR e arricchisci con i dettagli
+            materials_data = []
+            with DBF(spesafo_path, encoding='latin-1') as table:
+                for record in table:
+                    if record is None:
+                        continue
+                    
+                    # Estrai dati da SPESAFOR usando il mapping corretto
+                    id_fattura = self._clean_dbf_value(record.get('DB_CODE', ''))  # ID fattura
+                    fornitoreid = self._clean_dbf_value(record.get('DB_SPFOCOD', ''))  # codice fornitore
+                    descrizione = self._clean_dbf_value(record.get('DB_SPDESCR', ''))  # descrizione
+                    costo_netto = self._safe_float(record.get('DB_SPCOSTO', 0))  # costo netto
+                    costo_iva = self._safe_float(record.get('DB_SPCOIVA', 0))  # costo con IVA
+                    numero_documento = self._clean_dbf_value(record.get('DB_SPNUMER', ''))  # numero documento
+                    data_spesa = self._clean_dbf_value(record.get('DB_SPDATA', ''))  # data spesa
+                    
+                    # Salta record senza dati essenziali
+                    if not id_fattura or not fornitoreid:
+                        continue
+                    
+                    # Trova nome fornitore tramite FORNITOR
+                    fornitorenome = fornitor_map.get(fornitoreid, '')
+                    
+                    # Ottieni dettagli per questa fattura
+                    dettagli_fattura = dettagli_dict.get(id_fattura, [])
+                    
+                    if not dettagli_fattura:
+                        # Se non ci sono dettagli utili, salta questa fattura
+                        continue
+                    
+                    # Crea un record per ogni dettaglio
+                    for dettaglio in dettagli_fattura:
+                        material = {
+                            'id_fattura': id_fattura,
+                            'codicearticolo': dettaglio['codice_articolo'] or '',
+                            'nome': dettaglio['descrizione'],  # Usa descrizione dal dettaglio
+                            'fornitoreid': fornitoreid,
+                            'fornitorenome': fornitorenome,
+                            'costo_unitario': dettaglio['prezzo_unitario'],  # Usa prezzo dal dettaglio
+                            'costo_netto': costo_netto,
+                            'costo_iva': costo_iva,
+                            'data_spesa': data_spesa,
+                            'numero_documento': numero_documento,
+                            'quantita': dettaglio['quantita'],
+                            'sconto': dettaglio['sconto'],
+                            'aliquota_iva': dettaglio['aliquota_iva'],
+                            'totale_riga': dettaglio['totale_riga']
+                        }
+                        materials_data.append(material)
+            
+            logger.info(f"Read {len(materials_data)} valid records from SPESAFOR.DBF with joins")
+            
+            # Log fornitori presenti nel DBF
+            suppliers_in_dbf = set()
+            for material in materials_data:
+                suppliers_in_dbf.add(f"{material.get('fornitoreid')} - {material.get('fornitorenome')}")
+            
+            logger.info(f"DEBUG - Suppliers in DBF: {len(suppliers_in_dbf)}")
+            for supplier in sorted(suppliers_in_dbf):
+                logger.info(f"DEBUG - DBF Supplier: {supplier}")
+            
+            return materials_data
+            
+        except Exception as e:
+            logger.error(f"Error reading SPESAFOR.DBF: {e}")
+            raise DbfProcessingError(f"Failed to read SPESAFOR.DBF: {str(e)}")
+    
+    def _is_material_useful(self, descrizione: str, quantita: float, prezzo_unitario: float) -> bool:
+        """
+        Determina se un materiale è utile per la migrazione (filtra come fa la V1).
+        
+        Args:
+            descrizione: Descrizione del materiale
+            quantita: Quantità
+            prezzo_unitario: Prezzo unitario
+            
+        Returns:
+            True se il materiale è utile, False altrimenti
+        """
+        if not descrizione:
+            return False
+        
+        descrizione = str(descrizione).strip().upper()
+        
+        # Escludi righe con quantità 0 o prezzo 0
+        if quantita == 0 or prezzo_unitario == 0:
+            return False
+        
+        # Escludi righe che iniziano con pattern non utili
+        exclude_patterns = [
+            'DDT N°',
+            'SKU ',
+            'RIGA AUSILIARIA',
+            'A5 CONTRIBUTO',
+            'CONTRIBUTO SPESE',
+            'SPESE TRASP',
+            'IMBALLO'
+        ]
+        
+        for pattern in exclude_patterns:
+            if descrizione.startswith(pattern):
+                return False
+        
+        # Escludi righe troppo corte (probabilmente non materiali)
+        if len(descrizione) < 5:
+            return False
+        
+        return True
+    
+    def filter_materials_by_classification(self, materials_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Filtra i materiali per fornitori classificati e applica pattern recognition.
+        ESCLUDE i materiali già importati nella tabella materiali.
+        
+        Args:
+            materials_data: Lista di materiali da VOCISPES.DBF
+            
+        Returns:
+            Lista di materiali con classificazione e pattern recognition (solo NON importati)
+        """
+        classified_materials = []
+        stats = {
+            'total': len(materials_data),
+            'classified': 0,
+            'excluded': 0,
+            'no_classification': 0,
+            'pattern_matched': 0,
+            'supplier_classification': 0,
+            'already_imported': 0
+        }
+        
+        # Carica pattern esistenti per il matching
+        existing_patterns = self._load_existing_patterns()
+        
+        for material in materials_data:
+            descrizione = material.get('nome', '')
+            fornitore_nome = material.get('fornitorenome', '')
+            
+            # Skip materiali senza descrizione
+            if not descrizione or len(descrizione.strip()) < 3:
+                stats['excluded'] += 1
+                continue
+            
+            # Controlla se è materiale dentale - ESCLUDI materiali non dentali
+            is_dental, dental_confidence = self.is_dental_material(descrizione)
+            if not is_dental:
+                stats['excluded'] += 1
+                continue
+            
+            # Verifica se il fornitore è classificato
+            fornitore_id = material.get('fornitoreid', '')
+            fattura_id = material.get('id_fattura', '')
+            
+            # PRIMA: Controlla se il materiale esiste già nella tabella materiali
+            existing_material_classification = self._get_existing_material_classification(
+                descrizione, fornitore_id, fattura_id
+            )
+            
+            # Mantieni il materiale anche se già importato per mostrarlo come "già fatto"
+            
+            # SECONDA: Se già importato, usa la classificazione esistente
+            if existing_material_classification:
+                # Usa classificazione già esistente
+                classification_data = {
+                    'contoid': existing_material_classification['contoid'],
+                    'brancaid': existing_material_classification['brancaid'],
+                    'sottocontoid': existing_material_classification['sottocontoid'],
+                    'contonome': existing_material_classification['contonome'],
+                    'brancanome': existing_material_classification['brancanome'],
+                    'sottocontonome': existing_material_classification['sottocontonome']
+                }
+                confidence = 100  # Massima confidenza per materiali già importati
+                stats['already_imported'] += 1
+            else:
+                # TERZA: Prova pattern matching per classificazione specifica
+                pattern_match = self._find_pattern_match(descrizione, existing_patterns)
+                if pattern_match:
+                    # Usa classificazione specifica dal pattern
+                    classification_data = pattern_match['classification']
+                    confidence = pattern_match['confidence']
+                    stats['pattern_matched'] += 1
+                else:
+                    # QUARTA: Usa classificazione del fornitore
+                    fornitore_classification = self._get_classification_data(fornitore_id)
+                    if fornitore_classification:
+                        classification_data = {
+                            'contoid': fornitore_classification['contoid'],
+                            'brancaid': fornitore_classification['brancaid'],
+                            'sottocontoid': fornitore_classification['sottocontoid'],
+                            'contonome': fornitore_classification['contonome'],
+                            'brancanome': fornitore_classification['brancanome'],
+                            'sottocontonome': fornitore_classification['sottocontonome']
+                        }
+                        confidence = 30  # Bassa confidenza per classificazione fornitore
+                        stats['supplier_classification'] += 1
+                    else:
+                        # Nessuna classificazione disponibile - usa classificazione vuota
+                        classification_data = {
+                            'contoid': None,
+                            'brancaid': None,
+                            'sottocontoid': None,
+                            'contonome': None,
+                            'brancanome': None,
+                            'sottocontonome': None
+                        }
+                        confidence = 0  # Nessuna confidenza per materiali non classificati
+                        stats['no_classification'] += 1
+            
+            # Aggiungi il materiale con classificazione
+            enriched_material = material.copy()
+            enriched_material.update({
+                'id': '',  # ID sarà generato dal database
+                'codice_prodotto': material.get('codicearticolo', ''),
+                'confidence': confidence,
+                'confermato': confidence >= 80,  # Auto-conferma se confidence alta
+                'occorrenze': 1,
+                'categoria_contabile': 'Materiali Classificati',
+                'fornitore_normalizzato': self.normalize_supplier_name(fornitore_nome),
+                'data_fattura': material.get('data_spesa', ''),
+                'fattura_id': material.get('id_fattura', ''),
+                # Aggiungi dati di classificazione
+                'contoid': classification_data['contoid'],
+                'brancaid': classification_data['brancaid'],
+                'sottocontoid': classification_data['sottocontoid'],
+                'contonome': classification_data['contonome'],
+                'brancanome': classification_data['brancanome'],
+                'sottocontonome': classification_data['sottocontonome'],
+            })
+            
+            classified_materials.append(enriched_material)
+            stats['classified'] += 1
+        
+        logger.info(f"Filtering results: {stats['total']} total, {stats['classified']} classified, {stats['excluded']} excluded, {stats['no_classification']} no classification, {stats['pattern_matched']} pattern matched, {stats['already_imported']} already imported (excluded)")
+        
+        return classified_materials
+    
+    def migrate_materials_to_db(self, dental_materials: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Migra i materiali dentali filtrati nel database SQLite usando la struttura esistente.
+        
+        Args:
+            dental_materials: Lista di materiali dentali da migrare
+            
+        Returns:
+            Dizionario con statistiche della migrazione
+        """
+        try:
+            import sqlite3
+            stats = {'inserted': 0, 'updated': 0, 'errors': 0, 'errors_list': []}
+            
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+            cursor = conn.cursor()
+            
+            for material in dental_materials:
+                try:
+                    # Verifica se il materiale esiste già usando la struttura esistente
+                    existing_query = """
+                        SELECT id FROM materiali 
+                        WHERE codicearticolo = ? AND fornitoreid = ?
+                    """
+                    existing = cursor.execute(existing_query, (
+                        material['codicearticolo'],
+                        material['fornitoreid']
+                    )).fetchone()
+                    
+                    if existing:
+                        # Aggiorna materiale esistente
+                        update_query = """
+                            UPDATE materiali SET
+                                nome = ?, fornitorenome = ?, costo_unitario = ?,
+                                confidence = ?, confermato = ?, occorrenze = ?,
+                                categoria_contabile = ?, contoid = ?, brancaid = ?, sottocontoid = ?,
+                                contonome = ?, brancanome = ?, sottocontonome = ?
+                            WHERE id = ?
+                        """
+                        cursor.execute(update_query, (
+                            material['nome'], material['fornitorenome'], material['costo_unitario'],
+                            material['confidence'], material['confermato'], material['occorrenze'],
+                            material['categoria_contabile'], material['contoid'], 
+                            material['brancaid'], material['sottocontoid'],
+                            material['contonome'], material['brancanome'], material['sottocontonome'],
+                            existing[0]
+                        ))
+                        stats['updated'] += 1
+                    else:
+                        # Inserisci nuovo materiale usando la struttura esistente
+                        insert_query = """
+                            INSERT INTO materiali (
+                                codicearticolo, nome, fornitoreid, fornitorenome, costo_unitario,
+                                confidence, confermato, occorrenze, categoria_contabile,
+                                contoid, brancaid, sottocontoid, contonome, brancanome, sottocontonome
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """
+                        cursor.execute(insert_query, (
+                            material['codicearticolo'], material['nome'],
+                            material['fornitoreid'], material['fornitorenome'], material['costo_unitario'],
+                            material['confidence'], material['confermato'], material['occorrenze'],
+                            material['categoria_contabile'], material['contoid'], 
+                            material['brancaid'], material['sottocontoid'],
+                            material['contonome'], material['brancanome'], material['sottocontonome']
+                        ))
+                        stats['inserted'] += 1
+                        
+                except Exception as e:
+                    stats['errors'] += 1
+                    error_msg = f"Error processing material {material.get('nome', 'Unknown')}: {str(e)}"
+                    stats['errors_list'].append(error_msg)
+                    logger.error(error_msg)
+                    continue
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Migration completed: {stats['inserted']} inserted, {stats['updated']} updated, {stats['errors']} errors")
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Error during migration: {e}")
+            raise DatabaseError(f"Migration failed: {str(e)}")
+    
+    def run_full_migration(self) -> Dict[str, Any]:
+        """
+        Esegue la migrazione completa da VOCISPES.DBF alla tabella materiali.
+        
+        Returns:
+            Dizionario con risultati della migrazione
+        """
+        try:
+            logger.info("Starting full materials migration from VOCISPES.DBF")
+            start_time = datetime.now()
+            
+            # Step 1: Leggi dati da VOCISPES.DBF
+            materials_data = self.read_spesafo_data()
+            
+            # Step 2: Filtra materiali dentali
+            dental_materials = self.filter_dental_materials(materials_data)
+            
+            # Step 3: Migra nel database
+            migration_stats = self.migrate_materials_to_db(dental_materials)
+            
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            
+            result = {
+                'success': True,
+                'duration_seconds': duration,
+                'total_records_processed': len(materials_data),
+                'dental_materials_found': len(dental_materials),
+                'migration_stats': migration_stats,
+                'completed_at': end_time.isoformat()
+            }
+            
+            logger.info(f"Migration completed successfully in {duration:.2f} seconds")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Full migration failed: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'completed_at': datetime.now().isoformat()
+            }
+    
+    def _clean_dbf_value(self, value: Any, default: str = '') -> str:
+        """Clean DBF value to string."""
+        if value is None:
+            return default
+        if isinstance(value, bytes):
+            return value.decode('latin-1', errors='ignore').strip()
+        return str(value).strip()
+    
+    def _safe_float(self, value: Any) -> float:
+        """Safely convert value to float."""
+        try:
+            if value is None:
+                return 0.0
+            return float(value)
+        except (ValueError, TypeError):
+            return 0.0
+    
+    def _get_existing_material_classification(self, nome: str, fornitore_id: str, fattura_id: str = None) -> dict:
+        """Recupera la classificazione di un materiale già esistente nella tabella materiali."""
+        try:
+            import sqlite3
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+            cursor = conn.cursor()
+            
+            # Cerca il materiale esistente con la sua classificazione
+            if fattura_id:
+                cursor.execute("""
+                    SELECT 
+                        contoid, brancaid, sottocontoid,
+                        contonome, brancanome, sottocontonome
+                    FROM materiali 
+                    WHERE nome = ? AND fornitoreid = ? AND fattura_id = ?
+                    AND contoid IS NOT NULL AND contonome IS NOT NULL
+                """, (nome, fornitore_id, fattura_id))
+            else:
+                cursor.execute("""
+                    SELECT 
+                        contoid, brancaid, sottocontoid,
+                        contonome, brancanome, sottocontonome
+                    FROM materiali 
+                    WHERE nome = ? AND fornitoreid = ?
+                    AND contoid IS NOT NULL AND contonome IS NOT NULL
+                    ORDER BY id DESC LIMIT 1
+                """, (nome, fornitore_id))
+            
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result:
+                return {
+                    'contoid': result[0],
+                    'brancaid': result[1],
+                    'sottocontoid': result[2],
+                    'contonome': result[3] or '',
+                    'brancanome': result[4] or '',
+                    'sottocontonome': result[5] or ''
+                }
+            return None
+            
+        except Exception as e:
+            logger.error(f"Errore nel recupero classificazione materiale esistente {nome}: {e}")
+            return None
+
+    def _get_classification_data(self, fornitore_id: str) -> dict:
+        """Recupera i dati di classificazione per un fornitore dalla tabella classificazioni_costi."""
+        try:
+            import sqlite3
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+            cursor = conn.cursor()
+            
+            # Cerca per fornitore_id (codice_riferimento) con JOIN per recuperare i nomi
+            cursor.execute("""
+                SELECT 
+                    cc.contoid, cc.brancaid, cc.sottocontoid,
+                    c.nome as contonome,
+                    b.nome as brancanome,
+                    s.nome as sottocontonome
+                FROM classificazioni_costi cc
+                LEFT JOIN conti c ON cc.contoid = c.id
+                LEFT JOIN branche b ON cc.brancaid = b.id
+                LEFT JOIN sottoconti s ON cc.sottocontoid = s.id
+                WHERE cc.codice_riferimento = ? AND cc.tipo_entita = 'fornitore'
+            """, (fornitore_id,))
+            
+            result = cursor.fetchone()
+            conn.close()
+            
+            if result:
+                return {
+                    'contoid': result[0],
+                    'brancaid': result[1],
+                    'sottocontoid': result[2],
+                    'contonome': result[3] or '',
+                    'brancanome': result[4] or '',
+                    'sottocontonome': result[5] or ''
+                }
+            return None
+            
+        except Exception as e:
+            logger.error(f"Errore nel recupero classificazione per fornitore ID {fornitore_id}: {e}")
+            return None
+    
+    def _load_existing_patterns(self) -> List[Dict[str, Any]]:
+        """
+        Carica i pattern esistenti dai materiali già classificati nel database.
+        
+        Returns:
+            Lista di pattern con classificazione
+        """
+        try:
+            import sqlite3
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+            cursor = conn.cursor()
+            
+            # Carica materiali già classificati con i loro nomi e classificazioni
+            cursor.execute("""
+                SELECT 
+                    m.nome,
+                    m.fornitoreid,
+                    m.contoid, m.brancaid, m.sottocontoid,
+                    m.contonome,
+                    m.brancanome,
+                    m.sottocontonome
+                FROM materiali m
+                WHERE m.nome IS NOT NULL AND m.nome != ''
+                AND m.contonome IS NOT NULL AND m.contonome != ''
+            """)
+            
+            patterns = []
+            for row in cursor.fetchall():
+                patterns.append({
+                    'nome': row[0],
+                    'fornitoreid': row[1],
+                    'classification': {
+                        'contoid': row[2],
+                        'brancaid': row[3],
+                        'sottocontoid': row[4],
+                        'contonome': row[5] or '',
+                        'brancanome': row[6] or '',
+                        'sottocontonome': row[7] or ''
+                    }
+                })
+            
+            conn.close()
+            logger.info(f"Caricati {len(patterns)} pattern esistenti")
+            return patterns
+            
+        except Exception as e:
+            logger.error(f"Errore nel caricamento pattern esistenti: {e}")
+            return []
+    
+    def _find_pattern_match(self, descrizione: str, existing_patterns: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Trova un pattern match per la descrizione del materiale.
+        
+        Args:
+            descrizione: Descrizione del materiale da classificare
+            existing_patterns: Lista di pattern esistenti
+            
+        Returns:
+            Dizionario con classificazione e confidence, o None se non trovato
+        """
+        if not existing_patterns:
+            return None
+        
+        descrizione_clean = self._clean_material_name(descrizione)
+        desc_lower = descrizione_clean.lower()
+        
+        # Regole specifiche per RECIPROC
+        if 'reciproc' in desc_lower:
+            if any(word in desc_lower for word in ['carta', 'paper', 'points']):
+                # Cerca pattern RECIPROC + carta/paper
+                for pattern in existing_patterns:
+                    pattern_clean = self._clean_material_name(pattern['nome']).lower()
+                    if 'reciproc' in pattern_clean and any(word in pattern_clean for word in ['carta', 'paper', 'points']):
+                        return {
+                            'classification': pattern['classification'],
+                            'confidence': 95,
+                            'matched_pattern': pattern['nome']
+                        }
+            
+            elif 'gutta' in desc_lower:
+                # Cerca pattern RECIPROC + gutta
+                for pattern in existing_patterns:
+                    pattern_clean = self._clean_material_name(pattern['nome']).lower()
+                    if 'reciproc' in pattern_clean and 'gutta' in pattern_clean:
+                        return {
+                            'classification': pattern['classification'],
+                            'confidence': 95,
+                            'matched_pattern': pattern['nome']
+                        }
+            
+            elif 'files' in desc_lower:
+                # Cerca pattern RECIPROC + files
+                for pattern in existing_patterns:
+                    pattern_clean = self._clean_material_name(pattern['nome']).lower()
+                    if 'reciproc' in pattern_clean and 'files' in pattern_clean:
+                        return {
+                            'classification': pattern['classification'],
+                            'confidence': 95,
+                            'matched_pattern': pattern['nome']
+                        }
+        
+        # Regola per FILES senza RECIPROC = ENDODONZIA-STRUMENTI MANUALI
+        elif 'files' in desc_lower and 'reciproc' not in desc_lower:
+            # Cerca pattern FILES senza RECIPROC
+            for pattern in existing_patterns:
+                pattern_clean = self._clean_material_name(pattern['nome']).lower()
+                if 'files' in pattern_clean and 'reciproc' not in pattern_clean:
+                    return {
+                        'classification': pattern['classification'],
+                        'confidence': 95,
+                        'matched_pattern': pattern['nome']
+                    }
+            
+            # Se non trova pattern, usa classificazione hardcoded
+            # Cerca un pattern di ENDODONZIA-STRUMENTI MANUALI come riferimento
+            for pattern in existing_patterns:
+                if (pattern['classification']['brancanome'] == 'ENDODONZIA' and 
+                    pattern['classification']['sottocontonome'] == 'STRUMENTI MANUALI'):
+                    return {
+                        'classification': pattern['classification'],
+                        'confidence': 90,
+                        'matched_pattern': f"Regola hardcoded: FILES senza RECIPROC"
+                    }
+        
+        # Algoritmo generale per altri materiali
+        best_match = None
+        best_score = 0
+        
+        for pattern in existing_patterns:
+            pattern_name_clean = self._clean_material_name(pattern['nome'])
+            
+            # Calcola similarità
+            similarity = self._calculate_similarity(descrizione_clean, pattern_name_clean)
+            
+            if similarity > best_score and similarity >= 0.5:
+                best_score = similarity
+                best_match = {
+                    'classification': pattern['classification'],
+                    'confidence': int(similarity * 100),
+                    'matched_pattern': pattern['nome']
+                }
+        
+        return best_match
+    
+    def _clean_material_name(self, name: str) -> str:
+        """
+        Pulisce il nome del materiale per il matching, rimuovendo varianti e codici.
+        
+        Args:
+            name: Nome originale del materiale
+            
+        Returns:
+            Nome pulito per il matching
+        """
+        if not name:
+            return ""
+        
+        # Converti in lowercase e rimuovi spazi extra
+        cleaned = str(name).lower().strip()
+        
+        # Rimuovi caratteri speciali comuni
+        import re
+        cleaned = re.sub(r'[^\w\s]', ' ', cleaned)
+        
+        # Rimuovi pattern comuni che non influenzano la classificazione
+        # Misure e dimensioni
+        cleaned = re.sub(r'\b\d+[x×]\d+\b', '', cleaned)  # 6X, 3X, etc.
+        cleaned = re.sub(r'\b[a-z]\d+\b', '', cleaned)    # A3, C14, etc.
+        cleaned = re.sub(r'\b\d+st\b', '', cleaned)       # 4ST, 6ST, etc.
+        cleaned = re.sub(r'\b\d+%\b', '', cleaned)        # Percentuali
+        cleaned = re.sub(r'\b\d+ml\b', '', cleaned)       # 10ml, 5ml, etc.
+        cleaned = re.sub(r'\b\d+cc\b', '', cleaned)       # 10cc, 5cc, etc.
+        cleaned = re.sub(r'\b\d+gr\b', '', cleaned)       # 10gr, 5gr, etc.
+        cleaned = re.sub(r'\b\d+mg\b', '', cleaned)       # 10mg, 5mg, etc.
+        
+        # Rimuovi suffissi comuni
+        cleaned = re.sub(r'\b(lt|refill|sterile|steril|r\d+|6x|sterile)\b', '', cleaned)
+        
+        # Rimuovi spazi multipli
+        cleaned = re.sub(r'\s+', ' ', cleaned)
+        
+        return cleaned.strip()
+    
+    def _calculate_similarity(self, name1: str, name2: str) -> float:
+        """
+        Calcola la similarità tra due nomi di materiali.
+        
+        Args:
+            name1: Primo nome
+            name2: Secondo nome
+            
+        Returns:
+            Score di similarità tra 0 e 1
+        """
+        if not name1 or not name2:
+            return 0.0
+        
+        # Match esatto
+        if name1 == name2:
+            return 1.0
+        
+        # Match parziale - controlla se uno contiene l'altro
+        if name1 in name2 or name2 in name1:
+            return 0.9
+        
+        # Similarità per parole chiave
+        words1 = set(name1.split())
+        words2 = set(name2.split())
+        
+        if not words1 or not words2:
+            return 0.0
+        
+        # Calcola Jaccard similarity
+        intersection = len(words1.intersection(words2))
+        union = len(words1.union(words2))
+        
+        jaccard_score = intersection / union if union > 0 else 0.0
+        
+        # Bonus per parole chiave dentali comuni
+        dental_keywords = {'ml', 'cc', 'gr', 'mg', 'sterile', 'monouso', 'disposable', 'dental', 'dent'}
+        common_dental = len(words1.intersection(words2).intersection(dental_keywords))
+        
+        if common_dental > 0:
+            jaccard_score += 0.1 * common_dental
+        
+        # Bonus per pattern comuni (es. "RECIPROC BLUE" → endodonzia)
+        pattern_bonus = 0
+        if len(words1) >= 2 and len(words2) >= 2:
+            # Controlla se le prime 2-3 parole sono simili
+            words1_list = list(words1)
+            words2_list = list(words2)
+            
+            # Conta parole comuni nelle prime posizioni
+            min_words = min(len(words1_list), len(words2_list), 3)
+            common_start = 0
+            for i in range(min_words):
+                if words1_list[i] in words2_list or words2_list[i] in words1_list:
+                    common_start += 1
+            
+            if common_start >= 2:
+                pattern_bonus = 0.2
+        
+        # Bonus per match di brand/famiglia (es. "CELTRA", "RECIPROC")
+        brand_keywords = {'celtra', 'reciproc', 'sdr', 'flow', 'blue', 'paper', 'files'}
+        common_brand = len(words1.intersection(words2).intersection(brand_keywords))
+        
+        if common_brand > 0:
+            pattern_bonus += 0.15 * common_brand
+        
+        # Bonus per match specifici di categoria
+        category_keywords = {'paper', 'points', 'files', 'gutta', 'guttapercha', 'compositi', 'blocchetti'}
+        common_category = len(words1.intersection(words2).intersection(category_keywords))
+        
+        if common_category > 0:
+            pattern_bonus += 0.25 * common_category  # Bonus maggiore per categorie specifiche
+        
+        final_score = jaccard_score + pattern_bonus
+        return min(final_score, 1.0)
+
+    def _derive_category(self, material_type: str) -> str:
+        """Deriva la categoria del materiale dal tipo."""
+        category_mapping = {
+            'resina': 'Materiali da Otturazione',
+            'strisce': 'Materiali da Otturazione',
+            'perni': 'Endodonzia',
+            'cunei': 'Strumentario',
+            'fili': 'Chirurgia',
+            'cementi': 'Materiali da Cementazione',
+            'anestesia': 'Farmaci',
+            'suture': 'Chirurgia',
+            'disinfettanti': 'Igiene e Disinfezione',
+            'protesi': 'Protesi',
+            'endodonzia': 'Endodonzia',
+            'chirurgia': 'Chirurgia',
+            'igiene': 'Igiene e Prevenzione',
+            'radiologia': 'Radiologia',
+            'laboratorio': 'Laboratorio'
+        }
+        
+        return category_mapping.get(material_type, 'Varie')
+    
+    def import_materials_for_supplier(self, supplier_name: str, materials: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Importa i materiali per un fornitore specifico.
+        
+        Args:
+            supplier_name: Nome del fornitore
+            materials: Lista di materiali da importare
+            
+        Returns:
+            Dizionario con statistiche dell'importazione
+        """
+        try:
+            stats = {
+                'supplier_name': supplier_name,
+                'materials_imported': 0,
+                'materials_updated': 0,
+                'materials_skipped': 0,
+                'total_processed': len(materials),
+                'errors': []
+            }
+            
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                for material in materials:
+                    try:
+                        # Verifica se il materiale esiste già
+                        existing_query = """
+                            SELECT id FROM materiali 
+                            WHERE codicearticolo = ? AND fornitoreid = ?
+                        """
+                        existing = cursor.execute(existing_query, (
+                            material.get('codicearticolo', ''),
+                            material.get('fornitoreid', 0)
+                        )).fetchone()
+                        
+                        if existing:
+                            # Aggiorna materiale esistente
+                            update_query = """
+                                UPDATE materiali SET
+                                    nome = ?, fornitorenome = ?, costo_unitario = ?,
+                                    confidence = ?, confermato = ?, occorrenze = ?,
+                                    categoria_contabile = ?, contoid = ?, brancaid = ?, sottocontoid = ?,
+                                    contonome = ?, brancanome = ?, sottocontonome = ?,
+                                    updated_at = CURRENT_TIMESTAMP
+                                WHERE id = ?
+                            """
+                            cursor.execute(update_query, (
+                                material.get('nome', ''),
+                                material.get('fornitorenome', ''),
+                                material.get('costo_unitario', 0.0),
+                                material.get('confidence', 0),
+                                material.get('confermato', False),
+                                material.get('occorrenze', 1),
+                                material.get('categoria_contabile', ''),
+                                material.get('contoid'),
+                                material.get('brancaid'),
+                                material.get('sottocontoid'),
+                                material.get('contonome'),
+                                material.get('brancanome'),
+                                material.get('sottocontonome'),
+                                existing[0]
+                            ))
+                            stats['materials_updated'] += 1
+                        else:
+                            # Inserisci nuovo materiale
+                            insert_query = """
+                                INSERT INTO materiali (
+                                    codicearticolo, nome, fornitoreid, fornitorenome,
+                                    costo_unitario, confidence, confermato, occorrenze,
+                                    categoria_contabile, contoid, brancaid, sottocontoid,
+                                    contonome, brancanome, sottocontonome,
+                                    source_file, migrated_at, created_at
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                            """
+                            cursor.execute(insert_query, (
+                                material.get('codicearticolo', ''),
+                                material.get('nome', ''),
+                                material.get('fornitoreid', 0),
+                                material.get('fornitorenome', ''),
+                                material.get('costo_unitario', 0.0),
+                                material.get('confidence', 0),
+                                material.get('confermato', False),
+                                material.get('occorrenze', 1),
+                                material.get('categoria_contabile', ''),
+                                material.get('contoid'),
+                                material.get('brancaid'),
+                                material.get('sottocontoid'),
+                                material.get('contonome'),
+                                material.get('brancanome'),
+                                material.get('sottocontonome'),
+                                'VOCISPES.DBF'
+                            ))
+                            stats['materials_imported'] += 1
+                            
+                    except Exception as e:
+                        logger.error(f"Errore nell'importazione materiale {material.get('nome', '')}: {e}")
+                        stats['errors'].append(f"Materiale {material.get('nome', '')}: {str(e)}")
+                        stats['materials_skipped'] += 1
+                
+                conn.commit()
+                
+            logger.info(f"Importazione completata per {supplier_name}: {stats}")
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Errore nell'importazione per fornitore {supplier_name}: {e}")
+            raise DatabaseError(f"Errore nell'importazione: {str(e)}")
+
+    def search_articles_in_spesafo(self, query: str, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Cerca articoli nelle fatture fornitori (SPESAFOR.DBF) con dettagli da VOCISPES.DBF.
+        
+        Args:
+            query: Termine di ricerca
+            limit: Numero massimo di risultati
+            
+        Returns:
+            Lista di articoli trovati con dettagli fattura
+        """
+        try:
+            from dbfread import DBF
+
+            # Percorsi dei file DBF (risolti dal config manager, dev/prod-aware)
+            config = get_config()
+            spesafo_path = config.get_dbf_path('spese')
+            fornitor_path = config.get_dbf_path('fornitori')
+            vocispes_path = config.get_dbf_path('voci_spese')
+
+            logger.info(f"Searching articles in SPESAFOR.DBF with query: {query}")
+            
+            # Carica FORNITOR per i nomi fornitori
+            fornitor_map = {}
+            with DBF(fornitor_path, encoding='latin-1') as fornitor_table:
+                for record in fornitor_table:
+                    fornitor_map[record.get('CODICE', '')] = record.get('NOME', '')
+            
+            results = []
+            query_lower = query.lower()
+            
+            # Cerca in SPESAFOR
+            with DBF(spesafo_path, encoding='latin-1') as spesafo_table:
+                for record in spesafo_table:
+                    # Cerca nel codice articolo e descrizione
+                    codice_articolo = record.get('CODICE', '')
+                    descrizione = record.get('DESCRIZIONE', '')
+                    
+                    if (query_lower in codice_articolo.lower() or 
+                        query_lower in descrizione.lower()):
+                        
+                        # Cerca i dettagli in VOCISPES
+                        vocispes_details = []
+                        with DBF(vocispes_path, encoding='latin-1') as vocispes_table:
+                            for vocispes_record in vocispes_table:
+                                if (vocispes_record.get('CODICE', '') == codice_articolo and
+                                    vocispes_record.get('NUMERO', '') == record.get('NUMERO', '')):
+                                    vocispes_details.append(vocispes_record)
+                        
+                        # Costruisci il risultato
+                        for detail in vocispes_details:
+                            result = {
+                                'codice_articolo': codice_articolo,
+                                'descrizione': descrizione,
+                                'quantita': detail.get('QUANTITA', 0),
+                                'prezzo_unitario': detail.get('PREZZO', 0),
+                                'fattura': {
+                                    'id': f"{record.get('CODICE_FORNITORE', '')}_{record.get('NUMERO', '')}",
+                                    'numero_documento': record.get('NUMERO', ''),
+                                    'codice_fornitore': record.get('CODICE_FORNITORE', ''),
+                                    'nome_fornitore': fornitor_map.get(record.get('CODICE_FORNITORE', ''), ''),
+                                    'data_spesa': record.get('DATA', ''),
+                                    'costo_totale': record.get('TOTALE', 0)
+                                }
+                            }
+                            results.append(result)
+                            
+                            if len(results) >= limit:
+                                break
+                    
+                    if len(results) >= limit:
+                        break
+            
+            logger.info(f"Found {len(results)} articles matching query: {query}")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Errore nella ricerca articoli: {e}")
+            raise DatabaseError(f"Errore nella ricerca: {str(e)}")
+
+--- server_v2\repositories\materiali_repository.py::MaterialiRepository (lines 25-563) ---
+class MaterialiRepository(BaseRepository):
+    """
+    Repository for managing materials data with advanced classification capabilities.
+    
+    Features:
+    - Material CRUD operations with classification support
+    - Supplier relationship management
+    - DBF integration for invoice processing
+    - Auto-classification based on patterns and history
+    - Price tracking and statistics
+    - Bulk operations for performance
+    """
+    
+    @property
+    def table_name(self) -> str:
+        return 'materiali'
+    
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+        self._ensure_table_exists()
+    
+    def _ensure_table_exists(self) -> None:
+        """Ensure the materiali table exists with all required fields."""
+        try:
+            create_table_sql = '''
+                CREATE TABLE IF NOT EXISTS materiali (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    codicearticolo TEXT,
+                    nome TEXT NOT NULL,
+                    fornitoreid TEXT,
+                    fornitorenome TEXT,
+                    contoid INTEGER,
+                    contonome TEXT,
+                    brancaid INTEGER,
+                    brancanome TEXT,
+                    sottocontoid INTEGER,
+                    sottocontonome TEXT,
+                    metodo_classificazione TEXT DEFAULT 'manuale',
+                    confidence INTEGER DEFAULT 0,
+                    confermato INTEGER DEFAULT 0,
+                    occorrenze INTEGER DEFAULT 0,
+                    conto_codice TEXT,
+                    sottoconto_codice TEXT,
+                    categoria_contabile TEXT,
+                    data_fattura DATE,
+                    costo_unitario REAL,
+                    fattura_id TEXT,
+                    riga_fattura_id TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    deleted_at TIMESTAMP NULL
+                )
+            '''
+            
+            # Create indexes for performance
+            indexes = [
+                'CREATE INDEX IF NOT EXISTS idx_materiali_fornitore ON materiali(fornitoreid)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_conto ON materiali(contoid)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_branca ON materiali(brancaid)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_sottoconto ON materiali(sottocontoid)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_lookup ON materiali(nome, fornitoreid, confermato, contoid)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_confidence ON materiali(confidence DESC, id DESC)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_codice ON materiali(codicearticolo)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_fattura ON materiali(fattura_id)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_data ON materiali(data_fattura)',
+                'CREATE INDEX IF NOT EXISTS idx_materiali_deleted ON materiali(deleted_at)'
+            ]
+            
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute(create_table_sql)
+                
+                for index_sql in indexes:
+                    cursor.execute(index_sql)
+                    
+                cursor.close()
+                
+            logger.info("Materiali table and indexes ensured")
+            
+        except Exception as e:
+            logger.error(f"Failed to ensure materiali table: {e}")
+            raise RepositoryError(f"Failed to ensure materiali table: {str(e)}", cause=e)
+    
+    def _validate_entity_data(self, data: Dict[str, Any], is_update: bool = False) -> None:
+        """Validate materiali entity data."""
+        super()._validate_entity_data(data, is_update)
+        
+        # Required fields for creation
+        if not is_update:
+            required_fields = ['nome', 'fornitoreid', 'fornitorenome']
+            for field in required_fields:
+                if not data.get(field) or not str(data[field]).strip():
+                    raise ValidationError(f"Field '{field}' is required and cannot be empty")
+        
+        # Validate numeric fields
+        numeric_fields = ['contoid', 'brancaid', 'sottocontoid', 'confidence', 'occorrenze']
+        for field in numeric_fields:
+            if field in data and data[field] is not None:
+                try:
+                    data[field] = int(data[field])
+                except (ValueError, TypeError):
+                    raise ValidationError(f"Field '{field}' must be a valid integer")
+        
+        # Validate confidence range
+        if 'confidence' in data and data['confidence'] is not None:
+            if not 0 <= data['confidence'] <= 100:
+                raise ValidationError("Confidence must be between 0 and 100")
+        
+        # Validate price fields
+        price_fields = ['costo_unitario']
+        for field in price_fields:
+            if field in data and data[field] is not None:
+                try:
+                    data[field] = float(data[field])
+                except (ValueError, TypeError):
+                    raise ValidationError(f"Field '{field}' must be a valid number")
+        
+        # Clean string fields
+        string_fields = ['codicearticolo', 'nome', 'fornitoreid', 'fornitorenome', 
+                        'contonome', 'brancanome', 'sottocontonome', 'conto_codice',
+                        'sottoconto_codice', 'categoria_contabile', 'metodo_classificazione',
+                        'fattura_id', 'riga_fattura_id']
+        for field in string_fields:
+            if field in data and data[field] is not None:
+                data[field] = str(data[field]).strip()
+    
+    def get_by_supplier(self, fornitoreid: str, options: Optional[QueryOptions] = None) -> QueryResult:
+        """Get materials by supplier ID."""
+        options = options or QueryOptions()
+        if not options.filters:
+            options.filters = {}
+        options.filters['fornitoreid'] = fornitoreid
+        
+        return self.list(options)
+    
+    def get_by_classification(
+        self, 
+        contoid: Optional[int] = None,
+        brancaid: Optional[int] = None,
+        sottocontoid: Optional[int] = None,
+        options: Optional[QueryOptions] = None
+    ) -> QueryResult:
+        """Get materials by classification hierarchy."""
+        options = options or QueryOptions()
+        if not options.filters:
+            options.filters = {}
+        
+        if contoid:
+            options.filters['contoid'] = contoid
+        if brancaid:
+            options.filters['brancaid'] = brancaid
+        if sottocontoid:
+            options.filters['sottocontoid'] = sottocontoid
+            
+        return self.list(options)
+    
+    def search_by_description(self, search_term: str, options: Optional[QueryOptions] = None) -> QueryResult:
+        """Search materials by description using LIKE query."""
+        try:
+            options = options or QueryOptions()
+            
+            # Build search query
+            base_query, base_params = self._build_select_query(
+                options, 
+                additional_conditions="nome LIKE ?"
+            )
+            search_params = base_params + (f"%{search_term}%",)
+            
+            # Get total count
+            count_query = f"SELECT COUNT(*) as total FROM ({base_query})"
+            total_count = self.db_manager.execute_query(
+                count_query, 
+                search_params, 
+                fetch_one=True
+            )['total']
+            
+            # Get results
+            results = self.db_manager.execute_query(base_query, search_params, fetch_all=True)
+            data = [dict(row) for row in results] if results else []
+            
+            return QueryResult(
+                data=data,
+                total_count=total_count,
+                page=options.page,
+                page_size=options.page_size
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to search materials by description '{search_term}': {e}")
+            raise RepositoryError(f"Search failed: {str(e)}", cause=e)
+    
+    def find_similar_materials(
+        self, 
+        descrizione: str, 
+        fornitoreid: Optional[str] = None,
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """Find similar materials based on description and supplier."""
+        try:
+            conditions = ["nome LIKE ?"]
+            params = [f"%{descrizione}%"]
+            
+            if fornitoreid:
+                conditions.append("fornitoreid = ?")
+                params.append(fornitoreid)
+            
+            # Add confirmed materials filter
+            conditions.append("confermato = 1")
+            conditions.append("contoid IS NOT NULL")
+            
+            query = f"""
+                SELECT * FROM {self.table_name}
+                WHERE {' AND '.join(conditions)}
+                ORDER BY confidence DESC, occorrenze DESC
+                LIMIT ?
+            """
+            params.append(limit)
+            
+            results = self.db_manager.execute_query(query, tuple(params), fetch_all=True)
+            return [dict(row) for row in results] if results else []
+            
+        except Exception as e:
+            logger.error(f"Failed to find similar materials: {e}")
+            raise RepositoryError(f"Failed to find similar materials: {str(e)}", cause=e)
+    
+    def get_classification_suggestions(
+        self, 
+        materiale_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Get classification suggestions based on similar materials and patterns."""
+        try:
+            suggestions = []
+            
+            descrizione = materiale_data.get('nome', '')
+            codice_articolo = materiale_data.get('codicearticolo', '')
+            fornitoreid = materiale_data.get('fornitoreid', '')
+            
+            # 1. Exact code match (highest priority)
+            if codice_articolo and fornitoreid:
+                exact_matches = self.execute_custom_query(
+                    """
+                    SELECT contoid, brancaid, sottocontoid, contonome, brancanome, sottocontonome, 
+                           confidence, COUNT(*) as occorrenze
+                    FROM materiali 
+                    WHERE TRIM(LOWER(codicearticolo)) = TRIM(LOWER(?)) 
+                      AND fornitoreid = ? 
+                      AND confermato = 1 
+                      AND contoid IS NOT NULL
+                    GROUP BY contoid, brancaid, sottocontoid
+                    ORDER BY confidence DESC, occorrenze DESC
+                    LIMIT 3
+                    """,
+                    (codice_articolo, fornitoreid),
+                    fetch_all=True
+                )
+                
+                for match in exact_matches:
+                    suggestions.append({
+                        'contoid': match['contoid'],
+                        'brancaid': match['brancaid'],
+                        'sottocontoid': match['sottocontoid'],
+                        'contonome': match['contonome'],
+                        'brancanome': match['brancanome'],
+                        'sottocontonome': match['sottocontonome'],
+                        'confidence': 95,
+                        'motivo': f"Codice identico già classificato (occorrenze: {match['occorrenze']})",
+                        'source': 'exact_code_match'
+                    })
+            
+            # 2. Description similarity (medium priority)
+            if descrizione and len(suggestions) < 3:
+                similar_materials = self.find_similar_materials(descrizione, fornitoreid, 5)
+                for material in similar_materials:
+                    if material['contoid']:
+                        suggestions.append({
+                            'contoid': material['contoid'],
+                            'brancaid': material['brancaid'],
+                            'sottocontoid': material['sottocontoid'],
+                            'contonome': material['contonome'],
+                            'brancanome': material['brancanome'],
+                            'sottocontonome': material['sottocontonome'],
+                            'confidence': 85,
+                            'motivo': f"Materiale simile: {material['nome'][:50]}...",
+                            'source': 'description_similarity'
+                        })
+            
+            # 3. Supplier pattern (lower priority)
+            if fornitoreid and len(suggestions) < 3:
+                supplier_patterns = self.execute_custom_query(
+                    """
+                    SELECT contoid, brancaid, sottocontoid, contonome, brancanome, sottocontonome,
+                           COUNT(*) as frequency, AVG(confidence) as avg_confidence
+                    FROM materiali 
+                    WHERE fornitoreid = ? 
+                      AND confermato = 1 
+                      AND contoid IS NOT NULL
+                    GROUP BY contoid, brancaid, sottocontoid
+                    ORDER BY frequency DESC, avg_confidence DESC
+                    LIMIT 3
+                    """,
+                    (fornitoreid,),
+                    fetch_all=True
+                )
+                
+                for pattern in supplier_patterns:
+                    suggestions.append({
+                        'contoid': pattern['contoid'],
+                        'brancaid': pattern['brancaid'],
+                        'sottocontoid': pattern['sottocontoid'],
+                        'contonome': pattern['contonome'],
+                        'brancanome': pattern['brancanome'],
+                        'sottocontonome': pattern['sottocontonome'],
+                        'confidence': min(70, int(pattern['avg_confidence'])),
+                        'motivo': f"Pattern fornitore (frequenza: {pattern['frequency']})",
+                        'source': 'supplier_pattern'
+                    })
+            
+            # Remove duplicates and limit results
+            unique_suggestions = []
+            seen_combinations = set()
+            
+            for suggestion in suggestions:
+                key = (suggestion['contoid'], suggestion['brancaid'], suggestion['sottocontoid'])
+                if key not in seen_combinations:
+                    unique_suggestions.append(suggestion)
+                    seen_combinations.add(key)
+                    
+                if len(unique_suggestions) >= 5:
+                    break
+            
+            return unique_suggestions
+            
+        except Exception as e:
+            logger.error(f"Failed to get classification suggestions: {e}")
+            return []
+    
+    def save_classification(
+        self, 
+        materiale_data: Dict[str, Any],
+        classification_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Save or update material classification."""
+        try:
+            # Combine material and classification data
+            combined_data = {**materiale_data, **classification_data}
+            combined_data['confermato'] = 1
+            combined_data['metodo_classificazione'] = 'manuale'
+            combined_data['confidence'] = 100
+            
+            # Check if material already exists
+            existing = self._find_existing_material(
+                combined_data.get('codicearticolo', ''),
+                combined_data.get('nome', ''),
+                combined_data.get('fornitoreid', '')
+            )
+            
+            if existing:
+                # Update existing material
+                updated_material = self.update(existing['id'], combined_data)
+                logger.info(f"Updated material classification for ID {existing['id']}")
+                return updated_material
+            else:
+                # Create new material
+                created_material = self.create(combined_data)
+                logger.info(f"Created new material with classification: {created_material['id']}")
+                return created_material
+                
+        except Exception as e:
+            logger.error(f"Failed to save material classification: {e}")
+            raise RepositoryError(f"Failed to save classification: {str(e)}", cause=e)
+    
+    def _find_existing_material(
+        self, 
+        codicearticolo: str, 
+        nome: str, 
+        fornitoreid: str
+    ) -> Optional[Dict[str, Any]]:
+        """Find existing material by key fields."""
+        try:
+            result = self.execute_custom_query(
+                """
+                SELECT * FROM materiali
+                WHERE IFNULL(codicearticolo, '') = ? 
+                  AND nome = ? 
+                  AND IFNULL(fornitoreid, '') = ?
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (codicearticolo or '', nome, fornitoreid or ''),
+                fetch_one=True
+            )
+            
+            return dict(result) if result else None
+            
+        except Exception as e:
+            logger.warning(f"Error finding existing material: {e}")
+            return None
+    
+    def bulk_insert_materials(self, materials_data: List[Dict[str, Any]]) -> Tuple[int, int, List[str]]:
+        """Bulk insert materials with error handling."""
+        try:
+            inserted_count = 0
+            error_count = 0
+            errors = []
+            
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                
+                for idx, material_data in enumerate(materials_data):
+                    try:
+                        # Validate data
+                        self._validate_entity_data(material_data, is_update=False)
+                        
+                        # Build insert query
+                        query, params = self._build_insert_query(material_data)
+                        cursor.execute(query, params)
+                        
+                        inserted_count += 1
+                        
+                    except Exception as e:
+                        error_count += 1
+                        errors.append(f"Material {idx}: {str(e)}")
+                        logger.warning(f"Failed to insert material {idx}: {e}")
+                        continue
+                
+                cursor.close()
+            
+            logger.info(f"Bulk insert completed: {inserted_count} inserted, {error_count} failed")
+            return inserted_count, error_count, errors
+            
+        except Exception as e:
+            logger.error(f"Bulk insert failed: {e}")
+            raise RepositoryError(f"Bulk insert failed: {str(e)}", cause=e)
+    
+    def get_price_history(self, materiale_id: int) -> List[Dict[str, Any]]:
+        """Get price history for a material."""
+        try:
+            material = self.get_by_id(materiale_id)
+            if not material:
+                raise RepositoryError(f"Material not found", entity_id=materiale_id)
+            
+            # Get all materials with same code/description/supplier
+            query = """
+                SELECT data_fattura, costo_unitario, fattura_id, riga_fattura_id, created_at
+                FROM materiali
+                WHERE IFNULL(codicearticolo, '') = IFNULL(?, '')
+                  AND nome = ?
+                  AND IFNULL(fornitoreid, '') = IFNULL(?, '')
+                  AND costo_unitario IS NOT NULL
+                  AND costo_unitario > 0
+                ORDER BY COALESCE(data_fattura, created_at) DESC
+            """
+            
+            results = self.execute_custom_query(
+                query,
+                (material['codicearticolo'], material['nome'], material['fornitoreid']),
+                fetch_all=True
+            )
+            
+            return [dict(row) for row in results] if results else []
+            
+        except Exception as e:
+            logger.error(f"Failed to get price history for material {materiale_id}: {e}")
+            raise RepositoryError(f"Failed to get price history: {str(e)}", cause=e)
+    
+    def get_statistics_by_supplier(self, fornitoreid: str) -> Dict[str, Any]:
+        """Get material statistics for a supplier."""
+        try:
+            stats = self.execute_custom_query(
+                """
+                SELECT 
+                    COUNT(*) as total_materials,
+                    COUNT(CASE WHEN confermato = 1 THEN 1 END) as classified_materials,
+                    COUNT(CASE WHEN contoid IS NOT NULL THEN 1 END) as materials_with_account,
+                    COUNT(DISTINCT IFNULL(codicearticolo, '')) as unique_codes,
+                    AVG(confidence) as avg_confidence,
+                    MIN(created_at) as first_material,
+                    MAX(created_at) as last_material,
+                    SUM(occorrenze) as total_occurrences
+                FROM materiali
+                WHERE fornitoreid = ? AND deleted_at IS NULL
+                """,
+                (fornitoreid,),
+                fetch_one=True
+            )
+            
+            return dict(stats) if stats else {}
+            
+        except Exception as e:
+            logger.error(f"Failed to get supplier statistics: {e}")
+            raise RepositoryError(f"Failed to get statistics: {str(e)}", cause=e)
+    
+    def get_unclassified_materials(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Get materials that need classification."""
+        try:
+            query = """
+                SELECT * FROM materiali
+                WHERE (contoid IS NULL OR confermato = 0)
+                  AND deleted_at IS NULL
+                ORDER BY created_at DESC, occorrenze DESC
+            """
+            
+            if limit:
+                query += f" LIMIT {limit}"
+            
+            results = self.execute_custom_query(query, fetch_all=True)
+            return [dict(row) for row in results] if results else []
+            
+        except Exception as e:
+            logger.error(f"Failed to get unclassified materials: {e}")
+            raise RepositoryError(f"Failed to get unclassified materials: {str(e)}", cause=e)
+    
+    def confirm_auto_classifications(self, confidence_threshold: int = 80) -> int:
+        """Confirm auto-classifications above confidence threshold."""
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute(
+                    """
+                    UPDATE materiali 
+                    SET confermato = 1, metodo_classificazione = 'auto_confirmed'
+                    WHERE confidence >= ? 
+                      AND confermato = 0 
+                      AND contoid IS NOT NULL
+                      AND deleted_at IS NULL
+                    """,
+                    (confidence_threshold,)
+                )
+                
+                confirmed_count = cursor.rowcount
+                cursor.close()
+                
+            logger.info(f"Auto-confirmed {confirmed_count} materials with confidence >= {confidence_threshold}")
+            return confirmed_count
+            
+        except Exception as e:
+            logger.error(f"Failed to confirm auto-classifications: {e}")
+            raise RepositoryError(f"Failed to confirm auto-classifications: {str(e)}", cause=e)
+
+--- server_v2\services\materiali_migration_service.py::classify_material_type (lines 138-221) ---
+    def classify_material_type(self, descrizione: str) -> Tuple[str, int]:
+        """
+        Classifica il tipo di materiale basandosi sulla descrizione con confidence scoring avanzato.
+        
+        Args:
+            descrizione: Descrizione del materiale
+            
+        Returns:
+            Tupla (tipo_materiale, confidence_score)
+        """
+        if not descrizione:
+            return 'unknown', 0
+        
+        # Cache per performance
+        cache_key = descrizione.lower().strip()
+        if cache_key in self._classification_cache:
+            return self._classification_cache[cache_key]
+        
+        descrizione_lower = descrizione.lower().strip()
+        
+        # Verifica se è un materiale da escludere (logica intelligente come backend v1)
+        for exclude_word in self.exclude_keywords:
+            if exclude_word in descrizione_lower:
+                result = ('non_dental', 0)
+                self._classification_cache[cache_key] = result
+                return result
+        
+        # Cerca corrispondenze con parole chiave dentali
+        best_match = ('unknown', 0)
+        category_scores = {}
+        
+        for categoria, keywords in self.dental_keywords.items():
+            confidence = 0
+            matches = 0
+            exact_matches = 0
+            partial_matches = 0
+            
+            for keyword in keywords:
+                if keyword in descrizione_lower:
+                    matches += 1
+                    
+                    # Peso maggiore per match esatti
+                    if keyword == descrizione_lower:
+                        confidence += self.WEIGHT_EXACT_MATCH
+                        exact_matches += 1
+                    # Match parziale con peso basato sulla lunghezza
+                    else:
+                        weight = min(self.WEIGHT_PARTIAL_MATCH, len(keyword) * 5)  # Peso proporzionale alla lunghezza
+                        confidence += weight
+                        partial_matches += 1
+                
+                # Controllo aggiuntivo per frasi composte (es. "lidocaina 2%")
+                elif ' ' in keyword:
+                    words = keyword.split()
+                    if all(word in descrizione_lower for word in words):
+                        matches += 1
+                        confidence += min(self.WEIGHT_PHRASE_MATCH, len(keyword) * 4)  # Peso leggermente inferiore per frasi
+                        partial_matches += 1
+            
+            # Bonus per multiple matches nella stessa categoria
+            if matches > 1:
+                confidence += matches * self.WEIGHT_MULTIPLE_MATCHES
+            
+            # Bonus per match esatti
+            if exact_matches > 0:
+                confidence += exact_matches * self.WEIGHT_EXACT_BONUS
+            
+            # Penalità per descrizioni troppo generiche
+            if len(descrizione_lower) < 5:
+                confidence *= 0.5
+            
+            category_scores[categoria] = confidence
+            
+            if confidence > best_match[1]:
+                best_match = (categoria, confidence)
+        
+        # Se la confidence è troppo bassa, classifica come unknown (CONSTANTE CONFIGURABILE)
+        if best_match[1] < self.CONFIDENCE_THRESHOLD_UNKNOWN:
+            best_match = ('unknown', best_match[1])
+        
+        # Cache del risultato con limite (GPT suggestion)
+        self._manage_cache_size()
+        self._classification_cache[cache_key] = best_match
+        return best_match
+
+--- server_v2\services\materiali_migration_service.py::is_dental_material (lines 231-306) ---
+    def is_dental_material(self, descrizione: str, prezzo: Optional[float] = None, quantita: Optional[float] = None) -> Tuple[bool, int]:
+        """
+        LOGICA DI ESCLUSIONE: Esclude solo materiali chiaramente non dentali.
+        Tutto il resto è considerato potenzialmente dentale.
+        
+        Args:
+            descrizione: Descrizione del materiale
+            prezzo: Prezzo del materiale (opzionale)
+            quantita: Quantità del materiale (opzionale)
+            
+        Returns:
+            Tupla (is_dental, confidence_score)
+        """
+        if not descrizione:
+            return False, 0
+        
+        descrizione_lower = descrizione.lower()
+        
+        # LISTA DI ESCLUSIONE: Solo parole chiaramente NON dentali
+        exclusion_keywords = [
+            # Voci amministrative/fatturazione
+            'iva', 'imposta', 'bollo', 'sconto', 'ritenuta', 'commissione', 'fee', 'tax', 'vat',
+            
+            # Trasporti e spedizioni
+            'trasporto', 'spedizione', 'shipping', 'spese di trasporto', 'spese di spedizione',
+            
+            # Imballaggi e packaging
+            'imballo', 'packaging', 'confezione vuota',
+            
+            # Ufficio e amministrazione
+            'telefono', 'phone', 'computer', 'software', 'licenza', 'license',
+            'stampante', 'printer', 'toner', 'cartuccia', 'ink',
+            'busta', 'envelope', 'timbro', 'stamp', 'cartolina', 'postcard',
+            'penna', 'pen', 'matita', 'pencil', 'cancelleria', 'office supplies',
+            
+            # Servizi amministrativi
+            'assicurazione', 'insurance', 'tasse', 'consulenza', 'consulting',
+            'formazione', 'training', 'corso', 'course', 'abbonamento', 'subscription',
+            'contabilità', 'accounting', 'banca', 'bank', 'finanziario', 'financial',
+            
+            # Carburanti e veicoli
+            'benzina', 'gasolio', 'carburante', 'fuel', 'auto', 'car', 'parcheggio',
+            
+            # Consumabili generali non dentali
+            'caffè', 'coffee', 'acqua', 'water', 'bibite', 'drinks', 'snack',
+            
+            # Pulizia generale non dentale
+            'pulizia ufficio', 'cleaning', 'detergente casa', 'sapone mani',
+            'carta igienica', 'toilet paper', 'asciugamani', 'towels'
+        ]
+        
+        # CONTROLLO ESCLUSIONE: Se contiene parole di esclusione → NON dentale
+        for exclude_word in exclusion_keywords:
+            if exclude_word in descrizione_lower:
+                return False, 0
+        
+        # TUTTO IL RESTO È CONSIDERATO POTENZIALMENTE DENTALE
+        # Assegna confidence basata su indicatori positivi
+        
+        confidence = 50  # Base confidence per materiali non esclusi
+        
+        # Bonus per indicatori dentali specifici
+        if self.compiled_patterns['medical_units'].search(descrizione_lower):
+            confidence += 20
+        if self.compiled_patterns['sterile'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['disposable'].search(descrizione_lower):
+            confidence += 20
+        if self.compiled_patterns['guanti'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['mascherine'].search(descrizione_lower):
+            confidence += 25
+        if self.compiled_patterns['dental_ref'].search(descrizione_lower):
+            confidence += 30
+        
+        return True, min(100, confidence)
+
+--- server_v2\services\materiali_migration_service.py::normalize_supplier_name (lines 308-338) ---
+    def normalize_supplier_name(self, supplier_name: str) -> str:
+        """
+        Normalizza il nome del fornitore per aggregazione intelligente.
+        
+        Args:
+            supplier_name: Nome originale del fornitore
+            
+        Returns:
+            Nome normalizzato del fornitore
+        """
+        if not supplier_name:
+            return supplier_name
+        
+        # Cache per performance
+        cache_key = supplier_name.lower().strip()
+        if cache_key in self._supplier_cache:
+            return self._supplier_cache[cache_key]
+        
+        supplier_lower = supplier_name.lower().strip()
+        
+        # Cerca corrispondenze con fornitori simili
+        for normalized_name, variations in self.similar_suppliers.items():
+            for variation in variations:
+                if variation in supplier_lower:
+                    self._supplier_cache[cache_key] = normalized_name.title()
+                    return normalized_name.title()
+        
+        # Se non trova corrispondenze, normalizza il nome originale
+        normalized = supplier_name.strip().title()
+        self._supplier_cache[cache_key] = normalized
+        return normalized
+
+--- server_v2\services\materiali_migration_service.py::read_spesafo_data (lines 340-476) ---
+    def read_spesafo_data(self) -> List[Dict[str, Any]]:
+        """
+        Legge i dati dalla tabella SPESAFOR.DBF e li arricchisce con i dettagli da VOCISPES.DBF.
+        
+        Returns:
+            Lista di dizionari con i dati delle spese per fornitori e i loro dettagli
+        """
+        try:
+            from dbfread import DBF
+
+            # Percorsi dei file DBF (risolti dal config manager, dev/prod-aware)
+            config = get_config()
+            spesafo_path = config.get_dbf_path('spese')
+            fornitor_path = config.get_dbf_path('fornitori')
+            vocispes_path = config.get_dbf_path('voci_spese')
+
+            logger.info(f"Reading SPESAFOR.DBF from: {spesafo_path}")
+            
+            # Carica FORNITOR per i nomi fornitori
+            fornitor_map = {}
+            with DBF(fornitor_path, encoding='latin-1') as fornitor_table:
+                for record in fornitor_table:
+                    if record is None:
+                        continue
+                    code = self._clean_dbf_value(record.get('DB_CODE', ''))
+                    nome = self._clean_dbf_value(record.get('DB_FONOME', ''))
+                    if code and nome:
+                        fornitor_map[code] = nome
+            
+            logger.info(f"Loaded {len(fornitor_map)} fornitori from FORNITOR.DBF")
+            
+            # Leggi dettagli da VOCISPES.DBF
+            dettagli_dict = {}
+            with DBF(vocispes_path, encoding='latin-1') as vocispes_table:
+                for record in vocispes_table:
+                    if record is None:
+                        continue
+                    
+                    codice_fattura = self._clean_dbf_value(record.get('DB_VOSPCOD', ''))
+                    if not codice_fattura:
+                        continue
+                    
+                    # Estrai dettagli usando il mapping corretto
+                    codice_articolo = self._clean_dbf_value(record.get('DB_VOSOCOD', ''))
+                    descrizione = self._clean_dbf_value(record.get('DB_VODESCR', ''))
+                    quantita = self._safe_float(record.get('DB_VOQUANT', 0))
+                    prezzo_unitario = self._safe_float(record.get('DB_VOPREZZ', 0))
+                    sconto = self._safe_float(record.get('DB_VOSCONT', 0))
+                    aliquota_iva = self._safe_float(record.get('DB_VOIVA', 0))
+                    
+                    # Filtra solo i materiali utili (come fa la V1)
+                    if not self._is_material_useful(descrizione, quantita, prezzo_unitario):
+                        continue
+                    
+                    if codice_fattura not in dettagli_dict:
+                        dettagli_dict[codice_fattura] = []
+                    
+                    dettaglio = {
+                        'codice_articolo': codice_articolo,
+                        'descrizione': descrizione,
+                        'quantita': quantita,
+                        'prezzo_unitario': prezzo_unitario,
+                        'sconto': sconto,
+                        'aliquota_iva': aliquota_iva,
+                        'totale_riga': quantita * prezzo_unitario * (1 - sconto / 100) if quantita and prezzo_unitario else 0.0
+                    }
+                    
+                    dettagli_dict[codice_fattura].append(dettaglio)
+            
+            logger.info(f"Loaded details for {len(dettagli_dict)} invoices from VOCISPES.DBF")
+            
+            # Leggi SPESAFOR e arricchisci con i dettagli
+            materials_data = []
+            with DBF(spesafo_path, encoding='latin-1') as table:
+                for record in table:
+                    if record is None:
+                        continue
+                    
+                    # Estrai dati da SPESAFOR usando il mapping corretto
+                    id_fattura = self._clean_dbf_value(record.get('DB_CODE', ''))  # ID fattura
+                    fornitoreid = self._clean_dbf_value(record.get('DB_SPFOCOD', ''))  # codice fornitore
+                    descrizione = self._clean_dbf_value(record.get('DB_SPDESCR', ''))  # descrizione
+                    costo_netto = self._safe_float(record.get('DB_SPCOSTO', 0))  # costo netto
+                    costo_iva = self._safe_float(record.get('DB_SPCOIVA', 0))  # costo con IVA
+                    numero_documento = self._clean_dbf_value(record.get('DB_SPNUMER', ''))  # numero documento
+                    data_spesa = self._clean_dbf_value(record.get('DB_SPDATA', ''))  # data spesa
+                    
+                    # Salta record senza dati essenziali
+                    if not id_fattura or not fornitoreid:
+                        continue
+                    
+                    # Trova nome fornitore tramite FORNITOR
+                    fornitorenome = fornitor_map.get(fornitoreid, '')
+                    
+                    # Ottieni dettagli per questa fattura
+                    dettagli_fattura = dettagli_dict.get(id_fattura, [])
+                    
+                    if not dettagli_fattura:
+                        # Se non ci sono dettagli utili, salta questa fattura
+                        continue
+                    
+                    # Crea un record per ogni dettaglio
+                    for dettaglio in dettagli_fattura:
+                        material = {
+                            'id_fattura': id_fattura,
+                            'codicearticolo': dettaglio['codice_articolo'] or '',
+                            'nome': dettaglio['descrizione'],  # Usa descrizione dal dettaglio
+                            'fornitoreid': fornitoreid,
+                            'fornitorenome': fornitorenome,
+                            'costo_unitario': dettaglio['prezzo_unitario'],  # Usa prezzo dal dettaglio
+                            'costo_netto': costo_netto,
+                            'costo_iva': costo_iva,
+                            'data_spesa': data_spesa,
+                            'numero_documento': numero_documento,
+                            'quantita': dettaglio['quantita'],
+                            'sconto': dettaglio['sconto'],
+                            'aliquota_iva': dettaglio['aliquota_iva'],
+                            'totale_riga': dettaglio['totale_riga']
+                        }
+                        materials_data.append(material)
+            
+            logger.info(f"Read {len(materials_data)} valid records from SPESAFOR.DBF with joins")
+            
+            # Log fornitori presenti nel DBF
+            suppliers_in_dbf = set()
+            for material in materials_data:
+                suppliers_in_dbf.add(f"{material.get('fornitoreid')} - {material.get('fornitorenome')}")
+            
+            logger.info(f"DEBUG - Suppliers in DBF: {len(suppliers_in_dbf)}")
+            for supplier in sorted(suppliers_in_dbf):
+                logger.info(f"DEBUG - DBF Supplier: {supplier}")
+            
+            return materials_data
+            
+        except Exception as e:
+            logger.error(f"Error reading SPESAFOR.DBF: {e}")
+            raise DbfProcessingError(f"Failed to read SPESAFOR.DBF: {str(e)}")
+
+--- server_v2\services\materiali_migration_service.py::filter_materials_by_classification (lines 520-645) ---
+    def filter_materials_by_classification(self, materials_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Filtra i materiali per fornitori classificati e applica pattern recognition.
+        ESCLUDE i materiali già importati nella tabella materiali.
+        
+        Args:
+            materials_data: Lista di materiali da VOCISPES.DBF
+            
+        Returns:
+            Lista di materiali con classificazione e pattern recognition (solo NON importati)
+        """
+        classified_materials = []
+        stats = {
+            'total': len(materials_data),
+            'classified': 0,
+            'excluded': 0,
+            'no_classification': 0,
+            'pattern_matched': 0,
+            'supplier_classification': 0,
+            'already_imported': 0
+        }
+        
+        # Carica pattern esistenti per il matching
+        existing_patterns = self._load_existing_patterns()
+        
+        for material in materials_data:
+            descrizione = material.get('nome', '')
+            fornitore_nome = material.get('fornitorenome', '')
+            
+            # Skip materiali senza descrizione
+            if not descrizione or len(descrizione.strip()) < 3:
+                stats['excluded'] += 1
+                continue
+            
+            # Controlla se è materiale dentale - ESCLUDI materiali non dentali
+            is_dental, dental_confidence = self.is_dental_material(descrizione)
+            if not is_dental:
+                stats['excluded'] += 1
+                continue
+            
+            # Verifica se il fornitore è classificato
+            fornitore_id = material.get('fornitoreid', '')
+            fattura_id = material.get('id_fattura', '')
+            
+            # PRIMA: Controlla se il materiale esiste già nella tabella materiali
+            existing_material_classification = self._get_existing_material_classification(
+                descrizione, fornitore_id, fattura_id
+            )
+            
+            # Mantieni il materiale anche se già importato per mostrarlo come "già fatto"
+            
+            # SECONDA: Se già importato, usa la classificazione esistente
+            if existing_material_classification:
+                # Usa classificazione già esistente
+                classification_data = {
+                    'contoid': existing_material_classification['contoid'],
+                    'brancaid': existing_material_classification['brancaid'],
+                    'sottocontoid': existing_material_classification['sottocontoid'],
+                    'contonome': existing_material_classification['contonome'],
+                    'brancanome': existing_material_classification['brancanome'],
+                    'sottocontonome': existing_material_classification['sottocontonome']
+                }
+                confidence = 100  # Massima confidenza per materiali già importati
+                stats['already_imported'] += 1
+            else:
+                # TERZA: Prova pattern matching per classificazione specifica
+                pattern_match = self._find_pattern_match(descrizione, existing_patterns)
+                if pattern_match:
+                    # Usa classificazione specifica dal pattern
+                    classification_data = pattern_match['classification']
+                    confidence = pattern_match['confidence']
+                    stats['pattern_matched'] += 1
+                else:
+                    # QUARTA: Usa classificazione del fornitore
+                    fornitore_classification = self._get_classification_data(fornitore_id)
+                    if fornitore_classification:
+                        classification_data = {
+                            'contoid': fornitore_classification['contoid'],
+                            'brancaid': fornitore_classification['brancaid'],
+                            'sottocontoid': fornitore_classification['sottocontoid'],
+                            'contonome': fornitore_classification['contonome'],
+                            'brancanome': fornitore_classification['brancanome'],
+                            'sottocontonome': fornitore_classification['sottocontonome']
+                        }
+                        confidence = 30  # Bassa confidenza per classificazione fornitore
+                        stats['supplier_classification'] += 1
+                    else:
+                        # Nessuna classificazione disponibile - usa classificazione vuota
+                        classification_data = {
+                            'contoid': None,
+                            'brancaid': None,
+                            'sottocontoid': None,
+                            'contonome': None,
+                            'brancanome': None,
+                            'sottocontonome': None
+                        }
+                        confidence = 0  # Nessuna confidenza per materiali non classificati
+                        stats['no_classification'] += 1
+            
+            # Aggiungi il materiale con classificazione
+            enriched_material = material.copy()
+            enriched_material.update({
+                'id': '',  # ID sarà generato dal database
+                'codice_prodotto': material.get('codicearticolo', ''),
+                'confidence': confidence,
+                'confermato': confidence >= 80,  # Auto-conferma se confidence alta
+                'occorrenze': 1,
+                'categoria_contabile': 'Materiali Classificati',
+                'fornitore_normalizzato': self.normalize_supplier_name(fornitore_nome),
+                'data_fattura': material.get('data_spesa', ''),
+                'fattura_id': material.get('id_fattura', ''),
+                # Aggiungi dati di classificazione
+                'contoid': classification_data['contoid'],
+                'brancaid': classification_data['brancaid'],
+                'sottocontoid': classification_data['sottocontoid'],
+                'contonome': classification_data['contonome'],
+                'brancanome': classification_data['brancanome'],
+                'sottocontonome': classification_data['sottocontonome'],
+            })
+            
+            classified_materials.append(enriched_material)
+            stats['classified'] += 1
+        
+        logger.info(f"Filtering results: {stats['total']} total, {stats['classified']} classified, {stats['excluded']} excluded, {stats['no_classification']} no classification, {stats['pattern_matched']} pattern matched, {stats['already_imported']} already imported (excluded)")
+        
+        return classified_materials
+
+--- server_v2\services\materiali_migration_service.py::migrate_materials_to_db (lines 647-729) ---
+    def migrate_materials_to_db(self, dental_materials: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Migra i materiali dentali filtrati nel database SQLite usando la struttura esistente.
+        
+        Args:
+            dental_materials: Lista di materiali dentali da migrare
+            
+        Returns:
+            Dizionario con statistiche della migrazione
+        """
+        try:
+            import sqlite3
+            stats = {'inserted': 0, 'updated': 0, 'errors': 0, 'errors_list': []}
+            
+            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+            cursor = conn.cursor()
+            
+            for material in dental_materials:
+                try:
+                    # Verifica se il materiale esiste già usando la struttura esistente
+                    existing_query = """
+                        SELECT id FROM materiali 
+                        WHERE codicearticolo = ? AND fornitoreid = ?
+                    """
+                    existing = cursor.execute(existing_query, (
+                        material['codicearticolo'],
+                        material['fornitoreid']
+                    )).fetchone()
+                    
+                    if existing:
+                        # Aggiorna materiale esistente
+                        update_query = """
+                            UPDATE materiali SET
+                                nome = ?, fornitorenome = ?, costo_unitario = ?,
+                                confidence = ?, confermato = ?, occorrenze = ?,
+                                categoria_contabile = ?, contoid = ?, brancaid = ?, sottocontoid = ?,
+                                contonome = ?, brancanome = ?, sottocontonome = ?
+                            WHERE id = ?
+                        """
+                        cursor.execute(update_query, (
+                            material['nome'], material['fornitorenome'], material['costo_unitario'],
+                            material['confidence'], material['confermato'], material['occorrenze'],
+                            material['categoria_contabile'], material['contoid'], 
+                            material['brancaid'], material['sottocontoid'],
+                            material['contonome'], material['brancanome'], material['sottocontonome'],
+                            existing[0]
+                        ))
+                        stats['updated'] += 1
+                    else:
+                        # Inserisci nuovo materiale usando la struttura esistente
+                        insert_query = """
+                            INSERT INTO materiali (
+                                codicearticolo, nome, fornitoreid, fornitorenome, costo_unitario,
+                                confidence, confermato, occorrenze, categoria_contabile,
+                                contoid, brancaid, sottocontoid, contonome, brancanome, sottocontonome
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """
+                        cursor.execute(insert_query, (
+                            material['codicearticolo'], material['nome'],
+                            material['fornitoreid'], material['fornitorenome'], material['costo_unitario'],
+                            material['confidence'], material['confermato'], material['occorrenze'],
+                            material['categoria_contabile'], material['contoid'], 
+                            material['brancaid'], material['sottocontoid'],
+                            material['contonome'], material['brancanome'], material['sottocontonome']
+                        ))
+                        stats['inserted'] += 1
+                        
+                except Exception as e:
+                    stats['errors'] += 1
+                    error_msg = f"Error processing material {material.get('nome', 'Unknown')}: {str(e)}"
+                    stats['errors_list'].append(error_msg)
+                    logger.error(error_msg)
+                    continue
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Migration completed: {stats['inserted']} inserted, {stats['updated']} updated, {stats['errors']} errors")
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Error during migration: {e}")
+            raise DatabaseError(f"Migration failed: {str(e)}")
+
+--- server_v2\services\materiali_migration_service.py::run_full_migration (lines 731-772) ---
+    def run_full_migration(self) -> Dict[str, Any]:
+        """
+        Esegue la migrazione completa da VOCISPES.DBF alla tabella materiali.
+        
+        Returns:
+            Dizionario con risultati della migrazione
+        """
+        try:
+            logger.info("Starting full materials migration from VOCISPES.DBF")
+            start_time = datetime.now()
+            
+            # Step 1: Leggi dati da VOCISPES.DBF
+            materials_data = self.read_spesafo_data()
+            
+            # Step 2: Filtra materiali dentali
+            dental_materials = self.filter_dental_materials(materials_data)
+            
+            # Step 3: Migra nel database
+            migration_stats = self.migrate_materials_to_db(dental_materials)
+            
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            
+            result = {
+                'success': True,
+                'duration_seconds': duration,
+                'total_records_processed': len(materials_data),
+                'dental_materials_found': len(dental_materials),
+                'migration_stats': migration_stats,
+                'completed_at': end_time.isoformat()
+            }
+            
+            logger.info(f"Migration completed successfully in {duration:.2f} seconds")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Full migration failed: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'completed_at': datetime.now().isoformat()
+            }
+
+--- server_v2\services\materiali_migration_service.py::import_materials_for_supplier (lines 1157-1264) ---
+    def import_materials_for_supplier(self, supplier_name: str, materials: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Importa i materiali per un fornitore specifico.
+        
+        Args:
+            supplier_name: Nome del fornitore
+            materials: Lista di materiali da importare
+            
+        Returns:
+            Dizionario con statistiche dell'importazione
+        """
+        try:
+            stats = {
+                'supplier_name': supplier_name,
+                'materials_imported': 0,
+                'materials_updated': 0,
+                'materials_skipped': 0,
+                'total_processed': len(materials),
+                'errors': []
+            }
+            
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                for material in materials:
+                    try:
+                        # Verifica se il materiale esiste già
+                        existing_query = """
+                            SELECT id FROM materiali 
+                            WHERE codicearticolo = ? AND fornitoreid = ?
+                        """
+                        existing = cursor.execute(existing_query, (
+                            material.get('codicearticolo', ''),
+                            material.get('fornitoreid', 0)
+                        )).fetchone()
+                        
+                        if existing:
+                            # Aggiorna materiale esistente
+                            update_query = """
+                                UPDATE materiali SET
+                                    nome = ?, fornitorenome = ?, costo_unitario = ?,
+                                    confidence = ?, confermato = ?, occorrenze = ?,
+                                    categoria_contabile = ?, contoid = ?, brancaid = ?, sottocontoid = ?,
+                                    contonome = ?, brancanome = ?, sottocontonome = ?,
+                                    updated_at = CURRENT_TIMESTAMP
+                                WHERE id = ?
+                            """
+                            cursor.execute(update_query, (
+                                material.get('nome', ''),
+                                material.get('fornitorenome', ''),
+                                material.get('costo_unitario', 0.0),
+                                material.get('confidence', 0),
+                                material.get('confermato', False),
+                                material.get('occorrenze', 1),
+                                material.get('categoria_contabile', ''),
+                                material.get('contoid'),
+                                material.get('brancaid'),
+                                material.get('sottocontoid'),
+                                material.get('contonome'),
+                                material.get('brancanome'),
+                                material.get('sottocontonome'),
+                                existing[0]
+                            ))
+                            stats['materials_updated'] += 1
+                        else:
+                            # Inserisci nuovo materiale
+                            insert_query = """
+                                INSERT INTO materiali (
+                                    codicearticolo, nome, fornitoreid, fornitorenome,
+                                    costo_unitario, confidence, confermato, occorrenze,
+                                    categoria_contabile, contoid, brancaid, sottocontoid,
+                                    contonome, brancanome, sottocontonome,
+                                    source_file, migrated_at, created_at
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                            """
+                            cursor.execute(insert_query, (
+                                material.get('codicearticolo', ''),
+                                material.get('nome', ''),
+                                material.get('fornitoreid', 0),
+                                material.get('fornitorenome', ''),
+                                material.get('costo_unitario', 0.0),
+                                material.get('confidence', 0),
+                                material.get('confermato', False),
+                                material.get('occorrenze', 1),
+                                material.get('categoria_contabile', ''),
+                                material.get('contoid'),
+                                material.get('brancaid'),
+                                material.get('sottocontoid'),
+                                material.get('contonome'),
+                                material.get('brancanome'),
+                                material.get('sottocontonome'),
+                                'VOCISPES.DBF'
+                            ))
+                            stats['materials_imported'] += 1
+                            
+                    except Exception as e:
+                        logger.error(f"Errore nell'importazione materiale {material.get('nome', '')}: {e}")
+                        stats['errors'].append(f"Materiale {material.get('nome', '')}: {str(e)}")
+                        stats['materials_skipped'] += 1
+                
+                conn.commit()
+                
+            logger.info(f"Importazione completata per {supplier_name}: {stats}")
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Errore nell'importazione per fornitore {supplier_name}: {e}")
+            raise DatabaseError(f"Errore nell'importazione: {str(e)}")
+
+--- server_v2\services\materiali_migration_service.py::search_articles_in_spesafo (lines 1266-1344) ---
+    def search_articles_in_spesafo(self, query: str, limit: int = 100) -> List[Dict[str, Any]]:
+        """
+        Cerca articoli nelle fatture fornitori (SPESAFOR.DBF) con dettagli da VOCISPES.DBF.
+        
+        Args:
+            query: Termine di ricerca
+            limit: Numero massimo di risultati
+            
+        Returns:
+            Lista di articoli trovati con dettagli fattura
+        """
+        try:
+            from dbfread import DBF
+
+            # Percorsi dei file DBF (risolti dal config manager, dev/prod-aware)
+            config = get_config()
+            spesafo_path = config.get_dbf_path('spese')
+            fornitor_path = config.get_dbf_path('fornitori')
+            vocispes_path = config.get_dbf_path('voci_spese')
+
+            logger.info(f"Searching articles in SPESAFOR.DBF with query: {query}")
+            
+            # Carica FORNITOR per i nomi fornitori
+            fornitor_map = {}
+            with DBF(fornitor_path, encoding='latin-1') as fornitor_table:
+                for record in fornitor_table:
+                    fornitor_map[record.get('CODICE', '')] = record.get('NOME', '')
+            
+            results = []
+            query_lower = query.lower()
+            
+            # Cerca in SPESAFOR
+            with DBF(spesafo_path, encoding='latin-1') as spesafo_table:
+                for record in spesafo_table:
+                    # Cerca nel codice articolo e descrizione
+                    codice_articolo = record.get('CODICE', '')
+                    descrizione = record.get('DESCRIZIONE', '')
+                    
+                    if (query_lower in codice_articolo.lower() or 
+                        query_lower in descrizione.lower()):
+                        
+                        # Cerca i dettagli in VOCISPES
+                        vocispes_details = []
+                        with DBF(vocispes_path, encoding='latin-1') as vocispes_table:
+                            for vocispes_record in vocispes_table:
+                                if (vocispes_record.get('CODICE', '') == codice_articolo and
+                                    vocispes_record.get('NUMERO', '') == record.get('NUMERO', '')):
+                                    vocispes_details.append(vocispes_record)
+                        
+                        # Costruisci il risultato
+                        for detail in vocispes_details:
+                            result = {
+                                'codice_articolo': codice_articolo,
+                                'descrizione': descrizione,
+                                'quantita': detail.get('QUANTITA', 0),
+                                'prezzo_unitario': detail.get('PREZZO', 0),
+                                'fattura': {
+                                    'id': f"{record.get('CODICE_FORNITORE', '')}_{record.get('NUMERO', '')}",
+                                    'numero_documento': record.get('NUMERO', ''),
+                                    'codice_fornitore': record.get('CODICE_FORNITORE', ''),
+                                    'nome_fornitore': fornitor_map.get(record.get('CODICE_FORNITORE', ''), ''),
+                                    'data_spesa': record.get('DATA', ''),
+                                    'costo_totale': record.get('TOTALE', 0)
+                                }
+                            }
+                            results.append(result)
+                            
+                            if len(results) >= limit:
+                                break
+                    
+                    if len(results) >= limit:
+                        break
+            
+            logger.info(f"Found {len(results)} articles matching query: {query}")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Errore nella ricerca articoli: {e}")
+            raise DatabaseError(f"Errore nella ricerca: {str(e)}")
+
+--- server_v2\api\v2_materiali.py::get_materiali (lines 28-110) ---
+def get_materiali():
+    """
+    Get list of materials with pagination and filtering.
+    
+    Query Parameters:
+        page (int): Page number (default: 1)
+        per_page (int): Items per page (default: 50, max: 100)
+        search (str): Search term for name/description
+        categoria (str): Filter by category
+        fornitore_id (int): Filter by supplier ID
+        classificato (bool): Filter by classification status
+        
+    Returns:
+        JSON response with materials list and pagination info
+    """
+    try:
+        user_id = require_auth()
+        
+        # Parse query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 50, type=int), 100)
+        search = request.args.get('search', '').strip()
+        categoria = request.args.get('categoria', '').strip()
+        fornitore_id = request.args.get('fornitore_id', type=int)
+        classificato = request.args.get('classificato', type=bool)
+        
+        # Build filters
+        filters = {}
+        if search:
+            filters['search'] = search
+        if categoria:
+            filters['categoria'] = categoria
+        if fornitore_id:
+            filters['fornitore_id'] = fornitore_id
+        if classificato is not None:
+            filters['classificato'] = classificato
+        
+        # Get materials using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        result = materiali_service.get_materiali_paginated(
+            page=page,
+            per_page=per_page,
+            filters=filters
+        )
+        
+        # Clean DBF data for JSON response
+        clean_data = handle_dbf_data(result['materiali'])
+        
+        return format_response(
+            data={
+                'materiali': clean_data,
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total': result['total'],
+                    'pages': result['pages'],
+                    'has_next': result['has_next'],
+                    'has_prev': result['has_prev']
+                }
+            },
+            message=f"Retrieved {len(clean_data)} materials"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in get_materiali: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_materiali: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in get_materiali: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
+
+--- server_v2\api\v2_materiali.py::get_all_materiali (lines 115-153) ---
+def get_all_materiali():
+    """
+    Get all materials without pagination, filters, or sorting.
+    
+    Returns:
+        JSON response with all materials raw data
+    """
+    try:
+        user_id = require_auth()
+        
+        # Get materials using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        materiali = materiali_service.get_all_materiali()
+        
+        # Clean DBF data for JSON response
+        clean_data = handle_dbf_data(materiali)
+        
+        return format_response(
+            data={
+                'materiali': clean_data,
+                'total': len(clean_data)
+            },
+            message=f"Trovati {len(clean_data)} materiali"
+        )
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_all_materiali: {e}")
+        return format_response(
+            data=None,
+            message="Errore database",
+            success=False
+        ), 500
+    except Exception as e:
+        logger.error(f"Unexpected error in get_all_materiali: {e}")
+        return format_response(
+            data=None,
+            message="Errore interno del server",
+            success=False
+        ), 500
+
+--- server_v2\api\v2_materiali.py::search_materiali (lines 467-534) ---
+def search_materiali():
+    """
+    Advanced material search with intelligent suggestions.
+    
+    Query Parameters:
+        q (str): Search query (required)
+        limit (int): Max results (default: 20, max: 100)
+        include_suggestions (bool): Include intelligent suggestions
+        
+    Returns:
+        JSON response with search results and suggestions
+    """
+    try:
+        user_id = require_auth()
+        
+        # Parse query parameters
+        query = request.args.get('q', '').strip()
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        include_suggestions = request.args.get('include_suggestions', True, type=bool)
+        
+        if not query:
+            return format_response(
+                success=False,
+                error="Search query 'q' is required"
+            ), 400
+        
+        # Search using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        results = materiali_service.search_materiali(
+            query=query,
+            limit=limit,
+            include_suggestions=include_suggestions
+        )
+        
+        # Clean DBF data
+        clean_results = handle_dbf_data(results['materiali'])
+        clean_suggestions = handle_dbf_data(results.get('suggestions', []))
+        
+        return format_response(
+            data={
+                'materiali': clean_results,
+                'suggestions': clean_suggestions,
+                'query': query,
+                'total_found': len(clean_results)
+            },
+            message=f"Found {len(clean_results)} materials"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in search_materiali: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in search_materiali: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in search_materiali: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
+
+--- server_v2\api\v2_materiali.py::get_materiali_stats (lines 539-570) ---
+def get_materiali_stats():
+    """
+    Get materials statistics and analytics.
+    
+    Returns:
+        JSON response with statistics
+    """
+    try:
+        user_id = require_auth()
+        
+        # Get statistics using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        stats = materiali_service.get_statistics()
+        
+        return format_response(
+            data=stats,
+            message="Statistics retrieved successfully"
+        )
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_materiali_stats: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in get_materiali_stats: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
+
+--- server_v2\api\v2_materiali.py::ricerca_materiali_classificati (lines 574-657) ---
+def ricerca_materiali_classificati():
+    """
+    Ricerca materiali già classificati nella tabella materiali
+    
+    Query Parameters:
+        q (str): Search query (required)
+        limit (int): Max results (default: 20, max: 100)
+        
+    Returns:
+        JSON response with classified materials
+    """
+    try:
+        user_id = require_auth()
+        
+        # Parse query parameters
+        query = request.args.get('q', '').strip()
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        
+        if not query:
+            return format_response(
+                success=False,
+                error="Search query 'q' is required"
+            ), 400
+        
+        # Usa il database manager esistente
+        db_manager = get_database_manager()
+        
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Cerca materiali classificati
+            search_query_lower = query.lower()
+            cursor.execute('''
+                SELECT id, codicearticolo, nome, fornitoreid, fornitorenome,
+                       contoid, contonome, brancaid, brancanome, 
+                       sottocontoid, sottocontonome, confermato, 
+                       metodo_classificazione, fattura_id, data_fattura, costo_unitario
+                FROM materiali 
+                WHERE (LOWER(codicearticolo) LIKE ? OR LOWER(nome) LIKE ?)
+                AND confermato = 1
+                ORDER BY nome
+                LIMIT ?
+            ''', (f'%{search_query_lower}%', f'%{search_query_lower}%', limit))
+            
+            materiali = cursor.fetchall()
+            
+            # Trasforma i risultati
+            materiali_list = []
+            for materiale in materiali:
+                materiale_dict = {
+                    'id': materiale[0],
+                    'codice_articolo': materiale[1],
+                    'descrizione': materiale[2],
+                    'fornitore_id': materiale[3],
+                    'nome_fornitore': materiale[4],
+                    'contoid': materiale[5],
+                    'contonome': materiale[6],
+                    'brancaid': materiale[7],
+                    'brancanome': materiale[8],
+                    'sottocontoid': materiale[9],
+                    'sottocontonome': materiale[10],
+                    'confermato': materiale[11],
+                    'metodo_classificazione': materiale[12],
+                    'fattura_id': materiale[13],
+                    'data_fattura': materiale[14],
+                    'costo_unitario': materiale[15]
+                }
+                materiali_list.append(materiale_dict)
+            
+            return format_response(
+                data={
+                    'materiali': materiali_list,
+                    'total_found': len(materiali_list),
+                    'query': query
+                },
+                message=f"Found {len(materiali_list)} classified materials"
+            )
+            
+    except Exception as e:
+        logger.error(f"Errore ricerca materiali classificati: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 500
+
+--- server_v2\api\v2_materiali.py::salva_classificazione_materiali_bulk (lines 860-1031) ---
+def salva_classificazione_materiali_bulk():
+    """
+    Salva classificazioni multiple di materiali nella tabella materiali
+    
+    Body: {
+        "materiali": [
+            {
+                "codice_articolo": "REF V04025202502S", 
+                "descrizione": "RECIPROC BLUE FILES",
+                "fornitore_id": "ZZZZZZO",
+                "nome_fornitore": "Dentsply Sirona Italia Srl",
+                "contoid": 18,
+                "contonome": "MATERIALI DENTALI",
+                "brancaid": 3,
+                "brancanome": "CONSERVATIVA", 
+                "sottocontoid": 7,
+                "sottocontonome": "COMPOSITI",
+                "fattura_id": "ZZZWHC",
+                "data_fattura": "2025-05-31",
+                "costo_unitario": 16.4
+            }
+        ]
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        # Validazione
+        if not data.get('materiali') or not isinstance(data['materiali'], list):
+            return jsonify({
+                'success': False,
+                'error': 'Campo "materiali" obbligatorio e deve essere un array'
+            }), 400
+        
+        materiali = data['materiali']
+        if not materiali:
+            return jsonify({
+                'success': False,
+                'error': 'Array materiali non può essere vuoto'
+            }), 400
+        
+        # Validazione campi obbligatori per ogni materiale
+        for i, materiale in enumerate(materiali):
+            required_fields = ['descrizione', 'fornitore_id', 'nome_fornitore', 'contoid']
+            for field in required_fields:
+                if not materiale.get(field):
+                    return jsonify({
+                        'success': False,
+                        'error': f'Materiale {i+1}: Campo obbligatorio mancante: {field}'
+                    }), 400
+        
+        # Usa il database manager esistente
+        db_manager = get_database_manager()
+        
+        with db_manager.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            inseriti = 0
+            aggiornati = 0
+            risultati_dettagliati = []
+            
+            for i, materiale in enumerate(materiali):
+                try:
+                    # Estrai dati dal materiale
+                    codicearticolo = materiale.get('codice_articolo', '').strip()
+                    nome = materiale.get('descrizione', '').strip()
+                    fornitoreid = materiale.get('fornitore_id', '').strip()
+                    fornitorenome = materiale.get('nome_fornitore', '').strip()
+                    contoid = int(materiale.get('contoid'))
+                    contonome = materiale.get('contonome', '').strip() if materiale.get('contonome') else ''
+                    brancaid = int(materiale.get('brancaid')) if materiale.get('brancaid') else None
+                    brancanome = materiale.get('brancanome', '').strip() if materiale.get('brancanome') else ''
+                    sottocontoid = int(materiale.get('sottocontoid')) if materiale.get('sottocontoid') else None
+                    sottocontonome = materiale.get('sottocontonome', '').strip() if materiale.get('sottocontonome') else ''
+                    fattura_id = materiale.get('fattura_id', '').strip() if materiale.get('fattura_id') else None
+                    riga_fattura_id = materiale.get('riga_fattura_id', '').strip() if materiale.get('riga_fattura_id') else None
+                    data_fattura = materiale.get('data_fattura', '').strip() if materiale.get('data_fattura') else None
+                    costo_unitario = materiale.get('costo_unitario')
+                    
+                    # Verifica se esiste già il materiale per questa fattura
+                    cursor.execute('''
+                        SELECT id FROM materiali 
+                        WHERE codicearticolo = ? AND nome = ? AND fornitoreid = ? AND fattura_id = ?
+                    ''', (codicearticolo, nome, fornitoreid, fattura_id))
+                    
+                    existing = cursor.fetchone()
+                    
+                    if existing:
+                        # Aggiorna solo la classificazione del materiale esistente
+                        cursor.execute('''
+                            UPDATE materiali 
+                            SET codicearticolo = ?, contoid = ?, contonome = ?, brancaid = ?, brancanome = ?, 
+                                sottocontoid = ?, sottocontonome = ?, confermato = 1,
+                                metodo_classificazione = 'bulk_update'
+                            WHERE id = ?
+                        ''', (codicearticolo, contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome, existing[0]))
+                        
+                        aggiornati += 1
+                        risultati_dettagliati.append({
+                            'indice': i,
+                            'codice_articolo': codicearticolo,
+                            'descrizione': nome,
+                            'fornitore_id': fornitoreid,
+                            'successo': True,
+                            'operazione': 'aggiornato',
+                            'materiale_id': existing[0]
+                        })
+                    else:
+                        # Inserisci nuovo materiale
+                        cursor.execute('''
+                            INSERT INTO materiali 
+                            (codicearticolo, nome, fornitoreid, fornitorenome, 
+                             contoid, contonome, brancaid, brancanome, 
+                             sottocontoid, sottocontonome, confidence, confermato,
+                             occorrenze, metodo_classificazione, fattura_id, riga_fattura_id, 
+                             data_fattura, costo_unitario)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 100, 1, 1, 'bulk_insert', ?, ?, ?, ?)
+                        ''', (codicearticolo, nome, fornitoreid, fornitorenome,
+                              contoid, contonome, brancaid, brancanome,
+                              sottocontoid, sottocontonome, fattura_id, riga_fattura_id, 
+                              data_fattura, costo_unitario))
+                        
+                        # Ottieni l'ID del materiale appena inserito
+                        materiale_id = cursor.lastrowid
+                        inseriti += 1
+                        risultati_dettagliati.append({
+                            'indice': i,
+                            'codice_articolo': codicearticolo,
+                            'descrizione': nome,
+                            'fornitore_id': fornitoreid,
+                            'successo': True,
+                            'operazione': 'inserito',
+                            'materiale_id': materiale_id
+                        })
+                        
+                except Exception as e:
+                    error_msg = str(e)
+                    logger.error(f"Errore nel salvataggio materiale {i+1}: {e}")
+                    risultati_dettagliati.append({
+                        'indice': i,
+                        'codice_articolo': materiale.get('codice_articolo', ''),
+                        'descrizione': materiale.get('descrizione', 'N/A'),
+                        'fornitore_id': materiale.get('fornitore_id', ''),
+                        'successo': False,
+                        'operazione': 'errore',
+                        'errore': error_msg
+                    })
+            
+            conn.commit()
+        
+        # Calcola errori
+        errori = [r for r in risultati_dettagliati if not r['successo']]
+        
+        return jsonify({
+            'success': True,
+            'message': f'Bulk classificazione completata: {inseriti} inseriti, {aggiornati} aggiornati, {len(errori)} errori',
+            'data': {
+                'inseriti': inseriti,
+                'aggiornati': aggiornati,
+                'errori': len(errori),
+                'total_processed': len(materiali),
+                'risultati_dettagliati': risultati_dettagliati,
+                'materiali_da_rimuovere': [r for r in risultati_dettagliati if r['successo']]
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Errore salvataggio bulk classificazione materiali: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+--- server_v2\services\materiali_service.py::MaterialiService (lines 15-417) ---
+class MaterialiService(BaseService):
+    """Service for materials management with optimized queries."""
+    
+    def get_all_materiali(self, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        Get all materials 
+            
+        Returns:
+            List of all materials
+        """
+        try:
+            # Build base query
+            query = """
+                SELECT * FROM materiali ORDER BY data_fattura DESC"""
+            
+            
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query)
+                columns = [description[0] for description in cursor.description]
+                materials = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                
+                return materials
+                
+        except Exception as e:
+            logging.error(f"Error getting all materials: {e}")
+            raise DatabaseError(f"Failed to get all materials: {str(e)}")
+
+    def get_materiali_paginated(self, page: int = 1, per_page: int = 50, 
+                               filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Get paginated list of materials with filters.
+        
+        Args:
+            page: Page number
+            per_page: Items per page
+            filters: Optional filters dictionary
+            
+        Returns:
+            Dictionary with materials and pagination info
+        """
+        try:
+            # Build WHERE clause from filters
+            where_conditions = []
+            params = []
+            
+            if filters:
+                if filters.get('search'):
+                    where_conditions.append("(nome LIKE ? OR codicearticolo LIKE ? OR fornitorenome LIKE ?)")
+                    search_term = f"%{filters['search']}%"
+                    params.extend([search_term, search_term, search_term])
+                
+                if filters.get('categoria'):
+                    where_conditions.append("categoria_contabile = ?")
+                    params.append(filters['categoria'])
+                
+                if filters.get('fornitore_id'):
+                    where_conditions.append("fornitoreid = ?")
+                    params.append(filters['fornitore_id'])
+            
+            where_clause = " WHERE " + " AND ".join(where_conditions) if where_conditions else ""
+            
+            # Count total records
+            count_query = f"SELECT COUNT(*) as total FROM materiali{where_clause}"
+            total_result = self.execute_single_query(count_query, tuple(params))
+            total = total_result['total'] if total_result else 0
+            
+            # Calculate pagination
+            offset = (page - 1) * per_page
+            pages = (total + per_page - 1) // per_page
+            has_next = page < pages
+            has_prev = page > 1
+            
+            # Get materials for current page - select all columns for auto-detect
+            query = f"""
+                SELECT *
+                FROM materiali{where_clause}
+                ORDER BY nome
+                LIMIT ? OFFSET ?
+            """
+            
+            materiali = self.execute_query(query, tuple(params + [per_page, offset]))
+            
+            return {
+                'materiali': self.clean_dbf_data(materiali),
+                'total': total,
+                'pages': pages,
+                'has_next': has_next,
+                'has_prev': has_prev
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error in get_materiali_paginated: {e}")
+            raise DatabaseError(f"Failed to retrieve materials: {str(e)}")
+    
+    def get_materiale_by_id(self, materiale_id: int) -> Optional[Dict[str, Any]]:
+        """
+        Get specific material by ID.
+        
+        Args:
+            materiale_id: Material ID
+            
+        Returns:
+            Material dictionary or None
+        """
+        try:
+            query = """
+                SELECT *
+                FROM materiali
+                WHERE id = ?
+            """
+            
+            materiale = self.execute_single_query(query, (materiale_id,))
+            return self.clean_dbf_data(materiale) if materiale else None
+            
+        except Exception as e:
+            self.logger.error(f"Error in get_materiale_by_id: {e}")
+            raise DatabaseError(f"Failed to retrieve material: {str(e)}")
+    
+    def create_materiale(self, data: Dict[str, Any], created_by: str) -> Dict[str, Any]:
+        """
+        Create new material.
+        
+        Args:
+            data: Material data
+            created_by: User who created the material
+            
+        Returns:
+            Created material dictionary
+        """
+        try:
+            # Validate required fields
+            self.validate_required_fields(data, ['nome'])
+            
+            # Insert material (simplified for demo)
+            query = """
+                INSERT INTO materiali (nome, codicearticolo, fornitoreid, fornitorenome, categoria_contabile, costo_unitario)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """
+            
+            params = (
+                data['nome'],
+                data.get('codicearticolo', ''),
+                data.get('fornitoreid'),
+                data.get('fornitorenome', ''),
+                data.get('categoria_contabile', ''),
+                data.get('costo_unitario')
+            )
+            
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                materiale_id = cursor.lastrowid
+                conn.commit()
+            
+            # Return created material
+            return self.get_materiale_by_id(materiale_id)
+            
+        except Exception as e:
+            self.logger.error(f"Error in create_materiale: {e}")
+            raise DatabaseError(f"Failed to create material: {str(e)}")
+    
+    def update_materiale(self, materiale_id: int, data: Dict[str, Any], 
+                        updated_by: str) -> Optional[Dict[str, Any]]:
+        """
+        Update existing material.
+        
+        Args:
+            materiale_id: Material ID
+            data: Updated data
+            updated_by: User who updated the material
+            
+        Returns:
+            Updated material dictionary or None
+        """
+        # Simplified implementation for demo
+        #return self.get_materiale_by_id(materiale_id)
+        try:
+            query="""
+                UPDATE materiali
+                SET nome = ?, codicearticolo = ?, fornitoreid = ?, fornitorenome = ?, categoria_contabile = ?, costo_unitario = ?
+                WHERE id = ?
+            """
+            params = (
+                data['nome'],
+                data['codicearticolo'],
+                data['fornitoreid'],
+                data['fornitorenome'],
+                data['categoria_contabile'],
+                data['costo_unitario'],
+                materiale_id
+            )
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                conn.commit()
+                return self.get_materiale_by_id(materiale_id)
+        except Exception as e:
+            self.logger.error(f"Error in update_materiale: {e}")
+            raise DatabaseError(f"Failed to update material: {str(e)}")
+    
+    def update_materiale_conti(self, materiale_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Aggiorna solo contoid, contonome, brancaid, brancanome, sottocontoid, sottocontonome
+        lasciando invariati gli altri campi del materiale.
+        """
+        try:
+            allowed_fields = {
+                'contoid', 'contonome',
+                'brancaid', 'brancanome',
+                'sottocontoid', 'sottocontonome'
+            }
+
+            set_clauses = []
+            params = {'id': materiale_id}
+
+            for key, value in data.items():
+                if key in allowed_fields:
+                    set_clauses.append(f"{key} = :{key}")
+                    params[key] = value
+
+            if not set_clauses:
+                return self.get_materiale_by_id(materiale_id)
+
+            query = f"UPDATE materiali SET {', '.join(set_clauses)} WHERE id = :id"
+
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, params)
+                conn.commit()
+
+            return self.get_materiale_by_id(materiale_id)
+
+        except Exception as e:
+            self.logger.error(f"Error in update_materiale_conti: {e}")
+            raise DatabaseError(f"Failed to update conti fields: {str(e)}")
+
+    def delete_materiale(self, materiale_id: int, deleted_by: str) -> bool:
+        """
+        Delete material (hard delete).
+        
+        Args:
+            materiale_id: Material ID
+            deleted_by: User who deleted the material
+            
+        Returns:
+            True if deleted successfully
+        """
+        try:
+            # Hard delete: remove record completely
+            query = """
+                DELETE FROM materiali 
+                WHERE id = ?
+            """
+            
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (materiale_id,))
+                conn.commit()
+                
+                # Check if delete was successful
+                if cursor.rowcount > 0:
+                    self.logger.info(f"Material {materiale_id} deleted")
+                    return True
+                else:
+                    self.logger.warning(f"No rows deleted for material {materiale_id}")
+                    return False
+                    
+        except Exception as e:
+            self.logger.error(f"Error in delete_materiale: {e}")
+            raise DatabaseError(f"Failed to delete material: {str(e)}")
+    
+    def search_materials(self, search_query: str = None, supplier_id: str = None, 
+                        classification_filters: Dict[str, Any] = None,
+                        page: int = 1, page_size: int = 20) -> Dict[str, Any]:
+        """
+        Search materials with advanced filtering and pagination.
+        
+        Args:
+            search_query: Search term for material description
+            supplier_id: Filter by supplier ID
+            classification_filters: Filter by classification
+            page: Page number
+            page_size: Items per page
+            
+        Returns:
+            Search results with pagination
+        """
+        try:
+            # Build WHERE clause
+            where_conditions = ["is_active = 1"]
+            params = []
+            
+            if search_query:
+                where_conditions.append("(descrizione LIKE ? OR codice_materiale LIKE ? OR nome_fornitore LIKE ?)")
+                search_term = f"%{search_query}%"
+                params.extend([search_term, search_term, search_term])
+            
+            if supplier_id:
+                where_conditions.append("codice_fornitore = ?")
+                params.append(supplier_id)
+            
+            if classification_filters:
+                if classification_filters.get('material_type'):
+                    where_conditions.append("material_type = ?")
+                    params.append(classification_filters['material_type'])
+                
+                if classification_filters.get('categoria_materiale'):
+                    where_conditions.append("categoria_materiale = ?")
+                    params.append(classification_filters['categoria_materiale'])
+            
+            where_clause = " WHERE " + " AND ".join(where_conditions)
+            
+            # Count total results
+            count_query = f"SELECT COUNT(*) as total FROM materiali{where_clause}"
+            total_result = self.execute_single_query(count_query, tuple(params))
+            total = total_result['total'] if total_result else 0
+            
+            # Calculate pagination
+            offset = (page - 1) * page_size
+            total_pages = (total + page_size - 1) // page_size
+            
+            # Get materials for current page
+            query = f"""
+                SELECT id, codice_materiale, descrizione, nome_fornitore,
+                       categoria_materiale, material_type, prezzo, costo_unitario,
+                       quantita_disponibile, quantita_minima, confidence_score,
+                       is_favorite, created_at, updated_at
+                FROM materiali{where_clause}
+                ORDER BY descrizione
+                LIMIT ? OFFSET ?
+            """
+            
+            materials = self.execute_query(query, tuple(params + [page_size, offset]))
+            
+            return {
+                'materials': self.clean_dbf_data(materials) if materials else [],
+                'pagination': {
+                    'page': page,
+                    'page_size': page_size,
+                    'total_count': total,
+                    'total_pages': total_pages,
+                    'has_next': page < total_pages,
+                    'has_prev': page > 1
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error in search_materials: {e}")
+            raise DatabaseError(f"Search failed: {str(e)}")
+    
+    def get_classification_suggestions(self, material: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Get classification suggestions for a material.
+        
+        Args:
+            material: Material dictionary
+            
+        Returns:
+            List of classification suggestions
+        """
+        # Simplified implementation - could be enhanced with ML
+        suggestions = []
+        
+        descrizione = material.get('descrizione', '').lower()
+        
+        # Basic keyword-based suggestions
+        if 'resina' in descrizione or 'composite' in descrizione:
+            suggestions.append({
+                'material_type': 'resina',
+                'categoria_materiale': 'Materiali da Otturazione',
+                'confidence': 85,
+                'reason': 'Keyword match: resina/composite'
+            })
+        elif 'perno' in descrizione or 'post' in descrizione:
+            suggestions.append({
+                'material_type': 'perni',
+                'categoria_materiale': 'Endodonzia',
+                'confidence': 80,
+                'reason': 'Keyword match: perno/post'
+            })
+        
+        return suggestions[:3]  # Return top 3 suggestions
+    
+    def get_statistics(self) -> Dict[str, Any]:
+        """Get materials statistics."""
+        try:
+            stats = super().get_statistics()
+            
+            # Add materials-specific stats
+            total_query = "SELECT COUNT(*) as total FROM materiali"
+            total_result = self.execute_single_query(total_query)
+            
+            stats.update({
+                'total_materiali': total_result['total'] if total_result else 0,
+                'categories': []  # Simplified for demo
+            })
+            
+            return stats
+            
+        except Exception as e:
+            self.logger.error(f"Error in get_statistics: {e}")
+            return super().get_statistics()
+
+--- client_v2\src\store\materiali.store.ts::useMateriali (lines 320-335) ---
+export const useMateriali = () => {
+  const store = useMaterialiStore();
+  
+  return {
+    materiali: store.materialiFiltered,
+    isLoading: store.isLoading,
+    error: store.error,
+    filtriAttivi: store.filtriAttivi,
+    load: store.loadMateriali,
+    applyFiltri: store.applyFiltri,
+    clearFiltri: store.clearFiltri,
+    deleteMateriale: store.deleteMateriale,
+    updateMateriale: store.updateMateriale,
+    updateMaterialeConti: store.updateMaterialeConti
+  };
+};
+
+--- client_v2\src\store\materiali.store.ts::useMaterialiByFornitore (lines 338-347) ---
+export const useMaterialiByFornitore = (fornitoreid: string | null) => {
+  const store = useMaterialiStore();
+  
+  return {
+    materiali: fornitoreid ? store.getMaterialiByFornitore(fornitoreid) : [],
+    isLoading: store.isLoading,
+    error: store.error,
+    load: store.loadMateriali
+  };
+};
+
+=== CONNECTIONS ===
+- server_v2/api/v2_materiali.py
+  external:
+    - app_v2
+    - core.database_manager
+    - core.exceptions
+    - datetime
+    - flask
+    - flask_jwt_extended
+    - logging
+    - services.materiali_migration_service
+    - services.materiali_service
+    - traceback
+- server_v2/repositories/materiali_repository.py
+  external:
+    - ..core.base_repository
+    - ..core.database_manager
+    - ..core.exceptions
+    - ..utils.dbf_utils
+    - datetime
+    - logging
+    - pandas
+    - sqlite3
+    - typing
+- server_v2/scripts/test_materiali_migration.py
+  external:
+    - argparse
+    - core.database_manager
+    - dbfread
+    - migrations.create_materiali_table
+    - os
+    - pathlib
+    - services.materiali_migration_service
+    - sys
+- server_v2/services/materiali_migration_service.py
+  external:
+    - .base_service
+    - core.config_manager
+    - core.exceptions
+    - core.paths
+    - datetime
+    - dbfread
+    - logging
+    - os
+    - pathlib
+    - re
+    - sqlite3
+    - typing
+    - utils.dbf_utils
+- server_v2/services/materiali_service.py
+  external:
+    - .base_service
+    - core.exceptions
+    - logging
+    - typing
+- client_v2/src/store/materiali.store.ts
+  internal:
+    - client_v2/src/services/api/client.ts
+  external:
+    - zustand
+    - zustand/middleware
+- client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
+  internal:
+    - @/store/branche.store
+    - @/store/sottoconti.store
+    - client_v2/src/components/selects/BrancheSelect.tsx
+    - client_v2/src/components/selects/ContiSelect.tsx
+    - client_v2/src/components/selects/SottocontiSelect.tsx
+    - client_v2/src/store/conti.store.ts
+    - client_v2/src/store/materiali.store.ts
+  external:
+    - @coreui/react
+    - react
+- client_v2/src/features/materiali/components/MaterialiAccordion.tsx
+  internal:
+    - client_v2/src/store/materiali.store.ts
+  external:
+    - @coreui/react
+    - react
+- client_v2/src/features/materiali/components/MaterialiTable.tsx
+  internal:
+    - client_v2/src/components/tables/DataTable.tsx
+    - client_v2/src/store/materiali.store.ts
+  external:
+    - @coreui/icons
+    - @coreui/icons-react
+    - @coreui/react
+    - react
+- client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx
+  internal:
+    - ../services/materiali-classification.service
+    - ../services/materiali-migration.service
+    - client_v2/src/components/forms/MaterialClassificationForm.tsx
+    - client_v2/src/store/fornitori.store.ts
+  external:
+    - @coreui/react
+    - react
+- client_v2/src/features/materiali/pages/MaterialiPage.tsx
+  internal:
+    - client_v2/src/components/layout/PageLayout.tsx
+    - client_v2/src/components/modals/ConfirmDeleteModal.tsx
+    - client_v2/src/components/modals/ModalFatturaDetail.tsx
+    - client_v2/src/components/selects/FornitoriSelect.tsx
+    - client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
+    - client_v2/src/features/materiali/components/MaterialiTable.tsx
+    - client_v2/src/services/api/fattura.service.ts
+    - client_v2/src/store/fornitori.store.ts
+    - client_v2/src/store/materiali.store.ts
+  external:
+    - @coreui/react
+    - react
+    - react-hot-toast
+- client_v2/src/features/materiali/pages/RicercaArticoli.tsx
+  internal:
+    - ../services/materiali-classification.service
+    - client_v2/src/components/layout/PageLayout.tsx
+    - client_v2/src/components/selects/BrancheSelect.tsx
+    - client_v2/src/components/selects/ContiSelect.tsx
+    - client_v2/src/components/selects/SlimSelect.tsx
+    - client_v2/src/components/selects/SottocontiSelect.tsx
+    - client_v2/src/store/conti.store.ts
+  external:
+    - @coreui/react
+    - react
+- client_v2/src/features/materiali/services/materiali-classification.service.ts
+  internal:
+    - client_v2/src/services/api/client.ts
+- client_v2/src/features/materiali/services/materiali-migration.service.ts
+  internal:
+    - client_v2/src/services/api/client.ts

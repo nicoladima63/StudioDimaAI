@@ -1,12 +1,16 @@
 import json
+import re
 from pathlib import Path
 from .context import expand_context
 from .formatter import format_context
+from .prompt_builder import build_prompt_context
+from .query_terms import normalize_query_terms, text_matches_query
 from .ranker import rank_files
 
 BASE = Path(__file__).parent.parent.parent
 
 KNOWLEDGE = BASE / "knowledge" / "output"
+CONTEXT_CACHE = BASE / "knowledge" / "context_cache"
 
 
 def load_json(name):
@@ -18,10 +22,32 @@ def load_json(name):
         return json.load(f)
 
 
+def save_context_text(term, content):
+
+    slug = re.sub(
+        r"[^a-zA-Z0-9]+",
+        "_",
+        term.lower()
+    ).strip("_") or "query"
+
+    CONTEXT_CACHE.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    path = CONTEXT_CACHE / f"{slug}.txt"
+    path.write_text(
+        content,
+        encoding="utf-8"
+    )
+
+    return path
+
+
 
 def search_text(query, items, fields):
 
-    query = query.lower()
+    query_words = normalize_query_terms(query)
 
     results = []
 
@@ -33,9 +59,9 @@ def search_text(query, items, fields):
         ).lower()
 
 
-        if any(
-            word in text
-            for word in query.split()
+        if text_matches_query(
+            text,
+            query_words
         ):
             results.append(item)
 
@@ -155,6 +181,12 @@ def query(
 
     formatted.query = term
 
+    context_file = save_context_text(
+        term,
+        build_prompt_context(formatted)
+    )
+    formatted.context_file = str(context_file)
+
     if debug:
 
         print("\n=== ARCHITECTURE ===")
@@ -187,6 +219,9 @@ def query(
                 "|",
                 symbol["path"]
             )
+
+        print("\n=== CONTEXT FILE ===")
+        print(context_file)
 
 
     return formatted

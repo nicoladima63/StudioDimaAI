@@ -8,6 +8,8 @@ class QueryContext:
 
     files: list = field(default_factory=list)
 
+    focus_files: list = field(default_factory=list)
+
     symbols: list = field(default_factory=list)
 
     connections: list = field(default_factory=list)
@@ -23,3 +25,5 @@ class QueryContext:
     internal_symbols: list = field(default_factory=list)
 
     code_slices: list = field(default_factory=list)
+
+    context_file: str = ""

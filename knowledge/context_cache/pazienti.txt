@@ -1,0 +1,1191 @@
+QUERY: pazienti
+
+=== PRIORITY FILES ===
+- server_v2/services/pazienti_service.py | role=service | score=51 | structural=41 | query=10 | matched=pazienti
+- server_v2/api/v2_pazienti.py | role=api | score=41 | structural=31 | query=10 | matched=pazienti
+- client_v2/src/store/pazienti.store.tsx | role=state | score=40 | structural=30 | query=10 | matched=pazienti
+- client_v2/src/features/pazienti/pages/PazientiPage.tsx | role=page | score=33 | structural=27 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx | role=page | score=33 | structural=27 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/components/RichiamoStatus.tsx | role=component | score=32 | structural=26 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/pages/RichiamiPage.tsx | role=page | score=31 | structural=25 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx | role=component | score=30 | structural=24 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/components/RichiamoGestione.tsx | role=component | score=27 | structural=21 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/components/PazientiTable.tsx | role=component | score=26 | structural=20 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/components/FiltriPazienti.tsx | role=component | score=23 | structural=17 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/components/BroadcastModal.tsx | role=component | score=23 | structural=17 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/services/richiami.service.ts | role=service | score=20 | structural=14 | query=6 | matched=pazienti
+- client_v2/src/features/pazienti/services/marketing.service.ts | role=service | score=18 | structural=12 | query=6 | matched=pazienti
+- client_v2/src/components/selects/PazientiSelect.tsx | role=component | score=14 | structural=8 | query=6 | matched=pazienti
+
+=== ARCHITECTURE ===
+
+SERVICE
+- server_v2/services/pazienti_service.py
+- client_v2/src/features/pazienti/services/richiami.service.ts
+- client_v2/src/features/pazienti/services/marketing.service.ts
+
+API
+- server_v2/api/v2_pazienti.py
+
+STATE
+- client_v2/src/store/pazienti.store.tsx
+
+PAGE
+- client_v2/src/features/pazienti/pages/PazientiPage.tsx
+- client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx
+- client_v2/src/features/pazienti/pages/RichiamiPage.tsx
+
+COMPONENT
+- client_v2/src/features/pazienti/components/RichiamoStatus.tsx
+- client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx
+- client_v2/src/features/pazienti/components/RichiamoGestione.tsx
+- client_v2/src/features/pazienti/components/PazientiTable.tsx
+- client_v2/src/features/pazienti/components/FiltriPazienti.tsx
+- client_v2/src/features/pazienti/components/BroadcastModal.tsx
+- client_v2/src/components/selects/PazientiSelect.tsx
+
+=== SYMBOLS ===
+- PazientiService | server_v2/services/pazienti_service.py | kind=class | category=core | score=62
+- get_pazienti_paginated | server_v2/services/pazienti_service.py | kind=function | category=domain | score=55
+- search_pazienti | server_v2/services/pazienti_service.py | kind=function | category=domain | score=55
+- usePazienti | client_v2/src/store/pazienti.store.tsx | kind=hook | category=domain | score=51
+- get_pazienti | server_v2/api/v2_pazienti.py | kind=function | category=domain | score=44
+- search_pazienti | server_v2/api/v2_pazienti.py | kind=function | category=domain | score=44
+- get_pazienti_stats | server_v2/api/v2_pazienti.py | kind=function | category=domain | score=44
+- get_paziente_by_id | server_v2/services/pazienti_service.py | kind=function | category=domain | score=40
+- _get_pazienti_dbf_path | server_v2/services/pazienti_service.py | kind=function | category=internal | score=40
+- getCampiAnagrafica | client_v2/src/features/pazienti/pages/PazientiPage.tsx | kind=component | category=support | score=30
+- carica | client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx | kind=component | category=support | score=30
+- get_paziente | server_v2/api/v2_pazienti.py | kind=function | category=domain | score=29
+- sortIcon | client_v2/src/features/pazienti/pages/RichiamiPage.tsx | kind=component | category=ui | score=28
+- calcolaProssimoRichiamo | client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx | kind=component | category=domain | score=27
+- getStatusBadge | client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx | kind=component | category=ui | score=27
+- hasGestionaleData | client_v2/src/features/pazienti/components/RichiamoStatus.tsx | kind=component | category=support | score=27
+- getRichiamoType | client_v2/src/features/pazienti/components/RichiamoStatus.tsx | kind=component | category=domain | score=27
+- calcolaProssimoRichiamo | client_v2/src/features/pazienti/components/RichiamoStatus.tsx | kind=component | category=domain | score=27
+- decodificaTipoRichiamo | client_v2/src/features/pazienti/components/RichiamoStatus.tsx | kind=component | category=domain | score=27
+- styled | client_v2/src/features/pazienti/components/RichiamoStatus.tsx | kind=component | category=ui | score=27
+- _extract_paziente_data | server_v2/services/pazienti_service.py | kind=function | category=internal | score=25
+- _apply_filters | server_v2/services/pazienti_service.py | kind=function | category=internal | score=25
+- _merge_with_richiami_data | server_v2/services/pazienti_service.py | kind=function | category=internal | score=25
+- calcolaEta | client_v2/src/features/pazienti/components/FiltriPazienti.tsx | kind=function | category=support | score=22
+- applicaFiltri | client_v2/src/features/pazienti/components/FiltriPazienti.tsx | kind=function | category=support | score=22
+- formatData | client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx | kind=function | category=support | score=21
+- parseSlotDate | client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx | kind=function | category=support | score=21
+- handleForceRefresh | client_v2/src/features/pazienti/pages/PazientiPage.tsx | kind=component | category=support | score=20
+- handleView | client_v2/src/features/pazienti/pages/PazientiPage.tsx | kind=component | category=support | score=20
+- closeAnagraficaModal | client_v2/src/features/pazienti/pages/PazientiPage.tsx | kind=component | category=ui | score=20
+- togglePaziente | client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx | kind=component | category=domain | score=20
+- handle_error | server_v2/api/v2_pazienti.py | kind=function | category=support | score=19
+- validate_pagination_params | server_v2/api/v2_pazienti.py | kind=function | category=support | score=19
+- handle_validation_error | server_v2/api/v2_pazienti.py | kind=function | category=support | score=19
+- handle_database_error | server_v2/api/v2_pazienti.py | kind=function | category=support | score=19
+- handle_validation_error | server_v2/api/v2_pazienti.py | kind=function | category=support | score=19
+- handle_database_error | server_v2/api/v2_pazienti.py | kind=function | category=support | score=19
+- resetFiltri | client_v2/src/features/pazienti/pages/RichiamiPage.tsx | kind=component | category=support | score=18
+- toggleSort | client_v2/src/features/pazienti/pages/RichiamiPage.tsx | kind=component | category=ui | score=18
+- formatData | client_v2/src/features/pazienti/pages/RichiamiPage.tsx | kind=component | category=support | score=18
+- handleTipoToggle | client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx | kind=component | category=ui | score=17
+- handleSaveStatus | client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx | kind=component | category=support | score=17
+- handleQuickSave | client_v2/src/features/pazienti/components/RichiamoStatus.tsx | kind=component | category=support | score=17
+- _format_date_field | server_v2/services/pazienti_service.py | kind=function | category=internal | score=15
+- handleStatusChange | client_v2/src/features/pazienti/components/RichiamoGestione.tsx | kind=component | category=support | score=15
+- handleSaveRichiamato | client_v2/src/features/pazienti/components/RichiamoGestione.tsx | kind=component | category=support | score=15
+- handleSaveConfig | client_v2/src/features/pazienti/components/RichiamoGestione.tsx | kind=component | category=support | score=15
+- handleTemplateChange | client_v2/src/features/pazienti/components/BroadcastModal.tsx | kind=component | category=support | score=11
+- handleSend | client_v2/src/features/pazienti/components/BroadcastModal.tsx | kind=component | category=support | score=11
+- handleClose | client_v2/src/features/pazienti/components/BroadcastModal.tsx | kind=component | category=support | score=11
+
+=== RELEVANT CODE ===
+
+--- server_v2\services\pazienti_service.py::PazientiService (lines 45-432) ---
+class PazientiService(BaseService):
+    
+    def get_pazienti_paginated(self, page=1, per_page=50, filters=None) -> Dict[str, Any]:
+        """Get paginated list of pazienti from DBF files."""
+        try:
+            # Get DBF file path using config manager
+            pazienti_path = self._get_pazienti_dbf_path()
+            
+            if not os.path.exists(pazienti_path):
+                self.logger.warning(f"Pazienti DBF file not found: {pazienti_path}")
+                raise DatabaseError(f"Pazienti DBF file not found: {pazienti_path}")
+            
+            # Read DBF file directly using dbf library
+            pazienti_raw = []
+            with dbf.Table(pazienti_path, codepage='cp1252') as table:
+                for record in table:
+                    try:
+                        # Extract fields using constants mapping - access directly by field name
+                        paziente_id = clean_dbf_value(record[PAZIENTI_FIELDS['id']])
+                        paziente_nome = clean_dbf_value(record[PAZIENTI_FIELDS['nome']])
+                        
+                        if paziente_id and paziente_nome:
+                            # Extract all available fields
+                            paziente_data = {
+                                'id': str(paziente_id).strip(),
+                                'nome': str(paziente_nome).strip()
+                            }
+                            
+                            # Add optional fields if available
+                            try:
+                                if 'codice_fiscale' in PAZIENTI_FIELDS:
+                                    cf = clean_dbf_value(record[PAZIENTI_FIELDS['codice_fiscale']])
+                                    if cf:
+                                        paziente_data['codice_fiscale'] = str(cf).strip()
+                                        
+                                if 'data_nascita' in PAZIENTI_FIELDS:
+                                    data_nascita = clean_dbf_value(record[PAZIENTI_FIELDS['data_nascita']])
+                                    if data_nascita:
+                                        paziente_data['data_nascita'] = self._format_date_field(data_nascita)
+                                        
+                                if 'sesso' in PAZIENTI_FIELDS:
+                                    sesso = clean_dbf_value(record[PAZIENTI_FIELDS['sesso']])
+                                    if sesso:
+                                        paziente_data['sesso'] = str(sesso).strip()
+                                        
+                                if 'telefono' in PAZIENTI_FIELDS:
+                                    telefono = clean_dbf_value(record[PAZIENTI_FIELDS['telefono']])
+                                    if telefono:
+                                        paziente_data['telefono'] = str(telefono).strip()
+                                        
+                                if 'cellulare' in PAZIENTI_FIELDS:
+                                    cellulare = clean_dbf_value(record[PAZIENTI_FIELDS['cellulare']])
+                                    if cellulare:
+                                        paziente_data['cellulare'] = str(cellulare).strip()
+                                        
+                                if 'email' in PAZIENTI_FIELDS:
+                                    email = clean_dbf_value(record[PAZIENTI_FIELDS['email']])
+                                    if email:
+                                        paziente_data['email'] = str(email).strip()
+                                        
+                                if 'indirizzo' in PAZIENTI_FIELDS:
+                                    indirizzo = clean_dbf_value(record[PAZIENTI_FIELDS['indirizzo']])
+                                    if indirizzo:
+                                        paziente_data['indirizzo'] = str(indirizzo).strip()
+                                        
+                                if 'citta' in PAZIENTI_FIELDS:
+                                    citta = clean_dbf_value(record[PAZIENTI_FIELDS['citta']])
+                                    if citta:
+                                        paziente_data['citta'] = str(citta).strip()
+                                        
+                                if 'provincia' in PAZIENTI_FIELDS:
+                                    provincia = clean_dbf_value(record[PAZIENTI_FIELDS['provincia']])
+                                    if provincia:
+                                        paziente_data['provincia'] = str(provincia).strip()
+                                        
+                                if 'cap' in PAZIENTI_FIELDS:
+                                    cap = clean_dbf_value(record[PAZIENTI_FIELDS['cap']])
+                                    if cap:
+                                        paziente_data['cap'] = str(cap).strip()
+                                        
+                                if 'note' in PAZIENTI_FIELDS:
+                                    note = clean_dbf_value(record[PAZIENTI_FIELDS['note']])
+                                    if note:
+                                        paziente_data['note'] = str(note).strip()
+                                        
+                                if 'ultima_visita' in PAZIENTI_FIELDS:
+                                    ultima_visita = clean_dbf_value(record[PAZIENTI_FIELDS['ultima_visita']])
+                                    if ultima_visita:
+                                        paziente_data['ultima_visita'] = self._format_date_field(ultima_visita)
+                                        
+                                if 'mesi_richiamo' in PAZIENTI_FIELDS:
+                                    mesi = clean_dbf_value(record[PAZIENTI_FIELDS['mesi_richiamo']])
+                                    if mesi and str(mesi).isdigit():
+                                        paziente_data['mesi_richiamo'] = int(mesi)
+                                        
+                                if 'tipo_richiamo' in PAZIENTI_FIELDS:
+                                    tipo = clean_dbf_value(record[PAZIENTI_FIELDS['tipo_richiamo']])
+                                    if tipo:
+                                        paziente_data['tipo_richiamo'] = str(tipo).strip()
+                                        
+                                if 'da_richiamare' in PAZIENTI_FIELDS:
+                                    da_richiamare = clean_dbf_value(record[PAZIENTI_FIELDS['da_richiamare']])
+                                    if da_richiamare:
+                                        paziente_data['da_richiamare'] = str(da_richiamare).strip()
+                                        
+                                if 'non_in_cura' in PAZIENTI_FIELDS:
+                                    non_in_cura = clean_dbf_value(record[PAZIENTI_FIELDS['non_in_cura']])
+                                    if non_in_cura:
+                                        paziente_data['non_in_cura'] = bool(non_in_cura)
+                                        
+                            except Exception as field_error:
+                                # Skip optional fields if they cause errors, but keep the record
+                                self.logger.debug(f"Error extracting optional fields for paziente {paziente_id}: {field_error}")
+                            
+                            pazienti_raw.append(paziente_data)
+                            
+                    except Exception as record_error:
+                        # Skip problematic records but continue processing
+                        self.logger.debug(f"Error processing record: {record_error}")
+                        continue
+            
+            # Apply filters
+            if filters:
+                pazienti_raw = self._apply_filters(pazienti_raw, filters)
+            
+            # Merge with richiami table data
+            pazienti_raw = self._merge_with_richiami_data(pazienti_raw)
+            
+            # Calculate pagination
+            total = len(pazienti_raw)
+            start = (page - 1) * per_page
+            end = start + per_page
+            pazienti_page = pazienti_raw[start:end]
+            
+            return {
+                'success': True,
+                'data': {
+                    'pazienti': pazienti_page,
+                    'pagination': {
+                        'page': page,
+                        'per_page': per_page,
+                        'total': total,
+                        'pages': (total + per_page - 1) // per_page,
+                        'has_next': end < total,
+                        'has_prev': page > 1
+                    }
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error getting pazienti: {e}")
+            raise DatabaseError(f"Failed to get pazienti: {str(e)}")
+
+    def get_paziente_by_id(self, paziente_id: str) -> Dict[str, Any]:
+        """Get single paziente by ID."""
+        try:
+            pazienti_path = self._get_pazienti_dbf_path()
+            
+            if not os.path.exists(pazienti_path):
+                raise DatabaseError(f"Pazienti DBF file not found: {pazienti_path}")
+            
+            with dbf.Table(pazienti_path, codepage='cp1252') as table:
+                for record in table:
+                    if str(record[PAZIENTI_FIELDS['id']]) == str(paziente_id):
+                        paziente_data = self._extract_paziente_data(record)
+                        if paziente_data:
+                            return {
+                                'success': True,
+                                'data': paziente_data
+                            }
+            
+            return {
+                'success': False,
+                'error': 'PAZIENTE_NOT_FOUND',
+                'message': f'Paziente {paziente_id} non trovato'
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error getting paziente {paziente_id}: {e}")
+            raise DatabaseError(f"Failed to get paziente: {str(e)}")
+
+    def search_pazienti(self, query: str, limit: int = 20, telefono: str = '') -> Dict[str, Any]:
+        """Search pazienti by name, codice fiscale or telefono."""
+        try:
+            pazienti_path = self._get_pazienti_dbf_path()
+
+            if not os.path.exists(pazienti_path):
+                raise DatabaseError(f"Pazienti DBF file not found: {pazienti_path}")
+
+            results = []
+            query_lower = query.lower().strip()
+            telefono_clean = telefono.strip()
+
+            with dbf.Table(pazienti_path, codepage='cp1252') as table:
+                for record in table:
+                    if len(results) >= limit:
+                        break
+
+                    if record[PAZIENTI_FIELDS['id']]:
+                        match = False
+
+                        if telefono_clean:
+                            tel = str(clean_dbf_value(record[PAZIENTI_FIELDS['telefono']]))
+                            cell = str(clean_dbf_value(record[PAZIENTI_FIELDS['cellulare']]))
+                            match = telefono_clean in tel or telefono_clean in cell
+                        elif query_lower:
+                            nome = clean_dbf_value(record[PAZIENTI_FIELDS['nome']])
+                            cf = clean_dbf_value(record[PAZIENTI_FIELDS['codice_fiscale']])
+                            match = query_lower in nome.lower() or query_lower in cf.lower()
+
+                        if match:
+                            paziente = self._extract_paziente_data(record)
+                            if paziente:
+                                results.append(paziente)
+            
+            return {
+                'success': True,
+                'data': results,
+                'count': len(results),
+                'query': query
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error searching pazienti: {e}")
+            raise DatabaseError(f"Failed to search pazienti: {str(e)}")
+
+    def _extract_paziente_data(self, record) -> Optional[Dict[str, Any]]:
+        """Extract paziente data from DBF record."""
+        try:
+            paziente = {}
+            
+            for field_name, dbf_field in PAZIENTI_FIELDS.items():
+                value = clean_dbf_value(record[dbf_field])
+                
+                # Clean and format values
+                if field_name in ['id']:
+                    paziente[field_name] = str(value) if value else None
+                elif field_name in ['data_nascita', 'ultima_visita']:
+                    # Convert date fields if needed
+                    paziente[field_name] = self._format_date_field(value)
+                elif field_name in ['tempo_richiamo']:
+                    paziente[field_name] = int(value) if value and str(value).isdigit() else None
+                elif field_name in ['non_in_cura']:
+                    paziente[field_name] = bool(value) if value else False
+                else:
+                    paziente[field_name] = str(value).strip() if value else None
+            
+            return paziente if paziente.get('id') else None
+            
+        except Exception as e:
+            self.logger.error(f"Error extracting paziente data: {e}")
+            return None
+
+    def _format_date_field(self, value):
+        """Format date field from DBF."""
+        if not value:
+            return None
+        
+        try:
+            # Handle different date formats from DBF
+            if hasattr(value, 'isoformat'):
+                return value.isoformat()
+            elif isinstance(value, str) and len(value) >= 8:
+                # YYYYMMDD format
+                return f"{value[:4]}-{value[4:6]}-{value[6:8]}"
+            else:
+                return str(value) if value else None
+        except:
+            return str(value) if value else None
+
+    def _apply_filters(self, pazienti: List[Dict], filters: Dict) -> List[Dict]:
+        """Apply filters to pazienti list."""
+        if not filters:
+            return pazienti
+        
+        filtered = pazienti
+        
+        # Filter by search term
+        if filters.get('search'):
+            search_term = filters['search'].lower()
+            filtered = [p for p in filtered 
+                       if (search_term in p.get('nome', '').lower() or
+                           search_term in p.get('codice_fiscale', '').lower())]
+        
+        # Filter by da_richiamare
+        if filters.get('da_richiamare') is not None:
+            filtered = [p for p in filtered 
+                       if p.get('da_richiamare') == 'S']
+        
+        # Filter by non_in_cura
+        if filters.get('in_cura') is not None:
+            in_cura = filters['in_cura']
+            filtered = [p for p in filtered 
+                       if p.get('non_in_cura') != in_cura]
+        
+        return filtered
+
+    def _merge_with_richiami_data(self, pazienti: List[Dict]) -> List[Dict]:
+        """Merge pazienti data with richiami table data."""
+        if not pazienti:
+            return pazienti
+        
+        try:
+            # Get all paziente IDs
+            paziente_ids = [p['id'] for p in pazienti if p.get('id')]
+            if not paziente_ids:
+                return pazienti
+            
+            # Query richiami table for these patients
+            placeholders = ','.join(['?' for _ in paziente_ids])
+            query = f"""
+                SELECT paziente_id, nome, data_ultima_visita, data_richiamo, 
+                       tipo_richiamo, tempo_richiamo, da_richiamare, richiamato_il, sms_sent
+                FROM richiami 
+                WHERE paziente_id IN ({placeholders})
+            """
+            
+            richiami_data = {}
+            try:
+                import sqlite3
+                db_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)), 
+                    'instance', 
+                    'studio_dima.db'
+                )
+                
+                if os.path.exists(db_path):
+                    conn = sqlite3.connect(db_path)
+                    conn.row_factory = sqlite3.Row
+                    cursor = conn.cursor()
+                    cursor.execute(query, paziente_ids)
+                    
+                    for row in cursor.fetchall():
+                        richiami_data[row['paziente_id']] = dict(row)
+                    
+                    conn.close()
+            except Exception as e:
+                self.logger.warning(f"Could not fetch richiami data: {e}")
+            
+            # Merge data for each paziente
+            for paziente in pazienti:
+                paziente_id = paziente.get('id')
+                if not paziente_id:
+                    continue
+                
+                richiamo = richiami_data.get(paziente_id)
+                if richiamo:
+                    # Patient exists in richiami table - use that data
+                    paziente['is_in_richiami_table'] = True
+                    paziente['tipo_richiamo_gestionale'] = paziente.get('tipo_richiamo')  # Keep original
+                    paziente['tipo_richiamo'] = richiamo['tipo_richiamo']
+                    paziente['tempo_richiamo'] = richiamo['tempo_richiamo']
+                    paziente['da_richiamare'] = richiamo['da_richiamare']
+                    paziente['data_richiamo'] = richiamo['data_richiamo']
+                    paziente['richiamato_il'] = richiamo['richiamato_il']
+                    paziente['sms_sent'] = richiamo['sms_sent']
+                    if richiamo['data_ultima_visita']:
+                        paziente['ultima_visita'] = richiamo['data_ultima_visita']
+                else:
+                    # Patient not in richiami table - use gestionale data
+                    paziente['is_in_richiami_table'] = False
+                    paziente['tipo_richiamo_gestionale'] = paziente.get('tipo_richiamo')
+            
+            return pazienti
+            
+        except Exception as e:
+            self.logger.error(f"Error merging richiami data: {e}")
+            return pazienti
+
+    def _get_pazienti_dbf_path(self) -> str:
+        """Get path to pazienti DBF file."""
+        try:
+            config = get_config()
+            mode = config.get_mode()
+            
+            # Try to get base path from config
+            base_path_key = f"{mode.upper()}_DB_BASE_PATH"
+            base_path = config.get(base_path_key)
+            
+            if base_path and os.path.exists(base_path):
+                pazienti_path = os.path.join(base_path, 'DATI', 'PAZIENTI.DBF')
+                if os.path.exists(pazienti_path):
+                    return pazienti_path
+            
+            raise FileNotFoundError(f"PAZIENTI.DBF not found in configured location: {base_path}")
+            
+        except Exception as e:
+            raise DatabaseError(f"Could not locate pazienti DBF file: {str(e)}")
+
+--- server_v2\services\pazienti_service.py::get_pazienti_paginated (lines 47-196) ---
+    def get_pazienti_paginated(self, page=1, per_page=50, filters=None) -> Dict[str, Any]:
+        """Get paginated list of pazienti from DBF files."""
+        try:
+            # Get DBF file path using config manager
+            pazienti_path = self._get_pazienti_dbf_path()
+            
+            if not os.path.exists(pazienti_path):
+                self.logger.warning(f"Pazienti DBF file not found: {pazienti_path}")
+                raise DatabaseError(f"Pazienti DBF file not found: {pazienti_path}")
+            
+            # Read DBF file directly using dbf library
+            pazienti_raw = []
+            with dbf.Table(pazienti_path, codepage='cp1252') as table:
+                for record in table:
+                    try:
+                        # Extract fields using constants mapping - access directly by field name
+                        paziente_id = clean_dbf_value(record[PAZIENTI_FIELDS['id']])
+                        paziente_nome = clean_dbf_value(record[PAZIENTI_FIELDS['nome']])
+                        
+                        if paziente_id and paziente_nome:
+                            # Extract all available fields
+                            paziente_data = {
+                                'id': str(paziente_id).strip(),
+                                'nome': str(paziente_nome).strip()
+                            }
+                            
+                            # Add optional fields if available
+                            try:
+                                if 'codice_fiscale' in PAZIENTI_FIELDS:
+                                    cf = clean_dbf_value(record[PAZIENTI_FIELDS['codice_fiscale']])
+                                    if cf:
+                                        paziente_data['codice_fiscale'] = str(cf).strip()
+                                        
+                                if 'data_nascita' in PAZIENTI_FIELDS:
+                                    data_nascita = clean_dbf_value(record[PAZIENTI_FIELDS['data_nascita']])
+                                    if data_nascita:
+                                        paziente_data['data_nascita'] = self._format_date_field(data_nascita)
+                                        
+                                if 'sesso' in PAZIENTI_FIELDS:
+                                    sesso = clean_dbf_value(record[PAZIENTI_FIELDS['sesso']])
+                                    if sesso:
+                                        paziente_data['sesso'] = str(sesso).strip()
+                                        
+                                if 'telefono' in PAZIENTI_FIELDS:
+                                    telefono = clean_dbf_value(record[PAZIENTI_FIELDS['telefono']])
+                                    if telefono:
+                                        paziente_data['telefono'] = str(telefono).strip()
+                                        
+                                if 'cellulare' in PAZIENTI_FIELDS:
+                                    cellulare = clean_dbf_value(record[PAZIENTI_FIELDS['cellulare']])
+                                    if cellulare:
+                                        paziente_data['cellulare'] = str(cellulare).strip()
+                                        
+                                if 'email' in PAZIENTI_FIELDS:
+                                    email = clean_dbf_value(record[PAZIENTI_FIELDS['email']])
+                                    if email:
+                                        paziente_data['email'] = str(email).strip()
+                                        
+                                if 'indirizzo' in PAZIENTI_FIELDS:
+                                    indirizzo = clean_dbf_value(record[PAZIENTI_FIELDS['indirizzo']])
+                                    if indirizzo:
+                                        paziente_data['indirizzo'] = str(indirizzo).strip()
+                                        
+                                if 'citta' in PAZIENTI_FIELDS:
+                                    citta = clean_dbf_value(record[PAZIENTI_FIELDS['citta']])
+                                    if citta:
+                                        paziente_data['citta'] = str(citta).strip()
+                                        
+                                if 'provincia' in PAZIENTI_FIELDS:
+                                    provincia = clean_dbf_value(record[PAZIENTI_FIELDS['provincia']])
+                                    if provincia:
+                                        paziente_data['provincia'] = str(provincia).strip()
+                                        
+                                if 'cap' in PAZIENTI_FIELDS:
+                                    cap = clean_dbf_value(record[PAZIENTI_FIELDS['cap']])
+                                    if cap:
+                                        paziente_data['cap'] = str(cap).strip()
+                                        
+                                if 'note' in PAZIENTI_FIELDS:
+                                    note = clean_dbf_value(record[PAZIENTI_FIELDS['note']])
+                                    if note:
+                                        paziente_data['note'] = str(note).strip()
+                                        
+                                if 'ultima_visita' in PAZIENTI_FIELDS:
+                                    ultima_visita = clean_dbf_value(record[PAZIENTI_FIELDS['ultima_visita']])
+                                    if ultima_visita:
+                                        paziente_data['ultima_visita'] = self._format_date_field(ultima_visita)
+                                        
+                                if 'mesi_richiamo' in PAZIENTI_FIELDS:
+                                    mesi = clean_dbf_value(record[PAZIENTI_FIELDS['mesi_richiamo']])
+                                    if mesi and str(mesi).isdigit():
+                                        paziente_data['mesi_richiamo'] = int(mesi)
+                                        
+                                if 'tipo_richiamo' in PAZIENTI_FIELDS:
+                                    tipo = clean_dbf_value(record[PAZIENTI_FIELDS['tipo_richiamo']])
+                                    if tipo:
+                                        paziente_data['tipo_richiamo'] = str(tipo).strip()
+                                        
+                                if 'da_richiamare' in PAZIENTI_FIELDS:
+                                    da_richiamare = clean_dbf_value(record[PAZIENTI_FIELDS['da_richiamare']])
+                                    if da_richiamare:
+                                        paziente_data['da_richiamare'] = str(da_richiamare).strip()
+                                        
+                                if 'non_in_cura' in PAZIENTI_FIELDS:
+                                    non_in_cura = clean_dbf_value(record[PAZIENTI_FIELDS['non_in_cura']])
+                                    if non_in_cura:
+                                        paziente_data['non_in_cura'] = bool(non_in_cura)
+                                        
+                            except Exception as field_error:
+                                # Skip optional fields if they cause errors, but keep the record
+                                self.logger.debug(f"Error extracting optional fields for paziente {paziente_id}: {field_error}")
+                            
+                            pazienti_raw.append(paziente_data)
+                            
+                    except Exception as record_error:
+                        # Skip problematic records but continue processing
+                        self.logger.debug(f"Error processing record: {record_error}")
+                        continue
+            
+            # Apply filters
+            if filters:
+                pazienti_raw = self._apply_filters(pazienti_raw, filters)
+            
+            # Merge with richiami table data
+            pazienti_raw = self._merge_with_richiami_data(pazienti_raw)
+            
+            # Calculate pagination
+            total = len(pazienti_raw)
+            start = (page - 1) * per_page
+            end = start + per_page
+            pazienti_page = pazienti_raw[start:end]
+            
+            return {
+                'success': True,
+                'data': {
+                    'pazienti': pazienti_page,
+                    'pagination': {
+                        'page': page,
+                        'per_page': per_page,
+                        'total': total,
+                        'pages': (total + per_page - 1) // per_page,
+                        'has_next': end < total,
+                        'has_prev': page > 1
+                    }
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error getting pazienti: {e}")
+            raise DatabaseError(f"Failed to get pazienti: {str(e)}")
+
+--- server_v2\services\pazienti_service.py::search_pazienti (lines 226-269) ---
+    def search_pazienti(self, query: str, limit: int = 20, telefono: str = '') -> Dict[str, Any]:
+        """Search pazienti by name, codice fiscale or telefono."""
+        try:
+            pazienti_path = self._get_pazienti_dbf_path()
+
+            if not os.path.exists(pazienti_path):
+                raise DatabaseError(f"Pazienti DBF file not found: {pazienti_path}")
+
+            results = []
+            query_lower = query.lower().strip()
+            telefono_clean = telefono.strip()
+
+            with dbf.Table(pazienti_path, codepage='cp1252') as table:
+                for record in table:
+                    if len(results) >= limit:
+                        break
+
+                    if record[PAZIENTI_FIELDS['id']]:
+                        match = False
+
+                        if telefono_clean:
+                            tel = str(clean_dbf_value(record[PAZIENTI_FIELDS['telefono']]))
+                            cell = str(clean_dbf_value(record[PAZIENTI_FIELDS['cellulare']]))
+                            match = telefono_clean in tel or telefono_clean in cell
+                        elif query_lower:
+                            nome = clean_dbf_value(record[PAZIENTI_FIELDS['nome']])
+                            cf = clean_dbf_value(record[PAZIENTI_FIELDS['codice_fiscale']])
+                            match = query_lower in nome.lower() or query_lower in cf.lower()
+
+                        if match:
+                            paziente = self._extract_paziente_data(record)
+                            if paziente:
+                                results.append(paziente)
+            
+            return {
+                'success': True,
+                'data': results,
+                'count': len(results),
+                'query': query
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error searching pazienti: {e}")
+            raise DatabaseError(f"Failed to search pazienti: {str(e)}")
+
+--- client_v2\src\store\pazienti.store.tsx::usePazienti (lines 294-308) ---
+export const usePazienti = () => {
+  const store = usePazientiStore();
+  
+  return {
+    pazienti: store.filteredPazienti,
+    allPazienti: store.pazienti,
+    isLoading: store.isLoading,
+    error: store.error,
+    searchTerm: store.searchTerm,
+    search: store.searchPazienti,
+    load: () => store.loadPazienti({ force: true }),
+    loadAll: () => store.loadAllPazienti(),
+    getById: store.getPazienteById
+  };
+};
+
+--- server_v2\api\v2_pazienti.py::get_pazienti (lines 79-135) ---
+def get_pazienti():
+    """
+    Get list of patients with pagination and filtering.
+    
+    Query Parameters:
+        page (int): Page number (default: 1)
+        per_page (int): Items per page (default: 50, max: 100)
+        search (str): Search term for name or codice fiscale
+        da_richiamare (bool): Filter by patients to recall
+        in_cura (bool): Filter by patients in care
+        all (int): If 1, load all patients without pagination
+    
+    Returns:
+        JSON response with paginated patients list
+    """
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 50, type=int), 100)
+        search = request.args.get('search', '').strip()
+        da_richiamare = request.args.get('da_richiamare', type=bool)
+        in_cura = request.args.get('in_cura', type=bool)
+        load_all = request.args.get('all', 0, type=int)
+        
+        # Validate parameters
+        validate_pagination_params(page, per_page)
+        
+        # If load_all is requested, set high per_page
+        if load_all:
+            per_page = 10000
+            page = 1
+        
+        # Build filters
+        filters = {}
+        if search:
+            filters['search'] = search
+        if da_richiamare is not None:
+            filters['da_richiamare'] = da_richiamare
+        if in_cura is not None:
+            filters['in_cura'] = in_cura
+        
+        # Get pazienti data
+        service = PazientiService(g.database_manager)
+        result = service.get_pazienti_paginated(
+            page=page,
+            per_page=per_page,
+            filters=filters
+        )
+        
+        # Return response
+        if result['success']:
+            return format_response(result['data'])
+        else:
+            return format_response(success=False, error=result.get('error', 'Errore caricamento pazienti'))
+        
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "get_pazienti")
+
+--- server_v2\api\v2_pazienti.py::search_pazienti (lines 168-203) ---
+def search_pazienti():
+    """
+    Search patients by name, codice fiscale or telefono.
+
+    Query Parameters:
+        q (str): Search query (required)
+        limit (int): Maximum results (default: 20, max: 100)
+        telefono (str): Search by phone number (optional, alternative to q)
+
+    Returns:
+        JSON response with search results
+    """
+    try:
+        query = request.args.get('q', '').strip()
+        telefono = request.args.get('telefono', '').strip()
+        limit = min(request.args.get('limit', 20, type=int), 100)
+
+        if not query and not telefono:
+            raise ValidationError("Search query is required")
+        if query and len(query) < 2:
+            raise ValidationError("Search query must be at least 2 characters")
+
+        service = PazientiService(g.database_manager)
+        result = service.search_pazienti(query, limit, telefono=telefono)
+        
+        if result['success']:
+            return format_response({
+                'pazienti': result['data'],
+                'count': result['count'],
+                'query': result['query']
+            })
+        else:
+            return format_response(success=False, error=result.get('error', 'Errore ricerca pazienti'))
+        
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "search_pazienti")
+
+--- server_v2\api\v2_pazienti.py::get_pazienti_stats (lines 208-244) ---
+def get_pazienti_stats():
+    """
+    Get patients statistics.
+    
+    Returns:
+        JSON response with statistics
+    """
+    try:
+        service = PazientiService(g.database_manager)
+        
+        # Get all patients for stats (using high per_page)
+        result = service.get_pazienti_paginated(page=1, per_page=10000)
+        
+        if not result['success']:
+            return format_response(success=False, error=result.get('error', 'Errore caricamento pazienti')), 500
+        
+        pazienti = result['data']['pazienti']
+        
+        # Calculate statistics
+        stats = {
+            'totale_pazienti': len(pazienti),
+            'da_richiamare': len([p for p in pazienti if p.get('da_richiamare') == 'S']),
+            'in_cura': len([p for p in pazienti if not p.get('non_in_cura', False)]),
+            'non_in_cura': len([p for p in pazienti if p.get('non_in_cura', False)]),
+            'con_email': len([p for p in pazienti if p.get('email')]),
+            'con_cellulare': len([p for p in pazienti if p.get('cellulare')])
+        }
+        
+        return format_response(stats)
+        
+    except Exception as e:
+        logger.error(f"Error in get_pazienti_stats: {e}")
+        return format_response({
+            'success': False,
+            'error': 'INTERNAL_ERROR',
+            'message': 'Internal server error'
+        }, 500)
+
+--- server_v2\services\pazienti_service.py::get_paziente_by_id (lines 198-224) ---
+    def get_paziente_by_id(self, paziente_id: str) -> Dict[str, Any]:
+        """Get single paziente by ID."""
+        try:
+            pazienti_path = self._get_pazienti_dbf_path()
+            
+            if not os.path.exists(pazienti_path):
+                raise DatabaseError(f"Pazienti DBF file not found: {pazienti_path}")
+            
+            with dbf.Table(pazienti_path, codepage='cp1252') as table:
+                for record in table:
+                    if str(record[PAZIENTI_FIELDS['id']]) == str(paziente_id):
+                        paziente_data = self._extract_paziente_data(record)
+                        if paziente_data:
+                            return {
+                                'success': True,
+                                'data': paziente_data
+                            }
+            
+            return {
+                'success': False,
+                'error': 'PAZIENTE_NOT_FOUND',
+                'message': f'Paziente {paziente_id} non trovato'
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error getting paziente {paziente_id}: {e}")
+            raise DatabaseError(f"Failed to get paziente: {str(e)}")
+
+--- server_v2\services\pazienti_service.py::_get_pazienti_dbf_path (lines 414-432) ---
+    def _get_pazienti_dbf_path(self) -> str:
+        """Get path to pazienti DBF file."""
+        try:
+            config = get_config()
+            mode = config.get_mode()
+            
+            # Try to get base path from config
+            base_path_key = f"{mode.upper()}_DB_BASE_PATH"
+            base_path = config.get(base_path_key)
+            
+            if base_path and os.path.exists(base_path):
+                pazienti_path = os.path.join(base_path, 'DATI', 'PAZIENTI.DBF')
+                if os.path.exists(pazienti_path):
+                    return pazienti_path
+            
+            raise FileNotFoundError(f"PAZIENTI.DBF not found in configured location: {base_path}")
+            
+        except Exception as e:
+            raise DatabaseError(f"Could not locate pazienti DBF file: {str(e)}")
+
+--- client_v2\src\features\pazienti\pages\PazientiPage.tsx::getCampiAnagrafica (lines 53-67) ---
+  const getCampiAnagrafica = (paziente: Paziente) => [
+    { label: 'Nome', value: paziente.nome || '-' },
+    { label: 'Codice Fiscale', value: paziente.codice_fiscale || '-' },
+    { label: 'Data di Nascita', value: paziente.data_nascita || '-' },
+    { label: 'Luogo di Nascita', value: paziente.luogo_nascita || '-' },
+    { label: 'Sesso', value: paziente.sesso || '-' },
+    { label: 'Indirizzo', value: paziente.indirizzo || '-' },
+    { label: 'Citta', value: paziente.citta || '-' },
+    { label: 'CAP', value: paziente.cap || '-' },
+    { label: 'Provincia', value: paziente.provincia || '-' },
+    { label: 'Telefono', value: paziente.telefono || '-' },
+    { label: 'Email', value: paziente.email || '-' },
+    { label: 'Tessera Sanitaria', value: paziente.tessera_sanitaria || '-' },
+    { label: 'Note', value: paziente.note || '-' },
+  ];
+
+--- client_v2\src\features\pazienti\pages\SlotLiberiPage.tsx::carica (lines 52-63) ---
+    const carica = async () => {
+      setLoading(true)
+      setError(null)
+      const res = await richiami.apiGetCandidatiSlot(10)
+      if (cancelled) return
+      if (res.success && res.pazienti) {
+        setCandidati(res.pazienti)
+      } else {
+        setError(res.error || 'Errore caricamento candidati')
+      }
+      setLoading(false)
+    }
+
+--- server_v2\api\v2_pazienti.py::get_paziente (lines 140-163) ---
+def get_paziente(paziente_id):
+    """
+    Get single patient by ID.
+    
+    Args:
+        paziente_id (str): Patient ID
+    
+    Returns:
+        JSON response with patient details
+    """
+    try:
+        if not paziente_id:
+            raise ValidationError("Patient ID is required")
+        
+        service = PazientiService(g.database_manager)
+        result = service.get_paziente_by_id(paziente_id)
+        
+        if not result['success']:
+            return format_response(success=False, error=result.get('error', 'Paziente non trovato')), 404
+        
+        return format_response(result['data'])
+        
+    except (ValidationError, DatabaseError, Exception) as e:
+        return handle_error(e, "get_paziente")
+
+--- client_v2\src\features\pazienti\pages\RichiamiPage.tsx::sortIcon (lines 179-180) ---
+  const sortIcon = (col: typeof sortCol) =>
+    sortCol === col ? (sortAsc ? ' ▲' : ' ▼') : '';
+
+--- client_v2\src\features\pazienti\components\ModalRichiamoGestione.tsx::calcolaProssimoRichiamo (lines 145-153) ---
+  const calcolaProssimoRichiamo = () => {
+    if (!paziente.ultima_visita || !tempoRichiamo) return null;
+    
+    const ultimaVisita = new Date(paziente.ultima_visita);
+    const prossimo = new Date(ultimaVisita);
+    prossimo.setMonth(prossimo.getMonth() + tempoRichiamo);
+    
+    return prossimo;
+  };
+
+--- client_v2\src\features\pazienti\components\ModalRichiamoGestione.tsx::getStatusBadge (lines 157-164) ---
+  const getStatusBadge = () => {
+    switch (status) {
+      case 'S': return <CBadge color="warning">Da richiamare</CBadge>;
+      case 'R': return <CBadge color="success">Richiamato</CBadge>;
+      case 'N': return <CBadge color="secondary">Non richiamare</CBadge>;
+      default: return <CBadge color="light">Non impostato</CBadge>;
+    }
+  };
+
+--- client_v2\src\features\pazienti\components\RichiamoStatus.tsx::hasGestionaleData (lines 26-28) ---
+  const hasGestionaleData = () => {
+    return !paziente.is_in_richiami_table && !!paziente.tipo_richiamo_gestionale;
+  };
+
+--- client_v2\src\features\pazienti\components\RichiamoStatus.tsx::getRichiamoType (lines 33-68) ---
+  const getRichiamoType = () => {
+    const status = paziente.da_richiamare;
+    const hasUltimaVisita = !!paziente.ultima_visita;
+    const hasTempoRichiamo = !!paziente.tempo_richiamo;
+
+    // Se ha tipo_richiamo dal gestionale ma non è ancora salvato, considera come "da_richiamare"
+    if (!paziente.is_in_richiami_table && paziente.tipo_richiamo_gestionale && status !== 'R' && status !== 'N') {
+      if (hasUltimaVisita && hasTempoRichiamo) {
+        // Calcola se è scaduto
+        const ultimaVisita = new Date(paziente.ultima_visita);
+        const prossimo = new Date(ultimaVisita);
+        prossimo.setMonth(prossimo.getMonth() + paziente.tempo_richiamo);
+        const oggi = new Date();
+        
+        return oggi > prossimo ? 'scaduto' : 'da_richiamare';
+      }
+      return 'da_richiamare';
+    }
+
+    if (status === 'R') return 'richiamato';
+    if (status === 'N') return 'non_richiamare';
+    if (status === 'S') {
+      if (hasUltimaVisita && hasTempoRichiamo) {
+        // Calcola se è scaduto
+        const ultimaVisita = new Date(paziente.ultima_visita);
+        const prossimo = new Date(ultimaVisita);
+        prossimo.setMonth(prossimo.getMonth() + paziente.tempo_richiamo);
+        const oggi = new Date();
+        
+        return oggi > prossimo ? 'scaduto' : 'da_richiamare';
+      }
+      return 'da_richiamare';
+    }
+    
+    return 'non_impostato';
+  };
+
+--- client_v2\src\features\pazienti\components\RichiamoStatus.tsx::calcolaProssimoRichiamo (lines 73-81) ---
+  const calcolaProssimoRichiamo = () => {
+    if (!paziente.ultima_visita || !paziente.tempo_richiamo) return null;
+    
+    const ultimaVisita = new Date(paziente.ultima_visita);
+    const prossimo = new Date(ultimaVisita);
+    prossimo.setMonth(prossimo.getMonth() + paziente.tempo_richiamo);
+    
+    return prossimo;
+  };
+
+--- client_v2\src\features\pazienti\components\RichiamoStatus.tsx::decodificaTipoRichiamo (lines 86-111) ---
+  const decodificaTipoRichiamo = (tipoRichiamo: string | undefined) => {
+    if (!tipoRichiamo) return [];
+    
+    const tipi: Array<{code: string, name: string, color: string}> = [];
+    
+    // Mappa tipi di richiamo ai colori degli appuntamenti corrispondenti
+    const tipoMap = {
+      '1': { name: 'Generico', color: '#808080' },    // Grigio (come Endodonzia)
+      '2': { name: 'Igiene', color: '#800080' },      // Viola (come Igiene)
+      '3': { name: 'Rx Impianto', color: '#FF00FF' }, // Magenta (come Implantologia)
+      '4': { name: 'Controllo', color: '#ADD8E6' },   // Azzurro chiaro (come Controllo)
+      '5': { name: 'Impianto', color: '#FF00FF' },    // Magenta (come Implantologia)
+      '6': { name: 'Ortodonzia', color: '#FFC0CB' }   // Rosa (come Ortodonzia)
+    };
+    
+    // Decodifica ogni carattere (es. "11" = Generico + Generico, "21" = Igiene + Generico)
+    for (let i = 0; i < tipoRichiamo.length; i++) {
+      const code = tipoRichiamo[i];
+      const tipo = tipoMap[code as keyof typeof tipoMap];
+      if (tipo) {
+        tipi.push({ code, name: tipo.name, color: tipo.color });
+      }
+    }
+    
+    return tipi;
+  };
+
+--- client_v2\src\features\pazienti\components\RichiamoStatus.tsx::styled (lines 145-156) ---
+  const styled = () => {
+    return {
+      padding: "0.375rem 0.75rem",
+      fontSize: "0.875rem",
+      fontWeight: "400",
+      borderRadius: "0.25rem",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: "100px",
+    };
+  };
+
+=== CONNECTIONS ===
+- server_v2/api/v2_pazienti.py
+  external:
+    - app_v2
+    - core.exceptions
+    - flask
+    - flask_jwt_extended
+    - logging
+    - services.pazienti_service
+- server_v2/services/pazienti_service.py
+  external:
+    - .base_service
+    - core.config_manager
+    - core.exceptions
+    - dbf
+    - logging
+    - os
+    - pandas
+    - pathlib
+    - sqlite3
+    - typing
+    - utils.dbf_utils
+- client_v2/src/store/pazienti.store.tsx
+  internal:
+    - client_v2/src/services/api/client.ts
+  external:
+    - zustand
+    - zustand/middleware
+- client_v2/src/features/pazienti/components/BroadcastModal.tsx
+  internal:
+    - ../services/marketing.service
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/components/FiltriPazienti.tsx
+  internal:
+    - client_v2/src/components/selects/SlimSelect.tsx
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx
+  internal:
+    - ../services/richiami.service
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - @coreui/icons
+    - @coreui/icons-react
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/components/PazientiTable.tsx
+  internal:
+    - client_v2/src/components/tables/DataTable.tsx
+    - client_v2/src/features/pazienti/components/RichiamoStatus.tsx
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - @coreui/icons
+    - @coreui/icons-react
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/components/RichiamoGestione.tsx
+  internal:
+    - ../services/richiami.service
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - @coreui/icons
+    - @coreui/icons-react
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/components/RichiamoStatus.tsx
+  internal:
+    - ../services/richiami.service
+    - client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - @coreui/icons
+    - @coreui/icons-react
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/pages/PazientiPage.tsx
+  internal:
+    - ../components/BroadcastModal
+    - ../components/FiltriPazienti
+    - client_v2/src/components/layout/PageLayout.tsx
+    - client_v2/src/components/modals/index.ts
+    - client_v2/src/features/pazienti/components/PazientiTable.tsx
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/pages/RichiamiPage.tsx
+  internal:
+    - client_v2/src/components/layout/PageLayout.tsx
+    - client_v2/src/features/pazienti/services/richiami.service.ts
+    - client_v2/src/services/api/client.ts
+  external:
+    - @coreui/icons
+    - @coreui/icons-react
+    - @coreui/react
+    - react
+- client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx
+  internal:
+    - ../services/richiami.service
+    - client_v2/src/components/layout/PageLayout.tsx
+  external:
+    - @coreui/icons
+    - @coreui/icons-react
+    - @coreui/react
+    - react
+    - react-router-dom
+- client_v2/src/features/pazienti/services/marketing.service.ts
+  internal:
+    - client_v2/src/services/api/client.ts
+- client_v2/src/features/pazienti/services/richiami.service.ts
+  internal:
+    - client_v2/src/services/api/client.ts
+- client_v2/src/components/selects/PazientiSelect.tsx
+  internal:
+    - client_v2/src/store/pazienti.store.tsx
+  external:
+    - react

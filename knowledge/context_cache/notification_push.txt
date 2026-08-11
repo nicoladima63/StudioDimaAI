@@ -1,0 +1,1356 @@
+QUERY: notification push
+
+=== PRIORITY FILES ===
+- server_v2/tests/test_create_task_notification.py | role=test | score=51 | structural=37 | query=14 | matched=notification, notifica
+- server_v2/services/push_notification_service.py | role=service | score=43 | structural=27 | query=16 | matched=notification, push
+- server_v2/api/v2_push.py | role=api | score=40 | structural=30 | query=10 | matched=push, notification
+- server_v2/services/notification_service.py | role=service | score=37 | structural=27 | query=10 | matched=notification
+- server_v2/repositories/notification_repository.py | role=repository | score=37 | structural=27 | query=10 | matched=notification
+- server_v2/api/v2_notifications.py | role=api | score=35 | structural=25 | query=10 | matched=notification
+- server_v2/scripts/verify_user_notification.py | role=script | score=25 | structural=15 | query=10 | matched=notification
+- client_v2/src/store/notifications.store.ts | role=state | score=23 | structural=17 | query=6 | matched=notification
+- server_v2/tests/test_push_notification.py | role=test | score=22 | structural=6 | query=16 | matched=notification, push
+- client_v2/src/services/api/notifications.service.ts | role=api | score=21 | structural=15 | query=6 | matched=notification
+
+=== ARCHITECTURE ===
+
+TEST
+- server_v2/tests/test_create_task_notification.py
+- server_v2/tests/test_push_notification.py
+
+SERVICE
+- server_v2/services/push_notification_service.py
+- server_v2/services/notification_service.py
+
+API
+- server_v2/api/v2_push.py
+- server_v2/api/v2_notifications.py
+- client_v2/src/services/api/notifications.service.ts
+
+REPOSITORY
+- server_v2/repositories/notification_repository.py
+
+SCRIPT
+- server_v2/scripts/verify_user_notification.py
+
+STATE
+- client_v2/src/store/notifications.store.ts
+
+=== SYMBOLS ===
+- PushNotificationService | server_v2/services/push_notification_service.py | kind=class | category=core | score=65
+- TestCreateTaskNotification | server_v2/tests/test_create_task_notification.py | kind=class | category=core | score=57
+- NotificationService | server_v2/services/notification_service.py | kind=class | category=core | score=52
+- NotificationRepository | server_v2/repositories/notification_repository.py | kind=class | category=core | score=50
+- test_1_create_task_notifica_primo_step | server_v2/tests/test_create_task_notification.py | kind=function | category=support | score=50
+- test_2_complete_step_notifica_fase_successiva | server_v2/tests/test_create_task_notification.py | kind=function | category=support | score=50
+- test_3_nessuna_notifica_se_stesso_utente | server_v2/tests/test_create_task_notification.py | kind=function | category=support | score=50
+- send_test_notification | server_v2/api/v2_push.py | kind=function | category=support | score=48
+- send_test_notification_simple | server_v2/api/v2_push.py | kind=function | category=support | score=48
+- get_unread_notifications | server_v2/services/notification_service.py | kind=function | category=support | score=45
+- get_notification_service | server_v2/api/v2_notifications.py | kind=function | category=support | score=44
+- get_unread_notifications | server_v2/api/v2_notifications.py | kind=function | category=support | score=44
+- mark_notification_read | server_v2/api/v2_notifications.py | kind=function | category=support | score=44
+- create_notification | server_v2/repositories/notification_repository.py | kind=function | category=support | score=43
+- send_notification | server_v2/services/push_notification_service.py | kind=function | category=support | score=43
+- send_notification_to_all | server_v2/services/push_notification_service.py | kind=function | category=support | score=43
+- TestUserNotification | server_v2/scripts/verify_user_notification.py | kind=class | category=core | score=41
+- tearDown | server_v2/tests/test_create_task_notification.py | kind=function | category=support | score=35
+- _get_unread_notifications | server_v2/tests/test_create_task_notification.py | kind=function | category=internal | score=35
+- test_4_full_trigger_action | server_v2/tests/test_create_task_notification.py | kind=function | category=support | score=35
+- test_notification_trigger | server_v2/scripts/verify_user_notification.py | kind=function | category=support | score=34
+- test_no_notification_same_user | server_v2/scripts/verify_user_notification.py | kind=function | category=support | score=34
+- subscribe | server_v2/api/v2_push.py | kind=function | category=support | score=33
+- unsubscribe | server_v2/api/v2_push.py | kind=function | category=support | score=33
+- get_public_key | server_v2/api/v2_push.py | kind=function | category=support | score=33
+- notify_user | server_v2/services/notification_service.py | kind=function | category=support | score=30
+- mark_read | server_v2/services/notification_service.py | kind=function | category=support | score=30
+- mark_all_read | server_v2/api/v2_notifications.py | kind=function | category=support | score=29
+- table_name | server_v2/repositories/notification_repository.py | kind=function | category=support | score=28
+- get_unread_for_user | server_v2/repositories/notification_repository.py | kind=function | category=support | score=28
+- mark_as_read | server_v2/repositories/notification_repository.py | kind=function | category=support | score=28
+- subscribe_user | server_v2/services/push_notification_service.py | kind=function | category=support | score=28
+- unsubscribe_user | server_v2/services/push_notification_service.py | kind=function | category=support | score=28
+- send_test_notification | server_v2/tests/test_push_notification.py | kind=function | category=support | score=28
+- setUp | server_v2/tests/test_create_task_notification.py | kind=function | category=support | score=25
+- _make_test_db | server_v2/tests/test_create_task_notification.py | kind=function | category=internal | score=20
+- _build_user_repo_mock | server_v2/tests/test_create_task_notification.py | kind=function | category=internal | score=20
+- _build_dbf_mock | server_v2/tests/test_create_task_notification.py | kind=function | category=internal | score=20
+- __init__ | server_v2/services/notification_service.py | kind=function | category=internal | score=15
+- __init__ | server_v2/repositories/notification_repository.py | kind=function | category=internal | score=13
+- _ensure_tables_exist | server_v2/repositories/notification_repository.py | kind=function | category=internal | score=13
+- __init__ | server_v2/services/push_notification_service.py | kind=function | category=internal | score=13
+- _get_user_subscriptions | server_v2/services/push_notification_service.py | kind=function | category=internal | score=13
+- setUp | server_v2/scripts/verify_user_notification.py | kind=function | category=support | score=9
+
+=== RELEVANT CODE ===
+
+--- server_v2\services\push_notification_service.py::PushNotificationService (lines 15-249) ---
+class PushNotificationService:
+    """
+    Service for managing browser push notifications via Web Push API.
+    """
+
+    def __init__(self, db_manager: DatabaseManager, vapid_private_key: str, vapid_claims: Dict[str, str]):
+        """
+        Initialize push notification service.
+
+        Args:
+            db_manager: Database manager instance
+            vapid_private_key: VAPID private key for authentication
+            vapid_claims: VAPID claims (e.g., {"sub": "mailto:admin@studiodima.com"})
+        """
+        self.db_manager = db_manager
+        self.vapid_private_key = vapid_private_key
+        self.vapid_claims = vapid_claims
+
+    def subscribe_user(self, user_id: int, subscription_info: Dict[str, Any]) -> bool:
+        """
+        Save user's push subscription to database.
+
+        Args:
+            user_id: User ID
+            subscription_info: Subscription object from browser (endpoint, keys, etc.)
+
+        Returns:
+            True if successful
+        """
+        try:
+            logger.info(f"Attempting to subscribe user {user_id}")
+            logger.info(f"Subscription endpoint: {subscription_info.get('endpoint', 'N/A')[:50]}...")
+
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+
+                # Insert or update subscription
+                cursor.execute('''
+                    INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(endpoint) DO UPDATE SET
+                        user_id = excluded.user_id,
+                        p256dh = excluded.p256dh,
+                        auth = excluded.auth,
+                        updated_at = CURRENT_TIMESTAMP
+                ''', (
+                    user_id,
+                    subscription_info['endpoint'],
+                    subscription_info['keys']['p256dh'],
+                    subscription_info['keys']['auth']
+                ))
+
+                rows_affected = cursor.rowcount
+                cursor.close()
+
+            logger.info(f"Successfully subscribed user {user_id} to push notifications (rows affected: {rows_affected})")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to subscribe user {user_id}: {e}", exc_info=True)
+            return False
+
+    def unsubscribe_user(self, user_id: int, endpoint: str) -> bool:
+        """
+        Remove user's push subscription.
+
+        Args:
+            user_id: User ID
+            endpoint: Subscription endpoint to remove
+
+        Returns:
+            True if successful
+        """
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    DELETE FROM push_subscriptions
+                    WHERE user_id = ? AND endpoint = ?
+                ''', (user_id, endpoint))
+                cursor.close()
+
+            logger.info(f"Unsubscribed user {user_id} from push notifications")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to unsubscribe user {user_id}: {e}")
+            return False
+
+    def send_notification(
+        self,
+        user_id: int,
+        title: str,
+        body: str,
+        icon: Optional[str] = None,
+        url: Optional[str] = None,
+        tag: Optional[str] = None,
+        urgency: str = 'normal'
+    ) -> Dict[str, Any]:
+        """
+        Send push notification to all subscribed devices of a user.
+
+        Args:
+            user_id: Target user ID
+            title: Notification title
+            body: Notification body/message
+            icon: Icon URL (optional)
+            url: URL to open on click (optional)
+            tag: Notification tag for grouping/replacing (optional)
+            urgency: Urgency level ('normal', 'high') - affects delivery priority
+
+        Returns:
+            Dict with success status and results
+        """
+        try:
+            # Get all subscriptions for this user
+            subscriptions = self._get_user_subscriptions(user_id)
+
+            if not subscriptions:
+                logger.warning(f"No push subscriptions found for user {user_id}")
+                return {
+                    'success': False,
+                    'error': 'No subscriptions found',
+                    'sent_count': 0
+                }
+
+            # Prepare notification payload
+            notification_payload = {
+                'title': title,
+                'body': body,
+                'icon': icon or '/logo192.png',
+                'badge': '/badge-icon.png',
+                'tag': tag,
+                'data': {
+                    'url': url or '/',
+                    'timestamp': None  # Will be set by browser
+                },
+                'requireInteraction': urgency == 'high',  # Stay visible if urgent
+                'vibrate': [200, 100, 200] if urgency == 'high' else [100]
+            }
+
+            # Send to all subscriptions
+            sent_count = 0
+            failed_subscriptions = []
+
+            for sub in subscriptions:
+                try:
+                    subscription_info = {
+                        'endpoint': sub['endpoint'],
+                        'keys': {
+                            'p256dh': sub['p256dh'],
+                            'auth': sub['auth']
+                        }
+                    }
+
+                    webpush(
+                        subscription_info=subscription_info,
+                        data=json.dumps(notification_payload),
+                        vapid_private_key=self.vapid_private_key,
+                        vapid_claims=self.vapid_claims,
+                        ttl=86400  # 24 hours
+                    )
+
+                    sent_count += 1
+                    logger.info(f"Push notification sent to user {user_id} (endpoint: {sub['endpoint'][:50]}...)")
+
+                except WebPushException as e:
+                    logger.error(f"Failed to send push to endpoint {sub['endpoint']}: {e}")
+
+                    # If subscription is expired/invalid, remove it
+                    if e.response and e.response.status_code in [404, 410]:
+                        failed_subscriptions.append(sub['endpoint'])
+
+            # Clean up failed subscriptions
+            for endpoint in failed_subscriptions:
+                self.unsubscribe_user(user_id, endpoint)
+
+            return {
+                'success': sent_count > 0,
+                'sent_count': sent_count,
+                'failed_count': len(failed_subscriptions)
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to send push notification to user {user_id}: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'sent_count': 0
+            }
+
+    def send_notification_to_all(
+        self,
+        title: str,
+        body: str,
+        data: Optional[Dict[str, Any]] = None,
+        url: Optional[str] = None,
+        urgency: str = 'normal',
+    ) -> Dict[str, Any]:
+        """Invia push notification a tutti gli utenti con subscription attiva."""
+        try:
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT DISTINCT user_id FROM push_subscriptions')
+                user_ids = [row[0] for row in cursor.fetchall()]
+                cursor.close()
+            sent = 0
+            for uid in user_ids:
+                res = self.send_notification(user_id=uid, title=title, body=body, url=url, urgency=urgency)
+                if res.get('success'):
+                    sent += res.get('sent_count', 0)
+            return {'success': True, 'sent_to': len(user_ids), 'sent_count': sent}
+        except Exception as e:
+            logger.error(f"Errore send_notification_to_all: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def _get_user_subscriptions(self, user_id: int):
+        """Get all push subscriptions for a user."""
+        try:
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT id, user_id, endpoint, p256dh, auth, created_at
+                    FROM push_subscriptions
+                    WHERE user_id = ?
+                ''', (user_id,))
+
+                columns = [description[0] for description in cursor.description]
+                rows = cursor.fetchall()
+                cursor.close()
+
+                return [dict(zip(columns, row)) for row in rows]
+        except Exception as e:
+            logger.error(f"Failed to get subscriptions for user {user_id}: {e}")
+            return []
+
+--- server_v2\tests\test_create_task_notification.py::TestCreateTaskNotification (lines 46-294) ---
+class TestCreateTaskNotification(unittest.TestCase):
+
+    def setUp(self):
+        self.db_manager, self.db_path = _make_test_db()
+
+        self.work_repo    = WorkRepository(self.db_manager)
+        self.mapping_repo = PrestazioneWorkMappingRepository(self.db_manager)
+
+        # Work template con 3 step: step0 -> user 1, step1 -> user 2, step2 -> user 2
+        work = self.work_repo.create_work(
+            work_data={
+                'name': 'Piano Implantare',
+                'description': 'Workflow implantologia',
+                'category': 'implantologia',
+            },
+            steps_data=[
+                {'name': 'Prima visita',   'order_index': 0, 'user_id': '1'},
+                {'name': 'Chirurgia',      'order_index': 1, 'user_id': '2'},
+                {'name': 'Controllo post', 'order_index': 2, 'user_id': '2'},
+            ],
+        )
+        self.work_id = work['id']
+
+        # Mapping codice prestazione -> work
+        self.mapping_repo.upsert_mapping('IMPL01', self.work_id)
+
+        # Utenti finti
+        self.user1 = {'id': 1, 'username': 'dottore',    'role': 'user'}
+        self.user2 = {'id': 2, 'username': 'assistente', 'role': 'user'}
+
+    def tearDown(self):
+        self.db_manager.close()
+        try:
+            os.unlink(self.db_path)
+        except OSError:
+            pass
+
+    # ------------------------------------------------------------------
+    # Helper
+    # ------------------------------------------------------------------
+
+    def _get_unread_notifications(self, user_id: int):
+        return NotificationRepository(self.db_manager).get_unread_for_user(user_id)
+
+    def _build_user_repo_mock(self):
+        """Mock di UserRepository che restituisce user1 e user2."""
+        mock = MagicMock()
+        mock.find_by_id.side_effect = lambda uid: self.user1 if int(uid) == 1 else self.user2
+        mock.get_all.return_value = [self.user1, self.user2]
+        return mock
+
+    def _build_dbf_mock(self, nome='Mario Rossi'):
+        """Mock di get_dbf_data_service con paziente finto."""
+        m = MagicMock()
+        m.get_patient_by_id.return_value = {'nome': nome}
+        return m
+
+    # Patch targets corretti: nomi importati lazy inside work_service functions
+    _PATCH_USER_REPO    = 'repositories.user_repository.UserRepository'
+    _PATCH_DBF_WS       = 'services.dbf_data_service.get_dbf_data_service'
+    _PATCH_TODO         = 'services.todo_service.TodoService'
+
+    # ------------------------------------------------------------------
+    # Test 1: create_task_from_work -> notifica al user del primo step
+    # ------------------------------------------------------------------
+
+    def test_1_create_task_notifica_primo_step(self):
+        """La creazione del task deve mandare la notifica al user del primo step."""
+        user_repo_mock = self._build_user_repo_mock()
+        dbf_mock       = self._build_dbf_mock()
+
+        with patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value = None
+
+            service = WorkService(self.db_manager)
+            task = service.create_task_from_work(patient_id='PAZ001', work_id=self.work_id)
+
+        self.assertIsNotNone(task, "Il task non e' stato creato")
+        self.assertEqual(task['patient_id'], 'PAZ001')
+        steps = task['steps']
+        self.assertEqual(len(steps), 3)
+
+        # Step 0 attivo, gli altri pending
+        self.assertEqual(steps[0]['status'], 'active',  "Step 0 deve essere 'active'")
+        self.assertEqual(steps[1]['status'], 'pending', "Step 1 deve essere 'pending'")
+        self.assertEqual(steps[2]['status'], 'pending', "Step 2 deve essere 'pending'")
+
+        # Notifica inviata al user 1
+        notifiche = self._get_unread_notifications(1)
+        self.assertGreater(len(notifiche), 0,
+            "Nessuna notifica trovata per user 1 dopo create_task_from_work")
+        msg = notifiche[0]['message']
+        self.assertIn('Prima visita', msg,
+            f"La notifica dovrebbe menzionare 'Prima visita', ma dice: '{msg}'")
+
+        # Nessuna notifica prematura al user 2
+        self.assertEqual(len(self._get_unread_notifications(2)), 0,
+            "Non ci devono essere notifiche per user 2 alla creazione del task")
+
+        print(f"\n  [OK] task={task['id']}, notifica user1='{msg}'")
+
+    # ------------------------------------------------------------------
+    # Test 2: completamento step 0 -> notifica al user dello step 1
+    # ------------------------------------------------------------------
+
+    def test_2_complete_step_notifica_fase_successiva(self):
+        """Completando lo step 0 (user 1), la notifica deve arrivare a user 2 (step 1)."""
+        user_repo_mock = self._build_user_repo_mock()
+        dbf_mock       = self._build_dbf_mock()
+
+        with patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value  = None
+            mock_todo_cls.return_value.auto_complete_step_todos.return_value = None
+
+            service = WorkService(self.db_manager)
+            task     = service.create_task_from_work(patient_id='PAZ002', work_id=self.work_id)
+            task_id  = task['id']
+            step0_id = task['steps'][0]['id']
+            step1_id = task['steps'][1]['id']
+
+            # Completa lo step 0 come user 1
+            updated = service.complete_step(task_id, step0_id, user_id='1')
+
+        # Step 0 completato
+        s0 = next(s for s in updated['steps'] if s['id'] == step0_id)
+        self.assertEqual(s0['status'], 'completed', "Step 0 deve essere 'completed'")
+
+        # Step 1 attivato automaticamente
+        s1 = next(s for s in updated['steps'] if s['id'] == step1_id)
+        self.assertEqual(s1['status'], 'active',
+            "Step 1 deve diventare 'active' dopo il completamento dello step 0")
+
+        # Notifica al user 2 per la fase successiva
+        notifiche2 = self._get_unread_notifications(2)
+        self.assertGreater(len(notifiche2), 0,
+            "Nessuna notifica trovata per user 2 dopo completamento step 0")
+        msg2 = notifiche2[0]['message']
+        self.assertIn('Chirurgia', msg2,
+            f"La notifica per user 2 dovrebbe menzionare 'Chirurgia', ma dice: '{msg2}'")
+
+        print(f"\n  [OK] step0 completato, notifica user2='{msg2}'")
+
+    # ------------------------------------------------------------------
+    # Test 3: stesso user su step consecutivi -> NO notifica ridondante
+    # ------------------------------------------------------------------
+
+    def test_3_nessuna_notifica_se_stesso_utente(self):
+        """
+        Step 1 e step 2 sono entrambi di user 2.
+        Quando user 2 completa step 1, step 2 diventa active ma NON deve arrivare
+        una seconda notifica a user 2 (sarebbe ridondante perche' e' lo stesso operatore).
+        """
+        user_repo_mock = self._build_user_repo_mock()
+        dbf_mock       = self._build_dbf_mock()
+
+        with patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value    = None
+            mock_todo_cls.return_value.auto_complete_step_todos.return_value = None
+
+            service  = WorkService(self.db_manager)
+            task     = service.create_task_from_work(patient_id='PAZ003', work_id=self.work_id)
+            task_id  = task['id']
+            step0_id = task['steps'][0]['id']
+            step1_id = task['steps'][1]['id']
+            step2_id = task['steps'][2]['id']
+
+            # User 1 completa step 0 -> step 1 attivato, user 2 riceve notifica
+            service.complete_step(task_id, step0_id, user_id='1')
+            # Leggo le notifiche prima che user 2 completi step 1
+            notifiche2_prima = self._get_unread_notifications(2)
+
+            # User 2 completa step 1 -> step 2 attivato (ma user 2 e' lo stesso)
+            updated = service.complete_step(task_id, step1_id, user_id='2')
+
+        # Step 2 deve essere active
+        s2 = next(s for s in updated['steps'] if s['id'] == step2_id)
+        self.assertEqual(s2['status'], 'active',
+            "Step 2 deve diventare 'active' dopo il completamento dello step 1")
+
+        # user 2 deve avere SOLO la notifica di quando user 1 ha completato step 0
+        # ma NON una seconda notifica (step1->step2 stesso operatore)
+        notifiche2_dopo = self._get_unread_notifications(2)
+        self.assertEqual(len(notifiche2_prima), 1,
+            f"User 2 dovrebbe avere 1 notifica dopo step0, ne ha {len(notifiche2_prima)}")
+        self.assertEqual(len(notifiche2_dopo), 1,
+            f"User 2 NON dovrebbe ricevere altra notifica (stesso operatore): ne ha {len(notifiche2_dopo)}")
+
+        print(f"\n  [OK] notifiche user2: {len(notifiche2_dopo)} (attesa 1, no duplicato stesso operatore)")
+
+    # ------------------------------------------------------------------
+    # Test 4: flusso completo via action (come chiama AutomationService)
+    # ------------------------------------------------------------------
+
+    def test_4_full_trigger_action(self):
+        """
+        Simula l'azione che AutomationService chiama quando DB_GUARDIA cambia a 3.
+        Usa il test DB, il mapping gia' caricato e verifica che la notifica venga
+        salvata per user 1 (primo step del work IMPL01).
+        """
+        from services.actions import system_actions
+        impl = system_actions.impl_create_task_from_work
+
+        # Contesto come arriva da _process_trigger_for_change (monitor preventivi)
+        context_data = {
+            'DB_GUARDIA':  '3',
+            'DB_PRONCOD':  'ROW_XYZ',   # id riga preventivo
+            'DB_PRELCOD':  'PIANO_ABC',  # piano di cura -> paziente (via dbf mock)
+            'DB_PRCODICE': 'IMPL01',     # codice prestazione -> mapping -> work_id
+            'trigger_id':  'IMPL01',
+        }
+
+        # Mock per get_dbf_data_service usato NELL'AZIONE (per risalire al paziente)
+        dbf_action_mock = MagicMock()
+        dbf_action_mock.get_patient_id_from_piano.return_value = 'PAZ010'
+
+        user_repo_mock = self._build_user_repo_mock()
+
+        # dbf mock per work_service (recupero nome paziente)
+        dbf_ws_mock = self._build_dbf_mock()
+
+        with patch.object(system_actions, 'get_database_manager', return_value=self.db_manager), \
+             patch.object(system_actions, 'get_dbf_data_service',  return_value=dbf_action_mock), \
+             patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_ws_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value = None
+
+            result = impl(context_data)
+
+        self.assertEqual(result.get('status'), 'success',
+            f"L'azione create_task_from_work e' fallita: {result}")
+        self.assertIn('task_id', result,
+            "Il risultato deve contenere 'task_id'")
+
+        # Notifica al user 1 (primo step del work)
+        notifiche = self._get_unread_notifications(1)
+        self.assertGreater(len(notifiche), 0,
+            "Nessuna notifica per user 1 dopo l'azione del trigger")
+        print(f"\n  [OK] trigger action: task={result['task_id']}, notifica user1='{notifiche[0]['message']}'")
+
+--- server_v2\services\notification_service.py::NotificationService (lines 9-71) ---
+class NotificationService:
+    """
+    Service for managing user notifications.
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.notification_repository = NotificationRepository(db_manager)
+        
+    def notify_user(self, user_id: int, message: str, type: str = 'info', link: str = None) -> Dict[str, Any]:
+        """Send a notification to a specific user via all available channels."""
+        logger.info(f"Notifying user {user_id}: {message}")
+        notification = self.notification_repository.create_notification(user_id, message, type, link)
+
+        # 1. Broadcast via WebSocket for real-time delivery (if user is online)
+        try:
+            from app_v2 import websocket_service
+            if websocket_service:
+                websocket_service.broadcast_notification(user_id, {
+                    'id': notification.get('id'),
+                    'message': message,
+                    'type': type,
+                    'link': link,
+                    'created_at': notification.get('created_at'),
+                    'is_read': False
+                })
+        except Exception as e:
+            logger.error(f"Failed to broadcast notification via WebSocket: {e}")
+
+        # 2. Send browser push notification (works even if browser is closed)
+        if type in ['info', 'warning', 'error']:
+            try:
+                from app_v2 import push_service
+                if push_service:
+                    # Extract title from message (first part before newline or full message)
+                    title_parts = message.split('\n', 1)
+                    title = title_parts[0][:50]  # Max 50 chars for title
+                    body = title_parts[1] if len(title_parts) > 1 else message[:100]
+
+                    # Determine urgency
+                    urgency = 'high' if type == 'error' else 'normal'
+
+                    push_service.send_notification(
+                        user_id=user_id,
+                        title=title,
+                        body=body,
+                        icon='/vite.svg',
+                        url=link or '/',
+                        tag=f'notification_{notification.get("id")}',
+                        urgency=urgency
+                    )
+                    logger.info(f"Push notification sent to user {user_id}")
+            except Exception as e:
+                logger.error(f"Failed to send push notification: {e}")
+
+        return notification
+        
+    def get_unread_notifications(self, user_id: int) -> List[Dict[str, Any]]:
+        """Get unread notifications for a user."""
+        return self.notification_repository.get_unread_for_user(user_id)
+        
+    def mark_read(self, notification_id: int) -> bool:
+        """Mark notification as read."""
+        return self.notification_repository.mark_as_read(notification_id)
+
+--- server_v2\repositories\notification_repository.py::NotificationRepository (lines 10-74) ---
+class NotificationRepository(BaseRepository):
+    """
+    Repository for managing user notifications.
+    """
+    
+    @property
+    def table_name(self) -> str:
+        return 'notifications'
+        
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+        self._ensure_tables_exist()
+        
+    def _ensure_tables_exist(self) -> None:
+        """Ensure notification table exists."""
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS notifications (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER NOT NULL,
+                        message TEXT NOT NULL,
+                        type TEXT DEFAULT 'info', -- info, warning, success, error
+                        link TEXT,
+                        read_at TIMESTAMP,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, read_at)')
+                
+        except Exception as e:
+            logger.error(f"Failed to ensure notification table: {e}")
+            raise RepositoryError(f"Failed to ensure notification table: {str(e)}", cause=e)
+
+    def create_notification(self, user_id: int, message: str, type: str = 'info', link: str = None) -> Dict[str, Any]:
+        """Create a new notification."""
+        data = {
+            'user_id': user_id,
+            'message': message,
+            'type': type,
+            'link': link
+        }
+        return self.create(data)
+
+    def get_unread_for_user(self, user_id: int) -> List[Dict[str, Any]]:
+        """Get unread notifications for a user."""
+        try:
+            query = "SELECT * FROM notifications WHERE user_id = ? AND read_at IS NULL ORDER BY created_at DESC"
+            results = self.execute_custom_query(query, (user_id,), fetch_all=True)
+            return [dict(row) for row in results] if results else []
+        except Exception as e:
+            logger.error(f"Failed to get notifications for user {user_id}: {e}")
+            return []
+
+    def mark_as_read(self, notification_id: int) -> bool:
+        """Mark a notification as read."""
+        try:
+            import datetime
+            update_data = {'read_at': datetime.datetime.now()}
+            result = self.update(notification_id, update_data)
+            return result is not None
+        except Exception as e:
+            logger.error(f"Failed to mark notification {notification_id} as read: {e}")
+            return False
+
+--- server_v2\tests\test_create_task_notification.py::test_1_create_task_notifica_primo_step (lines 112-148) ---
+    def test_1_create_task_notifica_primo_step(self):
+        """La creazione del task deve mandare la notifica al user del primo step."""
+        user_repo_mock = self._build_user_repo_mock()
+        dbf_mock       = self._build_dbf_mock()
+
+        with patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value = None
+
+            service = WorkService(self.db_manager)
+            task = service.create_task_from_work(patient_id='PAZ001', work_id=self.work_id)
+
+        self.assertIsNotNone(task, "Il task non e' stato creato")
+        self.assertEqual(task['patient_id'], 'PAZ001')
+        steps = task['steps']
+        self.assertEqual(len(steps), 3)
+
+        # Step 0 attivo, gli altri pending
+        self.assertEqual(steps[0]['status'], 'active',  "Step 0 deve essere 'active'")
+        self.assertEqual(steps[1]['status'], 'pending', "Step 1 deve essere 'pending'")
+        self.assertEqual(steps[2]['status'], 'pending', "Step 2 deve essere 'pending'")
+
+        # Notifica inviata al user 1
+        notifiche = self._get_unread_notifications(1)
+        self.assertGreater(len(notifiche), 0,
+            "Nessuna notifica trovata per user 1 dopo create_task_from_work")
+        msg = notifiche[0]['message']
+        self.assertIn('Prima visita', msg,
+            f"La notifica dovrebbe menzionare 'Prima visita', ma dice: '{msg}'")
+
+        # Nessuna notifica prematura al user 2
+        self.assertEqual(len(self._get_unread_notifications(2)), 0,
+            "Non ci devono essere notifiche per user 2 alla creazione del task")
+
+        print(f"\n  [OK] task={task['id']}, notifica user1='{msg}'")
+
+--- server_v2\tests\test_create_task_notification.py::test_2_complete_step_notifica_fase_successiva (lines 154-192) ---
+    def test_2_complete_step_notifica_fase_successiva(self):
+        """Completando lo step 0 (user 1), la notifica deve arrivare a user 2 (step 1)."""
+        user_repo_mock = self._build_user_repo_mock()
+        dbf_mock       = self._build_dbf_mock()
+
+        with patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value  = None
+            mock_todo_cls.return_value.auto_complete_step_todos.return_value = None
+
+            service = WorkService(self.db_manager)
+            task     = service.create_task_from_work(patient_id='PAZ002', work_id=self.work_id)
+            task_id  = task['id']
+            step0_id = task['steps'][0]['id']
+            step1_id = task['steps'][1]['id']
+
+            # Completa lo step 0 come user 1
+            updated = service.complete_step(task_id, step0_id, user_id='1')
+
+        # Step 0 completato
+        s0 = next(s for s in updated['steps'] if s['id'] == step0_id)
+        self.assertEqual(s0['status'], 'completed', "Step 0 deve essere 'completed'")
+
+        # Step 1 attivato automaticamente
+        s1 = next(s for s in updated['steps'] if s['id'] == step1_id)
+        self.assertEqual(s1['status'], 'active',
+            "Step 1 deve diventare 'active' dopo il completamento dello step 0")
+
+        # Notifica al user 2 per la fase successiva
+        notifiche2 = self._get_unread_notifications(2)
+        self.assertGreater(len(notifiche2), 0,
+            "Nessuna notifica trovata per user 2 dopo completamento step 0")
+        msg2 = notifiche2[0]['message']
+        self.assertIn('Chirurgia', msg2,
+            f"La notifica per user 2 dovrebbe menzionare 'Chirurgia', ma dice: '{msg2}'")
+
+        print(f"\n  [OK] step0 completato, notifica user2='{msg2}'")
+
+--- server_v2\tests\test_create_task_notification.py::test_3_nessuna_notifica_se_stesso_utente (lines 198-242) ---
+    def test_3_nessuna_notifica_se_stesso_utente(self):
+        """
+        Step 1 e step 2 sono entrambi di user 2.
+        Quando user 2 completa step 1, step 2 diventa active ma NON deve arrivare
+        una seconda notifica a user 2 (sarebbe ridondante perche' e' lo stesso operatore).
+        """
+        user_repo_mock = self._build_user_repo_mock()
+        dbf_mock       = self._build_dbf_mock()
+
+        with patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value    = None
+            mock_todo_cls.return_value.auto_complete_step_todos.return_value = None
+
+            service  = WorkService(self.db_manager)
+            task     = service.create_task_from_work(patient_id='PAZ003', work_id=self.work_id)
+            task_id  = task['id']
+            step0_id = task['steps'][0]['id']
+            step1_id = task['steps'][1]['id']
+            step2_id = task['steps'][2]['id']
+
+            # User 1 completa step 0 -> step 1 attivato, user 2 riceve notifica
+            service.complete_step(task_id, step0_id, user_id='1')
+            # Leggo le notifiche prima che user 2 completi step 1
+            notifiche2_prima = self._get_unread_notifications(2)
+
+            # User 2 completa step 1 -> step 2 attivato (ma user 2 e' lo stesso)
+            updated = service.complete_step(task_id, step1_id, user_id='2')
+
+        # Step 2 deve essere active
+        s2 = next(s for s in updated['steps'] if s['id'] == step2_id)
+        self.assertEqual(s2['status'], 'active',
+            "Step 2 deve diventare 'active' dopo il completamento dello step 1")
+
+        # user 2 deve avere SOLO la notifica di quando user 1 ha completato step 0
+        # ma NON una seconda notifica (step1->step2 stesso operatore)
+        notifiche2_dopo = self._get_unread_notifications(2)
+        self.assertEqual(len(notifiche2_prima), 1,
+            f"User 2 dovrebbe avere 1 notifica dopo step0, ne ha {len(notifiche2_prima)}")
+        self.assertEqual(len(notifiche2_dopo), 1,
+            f"User 2 NON dovrebbe ricevere altra notifica (stesso operatore): ne ha {len(notifiche2_dopo)}")
+
+        print(f"\n  [OK] notifiche user2: {len(notifiche2_dopo)} (attesa 1, no duplicato stesso operatore)")
+
+--- server_v2\api\v2_push.py::send_test_notification (lines 139-169) ---
+def send_test_notification():
+    """Send a test push notification (for debugging)."""
+    try:
+        from app_v2 import push_service
+
+        if not push_service:
+            return jsonify({
+                'success': False,
+                'error': 'Push notifications not configured'
+            }), 503
+
+        user = get_jwt_identity()
+        user_id = user['id'] if isinstance(user, dict) else user
+
+        result = push_service.send_notification(
+            user_id=user_id,
+            title="Test Notification",
+            body="This is a test push notification from Studio Dima AI!",
+            icon="/logo192.png",
+            url="/",
+            urgency='normal'
+        )
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Error sending test notification: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+--- server_v2\api\v2_push.py::send_test_notification_simple (lines 173-213) ---
+def send_test_notification_simple():
+    """
+    Test endpoint senza JWT per debug.
+    Accetta user_id, title, body come parametri query o JSON.
+    """
+    try:
+        from app_v2 import push_service
+
+        if not push_service:
+            return jsonify({
+                'success': False,
+                'error': 'Push notifications not configured'
+            }), 503
+
+        # Parametri da query string o JSON body
+        if request.method == 'POST' and request.is_json:
+            data = request.json
+        else:
+            data = request.args
+
+        user_id = int(data.get('user_id', 1))
+        title = data.get('title', 'Test Push Notification')
+        body = data.get('body', 'Questa e una notifica di test da Studio Dima AI!')
+
+        result = push_service.send_notification(
+            user_id=user_id,
+            title=title,
+            body=body,
+            icon='/vite.svg',
+            url='/',
+            urgency='normal'
+        )
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Error in test-simple endpoint: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+--- server_v2\services\notification_service.py::get_unread_notifications (lines 65-67) ---
+    def get_unread_notifications(self, user_id: int) -> List[Dict[str, Any]]:
+        """Get unread notifications for a user."""
+        return self.notification_repository.get_unread_for_user(user_id)
+
+--- server_v2\api\v2_notifications.py::get_notification_service (lines 20-23) ---
+def get_notification_service():
+    """Helper to instantiate NotificationService."""
+    db_manager = get_database_manager()
+    return NotificationService(db_manager)
+
+--- server_v2\api\v2_notifications.py::get_unread_notifications (lines 28-72) ---
+def get_unread_notifications():
+    """
+    Get unread notifications for the current user.
+
+    Returns:
+        JSON with unread notifications list
+    """
+    try:
+        user_identity = get_jwt_identity()
+        service = get_notification_service()
+
+        # Extract user_id from identity dict
+        if isinstance(user_identity, dict):
+            user_id = user_identity.get('id')
+        else:
+            user_id = user_identity
+
+        # Convert to int
+        try:
+            user_id_int = int(user_id)
+        except (ValueError, TypeError):
+            return format_response(
+                success=False,
+                error='Invalid user ID format',
+                state='error'
+            ), 400
+
+        notifications = service.get_unread_notifications(user_id_int)
+
+        return format_response(
+            success=True,
+            data={
+                'notifications': notifications,
+                'count': len(notifications)
+            },
+            state='success'
+        ), 200
+
+    except Exception as e:
+        logger.error(f"Error getting unread notifications: {e}")
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+--- server_v2\api\v2_notifications.py::mark_notification_read (lines 77-111) ---
+def mark_notification_read(notification_id):
+    """
+    Mark a notification as read.
+
+    Args:
+        notification_id: The notification ID to mark
+
+    Returns:
+        JSON with success status
+    """
+    try:
+        service = get_notification_service()
+
+        success = service.mark_read(notification_id)
+
+        if success:
+            return format_response(
+                success=True,
+                data={'message': 'Notification marked as read'},
+                state='success'
+            ), 200
+        else:
+            return format_response(
+                success=False,
+                error='Notification not found',
+                state='warning'
+            ), 404
+
+    except Exception as e:
+        logger.error(f"Error marking notification {notification_id} as read: {e}")
+        return format_response(
+            success=False,
+            error=str(e),
+            state='error'
+        ), 500
+
+--- server_v2\repositories\notification_repository.py::create_notification (lines 45-53) ---
+    def create_notification(self, user_id: int, message: str, type: str = 'info', link: str = None) -> Dict[str, Any]:
+        """Create a new notification."""
+        data = {
+            'user_id': user_id,
+            'message': message,
+            'type': type,
+            'link': link
+        }
+        return self.create(data)
+
+--- server_v2\services\push_notification_service.py::send_notification (lines 104-204) ---
+    def send_notification(
+        self,
+        user_id: int,
+        title: str,
+        body: str,
+        icon: Optional[str] = None,
+        url: Optional[str] = None,
+        tag: Optional[str] = None,
+        urgency: str = 'normal'
+    ) -> Dict[str, Any]:
+        """
+        Send push notification to all subscribed devices of a user.
+
+        Args:
+            user_id: Target user ID
+            title: Notification title
+            body: Notification body/message
+            icon: Icon URL (optional)
+            url: URL to open on click (optional)
+            tag: Notification tag for grouping/replacing (optional)
+            urgency: Urgency level ('normal', 'high') - affects delivery priority
+
+        Returns:
+            Dict with success status and results
+        """
+        try:
+            # Get all subscriptions for this user
+            subscriptions = self._get_user_subscriptions(user_id)
+
+            if not subscriptions:
+                logger.warning(f"No push subscriptions found for user {user_id}")
+                return {
+                    'success': False,
+                    'error': 'No subscriptions found',
+                    'sent_count': 0
+                }
+
+            # Prepare notification payload
+            notification_payload = {
+                'title': title,
+                'body': body,
+                'icon': icon or '/logo192.png',
+                'badge': '/badge-icon.png',
+                'tag': tag,
+                'data': {
+                    'url': url or '/',
+                    'timestamp': None  # Will be set by browser
+                },
+                'requireInteraction': urgency == 'high',  # Stay visible if urgent
+                'vibrate': [200, 100, 200] if urgency == 'high' else [100]
+            }
+
+            # Send to all subscriptions
+            sent_count = 0
+            failed_subscriptions = []
+
+            for sub in subscriptions:
+                try:
+                    subscription_info = {
+                        'endpoint': sub['endpoint'],
+                        'keys': {
+                            'p256dh': sub['p256dh'],
+                            'auth': sub['auth']
+                        }
+                    }
+
+                    webpush(
+                        subscription_info=subscription_info,
+                        data=json.dumps(notification_payload),
+                        vapid_private_key=self.vapid_private_key,
+                        vapid_claims=self.vapid_claims,
+                        ttl=86400  # 24 hours
+                    )
+
+                    sent_count += 1
+                    logger.info(f"Push notification sent to user {user_id} (endpoint: {sub['endpoint'][:50]}...)")
+
+                except WebPushException as e:
+                    logger.error(f"Failed to send push to endpoint {sub['endpoint']}: {e}")
+
+                    # If subscription is expired/invalid, remove it
+                    if e.response and e.response.status_code in [404, 410]:
+                        failed_subscriptions.append(sub['endpoint'])
+
+            # Clean up failed subscriptions
+            for endpoint in failed_subscriptions:
+                self.unsubscribe_user(user_id, endpoint)
+
+            return {
+                'success': sent_count > 0,
+                'sent_count': sent_count,
+                'failed_count': len(failed_subscriptions)
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to send push notification to user {user_id}: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'sent_count': 0
+            }
+
+--- server_v2\services\push_notification_service.py::send_notification_to_all (lines 206-229) ---
+    def send_notification_to_all(
+        self,
+        title: str,
+        body: str,
+        data: Optional[Dict[str, Any]] = None,
+        url: Optional[str] = None,
+        urgency: str = 'normal',
+    ) -> Dict[str, Any]:
+        """Invia push notification a tutti gli utenti con subscription attiva."""
+        try:
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT DISTINCT user_id FROM push_subscriptions')
+                user_ids = [row[0] for row in cursor.fetchall()]
+                cursor.close()
+            sent = 0
+            for uid in user_ids:
+                res = self.send_notification(user_id=uid, title=title, body=body, url=url, urgency=urgency)
+                if res.get('success'):
+                    sent += res.get('sent_count', 0)
+            return {'success': True, 'sent_to': len(user_ids), 'sent_count': sent}
+        except Exception as e:
+            logger.error(f"Errore send_notification_to_all: {e}")
+            return {'success': False, 'error': str(e)}
+
+--- server_v2\scripts\verify_user_notification.py::TestUserNotification (lines 12-85) ---
+class TestUserNotification(unittest.TestCase):
+    def setUp(self):
+        self.mock_db = MagicMock()
+        self.service = WorkService(self.mock_db)
+        self.service.task_repository = MagicMock()
+        self.service.get_task_details = MagicMock()
+        
+    @patch('services.notification_service.NotificationService')
+    def test_notification_trigger(self, MockNotificationService):
+        # Setup mocks
+        mock_notification_instance = MockNotificationService.return_value
+        
+        # Scenario: Completing Step 1 (by User A). Next is Step 2 (Assigned to User B).
+        current_user_id = "1" # User A
+        next_user_id = "2" # User B
+        
+        task_id = 100
+        step_id = 10
+        
+        # Mock step update returning the completed step
+        self.service.task_repository.update_step_status.return_value = {'id': step_id, 'order_index': 1}
+        
+        # Mock getting all steps (current and next)
+        self.service.task_repository.get_steps.return_value = [
+            {'id': 10, 'order_index': 1, 'status': 'completed', 'name': 'Step 1'},
+            {'id': 11, 'order_index': 2, 'status': 'pending', 'name': 'Step 2', 'user_id': next_user_id}
+        ]
+        
+        # Mock task details
+        self.service.get_task_details.return_value = {'id': task_id, 'description': 'Lavoro Test'}
+        
+        # Execute
+        self.service.complete_step(task_id, step_id, user_id=current_user_id)
+        
+        # Verify
+        # 1. Next step should be activated
+        self.service.task_repository.update_step_status.assert_any_call(11, 'active')
+        
+        # 2. Notification should be sent to next_user_id
+        mock_notification_instance.notify_user.assert_called_once()
+        args, kwargs = mock_notification_instance.notify_user.call_args
+        
+        print(f"\n[VERIFICA] Notifica inviata a User ID: {kwargs['user_id']}")
+        print(f"[VERIFICA] Messaggio: {kwargs['message']}")
+        
+        self.assertEqual(str(kwargs['user_id']), str(next_user_id))
+        self.assertIn('Lavoro Test', kwargs['message'])
+
+    @patch('services.notification_service.NotificationService')
+    def test_no_notification_same_user(self, MockNotificationService):
+        # Setup mocks
+        mock_notification_instance = MockNotificationService.return_value
+        
+        # Scenario: Completing Step 1 (by User A). Next is Step 2 (Assigned to User A).
+        current_user_id = "1" 
+        next_user_id = "1"
+        
+        task_id = 100
+        step_id = 10
+        
+        self.service.task_repository.update_step_status.return_value = {'id': step_id, 'order_index': 1}
+        self.service.task_repository.get_steps.return_value = [
+            {'id': 10, 'order_index': 1, 'status': 'completed', 'name': 'Step 1'},
+            {'id': 11, 'order_index': 2, 'status': 'pending', 'name': 'Step 2', 'user_id': next_user_id}
+        ]
+        self.service.get_task_details.return_value = {'id': task_id, 'description': 'Lavoro Test'}
+        
+        # Execute
+        self.service.complete_step(task_id, step_id, user_id=current_user_id)
+        
+        # Verify
+        # Notification should NOT be sent
+        mock_notification_instance.notify_user.assert_not_called()
+        print("\n[VERIFICA] Nessuna notifica inviata (stesso utente).")
+
+--- server_v2\tests\test_create_task_notification.py::tearDown (lines 76-81) ---
+    def tearDown(self):
+        self.db_manager.close()
+        try:
+            os.unlink(self.db_path)
+        except OSError:
+            pass
+
+--- server_v2\tests\test_create_task_notification.py::_get_unread_notifications (lines 87-88) ---
+    def _get_unread_notifications(self, user_id: int):
+        return NotificationRepository(self.db_manager).get_unread_for_user(user_id)
+
+--- server_v2\tests\test_create_task_notification.py::test_4_full_trigger_action (lines 248-294) ---
+    def test_4_full_trigger_action(self):
+        """
+        Simula l'azione che AutomationService chiama quando DB_GUARDIA cambia a 3.
+        Usa il test DB, il mapping gia' caricato e verifica che la notifica venga
+        salvata per user 1 (primo step del work IMPL01).
+        """
+        from services.actions import system_actions
+        impl = system_actions.impl_create_task_from_work
+
+        # Contesto come arriva da _process_trigger_for_change (monitor preventivi)
+        context_data = {
+            'DB_GUARDIA':  '3',
+            'DB_PRONCOD':  'ROW_XYZ',   # id riga preventivo
+            'DB_PRELCOD':  'PIANO_ABC',  # piano di cura -> paziente (via dbf mock)
+            'DB_PRCODICE': 'IMPL01',     # codice prestazione -> mapping -> work_id
+            'trigger_id':  'IMPL01',
+        }
+
+        # Mock per get_dbf_data_service usato NELL'AZIONE (per risalire al paziente)
+        dbf_action_mock = MagicMock()
+        dbf_action_mock.get_patient_id_from_piano.return_value = 'PAZ010'
+
+        user_repo_mock = self._build_user_repo_mock()
+
+        # dbf mock per work_service (recupero nome paziente)
+        dbf_ws_mock = self._build_dbf_mock()
+
+        with patch.object(system_actions, 'get_database_manager', return_value=self.db_manager), \
+             patch.object(system_actions, 'get_dbf_data_service',  return_value=dbf_action_mock), \
+             patch(self._PATCH_USER_REPO, return_value=user_repo_mock), \
+             patch(self._PATCH_DBF_WS,    return_value=dbf_ws_mock), \
+             patch(self._PATCH_TODO)       as mock_todo_cls:
+
+            mock_todo_cls.return_value.create_todo_from_step.return_value = None
+
+            result = impl(context_data)
+
+        self.assertEqual(result.get('status'), 'success',
+            f"L'azione create_task_from_work e' fallita: {result}")
+        self.assertIn('task_id', result,
+            "Il risultato deve contenere 'task_id'")
+
+        # Notifica al user 1 (primo step del work)
+        notifiche = self._get_unread_notifications(1)
+        self.assertGreater(len(notifiche), 0,
+            "Nessuna notifica per user 1 dopo l'azione del trigger")
+        print(f"\n  [OK] trigger action: task={result['task_id']}, notifica user1='{notifiche[0]['message']}'")
+
+=== CONNECTIONS ===
+- server_v2/api/v2_notifications.py
+  external:
+    - app_v2
+    - core.database_manager
+    - flask
+    - flask_jwt_extended
+    - logging
+    - services.notification_service
+- server_v2/api/v2_push.py
+  external:
+    - app_v2
+    - flask
+    - flask_jwt_extended
+    - logging
+- server_v2/repositories/notification_repository.py
+  external:
+    - core.base_repository
+    - core.database_manager
+    - core.exceptions
+    - datetime
+    - logging
+    - typing
+- server_v2/scripts/verify_user_notification.py
+  external:
+    - os
+    - services.work_service
+    - sys
+    - unittest
+    - unittest.mock
+- server_v2/services/notification_service.py
+  external:
+    - app_v2
+    - core.database_manager
+    - logging
+    - repositories.notification_repository
+    - typing
+- server_v2/services/push_notification_service.py
+  external:
+    - core.database_manager
+    - json
+    - logging
+    - pywebpush
+    - typing
+- server_v2/tests/test_create_task_notification.py
+  external:
+    - core.config
+    - core.database_manager
+    - os
+    - repositories.notification_repository
+    - repositories.prestazione_work_mapping_repository
+    - repositories.task_repository
+    - repositories.work_repository
+    - services.actions
+    - services.work_service
+    - sys
+    - tempfile
+    - unittest
+    - unittest.mock
+- server_v2/tests/test_push_notification.py
+  external:
+    - requests
+    - sys
+- client_v2/src/store/notifications.store.ts
+  internal:
+    - client_v2/src/services/api/notifications.service.ts
+    - client_v2/src/types/index.ts
+  external:
+    - zustand
+    - zustand/middleware
+    - zustand/middleware/immer
+- client_v2/src/services/api/notifications.service.ts
+  internal:
+    - client_v2/src/services/api/client.ts
+    - client_v2/src/types/index.ts

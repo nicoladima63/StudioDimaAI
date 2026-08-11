@@ -1,8 +1,9 @@
+from .query_terms import matched_terms, normalize_query_terms, tokenize_text
+
+
 def rank_files(files, query):
 
-    query = query.lower()
-
-    words = query.split()
+    words = normalize_query_terms(query)
 
     scored = []
 
@@ -12,7 +13,7 @@ def rank_files(files, query):
         path = file.get(
             "path",
             ""
-        ).lower()
+        )
 
         role = file.get(
             "role",
@@ -23,13 +24,21 @@ def rank_files(files, query):
         score = 0
 
 
+        path_terms = set(
+            tokenize_text(path)
+        )
+
+        filename_terms = set(
+            tokenize_text(path.split("/")[-1])
+        )
+
         for word in words:
 
-            if word in path:
+            if word in path_terms:
                 score += 10
 
 
-            if word in path.split("/")[-1]:
+            if word in filename_terms:
                 score += 20
 
 
@@ -45,9 +54,12 @@ def rank_files(files, query):
 
         matched_words = 0
 
-        for word in words:
-            if word in path:
-                matched_words += 1
+        matched_words = len(
+            matched_terms(
+                path,
+                words
+            )
+        )
 
 
         # bonus architettura solo se il file parla davvero del dominio

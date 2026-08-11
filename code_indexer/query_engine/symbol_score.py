@@ -1,3 +1,6 @@
+from .query_terms import matched_terms, normalize_query_terms
+
+
 ROLE_VALUE = {
 
     "class": 15,
@@ -73,10 +76,12 @@ def calculate_symbol_score(
 
     # corrispondenza query
 
-    for word in query.lower().split():
+    for word in matched_terms(
+        name,
+        normalize_query_terms(query)
+    ):
 
-        if word in name_lower:
-            score += 15
+        score += 15
 
 
 

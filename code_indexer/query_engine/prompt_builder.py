@@ -1,4 +1,68 @@
+from collections import defaultdict
 from ..core.context_models import QueryContext
+
+
+def _format_connections(connections, focus_paths):
+
+    grouped = defaultdict(lambda: {
+        "internal": set(),
+        "external": set()
+    })
+
+    for connection in connections:
+
+        if connection.get("relation") != "imports":
+            continue
+
+        source = connection.get("source", "")
+        source_path = source.removeprefix("file:")
+
+        if source_path not in focus_paths:
+            continue
+
+        target = connection.get("target", "").strip()
+        target_value = target.removeprefix("file:").strip(",;")
+
+        if target in {"", "{", "}"}:
+            continue
+
+        if not target_value:
+            continue
+
+        if (
+            target_value[0].isupper()
+            and "/" not in target_value
+        ):
+            continue
+
+        is_internal = (
+            target.startswith("file:")
+            or target.startswith("./")
+            or target.startswith("../")
+            or target.startswith("@/")
+        )
+
+        grouped[source_path][
+            "internal" if is_internal else "external"
+        ].add(target_value)
+
+    lines = []
+
+    for source_path, imports in grouped.items():
+
+        lines.append(f"- {source_path}")
+
+        if imports["internal"]:
+            lines.append("  internal:")
+            for target in sorted(imports["internal"]):
+                lines.append(f"    - {target}")
+
+        if imports["external"]:
+            lines.append("  external:")
+            for target in sorted(imports["external"]):
+                lines.append(f"    - {target}")
+
+    return lines
 
 
 def build_prompt_context(context: QueryContext):
@@ -14,7 +78,9 @@ def build_prompt_context(context: QueryContext):
         "\n=== PRIORITY FILES ==="
     )
 
-    for file in context.files[:50]:
+    priority_files = context.focus_files or context.files
+
+    for file in priority_files[:50]:
 
         matched_terms = ", ".join(
             file.get("matched_query_terms", [])
@@ -34,6 +100,11 @@ def build_prompt_context(context: QueryContext):
         "\n=== ARCHITECTURE ==="
     )
 
+    focus_paths = {
+        file.get("path")
+        for file in priority_files
+    }
+
     for role, files in context.architecture.items():
 
         lines.append(
@@ -41,6 +112,9 @@ def build_prompt_context(context: QueryContext):
         )
 
         for file in files:
+
+            if file not in focus_paths:
+                continue
 
             lines.append(
                 f"- {file}"
@@ -51,7 +125,12 @@ def build_prompt_context(context: QueryContext):
         "\n=== SYMBOLS ==="
     )
 
-    for symbol in context.symbols[:50]:
+    focus_symbols = [
+        symbol for symbol in context.symbols
+        if symbol.get("path") in focus_paths
+    ]
+
+    for symbol in focus_symbols[:50]:
 
         lines.append(
             f"- {symbol.get('name')} | {symbol.get('path')} | "
@@ -79,12 +158,11 @@ def build_prompt_context(context: QueryContext):
         "\n=== CONNECTIONS ==="
     )
 
-    for connection in context.connections[:50]:
-
-        lines.append(
-            f"- {connection.get('source')} "
-            f"--{connection.get('relation')}--> "
-            f"{connection.get('target')}"
+    lines.extend(
+        _format_connections(
+            context.connections,
+            focus_paths
         )
+    )
 
     return "\n".join(lines)

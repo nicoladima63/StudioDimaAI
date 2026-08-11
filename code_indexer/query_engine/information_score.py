@@ -1,4 +1,5 @@
 from collections import defaultdict
+from .query_terms import matched_terms, normalize_query_terms
 
 
 ROLE_VALUE = {
@@ -19,11 +20,7 @@ ROLE_VALUE = {
 
 
 def _query_words(query):
-    return [
-        word
-        for word in query.lower().split()
-        if len(word) > 2
-    ]
+    return normalize_query_terms(query)
 
 
 
@@ -97,10 +94,12 @@ def calculate_query_relevance(
         ]
     ).lower()
 
-    for word in query_words:
-
-        if word in file_text:
-            score += 6
+    score += 6 * len(
+        matched_terms(
+            file_text,
+            query_words
+        )
+    )
 
     file_symbols = [
         s for s in symbols
@@ -112,10 +111,12 @@ def calculate_query_relevance(
         for symbol in file_symbols
     ).lower()
 
-    for word in query_words:
-
-        if word in symbol_text:
-            score += 4
+    score += 4 * len(
+        matched_terms(
+            symbol_text,
+            query_words
+        )
+    )
 
     return min(
         score,
@@ -155,10 +156,15 @@ def calculate_score_breakdown(
         for symbol in file_symbols
     ).lower()
 
-    matched_query_terms = [
-        word for word in query_words
-        if word in file_text or word in symbol_text
-    ]
+    matched_query_terms = []
+
+    for word in matched_terms(file_text, query_words):
+        if word not in matched_query_terms:
+            matched_query_terms.append(word)
+
+    for word in matched_terms(symbol_text, query_words):
+        if word not in matched_query_terms:
+            matched_query_terms.append(word)
 
     query_relevance = calculate_query_relevance(
         file,
