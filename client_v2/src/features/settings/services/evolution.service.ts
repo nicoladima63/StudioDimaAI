@@ -69,6 +69,14 @@ const evolutionService = {
     return data.data
   },
 
+  async apiSyncHistory(): Promise<{ sync_started: boolean; message: string }> {
+    const { data } = await apiClient.post('/bot/evolution/sync-history')
+    if (!data.success) {
+      throw new Error(data.error || 'Impossibile avviare la sincronizzazione dello storico')
+    }
+    return data.data
+  },
+
   async apiLogoutInstance(): Promise<void> {
     await apiClient.post('/bot/whatsapp/logout')
   },

@@ -885,7 +885,14 @@ def get_evolution_conversation():
         r = requests.post(
             f'{EVOLUTION_BASE_URL}/chat/findMessages/{EVOLUTION_INSTANCE}',
             headers=_evo_headers(),
-            json={'where': {'key': {'remoteJid': jid}}, 'limit': 50},
+            # Evolution usa "offset" per la dimensione pagina; "limit" viene
+            # ignorato. Non filtrare per fromMe: devono essere restituiti sia i
+            # messaggi dello studio sia quelli ricevuti dal paziente.
+            json={
+                'where': {'key': {'remoteJid': jid}},
+                'offset': 100,
+                'page': 1,
+            },
             timeout=10,
         )
         if r.status_code != 200:
@@ -894,6 +901,64 @@ def get_evolution_conversation():
         return format_response({'messages': messages, 'jid': jid})
     except Exception as e:
         logger.warning(f'Errore recupero conversazione Evolution ({jid}): {e}')
+        return format_response(success=False, error='Evolution non raggiungibile', state='warning')
+
+
+@bot_v2_bp.route('/bot/evolution/sync-history', methods=['POST'])
+@jwt_required()
+def sync_evolution_history():
+    """Abilita lo storico completo e riavvia l'istanza per avviare la sincronizzazione."""
+    default_settings = {
+        'rejectCall': False,
+        'msgCall': '',
+        'groupsIgnore': False,
+        'alwaysOnline': False,
+        'readMessages': False,
+        'readStatus': False,
+        'syncFullHistory': True,
+        'wavoipToken': '',
+    }
+    try:
+        settings_response = requests.get(
+            f'{EVOLUTION_BASE_URL}/settings/find/{EVOLUTION_INSTANCE}',
+            headers=_evo_headers(), timeout=10,
+        )
+        if settings_response.status_code == 200:
+            saved = settings_response.json()
+            if isinstance(saved, dict):
+                saved = saved.get('settings', saved)
+                for key in default_settings:
+                    if key in saved and saved[key] is not None:
+                        default_settings[key] = saved[key]
+        default_settings['syncFullHistory'] = True
+
+        update_response = requests.post(
+            f'{EVOLUTION_BASE_URL}/settings/set/{EVOLUTION_INSTANCE}',
+            headers=_evo_headers(), json=default_settings, timeout=10,
+        )
+        if update_response.status_code not in (200, 201):
+            return format_response(
+                success=False,
+                error=f'Evolution API {update_response.status_code}: impossibile abilitare lo storico',
+                state='warning',
+            )
+
+        restart_response = requests.post(
+            f'{EVOLUTION_BASE_URL}/instance/restart/{EVOLUTION_INSTANCE}',
+            headers=_evo_headers(), json={}, timeout=15,
+        )
+        if restart_response.status_code not in (200, 201):
+            return format_response(
+                success=False,
+                error='Storico abilitato, ma il riavvio di WhatsApp non e riuscito. Riavvia l istanza.',
+                state='warning',
+            )
+        return format_response({
+            'sync_started': True,
+            'message': 'Sincronizzazione storico avviata. WhatsApp si riconnette per alcuni secondi.',
+        })
+    except Exception as e:
+        logger.warning(f'Errore sincronizzazione storico Evolution: {e}')
         return format_response(success=False, error='Evolution non raggiungibile', state='warning')
 
 
@@ -978,6 +1043,9 @@ def create_evolution_instance():
                 'instanceName': EVOLUTION_INSTANCE,
                 'integration': 'WHATSAPP-BAILEYS',
                 'qrcode': True,
+                # Al primo collegamento importa anche lo storico disponibile
+                # sul telefono, non solo i messaggi generati dall'API.
+                'syncFullHistory': True,
             },
             timeout=10
         )

@@ -35,7 +35,8 @@ _REMINDER_SCHEMA_SQL = """
         phone TEXT NOT NULL,
         has_whatsapp INTEGER DEFAULT NULL,
         wa_jid TEXT,
-        checked_at TEXT
+        checked_at TEXT,
+        verified_at TEXT
     );
     CREATE TABLE IF NOT EXISTS appointment_confirmations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,6 +97,13 @@ def _migrate_sqlite(conn: sqlite3.Connection):
             conn, "appointment_confirmations", "communication_id", "communication_id INTEGER"
         )
         _add_column_if_missing(conn, "appointment_confirmations", "received_at", "received_at TEXT")
+
+    if "pazienti_wa_cache" in {
+        r[0] for r in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table'"
+        ).fetchall()
+    }:
+        _add_column_if_missing(conn, "pazienti_wa_cache", "verified_at", "verified_at TEXT")
 
 
 def _insert_default_studio_hours(conn: sqlite3.Connection):

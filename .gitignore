@@ -63,6 +63,7 @@ yarn-error.log*
 .DS_Store
 
 **/test*.py
+!server_v2/tests/test_whatsapp_verification_cache.py
 
 app.log
 

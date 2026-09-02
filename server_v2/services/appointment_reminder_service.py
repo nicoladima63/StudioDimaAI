@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 EVOLUTION_BASE_URL = os.getenv('EVOLUTION_BASE_URL', 'http://127.0.0.1:8080')
 EVOLUTION_INSTANCE = os.getenv('EVOLUTION_INSTANCE', 'studio-instance')
+WA_CACHE_TTL_DAYS = 30
 
 REMINDER_MESSAGES = {
     '24h': {
@@ -242,22 +243,35 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
     Ordine: cache SQLite → studiobot_pazienti PostgreSQL → Evolution API.
     Ritorna (has_whatsapp, wa_jid).
     """
+    ensure_reminder_tables()
     phone_norm = _normalize_phone(phone)
+    if not _is_mobile(phone_norm):
+        return False, None
 
     # 1. Cache SQLite
     try:
         conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
         cur = conn.cursor()
         cur.execute(
-            "SELECT has_whatsapp, wa_jid, checked_at FROM pazienti_wa_cache WHERE patient_id = ?",
+            "SELECT phone, has_whatsapp, wa_jid, checked_at, verified_at "
+            "FROM pazienti_wa_cache WHERE patient_id = ?",
             (patient_id,)
         )
         row = cur.fetchone()
         conn.close()
-        if row and row[0] is not None:
-            checked_at = datetime.fromisoformat(row[2]) if row[2] else None
-            if checked_at and (datetime.now() - checked_at).days < 30:
-                return bool(row[0]), row[1]
+        if row and row[1] is not None:
+            cached_phone = _normalize_phone(row[0])
+            verified_at = row[4] or row[3]
+            checked_at = datetime.fromisoformat(verified_at) if verified_at else None
+            if (
+                cached_phone == phone_norm
+                and checked_at
+                and datetime.now() - checked_at < timedelta(days=WA_CACHE_TTL_DAYS)
+            ):
+                return bool(row[1]), row[2]
+
+            # Un numero modificato o una verifica scaduta non puo' decidere il canale.
+            _invalidate_wa_cache(patient_id)
     except Exception as e:
         logger.warning(f"Errore lettura wa_cache: {e}")
 
@@ -283,28 +297,44 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
                     return True, jid
             _save_wa_cache(patient_id, phone, False, None)
             return False, None
+        logger.warning(f"Evolution API check WA HTTP {r.status_code}")
     except Exception as e:
         logger.warning(f"Errore Evolution API check WA: {e}")
 
-    # Fallback: Evolution non raggiungibile e nessuna cache → assume WA per numeri mobili
-    phone_norm_jid = phone_norm + '@s.whatsapp.net'
-    return True, phone_norm_jid
+    # Non inventare un esito positivo quando Evolution non risponde: l'invio WA
+    # potrebbe fallire senza consegnare il reminder. Non salviamo questo esito.
+    return False, None
 
 
 def _save_wa_cache(patient_id: str, phone: str, has_wa: bool, jid: Optional[str]):
     try:
+        verified_at = datetime.now().isoformat()
         conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
         conn.execute("""
-            INSERT INTO pazienti_wa_cache (patient_id, phone, has_whatsapp, wa_jid, checked_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO pazienti_wa_cache
+                (patient_id, phone, has_whatsapp, wa_jid, checked_at, verified_at)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT(patient_id) DO UPDATE SET
                 phone=excluded.phone, has_whatsapp=excluded.has_whatsapp,
-                wa_jid=excluded.wa_jid, checked_at=excluded.checked_at
-        """, (patient_id, phone, 1 if has_wa else 0, jid, datetime.now().isoformat()))
+                wa_jid=excluded.wa_jid, checked_at=excluded.checked_at,
+                verified_at=excluded.verified_at
+        """, (patient_id, _normalize_phone(phone), 1 if has_wa else 0,
+              jid, verified_at, verified_at))
         conn.commit()
         conn.close()
     except Exception as e:
         logger.warning(f"Errore salvataggio wa_cache: {e}")
+
+
+def _invalidate_wa_cache(patient_id: str) -> None:
+    """Elimina un esito WA non piu' affidabile; il prossimo check sara' live."""
+    try:
+        conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
+        conn.execute("DELETE FROM pazienti_wa_cache WHERE patient_id = ?", (patient_id,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.warning(f"Errore invalidazione wa_cache: {e}")
 
 
 # ---------------------------------------------------------------------------

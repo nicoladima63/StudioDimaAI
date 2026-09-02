@@ -100,6 +100,7 @@ const EvolutionSettingsPage: React.FC = () => {
   const [starting, setStarting] = useState(false)
   const [stopping, setStopping] = useState(false)
   const [launchingDesktop, setLaunchingDesktop] = useState(false)
+  const [syncingHistory, setSyncingHistory] = useState(false)
   const [cmdOutput, setCmdOutput] = useState<{ text: string; ok: boolean } | null>(null)
   const [alert, setAlert] = useState<{ color: string; msg: string } | null>(null)
   const [selectedComm, setSelectedComm] = useState<RecentComm | null>(null)
@@ -239,6 +240,21 @@ const EvolutionSettingsPage: React.FC = () => {
     }
   }
 
+  const handleSyncHistory = async () => {
+    setSyncingHistory(true)
+    setAlert(null)
+    try {
+      const result = await evolutionService.apiSyncHistory()
+      setAlert({ color: 'info', msg: result.message })
+      setTimeout(loadStatus, 5000)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Sincronizzazione storico fallita'
+      setAlert({ color: 'danger', msg })
+    } finally {
+      setSyncingHistory(false)
+    }
+  }
+
   const handleCreateInstance = async () => {
     setCreating(true)
     setAlert(null)
@@ -359,10 +375,22 @@ const EvolutionSettingsPage: React.FC = () => {
       <PageLayout.Header
         title="WhatsApp Reminder — Stato Sistema"
         headerAction={
-          <CButton color="info" variant="outline" onClick={loadStatus} disabled={loading}>
-            {loading ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilReload} className="me-1" />}
-            Aggiorna
-          </CButton>
+          <div className="d-flex gap-2">
+            <CButton
+              color="primary"
+              variant="outline"
+              onClick={handleSyncHistory}
+              disabled={syncingHistory || status?.wa_state !== 'open'}
+              title="Abilita e importa la cronologia WhatsApp completa"
+            >
+              {syncingHistory ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilChatBubble} className="me-1" />}
+              Sincronizza chat
+            </CButton>
+            <CButton color="info" variant="outline" onClick={loadStatus} disabled={loading}>
+              {loading ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilReload} className="me-1" />}
+              Aggiorna
+            </CButton>
+          </div>
         }
       />
       <PageLayout.ContentBody>
