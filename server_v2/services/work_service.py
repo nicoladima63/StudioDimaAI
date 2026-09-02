@@ -28,6 +28,14 @@ class WorkService(BaseService):
         """Get all work templates."""
         result = self.work_repository.list()
         return result.data
+
+    @staticmethod
+    def _get_non_admin_users(user_repository) -> List[Dict[str, Any]]:
+        """Return every real user eligible for work-phase notifications."""
+        return [
+            user for user in user_repository.get_all()
+            if str(user.get('role') or '').strip().lower() != 'admin'
+        ]
         
     def get_work_details(self, work_id: int) -> Optional[Dict[str, Any]]:
         """Get full work template details with steps."""
@@ -120,7 +128,7 @@ class WorkService(BaseService):
                         link = f"/works/{task['id']}"
 
                         if first_user_id == 'tutti':
-                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
+                            all_users = self._get_non_admin_users(user_repository)
                             for u in all_users:
                                 msg = f"{u['username']}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
                                 notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
@@ -246,7 +254,7 @@ class WorkService(BaseService):
 
                         if next_user_id == 'tutti':
                             # Notifica tutti gli utenti non-admin
-                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
+                            all_users = self._get_non_admin_users(user_repository)
                             for u in all_users:
                                 msg = f"{current_username} ha completato la sua fase per {patient_name}. {u['username']}, hai la tua fase da completare: '{next_step['name']}'"
                                 notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
