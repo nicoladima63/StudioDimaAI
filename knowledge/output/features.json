@@ -1,0 +1,495 @@
+[
+  {
+    "id": "feature:admin",
+    "name": "admin",
+    "files": [
+      "client_v2/src/features/admin/services/adminService.ts"
+    ],
+    "roles": {
+      "service": 1
+    },
+    "entities_count": 0,
+    "relationships_count": 3
+  },
+  {
+    "id": "feature:auth",
+    "name": "auth",
+    "files": [
+      "client_v2/src/features/auth/pages/LoginPage.tsx",
+      "client_v2/src/features/auth/pages/RegisterPage.tsx"
+    ],
+    "roles": {
+      "page": 2
+    },
+    "entities_count": 3,
+    "relationships_count": 15
+  },
+  {
+    "id": "feature:automation",
+    "name": "automation",
+    "files": [
+      "client_v2/src/features/automation/pages/AutomationMessages.tsx",
+      "client_v2/src/features/automation/services/automationMessagesService.ts"
+    ],
+    "roles": {
+      "page": 1,
+      "service": 1
+    },
+    "entities_count": 3,
+    "relationships_count": 5
+  },
+  {
+    "id": "feature:bot",
+    "name": "bot",
+    "files": [
+      "client_v2/src/features/bot/components/ConversazioniTab.tsx",
+      "client_v2/src/features/bot/components/ReminderRepliesTab.tsx",
+      "client_v2/src/features/bot/components/ServiziTab.tsx",
+      "client_v2/src/features/bot/components/SimulazioneTab.tsx",
+      "client_v2/src/features/bot/components/StoricoComunicazioniTab.tsx",
+      "client_v2/src/features/bot/components/StudioInfoTab.tsx",
+      "client_v2/src/features/bot/pages/BotPage.tsx",
+      "client_v2/src/features/bot/services/botService.ts",
+      "client_v2/src/features/bot/types/bot.types.ts"
+    ],
+    "roles": {
+      "component": 6,
+      "page": 1,
+      "service": 1,
+      "types": 1
+    },
+    "entities_count": 25,
+    "relationships_count": 57
+  },
+  {
+    "id": "feature:calendar",
+    "name": "calendar",
+    "files": [
+      "client_v2/src/features/calendar/components/AutoSyncModal.tsx",
+      "client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+      "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "client_v2/src/features/calendar/hook/useCalendarHealth.ts",
+      "client_v2/src/features/calendar/pages/CalendarPage.tsx",
+      "client_v2/src/features/calendar/services/calendar.service.ts",
+      "client_v2/src/features/calendar/services/calendarHealthCheck.ts"
+    ],
+    "roles": {
+      "component": 4,
+      "feature": 1,
+      "page": 1,
+      "service": 2
+    },
+    "entities_count": 27,
+    "relationships_count": 52
+  },
+  {
+    "id": "feature:cbct",
+    "name": "cbct",
+    "files": [
+      "client_v2/src/features/cbct/pages/DownloadTacPage.tsx",
+      "client_v2/src/features/cbct/services/cbct.service.ts"
+    ],
+    "roles": {
+      "page": 1,
+      "service": 1
+    },
+    "entities_count": 2,
+    "relationships_count": 10
+  },
+  {
+    "id": "feature:collaboratori",
+    "name": "collaboratori",
+    "files": [
+      "client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+      "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx"
+    ],
+    "roles": {
+      "component": 1,
+      "page": 1
+    },
+    "entities_count": 4,
+    "relationships_count": 13
+  },
+  {
+    "id": "feature:conti",
+    "name": "conti",
+    "files": [
+      "client_v2/src/features/conti/components/ColumnDefinition.ts",
+      "client_v2/src/features/conti/components/ContiTable.tsx",
+      "client_v2/src/features/conti/components/SmartTable.tsx",
+      "client_v2/src/features/conti/pages/ContiPage.tsx"
+    ],
+    "roles": {
+      "component": 3,
+      "page": 1
+    },
+    "entities_count": 12,
+    "relationships_count": 13
+  },
+  {
+    "id": "feature:dashboard",
+    "name": "dashboard",
+    "files": [
+      "client_v2/src/features/dashboard/components/ActiveWorkCard.tsx",
+      "client_v2/src/features/dashboard/components/CalendarAutomation.tsx",
+      "client_v2/src/features/dashboard/components/DashboardStats.tsx",
+      "client_v2/src/features/dashboard/components/DatabaseStatusCard.tsx",
+      "client_v2/src/features/dashboard/components/MonitorRules.tsx",
+      "client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+      "client_v2/src/features/dashboard/components/RecallAutomationCard.tsx",
+      "client_v2/src/features/dashboard/components/ReminderAutomationCard.tsx",
+      "client_v2/src/features/dashboard/components/ServiceStatusCard.tsx",
+      "client_v2/src/features/dashboard/components/ServicesStatusSection.tsx",
+      "client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "client_v2/src/features/dashboard/components/TodoWidget.tsx",
+      "client_v2/src/features/dashboard/components/WhatsAppStatusWidget.tsx",
+      "client_v2/src/features/dashboard/pages/Dashboard.tsx"
+    ],
+    "roles": {
+      "component": 13,
+      "page": 1
+    },
+    "entities_count": 50,
+    "relationships_count": 105
+  },
+  {
+    "id": "feature:economics",
+    "name": "economics",
+    "files": [
+      "client_v2/src/features/economics/components/BreakEvenIndicator.tsx",
+      "client_v2/src/features/economics/components/CollaboratoriRedditivita.tsx",
+      "client_v2/src/features/economics/components/ComparisonChart.tsx",
+      "client_v2/src/features/economics/components/DashboardTab.tsx",
+      "client_v2/src/features/economics/components/ForecastChart.tsx",
+      "client_v2/src/features/economics/components/ForecastTab.tsx",
+      "client_v2/src/features/economics/components/HealthPulse.tsx",
+      "client_v2/src/features/economics/components/KpiCard.tsx",
+      "client_v2/src/features/economics/components/MonthlyChart.tsx",
+      "client_v2/src/features/economics/components/MultiYearChart.tsx",
+      "client_v2/src/features/economics/components/ReportAppuntamenti.tsx",
+      "client_v2/src/features/economics/components/ReportPrestazioni.tsx",
+      "client_v2/src/features/economics/components/SimulatoreTab.tsx",
+      "client_v2/src/features/economics/components/TrimesterForecastCard.tsx",
+      "client_v2/src/features/economics/pages/AnalisiComparativaPage.tsx",
+      "client_v2/src/features/economics/pages/CentroCostoPage.tsx",
+      "client_v2/src/features/economics/pages/EconomicsPage.tsx",
+      "client_v2/src/features/economics/services/economics.service.ts",
+      "client_v2/src/features/economics/types.ts"
+    ],
+    "roles": {
+      "component": 14,
+      "page": 3,
+      "service": 1,
+      "feature": 1
+    },
+    "entities_count": 27,
+    "relationships_count": 109
+  },
+  {
+    "id": "feature:email",
+    "name": "email",
+    "files": [
+      "client_v2/src/features/email/components/EmailAiConfig.tsx",
+      "client_v2/src/features/email/components/EmailDetail.tsx",
+      "client_v2/src/features/email/components/EmailList.tsx",
+      "client_v2/src/features/email/components/EmailOAuthSetup.tsx",
+      "client_v2/src/features/email/components/EmailRulesManager.tsx",
+      "client_v2/src/features/email/components/EmailScopeFilter.tsx",
+      "client_v2/src/features/email/components/EmailScopesManager.tsx",
+      "client_v2/src/features/email/components/TagInput.tsx",
+      "client_v2/src/features/email/pages/EmailPage.tsx",
+      "client_v2/src/features/email/services/emailService.ts",
+      "client_v2/src/features/email/store/email.store.ts",
+      "client_v2/src/features/email/types/email.types.ts"
+    ],
+    "roles": {
+      "component": 8,
+      "page": 1,
+      "service": 1,
+      "state": 1,
+      "types": 1
+    },
+    "entities_count": 27,
+    "relationships_count": 83
+  },
+  {
+    "id": "feature:fornitori",
+    "name": "fornitori",
+    "files": [
+      "client_v2/src/features/fornitori/components/ClassificazioneCompleta.tsx",
+      "client_v2/src/features/fornitori/components/ClassificazioneGerarchica.tsx",
+      "client_v2/src/features/fornitori/components/ClassificazioneStatus.tsx",
+      "client_v2/src/features/fornitori/components/ClassificazioneToggle.tsx",
+      "client_v2/src/features/fornitori/components/FornitoriTable.tsx",
+      "client_v2/src/features/fornitori/hooks/useFornitoreModals.ts",
+      "client_v2/src/features/fornitori/pages/FornitoriClassificazione.tsx",
+      "client_v2/src/features/fornitori/pages/FornitoriPage.tsx",
+      "client_v2/src/features/fornitori/services/classificazioni.service.ts",
+      "client_v2/src/features/fornitori/types/index.ts"
+    ],
+    "roles": {
+      "component": 5,
+      "hook": 1,
+      "page": 2,
+      "service": 1,
+      "types": 1
+    },
+    "entities_count": 42,
+    "relationships_count": 74
+  },
+  {
+    "id": "feature:lavorazioni",
+    "name": "lavorazioni",
+    "files": [
+      "client_v2/src/features/lavorazioni/ProvidersPage.tsx",
+      "client_v2/src/features/lavorazioni/StepsPage.tsx",
+      "client_v2/src/features/lavorazioni/TasksPage.tsx",
+      "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+      "client_v2/src/features/lavorazioni/WorksPage.tsx"
+    ],
+    "roles": {
+      "feature": 6
+    },
+    "entities_count": 31,
+    "relationships_count": 64
+  },
+  {
+    "id": "feature:materiali",
+    "name": "materiali",
+    "files": [
+      "client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+      "client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+      "client_v2/src/features/materiali/components/MaterialiTable.tsx",
+      "client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+      "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "client_v2/src/features/materiali/pages/RicercaArticoli.tsx",
+      "client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "client_v2/src/features/materiali/services/materiali-migration.service.ts"
+    ],
+    "roles": {
+      "component": 3,
+      "page": 3,
+      "service": 2
+    },
+    "entities_count": 37,
+    "relationships_count": 58
+  },
+  {
+    "id": "feature:pazienti",
+    "name": "pazienti",
+    "files": [
+      "client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+      "client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+      "client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+      "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+      "client_v2/src/features/pazienti/services/marketing.service.ts",
+      "client_v2/src/features/pazienti/services/richiami.service.ts"
+    ],
+    "roles": {
+      "component": 6,
+      "page": 3,
+      "service": 2
+    },
+    "entities_count": 31,
+    "relationships_count": 74
+  },
+  {
+    "id": "feature:ricetta-elettronica",
+    "name": "ricetta-elettronica",
+    "files": [
+      "client_v2/src/features/ricetta-elettronica/components/ListaRicetteTest.tsx",
+      "client_v2/src/features/ricetta-elettronica/components/RicettaAuthStatus.tsx",
+      "client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx",
+      "client_v2/src/features/ricetta-elettronica/components/RicettePaziente.tsx",
+      "client_v2/src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx",
+      "client_v2/src/features/ricetta-elettronica/components/TestInvioRicetta.tsx",
+      "client_v2/src/features/ricetta-elettronica/components/TestSistemaTSRaw.tsx",
+      "client_v2/src/features/ricetta-elettronica/hooks/usePazienteModals.ts",
+      "client_v2/src/features/ricetta-elettronica/pages/RNETestPage.tsx",
+      "client_v2/src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx"
+    ],
+    "roles": {
+      "component": 7,
+      "hook": 1,
+      "page": 2
+    },
+    "entities_count": 47,
+    "relationships_count": 50
+  },
+  {
+    "id": "feature:scheduler",
+    "name": "scheduler",
+    "files": [
+      "client_v2/src/features/scheduler/pages/SchedulerPage.tsx",
+      "client_v2/src/features/scheduler/services/remindersService.ts",
+      "client_v2/src/features/scheduler/services/schedulerService.ts"
+    ],
+    "roles": {
+      "page": 1,
+      "service": 2
+    },
+    "entities_count": 9,
+    "relationships_count": 22
+  },
+  {
+    "id": "feature:seo",
+    "name": "seo",
+    "files": [
+      "client_v2/src/features/seo/pages/SeoPage.tsx",
+      "client_v2/src/features/seo/services/seoService.ts"
+    ],
+    "roles": {
+      "page": 1,
+      "service": 1
+    },
+    "entities_count": 9,
+    "relationships_count": 13
+  },
+  {
+    "id": "feature:settings",
+    "name": "settings",
+    "files": [
+      "client_v2/src/features/settings/components/SmsSettingsCard.tsx",
+      "client_v2/src/features/settings/components/TemplateEditor.tsx",
+      "client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+      "client_v2/src/features/settings/components/monitor/CreateMonitorModal.tsx",
+      "client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx",
+      "client_v2/src/features/settings/components/monitor/ListaRegole.tsx",
+      "client_v2/src/features/settings/components/monitor/LogMonitorCard.tsx",
+      "client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+      "client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+      "client_v2/src/features/settings/components/monitor/StatoMonitorCard.tsx",
+      "client_v2/src/features/settings/components/monitor/TipiAppuntamentoSelect.tsx",
+      "client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx",
+      "client_v2/src/features/settings/pages/AutomationPage.tsx",
+      "client_v2/src/features/settings/pages/CalendarSettings.tsx",
+      "client_v2/src/features/settings/pages/DayReminderSettings.tsx",
+      "client_v2/src/features/settings/pages/EvolutionSettingsPage.tsx",
+      "client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx",
+      "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+      "client_v2/src/features/settings/pages/MonitoringSettings.tsx",
+      "client_v2/src/features/settings/pages/TemplatesPage copy.tsx",
+      "client_v2/src/features/settings/pages/TemplatesPage.tsx",
+      "client_v2/src/features/settings/services/automation.service.ts",
+      "client_v2/src/features/settings/services/changes.service.ts",
+      "client_v2/src/features/settings/services/dayReminder.service.ts",
+      "client_v2/src/features/settings/services/environment.service.ts",
+      "client_v2/src/features/settings/services/evolution.service.ts",
+      "client_v2/src/features/settings/services/monitoring.service.ts",
+      "client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+      "client_v2/src/features/settings/services/templates.service.ts"
+    ],
+    "roles": {
+      "component": 12,
+      "page": 9,
+      "service": 8
+    },
+    "entities_count": 102,
+    "relationships_count": 178
+  },
+  {
+    "id": "feature:simulation",
+    "name": "simulation",
+    "files": [
+      "client_v2/src/features/simulation/components/EmailSimulationTab.tsx",
+      "client_v2/src/features/simulation/components/PreviewDialog.tsx",
+      "client_v2/src/features/simulation/components/RecallSimulationTab.tsx",
+      "client_v2/src/features/simulation/components/ReminderSimulationTab.tsx",
+      "client_v2/src/features/simulation/pages/SimulationDashboard.tsx",
+      "client_v2/src/features/simulation/services/simulation.service.ts"
+    ],
+    "roles": {
+      "component": 4,
+      "page": 1,
+      "service": 1
+    },
+    "entities_count": 2,
+    "relationships_count": 34
+  },
+  {
+    "id": "feature:spese",
+    "name": "spese",
+    "files": [
+      "client_v2/src/features/spese/components/RiepilogoSpeseTab.tsx",
+      "client_v2/src/features/spese/components/SpeseAggregatedTable.tsx",
+      "client_v2/src/features/spese/components/SpeseFilters.tsx",
+      "client_v2/src/features/spese/components/SpeseStats.tsx",
+      "client_v2/src/features/spese/components/SpeseTable.tsx",
+      "client_v2/src/features/spese/hooks/useAutoCategorization.ts",
+      "client_v2/src/features/spese/index.ts",
+      "client_v2/src/features/spese/pages/SpesePage.tsx",
+      "client_v2/src/features/spese/services/spese.service.ts",
+      "client_v2/src/features/spese/types.ts",
+      "client_v2/src/features/spese/utils/autoCategorization.ts",
+      "client_v2/src/features/spese/utils/autoLearning.ts",
+      "client_v2/src/features/spese/utils/studioClassification.ts",
+      "client_v2/src/features/spese/utils/testCategorization.ts"
+    ],
+    "roles": {
+      "component": 5,
+      "hook": 1,
+      "feature": 2,
+      "page": 1,
+      "service": 1,
+      "utility": 4
+    },
+    "entities_count": 23,
+    "relationships_count": 51
+  },
+  {
+    "id": "feature:tempo",
+    "name": "tempo",
+    "files": [
+      "client_v2/src/features/tempo/pages/TempoPage.tsx"
+    ],
+    "roles": {
+      "page": 1
+    },
+    "entities_count": 15,
+    "relationships_count": 7
+  },
+  {
+    "id": "feature:test",
+    "name": "test",
+    "files": [
+      "client_v2/src/features/test/TestSelectPage.tsx"
+    ],
+    "roles": {
+      "feature": 1
+    },
+    "entities_count": 2,
+    "relationships_count": 10
+  },
+  {
+    "id": "feature:todos",
+    "name": "todos",
+    "files": [
+      "client_v2/src/features/todos/pages/TodosPage.tsx"
+    ],
+    "roles": {
+      "page": 1
+    },
+    "entities_count": 10,
+    "relationships_count": 12
+  },
+  {
+    "id": "feature:users",
+    "name": "users",
+    "files": [
+      "client_v2/src/features/users/UserForm.tsx",
+      "client_v2/src/features/users/UserListPage.tsx"
+    ],
+    "roles": {
+      "feature": 2
+    },
+    "entities_count": 6,
+    "relationships_count": 21
+  }
+]

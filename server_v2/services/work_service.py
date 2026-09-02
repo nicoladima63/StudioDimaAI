@@ -289,6 +289,41 @@ class WorkService(BaseService):
             logger.error(f"Failed to complete step: {e}")
             raise ServiceError(f"Failed to complete step: {str(e)}")
 
+    def undo_complete_step(self, task_id: int, step_id: int) -> Dict[str, Any]:
+        """Return the most recently completed phase to the active state."""
+        try:
+            task = self.task_repository.get_task_with_steps(task_id)
+            if not task:
+                return None
+
+            steps = sorted(task.get('steps', []), key=lambda step: step['order_index'])
+            step = next((item for item in steps if item['id'] == step_id), None)
+            if not step:
+                raise ValidationError(f"Step {step_id} does not belong to task {task_id}")
+            if step['status'] != 'completed':
+                raise ValidationError("Only completed steps can be restored")
+
+            # Do not break the sequential workflow: undo is allowed only on the
+            # last completed phase, so no already-completed later phase exists.
+            if any(item['order_index'] > step['order_index'] and item['status'] == 'completed' for item in steps):
+                raise ValidationError("Restore the later completed phases first")
+
+            self.task_repository.update_step_status(step_id, 'active')
+            for item in steps:
+                if item['order_index'] > step['order_index'] and item['status'] == 'active':
+                    self.task_repository.update_step_status(item['id'], 'pending')
+
+            self.task_repository.update(task_id, {
+                'status': 'active',
+                'completed_at': None,
+                'updated_at': datetime.utcnow().isoformat()
+            })
+            logger.info(f"Completion of step {step_id} for task {task_id} undone")
+            return self.get_task_details(task_id)
+        except Exception as e:
+            logger.error(f"Failed to undo completion of step {step_id}: {e}")
+            raise ServiceError(f"Failed to undo completion of step: {str(e)}")
+
     def delete_task(self, task_id: int) -> bool:
         """Delete a task."""
         try:

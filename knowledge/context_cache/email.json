@@ -1,0 +1,773 @@
+{
+  "schema_version": 1,
+  "task": "email",
+  "files": [
+    {
+      "path": "server_v2/services/email_service.py",
+      "role": "service",
+      "score": 30,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "base64",
+        "logging",
+        "re",
+        "typing",
+        "email.utils",
+        "html",
+        "core.google_gmail_client",
+        "core.paths",
+        "core.exceptions",
+        "repositories.email_repository"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/api/v2_email.py",
+      "role": "api",
+      "score": 29,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "os",
+        "logging",
+        "flask",
+        "flask_jwt_extended",
+        "app_v2",
+        "services.email_service",
+        "core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/repositories/email_repository.py",
+      "role": "repository",
+      "score": 24,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "logging",
+        "typing",
+        "core.base_repository",
+        "core.database_manager",
+        "core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/ricetta_email_service.py",
+      "role": "service",
+      "score": 21,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "os",
+        "base64",
+        "smtplib",
+        "logging",
+        "email.mime.multipart",
+        "email.mime.text",
+        "email.mime.base",
+        "email"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/email/components/EmailRulesManager.tsx",
+      "role": "component",
+      "score": 19,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../services/emailService",
+        "../types/email.types",
+        "../store/email.store",
+        "file:client_v2/src/features/email/components/TagInput.tsx"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/email/services/emailService.ts",
+      "role": "service",
+      "score": 18,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts",
+        "type",
+        "../types/email.types"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/email/components/TagInput.tsx",
+      "role": "component",
+      "score": 16,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "react",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons"
+      ],
+      "callers": [
+        "file:client_v2/src/features/email/components/EmailRulesManager.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/email/pages/EmailPage.tsx",
+      "role": "page",
+      "score": 14,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "file:client_v2/src/components/layout/PageLayout.tsx",
+        "../components/EmailList",
+        "../components/EmailDetail",
+        "../components/EmailScopeFilter",
+        "../components/EmailScopesManager",
+        "../components/EmailRulesManager",
+        "../components/EmailAiConfig"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/email/components/EmailDetail.tsx",
+      "role": "component",
+      "score": 14,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../services/emailService",
+        "../types/email.types"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/email/components/EmailList.tsx",
+      "role": "component",
+      "score": 13,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../types/email.types"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/email/store/email.store.ts",
+      "role": "state",
+      "score": 13,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "zustand",
+        "zustand/middleware",
+        "zustand/middleware/immer",
+        "../services/emailService",
+        "../types/email.types"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/email/components/EmailAiConfig.tsx",
+      "role": "component",
+      "score": 12,
+      "matched_terms": [
+        "email"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../services/emailService",
+        "../types/email.types"
+      ],
+      "callers": []
+    }
+  ],
+  "symbols": [
+    {
+      "name": "EmailService",
+      "kind": "class",
+      "path": "server_v2/services/email_service.py",
+      "line": 21,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "EmailScopeRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/email_repository.py",
+      "line": 10,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "EmailRuleRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/email_repository.py",
+      "line": 127,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "EmailAiConfigRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/email_repository.py",
+      "line": 185,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "EmailCacheRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/email_repository.py",
+      "line": 214,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "get_emails",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 63,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_email_detail",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 100,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "classify_email_by_rules",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 214,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "classify_email_ai",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 274,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "classify_email",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 340,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_relevant_emails",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 386,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "invia_pdf_ricetta_email",
+      "kind": "function",
+      "path": "server_v2/services/ricetta_email_service.py",
+      "line": 17,
+      "information_score": 39,
+      "category": "domain"
+    },
+    {
+      "name": "get_emails",
+      "kind": "function",
+      "path": "server_v2/api/v2_email.py",
+      "line": 88,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_email_detail",
+      "kind": "function",
+      "path": "server_v2/api/v2_email.py",
+      "line": 134,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_relevant_emails",
+      "kind": "function",
+      "path": "server_v2/api/v2_email.py",
+      "line": 169,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "handleSelectEmail",
+      "kind": "component",
+      "path": "client_v2/src/features/email/pages/EmailPage.tsx",
+      "line": 69,
+      "information_score": 25,
+      "category": "support"
+    },
+    {
+      "name": "get_oauth_url",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 45,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_oauth_status",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 53,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_labels",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 114,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "_get_email_field",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 233,
+      "information_score": 24,
+      "category": "internal"
+    },
+    {
+      "name": "get_scopes",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 430,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_active_scopes",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 433,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "create_scope",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 436,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "update_scope",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 439,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "delete_scope",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 442,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_rules",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 449,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "create_rule",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 454,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "update_rule",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 457,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "delete_rule",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 460,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_ai_config",
+      "kind": "function",
+      "path": "server_v2/services/email_service.py",
+      "line": 467,
+      "information_score": 24,
+      "category": "support"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/features/email/components/EmailRulesManager.tsx",
+      "target": "file:client_v2/src/features/email/components/TagInput.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/email/components/EmailRulesManager.tsx",
+      "to": "file:client_v2/src/features/email/components/TagInput.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/email/pages/EmailPage.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/email/pages/EmailPage.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/email/services/emailService.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/oauth/url",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/oauth/status",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/messages",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/messages/relevant",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/labels",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/scopes",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/rules",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/ai/config",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/ai/test",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/email/services/emailService.ts",
+      "relation": "calls_route",
+      "target": "route:/email/cache/clear",
+      "method": "POST"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:25:get_gmail_oauth_url",
+      "relation": "exposes_route",
+      "target": "route:/email/oauth/url",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:61:gmail_oauth_status",
+      "relation": "exposes_route",
+      "target": "route:/email/oauth/status",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:88:get_emails",
+      "relation": "exposes_route",
+      "target": "route:/email/messages",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:134:get_email_detail",
+      "relation": "exposes_route",
+      "target": "route:/email/messages/<message_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:169:get_relevant_emails",
+      "relation": "exposes_route",
+      "target": "route:/email/messages/relevant",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:207:get_labels",
+      "relation": "exposes_route",
+      "target": "route:/email/labels",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:240:get_scopes",
+      "relation": "exposes_route",
+      "target": "route:/email/scopes",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:261:create_scope",
+      "relation": "exposes_route",
+      "target": "route:/email/scopes",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:292:update_scope",
+      "relation": "exposes_route",
+      "target": "route:/email/scopes/<int:scope_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:322:delete_scope",
+      "relation": "exposes_route",
+      "target": "route:/email/scopes/<int:scope_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:355:get_rules",
+      "relation": "exposes_route",
+      "target": "route:/email/rules",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:377:create_rule",
+      "relation": "exposes_route",
+      "target": "route:/email/rules",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:410:update_rule",
+      "relation": "exposes_route",
+      "target": "route:/email/rules/<int:rule_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:440:delete_rule",
+      "relation": "exposes_route",
+      "target": "route:/email/rules/<int:rule_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:473:get_ai_config",
+      "relation": "exposes_route",
+      "target": "route:/email/ai/config",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:494:save_ai_config",
+      "relation": "exposes_route",
+      "target": "route:/email/ai/config",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:517:test_ai_classification",
+      "relation": "exposes_route",
+      "target": "route:/email/ai/test",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:554:clear_cache",
+      "relation": "exposes_route",
+      "target": "route:/email/cache/clear",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:292:update_scope",
+      "relation": "writes",
+      "target": "database:an",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_email.py:410:update_rule",
+      "relation": "writes",
+      "target": "database:an",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:21:_ensure_tables_exist",
+      "relation": "reads",
+      "target": "database:email_scopes",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:99:get_active_scopes",
+      "relation": "reads",
+      "target": "database:email_scopes",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:108:get_all_scopes",
+      "relation": "reads",
+      "target": "database:email_scopes",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:137:get_rules_by_scope",
+      "relation": "reads",
+      "target": "database:email_filter_rules",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:146:get_all_active_rules",
+      "relation": "reads",
+      "target": "database:email_filter_rules",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:161:get_all_rules",
+      "relation": "reads",
+      "target": "database:email_filter_rules",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:195:get_active_config",
+      "relation": "reads",
+      "target": "database:email_ai_config",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:224:get_cached_classification",
+      "relation": "reads",
+      "target": "database:email_cache",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:241:get_cached_by_scope",
+      "relation": "reads",
+      "target": "database:email_cache",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:21:_ensure_tables_exist",
+      "relation": "writes",
+      "target": "database:email_scopes",
+      "statement": "INSERT INTO"
+    },
+    {
+      "source": "python:function:server_v2/repositories/email_repository.py:250:clear_cache",
+      "relation": "writes",
+      "target": "database:email_cache",
+      "statement": "DELETE FROM"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:email",
+      "name": "email",
+      "files": [
+        "client_v2/src/features/email/components/EmailAiConfig.tsx",
+        "client_v2/src/features/email/components/EmailDetail.tsx",
+        "client_v2/src/features/email/components/EmailList.tsx",
+        "client_v2/src/features/email/components/EmailOAuthSetup.tsx",
+        "client_v2/src/features/email/components/EmailRulesManager.tsx",
+        "client_v2/src/features/email/components/EmailScopeFilter.tsx",
+        "client_v2/src/features/email/components/EmailScopesManager.tsx",
+        "client_v2/src/features/email/components/TagInput.tsx",
+        "client_v2/src/features/email/pages/EmailPage.tsx",
+        "client_v2/src/features/email/services/emailService.ts",
+        "client_v2/src/features/email/store/email.store.ts",
+        "client_v2/src/features/email/types/email.types.ts"
+      ],
+      "roles": {
+        "component": 8,
+        "page": 1,
+        "service": 1,
+        "state": 1,
+        "types": 1
+      },
+      "entities_count": 27,
+      "relationships_count": 83
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\email.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\email.json"
+}

@@ -1,24 +1,24 @@
 {
   "statistics": {
-    "files": 591,
-    "entities": 2943,
-    "relationships": 3378
+    "files": 565,
+    "entities": 2899,
+    "relationships": 4066
   },
   "languages": {
     "typescript": 303,
-    "python": 288
+    "python": 262
   },
   "file_roles": {
     "component": 159,
     "service": 97,
     "api": 63,
     "test": 51,
-    "script": 44,
     "page": 38,
-    "unknown": 31,
-    "core_module": 19,
+    "script": 38,
+    "core_module": 17,
     "state": 15,
     "repository": 14,
+    "unknown": 13,
     "feature": 13,
     "configuration": 11,
     "utility": 11,
@@ -29,17 +29,21 @@
     "entry_point": 1
   },
   "relationships": {
-    "contains": 2943,
-    "imports": 435
+    "contains": 2899,
+    "imports": 435,
+    "calls_route": 124,
+    "exposes_route": 375,
+    "reads": 153,
+    "writes": 80
   },
   "main_directories": {
     "components": 83,
     "services": 78,
     "api": 63,
     "tests": 51,
-    "scripts": 44,
     "pages": 38,
-    "core": 23,
+    "scripts": 38,
+    "core": 21,
     "ui": 18,
     "layout": 17,
     "store": 15,
@@ -47,7 +51,7 @@
     "economics": 12,
     "utils": 11,
     "monitor": 10,
-    "types": 9
+    "selects": 9
   },
   "important_files": [
     {
@@ -87,15 +91,15 @@
       "symbols": 30
     },
     {
+      "path": "server_v2/repositories/email_repository.py",
+      "symbols": 30
+    },
+    {
       "path": "tests/test_base_repository.py",
       "symbols": 30
     },
     {
       "path": "tests/test_dbf_utils.py",
-      "symbols": 30
-    },
-    {
-      "path": "server_v2/repositories/email_repository.py",
       "symbols": 30
     },
     {
@@ -157,11 +161,11 @@
       "imports": 13
     },
     {
-      "file": "file:client_v2/src/services/api/todos.ts",
+      "file": "file:client_v2/src/store/prestazioni.store.ts",
       "imports": 8
     },
     {
-      "file": "file:client_v2/src/store/prestazioni.store.ts",
+      "file": "file:client_v2/src/services/api/todos.ts",
       "imports": 8
     },
     {
@@ -181,18 +185,6 @@
       "imports": 6
     },
     {
-      "file": "file:client_v2/src/services/api/environment.service.ts",
-      "imports": 5
-    },
-    {
-      "file": "file:client_v2/src/services/api/monitorPrestazioni.ts",
-      "imports": 5
-    },
-    {
-      "file": "file:client_v2/src/services/ricette_ts.service.ts",
-      "imports": 5
-    },
-    {
       "file": "file:client_v2/src/components/selects/ContiSelect.tsx",
       "imports": 5
     },
@@ -205,11 +197,23 @@
       "imports": 5
     },
     {
-      "file": "file:client_v2/src/services/api/user.service.ts",
+      "file": "file:client_v2/src/services/api/environment.service.ts",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/services/ricette_ts.service.ts",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/components/layout/_nav.tsx",
       "imports": 4
     },
     {
-      "file": "file:client_v2/src/services/api/base.service.ts",
+      "file": "file:client_v2/src/components/ui/badge.tsx",
       "imports": 4
     }
   ]

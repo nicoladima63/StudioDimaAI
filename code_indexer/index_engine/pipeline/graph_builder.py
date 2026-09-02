@@ -1,4 +1,4 @@
-def build_graph(entities, files,relationships):
+def build_graph(entities, files, relationships):
     """
     Costruisce il grafo semantico base.
 
@@ -37,22 +37,18 @@ def build_graph(entities, files,relationships):
                 }
             )
 
-    # collega import tra file
+    # Collega import risolti e relazioni semantiche (route/database).
 
     for relation in relationships:
 
-        if (
-            relation.get("relation") == "imports"
-            and relation.get("resolved") is True
-        ):
-
-            graph.append(
-                {
-                    "source": relation["source"],
-                    "relation": "imports",
-                    "target": relation["target"]
-                }
-            )
+        if relation.get("relation") == "imports":
+            if relation.get("resolved") is not True:
+                continue
+        graph.append({
+            "source": relation["source"],
+            "relation": relation["relation"],
+            "target": relation["target"],
+        })
 
 
     return graph

@@ -1,0 +1,915 @@
+{
+  "schema_version": 1,
+  "task": "calendar",
+  "files": [
+    {
+      "path": "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "role": "component",
+      "score": 30,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/services/api/environment.service.ts",
+        "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+        "file:client_v2/src/features/calendar/services/calendar.service.ts",
+        "file:client_v2/src/features/settings/services/environment.service.ts",
+        "file:client_v2/src/components/layout/PageLayout.tsx"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/api/v2_calendar.py",
+      "role": "api",
+      "score": 29,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "flask",
+        "flask_jwt_extended",
+        "datetime",
+        "logging",
+        "uuid",
+        "threading",
+        "os",
+        "typing",
+        "pathlib",
+        "core.google_calendar_client"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/calendar_sync_job.py",
+      "role": "service",
+      "score": 27,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "logging",
+        "datetime",
+        "typing",
+        "services.change_logger"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/calendar_service.py",
+      "role": "service",
+      "score": 26,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "os",
+        "logging",
+        "typing",
+        "core.appointment_normalizer",
+        "core.google_calendar_client",
+        "core.exceptions",
+        "core.paths",
+        "services.calendar_sync_engine",
+        "datetime",
+        "core.environment_manager"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/calendar_sync_engine.py",
+      "role": "service",
+      "score": 25,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "os",
+        "time",
+        "logging",
+        "typing",
+        "googleapiclient.errors",
+        "core.schemas",
+        "core.google_event_factory",
+        "core.constants_v2"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/repositories/calendar_repository.py",
+      "role": "repository",
+      "score": 24,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "sqlite3",
+        "logging",
+        "time",
+        "datetime",
+        "typing",
+        "contextlib",
+        "dataclasses",
+        "..core.database_manager",
+        "..core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/calendar/services/calendar.service.ts",
+      "role": "service",
+      "score": 24,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+        "file:client_v2/src/features/dashboard/components/DashboardStats.tsx",
+        "file:client_v2/src/features/settings/pages/CalendarSettings.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+      "role": "service",
+      "score": 22,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts",
+        "file:client_v2/src/types/index.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/dashboard/pages/Dashboard.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+      "role": "component",
+      "score": 22,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../services/calendar.service",
+        "file:client_v2/src/components/layout/PageLayout.tsx"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/settings/pages/CalendarSettings.tsx",
+      "role": "page",
+      "score": 17,
+      "matched_terms": [],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+        "file:client_v2/src/features/calendar/services/calendar.service.ts",
+        "file:client_v2/src/features/settings/services/environment.service.ts",
+        "file:client_v2/src/components/layout/PageLayout.tsx"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "role": "component",
+      "score": 16,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "lucide-react",
+        "../hook/useCalendarHealth",
+        "file:client_v2/src/components/layout/PageLayout.tsx",
+        "file:client_v2/src/components/ui/button.tsx",
+        "file:client_v2/src/lib/utils.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/calendar/hook/useCalendarHealth.ts",
+      "role": "feature",
+      "score": 15,
+      "matched_terms": [
+        "calendar"
+      ],
+      "dependencies": [
+        "react",
+        "react-hot-toast",
+        "../services/calendarHealthCheck"
+      ],
+      "callers": []
+    }
+  ],
+  "symbols": [
+    {
+      "name": "CalendarSyncJob",
+      "kind": "class",
+      "path": "server_v2/services/calendar_sync_job.py",
+      "line": 20,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "CalendarRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/calendar_repository.py",
+      "line": 38,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "sync_calendar_from_records",
+      "kind": "function",
+      "path": "server_v2/services/calendar_service.py",
+      "line": 17,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "list_google_calendars",
+      "kind": "function",
+      "path": "server_v2/services/calendar_service.py",
+      "line": 183,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "clear_calendar",
+      "kind": "function",
+      "path": "server_v2/services/calendar_service.py",
+      "line": 258,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_calendar_sync_job",
+      "kind": "function",
+      "path": "server_v2/services/calendar_sync_job.py",
+      "line": 155,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "list_calendars",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 59,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "sync_calendar",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 104,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "clear_calendar",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 307,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "calendar_health_check",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 864,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "useCalendarHealth",
+      "kind": "function",
+      "path": "client_v2/src/features/calendar/hook/useCalendarHealth.ts",
+      "line": 5,
+      "information_score": 35,
+      "category": "support"
+    },
+    {
+      "name": "CalendarPage",
+      "kind": "component",
+      "path": "client_v2/src/features/calendar/pages/CalendarPage.tsx",
+      "line": 7,
+      "information_score": 35,
+      "category": "support"
+    },
+    {
+      "name": "fetchCalendars",
+      "kind": "component",
+      "path": "client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+      "line": 118,
+      "information_score": 34,
+      "category": "support"
+    },
+    {
+      "name": "QueryMetrics",
+      "kind": "class",
+      "path": "server_v2/repositories/calendar_repository.py",
+      "line": 31,
+      "information_score": 29,
+      "category": "core"
+    },
+    {
+      "name": "handle_calendar_sync_error",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 1126,
+      "information_score": 28,
+      "category": "support"
+    },
+    {
+      "name": "addLog",
+      "kind": "component",
+      "path": "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "line": 64,
+      "information_score": 27,
+      "category": "support"
+    },
+    {
+      "name": "startPolling",
+      "kind": "component",
+      "path": "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "line": 74,
+      "information_score": 27,
+      "category": "support"
+    },
+    {
+      "name": "stopPolling",
+      "kind": "component",
+      "path": "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "line": 88,
+      "information_score": 27,
+      "category": "support"
+    },
+    {
+      "name": "pollJobStatuses",
+      "kind": "component",
+      "path": "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "line": 98,
+      "information_score": 27,
+      "category": "support"
+    },
+    {
+      "name": "load_existing_google_events",
+      "kind": "function",
+      "path": "server_v2/services/calendar_service.py",
+      "line": 94,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "test_google_connection",
+      "kind": "function",
+      "path": "server_v2/services/calendar_service.py",
+      "line": 300,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "sync_appointments",
+      "kind": "function",
+      "path": "server_v2/services/calendar_sync_engine.py",
+      "line": 27,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "execute_with_retry",
+      "kind": "function",
+      "path": "server_v2/services/calendar_sync_engine.py",
+      "line": 369,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "run_sync",
+      "kind": "function",
+      "path": "server_v2/services/calendar_sync_job.py",
+      "line": 36,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "sync_job",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 137,
+      "information_score": 23,
+      "category": "support"
+    },
+    {
+      "name": "update_sync_progress",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 164,
+      "information_score": 23,
+      "category": "support"
+    },
+    {
+      "name": "sync_status",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 225,
+      "information_score": 23,
+      "category": "support"
+    },
+    {
+      "name": "cancel_sync_job",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 255,
+      "information_score": 23,
+      "category": "support"
+    },
+    {
+      "name": "clear_job",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 325,
+      "information_score": 23,
+      "category": "support"
+    },
+    {
+      "name": "get_clear_status",
+      "kind": "function",
+      "path": "server_v2/api/v2_calendar.py",
+      "line": 372,
+      "information_score": 23,
+      "category": "support"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "target": "file:client_v2/src/components/ui/button.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "to": "file:client_v2/src/components/ui/button.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "target": "file:client_v2/src/lib/utils.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+      "to": "file:client_v2/src/lib/utils.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "target": "file:client_v2/src/services/api/environment.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "to": "file:client_v2/src/services/api/environment.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "target": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "to": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "target": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "to": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "target": "file:client_v2/src/features/settings/services/environment.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "to": "file:client_v2/src/features/settings/services/environment.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/pages/CalendarPage.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/pages/CalendarPage.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+      "target": "file:client_v2/src/types/index.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+      "to": "file:client_v2/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/dashboard/components/DashboardStats.tsx",
+      "target": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/dashboard/components/DashboardStats.tsx",
+      "to": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/dashboard/pages/Dashboard.tsx",
+      "target": "file:client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/dashboard/pages/Dashboard.tsx",
+      "to": "file:client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/pages/CalendarSettings.tsx",
+      "target": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/pages/CalendarSettings.tsx",
+      "to": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/list",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/appointments",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/sync",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/sync-status",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/sync/cancel",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/clear/cancel",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/reauth-url",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/stats/summary",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/stats/first-visits",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/stats/year",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+      "relation": "calls_route",
+      "target": "route:/calendar/test-connection",
+      "method": "GET"
+    },
+    {
+      "source": "typescript:component:client_v2/src/features/dashboard/pages/Dashboard.tsx:67:handleStartMonitorById",
+      "relation": "writes",
+      "target": "database:if",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "typescript:component:client_v2/src/features/dashboard/pages/Dashboard.tsx:96:handleStopMonitorById",
+      "relation": "writes",
+      "target": "database:if",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+      "relation": "calls_route",
+      "target": "route:/scheduler/status",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+      "relation": "calls_route",
+      "target": "route:/scheduler/start",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+      "relation": "calls_route",
+      "target": "route:/scheduler/stop",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/services/environment.service.ts",
+      "relation": "calls_route",
+      "target": "route:/environment/status",
+      "method": "GET"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:59:list_calendars",
+      "relation": "exposes_route",
+      "target": "route:/list",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:104:sync_calendar",
+      "relation": "exposes_route",
+      "target": "route:/sync",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:225:sync_status",
+      "relation": "exposes_route",
+      "target": "route:/sync-status",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:255:cancel_sync_job",
+      "relation": "exposes_route",
+      "target": "route:/sync/cancel",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:307:clear_calendar",
+      "relation": "exposes_route",
+      "target": "route:/clear/<path:calendar_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:372:get_clear_status",
+      "relation": "exposes_route",
+      "target": "route:/clear-status",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:402:cancel_clear_job",
+      "relation": "exposes_route",
+      "target": "route:/clear/cancel",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:458:get_appointments_for_month",
+      "relation": "exposes_route",
+      "target": "route:/appointments",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:502:get_appointments_stats_for_year",
+      "relation": "exposes_route",
+      "target": "route:/stats/year",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:526:get_first_visits_stats",
+      "relation": "exposes_route",
+      "target": "route:/stats/first-visits",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:579:get_appointments_stats_summary",
+      "relation": "exposes_route",
+      "target": "route:/stats/summary",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:636:get_google_oauth_url",
+      "relation": "exposes_route",
+      "target": "route:/reauth-url",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:705:oauth_status",
+      "relation": "exposes_route",
+      "target": "route:/oauth/status",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:741:test_jwt",
+      "relation": "exposes_route",
+      "target": "route:/test-jwt",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:769:reset_sync_state",
+      "relation": "exposes_route",
+      "target": "route:/sync/reset",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:822:check_first_sync_status",
+      "relation": "exposes_route",
+      "target": "route:/first-sync-status",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:864:calendar_health_check",
+      "relation": "exposes_route",
+      "target": "route:/health",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:908:auto_reset_and_sync",
+      "relation": "exposes_route",
+      "target": "route:/auto-reset-and-sync",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:1081:get_auto_sync_job_status",
+      "relation": "exposes_route",
+      "target": "route:/sync/job/<job_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:164:update_sync_progress",
+      "relation": "writes",
+      "target": "database:final",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_calendar.py:325:clear_job",
+      "relation": "writes",
+      "target": "database:status",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/repositories/calendar_repository.py:50:__init__",
+      "relation": "reads",
+      "target": "database:appointments_view",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/calendar_repository.py:158:get_appointments_overview",
+      "relation": "reads",
+      "target": "database:appointments_view",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/calendar_repository.py:237:get_appointments_by_filters",
+      "relation": "reads",
+      "target": "database:appointments_view",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/calendar_repository.py:351:get_appointments_for_sync",
+      "relation": "reads",
+      "target": "database:appointments_view",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/calendar_repository.py:399:get_sync_state_summary",
+      "relation": "reads",
+      "target": "database:sync_state",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/calendar_repository.py:421:update_sync_state",
+      "relation": "writes",
+      "target": "database:sync",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/repositories/calendar_repository.py:455:cleanup_old_sync_state",
+      "relation": "writes",
+      "target": "database:sync_state",
+      "statement": "DELETE FROM"
+    },
+    {
+      "source": "python:function:server_v2/services/calendar_sync_engine.py:155:_insert_event",
+      "relation": "writes",
+      "target": "database:it",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/calendar_sync_engine.py:199:_upsert_event",
+      "relation": "writes",
+      "target": "database:in",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/calendar_sync_engine.py:199:_upsert_event",
+      "relation": "writes",
+      "target": "database:uid",
+      "statement": "UPDATE"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:calendar",
+      "name": "calendar",
+      "files": [
+        "client_v2/src/features/calendar/components/AutoSyncModal.tsx",
+        "client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+        "client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+        "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+        "client_v2/src/features/calendar/hook/useCalendarHealth.ts",
+        "client_v2/src/features/calendar/pages/CalendarPage.tsx",
+        "client_v2/src/features/calendar/services/calendar.service.ts",
+        "client_v2/src/features/calendar/services/calendarHealthCheck.ts"
+      ],
+      "roles": {
+        "component": 4,
+        "feature": 1,
+        "page": 1,
+        "service": 2
+      },
+      "entities_count": 27,
+      "relationships_count": 52
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\calendar.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\calendar.json"
+}

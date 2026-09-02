@@ -1,6 +1,5 @@
 @echo off
-setlocal enabledelayedexpansion
-
+etlocal enabledelayedexpnsion
 :: LOGGING SU FILE
 set "LOGFILE=%~dp0deploy_log.txt"
 echo ========================================== > "%LOGFILE%"
@@ -14,7 +13,7 @@ echo ==========================================
 echo.
 
 :: Configurazione
-set "SERVER=\\SERVERDIMA"
+set "SERVER=\\192.168.1.200"
 set "DEPLOY_PATH=%SERVER%\StudioDimaAI"
 set "TIMESTAMP=%date:~-4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%%time:~6,2%"
 set "TIMESTAMP=%TIMESTAMP: =0%"

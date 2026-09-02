@@ -14,7 +14,7 @@ import {
     CContainer
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilArrowLeft, cilCheckCircle, cilTask, cilUser } from '@coreui/icons';
+import { cilActionUndo, cilArrowLeft, cilCheckCircle, cilTask } from '@coreui/icons';
 import { worksService } from '../../services/works.service';
 import { Task } from '../../types/works.types';
 import toast from 'react-hot-toast';
@@ -63,6 +63,18 @@ const WorkDetailsPage: React.FC = () => {
         } catch (error) {
             console.error("Error completing step:", error);
             toast.error("Errore nel completamento della fase");
+        }
+    };
+
+    const handleUndoCompleteStep = async (stepId: number) => {
+        if (!task) return;
+        try {
+            await worksService.undoCompleteStep(task.id, stepId);
+            toast.success("Fase ripristinata come da eseguire");
+            loadTaskAndPatients(task.id);
+        } catch (error) {
+            console.error("Error undoing completed step:", error);
+            toast.error("Impossibile ripristinare la fase");
         }
     };
 
@@ -166,21 +178,22 @@ const WorkDetailsPage: React.FC = () => {
                                             </div>
 
                                             <div>
-                                                {isActive && (step.user_id === 'tutti' || (step.user_id && currentUser && step.user_id.toString() === currentUser.id.toString())) && (
+                                                {((isActive && (step.user_id === 'tutti' || (step.user_id && currentUser && step.user_id.toString() === currentUser.id.toString()))) || isCompleted) && (
                                                     <CButton
-                                                        color="success"
-                                                        className="text-white"
-                                                        onClick={() => handleCompleteStep(step.id)}
+                                                        color={isCompleted ? 'warning' : 'success'}
+                                                        {...(isCompleted ? { variant: 'outline' as const } : {})}
+                                                        className={isCompleted ? '' : 'text-white'}
+                                                        onClick={() => isCompleted ? handleUndoCompleteStep(step.id) : handleCompleteStep(step.id)}
                                                     >
-                                                        <CIcon icon={cilCheckCircle} className="me-2" />
-                                                        Fatto
+                                                        <CIcon icon={isCompleted ? cilActionUndo : cilCheckCircle} className="me-2" />
+                                                        {isCompleted ? 'Da eseguire' : 'Fatto'}
                                                     </CButton>
                                                 )}
                                                 {isActive && step.user_id !== 'tutti' && (!step.user_id || !currentUser || step.user_id.toString() !== currentUser.id.toString()) && (
                                                     <span className="text-muted small">Assegnato a: {getUserName(step.user_id)}</span>
                                                 )}
                                                 {isCompleted && (
-                                                    <span className="text-success small fw-bold">Completato il {new Date(step.updated_at).toLocaleDateString()}</span>
+                                                    <span className="text-success small fw-bold me-3">Completato il {new Date(step.updated_at).toLocaleDateString()}</span>
                                                 )}
                                                 {isPending && <span className="text-muted small">In attesa</span>}
                                             </div>

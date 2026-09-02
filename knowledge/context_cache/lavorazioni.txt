@@ -1,112 +1,117 @@
 QUERY: lavorazioni
 
 === PRIORITY FILES ===
-- server_v2/services/work_service.py | role=service | score=74 | structural=60 | query=14 | matched=work, works
-- client_v2/src/features/lavorazioni/WorksPage.tsx | role=feature | score=55 | structural=49 | query=6 | matched=lavorazioni
-- client_v2/src/features/lavorazioni/TasksPage.tsx | role=feature | score=50 | structural=44 | query=6 | matched=lavorazioni
-- server_v2/api/v2_works.py | role=api | score=43 | structural=23 | query=20 | matched=work, works
-- server_v2/repositories/work_repository.py | role=repository | score=40 | structural=30 | query=10 | matched=work
-- client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | role=feature | score=40 | structural=34 | query=6 | matched=lavorazioni
-- server_v2/repositories/prestazione_work_mapping_repository.py | role=repository | score=38 | structural=28 | query=10 | matched=work
-- client_v2/src/features/lavorazioni/ProvidersPage.tsx | role=feature | score=34 | structural=28 | query=6 | matched=lavorazioni
-- server_v2/api/v2_prestazione_work_mapping.py | role=api | score=31 | structural=25 | query=6 | matched=work
-- client_v2/src/features/lavorazioni/WorkStepItem.tsx | role=feature | score=30 | structural=24 | query=6 | matched=lavorazioni
-- client_v2/src/store/works.store.ts | role=state | score=29 | structural=17 | query=12 | matched=work, works
+- server_v2/api/v2_works.py | role=api | score=35 | structural=15 | query=20 | matched=work, works
+- server_v2/services/work_service.py | role=service | score=34 | structural=20 | query=14 | matched=work, works
+- server_v2/repositories/prestazione_work_mapping_repository.py | role=repository | score=28 | structural=18 | query=10 | matched=work
 - client_v2/src/services/works.service.ts | role=service | score=28 | structural=16 | query=12 | matched=work, works
-- client_v2/src/services/api/works.service.ts | role=api | score=23 | structural=11 | query=12 | matched=work, works
-- client_v2/src/features/lavorazioni/StepsPage.tsx | role=feature | score=21 | structural=15 | query=6 | matched=lavorazioni
-- client_v2/src/types/works.types.ts | role=types | score=16 | structural=4 | query=12 | matched=work, works
+- server_v2/repositories/work_repository.py | role=repository | score=28 | structural=18 | query=10 | matched=work
+- client_v2/src/services/api/works.service.ts | role=api | score=27 | structural=15 | query=12 | matched=work, works
+- client_v2/src/store/works.store.ts | role=state | score=25 | structural=13 | query=12 | matched=work, works
+- client_v2/src/features/lavorazioni/WorksPage.tsx | role=feature | score=23 | structural=17 | query=6 | matched=lavorazioni
+- server_v2/api/v2_prestazione_work_mapping.py | role=api | score=19 | structural=13 | query=6 | matched=work
+- client_v2/src/types/works.types.ts | role=types | score=18 | structural=6 | query=12 | matched=work, works
+- client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | role=feature | score=18 | structural=12 | query=6 | matched=lavorazioni
+- client_v2/src/features/lavorazioni/WorkStepItem.tsx | role=feature | score=14 | structural=8 | query=6 | matched=lavorazioni
 
 === ARCHITECTURE ===
+
+API
+- server_v2/api/v2_works.py
+- client_v2/src/services/api/works.service.ts
+- server_v2/api/v2_prestazione_work_mapping.py
 
 SERVICE
 - server_v2/services/work_service.py
 - client_v2/src/services/works.service.ts
 
-FEATURE
-- client_v2/src/features/lavorazioni/WorksPage.tsx
-- client_v2/src/features/lavorazioni/TasksPage.tsx
-- client_v2/src/features/lavorazioni/WorkDetailsPage.tsx
-- client_v2/src/features/lavorazioni/ProvidersPage.tsx
-- client_v2/src/features/lavorazioni/WorkStepItem.tsx
-- client_v2/src/features/lavorazioni/StepsPage.tsx
-
-API
-- server_v2/api/v2_works.py
-- server_v2/api/v2_prestazione_work_mapping.py
-- client_v2/src/services/api/works.service.ts
-
 REPOSITORY
-- server_v2/repositories/work_repository.py
 - server_v2/repositories/prestazione_work_mapping_repository.py
+- server_v2/repositories/work_repository.py
 
 STATE
 - client_v2/src/store/works.store.ts
+
+FEATURE
+- client_v2/src/features/lavorazioni/WorksPage.tsx
+- client_v2/src/features/lavorazioni/WorkDetailsPage.tsx
+- client_v2/src/features/lavorazioni/WorkStepItem.tsx
 
 TYPES
 - client_v2/src/types/works.types.ts
 
 === SYMBOLS ===
-- get_all_works | server_v2/services/work_service.py | kind=function | category=support | score=88
-- WorkService | server_v2/services/work_service.py | kind=class | category=core | score=80
-- get_work_details | server_v2/services/work_service.py | kind=function | category=support | score=73
-- create_work_template | server_v2/services/work_service.py | kind=function | category=support | score=73
-- update_work_template | server_v2/services/work_service.py | kind=function | category=support | score=73
-- delete_work_template | server_v2/services/work_service.py | kind=function | category=support | score=73
-- create_task_from_work | server_v2/services/work_service.py | kind=function | category=support | score=73
-- get_task_details | server_v2/services/work_service.py | kind=function | category=support | score=58
-- get_tasks_for_patient | server_v2/services/work_service.py | kind=function | category=support | score=58
-- get_all_tasks | server_v2/services/work_service.py | kind=function | category=support | score=58
-- complete_step | server_v2/services/work_service.py | kind=function | category=support | score=58
-- delete_task | server_v2/services/work_service.py | kind=function | category=support | score=58
-- update_task_status | server_v2/services/work_service.py | kind=function | category=support | score=58
-- postpone_task | server_v2/services/work_service.py | kind=function | category=support | score=58
-- get_works | server_v2/api/v2_works.py | kind=function | category=support | score=55
-- WorkRepository | server_v2/repositories/work_repository.py | kind=class | category=core | score=50
-- PrestazioneWorkMappingRepository | server_v2/repositories/prestazione_work_mapping_repository.py | kind=class | category=core | score=48
-- reset_task | server_v2/services/work_service.py | kind=function | category=support | score=48
-- init | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=47
-- confirmDelete | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=47
-- openModal | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=ui | score=47
-- addStep | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=47
-- updateStep | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=47
-- removeStep | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=47
-- get_work_with_steps | server_v2/repositories/work_repository.py | kind=function | category=support | score=43
-- create_work | server_v2/repositories/work_repository.py | kind=function | category=support | score=43
-- update_work_with_steps | server_v2/repositories/work_repository.py | kind=function | category=support | score=43
-- __init__ | server_v2/services/work_service.py | kind=function | category=internal | score=43
-- get_work_id_by_prestazione | server_v2/repositories/prestazione_work_mapping_repository.py | kind=function | category=domain | score=41
-- fetchTasks | client_v2/src/features/lavorazioni/TasksPage.tsx | kind=component | category=support | score=41
-- getTaskColor | client_v2/src/features/lavorazioni/TasksPage.tsx | kind=component | category=support | score=41
-- getTaskCategoryName | client_v2/src/features/lavorazioni/TasksPage.tsx | kind=component | category=support | score=41
-- calculateProgress | client_v2/src/features/lavorazioni/TasksPage.tsx | kind=component | category=support | score=41
-- confirmDelete | client_v2/src/features/lavorazioni/TasksPage.tsx | kind=component | category=support | score=41
-- confirmCancel | client_v2/src/features/lavorazioni/TasksPage.tsx | kind=component | category=support | score=41
-- get_work_service | server_v2/api/v2_works.py | kind=function | category=support | score=40
-- get_work_details | server_v2/api/v2_works.py | kind=function | category=support | score=40
-- create_work | server_v2/api/v2_works.py | kind=function | category=support | score=40
-- update_work | server_v2/api/v2_works.py | kind=function | category=support | score=40
-- delete_work | server_v2/api/v2_works.py | kind=function | category=support | score=40
-- loadTaskAndPatients | client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | kind=component | category=support | score=37
-- getPatientName | client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | kind=component | category=support | score=37
-- getUserName | client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | kind=component | category=support | score=37
-- handleDragEnd | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=37
-- handleSave | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=37
-- handleDelete | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=37
-- SimpleResult | server_v2/repositories/prestazione_work_mapping_repository.py | kind=class | category=core | score=33
-- confirmDelete | client_v2/src/features/lavorazioni/ProvidersPage.tsx | kind=component | category=support | score=31
-- openModal | client_v2/src/features/lavorazioni/ProvidersPage.tsx | kind=component | category=ui | score=31
-- handleOpenModal | client_v2/src/features/lavorazioni/TasksPage.tsx | kind=component | category=ui | score=31
+- get_works | server_v2/api/v2_works.py | kind=function | category=support | score=59
+- get_all_works | server_v2/services/work_service.py | kind=function | category=support | score=54
+- WorkService | server_v2/services/work_service.py | kind=class | category=core | score=46
+- get_work_service | server_v2/api/v2_works.py | kind=function | category=support | score=44
+- get_work_details | server_v2/api/v2_works.py | kind=function | category=support | score=44
+- create_work | server_v2/api/v2_works.py | kind=function | category=support | score=44
+- update_work | server_v2/api/v2_works.py | kind=function | category=support | score=44
+- delete_work | server_v2/api/v2_works.py | kind=function | category=support | score=44
+- PrestazioneWorkMappingRepository | server_v2/repositories/prestazione_work_mapping_repository.py | kind=class | category=core | score=44
+- WorkRepository | server_v2/repositories/work_repository.py | kind=class | category=core | score=44
+- get_work_details | server_v2/services/work_service.py | kind=function | category=support | score=39
+- create_work_template | server_v2/services/work_service.py | kind=function | category=support | score=39
+- update_work_template | server_v2/services/work_service.py | kind=function | category=support | score=39
+- delete_work_template | server_v2/services/work_service.py | kind=function | category=support | score=39
+- create_task_from_work | server_v2/services/work_service.py | kind=function | category=support | score=39
+- get_work_id_by_prestazione | server_v2/repositories/prestazione_work_mapping_repository.py | kind=function | category=domain | score=37
+- get_work_with_steps | server_v2/repositories/work_repository.py | kind=function | category=support | score=37
+- create_work | server_v2/repositories/work_repository.py | kind=function | category=support | score=37
+- update_work_with_steps | server_v2/repositories/work_repository.py | kind=function | category=support | score=37
+- SimpleResult | server_v2/repositories/prestazione_work_mapping_repository.py | kind=class | category=core | score=29
+- get_task_details | server_v2/services/work_service.py | kind=function | category=support | score=24
+- get_tasks_for_patient | server_v2/services/work_service.py | kind=function | category=support | score=24
+- get_all_tasks | server_v2/services/work_service.py | kind=function | category=support | score=24
+- complete_step | server_v2/services/work_service.py | kind=function | category=support | score=24
+- delete_task | server_v2/services/work_service.py | kind=function | category=support | score=24
+- update_task_status | server_v2/services/work_service.py | kind=function | category=support | score=24
+- postpone_task | server_v2/services/work_service.py | kind=function | category=support | score=24
+- get_all_mappings | server_v2/api/v2_prestazione_work_mapping.py | kind=function | category=support | score=23
+- get_mapping | server_v2/api/v2_prestazione_work_mapping.py | kind=function | category=support | score=23
+- create_or_update_mapping | server_v2/api/v2_prestazione_work_mapping.py | kind=function | category=support | score=23
+- delete_mapping | server_v2/api/v2_prestazione_work_mapping.py | kind=function | category=support | score=23
+- table_name | server_v2/repositories/prestazione_work_mapping_repository.py | kind=function | category=support | score=22
+- upsert_mapping | server_v2/repositories/prestazione_work_mapping_repository.py | kind=function | category=support | score=22
+- list | server_v2/repositories/prestazione_work_mapping_repository.py | kind=function | category=support | score=22
+- delete_mapping | server_v2/repositories/prestazione_work_mapping_repository.py | kind=function | category=support | score=22
+- table_name | server_v2/repositories/work_repository.py | kind=function | category=support | score=22
+- list | server_v2/repositories/work_repository.py | kind=function | category=support | score=22
+- get_step_templates | server_v2/repositories/work_repository.py | kind=function | category=support | score=22
+- add_step_template | server_v2/repositories/work_repository.py | kind=function | category=support | score=22
+- loadTaskAndPatients | client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | kind=component | category=support | score=21
+- getPatientName | client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | kind=component | category=support | score=21
+- getUserName | client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | kind=component | category=support | score=21
+- init | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=21
+- confirmDelete | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=21
+- openModal | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=ui | score=21
+- addStep | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=21
+- updateStep | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=21
+- removeStep | client_v2/src/features/lavorazioni/WorksPage.tsx | kind=component | category=support | score=21
+- reset_task | server_v2/services/work_service.py | kind=function | category=support | score=14
+- handleCompleteStep | client_v2/src/features/lavorazioni/WorkDetailsPage.tsx | kind=component | category=support | score=11
 
 === RELEVANT CODE ===
 
---- server_v2\services\work_service.py::get_all_works (lines 27-30) ---
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_works.py::get_works (lines 16-24) ---
+def get_works():
+    """Get all work templates."""
+    try:
+        service = get_work_service()
+        works = service.get_all_works()
+        return jsonify({'success': True, 'data': works})
+    except Exception as e:
+        logger.error(f"Error getting works: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\work_service.py::get_all_works (lines 27-30) ---
     def get_all_works(self) -> List[Dict[str, Any]]:
         """Get all work templates."""
         result = self.work_repository.list()
         return result.data
 
---- server_v2\services\work_service.py::WorkService (lines 15-387) ---
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\work_service.py::WorkService (lines 15-387) ---
 class WorkService(BaseService):
     """
     Service for managing Works, Tasks, and Steps logic.
@@ -207,626 +212,177 @@ class WorkService(BaseService):
                         todo_service = TodoService(self.db_manager)
                         user_repository = UserRepository()
                         dbf_service = get_dbf_data_service()
+# … snippet truncated; inspect the source file for the remaining lines
 
-                        patient_name = "un nuovo paziente"
-                        patient_data = dbf_service.get_patient_by_id(patient_id)
-                        if patient_data and patient_data.get('nome'):
-                            patient_name = patient_data['nome']
-                        link = f"/works/{task['id']}"
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_works.py::get_work_service (lines 11-13) ---
+def get_work_service():
+    db_manager = get_database_manager()
+    return WorkService(db_manager)
 
-                        if first_user_id == 'tutti':
-                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
-                            for u in all_users:
-                                msg = f"{u['username']}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
-                                notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
-                                todo_service.create_todo_from_step(
-                                    step={**first_step, 'user_id': str(u['id'])},
-                                    task=task,
-                                    sender_id=1
-                                )
-                            logger.info(f"Notifiche inviate a tutti gli utenti per nuovo task {task['id']}")
-                        else:
-                            try:
-                                user_id_int = int(first_user_id)
-                            except (ValueError, TypeError):
-                                logger.warning(f"Invalid user_id format for first step notification: {first_user_id}")
-                                user_id_int = None
-
-                            if user_id_int:
-                                user = user_repository.find_by_id(user_id_int)
-                                username = user.get('username', 'tu') if user else 'tu'
-                                message = f"{username}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
-                                notification_service.notify_user(user_id=user_id_int, message=message, type='info', link=link)
-                                todo_service.create_todo_from_step(step=first_step, task=task, sender_id=1)
-                                logger.info(f"Notifica e todo inviati all'utente {user_id_int} per nuovo task {task['id']}")
-
-                    except Exception as e:
-                        logger.error(f"Failed to send notification/todo for new task: {e}")
-
-            logger.info(f"Created Task {task['id']} for Patient {patient_id} from Work {work_id}")
-            return task
-            
-        except Exception as e:
-            logger.error(f"Failed to create task from work: {e}")
-            raise ServiceError(f"Failed to create task: {str(e)}")
-
-    def get_task_details(self, task_id: int) -> Optional[Dict[str, Any]]:
-        """Get task details with steps."""
-        return self.task_repository.get_task_with_steps(task_id)
-
-    def get_tasks_for_patient(self, patient_id: str) -> List[Dict[str, Any]]:
-        """List tasks for a patient."""
-        return self.task_repository.get_tasks_by_patient(patient_id)
-        
-    def get_all_tasks(self) -> List[Dict[str, Any]]:
-        """List all tasks."""
-        return self.task_repository.get_all_tasks()
-
-    def complete_step(self, task_id: int, step_id: int, user_id: str = None) -> Dict[str, Any]:
-        """
-        Mark a step as completed and activate the next one.
-        Triggers any associated automation.
-        """
-        try:
-            # 1. Update current step and get updated Object
-            updated_step = self.task_repository.update_step_status(step_id, 'completed', user_id)
-            if not updated_step:
-                raise ValidationError(f"Step {step_id} not found")
-                
-            # 2. Find next step
-            all_steps = self.task_repository.get_steps(task_id)
-            
-            current_index = updated_step['order_index']
-            next_step = None
-            
-            for step in all_steps:
-                if step['order_index'] > current_index and step['status'] == 'pending':
-                    next_step = step
-                    break
-            
-            # 3. Auto-complete todos for completed step
-            try:
-                from services.todo_service import TodoService
-                todo_service = TodoService(self.db_manager)
-                todo_service.auto_complete_step_todos(step_id)
-            except Exception as e:
-                logger.error(f"Failed to auto-complete todos for step {step_id}: {e}")
-            
-            # 4. Activate next step
-            if next_step:
-                self.task_repository.update_step_status(next_step['id'], 'active')
-                logger.info(f"Activated next step {next_step['id']} for task {task_id}")
-
-                # 5. Send notification and create todo for next step assignee(s)
-                next_user_id = next_step.get('user_id')
-                current_user_id = updated_step.get('user_id')
-
-                if next_user_id:
-                    try:
-                        from services.notification_service import NotificationService
-                        from services.todo_service import TodoService
-                        from repositories.user_repository import UserRepository
-                        from services.dbf_data_service import get_dbf_data_service
-
-                        notification_service = NotificationService(self.db_manager)
-                        todo_service = TodoService(self.db_manager)
-                        user_repository = UserRepository()
-                        dbf_service = get_dbf_data_service()
-
-                        # Recupera nome paziente e dati contestuali
-                        task = self.get_task_details(task_id)
-                        patient_name = "il paziente"
-                        if task and task.get('patient_id'):
-                            patient_data = dbf_service.get_patient_by_id(task['patient_id'])
-                            if patient_data and patient_data.get('nome'):
-                                patient_name = patient_data['nome']
-
-                        # Chi ha completato lo step corrente
-                        effective_current_id = None
-                        if current_user_id and current_user_id != 'tutti':
-                            try:
-                                effective_current_id = int(current_user_id)
-                            except (ValueError, TypeError):
-                                pass
-                        if not effective_current_id and user_id:
-                            try:
-                                effective_current_id = int(user_id)
-                            except (ValueError, TypeError):
-                                pass
-
-                        current_user_obj = user_repository.find_by_id(effective_current_id) if effective_current_id else None
-                        current_username = current_user_obj.get('username', 'Un collega') if current_user_obj else 'Un collega'
-                        link = f"/works/{task_id}"
-                        sender_id = effective_current_id or 1
-
-                        if next_user_id == 'tutti':
-                            # Notifica tutti gli utenti non-admin
-                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
-                            for u in all_users:
-                                msg = f"{current_username} ha completato la sua fase per {patient_name}. {u['username']}, hai la tua fase da completare: '{next_step['name']}'"
-                                notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
-                                todo_service.create_todo_from_step(
-                                    step={**next_step, 'user_id': str(u['id'])},
-                                    task=task,
-                                    sender_id=sender_id
-                                )
-                            logger.info(f"Notifiche inviate a tutti gli utenti per step {next_step['id']}")
-                        else:
-                            try:
-                                next_user_id_int = int(next_user_id)
-                            except (ValueError, TypeError):
-                                logger.warning(f"Invalid user_id format for notification: {next_user_id}")
-                                next_user_id_int = None
-
-                            if next_user_id_int:
-                                next_user = user_repository.find_by_id(next_user_id_int)
-                                next_username = next_user.get('username', 'tu') if next_user else 'tu'
-                                operator_changed = str(next_user_id) != str(current_user_id) if current_user_id else True
-
-                                if operator_changed:
-                                    message = f"{current_username} ha completato la sua fase per {patient_name}. {next_username}, hai la tua fase da completare: '{next_step['name']}'"
-                                    notification_service.notify_user(user_id=next_user_id_int, message=message, type='info', link=link)
-                                    logger.info(f"Notifica inviata all'utente {next_user_id_int} per step {next_step['id']}")
-
-                                todo_service.create_todo_from_step(step=next_step, task=task, sender_id=sender_id)
-                                logger.info(f"Todo creato per utente {next_user_id_int} per step {next_step['id']}")
-
-                    except Exception as notif_error:
-                        logger.error(f"Failed to send notification/todo: {notif_error}")
-            else:
-                # No more steps, complete the task
-                self.task_repository.update(task_id, {'status': 'completed', 'completed_at': datetime.now()})
-                logger.info(f"Task {task_id} completed")
-                
-            return self.get_task_details(task_id)
-            
-        except Exception as e:
-            logger.error(f"Failed to complete step: {e}")
-            raise ServiceError(f"Failed to complete step: {str(e)}")
-
-    def delete_task(self, task_id: int) -> bool:
-        """Delete a task."""
-        try:
-            return self.task_repository.delete(task_id)
-        except Exception as e:
-            logger.error(f"Failed to delete task {task_id}: {e}")
-            raise ServiceError(f"Failed to delete task: {str(e)}")
-
-    def update_task_status(self, task_id: int, status: str) -> Optional[Dict[str, Any]]:
-        """Update task status."""
-        try:
-            return self.task_repository.update(task_id, {'status': status})
-        except Exception as e:
-            logger.error(f"Failed to update task status {task_id}: {e}")
-            raise ServiceError(f"Failed to update task: {str(e)}")
-
-    def reset_task(self, task_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Reset all steps of a task to pending status.
-        Sets the first step to active and the task status to in_progress.
-        """
-        try:
-            # Get task details
-            task = self.task_repository.get_task_with_steps(task_id)
-            if not task:
-                return None
-            
-            # Reset all steps to pending
-            steps = task.get('steps', [])
-            for step in steps:
-                self.task_repository.update_step_status(step['id'], 'pending')
-            
-            # Activate the first step (if exists)
-            if steps:
-                sorted_steps = sorted(steps, key=lambda s: s.get('order_index', 0))
-                first_step = sorted_steps[0]
-                self.task_repository.update_step_status(first_step['id'], 'active')
-            
-            # Update task status to in_progress
-            updated_task = self.task_repository.update(task_id, {
-                'status': 'in_progress',
-                'updated_at': datetime.utcnow().isoformat()
-            })
-            
-            logger.info(f"Task {task_id} reset successfully")
-            return updated_task
-            
-        except Exception as e:
-            logger.error(f"Failed to reset task {task_id}: {e}")
-            raise ServiceError(f"Failed to reset task: {str(e)}")
-    
-    def postpone_task(self, task_id: int, days: int, user_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Postpone a task by X days.
-        Updates task due_date and postpones all related todos.
-        Useful when patient reschedules appointment.
-        """
-        try:
-            from datetime import datetime, timedelta
-            from services.todo_service import TodoService
-            
-            # Get task
-            task = self.task_repository.get_task_with_steps(task_id)
-            if not task:
-                return None
-            
-            # Calculate new due_date
-            current_due_date = task.get('due_date')
-            if current_due_date:
-                if 'T' in current_due_date:
-                    due_date_obj = datetime.fromisoformat(current_due_date.replace('Z', '+00:00'))
-                else:
-                    due_date_obj = datetime.strptime(current_due_date, '%Y-%m-%d')
-                
-                new_due_date = due_date_obj + timedelta(days=days)
-            else:
-                # If no due_date, set to X days from now
-                new_due_date = datetime.now() + timedelta(days=days)
-            
-            # Update task due_date
-            updated_task = self.task_repository.update(task_id, {
-                'due_date': new_due_date.isoformat(),
-                'updated_at': datetime.utcnow().isoformat()
-            })
-            
-            # Postpone all related todos
-            todo_service = TodoService(self.db_manager)
-            result = todo_service.postpone_task_todos(task_id, days, user_id)
-            
-            logger.info(f"Task {task_id} postponed by {days} days, {result.get('postponed_count', 0)} todos affected")
-            
-            return updated_task
-            
-        except Exception as e:
-            logger.error(f"Failed to postpone task {task_id}: {e}")
-            raise ServiceError(f"Failed to postpone task: {str(e)}")
-
---- server_v2\services\work_service.py::get_work_details (lines 32-34) ---
-    def get_work_details(self, work_id: int) -> Optional[Dict[str, Any]]:
-        """Get full work template details with steps."""
-        return self.work_repository.get_work_with_steps(work_id)
-
---- server_v2\services\work_service.py::create_work_template (lines 36-38) ---
-    def create_work_template(self, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Create a new work template."""
-        return self.work_repository.create_work(work_data, steps_data)
-
---- server_v2\services\work_service.py::update_work_template (lines 40-42) ---
-    def update_work_template(self, work_id: int, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Update a work template and its steps."""
-        return self.work_repository.update_work_with_steps(work_id, work_data, steps_data)
-
---- server_v2\services\work_service.py::delete_work_template (lines 44-46) ---
-    def delete_work_template(self, work_id: int) -> bool:
-        """Delete a work template."""
-        return self.work_repository.delete(work_id)
-
---- server_v2\services\work_service.py::create_task_from_work (lines 48-156) ---
-    def create_task_from_work(
-        self, 
-        patient_id: str, 
-        work_id: int, 
-        description: str = None, 
-        prestazione_id: str = None,
-        external_ref_id: str = None,
-        start_date: str = None,
-        due_date: str = None,
-        user_id: str = None
-    ) -> Dict[str, Any]:
-        """
-        Create a new Task instance from a Work template.
-        Copies all StepTemplates to Steps.
-        """
-        try:
-            # 1. Get Work Template
-            work = self.work_repository.get_work_with_steps(work_id)
-            if not work:
-                raise ValidationError(f"Work template {work_id} not found")
-                
-            # 2. Prepare Task Data
-            task_data = {
-                'patient_id': patient_id,
-                'work_id': work_id,
-                'description': description or work['name'],
-                'prestazione_id': prestazione_id,
-                'external_ref_id': external_ref_id,
-                'status': 'active', # Start as active immediately? Or pending? Let's say active.
-                'start_date': start_date or datetime.now(),
-                'due_date': due_date
-            }
-            
-            # 3. Prepare Steps Data from Template
-            steps_data = []
-            for step_temp in work.get('steps', []):
-                steps_data.append({
-                    'name': step_temp['name'],
-                    'description': step_temp.get('description'),
-                    'order_index': step_temp['order_index'],
-                    'user_id': step_temp.get('user_id'),
-                    'metadata': step_temp.get('metadata', '{}'),
-                    'status': 'pending' 
-                })
-            
-            # 4. Create Task and Steps via Repository
-            task = self.task_repository.create_task(task_data, steps_data)
-            
-            # 5. Activate first step automatically
-            if task and task.get('steps'):
-                first_step = task['steps'][0]
-                self.task_repository.update_step_status(first_step['id'], 'active')
-                task['steps'][0]['status'] = 'active' # Update local object to reflect
-
-                # 6. Send notification to first user(s) AND create todo
-                first_user_id = first_step.get('user_id')
-                if first_user_id:
-                    try:
-                        from services.notification_service import NotificationService
-                        from services.todo_service import TodoService
-                        from repositories.user_repository import UserRepository
-                        from services.dbf_data_service import get_dbf_data_service
-
-                        notification_service = NotificationService(self.db_manager)
-                        todo_service = TodoService(self.db_manager)
-                        user_repository = UserRepository()
-                        dbf_service = get_dbf_data_service()
-
-                        patient_name = "un nuovo paziente"
-                        patient_data = dbf_service.get_patient_by_id(patient_id)
-                        if patient_data and patient_data.get('nome'):
-                            patient_name = patient_data['nome']
-                        link = f"/works/{task['id']}"
-
-                        if first_user_id == 'tutti':
-                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
-                            for u in all_users:
-                                msg = f"{u['username']}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
-                                notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
-                                todo_service.create_todo_from_step(
-                                    step={**first_step, 'user_id': str(u['id'])},
-                                    task=task,
-                                    sender_id=1
-                                )
-                            logger.info(f"Notifiche inviate a tutti gli utenti per nuovo task {task['id']}")
-                        else:
-                            try:
-                                user_id_int = int(first_user_id)
-                            except (ValueError, TypeError):
-                                logger.warning(f"Invalid user_id format for first step notification: {first_user_id}")
-                                user_id_int = None
-
-                            if user_id_int:
-                                user = user_repository.find_by_id(user_id_int)
-                                username = user.get('username', 'tu') if user else 'tu'
-                                message = f"{username}, hai una nuova lavorazione per {patient_name}: '{first_step['name']}'"
-                                notification_service.notify_user(user_id=user_id_int, message=message, type='info', link=link)
-                                todo_service.create_todo_from_step(step=first_step, task=task, sender_id=1)
-                                logger.info(f"Notifica e todo inviati all'utente {user_id_int} per nuovo task {task['id']}")
-
-                    except Exception as e:
-                        logger.error(f"Failed to send notification/todo for new task: {e}")
-
-            logger.info(f"Created Task {task['id']} for Patient {patient_id} from Work {work_id}")
-            return task
-            
-        except Exception as e:
-            logger.error(f"Failed to create task from work: {e}")
-            raise ServiceError(f"Failed to create task: {str(e)}")
-
---- server_v2\services\work_service.py::get_task_details (lines 158-160) ---
-    def get_task_details(self, task_id: int) -> Optional[Dict[str, Any]]:
-        """Get task details with steps."""
-        return self.task_repository.get_task_with_steps(task_id)
-
---- server_v2\services\work_service.py::get_tasks_for_patient (lines 162-164) ---
-    def get_tasks_for_patient(self, patient_id: str) -> List[Dict[str, Any]]:
-        """List tasks for a patient."""
-        return self.task_repository.get_tasks_by_patient(patient_id)
-
---- server_v2\services\work_service.py::get_all_tasks (lines 166-168) ---
-    def get_all_tasks(self) -> List[Dict[str, Any]]:
-        """List all tasks."""
-        return self.task_repository.get_all_tasks()
-
---- server_v2\services\work_service.py::complete_step (lines 170-290) ---
-    def complete_step(self, task_id: int, step_id: int, user_id: str = None) -> Dict[str, Any]:
-        """
-        Mark a step as completed and activate the next one.
-        Triggers any associated automation.
-        """
-        try:
-            # 1. Update current step and get updated Object
-            updated_step = self.task_repository.update_step_status(step_id, 'completed', user_id)
-            if not updated_step:
-                raise ValidationError(f"Step {step_id} not found")
-                
-            # 2. Find next step
-            all_steps = self.task_repository.get_steps(task_id)
-            
-            current_index = updated_step['order_index']
-            next_step = None
-            
-            for step in all_steps:
-                if step['order_index'] > current_index and step['status'] == 'pending':
-                    next_step = step
-                    break
-            
-            # 3. Auto-complete todos for completed step
-            try:
-                from services.todo_service import TodoService
-                todo_service = TodoService(self.db_manager)
-                todo_service.auto_complete_step_todos(step_id)
-            except Exception as e:
-                logger.error(f"Failed to auto-complete todos for step {step_id}: {e}")
-            
-            # 4. Activate next step
-            if next_step:
-                self.task_repository.update_step_status(next_step['id'], 'active')
-                logger.info(f"Activated next step {next_step['id']} for task {task_id}")
-
-                # 5. Send notification and create todo for next step assignee(s)
-                next_user_id = next_step.get('user_id')
-                current_user_id = updated_step.get('user_id')
-
-                if next_user_id:
-                    try:
-                        from services.notification_service import NotificationService
-                        from services.todo_service import TodoService
-                        from repositories.user_repository import UserRepository
-                        from services.dbf_data_service import get_dbf_data_service
-
-                        notification_service = NotificationService(self.db_manager)
-                        todo_service = TodoService(self.db_manager)
-                        user_repository = UserRepository()
-                        dbf_service = get_dbf_data_service()
-
-                        # Recupera nome paziente e dati contestuali
-                        task = self.get_task_details(task_id)
-                        patient_name = "il paziente"
-                        if task and task.get('patient_id'):
-                            patient_data = dbf_service.get_patient_by_id(task['patient_id'])
-                            if patient_data and patient_data.get('nome'):
-                                patient_name = patient_data['nome']
-
-                        # Chi ha completato lo step corrente
-                        effective_current_id = None
-                        if current_user_id and current_user_id != 'tutti':
-                            try:
-                                effective_current_id = int(current_user_id)
-                            except (ValueError, TypeError):
-                                pass
-                        if not effective_current_id and user_id:
-                            try:
-                                effective_current_id = int(user_id)
-                            except (ValueError, TypeError):
-                                pass
-
-                        current_user_obj = user_repository.find_by_id(effective_current_id) if effective_current_id else None
-                        current_username = current_user_obj.get('username', 'Un collega') if current_user_obj else 'Un collega'
-                        link = f"/works/{task_id}"
-                        sender_id = effective_current_id or 1
-
-                        if next_user_id == 'tutti':
-                            # Notifica tutti gli utenti non-admin
-                            all_users = [u for u in user_repository.get_all() if u.get('role') != 'admin']
-                            for u in all_users:
-                                msg = f"{current_username} ha completato la sua fase per {patient_name}. {u['username']}, hai la tua fase da completare: '{next_step['name']}'"
-                                notification_service.notify_user(user_id=u['id'], message=msg, type='info', link=link)
-                                todo_service.create_todo_from_step(
-                                    step={**next_step, 'user_id': str(u['id'])},
-                                    task=task,
-                                    sender_id=sender_id
-                                )
-                            logger.info(f"Notifiche inviate a tutti gli utenti per step {next_step['id']}")
-                        else:
-                            try:
-                                next_user_id_int = int(next_user_id)
-                            except (ValueError, TypeError):
-                                logger.warning(f"Invalid user_id format for notification: {next_user_id}")
-                                next_user_id_int = None
-
-                            if next_user_id_int:
-                                next_user = user_repository.find_by_id(next_user_id_int)
-                                next_username = next_user.get('username', 'tu') if next_user else 'tu'
-                                operator_changed = str(next_user_id) != str(current_user_id) if current_user_id else True
-
-                                if operator_changed:
-                                    message = f"{current_username} ha completato la sua fase per {patient_name}. {next_username}, hai la tua fase da completare: '{next_step['name']}'"
-                                    notification_service.notify_user(user_id=next_user_id_int, message=message, type='info', link=link)
-                                    logger.info(f"Notifica inviata all'utente {next_user_id_int} per step {next_step['id']}")
-
-                                todo_service.create_todo_from_step(step=next_step, task=task, sender_id=sender_id)
-                                logger.info(f"Todo creato per utente {next_user_id_int} per step {next_step['id']}")
-
-                    except Exception as notif_error:
-                        logger.error(f"Failed to send notification/todo: {notif_error}")
-            else:
-                # No more steps, complete the task
-                self.task_repository.update(task_id, {'status': 'completed', 'completed_at': datetime.now()})
-                logger.info(f"Task {task_id} completed")
-                
-            return self.get_task_details(task_id)
-            
-        except Exception as e:
-            logger.error(f"Failed to complete step: {e}")
-            raise ServiceError(f"Failed to complete step: {str(e)}")
-
---- server_v2\services\work_service.py::delete_task (lines 292-298) ---
-    def delete_task(self, task_id: int) -> bool:
-        """Delete a task."""
-        try:
-            return self.task_repository.delete(task_id)
-        except Exception as e:
-            logger.error(f"Failed to delete task {task_id}: {e}")
-            raise ServiceError(f"Failed to delete task: {str(e)}")
-
---- server_v2\services\work_service.py::update_task_status (lines 300-306) ---
-    def update_task_status(self, task_id: int, status: str) -> Optional[Dict[str, Any]]:
-        """Update task status."""
-        try:
-            return self.task_repository.update(task_id, {'status': status})
-        except Exception as e:
-            logger.error(f"Failed to update task status {task_id}: {e}")
-            raise ServiceError(f"Failed to update task: {str(e)}")
-
---- server_v2\services\work_service.py::postpone_task (lines 343-387) ---
-    def postpone_task(self, task_id: int, days: int, user_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Postpone a task by X days.
-        Updates task due_date and postpones all related todos.
-        Useful when patient reschedules appointment.
-        """
-        try:
-            from datetime import datetime, timedelta
-            from services.todo_service import TodoService
-            
-            # Get task
-            task = self.task_repository.get_task_with_steps(task_id)
-            if not task:
-                return None
-            
-            # Calculate new due_date
-            current_due_date = task.get('due_date')
-            if current_due_date:
-                if 'T' in current_due_date:
-                    due_date_obj = datetime.fromisoformat(current_due_date.replace('Z', '+00:00'))
-                else:
-                    due_date_obj = datetime.strptime(current_due_date, '%Y-%m-%d')
-                
-                new_due_date = due_date_obj + timedelta(days=days)
-            else:
-                # If no due_date, set to X days from now
-                new_due_date = datetime.now() + timedelta(days=days)
-            
-            # Update task due_date
-            updated_task = self.task_repository.update(task_id, {
-                'due_date': new_due_date.isoformat(),
-                'updated_at': datetime.utcnow().isoformat()
-            })
-            
-            # Postpone all related todos
-            todo_service = TodoService(self.db_manager)
-            result = todo_service.postpone_task_todos(task_id, days, user_id)
-            
-            logger.info(f"Task {task_id} postponed by {days} days, {result.get('postponed_count', 0)} todos affected")
-            
-            return updated_task
-            
-        except Exception as e:
-            logger.error(f"Failed to postpone task {task_id}: {e}")
-            raise ServiceError(f"Failed to postpone task: {str(e)}")
-
---- server_v2\api\v2_works.py::get_works (lines 16-24) ---
-def get_works():
-    """Get all work templates."""
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_works.py::get_work_details (lines 27-37) ---
+def get_work_details(work_id):
+    """Get work details with steps."""
     try:
         service = get_work_service()
-        works = service.get_all_works()
-        return jsonify({'success': True, 'data': works})
+        work = service.get_work_details(work_id)
+        if not work:
+            return jsonify({'success': False, 'error': 'Work not found'}), 404
+        return jsonify({'success': True, 'data': work})
     except Exception as e:
-        logger.error(f"Error getting works: {e}")
+        logger.error(f"Error getting work {work_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
---- server_v2\repositories\work_repository.py::WorkRepository (lines 11-254) ---
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_works.py::create_work (lines 40-60) ---
+def create_work():
+    """Create a new work template."""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        work_data = data.get('work')
+        steps_data = data.get('steps')
+        
+        if not work_data:
+             return jsonify({'success': False, 'error': 'Work data is required'}), 400
+             
+        service = get_work_service()
+        new_work = service.create_work_template(work_data, steps_data)
+        
+        return jsonify({'success': True, 'data': new_work}), 201
+        
+    except Exception as e:
+        logger.error(f"Error creating work: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_works.py::update_work (lines 63-81) ---
+def update_work(work_id):
+    """Update a work template."""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+            
+        steps_data = data.get('steps')
+        # Filter out steps from work data if present at top level, though service handles it too
+        work_data = {k: v for k, v in data.items() if k != 'steps'}
+             
+        service = get_work_service()
+        updated_work = service.update_work_template(work_id, work_data, steps_data)
+        
+        return jsonify({'success': True, 'data': updated_work})
+        
+    except Exception as e:
+        logger.error(f"Error updating work {work_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_works.py::delete_work (lines 84-97) ---
+def delete_work(work_id):
+    """Delete a work template."""
+    try:
+        service = get_work_service()
+        result = service.delete_work_template(work_id)
+        
+        if result:
+            return jsonify({'success': True, 'message': 'Work deleted successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Work not found or failed to delete'}), 404
+            
+    except Exception as e:
+        logger.error(f"Error deleting work {work_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\prestazione_work_mapping_repository.py::PrestazioneWorkMappingRepository (lines 9-96) ---
+class PrestazioneWorkMappingRepository(BaseRepository):
+    """Repository per mappare codici prestazione → work_id"""
+
+    @property
+    def table_name(self) -> str:
+        return 'prestazione_work_mapping'
+
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+        self._ensure_tables_exist()
+
+    def _ensure_tables_exist(self) -> None:
+        """Crea la tabella mapping se non esiste."""
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS prestazione_work_mapping (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        codice_prestazione TEXT NOT NULL UNIQUE,
+                        work_id INTEGER NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (work_id) REFERENCES works(id)
+                    )
+                ''')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_prestazione_codice ON prestazione_work_mapping(codice_prestazione)')
+        except Exception as e:
+            logger.error(f"Failed to ensure prestazione_work_mapping table: {e}")
+            raise RepositoryError(f"Failed to ensure table: {str(e)}", cause=e)
+
+    def get_work_id_by_prestazione(self, codice_prestazione: str) -> Optional[int]:
+        """Ottiene work_id dato il codice prestazione."""
+        try:
+            query = "SELECT work_id FROM prestazione_work_mapping WHERE codice_prestazione = ?"
+            result = self.execute_custom_query(query, (codice_prestazione,), fetch_one=True, fetch_all=False)
+            return result['work_id'] if result else None
+        except Exception as e:
+            logger.error(f"Failed to get work_id for prestazione {codice_prestazione}: {e}")
+            return None
+
+    def upsert_mapping(self, codice_prestazione: str, work_id: int) -> Dict[str, Any]:
+        """Inserisce o aggiorna un mapping."""
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    INSERT INTO prestazione_work_mapping (codice_prestazione, work_id, updated_at)
+                    VALUES (?, ?, datetime('now'))
+                    ON CONFLICT(codice_prestazione) DO UPDATE SET
+                        work_id = excluded.work_id,
+                        updated_at = datetime('now')
+                ''', (codice_prestazione, work_id))
+
+                cursor.execute('SELECT * FROM prestazione_work_mapping WHERE codice_prestazione = ?', (codice_prestazione,))
+                return dict(cursor.fetchone())
+        except Exception as e:
+            logger.error(f"Failed to upsert mapping {codice_prestazione} → {work_id}: {e}")
+            raise RepositoryError(f"Failed to upsert mapping: {str(e)}", cause=e)
+
+    def list(self, options=None):
+        """Override list per non usare deleted_at."""
+        try:
+            query = "SELECT * FROM prestazione_work_mapping ORDER BY codice_prestazione"
+            results = self.execute_custom_query(query, (), fetch_all=True)
+            data = [dict(row) for row in results] if results else []
+
+            # Return oggetto compatibile con QueryResult
+            class SimpleResult:
+                def __init__(self, data):
+                    self.data = data
+                    self.total = len(data)
+
+            return SimpleResult(data)
+        except Exception as e:
+            logger.error(f"Failed to list mappings: {e}")
+            return SimpleResult([])
+
+    def delete_mapping(self, codice_prestazione: str) -> bool:
+        """Elimina un mapping."""
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute('DELETE FROM prestazione_work_mapping WHERE codice_prestazione = ?', (codice_prestazione,))
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Failed to delete mapping for {codice_prestazione}: {e}")
+            return False
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\work_repository.py::WorkRepository (lines 11-254) ---
 class WorkRepository(BaseRepository):
     """
     Repository for managing Work templates and their associated Step templates.
@@ -927,432 +483,23 @@ class WorkRepository(BaseRepository):
             if not results:
                 return []
             
-            # Filter out provider_id and ensure dict
-            steps = []
-            for row in results:
-                step = dict(row)
-                if 'provider_id' in step:
-                    del step['provider_id']
-                steps.append(step)
-            return steps
-        except Exception as e:
-            logger.error(f"Failed to get step templates for work {work_id}: {e}")
-            return []
-
-    def create_work(self, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Create a new work with optional steps in a transaction."""
-        try:
-            with self.db_manager.transaction() as conn:
-                # 1. Create Work
-                # Remove 'steps' field if present (it's not a column in works table)
-                clean_work_data = {k: v for k, v in work_data.items() if k != 'steps'}
-                
-                # validation is handled by base create(), but here we do manual insert for transaction safety
-                self._validate_entity_data(clean_work_data)
-                query, params = self._build_insert_query(clean_work_data)
-                cursor = conn.cursor()
-                cursor.execute(query, params)
-                work_id = cursor.lastrowid
-                
-                # 2. Create Steps
-                if steps_data:
-                    for index, step in enumerate(steps_data):
-                        step['work_id'] = work_id
-                        step['order_index'] = step.get('order_index', index)
-                        
-                        # Map incoming user_id to DB user_id
-                        step['user_id'] = step.get('user_id')
-                        # Ensure provider_id is NOT used for steps
-                        if 'provider_id' in step:
-                            del step['provider_id']
-                            
-                        fields = ', '.join(step.keys())
-                        placeholders = ', '.join(['?' for _ in step.keys()])
-                        values = list(step.values())
-                        
-                        step_query = f"INSERT INTO step_templates ({fields}) VALUES ({placeholders})"
-                        cursor.execute(step_query, values)
-                
-                cursor.close()
-                
-            # Return complete object
-            return self.get_work_with_steps(work_id)
-                
-        except Exception as e:
-            logger.error(f"Failed to create work with steps: {e}")
-            raise RepositoryError(f"Failed to create work: {str(e)}", cause=e)
-
-    def add_step_template(self, step_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Add a single step template to a work."""
-        try:
-            # Simple direct insert using base logic could be tricky due to table name mismatch
-            # creating a mini-repo or just custom query is better
-            # Ensure user_id usage
-            if 'provider_id' in step_data:
-                del step_data['provider_id']
-            
-            fields = ', '.join(step_data.keys())
-            placeholders = ', '.join(['?' for _ in step_data.keys()])
-            values = list(step_data.values())
-            
-            with self.db_manager.transaction() as conn:
-                cursor = conn.cursor()
-                cursor.execute(f"INSERT INTO step_templates ({fields}) VALUES ({placeholders})", values)
-                step_id = cursor.lastrowid
-                cursor.close()
-                
-                # Fetch back
-                result = self.execute_custom_query(
-                    "SELECT * FROM step_templates WHERE id = ?", (step_id,), fetch_one=True
-                )
-                return dict(result)
-        except Exception as e:
-             logger.error(f"Failed to add step template: {e}")
-             raise RepositoryError(f"Failed to add step: {str(e)}", cause=e)
-
-    def update_work_with_steps(self, work_id: int, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Update a work and its steps in a transaction."""
-        try:
-            with self.db_manager.transaction() as conn:
-                # 1. Update Work
-                if work_data:
-                    # Remove steps if present in work_data to avoid DB error
-                    clean_work_data = {k: v for k, v in work_data.items() if k != 'steps'}
-                    self.update(work_id, clean_work_data)
-                
-                # 2. Update Steps
-                if steps_data is not None:
-                    cursor = conn.cursor()
-                    
-                    # Get existing step IDs to detect deletions
-                    existing_steps = self.get_step_templates(work_id)
-                    existing_ids = {s['id'] for s in existing_steps}
-                    incoming_ids = {s['id'] for s in steps_data if 'id' in s}
-                    
-                    # Delete steps that are no longer present
-                    ids_to_delete = existing_ids - incoming_ids
-                    if ids_to_delete:
-                        placeholders = ', '.join(['?' for _ in ids_to_delete])
-                        delete_query = f"UPDATE step_templates SET deleted_at = CURRENT_TIMESTAMP WHERE id IN ({placeholders})"
-                        cursor.execute(delete_query, list(ids_to_delete))
-                    
-                    # Upsert steps
-                    for index, step in enumerate(steps_data):
-                        step_id = step.get('id')
-                        step_data = {
-                            'work_id': work_id,
-                            'name': step['name'],
-                            'description': step.get('description'),
-                            'order_index': step.get('order_index', index),
-                            'order_index': step.get('order_index', index),
-                            'user_id': step.get('user_id'),
-                            # 'provider_id': step.get('provider_id'), # Removed
-                            'metadata': step.get('metadata', '{}') if isinstance(step.get('metadata'), str) else json.dumps(step.get('metadata', {}))
-                        }
-                        
-                        if step_id and step_id in existing_ids:
-                            # Update existing
-                            set_clauses = [f"{k} = ?" for k in step_data.keys()]
-                            query = f"UPDATE step_templates SET {', '.join(set_clauses)}, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
-                            values = list(step_data.values()) + [step_id]
-                            cursor.execute(query, values)
-                        else:
-                            # Insert new
-                            fields = ', '.join(step_data.keys())
-                            placeholders = ', '.join(['?' for _ in step_data.keys()])
-                            query = f"INSERT INTO step_templates ({fields}) VALUES ({placeholders})"
-                            values = list(step_data.values())
-                            cursor.execute(query, values)
-                            
-                    cursor.close()
-                
-            return self.get_work_with_steps(work_id)
-                
-        except Exception as e:
-            logger.error(f"Failed to update work with steps: {e}")
-            raise RepositoryError(f"Failed to update work: {str(e)}", cause=e)
-
---- server_v2\repositories\prestazione_work_mapping_repository.py::PrestazioneWorkMappingRepository (lines 9-96) ---
-class PrestazioneWorkMappingRepository(BaseRepository):
-    """Repository per mappare codici prestazione → work_id"""
-
-    @property
-    def table_name(self) -> str:
-        return 'prestazione_work_mapping'
-
-    def __init__(self, db_manager: Optional[DatabaseManager] = None):
-        super().__init__(db_manager)
-        self._ensure_tables_exist()
-
-    def _ensure_tables_exist(self) -> None:
-        """Crea la tabella mapping se non esiste."""
-        try:
-            with self.db_manager.transaction() as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS prestazione_work_mapping (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        codice_prestazione TEXT NOT NULL UNIQUE,
-                        work_id INTEGER NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (work_id) REFERENCES works(id)
-                    )
-                ''')
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_prestazione_codice ON prestazione_work_mapping(codice_prestazione)')
-        except Exception as e:
-            logger.error(f"Failed to ensure prestazione_work_mapping table: {e}")
-            raise RepositoryError(f"Failed to ensure table: {str(e)}", cause=e)
-
-    def get_work_id_by_prestazione(self, codice_prestazione: str) -> Optional[int]:
-        """Ottiene work_id dato il codice prestazione."""
-        try:
-            query = "SELECT work_id FROM prestazione_work_mapping WHERE codice_prestazione = ?"
-            result = self.execute_custom_query(query, (codice_prestazione,), fetch_one=True, fetch_all=False)
-            return result['work_id'] if result else None
-        except Exception as e:
-            logger.error(f"Failed to get work_id for prestazione {codice_prestazione}: {e}")
-            return None
-
-    def upsert_mapping(self, codice_prestazione: str, work_id: int) -> Dict[str, Any]:
-        """Inserisce o aggiorna un mapping."""
-        try:
-            with self.db_manager.transaction() as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT INTO prestazione_work_mapping (codice_prestazione, work_id, updated_at)
-                    VALUES (?, ?, datetime('now'))
-                    ON CONFLICT(codice_prestazione) DO UPDATE SET
-                        work_id = excluded.work_id,
-                        updated_at = datetime('now')
-                ''', (codice_prestazione, work_id))
-
-                cursor.execute('SELECT * FROM prestazione_work_mapping WHERE codice_prestazione = ?', (codice_prestazione,))
-                return dict(cursor.fetchone())
-        except Exception as e:
-            logger.error(f"Failed to upsert mapping {codice_prestazione} → {work_id}: {e}")
-            raise RepositoryError(f"Failed to upsert mapping: {str(e)}", cause=e)
-
-    def list(self, options=None):
-        """Override list per non usare deleted_at."""
-        try:
-            query = "SELECT * FROM prestazione_work_mapping ORDER BY codice_prestazione"
-            results = self.execute_custom_query(query, (), fetch_all=True)
-            data = [dict(row) for row in results] if results else []
-
-            # Return oggetto compatibile con QueryResult
-            class SimpleResult:
-                def __init__(self, data):
-                    self.data = data
-                    self.total = len(data)
-
-            return SimpleResult(data)
-        except Exception as e:
-            logger.error(f"Failed to list mappings: {e}")
-            return SimpleResult([])
-
-    def delete_mapping(self, codice_prestazione: str) -> bool:
-        """Elimina un mapping."""
-        try:
-            with self.db_manager.transaction() as conn:
-                cursor = conn.cursor()
-                cursor.execute('DELETE FROM prestazione_work_mapping WHERE codice_prestazione = ?', (codice_prestazione,))
-                return cursor.rowcount > 0
-        except Exception as e:
-            logger.error(f"Failed to delete mapping for {codice_prestazione}: {e}")
-            return False
-
---- server_v2\services\work_service.py::reset_task (lines 308-341) ---
-    def reset_task(self, task_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Reset all steps of a task to pending status.
-        Sets the first step to active and the task status to in_progress.
-        """
-        try:
-            # Get task details
-            task = self.task_repository.get_task_with_steps(task_id)
-            if not task:
-                return None
-            
-            # Reset all steps to pending
-            steps = task.get('steps', [])
-            for step in steps:
-                self.task_repository.update_step_status(step['id'], 'pending')
-            
-            # Activate the first step (if exists)
-            if steps:
-                sorted_steps = sorted(steps, key=lambda s: s.get('order_index', 0))
-                first_step = sorted_steps[0]
-                self.task_repository.update_step_status(first_step['id'], 'active')
-            
-            # Update task status to in_progress
-            updated_task = self.task_repository.update(task_id, {
-                'status': 'in_progress',
-                'updated_at': datetime.utcnow().isoformat()
-            })
-            
-            logger.info(f"Task {task_id} reset successfully")
-            return updated_task
-            
-        except Exception as e:
-            logger.error(f"Failed to reset task {task_id}: {e}")
-            raise ServiceError(f"Failed to reset task: {str(e)}")
-
---- client_v2\src\features\lavorazioni\WorksPage.tsx::init (lines 110-116) ---
-        const init = async () => {
-            await Promise.all([
-                loadWorks(),
-                loadProviders(),
-                loadUsers()
-            ]);
-        };
-
---- client_v2\src\features\lavorazioni\WorksPage.tsx::confirmDelete (lines 170-182) ---
-    const confirmDelete = async () => {
-        if (!itemToDelete) return;
-        try {
-            await deleteWork(itemToDelete);
-            toast.success('Work eliminato');
-        } catch (error) {
-            console.error('Error deleting work:', error);
-            toast.error('Errore durante l\'eliminazione');
-        } finally {
-            setDeleteModalVisible(false);
-            setItemToDelete(null);
-        }
-    };
+# … snippet truncated; inspect the source file for the remaining lines
 
 === CONNECTIONS ===
-- server_v2/api/v2_prestazione_work_mapping.py
-  external:
-    - app_v2
-    - core.database_manager
-    - flask
-    - flask_jwt_extended
-    - logging
-    - repositories.prestazione_work_mapping_repository
-- server_v2/api/v2_works.py
-  external:
-    - core.database_manager
-    - flask
-    - logging
-    - services.work_service
-- server_v2/repositories/prestazione_work_mapping_repository.py
-  external:
-    - core.base_repository
-    - core.database_manager
-    - core.exceptions
-    - logging
-    - typing
-- server_v2/repositories/work_repository.py
-  external:
-    - core.base_repository
-    - core.database_manager
-    - core.exceptions
-    - json
-    - logging
-    - typing
-- server_v2/services/work_service.py
-  external:
-    - core.database_manager
-    - core.exceptions
-    - datetime
-    - json
-    - logging
-    - repositories.task_repository
-    - repositories.user_repository
-    - repositories.work_repository
-    - services.base_service
-    - services.dbf_data_service
-    - services.notification_service
-    - services.todo_service
-    - typing
+- client_v2/src/features/lavorazioni/WorkDetailsPage.tsx
+  internal:
+    - client_v2/src/store/pazienti.store.tsx
+- client_v2/src/features/lavorazioni/WorksPage.tsx
+  internal:
+    - client_v2/src/features/lavorazioni/WorkStepItem.tsx
+- client_v2/src/services/api/works.service.ts
+  internal:
+    - client_v2/src/services/api/client.ts
 - client_v2/src/services/works.service.ts
   internal:
-    - ../types/works.types
     - client_v2/src/services/api/client.ts
 - client_v2/src/store/works.store.ts
   internal:
     - client_v2/src/services/works.service.ts
     - client_v2/src/types/index.ts
     - client_v2/src/types/works.types.ts
-  external:
-    - zustand
-    - zustand/middleware/immer
-- client_v2/src/services/api/works.service.ts
-  internal:
-    - client_v2/src/services/api/client.ts
-- client_v2/src/features/lavorazioni/ProvidersPage.tsx
-  internal:
-    - ../../components/modals/ConfirmDeleteModal
-    - ../../store/provider.store
-    - ../../types/works.types
-  external:
-    - @coreui/icons
-    - @coreui/icons-react
-    - @coreui/react
-    - react
-    - react-hot-toast
-- client_v2/src/features/lavorazioni/StepsPage.tsx
-  internal:
-    - client_v2/src/components/layout/PageTemplate.tsx
-  external:
-    - @coreui/react
-    - react
-- client_v2/src/features/lavorazioni/TasksPage.tsx
-  internal:
-    - ../../components/modals/ConfirmActionModal
-    - ../../components/modals/ConfirmDeleteModal
-    - ../../components/selects/PazientiSelect
-    - ../../services/works.service
-    - ../../store/auth.store
-    - ../../store/pazienti.store
-    - ../../types/works.types
-  external:
-    - @coreui/icons
-    - @coreui/icons-react
-    - @coreui/react
-    - react
-    - react-hot-toast
-    - react-router-dom
-- client_v2/src/features/lavorazioni/WorkDetailsPage.tsx
-  internal:
-    - ../../services/works.service
-    - ../../store/auth.store
-    - ../../store/user.store
-    - ../../types/works.types
-    - client_v2/src/store/pazienti.store.tsx
-  external:
-    - @coreui/icons
-    - @coreui/icons-react
-    - @coreui/react
-    - react
-    - react-hot-toast
-    - react-router-dom
-- client_v2/src/features/lavorazioni/WorksPage.tsx
-  internal:
-    - ../../components/modals/ConfirmDeleteModal
-    - ../../services/works.service
-    - ../../store/provider.store
-    - ../../store/user.store
-    - ../../store/works.store
-    - ../../types/works.types
-    - client_v2/src/features/lavorazioni/WorkStepItem.tsx
-  external:
-    - @coreui/icons
-    - @coreui/icons-react
-    - @coreui/react
-    - @dnd-kit/core
-    - @dnd-kit/sortable
-    - react
-    - react-hot-toast
-- client_v2/src/features/lavorazioni/WorkStepItem.tsx
-  internal:
-    - ../../types/works.types
-  external:
-    - @coreui/icons
-    - @coreui/icons-react
-    - @coreui/react
-    - @dnd-kit/sortable
-    - @dnd-kit/utilities
-    - react

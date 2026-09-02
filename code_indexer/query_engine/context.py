@@ -1,248 +1,71 @@
-from collections import defaultdict
-from .scorer import score_file
-from .information_score import (
-    calculate_information_score,
-    calculate_score_breakdown
-)
+from .information_score import calculate_information_score, calculate_score_breakdown
 from .symbol_score import calculate_symbol_score
 from .symbol_classifier import classify_symbol
 
 
-GENERIC_ROLES = {
-    "utility",
-    "types",
-    "configuration",
-    "component"
-}
-
 GENERIC_PATHS = {
-    "components/ui",
-    "components/modals",
-    "components/tables",
-    "components/layout",
-    "components/selects",
-    "services/api/client.ts",
-    "store/prestazioni.store.ts"
+    'components/ui', 'components/modals', 'components/tables', 'components/layout',
+    'components/selects', 'services/api/client.ts', 'store/prestazioni.store.ts',
 }
-EXTERNAL_IMPORTS = {
-    "react",
-    "axios",
-    "flask",
-    "logging",
-    "pandas",
-    "zustand",
-    "pathlib",
-    "typing",
-    "sqlite3",
-    "os",
-    "dbf"
-}
+EXCLUDED_ROLES = {'configuration', 'unknown', 'certificate'}
 
 
 def is_generic_file(file):
-
-    path = file.get("path", "").replace("\\", "/")
-
-    for item in GENERIC_PATHS:
-
-        if item in path:
-            return True
-
-    return False
+    path = file.get('path', '').replace('\\', '/')
+    return any(item in path for item in GENERIC_PATHS)
 
 
-def expand_context(
-    matched_files,
-    files,
-    entities,
-    relationships,
-    query=""
-):
-
-    file_map = {
-        file["id"]: file
-        for file in files
-    }
+def _can_expand(file):
+    return file.get('role') not in EXCLUDED_ROLES and not is_generic_file(file)
 
 
-    context = {
-        "files": [],
-        "symbols": [],
-        "connections": []
-    }
-
-
-    selected_ids = set()
-
-
-    # file iniziali trovati dalla query
-
-    for file in matched_files:
-
-        file_id = file["id"]
-
-        selected_ids.add(file_id)
-
-        context["files"].append(file)
-
-
-    # espansione grafo con profondità
-
+def expand_context(matched_files, files, entities, relationships, query='', depth=1):
+    """Build a compact context by following internal imports in both directions."""
+    file_map = {file['id']: file for file in files}
+    selected_ids = {file['id'] for file in matched_files}
+    connections = []
+    visited = set(selected_ids)
     frontier = set(selected_ids)
 
-    visited = set(selected_ids)
-
-    depth = 1
-
     for _ in range(depth):
-
         next_frontier = set()
-
-
         for relation in relationships:
-
-            source = relation.get("source")
-            target = relation.get("target")
-
-            if source in frontier:
-
-                if relation.get("relation") != "imports":
-                    continue
-
-                context["connections"].append(
-                    relation
-                )
-
-
-                if source in file_map and source not in visited:
-
-                    file = file_map[source]
-
-                    if (
-                        file.get("role") not in [
-                            "configuration",
-                            "unknown",
-                            "certificate"
-                        ]
-                        and not is_generic_file(file)
-                    ):
-                        visited.add(source)
-                        next_frontier.add(source)
-
-
-                if target in file_map and target not in visited:
-
-                    file = file_map[target]
-
-                    if (
-                        file.get("role") not in [
-                            "configuration",
-                            "unknown",
-                            "certificate"
-                        ]
-                        and not is_generic_file(file)
-                    ):
-                        visited.add(target)
-                        next_frontier.add(target)
-
-
+            if relation.get('relation') != 'imports' or relation.get('resolved') is not True:
+                continue
+            source = relation.get('source')
+            target = relation.get('target')
+            if source not in frontier and target not in frontier:
+                continue
+            connections.append(relation)
+            connected = target if source in frontier else source
+            file = file_map.get(connected)
+            if file and connected not in visited and _can_expand(file):
+                visited.add(connected)
+                next_frontier.add(connected)
         frontier = next_frontier
-
-
         if not frontier:
             break
 
-
-    selected_ids.update(
-        visited
-    )
-
-
-    # aggiunge file collegati con filtro importanza
-
-    for file_id in selected_ids:
-
-        if file_id in file_map:
-
-            file = file_map[file_id]
-
-            if file not in context["files"]:
-
-                if file.get("role") not in [
-                    "configuration",
-                    "unknown",
-                    "certificate"
-                ]:
-                    context["files"].append(file)
-
-
-    # simboli appartenenti ai file
-
-    selected_paths = {
-        file["path"]
-        for file in context["files"]
-    }
-
-
+    context_files = [file_map[file_id] for file_id in visited if file_id in file_map]
+    selected_paths = {file['path'] for file in context_files}
     file_scores = {
-        file["path"]: calculate_information_score(
-            file,
-            context["connections"],
-            []
-        )
-        for file in context["files"]
+        file['path']: calculate_information_score(file, connections, [], query)
+        for file in context_files
     }
-
-
+    context_symbols = []
     for entity in entities:
+        if entity.get('path') not in selected_paths:
+            continue
+        scored = dict(entity)
+        scored['information_score'] = calculate_symbol_score(
+            scored, query, file_scores.get(scored.get('path'), 0)
+        )
+        scored['category'] = classify_symbol(scored)
+        context_symbols.append(scored)
 
-        if entity.get("path") in selected_paths:
+    context_symbols.sort(key=lambda item: item.get('information_score', 0), reverse=True)
+    for file in context_files:
+        file.update(calculate_score_breakdown(file, connections, context_symbols, query))
+    context_files.sort(key=lambda item: item.get('information_score', 0), reverse=True)
 
-            entity["information_score"] = calculate_symbol_score(
-                entity,
-                query,
-                file_scores.get(
-                    entity.get("path"),
-                    0
-                )
-            )
-
-            entity["category"] = classify_symbol(
-                entity
-            )
-
-            context["symbols"].append(
-                entity
-            )
-
-
-    context["symbols"] = sorted(
-        context["symbols"],
-        key=lambda x: x.get(
-            "information_score",
-            0
-        ),
-        reverse=True
-    )
-
-
-    for file in context["files"]:
-
-        file.update(calculate_score_breakdown(
-            file,
-            context["connections"],
-            context["symbols"],
-            query
-        ))
-
-
-    context["files"] = sorted(
-        context["files"],
-        key=lambda x: x.get(
-            "information_score",
-            0
-        ),
-        reverse=True
-    )
-
-    return context
+    return {'files': context_files, 'symbols': context_symbols, 'connections': connections}

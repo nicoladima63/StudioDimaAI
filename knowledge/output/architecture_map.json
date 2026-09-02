@@ -4,12 +4,12 @@
     "service": 97,
     "api": 63,
     "test": 51,
-    "script": 44,
     "page": 38,
-    "unknown": 31,
-    "core_module": 19,
+    "script": 38,
+    "core_module": 17,
     "state": 15,
     "repository": 14,
+    "unknown": 13,
     "feature": 13,
     "configuration": 11,
     "utility": 11,
@@ -45,11 +45,11 @@
       "imports": 13
     },
     {
-      "file": "file:client_v2/src/services/api/todos.ts",
+      "file": "file:client_v2/src/store/prestazioni.store.ts",
       "imports": 8
     },
     {
-      "file": "file:client_v2/src/store/prestazioni.store.ts",
+      "file": "file:client_v2/src/services/api/todos.ts",
       "imports": 8
     },
     {
@@ -69,18 +69,6 @@
       "imports": 6
     },
     {
-      "file": "file:client_v2/src/services/api/environment.service.ts",
-      "imports": 5
-    },
-    {
-      "file": "file:client_v2/src/services/api/monitorPrestazioni.ts",
-      "imports": 5
-    },
-    {
-      "file": "file:client_v2/src/services/ricette_ts.service.ts",
-      "imports": 5
-    },
-    {
       "file": "file:client_v2/src/components/selects/ContiSelect.tsx",
       "imports": 5
     },
@@ -93,11 +81,23 @@
       "imports": 5
     },
     {
-      "file": "file:client_v2/src/services/api/user.service.ts",
-      "imports": 4
+      "file": "file:client_v2/src/services/api/environment.service.ts",
+      "imports": 5
     },
     {
-      "file": "file:client_v2/src/services/api/base.service.ts",
+      "file": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/services/ricette_ts.service.ts",
+      "imports": 5
+    },
+    {
+      "file": "route:/",
+      "imports": 5
+    },
+    {
+      "file": "file:client_v2/src/components/layout/_nav.tsx",
       "imports": 4
     }
   ],
@@ -106,22 +106,124 @@
   ],
   "layers": {
     "configuration": 11,
-    "unknown": 31,
-    "entry_point": 1,
-    "test": 51,
-    "api": 63,
-    "core_module": 19,
-    "legacy": 4,
-    "repository": 14,
-    "script": 44,
-    "service": 97,
-    "utility": 11,
-    "certificate": 3,
+    "unknown": 13,
     "component": 159,
-    "hook": 8,
-    "state": 15,
+    "service": 97,
+    "page": 38,
     "types": 9,
     "feature": 13,
-    "page": 38
-  }
+    "state": 15,
+    "hook": 8,
+    "utility": 11,
+    "api": 63,
+    "entry_point": 1,
+    "certificate": 3,
+    "core_module": 17,
+    "legacy": 4,
+    "repository": 14,
+    "script": 38,
+    "test": 51
+  },
+  "complex_files": [
+    {
+      "file": "server_v2/utils/dbf_utils.py",
+      "symbols": 49,
+      "role": "utility"
+    },
+    {
+      "file": "server_v2/core/environment_manager.py",
+      "symbols": 42,
+      "role": "core_module"
+    },
+    {
+      "file": "server_v2/api/v2_bot.py",
+      "symbols": 41,
+      "role": "api"
+    },
+    {
+      "file": "tests/test_service_layer.py",
+      "symbols": 37,
+      "role": "test"
+    },
+    {
+      "file": "server_v2/services/email_service.py",
+      "symbols": 36,
+      "role": "service"
+    },
+    {
+      "file": "server_v2/core/exceptions.py",
+      "symbols": 34,
+      "role": "core_module"
+    },
+    {
+      "file": "server_v2/services/ricette_ts_service.py",
+      "symbols": 34,
+      "role": "service"
+    },
+    {
+      "file": "tests/test_compatibility_bridge.py",
+      "symbols": 33,
+      "role": "test"
+    },
+    {
+      "file": "server_v2/app_v2.py",
+      "symbols": 30,
+      "role": "entry_point"
+    },
+    {
+      "file": "server_v2/repositories/email_repository.py",
+      "symbols": 30,
+      "role": "repository"
+    },
+    {
+      "file": "tests/test_base_repository.py",
+      "symbols": 30,
+      "role": "test"
+    },
+    {
+      "file": "tests/test_dbf_utils.py",
+      "symbols": 30,
+      "role": "test"
+    },
+    {
+      "file": "server_v2/api/v2_calendar.py",
+      "symbols": 29,
+      "role": "api"
+    },
+    {
+      "file": "server_v2/services/sms_service.py",
+      "symbols": 27,
+      "role": "service"
+    },
+    {
+      "file": "server_v2/api/compatibility_bridge.py",
+      "symbols": 25,
+      "role": "api"
+    },
+    {
+      "file": "server_v2/core/config.py",
+      "symbols": 25,
+      "role": "configuration"
+    },
+    {
+      "file": "server_v2/services/materiali_migration_service.py",
+      "symbols": 24,
+      "role": "service"
+    },
+    {
+      "file": "server_v2/services/snapshot_manager.py",
+      "symbols": 24,
+      "role": "service"
+    },
+    {
+      "file": "server_v2/api/v2_ricetta.py",
+      "symbols": 23,
+      "role": "api"
+    },
+    {
+      "file": "server_v2/core/config_manager.py",
+      "symbols": 23,
+      "role": "configuration"
+    }
+  ]
 }

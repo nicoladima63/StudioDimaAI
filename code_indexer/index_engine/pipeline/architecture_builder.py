@@ -25,7 +25,7 @@ def build_architecture_map(files, graph):
 
     for edge in graph:
 
-        if edge.get("relation") == "imports":
+        if edge.get("relation") in {"imports", "calls_route", "exposes_route"}:
 
             imported[edge["target"]] += 1
 

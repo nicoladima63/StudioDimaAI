@@ -1,0 +1,6480 @@
+[
+  {
+    "path": "client_v2/postcss.config.js",
+    "role": "configuration",
+    "summary": "configuration typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/public/service-worker.js",
+    "role": "unknown",
+    "summary": "unknown typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/App.tsx",
+    "role": "unknown",
+    "summary": "unknown typescript con 1 simboli e 6 import.",
+    "symbols": [
+      "App"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/base/EnvironmentCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 9 import.",
+    "symbols": [
+      "getBadgeConfig",
+      "getStatusIcon",
+      "handleEnvironmentChange",
+      "handleTest"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/base/EnvironmentPanel.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 9 import.",
+    "symbols": [
+      "getLayoutClass",
+      "getOverallStatus",
+      "handleBulkEnvironmentSwitch",
+      "handleServiceSelection",
+      "handleTestAll"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/base/EnvironmentStatus.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 7 import.",
+    "symbols": [
+      "getBadgeContent",
+      "getSizeClass",
+      "getStatusInfo"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/base/EnvironmentSwitch.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 8 import.",
+    "symbols": [
+      "getBadgeColor",
+      "getNextEnvironment",
+      "getSizeClass",
+      "getSwitchConfig",
+      "handleSwitch"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/base/index.ts",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/environment/specialized/DatabaseModeSwitch.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 5 import.",
+    "symbols": [
+      "DatabaseModeSwitch",
+      "handleEnvironmentChange",
+      "handleTest",
+      "validateNetworkSwitch"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/specialized/index.ts",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/environment/specialized/RentriModeSwitch.tsx",
+    "role": "component",
+    "summary": "component typescript con 8 simboli e 6 import.",
+    "symbols": [
+      "RentriModeSwitch",
+      "getConfigurationStatus",
+      "getConnectionStatus",
+      "getTroubleshootingTips",
+      "handleApiTest",
+      "handleEnvironmentChange",
+      "handleTest",
+      "validateRentriConfig"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/specialized/RicettaModeSwitch.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 6 import.",
+    "symbols": [
+      "getCertificateStatus",
+      "getTroubleshootingTips",
+      "handleEnvironmentChange",
+      "handleTest",
+      "validateRicettaConfig"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/environment/specialized/SMSModeSwitch.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 6 import.",
+    "symbols": [
+      "handleEnvironmentChange",
+      "handleSendTestSMS",
+      "handleTest",
+      "validateSMSConfig"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/forms/MaterialClassificationForm.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 8 import.",
+    "symbols": [
+      "handleBrancaChange",
+      "handleClose",
+      "handleContoChange",
+      "handleSave",
+      "handleSottocontoChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav-01.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav-02.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav-03.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav-04.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav.01.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav.02.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav.03.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/_nav.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/AppSidebar.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 12 import.",
+    "symbols": [
+      "handleRestart",
+      "startPollingForNewBuild",
+      "stopPolling"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/layout/AppSidebarNav.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 10 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/BottomNav.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 7 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/Header.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 14 import.",
+    "symbols": [
+      "getRoleBadgeColor",
+      "handleLogout",
+      "showToast"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/layout/Layout.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 16 import.",
+    "symbols": [
+      "handleLogout",
+      "handleScroll",
+      "handler"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/layout/MobileDrawer.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 14 import.",
+    "symbols": [
+      "handleLogout"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/layout/PageLayout.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 2 import.",
+    "symbols": [
+      "PageLayout"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/layout/PageTemplate.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 6 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/layout/ProtectedRoute.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 5 import.",
+    "symbols": [
+      "ProtectedRoute"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/modals/ConfirmActionModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 5 import.",
+    "symbols": [
+      "getButtonColor",
+      "getColorClass",
+      "getDefaultIcon",
+      "handleConfirm"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/modals/ConfirmDeleteModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 5 import.",
+    "symbols": [
+      "handleConfirm"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/modals/DetailViewModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 5 import.",
+    "symbols": [
+      "renderField",
+      "renderSection"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/modals/EditModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 5 import.",
+    "symbols": [
+      "EditModal",
+      "handleFieldChange",
+      "handleSubmit",
+      "renderField",
+      "validateField",
+      "validateForm"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/modals/index.ts",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 12 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/modals/ModalAnagrafica.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 6 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/modals/ModalFatturaDetail.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 7 import.",
+    "symbols": [
+      "fetchFatturaDetail",
+      "formatCurrency",
+      "formatDate",
+      "getRigheFiltrate",
+      "getTotaleRighe",
+      "resetState"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/modals/ModalFattureElenco.tsx",
+    "role": "component",
+    "summary": "component typescript con 8 simboli e 6 import.",
+    "symbols": [
+      "fetchFatture",
+      "formatCurrency",
+      "formatDate",
+      "getDataLabel",
+      "getDataValue",
+      "handlePageChange",
+      "handleToggleDettagli",
+      "resetState"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/PushNotificationToggle.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 4 import.",
+    "symbols": [
+      "PushNotificationToggle",
+      "handleToggle"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/selects/BrancheSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/selects/ContiSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/selects/FornitoriSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 2 import.",
+    "symbols": [
+      "getScore"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/selects/MaterialiSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 2 import.",
+    "symbols": [
+      "getConfidenceBadge",
+      "getScore"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/selects/PazientiSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/selects/PeriodoSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/selects/PrestazioniSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 3 import.",
+    "symbols": [
+      "PrestazioniSelect",
+      "formatPrestazioneDisplay",
+      "handleCategoriaChange",
+      "handleClear",
+      "handlePrestazioneChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/selects/SlimSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "SlimSelectComponent"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/selects/SottocontiSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/tables/DataTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 9 simboli e 4 import.",
+    "symbols": [
+      "getColumnAlignment",
+      "getColumnWidth",
+      "handleClickOutside",
+      "handleKeyDown",
+      "handleSort",
+      "loadColumnConfig",
+      "moveColumn",
+      "saveColumnConfig",
+      "toggleColumn"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/tables/DataTable2.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 6 import.",
+    "symbols": [
+      "getSortIcon",
+      "handleResizeEnd",
+      "handleResizeMove",
+      "handleResizeStart",
+      "handleSort"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/TheoreticalModeToggle.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 4 import.",
+    "symbols": [
+      "handleToggle",
+      "loadSettings"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/toggle/databaseToggle.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 3 import.",
+    "symbols": [
+      "DatabaseToggle",
+      "handleToggle",
+      "refreshStatus",
+      "setStatus"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/ui/avatar.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/badge.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "Badge"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/ui/button.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/card.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/dialog.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/dropdown-menu.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/ErrorFallback.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/input.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/label.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/NotFoundPage.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/NotificationBell.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 8 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/NotificationCenter.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 7 import.",
+    "symbols": [
+      "formatTimestamp",
+      "getNotificationColor",
+      "getNotificationIcon",
+      "handleMarkAllRead",
+      "handleNotificationClick"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/ui/scroll-area.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/separator.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/sheet.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/skeleton.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 1 import.",
+    "symbols": [
+      "Skeleton"
+    ]
+  },
+  {
+    "path": "client_v2/src/components/ui/switch.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/components/ui/tabs.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/admin/services/adminService.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/auth/pages/LoginPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 1 simboli e 11 import.",
+    "symbols": [
+      "onSubmit"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/auth/pages/RegisterPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 2 simboli e 4 import.",
+    "symbols": [
+      "RegisterPage",
+      "handleSubmit"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/automation/pages/AutomationMessages.tsx",
+    "role": "page",
+    "summary": "page typescript con 3 simboli e 3 import.",
+    "symbols": [
+      "fmtDateTime",
+      "getResultMessage",
+      "load"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/automation/services/automationMessagesService.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/bot/components/ConversazioniTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 7 import.",
+    "symbols": [
+      "formatDate",
+      "handleDelete",
+      "handleOpenChat",
+      "handleSearchPhone",
+      "load",
+      "nomePaziente"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/bot/components/ReminderRepliesTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 7 import.",
+    "symbols": [
+      "RispostaBadge",
+      "fmtDate",
+      "fmtDateTime",
+      "load"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/bot/components/ServiziTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 7 import.",
+    "symbols": [
+      "handleLogout",
+      "handleShowQr",
+      "load"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/bot/components/SimulazioneTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 6 import.",
+    "symbols": [
+      "ChannelIcon",
+      "ReminderTable",
+      "fmtDate",
+      "runSimulation"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/bot/components/StoricoComunicazioniTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 7 import.",
+    "symbols": [
+      "fmtDateTime",
+      "handlePerPage",
+      "load"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/bot/components/StudioInfoTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 7 import.",
+    "symbols": [
+      "handleCreate",
+      "handleDelete",
+      "handleSave",
+      "isTextarea",
+      "load"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/bot/pages/BotPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 0 simboli e 7 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/bot/services/botService.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/bot/types/bot.types.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/calendar/components/AutoSyncModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 6 import.",
+    "symbols": [
+      "getPhaseStatus",
+      "renderPhaseIcon"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/calendar/components/CalendarHealthCheck.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 7 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/calendar/components/CalendarMainContent.tsx",
+    "role": "component",
+    "summary": "component typescript con 10 simboli e 7 import.",
+    "symbols": [
+      "confirmClear",
+      "fetchAppointments",
+      "fetchCalendars",
+      "handleCancelClear",
+      "handleCancelSync",
+      "handleClear",
+      "handleSync",
+      "pollClearStatus",
+      "pollSyncStatus",
+      "showToastMessage"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx",
+    "role": "component",
+    "summary": "component typescript con 11 simboli e 10 import.",
+    "symbols": [
+      "addLog",
+      "fetchSettings",
+      "handleClearAll",
+      "handleDatabaseModeChange",
+      "handleEnabledChange",
+      "handleForceResync",
+      "handleSave",
+      "handleSyncAll",
+      "pollJobStatuses",
+      "startPolling",
+      "stopPolling"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/calendar/hook/useCalendarHealth.ts",
+    "role": "feature",
+    "summary": "feature typescript con 3 simboli e 3 import.",
+    "symbols": [
+      "checkHealth",
+      "resetSyncState",
+      "useCalendarHealth"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/calendar/pages/CalendarPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 1 simboli e 5 import.",
+    "symbols": [
+      "CalendarPage"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/calendar/services/calendar.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/calendar/services/calendarHealthCheck.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/cbct/pages/DownloadTacPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 1 simboli e 9 import.",
+    "symbols": [
+      "handleScarica"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/cbct/services/cbct.service.ts",
+    "role": "service",
+    "summary": "service typescript con 1 simboli e 1 import.",
+    "symbols": [
+      "percorsoNasToFileUrl"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "formatCurrency"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 3 simboli e 9 import.",
+    "symbols": [
+      "handleYearChange",
+      "loadProduction",
+      "loadYears"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/conti/components/ColumnDefinition.ts",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/conti/components/ContiTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 7 import.",
+    "symbols": [
+      "toggleExpand",
+      "toggleExpandBranca"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/conti/components/SmartTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/conti/pages/ContiPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 10 simboli e 6 import.",
+    "symbols": [
+      "addBranca",
+      "addSottoconto",
+      "editBranca",
+      "editSottoconto",
+      "fetchAllData",
+      "handleAddConto",
+      "handleDeleteBranca",
+      "handleDeleteConto",
+      "handleDeleteSottoconto",
+      "handleEditConto"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/ActiveWorkCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 9 import.",
+    "symbols": [
+      "getPatientName",
+      "getPhaseLabel",
+      "loadData"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/CalendarAutomation.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 7 import.",
+    "symbols": [
+      "fetchSettings",
+      "handleEnabledChange",
+      "handleSave"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/DashboardStats.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 9 import.",
+    "symbols": [
+      "fetchData"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/DatabaseStatusCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 3 import.",
+    "symbols": [
+      "fetchStatus",
+      "getStatusColor",
+      "handleToggle"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/MonitorRules.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 3 import.",
+    "symbols": [
+      "MonitorRules",
+      "fetchRules"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 8 import.",
+    "symbols": [
+      "handleChange",
+      "handleSubmit",
+      "loadUsers"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/RecallAutomationCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 4 import.",
+    "symbols": [
+      "RecallAutomationCard",
+      "fetchSettings",
+      "handleToggle"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/ReminderAutomationCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 5 import.",
+    "symbols": [
+      "ReminderAutomationCard",
+      "fetchSettings",
+      "handleToggle"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/ServicesStatusSection.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 10 import.",
+    "symbols": [
+      "fetchServicesStatus",
+      "getOverallStatus",
+      "getServiceColor",
+      "handleForceFallback",
+      "handleOpenSettings",
+      "handleToggleService"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/ServiceStatusCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 5 import.",
+    "symbols": [
+      "getActionButton",
+      "getStatusBadge",
+      "getStatusIcon"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/TodoModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 9 import.",
+    "symbols": [
+      "handleChange",
+      "handleSubmit",
+      "loadUsers"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/TodoWidget.tsx",
+    "role": "component",
+    "summary": "component typescript con 8 simboli e 9 import.",
+    "symbols": [
+      "formatDueDate",
+      "getEffectiveUrgency",
+      "getUrgencyColor",
+      "getUrgencyIcon",
+      "getUrgencyLabel",
+      "handleComplete",
+      "handleSnooze",
+      "loadTodos"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/components/WhatsAppStatusWidget.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 7 import.",
+    "symbols": [
+      "handleLogout",
+      "handleShowQr",
+      "loadStatus"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/dashboard/pages/Dashboard.tsx",
+    "role": "page",
+    "summary": "page typescript con 6 simboli e 17 import.",
+    "symbols": [
+      "checkFirstSync",
+      "handleAutoSyncComplete",
+      "handleStartMonitorById",
+      "handleStopMonitorById",
+      "loadStatus",
+      "resetCalendarFirstSyncCheck"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/BreakEvenIndicator.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 2 import.",
+    "symbols": [
+      "safe"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/CollaboratoriRedditivita.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 8 import.",
+    "symbols": [
+      "formatCurrency",
+      "getMarginBadge",
+      "getMarginColor",
+      "getTipoLabel"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/ComparisonChart.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "formatCurrency"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/DashboardTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 9 import.",
+    "symbols": [
+      "loadData"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/ForecastChart.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "formatCurrency"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/ForecastTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 8 import.",
+    "symbols": [
+      "ForecastTab",
+      "loadForecast"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/HealthPulse.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 3 import.",
+    "symbols": [
+      "HealthPulse",
+      "computeIndices",
+      "getColor",
+      "getStatusLabel"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/KpiCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 2 import.",
+    "symbols": [
+      "KpiCard"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/MonthlyChart.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "formatCurrency"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/MultiYearChart.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 5 import.",
+    "symbols": [
+      "formatCurrency"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/ReportAppuntamenti.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 7 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/economics/components/ReportPrestazioni.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 7 import.",
+    "symbols": [
+      "fmtEur",
+      "sortIndicator",
+      "toggleSort"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/SimulatoreTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 7 import.",
+    "symbols": [
+      "runSimulation"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/components/TrimesterForecastCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "fmt"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/pages/AnalisiComparativaPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 3 simboli e 13 import.",
+    "symbols": [
+      "handleCarica",
+      "handleClearCache",
+      "handleToggleAnno"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/pages/CentroCostoPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 2 simboli e 8 import.",
+    "symbols": [
+      "formatEuro",
+      "loadCollaboratori"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/economics/pages/EconomicsPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 0 simboli e 7 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/economics/services/economics.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/economics/types.ts",
+    "role": "feature",
+    "summary": "feature typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/email/components/EmailAiConfig.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 7 import.",
+    "symbols": [
+      "handleSave",
+      "loadConfig"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/components/EmailDetail.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 7 import.",
+    "symbols": [
+      "buildRulePresets",
+      "formatFileSize",
+      "handleCreateRule",
+      "loadDetail"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/components/EmailList.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 6 import.",
+    "symbols": [
+      "formatDate",
+      "handleKeyDown",
+      "handleSearch"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/components/EmailOAuthSetup.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 7 import.",
+    "symbols": [
+      "handleConnect"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/components/EmailRulesManager.tsx",
+    "role": "component",
+    "summary": "component typescript con 7 simboli e 9 import.",
+    "symbols": [
+      "getScopeColor",
+      "getScopeLabel",
+      "handleCreateScopeInline",
+      "handleDelete",
+      "handleSave",
+      "openCreate",
+      "openEdit"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/components/EmailScopeFilter.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "toggleScope"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/components/EmailScopesManager.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 8 import.",
+    "symbols": [
+      "handleDelete",
+      "handleSave",
+      "openCreate",
+      "openEdit"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/components/TagInput.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 4 import.",
+    "symbols": [
+      "addTag",
+      "handleKeyDown",
+      "handlePaste",
+      "removeTag"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/pages/EmailPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 1 simboli e 14 import.",
+    "symbols": [
+      "handleSelectEmail"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/email/services/emailService.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/email/store/email.store.ts",
+    "role": "state",
+    "summary": "state typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/email/types/email.types.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneCompleta.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 12 import.",
+    "symbols": [
+      "applyClassificazione",
+      "handleBrancaChange",
+      "handleContoChange",
+      "handleRemove",
+      "handleSave",
+      "loadClassificazione"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneGerarchica.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 9 import.",
+    "symbols": [
+      "handleBrancaChange",
+      "handleContoChange",
+      "handleSalvaParziale",
+      "handleSottocontoChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneStatus.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 7 import.",
+    "symbols": [
+      "getBrancaNome",
+      "getClassificationType",
+      "getContoNome",
+      "getSottocontoNome",
+      "handleRemoveClassificazione",
+      "styled"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/components/ClassificazioneToggle.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 4 import.",
+    "symbols": [
+      "getButtonProps",
+      "handleToggle"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/components/FornitoriTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 10 import.",
+    "symbols": [
+      "fetchClassificazioni"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/hooks/useFornitoreModals.ts",
+    "role": "hook",
+    "summary": "hook typescript con 13 simboli e 4 import.",
+    "symbols": [
+      "closeAnagraficaModal",
+      "closeFatturaDetailModal",
+      "closeFattureElencoModal",
+      "fetchDettagliCompleti",
+      "fetchDettagliFatturaRighe",
+      "fetchFatturaCompleta",
+      "fetchFattureFornitore",
+      "getCampiAnagrafica",
+      "openAnagraficaModal",
+      "openFatturaDetailModal",
+      "openFattureElencoModal",
+      "switchToFattureFromAnagrafica",
+      "useFornitoreModals"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/pages/FornitoriClassificazione.tsx",
+    "role": "page",
+    "summary": "page typescript con 4 simboli e 11 import.",
+    "symbols": [
+      "handleClassificazioneChange",
+      "handleRefresh",
+      "loadClassificazioni",
+      "toggleRow"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/pages/FornitoriPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 6 simboli e 12 import.",
+    "symbols": [
+      "getClassificazioneForFornitore",
+      "handleClassificazioneChange",
+      "handleForceRefresh",
+      "handleView",
+      "handleViewSpese",
+      "loadClassificazioni"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/fornitori/services/classificazioni.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/fornitori/types/index.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/lavorazioni/ProvidersPage.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 4 simboli e 9 import.",
+    "symbols": [
+      "confirmDelete",
+      "handleDelete",
+      "handleSave",
+      "openModal"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/lavorazioni/StepsPage.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "PageTemplateTest"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/lavorazioni/TasksPage.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 13 simboli e 14 import.",
+    "symbols": [
+      "calculateProgress",
+      "confirmCancel",
+      "confirmDelete",
+      "confirmReset",
+      "fetchTasks",
+      "getTaskCategoryName",
+      "getTaskColor",
+      "handleCancelTask",
+      "handleCompleteStep",
+      "handleCreateTask",
+      "handleDeleteTask",
+      "handleOpenModal",
+      "handleResetTask"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 4 simboli e 12 import.",
+    "symbols": [
+      "getPatientName",
+      "getUserName",
+      "handleCompleteStep",
+      "loadTaskAndPatients"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/lavorazioni/WorksPage.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 9 simboli e 17 import.",
+    "symbols": [
+      "addStep",
+      "confirmDelete",
+      "handleDelete",
+      "handleDragEnd",
+      "handleSave",
+      "init",
+      "openModal",
+      "removeStep",
+      "updateStep"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 0 simboli e 8 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 10 import.",
+    "symbols": [
+      "handleSave"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/materiali/components/MaterialiTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 6 import.",
+    "symbols": [
+      "getBadgeColor"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+    "role": "page",
+    "summary": "page typescript con 10 simboli e 9 import.",
+    "symbols": [
+      "caricaAnteprima",
+      "getScore",
+      "handleClassificationError",
+      "handleClassificationSave",
+      "handleCloseClassificationModal",
+      "handleFornitoreSelect",
+      "handleRowClick",
+      "handleSearchChange",
+      "importaFornitore",
+      "importaTutti"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 9 simboli e 12 import.",
+    "symbols": [
+      "handleConfirmDelete",
+      "handleDelete",
+      "handleEdit",
+      "handleSaveClassification",
+      "handleSearchBlur",
+      "handleSearchClear",
+      "handleSearchSubmit",
+      "handleSuggestionClick",
+      "handleViewFattura"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/materiali/pages/RicercaArticoli.tsx",
+    "role": "page",
+    "summary": "page typescript con 16 simboli e 10 import.",
+    "symbols": [
+      "cancelDeleteMateriale",
+      "caricaClassificazioniEsistenti",
+      "cercaArticoli",
+      "confirmDeleteMateriale",
+      "formatCurrency",
+      "formatDate",
+      "formatNumber",
+      "getArticoloKey",
+      "handleAnnullaModifica",
+      "handleBrancaChange",
+      "handleCancellaMateriale",
+      "handleContoChange",
+      "handleIniziaModifica",
+      "handleSalvaClassificazione",
+      "handleSottocontoChange",
+      "handleSubmit"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/materiali/services/materiali-classification.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/materiali/services/materiali-migration.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 5 import.",
+    "symbols": [
+      "handleClose",
+      "handleSend",
+      "handleTemplateChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 5 import.",
+    "symbols": [
+      "applicaFiltri",
+      "calcolaEta",
+      "set"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 7 import.",
+    "symbols": [
+      "calcolaProssimoRichiamo",
+      "getStatusBadge",
+      "handleSaveStatus",
+      "handleTipoToggle"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/components/PazientiTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 7 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 7 import.",
+    "symbols": [
+      "handleSaveConfig",
+      "handleSaveRichiamato",
+      "handleStatusChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 7 import.",
+    "symbols": [
+      "calcolaProssimoRichiamo",
+      "decodificaTipoRichiamo",
+      "getRichiamoType",
+      "handleQuickSave",
+      "hasGestionaleData",
+      "styled"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 4 simboli e 9 import.",
+    "symbols": [
+      "closeAnagraficaModal",
+      "getCampiAnagrafica",
+      "handleForceRefresh",
+      "handleView"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 4 simboli e 8 import.",
+    "symbols": [
+      "formatData",
+      "resetFiltri",
+      "sortIcon",
+      "toggleSort"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 4 simboli e 9 import.",
+    "symbols": [
+      "carica",
+      "formatData",
+      "parseSlotDate",
+      "togglePaziente"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/pazienti/services/marketing.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/pazienti/services/richiami.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/components/ListaRicetteTest.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "caricaRicetteFromSistemaTS"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicettaAuthStatus.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "RicettaAuthStatus"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx",
+    "role": "component",
+    "summary": "component typescript con 8 simboli e 7 import.",
+    "symbols": [
+      "confermaInvio",
+      "handleDiagnosiChange",
+      "handleFarmacoChange",
+      "handleInvia",
+      "handleProdottoChange",
+      "loadData",
+      "loadFarmaci",
+      "loadProdotti"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicettePaziente.tsx",
+    "role": "component",
+    "summary": "component typescript con 4 simboli e 8 import.",
+    "symbols": [
+      "cercaRicette",
+      "formatData",
+      "getStatoBadge",
+      "scaricaPDF"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx",
+    "role": "component",
+    "summary": "component typescript con 11 simboli e 5 import.",
+    "symbols": [
+      "formatData",
+      "formatXmlForDisplay",
+      "getStatoBadge",
+      "handleApriEmailModal",
+      "handleCerca",
+      "handleFiltriChange",
+      "handleInviaEmail",
+      "handleResetFiltri",
+      "handleSalvaRicetta",
+      "handleStampaPDF",
+      "loadRicette"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/components/TestInvioRicetta.tsx",
+    "role": "component",
+    "summary": "component typescript con 5 simboli e 5 import.",
+    "symbols": [
+      "analyzeResponse",
+      "downloadPDF",
+      "handleSaveRicetta",
+      "handleSendEmail",
+      "handleTestInvio"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/components/TestSistemaTSRaw.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/hooks/usePazienteModals.ts",
+    "role": "hook",
+    "summary": "hook typescript con 13 simboli e 4 import.",
+    "symbols": [
+      "closeAnagraficaModal",
+      "closeFatturaDetailModal",
+      "closeFattureElencoModal",
+      "fetchDettagliCompleti",
+      "fetchDettagliFatturaRighe",
+      "fetchFatturaCompleta",
+      "fetchFatturePaziente",
+      "getCampiAnagrafica",
+      "openAnagraficaModal",
+      "openFatturaDetailModal",
+      "openFattureElencoModal",
+      "switchToFattureFromAnagrafica",
+      "usePazienteModals"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 3 simboli e 9 import.",
+    "symbols": [
+      "handleCloseModal",
+      "handleFormChange",
+      "handleSalvaNuovoPaziente"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/ricetta-elettronica/pages/RNETestPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 1 simboli e 5 import.",
+    "symbols": [
+      "RNETestPage"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/scheduler/pages/SchedulerPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 9 simboli e 10 import.",
+    "symbols": [
+      "formatNextRun",
+      "getServiceStatus",
+      "handleEditSettings",
+      "handleReminderToggle",
+      "handleSaveSettings",
+      "handleStartStop",
+      "handleTrigger",
+      "loadLogs",
+      "loadSchedulerData"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/scheduler/services/remindersService.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/scheduler/services/schedulerService.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/seo/pages/SeoPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 9 simboli e 8 import.",
+    "symbols": [
+      "buildFullUrl",
+      "handleAudit",
+      "handleCompetitorAnalysis",
+      "handleKeyDown",
+      "handleKeywordsKeyDown",
+      "handleLoadSavedAudit",
+      "scoreColor",
+      "severityColor",
+      "severityLabel"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/seo/services/seoService.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 11 import.",
+    "symbols": [
+      "CallbackCard",
+      "fetchSmsTemplates",
+      "fetchWorks",
+      "handleOpenModal",
+      "handleParamChange",
+      "handleSave"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/CreateMonitorModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 6 import.",
+    "symbols": [
+      "CreateMonitorModal",
+      "handleCreateMonitor"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 6 import.",
+    "symbols": [
+      "handleCategoryChange",
+      "handlePrestazioneSelectChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/ListaRegole.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 7 import.",
+    "symbols": [
+      "renderTrigger"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/LogMonitorCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 4 import.",
+    "symbols": [
+      "LogMonitorCard",
+      "formatTimestamp",
+      "getLogBadgeColor"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 10 import.",
+    "symbols": [
+      "findPrestazioneByCode",
+      "handleDelete",
+      "handleOpenModal",
+      "handleSave",
+      "loadData",
+      "loadWorks"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+    "role": "component",
+    "summary": "component typescript con 8 simboli e 9 import.",
+    "symbols": [
+      "handleActionChange",
+      "handleCancelEdit",
+      "handleDeleteRegola",
+      "handleDirectSaveParams",
+      "handleEditRegola",
+      "handleSave",
+      "handleToggleRegola",
+      "loadMonitorDetails"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/StatoMonitorCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "formatTimestamp"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/TipiAppuntamentoSelect.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "fetchTipiAppuntamento"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 5 import.",
+    "symbols": [
+      "handleSourceChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/SmsSettingsCard.tsx",
+    "role": "component",
+    "summary": "component typescript con 3 simboli e 6 import.",
+    "symbols": [
+      "fetchSettings",
+      "handleSave",
+      "handleTest"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/components/TemplateEditor.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 5 import.",
+    "symbols": [
+      "generatePreview",
+      "insertVariable",
+      "loadTemplate",
+      "resetTemplate",
+      "saveTemplate",
+      "showToastMessage"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/AutomationPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 1 simboli e 9 import.",
+    "symbols": [
+      "handleDelete"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/CalendarSettings.tsx",
+    "role": "page",
+    "summary": "page typescript con 13 simboli e 9 import.",
+    "symbols": [
+      "addLog",
+      "fetchSettings",
+      "handleAddSyncTime",
+      "handleClearAll",
+      "handleDatabaseModeChange",
+      "handleEnabledChange",
+      "handleRemoveSyncTime",
+      "handleSave",
+      "handleSyncAll",
+      "handleSyncTimeChange",
+      "pollJobStatuses",
+      "startPolling",
+      "stopPolling"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/DayReminderSettings.tsx",
+    "role": "page",
+    "summary": "page typescript con 5 simboli e 6 import.",
+    "symbols": [
+      "getEffectiveDay",
+      "handleSaveDay",
+      "handleToggleContinuous",
+      "handleToggleEnabled",
+      "loadSchedule"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/EvolutionSettingsPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 6 simboli e 8 import.",
+    "symbols": [
+      "StatusCard",
+      "channelBadge",
+      "handleSort",
+      "sortIndicator",
+      "statoBadge",
+      "statusColor"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/MonitoringSettings.tsx",
+    "role": "page",
+    "summary": "page typescript con 4 simboli e 5 import.",
+    "symbols": [
+      "MonitoringSettings",
+      "fetchActions",
+      "handleActionChange",
+      "handleParamsChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 10 simboli e 7 import.",
+    "symbols": [
+      "addLog",
+      "clearLogs",
+      "formatTimestamp",
+      "getLogBadgeColor",
+      "handleStartMonitor",
+      "handleStopMonitor",
+      "handleTestMonitor",
+      "loadLogs",
+      "loadStatus",
+      "refreshLogs"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+    "role": "page",
+    "summary": "page typescript con 10 simboli e 14 import.",
+    "symbols": [
+      "confirmDeleteMonitor",
+      "getBadgeColor",
+      "handleCreateRuleFromMapping",
+      "handlePickMonitor",
+      "handleStartMonitorById",
+      "handleStopMonitorById",
+      "loadMonitorableTables",
+      "loadStatus",
+      "openRulesForMonitor",
+      "requestDeleteMonitor"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/TemplatesPage copy.tsx",
+    "role": "page",
+    "summary": "page typescript con 5 simboli e 7 import.",
+    "symbols": [
+      "confirmDeleteTemplate",
+      "handleCreateEditClick",
+      "handleDeleteClick",
+      "handlePreviewTemplate",
+      "handleSaveTemplate"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/pages/TemplatesPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 8 simboli e 9 import.",
+    "symbols": [
+      "confirmDeleteTemplate",
+      "handleCreateEditClick",
+      "handleDeleteClick",
+      "handleMktDelete",
+      "handleMktSave",
+      "handlePreviewTemplate",
+      "handleSaveTemplate",
+      "insertPlaceholder"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/settings/services/automation.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/services/changes.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/services/dayReminder.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/services/environment.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/services/evolution.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/services/monitoring.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/settings/services/templates.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/simulation/components/EmailSimulationTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 6 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/simulation/components/PreviewDialog.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 6 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/simulation/components/RecallSimulationTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 6 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/simulation/components/ReminderSimulationTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 6 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/simulation/pages/SimulationDashboard.tsx",
+    "role": "page",
+    "summary": "page typescript con 2 simboli e 9 import.",
+    "symbols": [
+      "handleRunSimulation",
+      "loadResults"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/simulation/services/simulation.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/spese/components/RiepilogoSpeseTab.tsx",
+    "role": "component",
+    "summary": "component typescript con 2 simboli e 7 import.",
+    "symbols": [
+      "formatCurrency",
+      "loadExpenses"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/spese/components/SpeseAggregatedTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/spese/components/SpeseFilters.tsx",
+    "role": "component",
+    "summary": "component typescript con 6 simboli e 6 import.",
+    "symbols": [
+      "SpeseFilters",
+      "fetchActiveSuppliers",
+      "fetchBranche",
+      "fetchConti",
+      "fetchSottoconti",
+      "handleChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/spese/components/SpeseStats.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "fetchStats"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/spese/components/SpeseTable.tsx",
+    "role": "component",
+    "summary": "component typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "SpeseTable"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/spese/hooks/useAutoCategorization.ts",
+    "role": "hook",
+    "summary": "hook typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/spese/index.ts",
+    "role": "feature",
+    "summary": "feature typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/spese/pages/SpesePage.tsx",
+    "role": "page",
+    "summary": "page typescript con 5 simboli e 11 import.",
+    "symbols": [
+      "handleBackToAggregated",
+      "handleFiltriChange",
+      "handleSelectSupplier",
+      "loadAggregatedData",
+      "loadInvoices"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/spese/services/spese.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/spese/types.ts",
+    "role": "feature",
+    "summary": "feature typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/spese/utils/autoCategorization.ts",
+    "role": "utility",
+    "summary": "utility typescript con 2 simboli e 0 import.",
+    "symbols": [
+      "getClassificazioneFornitore",
+      "getClassificazioneSpesaFornitore"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/spese/utils/autoLearning.ts",
+    "role": "utility",
+    "summary": "utility typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/features/spese/utils/studioClassification.ts",
+    "role": "utility",
+    "summary": "utility typescript con 4 simboli e 0 import.",
+    "symbols": [
+      "classificaSpesaStudio",
+      "esportaClassificazioniStudio",
+      "getStudioClassificationStats",
+      "getSuggerimentiMiglioramentoStudio"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/spese/utils/testCategorization.ts",
+    "role": "utility",
+    "summary": "utility typescript con 2 simboli e 2 import.",
+    "symbols": [
+      "generaReportCategorizzazione",
+      "testCategorizzazione"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/tempo/pages/TempoPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 15 simboli e 7 import.",
+    "symbols": [
+      "getAllTags",
+      "getDaysRemaining",
+      "getFilteredTasks",
+      "getStats",
+      "handleCloseModal",
+      "handleDelete",
+      "handleDragOver",
+      "handleDragStart",
+      "handleDrop",
+      "handleOpenModal",
+      "handleSubmit",
+      "handleToggleComplete",
+      "isOverdue",
+      "loadTasks",
+      "saveTasks"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/test/TestSelectPage.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 2 simboli e 10 import.",
+    "symbols": [
+      "handleFornitoreChange",
+      "handleMaterialeChange"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+    "role": "page",
+    "summary": "page typescript con 10 simboli e 12 import.",
+    "symbols": [
+      "formatDate",
+      "getEffectiveUrgency",
+      "getStatusBadge",
+      "getUrgencyBadge",
+      "getUserName",
+      "handleArchive",
+      "handleComplete",
+      "handleSnooze",
+      "loadTodos",
+      "loadUsers"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/users/UserForm.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 1 simboli e 9 import.",
+    "symbols": [
+      "handleSubmit"
+    ]
+  },
+  {
+    "path": "client_v2/src/features/users/UserListPage.tsx",
+    "role": "feature",
+    "summary": "feature typescript con 5 simboli e 12 import.",
+    "symbols": [
+      "UserListPage",
+      "handleCloseModal",
+      "handleDelete",
+      "handleOpenCreateModal",
+      "handleOpenEditModal"
+    ]
+  },
+  {
+    "path": "client_v2/src/hooks/usePermissions.ts",
+    "role": "hook",
+    "summary": "hook typescript con 1 simboli e 2 import.",
+    "symbols": [
+      "usePermissions"
+    ]
+  },
+  {
+    "path": "client_v2/src/hooks/usePushNotifications.ts",
+    "role": "hook",
+    "summary": "hook typescript con 2 simboli e 2 import.",
+    "symbols": [
+      "checkSubscription",
+      "usePushNotifications"
+    ]
+  },
+  {
+    "path": "client_v2/src/hooks/useRealtimeNotifications.ts",
+    "role": "hook",
+    "summary": "hook typescript con 4 simboli e 4 import.",
+    "symbols": [
+      "handleNewNotification",
+      "requestPermission",
+      "showBrowserNotification",
+      "useRealtimeNotifications"
+    ]
+  },
+  {
+    "path": "client_v2/src/hooks/useTheme.ts",
+    "role": "hook",
+    "summary": "hook typescript con 4 simboli e 1 import.",
+    "symbols": [
+      "applyTheme",
+      "getInitialTheme",
+      "toggleTheme",
+      "useTheme"
+    ]
+  },
+  {
+    "path": "client_v2/src/hooks/useWebSocket.ts",
+    "role": "hook",
+    "summary": "hook typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "useWebSocket"
+    ]
+  },
+  {
+    "path": "client_v2/src/lib/utils.ts",
+    "role": "utility",
+    "summary": "utility typescript con 1 simboli e 2 import.",
+    "symbols": [
+      "cn"
+    ]
+  },
+  {
+    "path": "client_v2/src/main.tsx",
+    "role": "unknown",
+    "summary": "unknown typescript con 0 simboli e 9 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/router/index.tsx",
+    "role": "unknown",
+    "summary": "unknown typescript con 1 simboli e 5 import.",
+    "symbols": [
+      "LoadingFallback"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/api/auth.service.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/automation-settings.service.ts",
+    "role": "api",
+    "summary": "api typescript con 2 simboli e 2 import.",
+    "symbols": [
+      "getAutomationSettings",
+      "setAutomationSettings"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/api/base.service.ts",
+    "role": "api",
+    "summary": "api typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "createService"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/api/client.ts",
+    "role": "api",
+    "summary": "api typescript con 4 simboli e 4 import.",
+    "symbols": [
+      "clearTokens",
+      "getTokens",
+      "setTokens",
+      "setUnauthorizedCallback"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/api/environment.service.ts",
+    "role": "api",
+    "summary": "api typescript con 3 simboli e 5 import.",
+    "symbols": [
+      "connectionFailure",
+      "getDatabaseStatus",
+      "toggleDatabaseMode"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/api/fattura.service.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/index.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/monitorPrestazioni.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/notifications.service.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/prestazioneWorkMapping.service.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/ricetta.service.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/services-status.service.ts",
+    "role": "api",
+    "summary": "api typescript con 3 simboli e 2 import.",
+    "symbols": [
+      "getServiceDisplayName",
+      "getServiceIcon",
+      "getServicesStatus"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/api/todos.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/user.service.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/api/works.service.ts",
+    "role": "api",
+    "summary": "api typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/services/pushService.ts",
+    "role": "service",
+    "summary": "service typescript con 2 simboli e 1 import.",
+    "symbols": [
+      "extractBase64FromPEM",
+      "urlBase64ToUint8Array"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/ricette_ts.service.ts",
+    "role": "service",
+    "summary": "service typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "getRicetteTest"
+    ]
+  },
+  {
+    "path": "client_v2/src/services/works.service.ts",
+    "role": "service",
+    "summary": "service typescript con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/store/auth.store.ts",
+    "role": "state",
+    "summary": "state typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/store/classificazioni.store.ts",
+    "role": "state",
+    "summary": "state typescript con 1 simboli e 4 import.",
+    "symbols": [
+      "useClassificazioni"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/conti.store.ts",
+    "role": "state",
+    "summary": "state typescript con 3 simboli e 4 import.",
+    "symbols": [
+      "useBranche",
+      "useConti",
+      "useSottoconti"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/environment.store.ts",
+    "role": "state",
+    "summary": "state typescript con 5 simboli e 6 import.",
+    "symbols": [
+      "useEnvironmentBulk",
+      "useEnvironmentStatus",
+      "useEnvironmentSwitch",
+      "useEnvironmentTest",
+      "useEnvironmentValidation"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/fake.ricetta.store.ts",
+    "role": "state",
+    "summary": "state typescript con 4 simboli e 4 import.",
+    "symbols": [
+      "useRicettaEnvironment",
+      "useRicettaForm",
+      "useRicettaProtocolli",
+      "useRicettaSearch"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/fornitori.store.ts",
+    "role": "state",
+    "summary": "state typescript con 2 simboli e 3 import.",
+    "symbols": [
+      "useFornitori",
+      "useFornitoriSearch"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/materiali.store.ts",
+    "role": "state",
+    "summary": "state typescript con 4 simboli e 3 import.",
+    "symbols": [
+      "useMateriali",
+      "useMaterialiByConto",
+      "useMaterialiByFornitore",
+      "useMaterialiSearch"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/notifications.store.ts",
+    "role": "state",
+    "summary": "state typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/store/pazienti.store.tsx",
+    "role": "state",
+    "summary": "state typescript con 1 simboli e 3 import.",
+    "symbols": [
+      "usePazienti"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/prestazioni.store.ts",
+    "role": "state",
+    "summary": "state typescript con 3 simboli e 3 import.",
+    "symbols": [
+      "usePrestazioneById",
+      "usePrestazioniByCategoria",
+      "usePrestazioniByCodiceBreve"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/provider.store.ts",
+    "role": "state",
+    "summary": "state typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/store/ricette.store.ts",
+    "role": "state",
+    "summary": "state typescript con 3 simboli e 3 import.",
+    "symbols": [
+      "downloadRicettaPDF",
+      "getRicettePaziente",
+      "useRicette"
+    ]
+  },
+  {
+    "path": "client_v2/src/store/user.store.ts",
+    "role": "state",
+    "summary": "state typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/store/works.store.ts",
+    "role": "state",
+    "summary": "state typescript con 0 simboli e 5 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/test/setup.ts",
+    "role": "unknown",
+    "summary": "unknown typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/types/classifcazioni.types.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/types/environment.types.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/types/fatture.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/types/index.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/types/ricetta.types.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/types/works.types.ts",
+    "role": "types",
+    "summary": "types typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/utils/config.ts",
+    "role": "configuration",
+    "summary": "configuration typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/src/utils/index.ts",
+    "role": "utility",
+    "summary": "utility typescript con 9 simboli e 1 import.",
+    "symbols": [
+      "cn",
+      "debounce",
+      "formatCurrency",
+      "formatDate",
+      "formatNumber",
+      "generateId",
+      "isValidEmail",
+      "nanToNull",
+      "sleep"
+    ]
+  },
+  {
+    "path": "client_v2/src/vite-env.d.ts",
+    "role": "unknown",
+    "summary": "unknown typescript con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/tailwind.config.ts",
+    "role": "configuration",
+    "summary": "configuration typescript con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/vite.config.ts",
+    "role": "configuration",
+    "summary": "configuration typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "client_v2/vitest.config.ts",
+    "role": "configuration",
+    "summary": "configuration typescript con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/__init__.py",
+    "role": "unknown",
+    "summary": "unknown python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/api/__init__.py",
+    "role": "api",
+    "summary": "api python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/api/api_monitoring.py",
+    "role": "api",
+    "summary": "api python con 16 simboli e 8 import.",
+    "symbols": [
+      "create_monitor",
+      "delete_monitor",
+      "get_all_monitors",
+      "get_general_logs",
+      "get_monitor_details",
+      "get_monitor_logs",
+      "get_monitor_metrics",
+      "get_monitor_status",
+      "get_status",
+      "health_check",
+      "pause_monitor",
+      "register_callback",
+      "resume_monitor",
+      "start_monitor",
+      "stop_monitor",
+      "update_monitor"
+    ]
+  },
+  {
+    "path": "server_v2/api/compatibility_bridge.py",
+    "role": "api",
+    "summary": "api python con 25 simboli e 13 import.",
+    "symbols": [
+      "CompatibilityBridge",
+      "__init__",
+      "_safe_float",
+      "_safe_int",
+      "apply_error_handling",
+      "bridge_classificazioni_endpoints",
+      "bridge_fornitori_endpoints",
+      "bridge_materiali_endpoints",
+      "bridge_statistiche_endpoints",
+      "classifica_fornitore_completa",
+      "confirm_da_verificare",
+      "create_blueprint",
+      "create_compatible_blueprint",
+      "get_classificazione_fornitore",
+      "get_materiali_intelligenti",
+      "get_statistiche_fornitori",
+      "handle_business_logic_error",
+      "handle_error_compatibility",
+      "handle_general_error",
+      "handle_service_error"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_admin.py",
+    "role": "api",
+    "summary": "api python con 4 simboli e 10 import.",
+    "symbols": [
+      "_delayed_exit",
+      "_read_build_info",
+      "get_build_info",
+      "restart_server"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_auth.py",
+    "role": "api",
+    "summary": "api python con 5 simboli e 8 import.",
+    "symbols": [
+      "get_current_user",
+      "login",
+      "logout",
+      "refresh",
+      "register"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_automation_logs.py",
+    "role": "api",
+    "summary": "api python con 1 simboli e 3 import.",
+    "symbols": [
+      "list_automation_messages"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_automation_rules.py",
+    "role": "api",
+    "summary": "api python con 8 simboli e 5 import.",
+    "symbols": [
+      "create_rule",
+      "delete_rule",
+      "get_actions",
+      "get_available_triggers",
+      "get_rule",
+      "get_rules",
+      "toggle_rule",
+      "update_rule"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_automation_settings.py",
+    "role": "api",
+    "summary": "api python con 2 simboli e 5 import.",
+    "symbols": [
+      "get_settings",
+      "set_settings"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_bot.py",
+    "role": "api",
+    "summary": "api python con 41 simboli e 24 import.",
+    "symbols": [
+      "_busy_intervals",
+      "_compose_dir",
+      "_do_confirmation",
+      "_evo_headers",
+      "_extract_evo_text",
+      "_extract_qr_from_body",
+      "_fetch_calendar_events",
+      "_fetch_qr",
+      "_free_slots",
+      "_is_lara_no_day",
+      "_normalize_phone_to_jid",
+      "_parse_evo_messages",
+      "_require_bot_key",
+      "_run_docker",
+      "create_evolution_instance",
+      "create_studio_info",
+      "decorated",
+      "delete_conversazione",
+      "delete_studio_info",
+      "delete_whatsapp_instance"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_calendar.py",
+    "role": "api",
+    "summary": "api python con 29 simboli e 34 import.",
+    "symbols": [
+      "auto_reset_and_sync",
+      "auto_sync_job",
+      "calculate_metrics",
+      "calendar_health_check",
+      "cancel_clear_job",
+      "cancel_sync_job",
+      "check_first_sync_status",
+      "clear_calendar",
+      "clear_job",
+      "get_appointments_for_month",
+      "get_appointments_stats_for_year",
+      "get_appointments_stats_summary",
+      "get_auto_sync_job_status",
+      "get_clear_status",
+      "get_count",
+      "get_first_visits_stats",
+      "get_google_oauth_url",
+      "handle_calendar_sync_error",
+      "handle_google_credentials_error",
+      "handle_internal_error"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_cbct.py",
+    "role": "api",
+    "summary": "api python con 2 simboli e 6 import.",
+    "symbols": [
+      "get_lista_esami",
+      "scarica_esame"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_classificazioni.py",
+    "role": "api",
+    "summary": "api python con 10 simboli e 9 import.",
+    "symbols": [
+      "auto_suggest_classification",
+      "classifica_fornitore",
+      "get_branche",
+      "get_classification_stats",
+      "get_classificazione_fornitore",
+      "get_conti",
+      "get_fornitori_classificati",
+      "get_sottoconti",
+      "learn_classification",
+      "rimuovi_classificazione_fornitore"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_conti.py",
+    "role": "api",
+    "summary": "api python con 16 simboli e 6 import.",
+    "symbols": [
+      "create_branca",
+      "create_conto",
+      "create_sottoconto",
+      "delete_branca",
+      "delete_conto",
+      "delete_sottoconto",
+      "get_branca",
+      "get_branche",
+      "get_conti",
+      "get_conto",
+      "get_sottoconti",
+      "get_sottoconto",
+      "get_struttura_completa",
+      "update_branca",
+      "update_conto",
+      "update_sottoconto"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_economics.py",
+    "role": "api",
+    "summary": "api python con 16 simboli e 20 import.",
+    "symbols": [
+      "get_collaboratori_lista",
+      "get_collaboratori_redditivita",
+      "get_forecast",
+      "get_kpi_by_category",
+      "get_kpi_by_operator",
+      "get_kpi_comparison",
+      "get_kpi_current",
+      "get_kpi_monthly",
+      "get_multi_year_comparison",
+      "get_report_appuntamenti",
+      "get_report_prestazioni",
+      "get_seasonality",
+      "get_trend",
+      "get_trimester_forecast",
+      "invalidate_cache",
+      "simulate_scenario"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_email.py",
+    "role": "api",
+    "summary": "api python con 18 simboli e 7 import.",
+    "symbols": [
+      "clear_cache",
+      "create_rule",
+      "create_scope",
+      "delete_rule",
+      "delete_scope",
+      "get_ai_config",
+      "get_email_detail",
+      "get_emails",
+      "get_gmail_oauth_url",
+      "get_labels",
+      "get_relevant_emails",
+      "get_rules",
+      "get_scopes",
+      "gmail_oauth_status",
+      "save_ai_config",
+      "test_ai_classification",
+      "update_rule",
+      "update_scope"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_endpoints.py",
+    "role": "api",
+    "summary": "api python con 13 simboli e 7 import.",
+    "symbols": [
+      "bulk_classify",
+      "calculate_advanced_metrics",
+      "get_analytics_dashboard",
+      "get_classification_suggestions",
+      "get_material_analytics",
+      "get_materials",
+      "get_supplier_analytics",
+      "get_suppliers",
+      "get_system_performance",
+      "health_check",
+      "internal_server_error",
+      "method_not_allowed",
+      "not_found"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_environment.py",
+    "role": "api",
+    "summary": "api python con 16 simboli e 14 import.",
+    "symbols": [
+      "_perform_service_test",
+      "_test_database_connection",
+      "_test_rentri_connection",
+      "_test_ricetta_connection",
+      "_test_sms_connection",
+      "_validate_environment_switch",
+      "bulk_switch_environments",
+      "clear_environment_cache",
+      "get_environment_status",
+      "get_service_environment",
+      "handle_configuration_error",
+      "handle_validation_error",
+      "reload_configurations",
+      "switch_service_environment",
+      "test_service_connection",
+      "validate_service_configuration"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_fornitori.py",
+    "role": "api",
+    "summary": "api python con 8 simboli e 9 import.",
+    "symbols": [
+      "get_dettagli_fattura",
+      "get_fornitore",
+      "get_fornitori",
+      "get_fornitori_stats",
+      "get_spese_fornitore",
+      "health_check",
+      "suggest_categoria",
+      "update_classificazione"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_marketing.py",
+    "role": "api",
+    "summary": "api python con 8 simboli e 7 import.",
+    "symbols": [
+      "_ensure_tables",
+      "_evo_headers",
+      "_normalize_phone",
+      "broadcast",
+      "create_template",
+      "delete_template",
+      "get_templates",
+      "update_template"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_materiali.py",
+    "role": "api",
+    "summary": "api python con 17 simboli e 11 import.",
+    "symbols": [
+      "create_materiale",
+      "delete_materiale",
+      "get_all_materiali",
+      "get_classificazione_materiale",
+      "get_materiale",
+      "get_materiali",
+      "get_materiali_stats",
+      "import_all_materials",
+      "import_supplier_materials",
+      "preview_migration",
+      "ricerca_articoli",
+      "ricerca_materiali_classificati",
+      "salva_classificazione_materiale",
+      "salva_classificazione_materiali_bulk",
+      "search_materiali",
+      "update_materiale",
+      "update_materiale_conti"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_monitoring_changes.py",
+    "role": "api",
+    "summary": "api python con 8 simboli e 5 import.",
+    "symbols": [
+      "clear_changes",
+      "get_changes_for_date",
+      "get_changes_stats",
+      "get_changes_summary",
+      "get_monitoring_settings",
+      "get_recent_changes",
+      "get_today_changes",
+      "update_monitoring_settings"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_notifications.py",
+    "role": "api",
+    "summary": "api python con 4 simboli e 6 import.",
+    "symbols": [
+      "get_notification_service",
+      "get_unread_notifications",
+      "mark_all_read",
+      "mark_notification_read"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_pazienti.py",
+    "role": "api",
+    "summary": "api python con 10 simboli e 6 import.",
+    "symbols": [
+      "get_paziente",
+      "get_pazienti",
+      "get_pazienti_stats",
+      "handle_database_error",
+      "handle_database_error",
+      "handle_error",
+      "handle_validation_error",
+      "handle_validation_error",
+      "search_pazienti",
+      "validate_pagination_params"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_piani_cura.py",
+    "role": "api",
+    "summary": "api python con 5 simboli e 6 import.",
+    "symbols": [
+      "get_piani_paziente",
+      "get_piano_dettaglio",
+      "handle_database_error",
+      "handle_error",
+      "handle_validation_error"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_prestazione_work_mapping.py",
+    "role": "api",
+    "summary": "api python con 4 simboli e 6 import.",
+    "symbols": [
+      "create_or_update_mapping",
+      "delete_mapping",
+      "get_all_mappings",
+      "get_mapping"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_prestazioni.py",
+    "role": "api",
+    "summary": "api python con 3 simboli e 7 import.",
+    "symbols": [
+      "get_categorie",
+      "get_prestazioni",
+      "get_prestazioni_from_dbf"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_providers.py",
+    "role": "api",
+    "summary": "api python con 5 simboli e 6 import.",
+    "symbols": [
+      "create_provider",
+      "delete_provider",
+      "get_provider",
+      "get_providers",
+      "update_provider"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_push.py",
+    "role": "api",
+    "summary": "api python con 5 simboli e 8 import.",
+    "symbols": [
+      "get_public_key",
+      "send_test_notification",
+      "send_test_notification_simple",
+      "subscribe",
+      "unsubscribe"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_reminders.py",
+    "role": "api",
+    "summary": "api python con 11 simboli e 18 import.",
+    "symbols": [
+      "get_communications",
+      "get_reminder_replies",
+      "get_reminder_schedule",
+      "get_reminder_settings",
+      "get_reminders_status",
+      "get_wa_cache",
+      "trigger_24h",
+      "trigger_2h",
+      "trigger_followup",
+      "update_reminder_schedule",
+      "update_reminder_settings"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_ricetta.py",
+    "role": "api",
+    "summary": "api python con 23 simboli e 21 import.",
+    "symbols": [
+      "_ensure_tables",
+      "add_farmaci_commerciali",
+      "encrypt_cf",
+      "encrypt_pincode",
+      "get_all_diagnosi",
+      "get_durate_suggestions",
+      "get_environment_info",
+      "get_farmaci_commerciali",
+      "get_farmaci_per_diagnosi",
+      "get_farmaci_test_sicuri",
+      "get_note_suggestions",
+      "get_posologie_suggestions",
+      "get_protocolli_per_diagnosi",
+      "get_ricette_by_paziente",
+      "get_ricette_test_funzionanti",
+      "health_check",
+      "invia_ricetta",
+      "invia_ricetta_email",
+      "list_ricette_from_db",
+      "list_ricette_from_ts"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_ricetta_admin.py",
+    "role": "api",
+    "summary": "api python con 9 simboli e 5 import.",
+    "symbols": [
+      "check_certificates",
+      "get_configuration",
+      "get_environment_info",
+      "get_ricetta_logs",
+      "handle_configuration_error",
+      "handle_validation_error",
+      "reload_configuration",
+      "switch_environment",
+      "validate_configuration"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_richiami.py",
+    "role": "api",
+    "summary": "api python con 22 simboli e 17 import.",
+    "symbols": [
+      "_add_months",
+      "_check_auth",
+      "_months_between",
+      "_parse_date",
+      "export_richiami",
+      "get_anteprima_messaggio",
+      "get_pazienti_da_richiamare",
+      "get_richiami_da_fare",
+      "get_richiami_list",
+      "get_richiami_statistiche",
+      "get_richiamo_message",
+      "get_slot_per_paziente",
+      "handle_error",
+      "handle_internal_error",
+      "handle_not_found",
+      "mark_richiamo_completato",
+      "migrate_richiami_from_dbf",
+      "test_richiami",
+      "update_richiami_dates",
+      "update_richiamo_status"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_scheduler.py",
+    "role": "api",
+    "summary": "api python con 8 simboli e 7 import.",
+    "symbols": [
+      "get_calendar_sync_logs",
+      "get_recall_logs",
+      "get_scheduler_status",
+      "start_scheduler",
+      "stop_scheduler",
+      "update_calendar_sync_settings",
+      "update_recall_settings",
+      "update_reminder_settings"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_seo.py",
+    "role": "api",
+    "summary": "api python con 10 simboli e 11 import.",
+    "symbols": [
+      "_clean_host",
+      "_domain_from_url",
+      "_list_audits",
+      "_load_audit",
+      "_save_audit",
+      "seo_audit",
+      "seo_competitor_analysis",
+      "seo_load_audit",
+      "seo_quick_check",
+      "seo_saved_audits"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_simulation.py",
+    "role": "api",
+    "summary": "api python con 2 simboli e 5 import.",
+    "symbols": [
+      "get_simulation_results",
+      "run_simulation"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_sms.py",
+    "role": "api",
+    "summary": "api python con 9 simboli e 12 import.",
+    "symbols": [
+      "get_sms_settings",
+      "get_sms_status",
+      "get_sms_templates",
+      "preview_sms",
+      "send_bulk_sms",
+      "send_recall_sms",
+      "send_sms",
+      "test_sms_connection",
+      "update_sms_settings"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_sms_tracking.py",
+    "role": "api",
+    "summary": "api python con 3 simboli e 5 import.",
+    "symbols": [
+      "create_tracked_link",
+      "get_tracked_link",
+      "get_tracked_links"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_spese_fornitori.py",
+    "role": "api",
+    "summary": "api python con 12 simboli e 12 import.",
+    "symbols": [
+      "_safe_dbf_value",
+      "_safe_float",
+      "analyze_production",
+      "get_active_suppliers_list",
+      "get_dettagli_fattura",
+      "get_fattura_completa",
+      "get_production_years",
+      "get_riepilogo_spese",
+      "get_spese_list",
+      "get_spese_stats",
+      "health_check",
+      "ricerca_articoli"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_statistiche.py",
+    "role": "api",
+    "summary": "api python con 5 simboli e 6 import.",
+    "symbols": [
+      "get_dashboard_stats",
+      "get_statistiche_collaboratori",
+      "get_statistiche_fornitori",
+      "get_statistiche_materiali",
+      "get_statistiche_spese"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_steps.py",
+    "role": "api",
+    "summary": "api python con 2 simboli e 4 import.",
+    "symbols": [
+      "complete_step",
+      "get_work_service"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_tables.py",
+    "role": "api",
+    "summary": "api python con 1 simboli e 3 import.",
+    "symbols": [
+      "get_monitorable_tables"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_tasks.py",
+    "role": "api",
+    "summary": "api python con 9 simboli e 4 import.",
+    "symbols": [
+      "complete_step",
+      "create_task",
+      "delete_task",
+      "get_task_details",
+      "get_tasks",
+      "get_work_service",
+      "postpone_task",
+      "reset_task",
+      "update_task_status"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_templates.py",
+    "role": "api",
+    "summary": "api python con 5 simboli e 4 import.",
+    "symbols": [
+      "create_sms_template",
+      "delete_sms_template",
+      "get_sms_templates",
+      "preview_sms_template",
+      "update_sms_template"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_tipi_messaggi.py",
+    "role": "api",
+    "summary": "api python con 5 simboli e 3 import.",
+    "symbols": [
+      "create_tipo_messaggio",
+      "delete_tipo_messaggio",
+      "get_tipi_messaggi",
+      "get_tipo_messaggio",
+      "update_tipo_messaggio"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_todos.py",
+    "role": "api",
+    "summary": "api python con 13 simboli e 5 import.",
+    "symbols": [
+      "complete_todo",
+      "create_todo",
+      "delete_todo",
+      "get_inbox",
+      "get_pending",
+      "get_sent",
+      "get_todo",
+      "get_todo_service",
+      "get_todos",
+      "mark_todo_read",
+      "postpone_task_todos",
+      "snooze_todo",
+      "update_todo"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_tracker.py",
+    "role": "api",
+    "summary": "api python con 1 simboli e 3 import.",
+    "symbols": [
+      "track_click"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_users.py",
+    "role": "api",
+    "summary": "api python con 6 simboli e 6 import.",
+    "symbols": [
+      "create_user",
+      "delete_user",
+      "get_all_users",
+      "get_user_by_id",
+      "test_protected_route",
+      "update_user"
+    ]
+  },
+  {
+    "path": "server_v2/api/v2_works.py",
+    "role": "api",
+    "summary": "api python con 6 simboli e 4 import.",
+    "symbols": [
+      "create_work",
+      "delete_work",
+      "get_work_details",
+      "get_work_service",
+      "get_works",
+      "update_work"
+    ]
+  },
+  {
+    "path": "server_v2/app_v2.py",
+    "role": "entry_point",
+    "summary": "entry_point python con 30 simboli e 69 import.",
+    "symbols": [
+      "after_request",
+      "before_request",
+      "cleanup_request",
+      "create_app_v2",
+      "debug_routes",
+      "expired_token_callback",
+      "format_response",
+      "gmail_oauth_callback",
+      "handle_dbf_data",
+      "handle_internal_error",
+      "handle_method_not_allowed",
+      "handle_not_found",
+      "handle_studio_dima_error",
+      "health_check",
+      "init_database_manager",
+      "init_extensions",
+      "init_push_service",
+      "init_socketio",
+      "invalid_token_callback",
+      "missing_token_callback"
+    ]
+  },
+  {
+    "path": "server_v2/certs/rentri/extract_cert.py",
+    "role": "certificate",
+    "summary": "certificate python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/certs/rentri/rentri copy.py",
+    "role": "certificate",
+    "summary": "certificate python con 4 simboli e 6 import.",
+    "symbols": [
+      "build_xml_registro",
+      "main",
+      "sign_xml",
+      "validate_xml"
+    ]
+  },
+  {
+    "path": "server_v2/certs/rentri/rentri.py",
+    "role": "certificate",
+    "summary": "certificate python con 6 simboli e 9 import.",
+    "symbols": [
+      "authenticate",
+      "build_xml_registro",
+      "main",
+      "send_movimenti",
+      "sign_xml",
+      "validate_xml"
+    ]
+  },
+  {
+    "path": "server_v2/config/__init__.py",
+    "role": "configuration",
+    "summary": "configuration python con 0 simboli e 2 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/config/flask_config.py",
+    "role": "configuration",
+    "summary": "configuration python con 8 simboli e 3 import.",
+    "symbols": [
+      "DevelopmentConfig",
+      "FlaskConfig",
+      "ProductionConfig",
+      "TestingConfig",
+      "__init__",
+      "get_config",
+      "get_cors_config",
+      "get_jwt_config"
+    ]
+  },
+  {
+    "path": "server_v2/convert_vapid_to_base64.py",
+    "role": "unknown",
+    "summary": "unknown python con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/convert_vapid_to_standard_base64.py",
+    "role": "unknown",
+    "summary": "unknown python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/core/__init__.py",
+    "role": "core_module",
+    "summary": "core_module python con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/core/action_registry.py",
+    "role": "core_module",
+    "summary": "core_module python con 2 simboli e 2 import.",
+    "symbols": [
+      "decorator",
+      "register_action"
+    ]
+  },
+  {
+    "path": "server_v2/core/appointment_normalizer.py",
+    "role": "core_module",
+    "summary": "core_module python con 10 simboli e 7 import.",
+    "symbols": [
+      "_fmt_time",
+      "_hash_uid",
+      "_is_midnight",
+      "_normalize_title",
+      "_parse_time",
+      "build_uid",
+      "classify_appointment",
+      "normalize_appointment",
+      "normalize_batch",
+      "normalize_time"
+    ]
+  },
+  {
+    "path": "server_v2/core/automation_config.py",
+    "role": "configuration",
+    "summary": "configuration python con 3 simboli e 3 import.",
+    "symbols": [
+      "get_automation_settings",
+      "save_automation_settings",
+      "set_automation_settings"
+    ]
+  },
+  {
+    "path": "server_v2/core/base_repository.py",
+    "role": "core_module",
+    "summary": "core_module python con 20 simboli e 8 import.",
+    "symbols": [
+      "BaseRepository",
+      "QueryOptions",
+      "QueryResult",
+      "__init__",
+      "__post_init__",
+      "_build_insert_query",
+      "_build_select_query",
+      "_build_update_query",
+      "_validate_entity_data",
+      "count",
+      "create",
+      "delete",
+      "execute_custom_query",
+      "exists",
+      "get_by_id",
+      "has_more",
+      "list",
+      "primary_key",
+      "table_name",
+      "update"
+    ]
+  },
+  {
+    "path": "server_v2/core/config.py",
+    "role": "configuration",
+    "summary": "configuration python con 25 simboli e 4 import.",
+    "symbols": [
+      "Config",
+      "ConfigManager",
+      "__init__",
+      "__init__",
+      "__repr__",
+      "_load_env_file",
+      "_parse_env_file",
+      "_setup_connection_pool",
+      "_setup_database_path",
+      "_setup_logging",
+      "_setup_performance",
+      "get_api_config",
+      "get_config_bool",
+      "get_config_float",
+      "get_config_int",
+      "get_config_list",
+      "get_config_value",
+      "get_connection_string",
+      "get_environment_info",
+      "get_feature_flags"
+    ]
+  },
+  {
+    "path": "server_v2/core/config_manager.py",
+    "role": "configuration",
+    "summary": "configuration python con 23 simboli e 9 import.",
+    "symbols": [
+      "ConfigManager",
+      "__init__",
+      "_get_database_mode",
+      "_is_prod_reachable",
+      "_load_config",
+      "_load_env_file",
+      "_load_environment_overrides",
+      "_set_defaults",
+      "_validate_config",
+      "get",
+      "get_config",
+      "get_dbf_path",
+      "get_dbf_path",
+      "get_google_config",
+      "get_mode",
+      "get_mode",
+      "get_performance_config",
+      "get_status",
+      "is_debug_enabled",
+      "is_development"
+    ]
+  },
+  {
+    "path": "server_v2/core/constants_v2.py",
+    "role": "core_module",
+    "summary": "core_module python con 12 simboli e 0 import.",
+    "symbols": [
+      "get_all_appointment_types",
+      "get_all_guardia_types",
+      "get_all_medici",
+      "get_appointment_color",
+      "get_appointment_type_name",
+      "get_campo_dbf",
+      "get_dbf_table_info",
+      "get_google_color_id",
+      "get_guardia_type_name",
+      "get_medico_name",
+      "is_valid_appointment_type",
+      "is_valid_medico_id"
+    ]
+  },
+  {
+    "path": "server_v2/core/database_manager.py",
+    "role": "core_module",
+    "summary": "core_module python con 21 simboli e 12 import.",
+    "symbols": [
+      "ConnectionInfo",
+      "DatabaseManager",
+      "__enter__",
+      "__exit__",
+      "__init__",
+      "_cleanup_loop",
+      "_close_connection",
+      "_create_connection",
+      "_get_connection_from_pool",
+      "_initialize_pool",
+      "_log_statistics",
+      "_return_connection_to_pool",
+      "close",
+      "close_database_manager",
+      "execute_many",
+      "execute_query",
+      "get_connection",
+      "get_database_manager",
+      "get_statistics",
+      "initialize_database_manager"
+    ]
+  },
+  {
+    "path": "server_v2/core/environment_manager.py",
+    "role": "core_module",
+    "summary": "core_module python con 42 simboli e 16 import.",
+    "symbols": [
+      "Environment",
+      "EnvironmentManager",
+      "EnvironmentValidation",
+      "ServiceConfig",
+      "ServiceType",
+      "__init__",
+      "__new__",
+      "_build_service_config",
+      "_get_cache",
+      "_get_calendar_config",
+      "_get_database_config",
+      "_get_rentri_config",
+      "_get_ricetta_config",
+      "_get_ricetta_config_fallback",
+      "_get_sms_config",
+      "_initialize_services",
+      "_invalidate_service_cache",
+      "_is_cache_valid",
+      "_is_prod_db_reachable",
+      "_load_environment_from_file"
+    ]
+  },
+  {
+    "path": "server_v2/core/exceptions.py",
+    "role": "core_module",
+    "summary": "core_module python con 34 simboli e 1 import.",
+    "symbols": [
+      "AuthenticationError",
+      "AuthorizationError",
+      "CacheError",
+      "CalendarSyncError",
+      "CbctError",
+      "ConfigurationError",
+      "ConnectionPoolError",
+      "DatabaseError",
+      "DbfProcessingError",
+      "GmailApiError",
+      "GmailCredentialsNotFoundError",
+      "GoogleCredentialsNotFoundError",
+      "GoogleQuotaError",
+      "RepositoryError",
+      "RicettaServiceError",
+      "SSLConfigurationError",
+      "ServiceError",
+      "StudioDimaError",
+      "TemplateError",
+      "TemplateNotFoundError"
+    ]
+  },
+  {
+    "path": "server_v2/core/google_calendar_client.py",
+    "role": "core_module",
+    "summary": "core_module python con 13 simboli e 13 import.",
+    "symbols": [
+      "GoogleCalendarClient",
+      "__init__",
+      "_clear_saved_state",
+      "_get_state_path",
+      "_invalidate_token",
+      "_load_credentials",
+      "_load_saved_state",
+      "_refresh_or_reauth",
+      "_save_state_for_callback",
+      "_save_token",
+      "generate_web_auth_url",
+      "get_service",
+      "handle_web_auth_callback"
+    ]
+  },
+  {
+    "path": "server_v2/core/google_event_factory.py",
+    "role": "core_module",
+    "summary": "core_module python con 3 simboli e 7 import.",
+    "symbols": [
+      "_build_datetime",
+      "_get_calendar_id",
+      "build_google_event"
+    ]
+  },
+  {
+    "path": "server_v2/core/google_gmail_client.py",
+    "role": "core_module",
+    "summary": "core_module python con 13 simboli e 11 import.",
+    "symbols": [
+      "GoogleGmailClient",
+      "__init__",
+      "_clear_saved_state",
+      "_get_state_path",
+      "_invalidate_token",
+      "_load_credentials",
+      "_load_saved_state",
+      "_refresh_or_reauth",
+      "_save_state_for_callback",
+      "_save_token",
+      "generate_web_auth_url",
+      "get_service",
+      "handle_web_auth_callback"
+    ]
+  },
+  {
+    "path": "server_v2/core/paths.py",
+    "role": "core_module",
+    "summary": "core_module python con 1 simboli e 3 import.",
+    "symbols": [
+      "ensure_data_dir"
+    ]
+  },
+  {
+    "path": "server_v2/core/reminder_db.py",
+    "role": "core_module",
+    "summary": "core_module python con 6 simboli e 4 import.",
+    "symbols": [
+      "_add_column_if_missing",
+      "_insert_default_studio_hours",
+      "_migrate_sqlite",
+      "_table_columns",
+      "ensure_reminder_tables",
+      "is_appointment_confirmed"
+    ]
+  },
+  {
+    "path": "server_v2/core/ricetta_config.py",
+    "role": "configuration",
+    "summary": "configuration python con 10 simboli e 4 import.",
+    "symbols": [
+      "RicettaConfig",
+      "__init__",
+      "get_credentials_config",
+      "get_endpoints_config",
+      "get_environment",
+      "get_environment_info",
+      "get_full_config",
+      "get_ssl_config",
+      "set_environment",
+      "validate_config"
+    ]
+  },
+  {
+    "path": "server_v2/core/schemas.py",
+    "role": "core_module",
+    "summary": "core_module python con 5 simboli e 3 import.",
+    "symbols": [
+      "AppointmentAnomaly",
+      "AppointmentKind",
+      "NormalizationResult",
+      "NormalizedAppointment",
+      "TimeNormalizationResult"
+    ]
+  },
+  {
+    "path": "server_v2/core/ssl_manager.py",
+    "role": "core_module",
+    "summary": "core_module python con 8 simboli e 9 import.",
+    "symbols": [
+      "SSLManager",
+      "__init__",
+      "create_ssl_context",
+      "get_cert_paths",
+      "get_environment",
+      "get_environment_config",
+      "load_p12_certificate",
+      "validate_certificates"
+    ]
+  },
+  {
+    "path": "server_v2/core/template_manager copy.py",
+    "role": "core_module",
+    "summary": "core_module python con 14 simboli e 10 import.",
+    "symbols": [
+      "TemplateManager",
+      "__init__",
+      "_execute_command",
+      "_execute_query",
+      "create_template",
+      "delete_template",
+      "get_all_templates",
+      "get_template_by_id",
+      "get_template_by_name",
+      "get_template_manager",
+      "preview_template",
+      "render_template",
+      "render_template_by_id",
+      "update_template"
+    ]
+  },
+  {
+    "path": "server_v2/core/template_manager.py",
+    "role": "core_module",
+    "summary": "core_module python con 14 simboli e 10 import.",
+    "symbols": [
+      "TemplateManager",
+      "__init__",
+      "_execute_command",
+      "_execute_query",
+      "create_template",
+      "delete_template",
+      "get_all_templates",
+      "get_template_by_id",
+      "get_template_by_name",
+      "get_template_manager",
+      "preview_template",
+      "render_template",
+      "render_template_by_id",
+      "update_template"
+    ]
+  },
+  {
+    "path": "server_v2/debug_igiene_paziente.py",
+    "role": "unknown",
+    "summary": "unknown python con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/genera_gmail_token.py",
+    "role": "unknown",
+    "summary": "unknown python con 0 simboli e 4 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/generate_vapid_keys.py",
+    "role": "unknown",
+    "summary": "unknown python con 1 simboli e 3 import.",
+    "symbols": [
+      "generate_vapid_keys"
+    ]
+  },
+  {
+    "path": "server_v2/legacy_ricetta/__init__.py",
+    "role": "legacy",
+    "summary": "legacy python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/legacy_ricetta/ricetta_service.py",
+    "role": "legacy",
+    "summary": "legacy python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/legacy_ricetta/ssl_legacy_helper.py",
+    "role": "legacy",
+    "summary": "legacy python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/legacy_ricetta/utils.py",
+    "role": "legacy",
+    "summary": "legacy python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/repositories/__init__.py",
+    "role": "repository",
+    "summary": "repository python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/repositories/calendar_repository.py",
+    "role": "repository",
+    "summary": "repository python con 16 simboli e 9 import.",
+    "symbols": [
+      "CalendarRepository",
+      "QueryMetrics",
+      "__init__",
+      "_calculate_avg_query_time",
+      "_calculate_cache_hit_rate",
+      "_execute_query_with_metrics",
+      "_get_connection",
+      "cleanup_old_sync_state",
+      "ensure_indexes",
+      "get_appointments_by_filters",
+      "get_appointments_for_sync",
+      "get_appointments_overview",
+      "get_repository_metrics",
+      "get_sync_state_summary",
+      "reset_metrics",
+      "update_sync_state"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/email_repository.py",
+    "role": "repository",
+    "summary": "repository python con 30 simboli e 5 import.",
+    "symbols": [
+      "EmailAiConfigRepository",
+      "EmailCacheRepository",
+      "EmailRuleRepository",
+      "EmailScopeRepository",
+      "__init__",
+      "__init__",
+      "__init__",
+      "__init__",
+      "_ensure_tables_exist",
+      "cache_classification",
+      "clear_cache",
+      "create_rule",
+      "create_scope",
+      "delete_rule",
+      "delete_scope",
+      "get_active_config",
+      "get_active_scopes",
+      "get_all_active_rules",
+      "get_all_rules",
+      "get_all_scopes"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/fornitori_repository.py",
+    "role": "repository",
+    "summary": "repository python con 16 simboli e 9 import.",
+    "symbols": [
+      "FornitoriRepository",
+      "__init__",
+      "_ensure_tables_exist",
+      "_find_similar_supplier_classifications",
+      "analyze_supplier_historical_patterns",
+      "bulk_classify_suppliers",
+      "classify_supplier",
+      "get_most_common_classifications",
+      "get_supplier_classification",
+      "get_supplier_info",
+      "get_supplier_statistics",
+      "get_suppliers_by_classification",
+      "get_unclassified_suppliers",
+      "suggest_supplier_classification",
+      "table_name",
+      "update_supplier_cache"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/materiali_repository.py",
+    "role": "repository",
+    "summary": "repository python con 17 simboli e 9 import.",
+    "symbols": [
+      "MaterialiRepository",
+      "__init__",
+      "_ensure_table_exists",
+      "_find_existing_material",
+      "_validate_entity_data",
+      "bulk_insert_materials",
+      "confirm_auto_classifications",
+      "find_similar_materials",
+      "get_by_classification",
+      "get_by_supplier",
+      "get_classification_suggestions",
+      "get_price_history",
+      "get_statistics_by_supplier",
+      "get_unclassified_materials",
+      "save_classification",
+      "search_by_description",
+      "table_name"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/notification_repository.py",
+    "role": "repository",
+    "summary": "repository python con 7 simboli e 6 import.",
+    "symbols": [
+      "NotificationRepository",
+      "__init__",
+      "_ensure_tables_exist",
+      "create_notification",
+      "get_unread_for_user",
+      "mark_as_read",
+      "table_name"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/piani_cura_repository.py",
+    "role": "repository",
+    "summary": "repository python con 7 simboli e 4 import.",
+    "symbols": [
+      "PianiCuraRepository",
+      "__init__",
+      "_get_connection",
+      "get_piani_by_paziente",
+      "get_piano_by_id",
+      "get_piano_completo",
+      "get_prestazioni_by_piano"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/prestazione_work_mapping_repository.py",
+    "role": "repository",
+    "summary": "repository python con 10 simboli e 5 import.",
+    "symbols": [
+      "PrestazioneWorkMappingRepository",
+      "SimpleResult",
+      "__init__",
+      "__init__",
+      "_ensure_tables_exist",
+      "delete_mapping",
+      "get_work_id_by_prestazione",
+      "list",
+      "table_name",
+      "upsert_mapping"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/provider_repository.py",
+    "role": "repository",
+    "summary": "repository python con 5 simboli e 2 import.",
+    "symbols": [
+      "ProviderRepository",
+      "_ensure_tables_exist",
+      "find_by_name",
+      "get_all_active",
+      "table_name"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/statistiche_repository.py",
+    "role": "repository",
+    "summary": "repository python con 16 simboli e 10 import.",
+    "symbols": [
+      "StatisticheRepository",
+      "__init__",
+      "_cache_data",
+      "_calculate_summary_statistics",
+      "_calculate_supplier_statistics",
+      "_ensure_cache_table_exists",
+      "_get_cached_data",
+      "_get_category_breakdown",
+      "_get_time_series_data",
+      "clear_expired_cache",
+      "get_cache_statistics",
+      "get_collaboratori_statistics",
+      "get_performance_metrics",
+      "get_supplier_statistics",
+      "get_utenze_statistics",
+      "table_name"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/task_repository.py",
+    "role": "repository",
+    "summary": "repository python con 11 simboli e 6 import.",
+    "symbols": [
+      "TaskRepository",
+      "__init__",
+      "_attach_steps",
+      "_ensure_tables_exist",
+      "create_task",
+      "get_all_tasks",
+      "get_steps",
+      "get_task_with_steps",
+      "get_tasks_by_patient",
+      "table_name",
+      "update_step_status"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/todo_repository.py",
+    "role": "repository",
+    "summary": "repository python con 16 simboli e 7 import.",
+    "symbols": [
+      "TodoRepository",
+      "__init__",
+      "_ensure_tables_exist",
+      "archive_message",
+      "get_inbox",
+      "get_overdue_todos",
+      "get_pending_for_user",
+      "get_related_to_step",
+      "get_related_to_task",
+      "get_sent",
+      "mark_as_completed",
+      "mark_as_read",
+      "snooze_todo",
+      "table_name",
+      "update_status",
+      "update_urgency_level"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/user_repository.py",
+    "role": "repository",
+    "summary": "repository python con 8 simboli e 6 import.",
+    "symbols": [
+      "UserRepository",
+      "create",
+      "delete",
+      "find_by_id",
+      "find_by_username",
+      "get_all",
+      "get_db_connection",
+      "update"
+    ]
+  },
+  {
+    "path": "server_v2/repositories/work_repository.py",
+    "role": "repository",
+    "summary": "repository python con 10 simboli e 6 import.",
+    "symbols": [
+      "WorkRepository",
+      "__init__",
+      "_ensure_tables_exist",
+      "add_step_template",
+      "create_work",
+      "get_step_templates",
+      "get_work_with_steps",
+      "list",
+      "table_name",
+      "update_work_with_steps"
+    ]
+  },
+  {
+    "path": "server_v2/run_v2.py",
+    "role": "unknown",
+    "summary": "unknown python con 9 simboli e 18 import.",
+    "symbols": [
+      "ensure_evolution_running",
+      "main",
+      "parse_arguments",
+      "run_with_flask_dev",
+      "run_with_waitress",
+      "setup_environment_variables",
+      "setup_logging",
+      "startup_health_check",
+      "validate_configuration"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/add_user_id_to_steps.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 2 import.",
+    "symbols": [
+      "migrate"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/analyze_2026_types.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 7 import.",
+    "symbols": [
+      "analyze_types"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/analyze_deep_types.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 7 import.",
+    "symbols": [
+      "analyze_deep"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/check_field_values.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "check_fields"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/compare_elenco.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "compare_elenco_records"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/compare_prevent_items.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "compare_items"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/debug_first_visits.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 6 import.",
+    "symbols": [
+      "debug_visits"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/debug_monitor_start.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "debug_monitor_start"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/find_link_in_prevent.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "find_link"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/hunt_link.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 4 import.",
+    "symbols": [
+      "hunt_for_link"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_candidates.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 4 import.",
+    "symbols": [
+      "inspect_candidates"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_dbf_guardia.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 4 import.",
+    "symbols": [
+      "inspect_preventivi"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_elenco.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "inspect_elenco"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_plan_details.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "inspect_details"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_planning_schema.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 4 import.",
+    "symbols": [
+      "inspect_planning"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_planning_xx.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "inspect_targeted"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_prevent_columns.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 4 import.",
+    "symbols": [
+      "inspect_columns"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_prevent_links.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "inspect_prevent_links"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/inspect_social_db.py",
+    "role": "script",
+    "summary": "script python con 3 simboli e 5 import.",
+    "symbols": [
+      "inspect_table",
+      "inspect_table",
+      "main"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/migrate_legacy_data.py",
+    "role": "script",
+    "summary": "script python con 2 simboli e 9 import.",
+    "symbols": [
+      "dict_factory",
+      "migrate_data"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/migrate_richiami_batch.py",
+    "role": "script",
+    "summary": "script python con 3 simboli e 8 import.",
+    "symbols": [
+      "batch_insert_richiami",
+      "get_existing_richiami",
+      "main"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/reset_admin_password.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 3 import.",
+    "symbols": [
+      "reset_admin_password"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/reset_users.py",
+    "role": "script",
+    "summary": "script python con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/scripts/run_user_query.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "run_query"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/search_elenco_data.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "search_elenco"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/seed_patient_education.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 7 import.",
+    "symbols": [
+      "seed_patient_education"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/seed_social_accounts.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "seed_social_accounts"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/test_calvisi_analysis.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 8 import.",
+    "symbols": [
+      "analyze_calvisi_production"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/test_materiali_migration.py",
+    "role": "script",
+    "summary": "script python con 6 simboli e 8 import.",
+    "symbols": [
+      "main",
+      "test_migration_execution",
+      "test_migration_preview",
+      "test_migration_status",
+      "test_table_creation",
+      "test_vocispes_connection"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_classification.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 5 import.",
+    "symbols": [
+      "test_logic"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_migration.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 8 import.",
+    "symbols": [
+      "verify_migration"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_patient_plans.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 6 import.",
+    "symbols": [
+      "verify_plans"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_patient_preventivi.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 7 import.",
+    "symbols": [
+      "verify_patient_relation"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_provider_automation.py",
+    "role": "script",
+    "summary": "script python con 3 simboli e 5 import.",
+    "symbols": [
+      "TestProviderAutomation",
+      "setUp",
+      "test_sms_trigger"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_reminder_deploy.py",
+    "role": "script",
+    "summary": "script python con 12 simboli e 11 import.",
+    "symbols": [
+      "fail",
+      "main",
+      "ok",
+      "section",
+      "test_bot_postgres",
+      "test_evolution",
+      "test_n8n",
+      "test_reminder_dry_run",
+      "test_sqlite_reminder",
+      "test_studio_api",
+      "test_tcp",
+      "warn"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_scheduler_job.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 8 import.",
+    "symbols": [
+      "main"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_stats_migration.py",
+    "role": "script",
+    "summary": "script python con 1 simboli e 8 import.",
+    "symbols": [
+      "verify_stats"
+    ]
+  },
+  {
+    "path": "server_v2/scripts/verify_user_notification.py",
+    "role": "script",
+    "summary": "script python con 4 simboli e 5 import.",
+    "symbols": [
+      "TestUserNotification",
+      "setUp",
+      "test_no_notification_same_user",
+      "test_notification_trigger"
+    ]
+  },
+  {
+    "path": "server_v2/services/__init__.py",
+    "role": "service",
+    "summary": "service python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/services/actions/system_actions.py",
+    "role": "service",
+    "summary": "service python con 9 simboli e 22 import.",
+    "symbols": [
+      "_enrich_context_with_patient_data",
+      "_log_skip_no_phone_once",
+      "_phone_from_patient_record",
+      "impl_create_task_from_work",
+      "impl_log_prestazione_eseguita",
+      "impl_mark_richiamo_ok",
+      "impl_send_appointment_sms",
+      "impl_send_sms_link",
+      "impl_send_system_notification"
+    ]
+  },
+  {
+    "path": "server_v2/services/appointment_reminder_service.py",
+    "role": "service",
+    "summary": "service python con 19 simboli e 18 import.",
+    "symbols": [
+      "_already_sent",
+      "_dbf_path",
+      "_evo_headers",
+      "_is_mobile",
+      "_log_communication",
+      "_normalize_phone",
+      "_notify_staff_fisso",
+      "_ora_fmt",
+      "_save_wa_cache",
+      "_session_key",
+      "_write_log",
+      "check_whatsapp",
+      "get_appointments_pending_followup",
+      "get_upcoming_appointments",
+      "run_followup_reminders",
+      "run_reminders",
+      "send_sms_reminder",
+      "send_whatsapp_reminder",
+      "send_whatsapp_text"
+    ]
+  },
+  {
+    "path": "server_v2/services/automation_log_service.py",
+    "role": "service",
+    "summary": "service python con 6 simboli e 5 import.",
+    "symbols": [
+      "AutomationLogService",
+      "__init__",
+      "_ensure_tables",
+      "get_automation_log_service",
+      "list_messages",
+      "log_message"
+    ]
+  },
+  {
+    "path": "server_v2/services/automation_service.py",
+    "role": "service",
+    "summary": "service python con 14 simboli e 9 import.",
+    "symbols": [
+      "AutomationService",
+      "__init__",
+      "_ensure_tables",
+      "_execute_single_rule",
+      "_sync_registry_with_db",
+      "create_rule",
+      "delete_rule",
+      "delete_rules_for_monitor",
+      "dry_run_rules_for_trigger",
+      "execute_rules_for_trigger",
+      "get_all_rules",
+      "get_rule_by_id",
+      "list_actions",
+      "update_rule"
+    ]
+  },
+  {
+    "path": "server_v2/services/base_service.py",
+    "role": "service",
+    "summary": "service python con 8 simboli e 6 import.",
+    "symbols": [
+      "BaseService",
+      "__init__",
+      "clean_dbf_data",
+      "execute_command",
+      "execute_query",
+      "execute_single_query",
+      "get_statistics",
+      "validate_required_fields"
+    ]
+  },
+  {
+    "path": "server_v2/services/calendar_service.py",
+    "role": "service",
+    "summary": "service python con 6 simboli e 11 import.",
+    "symbols": [
+      "_event_fingerprint",
+      "clear_calendar",
+      "list_google_calendars",
+      "load_existing_google_events",
+      "sync_calendar_from_records",
+      "test_google_connection"
+    ]
+  },
+  {
+    "path": "server_v2/services/calendar_sync_engine.py",
+    "role": "service",
+    "summary": "service python con 9 simboli e 8 import.",
+    "symbols": [
+      "_appointment_fingerprint",
+      "_delete_event",
+      "_desired_event_id",
+      "_insert_event",
+      "_is_modified",
+      "_patch_event_add_uid",
+      "_upsert_event",
+      "execute_with_retry",
+      "sync_appointments"
+    ]
+  },
+  {
+    "path": "server_v2/services/calendar_sync_job.py",
+    "role": "service",
+    "summary": "service python con 7 simboli e 4 import.",
+    "symbols": [
+      "CalendarSyncJob",
+      "__init__",
+      "_sync_added_appointment",
+      "_sync_deleted_appointment",
+      "_sync_modified_appointment",
+      "get_calendar_sync_job",
+      "run_sync"
+    ]
+  },
+  {
+    "path": "server_v2/services/callback_service.py",
+    "role": "service",
+    "summary": "service python con 5 simboli e 6 import.",
+    "symbols": [
+      "CallbackPreparateService",
+      "__init__",
+      "create",
+      "delete",
+      "get_all"
+    ]
+  },
+  {
+    "path": "server_v2/services/cbct_service.py",
+    "role": "service",
+    "summary": "service python con 20 simboli e 13 import.",
+    "symbols": [
+      "AllianceMedicalClient",
+      "CbctService",
+      "__init__",
+      "__init__",
+      "_cartella_nas_univoca",
+      "_ensure_tables",
+      "_estrai_rar",
+      "_monta_nas",
+      "_notifica_utente",
+      "_sanitizza_componente_cartella",
+      "_smonta_nas",
+      "build_cartella_nas",
+      "get_lista_esami",
+      "get_lista_esami_html",
+      "login",
+      "merge_stato_esami",
+      "parse_lista_esami_html",
+      "parse_nome_paziente",
+      "scarica_archivio",
+      "scarica_ed_estrai"
+    ]
+  },
+  {
+    "path": "server_v2/services/change_detector.py",
+    "role": "service",
+    "summary": "service python con 8 simboli e 9 import.",
+    "symbols": [
+      "ChangeDetector",
+      "__init__",
+      "check_for_changes",
+      "get_change_detector",
+      "get_file_hash",
+      "get_file_mtime",
+      "load_snapshot",
+      "save_snapshot"
+    ]
+  },
+  {
+    "path": "server_v2/services/change_logger.py",
+    "role": "service",
+    "summary": "service python con 7 simboli e 5 import.",
+    "symbols": [
+      "ChangeLogger",
+      "__init__",
+      "clear_changes",
+      "get_change_count",
+      "get_change_logger",
+      "get_changes",
+      "log_change"
+    ]
+  },
+  {
+    "path": "server_v2/services/classificazioni_service.py",
+    "role": "service",
+    "summary": "service python con 11 simboli e 7 import.",
+    "symbols": [
+      "ClassificazioniService",
+      "__init__",
+      "_init_database",
+      "classifica_fornitore",
+      "classifica_fornitore_completo",
+      "get_classificazione_fornitore",
+      "get_fornitori_by_conto",
+      "get_fornitori_classificati",
+      "get_supplier_ids_by_classification",
+      "learn_classification",
+      "rimuovi_classificazione_fornitore"
+    ]
+  },
+  {
+    "path": "server_v2/services/conti_service.py",
+    "role": "service",
+    "summary": "service python con 17 simboli e 5 import.",
+    "symbols": [
+      "ContiService",
+      "create_branca",
+      "create_conto",
+      "create_sottoconto",
+      "delete_branca",
+      "delete_conto",
+      "delete_sottoconto",
+      "get_all_conti",
+      "get_branca_by_id",
+      "get_branche",
+      "get_conto_by_id",
+      "get_sottoconti",
+      "get_sottoconto_by_id",
+      "get_struttura_completa",
+      "update_branca",
+      "update_conto",
+      "update_sottoconto"
+    ]
+  },
+  {
+    "path": "server_v2/services/database_service.py",
+    "role": "service",
+    "summary": "service python con 20 simboli e 11 import.",
+    "symbols": [
+      "DatabaseService",
+      "__init__",
+      "_get_local_test_message",
+      "_get_network_test_message",
+      "_reload_configuration",
+      "_test_local_database",
+      "_test_network_database",
+      "backup_database",
+      "execute_command",
+      "execute_query",
+      "get_current_config",
+      "get_current_environment",
+      "get_database_manager",
+      "get_database_path",
+      "get_database_statistics",
+      "get_service_status",
+      "get_table_info",
+      "is_network_database",
+      "list_tables",
+      "test_connection"
+    ]
+  },
+  {
+    "path": "server_v2/services/dbf_data_service.py",
+    "role": "service",
+    "summary": "service python con 8 simboli e 5 import.",
+    "symbols": [
+      "DbfDataService",
+      "__init__",
+      "enrich_record",
+      "get_dbf_data_service",
+      "get_patient_by_id",
+      "get_patient_by_name",
+      "get_patient_id_from_piano",
+      "get_prestazione_by_id"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/__init__.py",
+    "role": "service",
+    "summary": "service python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/services/economics/collaboratori_engine.py",
+    "role": "service",
+    "summary": "service python con 4 simboli e 8 import.",
+    "symbols": [
+      "_build_onorario_map",
+      "_safe",
+      "_safe_float",
+      "get_collaboratori_redditivita"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/comparison_engine.py",
+    "role": "service",
+    "summary": "service python con 6 simboli e 8 import.",
+    "symbols": [
+      "_calcola_deviazione_mensile",
+      "_calcola_forecast_mensile",
+      "_calcola_statistiche",
+      "_safe",
+      "get_multi_year_comparison",
+      "get_trimester_forecast"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/data_normalizer.py",
+    "role": "service",
+    "summary": "service python con 11 simboli e 9 import.",
+    "symbols": [
+      "_dbf_time_to_minutes",
+      "_get_dbf_path",
+      "_safe_date",
+      "_safe_float",
+      "_safe_int",
+      "get_df_appointments",
+      "get_df_costs",
+      "get_df_estimates",
+      "get_df_payments",
+      "get_df_primanota",
+      "get_df_production"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/forecast_engine.py",
+    "role": "service",
+    "summary": "service python con 5 simboli e 8 import.",
+    "symbols": [
+      "_calcola_pipeline_preventivi",
+      "_calcola_scenari",
+      "_safe",
+      "_scenario",
+      "get_forecast"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/kpi_engine.py",
+    "role": "service",
+    "summary": "service python con 6 simboli e 7 import.",
+    "symbols": [
+      "_safe",
+      "get_kpi_by_category",
+      "get_kpi_by_operator",
+      "get_kpi_comparison",
+      "get_kpi_current",
+      "get_kpi_monthly"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/monthly_aggregator.py",
+    "role": "service",
+    "summary": "service python con 9 simboli e 8 import.",
+    "symbols": [
+      "_compute_monthly_for_year",
+      "_ensure_cache_table",
+      "_get_cached_data",
+      "_is_costo_studio",
+      "_load_classificazioni_fornitori",
+      "_safe_num",
+      "_save_to_cache",
+      "get_monthly_summary",
+      "invalidate_cache"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/prestazioni_engine.py",
+    "role": "service",
+    "summary": "service python con 7 simboli e 9 import.",
+    "symbols": [
+      "_build_onorario_full_map",
+      "_calcola_distribuzione_appuntamenti_anno",
+      "_calcola_distribuzione_prestazioni_anno",
+      "_safe",
+      "_safe_float",
+      "get_distribuzione_appuntamenti",
+      "get_distribuzione_prestazioni"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/scenario_engine.py",
+    "role": "service",
+    "summary": "service python con 3 simboli e 5 import.",
+    "symbols": [
+      "_clamp",
+      "_safe",
+      "simulate"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/seasonality_model.py",
+    "role": "service",
+    "summary": "service python con 2 simboli e 4 import.",
+    "symbols": [
+      "_empty_result",
+      "get_seasonality_index"
+    ]
+  },
+  {
+    "path": "server_v2/services/economics/trend_model.py",
+    "role": "service",
+    "summary": "service python con 3 simboli e 6 import.",
+    "symbols": [
+      "_empty_result",
+      "_safe",
+      "get_trend_analysis"
+    ]
+  },
+  {
+    "path": "server_v2/services/email_service.py",
+    "role": "service",
+    "summary": "service python con 36 simboli e 12 import.",
+    "symbols": [
+      "EmailService",
+      "__init__",
+      "_cache_classification",
+      "_extract_attachments",
+      "_extract_body",
+      "_get_email_field",
+      "_get_gmail_client",
+      "_get_gmail_service",
+      "_get_message_summary",
+      "_matches_rule",
+      "_parse_message_full",
+      "_parse_message_metadata",
+      "classify_email",
+      "classify_email_ai",
+      "classify_email_by_rules",
+      "clear_cache",
+      "create_rule",
+      "create_scope",
+      "delete_rule",
+      "delete_scope"
+    ]
+  },
+  {
+    "path": "server_v2/services/file_watcher.py",
+    "role": "service",
+    "summary": "service python con 12 simboli e 9 import.",
+    "symbols": [
+      "DbfFileEventHandler",
+      "FileWatcher",
+      "FileWatcher",
+      "__init__",
+      "__init__",
+      "_on_any_dbf_event",
+      "get_file_watcher",
+      "get_status",
+      "on_any_event",
+      "set_change_callback",
+      "start",
+      "stop"
+    ]
+  },
+  {
+    "path": "server_v2/services/fornitori_service.py",
+    "role": "service",
+    "summary": "service python con 8 simboli e 10 import.",
+    "symbols": [
+      "FornitoriService",
+      "_get_demo_fornitori_data",
+      "_get_fornitore_fallback_data",
+      "_get_fornitori_dbf_path",
+      "get_fornitore_by_id",
+      "get_fornitori_paginated",
+      "suggest_categoria",
+      "update_classificazione"
+    ]
+  },
+  {
+    "path": "server_v2/services/link_tracker_service.py",
+    "role": "service",
+    "summary": "service python con 4 simboli e 7 import.",
+    "symbols": [
+      "LinkTrackerService",
+      "__init__",
+      "create_tracked_link",
+      "get_original_url_and_log_click"
+    ]
+  },
+  {
+    "path": "server_v2/services/materiali_migration_service.py",
+    "role": "service",
+    "summary": "service python con 24 simboli e 19 import.",
+    "symbols": [
+      "MaterialiMigrationService",
+      "__init__",
+      "_calculate_similarity",
+      "_clean_dbf_value",
+      "_clean_material_name",
+      "_compile_regex_patterns",
+      "_derive_category",
+      "_find_pattern_match",
+      "_get_classification_data",
+      "_get_existing_material_classification",
+      "_initialize_supplier_mappings",
+      "_is_material_useful",
+      "_load_existing_patterns",
+      "_manage_cache_size",
+      "_safe_float",
+      "classify_material_type",
+      "filter_materials_by_classification",
+      "import_materials_for_supplier",
+      "is_dental_material",
+      "migrate_materials_to_db"
+    ]
+  },
+  {
+    "path": "server_v2/services/materiali_service.py",
+    "role": "service",
+    "summary": "service python con 11 simboli e 4 import.",
+    "symbols": [
+      "MaterialiService",
+      "create_materiale",
+      "delete_materiale",
+      "get_all_materiali",
+      "get_classification_suggestions",
+      "get_materiale_by_id",
+      "get_materiali_paginated",
+      "get_statistics",
+      "search_materials",
+      "update_materiale",
+      "update_materiale_conti"
+    ]
+  },
+  {
+    "path": "server_v2/services/monitoring_service.py",
+    "role": "service",
+    "summary": "service python con 23 simboli e 18 import.",
+    "symbols": [
+      "MonitorConfig",
+      "MonitorInstance",
+      "MonitorStatus",
+      "MonitorType",
+      "MonitoringService",
+      "__init__",
+      "_delete_config",
+      "_get_rules_summary",
+      "_is_path_reachable",
+      "_load_saved_configs",
+      "_load_settings",
+      "_process_trigger_for_change",
+      "_save_config",
+      "_save_settings",
+      "create_monitor",
+      "delete_monitor",
+      "get_all_monitors",
+      "get_logs",
+      "get_monitor_status",
+      "get_monitoring_service"
+    ]
+  },
+  {
+    "path": "server_v2/services/notification_service.py",
+    "role": "service",
+    "summary": "service python con 5 simboli e 6 import.",
+    "symbols": [
+      "NotificationService",
+      "__init__",
+      "get_unread_notifications",
+      "mark_read",
+      "notify_user"
+    ]
+  },
+  {
+    "path": "server_v2/services/pazienti_service.py",
+    "role": "service",
+    "summary": "service python con 9 simboli e 11 import.",
+    "symbols": [
+      "PazientiService",
+      "_apply_filters",
+      "_extract_paziente_data",
+      "_format_date_field",
+      "_get_pazienti_dbf_path",
+      "_merge_with_richiami_data",
+      "get_paziente_by_id",
+      "get_pazienti_paginated",
+      "search_pazienti"
+    ]
+  },
+  {
+    "path": "server_v2/services/piani_cura_service.py",
+    "role": "service",
+    "summary": "service python con 4 simboli e 5 import.",
+    "symbols": [
+      "PianiCuraService",
+      "__init__",
+      "get_piani_paziente",
+      "get_piano_dettaglio"
+    ]
+  },
+  {
+    "path": "server_v2/services/provider_automation_service.py",
+    "role": "service",
+    "summary": "service python con 3 simboli e 6 import.",
+    "symbols": [
+      "ProviderAutomationService",
+      "__init__",
+      "check_and_trigger_automation"
+    ]
+  },
+  {
+    "path": "server_v2/services/provider_service.py",
+    "role": "service",
+    "summary": "service python con 7 simboli e 5 import.",
+    "symbols": [
+      "ProviderService",
+      "__init__",
+      "create_provider",
+      "delete_provider",
+      "get_all_providers",
+      "get_provider_by_id",
+      "update_provider"
+    ]
+  },
+  {
+    "path": "server_v2/services/push_notification_service.py",
+    "role": "service",
+    "summary": "service python con 7 simboli e 5 import.",
+    "symbols": [
+      "PushNotificationService",
+      "__init__",
+      "_get_user_subscriptions",
+      "send_notification",
+      "send_notification_to_all",
+      "subscribe_user",
+      "unsubscribe_user"
+    ]
+  },
+  {
+    "path": "server_v2/services/reminder_dispatch_engine.py",
+    "role": "service",
+    "summary": "service python con 8 simboli e 6 import.",
+    "symbols": [
+      "ReminderDispatchEngine",
+      "dispatch_mode",
+      "get_all_config",
+      "get_config",
+      "get_dispatch_engine",
+      "get_morning_threshold_hour",
+      "should_send_today",
+      "update_config"
+    ]
+  },
+  {
+    "path": "server_v2/services/rentri_service.py",
+    "role": "service",
+    "summary": "service python con 16 simboli e 9 import.",
+    "symbols": [
+      "RentriService",
+      "__init__",
+      "_get_access_token",
+      "_has_valid_token",
+      "_reload_configuration",
+      "_test_api_call",
+      "get_available_services",
+      "get_current_config",
+      "get_current_environment",
+      "get_property_details",
+      "get_service_status",
+      "invalidate_token",
+      "is_configured",
+      "make_api_request",
+      "search_properties",
+      "test_connection"
+    ]
+  },
+  {
+    "path": "server_v2/services/ricetta_email_service.py",
+    "role": "service",
+    "summary": "service python con 1 simboli e 8 import.",
+    "symbols": [
+      "invia_pdf_ricetta_email"
+    ]
+  },
+  {
+    "path": "server_v2/services/ricette_db_service.py",
+    "role": "service",
+    "summary": "service python con 10 simboli e 8 import.",
+    "symbols": [
+      "RicetteDbService",
+      "__init__",
+      "_ensure_ricette_db_exists",
+      "_get_ricette_db_path",
+      "_init_ricette_db",
+      "get_all_ricette",
+      "get_ricetta_by_nre",
+      "get_ricette_by_paziente",
+      "save_ricetta",
+      "update_ricetta_stato"
+    ]
+  },
+  {
+    "path": "server_v2/services/ricette_ts_service.py",
+    "role": "service",
+    "summary": "service python con 34 simboli e 18 import.",
+    "symbols": [
+      "LegacySSLAdapter",
+      "RicetteTsService",
+      "__init__",
+      "_abs",
+      "_analyze_response_errors",
+      "_create_annulla_soap_request",
+      "_create_invio_soap_request",
+      "_create_session",
+      "_create_visualizza_soap_request",
+      "_dt",
+      "_encrypt_cf_assistito",
+      "_encrypt_pincode",
+      "_encrypt_with_sanitel",
+      "_extract_response_metadata",
+      "_extract_text",
+      "_genera_token_2fa",
+      "_get_current_env",
+      "_get_error_message_from_code",
+      "_load_configuration",
+      "_parse_annulla_response"
+    ]
+  },
+  {
+    "path": "server_v2/services/richiami_service.py",
+    "role": "service",
+    "summary": "service python con 12 simboli e 6 import.",
+    "symbols": [
+      "RichiamiService",
+      "__init__",
+      "_ensure_tables",
+      "_get_connection",
+      "create_richiamo",
+      "get_richiami_da_fare",
+      "get_richiami_paziente",
+      "get_richiamo_by_id",
+      "get_statistiche_richiami",
+      "mark_sms_sent",
+      "update_richiamo_config",
+      "update_richiamo_status"
+    ]
+  },
+  {
+    "path": "server_v2/services/scheduler_service.py",
+    "role": "service",
+    "summary": "service python con 22 simboli e 23 import.",
+    "symbols": [
+      "SchedulerService",
+      "__init__",
+      "get_scheduler_status",
+      "job",
+      "job",
+      "job",
+      "job",
+      "job_24h_afternoon",
+      "job_24h_morning",
+      "job_2h",
+      "job_followup",
+      "reschedule_calendar_sync_job",
+      "reschedule_recall_job",
+      "reschedule_reminder_job",
+      "reschedule_todo_escalation_job",
+      "schedule_appointment_reminders",
+      "schedule_calendar_sync_job",
+      "schedule_recall_job",
+      "schedule_reminder_job",
+      "schedule_todo_escalation_job"
+    ]
+  },
+  {
+    "path": "server_v2/services/seo/__init__.py",
+    "role": "service",
+    "summary": "service python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/services/seo/competitor_analysis copy.py",
+    "role": "service",
+    "summary": "service python con 4 simboli e 5 import.",
+    "symbols": [
+      "_build_corrections",
+      "_clean_host",
+      "_extract_metrics",
+      "competitor_analysis"
+    ]
+  },
+  {
+    "path": "server_v2/services/seo/competitor_analysis.py",
+    "role": "service",
+    "summary": "service python con 6 simboli e 5 import.",
+    "symbols": [
+      "_build_corrections",
+      "_clean_host",
+      "_extract_metrics",
+      "_extract_url",
+      "_top_benchmark",
+      "competitor_analysis"
+    ]
+  },
+  {
+    "path": "server_v2/services/seo/google_maps_competitors.py",
+    "role": "service",
+    "summary": "service python con 1 simboli e 3 import.",
+    "symbols": [
+      "get_local_competitors"
+    ]
+  },
+  {
+    "path": "server_v2/services/seo/keyword_search copy.py",
+    "role": "service",
+    "summary": "service python con 1 simboli e 5 import.",
+    "symbols": [
+      "search_competitors"
+    ]
+  },
+  {
+    "path": "server_v2/services/seo/keyword_search.py",
+    "role": "service",
+    "summary": "service python con 3 simboli e 5 import.",
+    "symbols": [
+      "_extract_real_url",
+      "_is_aggregator",
+      "search_competitors"
+    ]
+  },
+  {
+    "path": "server_v2/services/seo/seo_service.py",
+    "role": "service",
+    "summary": "service python con 12 simboli e 12 import.",
+    "symbols": [
+      "_analyze_ai_readiness",
+      "_analyze_content",
+      "_analyze_images",
+      "_analyze_on_page",
+      "_analyze_performance_hints",
+      "_analyze_schema",
+      "_analyze_technical",
+      "_score_label",
+      "fetch_page",
+      "parse_html",
+      "quick_check",
+      "run_page_audit"
+    ]
+  },
+  {
+    "path": "server_v2/services/simulation_service.py",
+    "role": "service",
+    "summary": "service python con 7 simboli e 12 import.",
+    "symbols": [
+      "SimulationService",
+      "__init__",
+      "get_last_results",
+      "run_all_simulations",
+      "simulate_emails",
+      "simulate_recalls",
+      "simulate_reminders"
+    ]
+  },
+  {
+    "path": "server_v2/services/slot_finder_service.py",
+    "role": "service",
+    "summary": "service python con 11 simboli e 7 import.",
+    "symbols": [
+      "_dbf_time_to_minutes",
+      "_get_appunta_path",
+      "_get_elenco_path",
+      "_get_prevent_path",
+      "_is_festivo",
+      "_leggi_occupati_per_giorno",
+      "_minutes_to_hhmm",
+      "_slot_liberi_in_finestra",
+      "build_last_igiene_lookup",
+      "trova_slot_liberi",
+      "trova_ultimo_igienista"
+    ]
+  },
+  {
+    "path": "server_v2/services/sms_service.py",
+    "role": "service",
+    "summary": "service python con 27 simboli e 10 import.",
+    "symbols": [
+      "SMSService",
+      "__init__",
+      "_clean_phone_number",
+      "_generate_appointment_reminder_message",
+      "_generate_recall_message",
+      "_prepare_recall_template_data",
+      "_reload_configuration",
+      "format_message_with_template",
+      "get_all_templates",
+      "get_automation_settings",
+      "get_current_config",
+      "get_current_environment",
+      "get_service_status",
+      "get_template",
+      "is_enabled",
+      "preview_recall_message",
+      "preview_template",
+      "reset_template",
+      "send_appointment_reminder_sms",
+      "send_bulk_recall_sms"
+    ]
+  },
+  {
+    "path": "server_v2/services/snapshot_manager.py",
+    "role": "service",
+    "summary": "service python con 24 simboli e 14 import.",
+    "symbols": [
+      "SnapshotManager",
+      "SnapshotRecord",
+      "TableSnapshot",
+      "__init__",
+      "_calculate_file_hash",
+      "_calculate_record_hash",
+      "_create_table_snapshot",
+      "_generate_record_id",
+      "_load_table_snapshot",
+      "_read_all_patients",
+      "_read_dbf_records",
+      "_save_table_snapshot",
+      "get_all_snapshots",
+      "get_changes",
+      "get_snapshot",
+      "get_snapshot_manager",
+      "get_snapshot_status",
+      "initialize_snapshots",
+      "load_existing_snapshots",
+      "start_monitoring"
+    ]
+  },
+  {
+    "path": "server_v2/services/spese_fornitori_service.py",
+    "role": "service",
+    "summary": "service python con 15 simboli e 13 import.",
+    "symbols": [
+      "SpeseFornitoriService",
+      "_apply_filters",
+      "_get_dettagli_spese_dbf_path",
+      "_get_fornitori_dbf_path",
+      "_get_spese_dbf_path",
+      "_safe_float",
+      "get_active_suppliers",
+      "get_analisi_produzione_operatore",
+      "get_available_production_years",
+      "get_riepilogo_spese",
+      "get_righe_spesa",
+      "get_spesa_by_id",
+      "get_spese",
+      "get_spese_by_fornitore",
+      "get_stats"
+    ]
+  },
+  {
+    "path": "server_v2/services/statistiche_service.py",
+    "role": "service",
+    "summary": "service python con 6 simboli e 2 import.",
+    "symbols": [
+      "StatisticheService",
+      "get_dashboard_statistics",
+      "get_statistiche_collaboratori",
+      "get_statistiche_fornitori",
+      "get_statistiche_materiali",
+      "get_statistiche_spese"
+    ]
+  },
+  {
+    "path": "server_v2/services/sync_state_manager.py",
+    "role": "service",
+    "summary": "service python con 17 simboli e 9 import.",
+    "symbols": [
+      "SyncStateManager",
+      "__init__",
+      "_load_sync_state",
+      "_save_sync_state",
+      "generate_appointment_hash",
+      "generate_appointment_id",
+      "get_appointments_to_delete",
+      "get_sync_state_for_studios",
+      "get_sync_state_manager",
+      "get_sync_statistics",
+      "is_appointment_synced",
+      "load_sync_state",
+      "mark_appointment_synced",
+      "remove_appointment_sync",
+      "reset_sync_state",
+      "save_sync_state",
+      "validate_and_clean_sync_state"
+    ]
+  },
+  {
+    "path": "server_v2/services/template_manager.py",
+    "role": "service",
+    "summary": "service python con 9 simboli e 3 import.",
+    "symbols": [
+      "TemplateManager",
+      "__init__",
+      "_get_template_content",
+      "_get_template_path",
+      "_replace_placeholders",
+      "get_available_templates",
+      "preview_template",
+      "render_template",
+      "replace_match"
+    ]
+  },
+  {
+    "path": "server_v2/services/todo_escalation_job.py",
+    "role": "service",
+    "summary": "service python con 5 simboli e 7 import.",
+    "symbols": [
+      "TodoEscalationJob",
+      "__init__",
+      "_calculate_urgency_level",
+      "_send_reminder_notification",
+      "check_and_escalate"
+    ]
+  },
+  {
+    "path": "server_v2/services/todo_service.py",
+    "role": "service",
+    "summary": "service python con 20 simboli e 12 import.",
+    "symbols": [
+      "TodoService",
+      "__init__",
+      "_broadcast_todo",
+      "_send_notification",
+      "archive_message",
+      "auto_complete_step_todos",
+      "create_todo",
+      "create_todo_from_step",
+      "get_all_todos",
+      "get_by_id",
+      "get_inbox",
+      "get_pending_for_user",
+      "get_related_to_step",
+      "get_related_to_task",
+      "get_sent",
+      "mark_as_completed",
+      "mark_as_read",
+      "postpone_task_todos",
+      "snooze_todo",
+      "update_todo"
+    ]
+  },
+  {
+    "path": "server_v2/services/trigger_config.py",
+    "role": "service",
+    "summary": "service python con 14 simboli e 6 import.",
+    "symbols": [
+      "TriggerConditionType",
+      "TriggerConfig",
+      "TriggerConfigManager",
+      "__init__",
+      "_check_field_change",
+      "_check_transition",
+      "_check_value_in_list",
+      "_check_value_match",
+      "_evaluate_condition",
+      "_load_configs",
+      "get_all_configs",
+      "get_config",
+      "reload",
+      "should_trigger"
+    ]
+  },
+  {
+    "path": "server_v2/services/websocket_service.py",
+    "role": "service",
+    "summary": "service python con 11 simboli e 4 import.",
+    "symbols": [
+      "WebSocketService",
+      "__init__",
+      "_register_handlers",
+      "broadcast_notification",
+      "broadcast_to_all",
+      "get_connected_users_count",
+      "handle_connect",
+      "handle_disconnect",
+      "handle_join",
+      "handle_leave",
+      "is_user_connected"
+    ]
+  },
+  {
+    "path": "server_v2/services/work_service.py",
+    "role": "service",
+    "summary": "service python con 16 simboli e 20 import.",
+    "symbols": [
+      "WorkService",
+      "__init__",
+      "complete_step",
+      "create_task_from_work",
+      "create_work_template",
+      "delete_task",
+      "delete_work_template",
+      "get_all_tasks",
+      "get_all_works",
+      "get_task_details",
+      "get_tasks_for_patient",
+      "get_work_details",
+      "postpone_task",
+      "reset_task",
+      "update_task_status",
+      "update_work_template"
+    ]
+  },
+  {
+    "path": "server_v2/tests/__init__.py",
+    "role": "test",
+    "summary": "test python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/tests/test_cbct_service.py",
+    "role": "test",
+    "summary": "test python con 5 simboli e 4 import.",
+    "symbols": [
+      "test_build_cartella_nas_formatta_cognome_nome_data",
+      "test_merge_stato_esami_marca_gia_scaricato_e_cartella",
+      "test_parse_lista_esami_html_estrae_tutte_le_righe",
+      "test_parse_nome_paziente_divide_cognome_e_nome",
+      "test_parse_nome_paziente_senza_separatore_solleva_errore"
+    ]
+  },
+  {
+    "path": "server_v2/tests/test_create_task_notification.py",
+    "role": "test",
+    "summary": "test python con 11 simboli e 13 import.",
+    "symbols": [
+      "TestCreateTaskNotification",
+      "_build_dbf_mock",
+      "_build_user_repo_mock",
+      "_get_unread_notifications",
+      "_make_test_db",
+      "setUp",
+      "tearDown",
+      "test_1_create_task_notifica_primo_step",
+      "test_2_complete_step_notifica_fase_successiva",
+      "test_3_nessuna_notifica_se_stesso_utente",
+      "test_4_full_trigger_action"
+    ]
+  },
+  {
+    "path": "server_v2/tests/test_paz_da_richiamare.py",
+    "role": "test",
+    "summary": "test python con 3 simboli e 4 import.",
+    "symbols": [
+      "_get",
+      "stampa_pazienti",
+      "stampa_slot"
+    ]
+  },
+  {
+    "path": "server_v2/tests/test_push_notification.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 2 import.",
+    "symbols": [
+      "send_test_notification"
+    ]
+  },
+  {
+    "path": "server_v2/tests/test_ricetta_fixes.py",
+    "role": "test",
+    "summary": "test python con 3 simboli e 14 import.",
+    "symbols": [
+      "fail",
+      "ok",
+      "skip"
+    ]
+  },
+  {
+    "path": "server_v2/tests/test_richiamo_ok.py",
+    "role": "test",
+    "summary": "test python con 2 simboli e 4 import.",
+    "symbols": [
+      "check_paziente",
+      "ultimi_richiamati"
+    ]
+  },
+  {
+    "path": "server_v2/tests/test_scraping.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 4 import.",
+    "symbols": [
+      "fetch_page"
+    ]
+  },
+  {
+    "path": "server_v2/tests/test_seo_service.py",
+    "role": "test",
+    "summary": "test python con 0 simboli e 3 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/tests/test_slot_finder.py",
+    "role": "test",
+    "summary": "test python con 2 simboli e 6 import.",
+    "symbols": [
+      "stampa_appuntamenti_giallo",
+      "stampa_slot"
+    ]
+  },
+  {
+    "path": "server_v2/utils/__init__.py",
+    "role": "utility",
+    "summary": "utility python con 0 simboli e 1 import.",
+    "symbols": []
+  },
+  {
+    "path": "server_v2/utils/auth_utils.py",
+    "role": "utility",
+    "summary": "utility python con 3 simboli e 3 import.",
+    "symbols": [
+      "decorator",
+      "roles_required",
+      "wrapper"
+    ]
+  },
+  {
+    "path": "server_v2/utils/dbf_utils.py",
+    "role": "utility",
+    "summary": "utility python con 49 simboli e 20 import.",
+    "symbols": [
+      "ChunkResult",
+      "DBFFileInfo",
+      "DBFOptimizedReader",
+      "DbfProcessor",
+      "ReadingMetrics",
+      "__init__",
+      "__init__",
+      "_calculate_cache_hit_rate",
+      "_generate_cache_key",
+      "_get_dbf_path",
+      "_get_deleted_records_binary",
+      "_get_file_info",
+      "_get_from_cache",
+      "_load_appointments_enterprise",
+      "_load_patients_optimized",
+      "_process_appointment_record",
+      "_process_chunk_enterprise",
+      "_read_appointments_parallel_chunks",
+      "_read_appointments_single_chunk",
+      "_record_metrics"
+    ]
+  },
+  {
+    "path": "server_v2/utils/old_automation_service.py",
+    "role": "utility",
+    "summary": "utility python con 21 simboli e 17 import.",
+    "symbols": [
+      "AutomationService",
+      "__init__",
+      "_enrich_context_with_patient_data",
+      "_execute_single_rule",
+      "_impl_send_appointment_sms",
+      "_impl_send_sms_link",
+      "_register_default_implementations",
+      "_sync_registry_with_db",
+      "create_rule",
+      "delete_rule",
+      "delete_rules_for_monitor",
+      "delete_rules_for_monitor",
+      "dry_run_rules_for_trigger",
+      "dry_run_rules_for_trigger",
+      "execute_rules_for_trigger",
+      "get_all_rules",
+      "get_rule_by_id",
+      "list_actions",
+      "render_value",
+      "render_value"
+    ]
+  },
+  {
+    "path": "server_v2/utils/ricetta_utils.py",
+    "role": "utility",
+    "summary": "utility python con 23 simboli e 5 import.",
+    "symbols": [
+      "RicettaDataManager",
+      "__init__",
+      "_load_data",
+      "cerca_diagnosi",
+      "cerca_diagnosi",
+      "cerca_farmaci",
+      "cerca_farmaci",
+      "get_durate_comuni",
+      "get_durate_standard",
+      "get_farmaci_per_diagnosi",
+      "get_farmaci_per_diagnosi",
+      "get_farmaci_test_sicuri",
+      "get_note_frequenti",
+      "get_note_frequenti",
+      "get_posologie_comuni",
+      "get_posologie_per_farmaco",
+      "get_protocolli_terapeutici",
+      "get_protocolli_terapeutici",
+      "get_protocollo_by_id",
+      "get_ricette_test_funzionanti"
+    ]
+  },
+  {
+    "path": "tests/__init__.py",
+    "role": "test",
+    "summary": "test python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "tests/complete_oauth_flow.py",
+    "role": "test",
+    "summary": "test python con 7 simboli e 9 import.",
+    "symbols": [
+      "check_existing_token",
+      "complete_oauth_with_code",
+      "create_test_event",
+      "main",
+      "start_oauth_flow",
+      "test_calendar_access",
+      "verify_event"
+    ]
+  },
+  {
+    "path": "tests/debug_dbf_fields.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 4 import.",
+    "symbols": [
+      "debug_dbf_structure"
+    ]
+  },
+  {
+    "path": "tests/debug_routes.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 3 import.",
+    "symbols": [
+      "debug_routes"
+    ]
+  },
+  {
+    "path": "tests/demo.py",
+    "role": "test",
+    "summary": "test python con 8 simboli e 13 import.",
+    "symbols": [
+      "DemoRepository",
+      "create_demo_database",
+      "demo_database_manager",
+      "demo_dbf_utilities",
+      "demo_performance_comparison",
+      "demo_repository_pattern",
+      "main",
+      "table_name"
+    ]
+  },
+  {
+    "path": "tests/generate_auth_url.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 3 import.",
+    "symbols": [
+      "generate_auth_url"
+    ]
+  },
+  {
+    "path": "tests/production_oauth_handler.py",
+    "role": "test",
+    "summary": "test python con 9 simboli e 10 import.",
+    "symbols": [
+      "ProductionOAuthHandler",
+      "__init__",
+      "_complete_oauth_flow",
+      "_create_test_event",
+      "_load_existing_credentials",
+      "get_calendar_service",
+      "main",
+      "simulate_production_calendar_sync",
+      "test_calendar_functionality"
+    ]
+  },
+  {
+    "path": "tests/run_tests.py",
+    "role": "test",
+    "summary": "test python con 9 simboli e 10 import.",
+    "symbols": [
+      "TestResult",
+      "__init__",
+      "addError",
+      "addFailure",
+      "addSuccess",
+      "main",
+      "run_specific_test",
+      "run_test_suite",
+      "startTest"
+    ]
+  },
+  {
+    "path": "tests/setup_calendar_auth.py",
+    "role": "test",
+    "summary": "test python con 3 simboli e 8 import.",
+    "symbols": [
+      "main",
+      "setup_oauth2_flow",
+      "verify_existing_token"
+    ]
+  },
+  {
+    "path": "tests/simple_demo.py",
+    "role": "test",
+    "summary": "test python con 4 simboli e 8 import.",
+    "symbols": [
+      "create_test_database",
+      "main",
+      "test_database_manager",
+      "test_dbf_utilities"
+    ]
+  },
+  {
+    "path": "tests/test_base_repository.py",
+    "role": "test",
+    "summary": "test python con 30 simboli e 9 import.",
+    "symbols": [
+      "TestBaseRepository",
+      "TestBaseRepositoryErrorHandling",
+      "TestRepository",
+      "_init_test_database",
+      "_validate_entity_data",
+      "setUp",
+      "setUp",
+      "table_name",
+      "tearDown",
+      "test_build_queries",
+      "test_count_entities",
+      "test_create_entity",
+      "test_create_entity_validation",
+      "test_custom_query",
+      "test_database_error_handling",
+      "test_delete_nonexistent_entity",
+      "test_exists",
+      "test_get_by_id",
+      "test_hard_delete",
+      "test_list_entities"
+    ]
+  },
+  {
+    "path": "tests/test_calendar_auth.py",
+    "role": "test",
+    "summary": "test python con 5 simboli e 8 import.",
+    "symbols": [
+      "main",
+      "test_calendar_config",
+      "test_credentials_file",
+      "test_google_calendar_api",
+      "test_token_file"
+    ]
+  },
+  {
+    "path": "tests/test_calendar_auth_simple.py",
+    "role": "test",
+    "summary": "test python con 5 simboli e 9 import.",
+    "symbols": [
+      "main",
+      "test_calendar_config",
+      "test_credentials_file",
+      "test_google_calendar_api",
+      "test_token_file"
+    ]
+  },
+  {
+    "path": "tests/test_calendar_event.py",
+    "role": "test",
+    "summary": "test python con 6 simboli e 7 import.",
+    "symbols": [
+      "check_authentication",
+      "cleanup_test_event",
+      "create_mock_event",
+      "get_target_calendar",
+      "main",
+      "verify_event"
+    ]
+  },
+  {
+    "path": "tests/test_calendar_simple.py",
+    "role": "test",
+    "summary": "test python con 6 simboli e 6 import.",
+    "symbols": [
+      "main",
+      "test_appointments_loading",
+      "test_automation_config",
+      "test_config_loading",
+      "test_dbf_reader",
+      "test_google_credentials"
+    ]
+  },
+  {
+    "path": "tests/test_calendar_v2.py",
+    "role": "test",
+    "summary": "test python con 7 simboli e 7 import.",
+    "symbols": [
+      "main",
+      "test_appointments_loading",
+      "test_automation_config",
+      "test_config_loading",
+      "test_dbf_reader",
+      "test_google_credentials",
+      "test_performance_benchmark"
+    ]
+  },
+  {
+    "path": "tests/test_calendar_v2_complete.py",
+    "role": "test",
+    "summary": "test python con 7 simboli e 6 import.",
+    "symbols": [
+      "benchmark_vs_v1",
+      "main",
+      "test_config_status",
+      "test_health_check",
+      "test_mode_switching",
+      "test_optimized_appointments_loading",
+      "test_performance_metrics"
+    ]
+  },
+  {
+    "path": "tests/test_calendar_with_data.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 5 import.",
+    "symbols": [
+      "test_with_historical_data"
+    ]
+  },
+  {
+    "path": "tests/test_check_id_sessione.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 2 import.",
+    "symbols": [
+      "test_check_id_sessione"
+    ]
+  },
+  {
+    "path": "tests/test_chiamata_reale_ts.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 5 import.",
+    "symbols": [
+      "test_chiamata_reale_ts"
+    ]
+  },
+  {
+    "path": "tests/test_cifratura_kit.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 4 import.",
+    "symbols": [
+      "test_cifratura"
+    ]
+  },
+  {
+    "path": "tests/test_compatibility_bridge.py",
+    "role": "test",
+    "summary": "test python con 33 simboli e 15 import.",
+    "symbols": [
+      "TestClassificazioniEndpointsCompatibility",
+      "TestCompatibilityBridgeBase",
+      "TestErrorHandlingCompatibility",
+      "TestFornitoriEndpointsCompatibility",
+      "TestMaterialiEndpointsCompatibility",
+      "TestNaNValueHandling",
+      "TestStatisticheEndpointsCompatibility",
+      "get_auth_headers",
+      "setUp",
+      "setUp",
+      "setUp",
+      "setUp",
+      "setUp",
+      "tearDown",
+      "test_business_logic_error_format",
+      "test_classifica_fornitore_completa_endpoint_format",
+      "test_classifica_fornitore_completa_validation_error_format",
+      "test_confirm_da_verificare_endpoint_format",
+      "test_get_classificazione_fornitore_endpoint_format",
+      "test_get_classificazione_fornitore_not_found_format"
+    ]
+  },
+  {
+    "path": "tests/test_config_integration.py",
+    "role": "test",
+    "summary": "test python con 4 simboli e 5 import.",
+    "symbols": [
+      "main",
+      "test_config_manager",
+      "test_convenience_functions",
+      "test_dbf_reader"
+    ]
+  },
+  {
+    "path": "tests/test_crud.py",
+    "role": "test",
+    "summary": "test python con 5 simboli e 7 import.",
+    "symbols": [
+      "TestCrudRepository",
+      "get_database_manager",
+      "main",
+      "table_name",
+      "test_crud_operations"
+    ]
+  },
+  {
+    "path": "tests/test_database_manager.py",
+    "role": "test",
+    "summary": "test python con 20 simboli e 13 import.",
+    "symbols": [
+      "TestDatabaseManager",
+      "TestDatabaseManagerEdgeCases",
+      "_init_test_database",
+      "setUp",
+      "tearDown",
+      "test_concurrent_access",
+      "test_configuration_validation",
+      "test_connection_cleanup",
+      "test_connection_creation",
+      "test_connection_pooling",
+      "test_database_manager_context",
+      "test_error_handling",
+      "test_execute_many",
+      "test_nonexistent_database",
+      "test_permission_denied",
+      "test_query_execution",
+      "test_statistics",
+      "test_transaction_commit",
+      "test_transaction_rollback",
+      "worker_thread"
+    ]
+  },
+  {
+    "path": "tests/test_dbf_utils.py",
+    "role": "test",
+    "summary": "test python con 30 simboli e 8 import.",
+    "symbols": [
+      "TestDbfProcessor",
+      "TestDbfUtilities",
+      "TestDbfUtilsErrorHandling",
+      "invalid_validation_func",
+      "is_valid_fornitore",
+      "setUp",
+      "setUp",
+      "tearDown",
+      "test_clean_data",
+      "test_clean_dbf_value",
+      "test_convenience_functions",
+      "test_convert_bytes_to_string",
+      "test_error_handling",
+      "test_extract_fornitori_errors",
+      "test_extract_fornitori_from_dbf",
+      "test_extract_unique_values",
+      "test_filter_by_field",
+      "test_filter_valid_records",
+      "test_filter_valid_records_errors",
+      "test_get_fornitori_mapping"
+    ]
+  },
+  {
+    "path": "tests/test_enriched_appointments.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 5 import.",
+    "symbols": [
+      "test_enriched_appointments"
+    ]
+  },
+  {
+    "path": "tests/test_environment_manager_fixes.py",
+    "role": "test",
+    "summary": "test python con 13 simboli e 9 import.",
+    "symbols": [
+      "TestEnvironmentManagerFixes",
+      "setUp",
+      "tearDown",
+      "test_backup_functionality",
+      "test_cache_efficiency_fix",
+      "test_empty_string_validation_fix",
+      "test_environment_info_functionality",
+      "test_environment_validation_fix",
+      "test_file_content_validation_fix",
+      "test_import_safety_fix",
+      "test_json_validation_fix",
+      "test_set_environment_validation_fix",
+      "test_validate_all_services_functionality"
+    ]
+  },
+  {
+    "path": "tests/test_event_format.py",
+    "role": "test",
+    "summary": "test python con 2 simboli e 5 import.",
+    "symbols": [
+      "test_event_format",
+      "test_time_conversion"
+    ]
+  },
+  {
+    "path": "tests/test_event_format_simple.py",
+    "role": "test",
+    "summary": "test python con 5 simboli e 4 import.",
+    "symbols": [
+      "create_event_data_v2",
+      "decimal_to_time",
+      "test_different_appointment_types",
+      "test_event_format",
+      "test_time_conversion"
+    ]
+  },
+  {
+    "path": "tests/test_event_safe.py",
+    "role": "test",
+    "summary": "test python con 3 simboli e 1 import.",
+    "symbols": [
+      "create_event_data_v2",
+      "decimal_to_time",
+      "main"
+    ]
+  },
+  {
+    "path": "tests/test_genera_id_sessione.py",
+    "role": "test",
+    "summary": "test python con 1 simboli e 2 import.",
+    "symbols": [
+      "test_genera_id_sessione"
+    ]
+  },
+  {
+    "path": "tests/test_integrated_calendar.py",
+    "role": "test",
+    "summary": "test python con 8 simboli e 9 import.",
+    "symbols": [
+      "IntegratedCalendarTest",
+      "__init__",
+      "_generate_mock_appointments",
+      "_simulate_oauth_flow",
+      "demonstrate_event_format",
+      "main",
+      "simulate_production_sync",
+      "test_system_readiness"
+    ]
+  },
+  {
+    "path": "tests/test_login.py",
+    "role": "test",
+    "summary": "test python con 7 simboli e 3 import.",
+    "symbols": [
+      "main",
+      "test_get_users",
+      "test_invalid_login",
+      "test_login",
+      "test_logout",
+      "test_protected_endpoint",
+      "test_server_health"
+    ]
+  },
+  {
+    "path": "tests/test_login_simple.py",
+    "role": "test",
+    "summary": "test python con 6 simboli e 3 import.",
+    "symbols": [
+      "main",
+      "test_bad_login",
+      "test_get_users",
+      "test_login",
+      "test_protected",
+      "test_server"
+    ]
+  },
+  {
+    "path": "tests/test_quick.py",
+    "role": "test",
+    "summary": "test python con 7 simboli e 7 import.",
+    "symbols": [
+      "FornitoriTestRepository",
+      "clean_dbf_value",
+      "main",
+      "table_name",
+      "test_base_repository",
+      "test_database_manager",
+      "test_dbf_utilities"
+    ]
+  },
+  {
+    "path": "tests/test_regole.py",
+    "role": "test",
+    "summary": "test python con 0 simboli e 0 import.",
+    "symbols": []
+  },
+  {
+    "path": "tests/test_ricetta_integration.py",
+    "role": "test",
+    "summary": "test python con 12 simboli e 15 import.",
+    "symbols": [
+      "TestRicettaIntegration",
+      "setup_method",
+      "test_configuration_validation",
+      "test_data_integrity",
+      "test_environment_switching",
+      "test_ricetta_data_manager",
+      "test_ricetta_invio_flow",
+      "test_ricetta_service_connection_test",
+      "test_ricetta_service_initialization",
+      "test_ricetta_validation",
+      "test_soap_envelope_generation",
+      "test_ssl_manager_configuration"
+    ]
+  },
+  {
+    "path": "tests/test_service_layer.py",
+    "role": "test",
+    "summary": "test python con 37 simboli e 17 import.",
+    "symbols": [
+      "TestAPICompatibility",
+      "TestClassificazioniService",
+      "TestFornitoriService",
+      "TestMaterialiService",
+      "TestPerformanceOptimizations",
+      "TestServiceLayerBase",
+      "TestStatisticheService",
+      "_create_test_tables",
+      "setUp",
+      "tearDown",
+      "test_advanced_metrics_calculation",
+      "test_bulk_material_operations",
+      "test_bulk_operations_performance",
+      "test_bulk_supplier_classification",
+      "test_classification_confidence_calculation",
+      "test_classification_pattern_analysis",
+      "test_classification_suggestions_with_explanations",
+      "test_comprehensive_supplier_statistics",
+      "test_create_material_validation_errors",
+      "test_create_material_with_validation"
+    ]
+  },
+  {
+    "path": "tests/test_simple_calendar_v2.py",
+    "role": "test",
+    "summary": "test python con 5 simboli e 8 import.",
+    "symbols": [
+      "main",
+      "test_appointments_loading",
+      "test_config_basic",
+      "test_dbf_reader_basic",
+      "test_performance_metrics"
+    ]
+  },
+  {
+    "path": "tests/test_sms_templates_integration.py",
+    "role": "test",
+    "summary": "test python con 6 simboli e 9 import.",
+    "symbols": [
+      "main",
+      "test_automation_settings",
+      "test_full_workflow",
+      "test_richiami_service",
+      "test_sms_service_integration",
+      "test_template_manager"
+    ]
+  }
+]

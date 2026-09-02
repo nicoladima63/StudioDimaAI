@@ -1,0 +1,612 @@
+QUERY: email
+
+=== PRIORITY FILES ===
+- server_v2/services/email_service.py | role=service | score=30 | structural=20 | query=10 | matched=email
+- server_v2/api/v2_email.py | role=api | score=29 | structural=19 | query=10 | matched=email
+- server_v2/repositories/email_repository.py | role=repository | score=24 | structural=18 | query=6 | matched=email
+- server_v2/services/ricetta_email_service.py | role=service | score=21 | structural=11 | query=10 | matched=email
+- client_v2/src/features/email/components/EmailRulesManager.tsx | role=component | score=19 | structural=13 | query=6 | matched=email
+- client_v2/src/features/email/services/emailService.ts | role=service | score=18 | structural=12 | query=6 | matched=email
+- client_v2/src/features/email/components/TagInput.tsx | role=component | score=16 | structural=10 | query=6 | matched=email
+- client_v2/src/features/email/pages/EmailPage.tsx | role=page | score=14 | structural=8 | query=6 | matched=email
+- client_v2/src/features/email/components/EmailDetail.tsx | role=component | score=14 | structural=8 | query=6 | matched=email
+- client_v2/src/features/email/components/EmailList.tsx | role=component | score=13 | structural=7 | query=6 | matched=email
+- client_v2/src/features/email/store/email.store.ts | role=state | score=13 | structural=7 | query=6 | matched=email
+- client_v2/src/features/email/components/EmailAiConfig.tsx | role=component | score=12 | structural=6 | query=6 | matched=email
+- client_v2/src/features/email/components/EmailOAuthSetup.tsx | role=component | score=11 | structural=5 | query=6 | matched=email
+
+=== ARCHITECTURE ===
+
+SERVICE
+- server_v2/services/email_service.py
+- server_v2/services/ricetta_email_service.py
+- client_v2/src/features/email/services/emailService.ts
+
+API
+- server_v2/api/v2_email.py
+
+REPOSITORY
+- server_v2/repositories/email_repository.py
+
+COMPONENT
+- client_v2/src/features/email/components/EmailRulesManager.tsx
+- client_v2/src/features/email/components/TagInput.tsx
+- client_v2/src/features/email/components/EmailDetail.tsx
+- client_v2/src/features/email/components/EmailList.tsx
+- client_v2/src/features/email/components/EmailAiConfig.tsx
+- client_v2/src/features/email/components/EmailOAuthSetup.tsx
+
+PAGE
+- client_v2/src/features/email/pages/EmailPage.tsx
+
+STATE
+- client_v2/src/features/email/store/email.store.ts
+
+=== SYMBOLS ===
+- EmailService | server_v2/services/email_service.py | kind=class | category=core | score=46
+- EmailScopeRepository | server_v2/repositories/email_repository.py | kind=class | category=core | score=44
+- EmailRuleRepository | server_v2/repositories/email_repository.py | kind=class | category=core | score=44
+- EmailAiConfigRepository | server_v2/repositories/email_repository.py | kind=class | category=core | score=44
+- EmailCacheRepository | server_v2/repositories/email_repository.py | kind=class | category=core | score=44
+- get_emails | server_v2/services/email_service.py | kind=function | category=support | score=39
+- get_email_detail | server_v2/services/email_service.py | kind=function | category=support | score=39
+- classify_email_by_rules | server_v2/services/email_service.py | kind=function | category=support | score=39
+- classify_email_ai | server_v2/services/email_service.py | kind=function | category=support | score=39
+- classify_email | server_v2/services/email_service.py | kind=function | category=support | score=39
+- get_relevant_emails | server_v2/services/email_service.py | kind=function | category=support | score=39
+- invia_pdf_ricetta_email | server_v2/services/ricetta_email_service.py | kind=function | category=domain | score=39
+- get_emails | server_v2/api/v2_email.py | kind=function | category=support | score=38
+- get_email_detail | server_v2/api/v2_email.py | kind=function | category=support | score=38
+- get_relevant_emails | server_v2/api/v2_email.py | kind=function | category=support | score=38
+- handleSelectEmail | client_v2/src/features/email/pages/EmailPage.tsx | kind=component | category=support | score=25
+- get_oauth_url | server_v2/services/email_service.py | kind=function | category=support | score=24
+- get_oauth_status | server_v2/services/email_service.py | kind=function | category=support | score=24
+- get_labels | server_v2/services/email_service.py | kind=function | category=support | score=24
+- _get_email_field | server_v2/services/email_service.py | kind=function | category=internal | score=24
+- get_scopes | server_v2/services/email_service.py | kind=function | category=support | score=24
+- get_active_scopes | server_v2/services/email_service.py | kind=function | category=support | score=24
+- create_scope | server_v2/services/email_service.py | kind=function | category=support | score=24
+- update_scope | server_v2/services/email_service.py | kind=function | category=support | score=24
+- delete_scope | server_v2/services/email_service.py | kind=function | category=support | score=24
+- get_rules | server_v2/services/email_service.py | kind=function | category=support | score=24
+- create_rule | server_v2/services/email_service.py | kind=function | category=support | score=24
+- update_rule | server_v2/services/email_service.py | kind=function | category=support | score=24
+- delete_rule | server_v2/services/email_service.py | kind=function | category=support | score=24
+- get_ai_config | server_v2/services/email_service.py | kind=function | category=support | score=24
+- save_ai_config | server_v2/services/email_service.py | kind=function | category=support | score=24
+- get_ai_config_with_key | server_v2/services/email_service.py | kind=function | category=support | score=24
+- test_ai_classification | server_v2/services/email_service.py | kind=function | category=support | score=24
+- clear_cache | server_v2/services/email_service.py | kind=function | category=support | score=24
+- get_gmail_oauth_url | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- gmail_oauth_status | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- get_labels | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- get_scopes | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- create_scope | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- update_scope | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- delete_scope | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- get_rules | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- create_rule | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- update_rule | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- delete_rule | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- get_ai_config | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- save_ai_config | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- test_ai_classification | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- clear_cache | server_v2/api/v2_email.py | kind=function | category=support | score=23
+- table_name | server_v2/repositories/email_repository.py | kind=function | category=support | score=22
+
+=== RELEVANT CODE ===
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\email_service.py::EmailService (lines 21-494) ---
+class EmailService:
+    """Service for reading and classifying Gmail emails."""
+
+    def __init__(self):
+        self._scope_repo = EmailScopeRepository()
+        self._rule_repo = EmailRuleRepository()
+        self._ai_config_repo = EmailAiConfigRepository()
+        self._cache_repo = EmailCacheRepository()
+
+    def _get_gmail_client(self) -> GoogleGmailClient:
+        return GoogleGmailClient(
+            credentials_path=GOOGLE_CREDENTIALS_PATH,
+            token_path=GMAIL_TOKEN_PATH,
+            oauth_state_path=GMAIL_OAUTH_STATE_PATH,
+        )
+
+    def _get_gmail_service(self):
+        client = self._get_gmail_client()
+        return client.get_service()
+
+    # =========================================================================
+    # OAuth
+    # =========================================================================
+
+    def get_oauth_url(self, redirect_uri: str) -> str:
+        client = self._get_gmail_client()
+        return client.generate_web_auth_url(redirect_uri)
+
+    def handle_oauth_callback(self, code: str, state: str, redirect_uri: str):
+        client = self._get_gmail_client()
+        client.handle_web_auth_callback(code, state, redirect_uri)
+
+    def get_oauth_status(self) -> Dict[str, Any]:
+        return {
+            'authenticated': GMAIL_TOKEN_PATH.exists(),
+            'token_path': str(GMAIL_TOKEN_PATH),
+        }
+
+    # =========================================================================
+    # Email Reading
+    # =========================================================================
+
+    def get_emails(self, max_results: int = 20, page_token: Optional[str] = None,
+                   query: Optional[str] = None) -> Dict[str, Any]:
+        """Fetch emails from Gmail with pagination."""
+        try:
+            service = self._get_gmail_service()
+            params = {
+                'userId': 'me',
+                'maxResults': max_results,
+            }
+            if page_token:
+                params['pageToken'] = page_token
+            if query:
+                params['q'] = query
+
+            results = service.users().messages().list(**params).execute()
+            messages = results.get('messages', [])
+            next_page_token = results.get('nextPageToken')
+
+            emails = []
+            if messages:
+                # Batch fetch message details
+                for msg in messages:
+                    email_data = self._get_message_summary(service, msg['id'])
+                    if email_data:
+                        emails.append(email_data)
+
+            return {
+                'emails': emails,
+                'next_page_token': next_page_token,
+                'result_size_estimate': results.get('resultSizeEstimate', 0),
+            }
+        except GmailCredentialsNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get emails: {e}")
+            raise GmailApiError(f"Failed to get emails: {str(e)}")
+
+    def get_email_detail(self, message_id: str) -> Dict[str, Any]:
+        """Get full detail of a single email."""
+        try:
+            service = self._get_gmail_service()
+            msg = service.users().messages().get(
+                userId='me', id=message_id, format='full'
+            ).execute()
+            return self._parse_message_full(msg)
+        except GmailCredentialsNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get email detail {message_id}: {e}")
+            raise GmailApiError(f"Failed to get email detail: {str(e)}")
+
+    def get_labels(self) -> List[Dict[str, Any]]:
+        """Get Gmail labels."""
+        try:
+            service = self._get_gmail_service()
+            results = service.users().labels().list(userId='me').execute()
+            labels = results.get('labels', [])
+            return [{'id': l['id'], 'name': l['name'], 'type': l.get('type', '')} for l in labels]
+# … snippet truncated; inspect the source file for the remaining lines
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\email_repository.py::EmailScopeRepository (lines 10-124) ---
+class EmailScopeRepository(BaseRepository):
+    """Repository for managing email scopes (categories)."""
+
+    @property
+    def table_name(self) -> str:
+        return 'email_scopes'
+
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+        self._ensure_tables_exist()
+
+    def _ensure_tables_exist(self) -> None:
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS email_scopes (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL UNIQUE,
+                        label TEXT NOT NULL,
+                        description TEXT,
+                        icon TEXT DEFAULT 'cilEnvelopeClosed',
+                        color TEXT DEFAULT '#3399ff',
+                        is_default INTEGER DEFAULT 0,
+                        active INTEGER DEFAULT 1,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS email_filter_rules (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        scope_id INTEGER NOT NULL,
+                        field TEXT NOT NULL,
+                        operator TEXT NOT NULL,
+                        value TEXT NOT NULL,
+                        priority INTEGER DEFAULT 0,
+                        active INTEGER DEFAULT 1,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (scope_id) REFERENCES email_scopes(id) ON DELETE CASCADE
+                    )
+                ''')
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS email_ai_config (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        provider TEXT NOT NULL DEFAULT 'claude',
+                        api_key TEXT,
+                        model TEXT DEFAULT 'claude-sonnet-4-20250514',
+                        active INTEGER DEFAULT 0,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS email_cache (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        message_id TEXT NOT NULL UNIQUE,
+                        scope_id INTEGER,
+                        subject TEXT,
+                        sender TEXT,
+                        date TEXT,
+                        snippet TEXT,
+                        classified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        classification_source TEXT DEFAULT 'rule',
+                        FOREIGN KEY (scope_id) REFERENCES email_scopes(id) ON DELETE SET NULL
+                    )
+                ''')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_email_cache_message ON email_cache(message_id)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_email_cache_scope ON email_cache(scope_id)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_email_rules_scope ON email_filter_rules(scope_id)')
+
+                # Insert default scopes if empty
+                cursor.execute('SELECT COUNT(*) FROM email_scopes')
+                count = cursor.fetchone()[0]
+                if count == 0:
+                    default_scopes = [
+                        ('fatture', 'Fatture e Documenti Fiscali', 'Email con fatture, note di credito, documenti contabili', 'cilDescription', '#28a745', 1),
+                        ('pazienti', 'Comunicazioni Pazienti', 'Email da/per pazienti relative ad appuntamenti e referti', 'cilUser', '#17a2b8', 1),
+                        ('ordini_fornitori', 'Ordini e Fornitori', 'Email relative a ordini materiali, preventivi, conferme', 'cilCart', '#ffc107', 1),
+                        ('comunicazioni_studio', 'Comunicazioni Studio', 'Email amministrative e comunicazioni interne dello studio', 'cilBuilding', '#6f42c1', 1),
+                    ]
+                    cursor.executemany(
+                        'INSERT INTO email_scopes (name, label, description, icon, color, is_default) VALUES (?, ?, ?, ?, ?, ?)',
+                        default_scopes
+                    )
+
+        except Exception as e:
+            logger.error(f"Failed to ensure email tables: {e}")
+            raise RepositoryError(f"Failed to ensure email tables: {str(e)}", cause=e)
+
+    def get_active_scopes(self) -> List[Dict[str, Any]]:
+        try:
+            query = "SELECT * FROM email_scopes WHERE active = 1 ORDER BY is_default DESC, label ASC"
+            results = self.execute_custom_query(query, fetch_all=True)
+            return [dict(row) for row in results] if results else []
+        except Exception as e:
+            logger.error(f"Failed to get active scopes: {e}")
+            return []
+
+    def get_all_scopes(self) -> List[Dict[str, Any]]:
+        try:
+# … snippet truncated; inspect the source file for the remaining lines
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\email_repository.py::EmailRuleRepository (lines 127-182) ---
+class EmailRuleRepository(BaseRepository):
+    """Repository for managing email filter rules."""
+
+    @property
+    def table_name(self) -> str:
+        return 'email_filter_rules'
+
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+
+    def get_rules_by_scope(self, scope_id: int) -> List[Dict[str, Any]]:
+        try:
+            query = "SELECT * FROM email_filter_rules WHERE scope_id = ? AND active = 1 ORDER BY priority DESC"
+            results = self.execute_custom_query(query, (scope_id,), fetch_all=True)
+            return [dict(row) for row in results] if results else []
+        except Exception as e:
+            logger.error(f"Failed to get rules for scope {scope_id}: {e}")
+            return []
+
+    def get_all_active_rules(self) -> List[Dict[str, Any]]:
+        try:
+            query = """
+                SELECT r.*, s.name as scope_name, s.label as scope_label
+                FROM email_filter_rules r
+                JOIN email_scopes s ON r.scope_id = s.id
+                WHERE r.active = 1 AND s.active = 1
+                ORDER BY r.priority DESC
+            """
+            results = self.execute_custom_query(query, fetch_all=True)
+            return [dict(row) for row in results] if results else []
+        except Exception as e:
+            logger.error(f"Failed to get all active rules: {e}")
+            return []
+
+    def get_all_rules(self) -> List[Dict[str, Any]]:
+        try:
+            query = """
+                SELECT r.*, s.name as scope_name, s.label as scope_label
+                FROM email_filter_rules r
+                JOIN email_scopes s ON r.scope_id = s.id
+                ORDER BY r.priority DESC
+            """
+            results = self.execute_custom_query(query, fetch_all=True)
+            return [dict(row) for row in results] if results else []
+        except Exception as e:
+            logger.error(f"Failed to get all rules: {e}")
+            return []
+
+    def create_rule(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return self.create(data)
+
+    def update_rule(self, rule_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        return self.update(rule_id, data)
+
+    def delete_rule(self, rule_id: int) -> bool:
+        return self.delete(rule_id, soft_delete=False)
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\email_repository.py::EmailAiConfigRepository (lines 185-211) ---
+class EmailAiConfigRepository(BaseRepository):
+    """Repository for managing AI classification config."""
+
+    @property
+    def table_name(self) -> str:
+        return 'email_ai_config'
+
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+
+    def get_active_config(self) -> Optional[Dict[str, Any]]:
+        try:
+            query = "SELECT * FROM email_ai_config WHERE active = 1 LIMIT 1"
+            results = self.execute_custom_query(query, fetch_all=True)
+            if results and len(results) > 0:
+                return dict(results[0])
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get AI config: {e}")
+            return None
+
+    def save_config(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        existing = self.get_active_config()
+        if existing:
+            data['updated_at'] = 'CURRENT_TIMESTAMP'
+            return self.update(existing['id'], data)
+        return self.create(data)
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\email_repository.py::EmailCacheRepository (lines 214-258) ---
+class EmailCacheRepository(BaseRepository):
+    """Repository for caching email classification results."""
+
+    @property
+    def table_name(self) -> str:
+        return 'email_cache'
+
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+
+    def get_cached_classification(self, message_id: str) -> Optional[Dict[str, Any]]:
+        try:
+            query = "SELECT * FROM email_cache WHERE message_id = ?"
+            results = self.execute_custom_query(query, (message_id,), fetch_all=True)
+            if results and len(results) > 0:
+                return dict(results[0])
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached classification for {message_id}: {e}")
+            return None
+
+    def cache_classification(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        existing = self.get_cached_classification(data.get('message_id', ''))
+        if existing:
+            return self.update(existing['id'], data)
+        return self.create(data)
+
+    def get_cached_by_scope(self, scope_id: int) -> List[Dict[str, Any]]:
+        try:
+            query = "SELECT * FROM email_cache WHERE scope_id = ? ORDER BY date DESC"
+            results = self.execute_custom_query(query, (scope_id,), fetch_all=True)
+            return [dict(row) for row in results] if results else []
+        except Exception as e:
+            logger.error(f"Failed to get cached emails for scope {scope_id}: {e}")
+            return []
+
+    def clear_cache(self) -> bool:
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM email_cache")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to clear email cache: {e}")
+            return False
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\email_service.py::get_emails (lines 63-98) ---
+    def get_emails(self, max_results: int = 20, page_token: Optional[str] = None,
+                   query: Optional[str] = None) -> Dict[str, Any]:
+        """Fetch emails from Gmail with pagination."""
+        try:
+            service = self._get_gmail_service()
+            params = {
+                'userId': 'me',
+                'maxResults': max_results,
+            }
+            if page_token:
+                params['pageToken'] = page_token
+            if query:
+                params['q'] = query
+
+            results = service.users().messages().list(**params).execute()
+            messages = results.get('messages', [])
+            next_page_token = results.get('nextPageToken')
+
+            emails = []
+            if messages:
+                # Batch fetch message details
+                for msg in messages:
+                    email_data = self._get_message_summary(service, msg['id'])
+                    if email_data:
+                        emails.append(email_data)
+
+            return {
+                'emails': emails,
+                'next_page_token': next_page_token,
+                'result_size_estimate': results.get('resultSizeEstimate', 0),
+            }
+        except GmailCredentialsNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get emails: {e}")
+            raise GmailApiError(f"Failed to get emails: {str(e)}")
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\email_service.py::get_email_detail (lines 100-112) ---
+    def get_email_detail(self, message_id: str) -> Dict[str, Any]:
+        """Get full detail of a single email."""
+        try:
+            service = self._get_gmail_service()
+            msg = service.users().messages().get(
+                userId='me', id=message_id, format='full'
+            ).execute()
+            return self._parse_message_full(msg)
+        except GmailCredentialsNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get email detail {message_id}: {e}")
+            raise GmailApiError(f"Failed to get email detail: {str(e)}")
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\email_service.py::classify_email_by_rules (lines 214-231) ---
+    def classify_email_by_rules(self, email_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Classify an email using manual rules. Returns scope info if matched."""
+        rules = self._rule_repo.get_all_active_rules()
+        if not rules:
+            return None
+
+        for rule in rules:
+            field_value = self._get_email_field(email_data, rule['field'])
+            if field_value and self._matches_rule(field_value, rule['operator'], rule['value']):
+                return {
+                    'scope_id': rule['scope_id'],
+                    'scope_name': rule.get('scope_name', ''),
+                    'scope_label': rule.get('scope_label', ''),
+                    'confidence': 0.95,
+                    'source': 'rule',
+                    'rule_id': rule['id'],
+                }
+        return None
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\email_service.py::classify_email_ai (lines 274-334) ---
+    def classify_email_ai(self, email_data: Dict[str, Any],
+                          scopes: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """Classify an email using AI (Claude API)."""
+        ai_config = self._ai_config_repo.get_active_config()
+        if not ai_config or not ai_config.get('api_key'):
+            return None
+
+        try:
+            import anthropic
+
+            client = anthropic.Anthropic(api_key=ai_config['api_key'])
+
+            scopes_desc = "\n".join([
+                f"- {s['name']} (ID: {s['id']}): {s.get('description', s['label'])}"
+                for s in scopes
+            ])
+
+            prompt = f"""Analizza questa email e classifica in una delle seguenti categorie dello studio dentistico.
+Se l'email non e' pertinente a nessuna categoria, rispondi con "none".
+
+Categorie disponibili:
+{scopes_desc}
+
+Email:
+- Mittente: {email_data.get('from_name', '')} <{email_data.get('from_email', '')}>
+- Oggetto: {email_data.get('subject', '')}
+- Anteprima: {email_data.get('snippet', '')[:500]}
+
+Rispondi SOLO con un JSON valido nel formato:
+{{"scope_name": "nome_categoria", "scope_id": id_numerico, "confidence": 0.0-1.0, "reasoning": "breve motivazione"}}
+
+Se non pertinente: {{"scope_name": "none", "scope_id": null, "confidence": 0.0, "reasoning": "motivazione"}}"""
+
+            response = client.messages.create(
+                model=ai_config.get('model', 'claude-sonnet-4-20250514'),
+                max_tokens=200,
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            import json
+            response_text = response.content[0].text.strip()
+            # Extract JSON from response
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                result = json.loads(json_match.group())
+                if result.get('scope_name') != 'none' and result.get('scope_id'):
+                    return {
+                        'scope_id': result['scope_id'],
+                        'scope_name': result.get('scope_name', ''),
+                        'confidence': result.get('confidence', 0.7),
+                        'source': 'ai',
+                        'reasoning': result.get('reasoning', ''),
+                    }
+            return None
+
+        except ImportError:
+            logger.error("anthropic package not installed")
+            return None
+        except Exception as e:
+            logger.error(f"AI classification failed: {e}")
+            return None
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\email_service.py::classify_email (lines 340-365) ---
+    def classify_email(self, email_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Hybrid classification: rules first, then AI if no match."""
+        # Check cache first
+        cached = self._cache_repo.get_cached_classification(email_data.get('id', ''))
+        if cached and cached.get('scope_id'):
+            return {
+                'scope_id': cached['scope_id'],
+                'source': cached.get('classification_source', 'cache'),
+                'confidence': 0.99,
+            }
+
+        # Try rules first
+        result = self.classify_email_by_rules(email_data)
+        if result:
+            self._cache_classification(email_data, result)
+            return result
+
+        # Try AI
+        scopes = self._scope_repo.get_active_scopes()
+        if scopes:
+            result = self.classify_email_ai(email_data, scopes)
+            if result:
+                self._cache_classification(email_data, result)
+                return result
+
+        return None
+
+=== CONNECTIONS ===
+- client_v2/src/features/email/components/EmailRulesManager.tsx
+  internal:
+    - client_v2/src/features/email/components/TagInput.tsx
+- client_v2/src/features/email/pages/EmailPage.tsx
+  internal:
+    - client_v2/src/components/layout/PageLayout.tsx
+- client_v2/src/features/email/services/emailService.ts
+  internal:
+    - client_v2/src/services/api/client.ts

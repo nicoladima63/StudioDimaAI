@@ -1,2 +1,5 @@
-from .engine import query
-from .prompt_builder import build_prompt_context
+"""Query Engine package.
+
+Import public functions from ``code_indexer.query_engine.engine`` when needed.
+Keeping this module side-effect free also makes ``python -m`` deterministic.
+"""

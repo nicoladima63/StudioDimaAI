@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "task": "collaboratori",
+  "files": [
+    {
+      "path": "server_v2/services/economics/collaboratori_engine.py",
+      "role": "service",
+      "score": 24,
+      "matched_terms": [
+        "collaboratori"
+      ],
+      "dependencies": [
+        "logging",
+        "math",
+        "dbf",
+        "datetime",
+        "typing",
+        "core.config_manager",
+        "core.constants_v2",
+        "utils.dbf_utils"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "role": "page",
+      "score": 20,
+      "matched_terms": [
+        "collaboratori"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/components/layout/PageLayout.tsx",
+        "../components/AnalisiProduzione",
+        "file:client_v2/src/features/spese/services/spese.service.ts",
+        "file:client_v2/src/features/spese/types.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+      "role": "component",
+      "score": 13,
+      "matched_terms": [
+        "collaboratori"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "file:client_v2/src/features/spese/types.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/spese/services/spese.service.ts",
+      "role": "service",
+      "score": 12,
+      "matched_terms": [],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts",
+        "type",
+        "../types"
+      ],
+      "callers": [
+        "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+        "file:client_v2/src/features/spese/index.ts"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/spese/types.ts",
+      "role": "feature",
+      "score": 10,
+      "matched_terms": [],
+      "dependencies": [],
+      "callers": [
+        "file:client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+        "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+        "file:client_v2/src/features/spese/index.ts"
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "name": "get_collaboratori_redditivita",
+      "kind": "function",
+      "path": "server_v2/services/economics/collaboratori_engine.py",
+      "line": 66,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "loadProduction",
+      "kind": "component",
+      "path": "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "line": 25,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "loadYears",
+      "kind": "component",
+      "path": "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "line": 43,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "handleYearChange",
+      "kind": "component",
+      "path": "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "line": 55,
+      "information_score": 14,
+      "category": "support"
+    },
+    {
+      "name": "formatCurrency",
+      "kind": "component",
+      "path": "client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+      "line": 24,
+      "information_score": 9,
+      "category": "support"
+    },
+    {
+      "name": "_safe",
+      "kind": "function",
+      "path": "server_v2/services/economics/collaboratori_engine.py",
+      "line": 20,
+      "information_score": 9,
+      "category": "internal"
+    },
+    {
+      "name": "_safe_float",
+      "kind": "function",
+      "path": "server_v2/services/economics/collaboratori_engine.py",
+      "line": 33,
+      "information_score": 9,
+      "category": "internal"
+    },
+    {
+      "name": "_build_onorario_map",
+      "kind": "function",
+      "path": "server_v2/services/economics/collaboratori_engine.py",
+      "line": 42,
+      "information_score": 9,
+      "category": "internal"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+      "target": "file:client_v2/src/features/spese/types.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+      "to": "file:client_v2/src/features/spese/types.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "target": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "to": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "target": "file:client_v2/src/features/spese/types.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx",
+      "to": "file:client_v2/src/features/spese/types.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/spese-fornitori/categorie-gestionale",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/spese-fornitori/categorizza-spesa",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/production/years",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/spese-fornitori/statistiche-gestionale",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/spese-fornitori/test-categorizzazione",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/spese-fornitori/clear-cache",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/spese-fornitori/analyze-xml-fatture",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+      "relation": "calls_route",
+      "target": "route:/spese-fornitori/integrate-xml-patterns",
+      "method": "POST"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:collaboratori",
+      "name": "collaboratori",
+      "files": [
+        "client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx",
+        "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx"
+      ],
+      "roles": {
+        "component": 1,
+        "page": 1
+      },
+      "entities_count": 4,
+      "relationships_count": 13
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\collaboratori.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\collaboratori.json"
+}

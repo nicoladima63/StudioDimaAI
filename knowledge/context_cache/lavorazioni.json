@@ -1,0 +1,677 @@
+{
+  "schema_version": 1,
+  "task": "lavorazioni",
+  "files": [
+    {
+      "path": "server_v2/api/v2_works.py",
+      "role": "api",
+      "score": 35,
+      "matched_terms": [
+        "work",
+        "works"
+      ],
+      "dependencies": [
+        "flask",
+        "core.database_manager",
+        "services.work_service",
+        "logging"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/work_service.py",
+      "role": "service",
+      "score": 34,
+      "matched_terms": [
+        "work",
+        "works"
+      ],
+      "dependencies": [
+        "logging",
+        "json",
+        "typing",
+        "datetime",
+        "core.database_manager",
+        "core.exceptions",
+        "repositories.work_repository",
+        "repositories.task_repository",
+        "services.base_service",
+        "services.notification_service"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/repositories/prestazione_work_mapping_repository.py",
+      "role": "repository",
+      "score": 28,
+      "matched_terms": [
+        "work"
+      ],
+      "dependencies": [
+        "logging",
+        "typing",
+        "core.base_repository",
+        "core.database_manager",
+        "core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/services/works.service.ts",
+      "role": "service",
+      "score": 28,
+      "matched_terms": [
+        "work",
+        "works"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts",
+        "../types/works.types"
+      ],
+      "callers": [
+        "file:client_v2/src/store/provider.store.ts",
+        "file:client_v2/src/store/works.store.ts"
+      ]
+    },
+    {
+      "path": "server_v2/repositories/work_repository.py",
+      "role": "repository",
+      "score": 28,
+      "matched_terms": [
+        "work"
+      ],
+      "dependencies": [
+        "logging",
+        "json",
+        "typing",
+        "core.base_repository",
+        "core.database_manager",
+        "core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/services/api/works.service.ts",
+      "role": "api",
+      "score": 27,
+      "matched_terms": [
+        "work",
+        "works"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+        "file:client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/store/works.store.ts",
+      "role": "state",
+      "score": 25,
+      "matched_terms": [
+        "work",
+        "works"
+      ],
+      "dependencies": [
+        "zustand",
+        "zustand/middleware/immer",
+        "file:client_v2/src/services/works.service.ts",
+        "file:client_v2/src/types/works.types.ts",
+        "file:client_v2/src/types/index.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/lavorazioni/WorksPage.tsx",
+      "role": "feature",
+      "score": 23,
+      "matched_terms": [
+        "lavorazioni"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../../types/works.types",
+        "react-hot-toast",
+        "../../components/modals/ConfirmDeleteModal",
+        "../../store/user.store",
+        "../../store/works.store"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/api/v2_prestazione_work_mapping.py",
+      "role": "api",
+      "score": 19,
+      "matched_terms": [
+        "work"
+      ],
+      "dependencies": [
+        "logging",
+        "flask",
+        "flask_jwt_extended",
+        "core.database_manager",
+        "repositories.prestazione_work_mapping_repository",
+        "app_v2"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/types/works.types.ts",
+      "role": "types",
+      "score": 18,
+      "matched_terms": [
+        "work",
+        "works"
+      ],
+      "dependencies": [],
+      "callers": [
+        "file:client_v2/src/store/provider.store.ts",
+        "file:client_v2/src/store/works.store.ts"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "role": "feature",
+      "score": 18,
+      "matched_terms": [
+        "lavorazioni"
+      ],
+      "dependencies": [
+        "react",
+        "react-router-dom",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../../services/works.service",
+        "../../types/works.types",
+        "react-hot-toast",
+        "../../store/user.store"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+      "role": "feature",
+      "score": 14,
+      "matched_terms": [
+        "lavorazioni"
+      ],
+      "dependencies": [
+        "react",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "../../types/works.types"
+      ],
+      "callers": [
+        "file:client_v2/src/features/lavorazioni/WorksPage.tsx"
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "name": "get_works",
+      "kind": "function",
+      "path": "server_v2/api/v2_works.py",
+      "line": 16,
+      "information_score": 59,
+      "category": "support"
+    },
+    {
+      "name": "get_all_works",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 27,
+      "information_score": 54,
+      "category": "support"
+    },
+    {
+      "name": "WorkService",
+      "kind": "class",
+      "path": "server_v2/services/work_service.py",
+      "line": 15,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "get_work_service",
+      "kind": "function",
+      "path": "server_v2/api/v2_works.py",
+      "line": 11,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "get_work_details",
+      "kind": "function",
+      "path": "server_v2/api/v2_works.py",
+      "line": 27,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "create_work",
+      "kind": "function",
+      "path": "server_v2/api/v2_works.py",
+      "line": 40,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "update_work",
+      "kind": "function",
+      "path": "server_v2/api/v2_works.py",
+      "line": 63,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "delete_work",
+      "kind": "function",
+      "path": "server_v2/api/v2_works.py",
+      "line": 84,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "PrestazioneWorkMappingRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/prestazione_work_mapping_repository.py",
+      "line": 9,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "WorkRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/work_repository.py",
+      "line": 11,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "fetchWorks",
+      "kind": "component",
+      "path": "client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+      "line": 68,
+      "information_score": 43,
+      "category": "support"
+    },
+    {
+      "name": "loadWorks",
+      "kind": "component",
+      "path": "client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+      "line": 63,
+      "information_score": 43,
+      "category": "support"
+    },
+    {
+      "name": "get_work_details",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 32,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "create_work_template",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 36,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "update_work_template",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 40,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "delete_work_template",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 44,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "create_task_from_work",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 48,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_work_id_by_prestazione",
+      "kind": "function",
+      "path": "server_v2/repositories/prestazione_work_mapping_repository.py",
+      "line": 40,
+      "information_score": 37,
+      "category": "domain"
+    },
+    {
+      "name": "get_work_with_steps",
+      "kind": "function",
+      "path": "server_v2/repositories/work_repository.py",
+      "line": 89,
+      "information_score": 37,
+      "category": "support"
+    },
+    {
+      "name": "create_work",
+      "kind": "function",
+      "path": "server_v2/repositories/work_repository.py",
+      "line": 123,
+      "information_score": 37,
+      "category": "support"
+    },
+    {
+      "name": "update_work_with_steps",
+      "kind": "function",
+      "path": "server_v2/repositories/work_repository.py",
+      "line": 194,
+      "information_score": 37,
+      "category": "support"
+    },
+    {
+      "name": "SimpleResult",
+      "kind": "class",
+      "path": "server_v2/repositories/prestazione_work_mapping_repository.py",
+      "line": 77,
+      "information_score": 29,
+      "category": "core"
+    },
+    {
+      "name": "get_task_details",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 158,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_tasks_for_patient",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 162,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_all_tasks",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 166,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "complete_step",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 170,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "delete_task",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 292,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "update_task_status",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 300,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "postpone_task",
+      "kind": "function",
+      "path": "server_v2/services/work_service.py",
+      "line": 343,
+      "information_score": 24,
+      "category": "support"
+    },
+    {
+      "name": "get_all_mappings",
+      "kind": "function",
+      "path": "server_v2/api/v2_prestazione_work_mapping.py",
+      "line": 15,
+      "information_score": 23,
+      "category": "support"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/lavorazioni/WorksPage.tsx",
+      "target": "file:client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/lavorazioni/WorksPage.tsx",
+      "to": "file:client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+      "target": "file:client_v2/src/services/api/works.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+      "to": "file:client_v2/src/services/api/works.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+      "target": "file:client_v2/src/services/api/works.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+      "to": "file:client_v2/src/services/api/works.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/services/api/works.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/services/api/works.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/services/works.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/services/works.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/store/provider.store.ts",
+      "target": "file:client_v2/src/services/works.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/store/provider.store.ts",
+      "to": "file:client_v2/src/services/works.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/store/provider.store.ts",
+      "target": "file:client_v2/src/types/works.types.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/store/provider.store.ts",
+      "to": "file:client_v2/src/types/works.types.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/store/works.store.ts",
+      "target": "file:client_v2/src/services/works.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/store/works.store.ts",
+      "to": "file:client_v2/src/services/works.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/store/works.store.ts",
+      "target": "file:client_v2/src/types/works.types.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/store/works.store.ts",
+      "to": "file:client_v2/src/types/works.types.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/store/works.store.ts",
+      "target": "file:client_v2/src/types/index.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/store/works.store.ts",
+      "to": "file:client_v2/src/types/index.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:15:get_all_mappings",
+      "relation": "exposes_route",
+      "target": "route:/prestazione-work-mapping",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:27:get_mapping",
+      "relation": "exposes_route",
+      "target": "route:/prestazione-work-mapping/<codice>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:41:create_or_update_mapping",
+      "relation": "exposes_route",
+      "target": "route:/prestazione-work-mapping",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:57:delete_mapping",
+      "relation": "exposes_route",
+      "target": "route:/prestazione-work-mapping/<codice>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_works.py:16:get_works",
+      "relation": "exposes_route",
+      "target": "route:/works",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_works.py:27:get_work_details",
+      "relation": "exposes_route",
+      "target": "route:/works/<int:work_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_works.py:40:create_work",
+      "relation": "exposes_route",
+      "target": "route:/works",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_works.py:63:update_work",
+      "relation": "exposes_route",
+      "target": "route:/works/<int:work_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_works.py:84:delete_work",
+      "relation": "exposes_route",
+      "target": "route:/works/<int:work_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:40:get_work_id_by_prestazione",
+      "relation": "reads",
+      "target": "database:prestazione_work_mapping",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:50:upsert_mapping",
+      "relation": "writes",
+      "target": "database:prestazione_work_mapping",
+      "statement": "INSERT INTO"
+    },
+    {
+      "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:50:upsert_mapping",
+      "relation": "reads",
+      "target": "database:prestazione_work_mapping",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:69:list",
+      "relation": "reads",
+      "target": "database:prestazione_work_mapping",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:87:delete_mapping",
+      "relation": "writes",
+      "target": "database:prestazione_work_mapping",
+      "statement": "DELETE FROM"
+    },
+    {
+      "source": "python:function:server_v2/repositories/work_repository.py:99:get_step_templates",
+      "relation": "reads",
+      "target": "database:step_templates",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/work_repository.py:194:update_work_with_steps",
+      "relation": "writes",
+      "target": "database:step_templates",
+      "statement": "INSERT INTO"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:lavorazioni",
+      "name": "lavorazioni",
+      "files": [
+        "client_v2/src/features/lavorazioni/ProvidersPage.tsx",
+        "client_v2/src/features/lavorazioni/StepsPage.tsx",
+        "client_v2/src/features/lavorazioni/TasksPage.tsx",
+        "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+        "client_v2/src/features/lavorazioni/WorkStepItem.tsx",
+        "client_v2/src/features/lavorazioni/WorksPage.tsx"
+      ],
+      "roles": {
+        "feature": 6
+      },
+      "entities_count": 31,
+      "relationships_count": 64
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\lavorazioni.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\lavorazioni.json"
+}

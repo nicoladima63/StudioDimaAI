@@ -1,308 +1,166 @@
-from pathlib import Path
-from dataclasses import asdict
-import json
+"""Configurable, incremental repository indexer."""
 
+from dataclasses import asdict
+from hashlib import sha256
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+
+from .core.path_utils import normalize_path
 from .parsers.python_parser import parse_python_file
 from .parsers.typescript_parser import parse_typescript_file
+from .pipeline.architecture_builder import build_architecture_map
+from .pipeline.context_builder import build_project_context
 from .pipeline.entity_builder import build_entities
 from .pipeline.file_builder import build_files
-from .pipeline.relationship_builder import build_import_relationships
 from .pipeline.graph_builder import build_graph
-from .pipeline.context_builder import build_project_context
 from .pipeline.import_resolver import resolve_relationships
-from .pipeline.architecture_builder import build_architecture_map
-from .core.path_utils import normalize_path
+from .pipeline.knowledge_builder import build_features, build_summaries
+from .pipeline.relationship_builder import build_import_relationships
+from .pipeline.semantic_relationship_builder import build_semantic_relationships
 
-
-# ==========================
-# PATH CONFIGURATION
-# ==========================
 
 INDEX_ENGINE_DIR = Path(__file__).parent
 CODE_INDEXER_DIR = INDEX_ENGINE_DIR.parent
 PROJECT_ROOT = CODE_INDEXER_DIR.parent
-
-OUTPUT_DIR = Path(__file__).parent.parent.parent / "knowledge" / "output"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# ==========================
-# FILE CONFIGURATION
-# ==========================
-
-SUPPORTED_EXTENSIONS = {
-    ".py",
-    ".js",
-    ".jsx",
-    ".ts",
-    ".tsx",
-}
-
-EXCLUDED_DIRS = {
-    ".git",
-    "node_modules",
-    ".next",
-    "dist",
-    "build",
-    "__pycache__",
-    "venv",
-    ".venv",
-}
+CONFIG_FILE = CODE_INDEXER_DIR / 'config' / 'index_config.json'
+PROJECT_CONFIG_FILE = CODE_INDEXER_DIR / 'config' / 'project_config.json'
+OUTPUT_DIR = PROJECT_ROOT / 'knowledge' / 'output'
+MANIFEST_FILE = OUTPUT_DIR / 'index_manifest.json'
 
 
-# ==========================
-# REPOSITORY SCANNER
-# ==========================
+def _load_config():
+    with CONFIG_FILE.open(encoding='utf-8') as file:
+        return json.load(file)
 
-def scan_repository(root_path: Path):
 
+def _file_hash(path: Path) -> str:
+    return sha256(path.read_bytes()).hexdigest()
+
+
+def scan_repository(root_path: Path, config: dict):
+    """Scan only configured workspaces, honoring the configured exclusions."""
     files = []
+    excluded_dirs = set(config.get('excluded_dirs', []))
+    extensions = set(config.get('extensions', []))
 
-    for file in root_path.rglob("*"):
-
-        if not file.is_file():
+    for workspace in config.get('workspaces', []):
+        workspace_path = root_path / workspace['path']
+        if not workspace_path.exists():
             continue
+        for file in workspace_path.rglob('*'):
+            if not file.is_file() or any(part in excluded_dirs for part in file.parts):
+                continue
+            if file.suffix.lower() in extensions:
+                files.append(file)
+    return sorted(files)
 
-        if any(
-            excluded in file.parts
-            for excluded in EXCLUDED_DIRS
-        ):
-            continue
-
-        if file.suffix in SUPPORTED_EXTENSIONS:
-            files.append(file)
-
-    return files
-
-
-# ==========================
-# PARSER ROUTER
-# ==========================
 
 def parse_file(file: Path):
-
-    if file.suffix == ".py":
+    if file.suffix == '.py':
         return parse_python_file(file)
-
-    if file.suffix in {
-        ".js",
-        ".jsx",
-        ".ts",
-        ".tsx",
-    }:
+    if file.suffix in {'.js', '.jsx', '.ts', '.tsx'}:
         return parse_typescript_file(file)
-
     return []
 
 
-# ==========================
-# SAVE JSON
-# ==========================
+def _load_json(path: Path, default):
+    try:
+        with path.open(encoding='utf-8') as file:
+            return json.load(file)
+    except (OSError, json.JSONDecodeError):
+        return default
+
+
+def _load_previous_symbols():
+    manifest = _load_json(MANIFEST_FILE, {'files': {}})
+    symbols = _load_json(OUTPUT_DIR / 'symbols.json', [])
+    by_path = {}
+    for symbol in symbols:
+        by_path.setdefault(symbol['file'], []).append(symbol)
+    return manifest.get('files', {}), by_path
+
 
 def save_json(filename: str, data):
-
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     output_file = OUTPUT_DIR / filename
-
-    with open(
-        output_file,
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        json.dump(
-            data,
-            f,
-            indent=2,
-            ensure_ascii=False
-        )
-
+    output_file.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding='utf-8')
     return output_file
 
 
-# ==========================
-# MAIN
-# ==========================
-
-def main():
-
-    print("Avvio indicizzazione repository...")
-    print(f"Root progetto: {PROJECT_ROOT}")
-
-
-    files = scan_repository(PROJECT_ROOT)
-
-    print(f"Trovati {len(files)} file")
-
-
+def main(force: bool = False):
+    config = _load_config()
+    files = scan_repository(PROJECT_ROOT, config)
+    previous_manifest, previous_symbols = _load_previous_symbols()
     symbols = []
+    manifest_files = {}
+    parsed_count = 0
 
+    print('Avvio indicizzazione repository...')
+    print(f'Root progetto: {PROJECT_ROOT}')
+    print(f'Trovati {len(files)} file nelle workspace configurate')
 
     for file in files:
+        relative_path = normalize_path(file, PROJECT_ROOT)
+        digest = _file_hash(file)
+        old = previous_manifest.get(relative_path, {})
+        if not force and old.get('hash') == digest:
+            file_symbols = previous_symbols.get(relative_path, [])
+        else:
+            parsed_count += 1
+            try:
+                file_symbols = [
+                    {**asdict(symbol), 'file': relative_path}
+                    for symbol in parse_file(file)
+                ]
+            except Exception as error:
+                print(f'Errore parsing {relative_path}: {error}')
+                file_symbols = []
+        symbols.extend(file_symbols)
+        manifest_files[relative_path] = {'hash': digest, 'symbols': len(file_symbols)}
 
-        try:
+    entities = build_entities(symbols)
+    files_data = build_files(files, [
+        type('SymbolData', (), {
+            'file': str(PROJECT_ROOT / symbol['file'])
+        })() for symbol in symbols
+    ], PROJECT_ROOT)
+    relationships = build_import_relationships(files, PROJECT_ROOT)
+    resolved_relationships = resolve_relationships(relationships, files_data, PROJECT_CONFIG_FILE)
+    semantic_relationships = build_semantic_relationships(files, entities, PROJECT_ROOT)
+    all_relationships = [*resolved_relationships, *semantic_relationships]
+    graph = build_graph(entities, files_data, all_relationships)
+    context = build_project_context(files_data, entities, graph)
+    architecture = build_architecture_map(files_data, graph)
+    features = build_features(files_data, entities, all_relationships)
+    summaries = build_summaries(files_data, entities, all_relationships)
 
-            symbols.extend(
-                parse_file(file)
-            )
+    outputs = {
+        'symbols.json': symbols,
+        'entities.json': entities,
+        'files.json': files_data,
+        'relationships.json': relationships,
+        'resolved_relationships.json': resolved_relationships,
+        'semantic_relationships.json': semantic_relationships,
+        'graph.json': graph,
+        'project_context.json': context,
+        'architecture_map.json': architecture,
+        'features.json': features,
+        'summaries.json': summaries,
+        'index_manifest.json': {
+            'schema_version': 2,
+            'project_root': str(PROJECT_ROOT),
+            'generated_at': datetime.now(timezone.utc).isoformat(),
+            'files': manifest_files,
+        },
+    }
+    for filename, data in outputs.items():
+        save_json(filename, data)
 
-        except Exception as e:
-
-            print(
-                f"Errore parsing {file}: {e}"
-            )
-
-
-    print(
-        f"Simboli trovati: {len(symbols)}"
-    )
-
-
-    # SYMBOL INDEX
-
-    symbol_data = []
-
-    for symbol in symbols:
-
-        data = asdict(symbol)
-
-        data["file"] = normalize_path(
-            symbol.file,
-            PROJECT_ROOT
-        )
-
-        symbol_data.append(data)
-
-    symbols_file = save_json(
-        "symbols.json",
-        symbol_data
-    )
-
-
-    # ENTITY INDEX
-
-    entities = build_entities(
-        symbol_data
-    )
-
-    entities_file = save_json(
-        "entities.json",
-        entities
-    )
-    
-    
-
-
-    # FILES INDEX
-    
-    files_data = build_files(
-        files,
-        symbols,
-        PROJECT_ROOT
-    )
-    
-    files_file = save_json(
-        "files.json",
-        files_data
-    )
-    
-    relationships = build_import_relationships(
-        files,
-        PROJECT_ROOT
-    )
-
-    relationships_file = save_json(
-        "relationships.json",
-        relationships
-    )
-
-    resolved_relationships = resolve_relationships(
-        relationships,
-        files_data,
-        CODE_INDEXER_DIR / "config" / "project_config.json"
-    )
-
-    save_json(
-        "resolved_relationships.json",
-        resolved_relationships
-    )
-    
-    graph = build_graph(
-        entities,
-        files_data,
-        resolved_relationships
-    )
-    
-    graph_file = save_json(
-        "graph.json",
-        graph
-    )
-
-    context = build_project_context(
-        files_data,
-        entities,
-        graph
-    )
-
-    context_file = save_json(
-        "project_context.json",
-        context
-    )
-
-    
-    architecture = build_architecture_map(
-    files_data,
-    graph
-    )
+    print(f'File riparsati: {parsed_count}; riusati dalla cache: {len(files) - parsed_count}')
+    print(f'Simboli: {len(symbols)} | Entità: {len(entities)} | Relazioni: {len(all_relationships)}')
+    print(f'Feature: {len(features)} | Output: {OUTPUT_DIR}')
 
 
-    architecture_file = save_json(
-        "architecture_map.json",
-        architecture
-    )
-
-    print(
-        f"Entità create: {len(entities)}"
-    )
-    
-    print(
-        f"Files indicizzati: {len(files_data)}"
-    )
-
-    print(
-        f"Relazioni create: {len(relationships)}"
-    )
-
-    print(
-        f"Nodi grafo creati: {len(graph)}"
-    )
-
-    print(
-        f"Symbols: {symbols_file}"
-    )
-
-    print(
-        f"Entities: {entities_file}"
-    )
-
-    print(
-        f"Files: {files_file}"
-    )
-
-    print(
-        f"Relationships: {relationships_file}"
-    )
-    
-    print(
-        f"Graph: {graph_file}"
-    )
-
-    print(
-        f"Context: {context_file}"
-    )
-
-    print(
-        f"Architecture: {architecture_file}"
-    )
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

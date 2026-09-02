@@ -1,0 +1,4394 @@
+[
+  {
+    "source": "file:client_v2/src/features/admin/services/adminService.ts",
+    "relation": "calls_route",
+    "target": "route:/build-info",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/admin/services/adminService.ts",
+    "relation": "calls_route",
+    "target": "route:/admin/restart",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/automation/services/automationMessagesService.ts",
+    "relation": "calls_route",
+    "target": "route:/automation/messages",
+    "method": "GET"
+  },
+  {
+    "source": "typescript:component:client_v2/src/features/bot/components/SimulazioneTab.tsx:94:runSimulation",
+    "relation": "calls_route",
+    "target": "route:/simulation/run",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/bot/services/botService.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/bot/services/botService.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/studio-info",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/bot/services/botService.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/whatsapp/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/bot/services/botService.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/whatsapp/qr",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/bot/services/botService.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/whatsapp/logout",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/bot/services/botService.ts",
+    "relation": "calls_route",
+    "target": "route:/pazienti/search",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/bot/services/botService.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/conversazioni",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/list",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/appointments",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/sync",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/sync-status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/sync/cancel",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/clear/cancel",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/reauth-url",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/stats/summary",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/stats/first-visits",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/stats/year",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/calendar/services/calendar.service.ts",
+    "relation": "calls_route",
+    "target": "route:/calendar/test-connection",
+    "method": "GET"
+  },
+  {
+    "source": "typescript:function:client_v2/src/features/cbct/services/cbct.service.ts:27:percorsoNasToFileUrl",
+    "relation": "calls_route",
+    "target": "route:cbct/esami",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/economics/services/economics.service.ts",
+    "relation": "calls_route",
+    "target": "route:/economics/scenario/simulate",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/economics/services/economics.service.ts",
+    "relation": "calls_route",
+    "target": "route:/economics/seasonality",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/economics/services/economics.service.ts",
+    "relation": "calls_route",
+    "target": "route:/economics/trend",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/economics/services/economics.service.ts",
+    "relation": "calls_route",
+    "target": "route:/economics/collaboratori/lista",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/oauth/url",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/oauth/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/messages",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/messages/relevant",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/labels",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/scopes",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/rules",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/ai/config",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/ai/test",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/email/services/emailService.ts",
+    "relation": "calls_route",
+    "target": "route:/email/cache/clear",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/fornitori/services/classificazioni.service.ts",
+    "relation": "calls_route",
+    "target": "route:/classificazioni/fornitori",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/fornitori/services/classificazioni.service.ts",
+    "relation": "calls_route",
+    "target": "route:/classificazioni/conti",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+    "relation": "calls_route",
+    "target": "route:/materiali/classificazione",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+    "relation": "calls_route",
+    "target": "route:/materiali/classificazione/bulk",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+    "relation": "calls_route",
+    "target": "route:/materiali/classificazione/statistiche",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+    "relation": "calls_route",
+    "target": "route:/materiali/migrazione/preview",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+    "relation": "calls_route",
+    "target": "route:/materiali/migrazione/import-all",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+    "relation": "calls_route",
+    "target": "route:/richiami/pazienti-da-richiamare",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+    "relation": "calls_route",
+    "target": "route:/marketing/templates",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+    "relation": "calls_route",
+    "target": "route:/marketing/broadcast",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+    "relation": "calls_route",
+    "target": "route:/richiami/statistiche",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+    "relation": "calls_route",
+    "target": "route:/richiami/da-fare",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+    "relation": "calls_route",
+    "target": "route:/richiami/pazienti-da-richiamare",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+    "relation": "calls_route",
+    "target": "route:/richiami/migrate-from-dbf",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+    "relation": "calls_route",
+    "target": "route:/richiami/anteprima-messaggio",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "relation": "calls_route",
+    "target": "route:/reminders/settings",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "relation": "calls_route",
+    "target": "route:/reminders/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "relation": "calls_route",
+    "target": "route:/reminders/trigger-24h",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "relation": "calls_route",
+    "target": "route:/reminders/trigger-2h",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "relation": "calls_route",
+    "target": "route:/reminders/trigger-followup",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "relation": "calls_route",
+    "target": "route:/reminders/replies",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/remindersService.ts",
+    "relation": "calls_route",
+    "target": "route:/reminders/communications",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+    "relation": "calls_route",
+    "target": "route:/scheduler/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+    "relation": "calls_route",
+    "target": "route:/scheduler/start",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/scheduler/services/schedulerService.ts",
+    "relation": "calls_route",
+    "target": "route:/scheduler/stop",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/seo/services/seoService.ts",
+    "relation": "calls_route",
+    "target": "route:seo/audit",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/seo/services/seoService.ts",
+    "relation": "calls_route",
+    "target": "route:seo/quick-check",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/seo/services/seoService.ts",
+    "relation": "calls_route",
+    "target": "route:seo/competitors",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/seo/services/seoService.ts",
+    "relation": "calls_route",
+    "target": "route:seo/audits",
+    "method": "GET"
+  },
+  {
+    "source": "typescript:component:client_v2/src/features/settings/components/SmsSettingsCard.tsx:30:fetchSettings",
+    "relation": "calls_route",
+    "target": "route:/sms/settings",
+    "method": "GET"
+  },
+  {
+    "source": "typescript:component:client_v2/src/features/settings/components/SmsSettingsCard.tsx:52:handleTest",
+    "relation": "calls_route",
+    "target": "route:/sms/test",
+    "method": "POST"
+  },
+  {
+    "source": "typescript:component:client_v2/src/features/settings/components/SmsSettingsCard.tsx:70:handleSave",
+    "relation": "calls_route",
+    "target": "route:/sms/settings",
+    "method": "PUT"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/automation.service.ts",
+    "relation": "calls_route",
+    "target": "route:automations/actions",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/automation.service.ts",
+    "relation": "calls_route",
+    "target": "route:automations/available-triggers",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/automation.service.ts",
+    "relation": "calls_route",
+    "target": "route:automations/rules",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/dayReminder.service.ts",
+    "relation": "calls_route",
+    "target": "route:/settings/reminder-schedule",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/environment.service.ts",
+    "relation": "calls_route",
+    "target": "route:/environment/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/evolution/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/evolution/create-instance",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/whatsapp/qr",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/whatsapp/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/evolution/start-docker-desktop",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/evolution/start",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/evolution/stop",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/whatsapp/logout",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/whatsapp/instance",
+    "method": "DELETE"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/evolution.service.ts",
+    "relation": "calls_route",
+    "target": "route:/bot/evolution/conversation",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+    "relation": "calls_route",
+    "target": "route:/regole",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+    "relation": "calls_route",
+    "target": "route:/regole/preview/send-sms-link",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+    "relation": "calls_route",
+    "target": "route:/regole/callbacks",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/settings/services/templates.service.ts",
+    "relation": "calls_route",
+    "target": "route:sms-templates",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/spese-fornitori/categorie-gestionale",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/spese-fornitori/categorizza-spesa",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/production/years",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/spese-fornitori/statistiche-gestionale",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/spese-fornitori/test-categorizzazione",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/spese-fornitori/clear-cache",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/spese-fornitori/analyze-xml-fatture",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/features/spese/services/spese.service.ts",
+    "relation": "calls_route",
+    "target": "route:/spese-fornitori/integrate-xml-patterns",
+    "method": "POST"
+  },
+  {
+    "source": "typescript:component:client_v2/src/services/api/automation-settings.service.ts:26:getAutomationSettings",
+    "relation": "calls_route",
+    "target": "route:/automation/settings",
+    "method": "GET"
+  },
+  {
+    "source": "typescript:component:client_v2/src/services/api/automation-settings.service.ts:39:setAutomationSettings",
+    "relation": "calls_route",
+    "target": "route:/automation/settings",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+    "relation": "calls_route",
+    "target": "route:/monitor/monitors",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+    "relation": "calls_route",
+    "target": "route:/monitor/status",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+    "relation": "calls_route",
+    "target": "route:/monitor/logs",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+    "relation": "calls_route",
+    "target": "route:/monitor/test",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+    "relation": "calls_route",
+    "target": "route:/monitor/clear-logs",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/services/api/monitorPrestazioni.ts",
+    "relation": "calls_route",
+    "target": "route:/monitorable-tables",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/services/api/todos.ts",
+    "relation": "calls_route",
+    "target": "route:/todos",
+    "method": "POST"
+  },
+  {
+    "source": "typescript:function:client_v2/src/services/pushService.ts:37:extractBase64FromPEM",
+    "relation": "calls_route",
+    "target": "route:/push/public-key",
+    "method": "GET"
+  },
+  {
+    "source": "typescript:function:client_v2/src/services/pushService.ts:37:extractBase64FromPEM",
+    "relation": "calls_route",
+    "target": "route:/push/subscribe",
+    "method": "POST"
+  },
+  {
+    "source": "typescript:function:client_v2/src/services/pushService.ts:37:extractBase64FromPEM",
+    "relation": "calls_route",
+    "target": "route:/push/unsubscribe",
+    "method": "POST"
+  },
+  {
+    "source": "typescript:function:client_v2/src/services/pushService.ts:37:extractBase64FromPEM",
+    "relation": "calls_route",
+    "target": "route:/push/test",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/services/ricette_ts.service.ts",
+    "relation": "calls_route",
+    "target": "route:/ricetta/diagnosi-all",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/services/ricette_ts.service.ts",
+    "relation": "calls_route",
+    "target": "route:/ricetta/suggestions/durate",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/services/ricette_ts.service.ts",
+    "relation": "calls_route",
+    "target": "route:/ricetta/suggestions/note",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/services/ricette_ts.service.ts",
+    "relation": "calls_route",
+    "target": "route:/ricetta/db/save",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/services/ricette_ts.service.ts",
+    "relation": "calls_route",
+    "target": "route:/ricetta/invio",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/store/classificazioni.store.ts",
+    "relation": "calls_route",
+    "target": "route:/api/classificazioni/all",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/store/conti.store.ts",
+    "relation": "calls_route",
+    "target": "route:/conti",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/store/conti.store.ts",
+    "relation": "calls_route",
+    "target": "route:/branche",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/store/conti.store.ts",
+    "relation": "calls_route",
+    "target": "route:/sottoconti",
+    "method": "POST"
+  },
+  {
+    "source": "file:client_v2/src/store/fornitori.store.ts",
+    "relation": "calls_route",
+    "target": "route:/fornitori?per_page=50",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/store/fornitori.store.ts",
+    "relation": "calls_route",
+    "target": "route:/fornitori?per_page=100&page=1",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/store/materiali.store.ts",
+    "relation": "calls_route",
+    "target": "route:/materiali_all",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/store/pazienti.store.tsx",
+    "relation": "calls_route",
+    "target": "route:/pazienti?per_page=50",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/store/pazienti.store.tsx",
+    "relation": "calls_route",
+    "target": "route:/pazienti?all=1",
+    "method": "GET"
+  },
+  {
+    "source": "file:client_v2/src/store/prestazioni.store.ts",
+    "relation": "calls_route",
+    "target": "route:/prestazioni",
+    "method": "GET"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:29:get_all_monitors",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:50:get_status",
+    "relation": "exposes_route",
+    "target": "route:/monitor/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:70:get_monitor_status",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:89:create_monitor",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:153:start_monitor",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/start",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:184:stop_monitor",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/stop",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:209:pause_monitor",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/pause",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:234:resume_monitor",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/resume",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:259:delete_monitor",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:284:get_monitor_details",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/details",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:321:update_monitor",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:344:register_callback",
+    "relation": "exposes_route",
+    "target": "route:/monitor/callbacks",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:371:get_general_logs",
+    "relation": "exposes_route",
+    "target": "route:/monitor/logs",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:390:get_monitor_logs",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/logs",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:411:get_monitor_metrics",
+    "relation": "exposes_route",
+    "target": "route:/monitor/monitors/<monitor_id>/metrics",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/api_monitoring.py:434:health_check",
+    "relation": "exposes_route",
+    "target": "route:/monitor/health",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:55:save_classificazione_materiale",
+    "relation": "exposes_route",
+    "target": "route:/save-classificazione",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:110:get_materiali_intelligenti",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/<fornitore_id>/materiali-intelligenti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:173:confirm_da_verificare",
+    "relation": "exposes_route",
+    "target": "route:/confirm-da-verificare",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:192:insert_materiali_bundle",
+    "relation": "exposes_route",
+    "target": "route:/insert-bundle",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:219:salva_classificazione_materiale",
+    "relation": "exposes_route",
+    "target": "route:/salva-classificazione",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:278:get_classificazione_fornitore",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/<fornitore_id>/classificazione",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:313:classifica_fornitore_completa",
+    "relation": "exposes_route",
+    "target": "route:/fornitore/<fornitore_id>/completa",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:365:suggest_categoria_fornitore",
+    "relation": "exposes_route",
+    "target": "route:/fornitore/<fornitore_id>/suggest-categoria",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/compatibility_bridge.py:404:get_statistiche_fornitori",
+    "relation": "exposes_route",
+    "target": "route:/statistiche",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_admin.py:41:get_build_info",
+    "relation": "exposes_route",
+    "target": "route:/build-info",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_admin.py:50:restart_server",
+    "relation": "exposes_route",
+    "target": "route:/admin/restart",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_auth.py:24:register",
+    "relation": "exposes_route",
+    "target": "route:/auth/register",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_auth.py:70:login",
+    "relation": "exposes_route",
+    "target": "route:/auth/login",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_auth.py:157:refresh",
+    "relation": "exposes_route",
+    "target": "route:/auth/refresh",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_auth.py:194:get_current_user",
+    "relation": "exposes_route",
+    "target": "route:/auth/me",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_auth.py:222:logout",
+    "relation": "exposes_route",
+    "target": "route:/auth/logout",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_logs.py:14:list_automation_messages",
+    "relation": "exposes_route",
+    "target": "route:/automation/messages",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:25:get_actions",
+    "relation": "exposes_route",
+    "target": "route:/automations/actions",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:36:get_available_triggers",
+    "relation": "exposes_route",
+    "target": "route:/automations/available-triggers",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:49:get_rules",
+    "relation": "exposes_route",
+    "target": "route:/automations/rules",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:72:get_rule",
+    "relation": "exposes_route",
+    "target": "route:/automations/rules/<int:rule_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:84:create_rule",
+    "relation": "exposes_route",
+    "target": "route:/automations/rules",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:109:update_rule",
+    "relation": "exposes_route",
+    "target": "route:/automations/rules/<int:rule_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:133:delete_rule",
+    "relation": "exposes_route",
+    "target": "route:/automations/rules/<int:rule_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_rules.py:147:toggle_rule",
+    "relation": "exposes_route",
+    "target": "route:/automations/rules/<int:rule_id>/toggle",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_settings.py:16:get_settings",
+    "relation": "exposes_route",
+    "target": "route:/automation/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_automation_settings.py:23:set_settings",
+    "relation": "exposes_route",
+    "target": "route:/automation/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:53:get_bot_status",
+    "relation": "exposes_route",
+    "target": "route:/bot/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:69:get_studio_info",
+    "relation": "exposes_route",
+    "target": "route:/bot/studio-info",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:75:create_studio_info",
+    "relation": "exposes_route",
+    "target": "route:/bot/studio-info",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:81:update_studio_info",
+    "relation": "exposes_route",
+    "target": "route:/bot/studio-info/<chiave>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:87:delete_studio_info",
+    "relation": "exposes_route",
+    "target": "route:/bot/studio-info/<chiave>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:93:get_whatsapp_status",
+    "relation": "exposes_route",
+    "target": "route:/bot/whatsapp/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:142:get_whatsapp_qr",
+    "relation": "exposes_route",
+    "target": "route:/bot/whatsapp/qr",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:156:logout_whatsapp",
+    "relation": "exposes_route",
+    "target": "route:/bot/whatsapp/logout",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:171:delete_whatsapp_instance",
+    "relation": "exposes_route",
+    "target": "route:/bot/whatsapp/instance",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:188:delete_conversazione",
+    "relation": "exposes_route",
+    "target": "route:/bot/conversazioni/<int:conv_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:194:get_paziente_by_phone",
+    "relation": "exposes_route",
+    "target": "route:/bot/paziente-by-phone",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:214:get_conversazioni",
+    "relation": "exposes_route",
+    "target": "route:/bot/conversazioni",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:220:get_messaggi",
+    "relation": "exposes_route",
+    "target": "route:/bot/conversazioni/<int:conv_id>/messaggi",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:312:get_available_slots",
+    "relation": "exposes_route",
+    "target": "route:/bot/available-slots",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:375:get_available_slots_visita",
+    "relation": "exposes_route",
+    "target": "route:/bot/available-slots-visita",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:413:get_triage_config",
+    "relation": "exposes_route",
+    "target": "route:/bot/triage-config",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:424:get_last_igienista",
+    "relation": "exposes_route",
+    "target": "route:/bot/last-igienista/<db_code>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:577:receive_appointment_confirmation",
+    "relation": "exposes_route",
+    "target": "route:/bot/appointment-confirmation",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:612:evolution_webhook",
+    "relation": "exposes_route",
+    "target": "route:/bot/whatsapp-webhook",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:668:get_pending_reminder",
+    "relation": "exposes_route",
+    "target": "route:/bot/pending-reminder",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:728:get_evolution_dashboard_status",
+    "relation": "exposes_route",
+    "target": "route:/bot/evolution/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:877:get_evolution_conversation",
+    "relation": "exposes_route",
+    "target": "route:/bot/evolution/conversation",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:934:start_docker_desktop",
+    "relation": "exposes_route",
+    "target": "route:/bot/evolution/start-docker-desktop",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:949:start_evolution",
+    "relation": "exposes_route",
+    "target": "route:/bot/evolution/start",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:960:stop_evolution",
+    "relation": "exposes_route",
+    "target": "route:/bot/evolution/stop",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:971:create_evolution_instance",
+    "relation": "exposes_route",
+    "target": "route:/bot/evolution/create-instance",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:502:_do_confirmation",
+    "relation": "reads",
+    "target": "database:patient_communications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:502:_do_confirmation",
+    "relation": "writes",
+    "target": "database:patient_communications",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:502:_do_confirmation",
+    "relation": "writes",
+    "target": "database:appointment_confirmations",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:668:get_pending_reminder",
+    "relation": "reads",
+    "target": "database:patient_communications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_bot.py:728:get_evolution_dashboard_status",
+    "relation": "reads",
+    "target": "database:patient_communications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:59:list_calendars",
+    "relation": "exposes_route",
+    "target": "route:/list",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:104:sync_calendar",
+    "relation": "exposes_route",
+    "target": "route:/sync",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:225:sync_status",
+    "relation": "exposes_route",
+    "target": "route:/sync-status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:255:cancel_sync_job",
+    "relation": "exposes_route",
+    "target": "route:/sync/cancel",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:307:clear_calendar",
+    "relation": "exposes_route",
+    "target": "route:/clear/<path:calendar_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:372:get_clear_status",
+    "relation": "exposes_route",
+    "target": "route:/clear-status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:402:cancel_clear_job",
+    "relation": "exposes_route",
+    "target": "route:/clear/cancel",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:458:get_appointments_for_month",
+    "relation": "exposes_route",
+    "target": "route:/appointments",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:502:get_appointments_stats_for_year",
+    "relation": "exposes_route",
+    "target": "route:/stats/year",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:526:get_first_visits_stats",
+    "relation": "exposes_route",
+    "target": "route:/stats/first-visits",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:579:get_appointments_stats_summary",
+    "relation": "exposes_route",
+    "target": "route:/stats/summary",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:636:get_google_oauth_url",
+    "relation": "exposes_route",
+    "target": "route:/reauth-url",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:705:oauth_status",
+    "relation": "exposes_route",
+    "target": "route:/oauth/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:741:test_jwt",
+    "relation": "exposes_route",
+    "target": "route:/test-jwt",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:769:reset_sync_state",
+    "relation": "exposes_route",
+    "target": "route:/sync/reset",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:822:check_first_sync_status",
+    "relation": "exposes_route",
+    "target": "route:/first-sync-status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:864:calendar_health_check",
+    "relation": "exposes_route",
+    "target": "route:/health",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:908:auto_reset_and_sync",
+    "relation": "exposes_route",
+    "target": "route:/auto-reset-and-sync",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_calendar.py:1081:get_auto_sync_job_status",
+    "relation": "exposes_route",
+    "target": "route:/sync/job/<job_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_cbct.py:21:get_lista_esami",
+    "relation": "exposes_route",
+    "target": "route:/cbct/esami",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_cbct.py:38:scarica_esame",
+    "relation": "exposes_route",
+    "target": "route:/cbct/esami/<portal_exam_id>/scarica",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:25:get_fornitori_classificati",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/fornitori",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:49:classifica_fornitore",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/fornitore/<fornitore_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:125:get_classificazione_fornitore",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/fornitore/<fornitore_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:157:rimuovi_classificazione_fornitore",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/fornitore/<fornitore_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:189:get_conti",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/conti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:225:get_branche",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/branche",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:272:get_sottoconti",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/sottoconti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:319:auto_suggest_classification",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/auto-suggest",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:387:learn_classification",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/learn",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_classificazioni.py:461:get_classification_stats",
+    "relation": "exposes_route",
+    "target": "route:/classificazioni/stats",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:25:get_conti",
+    "relation": "exposes_route",
+    "target": "route:/conti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:64:get_conto",
+    "relation": "exposes_route",
+    "target": "route:/conti/<int:conto_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:111:create_conto",
+    "relation": "exposes_route",
+    "target": "route:/conti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:166:update_conto",
+    "relation": "exposes_route",
+    "target": "route:/conti/<int:conto_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:230:delete_conto",
+    "relation": "exposes_route",
+    "target": "route:/conti/<int:conto_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:283:get_branche",
+    "relation": "exposes_route",
+    "target": "route:/branche",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:327:get_branca",
+    "relation": "exposes_route",
+    "target": "route:/branche/<int:branca_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:374:create_branca",
+    "relation": "exposes_route",
+    "target": "route:/branche",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:434:update_branca",
+    "relation": "exposes_route",
+    "target": "route:/branche/<int:branca_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:499:delete_branca",
+    "relation": "exposes_route",
+    "target": "route:/branche/<int:branca_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:553:get_sottoconti",
+    "relation": "exposes_route",
+    "target": "route:/sottoconti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:599:get_sottoconto",
+    "relation": "exposes_route",
+    "target": "route:/sottoconti/<int:sottoconto_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:646:create_sottoconto",
+    "relation": "exposes_route",
+    "target": "route:/sottoconti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:706:update_sottoconto",
+    "relation": "exposes_route",
+    "target": "route:/sottoconti/<int:sottoconto_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:771:delete_sottoconto",
+    "relation": "exposes_route",
+    "target": "route:/sottoconti/<int:sottoconto_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_conti.py:825:get_struttura_completa",
+    "relation": "exposes_route",
+    "target": "route:/struttura-completa",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:23:get_kpi_current",
+    "relation": "exposes_route",
+    "target": "route:/economics/kpi/current",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:40:get_kpi_monthly",
+    "relation": "exposes_route",
+    "target": "route:/economics/kpi/monthly",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:57:get_kpi_by_operator",
+    "relation": "exposes_route",
+    "target": "route:/economics/kpi/by-operator",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:74:get_kpi_by_category",
+    "relation": "exposes_route",
+    "target": "route:/economics/kpi/by-category",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:91:get_kpi_comparison",
+    "relation": "exposes_route",
+    "target": "route:/economics/kpi/comparison",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:112:get_seasonality",
+    "relation": "exposes_route",
+    "target": "route:/economics/seasonality",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:128:get_trend",
+    "relation": "exposes_route",
+    "target": "route:/economics/trend",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:148:get_forecast",
+    "relation": "exposes_route",
+    "target": "route:/economics/forecast",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:169:simulate_scenario",
+    "relation": "exposes_route",
+    "target": "route:/economics/scenario/simulate",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:192:get_multi_year_comparison",
+    "relation": "exposes_route",
+    "target": "route:/economics/comparison/multi-year",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:215:get_trimester_forecast",
+    "relation": "exposes_route",
+    "target": "route:/economics/comparison/trimester-forecast",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:240:get_report_appuntamenti",
+    "relation": "exposes_route",
+    "target": "route:/economics/report/appuntamenti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:264:get_report_prestazioni",
+    "relation": "exposes_route",
+    "target": "route:/economics/report/prestazioni",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:288:get_collaboratori_redditivita",
+    "relation": "exposes_route",
+    "target": "route:/economics/collaboratori/redditivita",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:309:get_collaboratori_lista",
+    "relation": "exposes_route",
+    "target": "route:/economics/collaboratori/lista",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_economics.py:338:invalidate_cache",
+    "relation": "exposes_route",
+    "target": "route:/economics/cache/invalidate",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:25:get_gmail_oauth_url",
+    "relation": "exposes_route",
+    "target": "route:/email/oauth/url",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:61:gmail_oauth_status",
+    "relation": "exposes_route",
+    "target": "route:/email/oauth/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:88:get_emails",
+    "relation": "exposes_route",
+    "target": "route:/email/messages",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:134:get_email_detail",
+    "relation": "exposes_route",
+    "target": "route:/email/messages/<message_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:169:get_relevant_emails",
+    "relation": "exposes_route",
+    "target": "route:/email/messages/relevant",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:207:get_labels",
+    "relation": "exposes_route",
+    "target": "route:/email/labels",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:240:get_scopes",
+    "relation": "exposes_route",
+    "target": "route:/email/scopes",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:261:create_scope",
+    "relation": "exposes_route",
+    "target": "route:/email/scopes",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:292:update_scope",
+    "relation": "exposes_route",
+    "target": "route:/email/scopes/<int:scope_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:322:delete_scope",
+    "relation": "exposes_route",
+    "target": "route:/email/scopes/<int:scope_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:355:get_rules",
+    "relation": "exposes_route",
+    "target": "route:/email/rules",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:377:create_rule",
+    "relation": "exposes_route",
+    "target": "route:/email/rules",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:410:update_rule",
+    "relation": "exposes_route",
+    "target": "route:/email/rules/<int:rule_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:440:delete_rule",
+    "relation": "exposes_route",
+    "target": "route:/email/rules/<int:rule_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:473:get_ai_config",
+    "relation": "exposes_route",
+    "target": "route:/email/ai/config",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:494:save_ai_config",
+    "relation": "exposes_route",
+    "target": "route:/email/ai/config",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:517:test_ai_classification",
+    "relation": "exposes_route",
+    "target": "route:/email/ai/test",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_email.py:554:clear_cache",
+    "relation": "exposes_route",
+    "target": "route:/email/cache/clear",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:31:health_check",
+    "relation": "exposes_route",
+    "target": "route:/health",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:113:get_materials",
+    "relation": "exposes_route",
+    "target": "route:/materials",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:202:get_material_analytics",
+    "relation": "exposes_route",
+    "target": "route:/materials/<int:material_id>/analytics",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:239:get_suppliers",
+    "relation": "exposes_route",
+    "target": "route:/suppliers",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:338:get_supplier_analytics",
+    "relation": "exposes_route",
+    "target": "route:/suppliers/<supplier_id>/analytics",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:366:get_classification_suggestions",
+    "relation": "exposes_route",
+    "target": "route:/classification/suggestions",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:445:bulk_classify",
+    "relation": "exposes_route",
+    "target": "route:/classification/bulk",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:539:get_analytics_dashboard",
+    "relation": "exposes_route",
+    "target": "route:/analytics/dashboard",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:585:calculate_advanced_metrics",
+    "relation": "exposes_route",
+    "target": "route:/analytics/advanced-metrics",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_endpoints.py:652:get_system_performance",
+    "relation": "exposes_route",
+    "target": "route:/system/performance",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:18:get_environment_status",
+    "relation": "exposes_route",
+    "target": "route:/environment/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:50:get_service_environment",
+    "relation": "exposes_route",
+    "target": "route:/environment/<service>/current",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:93:switch_service_environment",
+    "relation": "exposes_route",
+    "target": "route:/environment/<service>/switch",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:194:bulk_switch_environments",
+    "relation": "exposes_route",
+    "target": "route:/environment/bulk-switch",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:278:validate_service_configuration",
+    "relation": "exposes_route",
+    "target": "route:/environment/<service>/validate",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:334:test_service_connection",
+    "relation": "exposes_route",
+    "target": "route:/environment/<service>/test",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:385:clear_environment_cache",
+    "relation": "exposes_route",
+    "target": "route:/environment/cache/clear",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_environment.py:410:reload_configurations",
+    "relation": "exposes_route",
+    "target": "route:/environment/reload",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:26:get_fornitori",
+    "relation": "exposes_route",
+    "target": "route:/fornitori",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:106:get_fornitore",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/<int:fornitore_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:161:update_classificazione",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/<int:fornitore_id>/classificazione",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:240:suggest_categoria",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/<int:fornitore_id>/suggest-categoria",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:286:get_fornitori_stats",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/stats",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:322:get_spese_fornitore",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/<fornitore_id>/spese",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:441:get_dettagli_fattura",
+    "relation": "exposes_route",
+    "target": "route:/spese/<fattura_id>/dettagli",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_fornitori.py:507:health_check",
+    "relation": "exposes_route",
+    "target": "route:/fornitori/health",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:62:get_templates",
+    "relation": "exposes_route",
+    "target": "route:/marketing/templates",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:73:create_template",
+    "relation": "exposes_route",
+    "target": "route:/marketing/templates",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:89:update_template",
+    "relation": "exposes_route",
+    "target": "route:/marketing/templates/<int:tid>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:108:delete_template",
+    "relation": "exposes_route",
+    "target": "route:/marketing/templates/<int:tid>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:120:broadcast",
+    "relation": "exposes_route",
+    "target": "route:/marketing/broadcast",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:62:get_templates",
+    "relation": "reads",
+    "target": "database:marketing_templates",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:73:create_template",
+    "relation": "writes",
+    "target": "database:marketing_templates",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:89:update_template",
+    "relation": "writes",
+    "target": "database:marketing_templates",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:108:delete_template",
+    "relation": "writes",
+    "target": "database:marketing_templates",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_marketing.py:120:broadcast",
+    "relation": "writes",
+    "target": "database:patient_communications",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:28:get_materiali",
+    "relation": "exposes_route",
+    "target": "route:/materiali",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:115:get_all_materiali",
+    "relation": "exposes_route",
+    "target": "route:/materiali_all",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:158:get_materiale",
+    "relation": "exposes_route",
+    "target": "route:/materiali/<int:materiale_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:213:create_materiale",
+    "relation": "exposes_route",
+    "target": "route:/materiali",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:286:update_materiale",
+    "relation": "exposes_route",
+    "target": "route:/materiali/<int:materiale_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:356:update_materiale_conti",
+    "relation": "exposes_route",
+    "target": "route:/materiali-update/conti/<int:materiale_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:416:delete_materiale",
+    "relation": "exposes_route",
+    "target": "route:/materiali/<int:materiale_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:467:search_materiali",
+    "relation": "exposes_route",
+    "target": "route:/materiali/search",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:539:get_materiali_stats",
+    "relation": "exposes_route",
+    "target": "route:/materiali/stats",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:574:ricerca_materiali_classificati",
+    "relation": "exposes_route",
+    "target": "route:/materiali/ricerca-classificati",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:662:get_classificazione_materiale",
+    "relation": "exposes_route",
+    "target": "route:/materiali/classificazione/<codice_articolo>/<fattura_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+    "relation": "exposes_route",
+    "target": "route:/materiali/classificazione",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+    "relation": "exposes_route",
+    "target": "route:/materiali/classificazione/bulk",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:1036:ricerca_articoli",
+    "relation": "exposes_route",
+    "target": "route:/materiali/ricerca-articoli",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:1233:preview_migration",
+    "relation": "exposes_route",
+    "target": "route:/materiali/migrazione/preview",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:1322:import_supplier_materials",
+    "relation": "exposes_route",
+    "target": "route:/materiali/migrazione/import/<supplier_name>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:1377:import_all_materials",
+    "relation": "exposes_route",
+    "target": "route:/materiali/migrazione/import-all",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:574:ricerca_materiali_classificati",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:662:get_classificazione_materiale",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:23:get_changes_summary",
+    "relation": "exposes_route",
+    "target": "route:/summary",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:69:get_today_changes",
+    "relation": "exposes_route",
+    "target": "route:/today",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:95:get_changes_for_date",
+    "relation": "exposes_route",
+    "target": "route:/date/<date>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:133:get_recent_changes",
+    "relation": "exposes_route",
+    "target": "route:/recent",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:166:get_changes_stats",
+    "relation": "exposes_route",
+    "target": "route:/stats",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:216:clear_changes",
+    "relation": "exposes_route",
+    "target": "route:/clear",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:236:get_monitoring_settings",
+    "relation": "exposes_route",
+    "target": "route:/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_monitoring_changes.py:254:update_monitoring_settings",
+    "relation": "exposes_route",
+    "target": "route:/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_notifications.py:28:get_unread_notifications",
+    "relation": "exposes_route",
+    "target": "route:/notifications/unread",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_notifications.py:77:mark_notification_read",
+    "relation": "exposes_route",
+    "target": "route:/notifications/<int:notification_id>/read",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_notifications.py:116:mark_all_read",
+    "relation": "exposes_route",
+    "target": "route:/notifications/mark-all-read",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_pazienti.py:79:get_pazienti",
+    "relation": "exposes_route",
+    "target": "route:/pazienti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_pazienti.py:140:get_paziente",
+    "relation": "exposes_route",
+    "target": "route:/pazienti/<paziente_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_pazienti.py:168:search_pazienti",
+    "relation": "exposes_route",
+    "target": "route:/pazienti/search",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_pazienti.py:208:get_pazienti_stats",
+    "relation": "exposes_route",
+    "target": "route:/pazienti/stats",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_piani_cura.py:52:get_piani_paziente",
+    "relation": "exposes_route",
+    "target": "route:/pazienti/<paziente_id>/piani-cura",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_piani_cura.py:77:get_piano_dettaglio",
+    "relation": "exposes_route",
+    "target": "route:/piani-cura/<piano_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:15:get_all_mappings",
+    "relation": "exposes_route",
+    "target": "route:/prestazione-work-mapping",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:27:get_mapping",
+    "relation": "exposes_route",
+    "target": "route:/prestazione-work-mapping/<codice>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:41:create_or_update_mapping",
+    "relation": "exposes_route",
+    "target": "route:/prestazione-work-mapping",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_prestazione_work_mapping.py:57:delete_mapping",
+    "relation": "exposes_route",
+    "target": "route:/prestazione-work-mapping/<codice>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_prestazioni.py:94:get_prestazioni",
+    "relation": "exposes_route",
+    "target": "route:/prestazioni",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_prestazioni.py:113:get_categorie",
+    "relation": "exposes_route",
+    "target": "route:/prestazioni/categorie",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_providers.py:15:get_providers",
+    "relation": "exposes_route",
+    "target": "route:/providers",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_providers.py:27:get_provider",
+    "relation": "exposes_route",
+    "target": "route:/providers/<int:provider_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_providers.py:41:create_provider",
+    "relation": "exposes_route",
+    "target": "route:/providers",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_providers.py:56:update_provider",
+    "relation": "exposes_route",
+    "target": "route:/providers/<int:provider_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_providers.py:71:delete_provider",
+    "relation": "exposes_route",
+    "target": "route:/providers/<int:provider_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_push.py:17:subscribe",
+    "relation": "exposes_route",
+    "target": "route:/push/subscribe",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_push.py:69:unsubscribe",
+    "relation": "exposes_route",
+    "target": "route:/push/unsubscribe",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_push.py:113:get_public_key",
+    "relation": "exposes_route",
+    "target": "route:/push/public-key",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_push.py:139:send_test_notification",
+    "relation": "exposes_route",
+    "target": "route:/push/test",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_push.py:173:send_test_notification_simple",
+    "relation": "exposes_route",
+    "target": "route:/push/test-simple",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:22:get_reminder_settings",
+    "relation": "exposes_route",
+    "target": "route:/reminders/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:36:update_reminder_settings",
+    "relation": "exposes_route",
+    "target": "route:/reminders/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:64:get_reminders_status",
+    "relation": "exposes_route",
+    "target": "route:/reminders/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:86:trigger_24h",
+    "relation": "exposes_route",
+    "target": "route:/reminders/trigger-24h",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:102:trigger_2h",
+    "relation": "exposes_route",
+    "target": "route:/reminders/trigger-2h",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:118:get_communications",
+    "relation": "exposes_route",
+    "target": "route:/reminders/communications",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:151:trigger_followup",
+    "relation": "exposes_route",
+    "target": "route:/reminders/trigger-followup",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:167:get_reminder_replies",
+    "relation": "exposes_route",
+    "target": "route:/reminders/replies",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:218:get_wa_cache",
+    "relation": "exposes_route",
+    "target": "route:/reminders/wa-cache",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:241:get_reminder_schedule",
+    "relation": "exposes_route",
+    "target": "route:/settings/reminder-schedule",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:261:update_reminder_schedule",
+    "relation": "exposes_route",
+    "target": "route:/settings/reminder-schedule/<int:day_of_week>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:118:get_communications",
+    "relation": "reads",
+    "target": "database:patient_communications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_reminders.py:218:get_wa_cache",
+    "relation": "reads",
+    "target": "database:pazienti_wa_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:59:get_all_diagnosi",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/diagnosi-all",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:108:search_farmaci",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/farmaci",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:146:get_farmaci_per_diagnosi",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/farmaci/per-diagnosi/<codice_diagnosi>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:183:get_farmaci_commerciali",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/farmaci-commerciali/<int:farmaco_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:221:add_farmaci_commerciali",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/farmaci-commerciali",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:266:get_protocolli_per_diagnosi",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/protocolli-per-diagnosi/<int:diagnosi_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:328:get_posologie_suggestions",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/suggestions/posologie",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:349:get_durate_suggestions",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/suggestions/durate",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:370:get_note_suggestions",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/suggestions/note",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:390:invia_ricetta",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/invio",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:494:get_environment_info",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/environment",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:516:list_ricette_from_ts",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/ts/list",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:612:get_ricette_by_paziente",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/db/paziente/<cfPaziente>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:652:list_ricette_from_db",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/db/list",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:696:health_check",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/health",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:721:test_connection",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/test-connection",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:744:get_farmaci_test_sicuri",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/test/farmaci-sicuri",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:766:invia_ricetta_email",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/invio/email",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:812:save_ricetta",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/db/save",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:859:get_ricette_test_funzionanti",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/test/ricette-funzionanti",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:883:encrypt_cf",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/cifra-cf",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:931:encrypt_pincode",
+    "relation": "exposes_route",
+    "target": "route:/ricetta/cifra-pincode",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:59:get_all_diagnosi",
+    "relation": "reads",
+    "target": "database:diagnosi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:183:get_farmaci_commerciali",
+    "relation": "reads",
+    "target": "database:farmaci_commerciali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:221:add_farmaci_commerciali",
+    "relation": "writes",
+    "target": "database:farmaci_commerciali",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta.py:266:get_protocolli_per_diagnosi",
+    "relation": "reads",
+    "target": "database:protocolli_terapeutici",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta_admin.py:17:get_environment_info",
+    "relation": "exposes_route",
+    "target": "route:/environment",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta_admin.py:37:switch_environment",
+    "relation": "exposes_route",
+    "target": "route:/environment",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta_admin.py:96:validate_configuration",
+    "relation": "exposes_route",
+    "target": "route:/validate",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta_admin.py:120:get_configuration",
+    "relation": "exposes_route",
+    "target": "route:/configuration",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta_admin.py:154:check_certificates",
+    "relation": "exposes_route",
+    "target": "route:/certificates",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta_admin.py:200:reload_configuration",
+    "relation": "exposes_route",
+    "target": "route:/reload",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_ricetta_admin.py:232:get_ricetta_logs",
+    "relation": "exposes_route",
+    "target": "route:/logs",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:118:update_richiamo_status",
+    "relation": "exposes_route",
+    "target": "route:/pazienti/<paziente_id>/richiamo/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:148:update_richiamo_tipo",
+    "relation": "exposes_route",
+    "target": "route:/pazienti/<paziente_id>/richiamo/tipo",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:202:get_richiami_da_fare",
+    "relation": "exposes_route",
+    "target": "route:/richiami/da-fare",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:229:get_richiami_statistiche",
+    "relation": "exposes_route",
+    "target": "route:/richiami/statistiche",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:246:mark_richiamo_completato",
+    "relation": "exposes_route",
+    "target": "route:/richiami/<int:richiamo_id>/completato",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:280:migrate_richiami_from_dbf",
+    "relation": "exposes_route",
+    "target": "route:/richiami/migrate-from-dbf",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:362:get_richiami_list",
+    "relation": "exposes_route",
+    "target": "route:/richiami",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:414:get_richiamo_message",
+    "relation": "exposes_route",
+    "target": "route:/richiami/<int:richiamo_id>/message",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:448:update_richiami_dates",
+    "relation": "exposes_route",
+    "target": "route:/richiami/update-dates",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:487:export_richiami",
+    "relation": "exposes_route",
+    "target": "route:/richiami/export",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:521:test_richiami",
+    "relation": "exposes_route",
+    "target": "route:/richiami/test",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:548:get_anteprima_messaggio",
+    "relation": "exposes_route",
+    "target": "route:/richiami/anteprima-messaggio",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:597:get_pazienti_da_richiamare",
+    "relation": "exposes_route",
+    "target": "route:/richiami/pazienti-da-richiamare",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_richiami.py:743:get_slot_per_paziente",
+    "relation": "exposes_route",
+    "target": "route:/richiami/slot-per-paziente/<db_code>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:13:get_scheduler_status",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:49:update_reminder_settings",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/reminder/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:89:update_recall_settings",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/recall/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:129:update_calendar_sync_settings",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/calendar/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:180:start_scheduler",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/start",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:202:stop_scheduler",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/stop",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:222:get_recall_logs",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/logs/recall",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_scheduler.py:249:get_calendar_sync_logs",
+    "relation": "exposes_route",
+    "target": "route:/scheduler/logs/calendar",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_seo.py:93:seo_audit",
+    "relation": "exposes_route",
+    "target": "route:/seo/audit",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_seo.py:156:seo_quick_check",
+    "relation": "exposes_route",
+    "target": "route:/seo/quick-check",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_seo.py:213:seo_saved_audits",
+    "relation": "exposes_route",
+    "target": "route:/seo/audits",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_seo.py:235:seo_load_audit",
+    "relation": "exposes_route",
+    "target": "route:/seo/audits/<domain>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_seo.py:270:seo_competitor_analysis",
+    "relation": "exposes_route",
+    "target": "route:/seo/competitors",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_simulation.py:13:run_simulation",
+    "relation": "exposes_route",
+    "target": "route:/simulation/run",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_simulation.py:24:get_simulation_results",
+    "relation": "exposes_route",
+    "target": "route:/simulation/results",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:30:get_sms_settings",
+    "relation": "exposes_route",
+    "target": "route:/sms/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:50:update_sms_settings",
+    "relation": "exposes_route",
+    "target": "route:/sms/settings",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:99:send_sms",
+    "relation": "exposes_route",
+    "target": "route:/sms/send",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:166:send_recall_sms",
+    "relation": "exposes_route",
+    "target": "route:/sms/send-recall",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:258:send_bulk_sms",
+    "relation": "exposes_route",
+    "target": "route:/sms/send-bulk",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:342:get_sms_status",
+    "relation": "exposes_route",
+    "target": "route:/sms/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:371:test_sms_connection",
+    "relation": "exposes_route",
+    "target": "route:/sms/test",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:409:preview_sms",
+    "relation": "exposes_route",
+    "target": "route:/sms/preview",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms.py:484:get_sms_templates",
+    "relation": "exposes_route",
+    "target": "route:/sms/templates",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms_tracking.py:19:get_tracked_links",
+    "relation": "exposes_route",
+    "target": "route:/",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms_tracking.py:54:get_tracked_link",
+    "relation": "exposes_route",
+    "target": "route:/<int:link_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms_tracking.py:73:create_tracked_link",
+    "relation": "exposes_route",
+    "target": "route:/",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms_tracking.py:19:get_tracked_links",
+    "relation": "reads",
+    "target": "database:sms_tracked_links",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms_tracking.py:54:get_tracked_link",
+    "relation": "reads",
+    "target": "database:sms_tracked_links",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_sms_tracking.py:73:create_tracked_link",
+    "relation": "writes",
+    "target": "database:sms_tracked_links",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:44:get_spese_list",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:92:get_active_suppliers_list",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/active-suppliers",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:128:health_check",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/health",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:140:ricerca_articoli",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/ricerca-articoli",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:241:get_riepilogo_spese",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/riepilogo",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:292:get_production_years",
+    "relation": "exposes_route",
+    "target": "route:/production/years",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:319:get_spese_stats",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/stats",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:358:analyze_production",
+    "relation": "exposes_route",
+    "target": "route:/production/analyze-operator",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:404:get_fattura_completa",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/<fattura_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_spese_fornitori.py:538:get_dettagli_fattura",
+    "relation": "exposes_route",
+    "target": "route:/spese-fornitori/<fattura_id>/dettagli",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_statistiche.py:25:get_statistiche_fornitori",
+    "relation": "exposes_route",
+    "target": "route:/statistiche/fornitori",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_statistiche.py:91:get_statistiche_materiali",
+    "relation": "exposes_route",
+    "target": "route:/statistiche/materiali",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_statistiche.py:152:get_statistiche_collaboratori",
+    "relation": "exposes_route",
+    "target": "route:/statistiche/collaboratori",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_statistiche.py:191:get_statistiche_spese",
+    "relation": "exposes_route",
+    "target": "route:/statistiche/spese",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_statistiche.py:256:get_dashboard_stats",
+    "relation": "exposes_route",
+    "target": "route:/statistiche/dashboard",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_steps.py:16:complete_step",
+    "relation": "exposes_route",
+    "target": "route:/steps/<int:step_id>/complete",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tables.py:21:get_monitorable_tables",
+    "relation": "exposes_route",
+    "target": "route:/monitorable-tables",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:16:get_tasks",
+    "relation": "exposes_route",
+    "target": "route:/tasks",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:33:get_task_details",
+    "relation": "exposes_route",
+    "target": "route:/tasks/<int:task_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:46:create_task",
+    "relation": "exposes_route",
+    "target": "route:/tasks",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:82:complete_step",
+    "relation": "exposes_route",
+    "target": "route:/tasks/<int:task_id>/steps/<int:step_id>/complete",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:95:delete_task",
+    "relation": "exposes_route",
+    "target": "route:/tasks/<int:task_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:108:update_task_status",
+    "relation": "exposes_route",
+    "target": "route:/tasks/<int:task_id>/status",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:126:reset_task",
+    "relation": "exposes_route",
+    "target": "route:/tasks/<int:task_id>/reset",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tasks.py:139:postpone_task",
+    "relation": "exposes_route",
+    "target": "route:/tasks/<int:task_id>/postpone",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_templates.py:10:get_sms_templates",
+    "relation": "exposes_route",
+    "target": "route:/sms-templates",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_templates.py:21:create_sms_template",
+    "relation": "exposes_route",
+    "target": "route:/sms-templates",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_templates.py:38:update_sms_template",
+    "relation": "exposes_route",
+    "target": "route:/sms-templates/<template_name>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_templates.py:55:delete_sms_template",
+    "relation": "exposes_route",
+    "target": "route:/sms-templates/<template_name>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_templates.py:68:preview_sms_template",
+    "relation": "exposes_route",
+    "target": "route:/sms-templates/preview",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:19:get_tipi_messaggi",
+    "relation": "exposes_route",
+    "target": "route:/",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:30:get_tipo_messaggio",
+    "relation": "exposes_route",
+    "target": "route:/<int:tipo_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:44:create_tipo_messaggio",
+    "relation": "exposes_route",
+    "target": "route:/",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:70:update_tipo_messaggio",
+    "relation": "exposes_route",
+    "target": "route:/<int:tipo_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:88:delete_tipo_messaggio",
+    "relation": "exposes_route",
+    "target": "route:/<int:tipo_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:19:get_tipi_messaggi",
+    "relation": "reads",
+    "target": "database:tipi_di_messaggi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:30:get_tipo_messaggio",
+    "relation": "reads",
+    "target": "database:tipi_di_messaggi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:44:create_tipo_messaggio",
+    "relation": "writes",
+    "target": "database:tipi_di_messaggi",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tipi_messaggi.py:88:delete_tipo_messaggio",
+    "relation": "writes",
+    "target": "database:tipi_di_messaggi",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:18:get_todos",
+    "relation": "exposes_route",
+    "target": "route:/todos",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:72:get_todo",
+    "relation": "exposes_route",
+    "target": "route:/todos/<int:todo_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:88:get_inbox",
+    "relation": "exposes_route",
+    "target": "route:/todos/inbox",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:105:get_sent",
+    "relation": "exposes_route",
+    "target": "route:/todos/sent",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:122:get_pending",
+    "relation": "exposes_route",
+    "target": "route:/todos/pending",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:139:create_todo",
+    "relation": "exposes_route",
+    "target": "route:/todos",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:171:update_todo",
+    "relation": "exposes_route",
+    "target": "route:/todos/<int:todo_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:196:delete_todo",
+    "relation": "exposes_route",
+    "target": "route:/todos/<int:todo_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:216:complete_todo",
+    "relation": "exposes_route",
+    "target": "route:/todos/<int:todo_id>/complete",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:236:mark_todo_read",
+    "relation": "exposes_route",
+    "target": "route:/todos/<int:todo_id>/read",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:256:snooze_todo",
+    "relation": "exposes_route",
+    "target": "route:/todos/<int:todo_id>/snooze",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_todos.py:282:postpone_task_todos",
+    "relation": "exposes_route",
+    "target": "route:/tasks/<int:task_id>/todos/postpone",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_tracker.py:20:track_click",
+    "relation": "exposes_route",
+    "target": "route:/track/<string:tracking_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_users.py:19:get_all_users",
+    "relation": "exposes_route",
+    "target": "route:/users",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_users.py:38:create_user",
+    "relation": "exposes_route",
+    "target": "route:/users",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_users.py:74:get_user_by_id",
+    "relation": "exposes_route",
+    "target": "route:/users/<int:user_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_users.py:93:update_user",
+    "relation": "exposes_route",
+    "target": "route:/users/<int:user_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_users.py:130:delete_user",
+    "relation": "exposes_route",
+    "target": "route:/users/<int:user_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_users.py:156:test_protected_route",
+    "relation": "exposes_route",
+    "target": "route:/users/test",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_works.py:16:get_works",
+    "relation": "exposes_route",
+    "target": "route:/works",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_works.py:27:get_work_details",
+    "relation": "exposes_route",
+    "target": "route:/works/<int:work_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_works.py:40:create_work",
+    "relation": "exposes_route",
+    "target": "route:/works",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_works.py:63:update_work",
+    "relation": "exposes_route",
+    "target": "route:/works/<int:work_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/api/v2_works.py:84:delete_work",
+    "relation": "exposes_route",
+    "target": "route:/works/<int:work_id>",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/app_v2.py:109:serve_react_app",
+    "relation": "exposes_route",
+    "target": "route:/",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/app_v2.py:499:oauth_callback",
+    "relation": "exposes_route",
+    "target": "route:/oauth/callback",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/app_v2.py:547:gmail_oauth_callback",
+    "relation": "exposes_route",
+    "target": "route:/oauth/gmail/callback",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/app_v2.py:590:oauth_result",
+    "relation": "exposes_route",
+    "target": "route:/oauth-result",
+    "method": "http"
+  },
+  {
+    "source": "python:function:server_v2/core/reminder_db.py:78:_migrate_sqlite",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/core/reminder_db.py:101:_insert_default_studio_hours",
+    "relation": "reads",
+    "target": "database:studio_opening_hours",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/core/reminder_db.py:131:ensure_reminder_tables",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/core/reminder_db.py:181:is_appointment_confirmed",
+    "relation": "reads",
+    "target": "database:patient_communications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/core/reminder_db.py:181:is_appointment_confirmed",
+    "relation": "reads",
+    "target": "database:appointment_confirmations",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/calendar_repository.py:50:__init__",
+    "relation": "reads",
+    "target": "database:appointments_view",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/calendar_repository.py:158:get_appointments_overview",
+    "relation": "reads",
+    "target": "database:appointments_view",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/calendar_repository.py:237:get_appointments_by_filters",
+    "relation": "reads",
+    "target": "database:appointments_view",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/calendar_repository.py:351:get_appointments_for_sync",
+    "relation": "reads",
+    "target": "database:appointments_view",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/calendar_repository.py:399:get_sync_state_summary",
+    "relation": "reads",
+    "target": "database:sync_state",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/calendar_repository.py:455:cleanup_old_sync_state",
+    "relation": "writes",
+    "target": "database:sync_state",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:21:_ensure_tables_exist",
+    "relation": "reads",
+    "target": "database:email_scopes",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:21:_ensure_tables_exist",
+    "relation": "writes",
+    "target": "database:email_scopes",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:99:get_active_scopes",
+    "relation": "reads",
+    "target": "database:email_scopes",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:108:get_all_scopes",
+    "relation": "reads",
+    "target": "database:email_scopes",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:137:get_rules_by_scope",
+    "relation": "reads",
+    "target": "database:email_filter_rules",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:146:get_all_active_rules",
+    "relation": "reads",
+    "target": "database:email_filter_rules",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:161:get_all_rules",
+    "relation": "reads",
+    "target": "database:email_filter_rules",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:195:get_active_config",
+    "relation": "reads",
+    "target": "database:email_ai_config",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:224:get_cached_classification",
+    "relation": "reads",
+    "target": "database:email_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:241:get_cached_by_scope",
+    "relation": "reads",
+    "target": "database:email_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/email_repository.py:250:clear_cache",
+    "relation": "writes",
+    "target": "database:email_cache",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/repositories/fornitori_repository.py:123:get_supplier_classification",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/materiali_repository.py:250:get_classification_suggestions",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/materiali_repository.py:396:_find_existing_material",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/materiali_repository.py:459:get_price_history",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/materiali_repository.py:517:get_unclassified_materials",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/materiali_repository.py:537:confirm_auto_classifications",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/repositories/notification_repository.py:55:get_unread_for_user",
+    "relation": "reads",
+    "target": "database:notifications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/piani_cura_repository.py:39:get_piani_by_paziente",
+    "relation": "reads",
+    "target": "database:elenco",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/piani_cura_repository.py:72:get_piano_by_id",
+    "relation": "reads",
+    "target": "database:elenco",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/piani_cura_repository.py:109:get_prestazioni_by_piano",
+    "relation": "reads",
+    "target": "database:preventivi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:40:get_work_id_by_prestazione",
+    "relation": "reads",
+    "target": "database:prestazione_work_mapping",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:50:upsert_mapping",
+    "relation": "writes",
+    "target": "database:prestazione_work_mapping",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:50:upsert_mapping",
+    "relation": "reads",
+    "target": "database:prestazione_work_mapping",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:69:list",
+    "relation": "reads",
+    "target": "database:prestazione_work_mapping",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/prestazione_work_mapping_repository.py:87:delete_mapping",
+    "relation": "writes",
+    "target": "database:prestazione_work_mapping",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:325:_get_time_series_data",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:373:get_utenze_statistics",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:433:_get_cached_data",
+    "relation": "reads",
+    "target": "database:statistiche_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:433:_get_cached_data",
+    "relation": "writes",
+    "target": "database:statistiche_cache",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:493:clear_expired_cache",
+    "relation": "writes",
+    "target": "database:statistiche_cache",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:509:get_cache_statistics",
+    "relation": "reads",
+    "target": "database:statistiche_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:537:get_performance_metrics",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:537:get_performance_metrics",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/statistiche_repository.py:537:get_performance_metrics",
+    "relation": "reads",
+    "target": "database:statistiche_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/task_repository.py:95:get_steps",
+    "relation": "reads",
+    "target": "database:steps",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/task_repository.py:142:create_task",
+    "relation": "writes",
+    "target": "database:steps",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/repositories/task_repository.py:177:update_step_status",
+    "relation": "writes",
+    "target": "database:steps",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/repositories/task_repository.py:177:update_step_status",
+    "relation": "reads",
+    "target": "database:steps",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/todo_repository.py:110:get_pending_for_user",
+    "relation": "reads",
+    "target": "database:todo_messages",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/todo_repository.py:166:get_related_to_task",
+    "relation": "reads",
+    "target": "database:todo_messages",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/todo_repository.py:187:get_related_to_step",
+    "relation": "reads",
+    "target": "database:todo_messages",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/todo_repository.py:208:get_overdue_todos",
+    "relation": "reads",
+    "target": "database:todo_messages",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/user_repository.py:42:find_by_username",
+    "relation": "reads",
+    "target": "database:user",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/user_repository.py:62:find_by_id",
+    "relation": "reads",
+    "target": "database:user",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/user_repository.py:82:get_all",
+    "relation": "reads",
+    "target": "database:user",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/user_repository.py:99:create",
+    "relation": "writes",
+    "target": "database:user",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/repositories/user_repository.py:129:update",
+    "relation": "writes",
+    "target": "database:user",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/repositories/user_repository.py:173:delete",
+    "relation": "writes",
+    "target": "database:google_credentials",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/repositories/user_repository.py:173:delete",
+    "relation": "writes",
+    "target": "database:user",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/repositories/work_repository.py:99:get_step_templates",
+    "relation": "reads",
+    "target": "database:step_templates",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/repositories/work_repository.py:194:update_work_with_steps",
+    "relation": "writes",
+    "target": "database:step_templates",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_legacy_data.py:30:migrate_data",
+    "relation": "reads",
+    "target": "database:Providers",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_legacy_data.py:30:migrate_data",
+    "relation": "writes",
+    "target": "database:providers",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_legacy_data.py:30:migrate_data",
+    "relation": "reads",
+    "target": "database:Works",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_legacy_data.py:30:migrate_data",
+    "relation": "writes",
+    "target": "database:works",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_legacy_data.py:30:migrate_data",
+    "relation": "reads",
+    "target": "database:StepTemps",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_legacy_data.py:30:migrate_data",
+    "relation": "writes",
+    "target": "database:step_templates",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_legacy_data.py:30:migrate_data",
+    "relation": "reads",
+    "target": "database:Tasks",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_richiami_batch.py:25:get_existing_richiami",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/migrate_richiami_batch.py:47:batch_insert_richiami",
+    "relation": "writes",
+    "target": "database:richiami",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/scripts/reset_admin_password.py:8:reset_admin_password",
+    "relation": "reads",
+    "target": "database:user",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/reset_admin_password.py:8:reset_admin_password",
+    "relation": "writes",
+    "target": "database:user",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "file:server_v2/scripts/reset_users.py",
+    "relation": "writes",
+    "target": "database:user",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/scripts/seed_patient_education.py:16:seed_patient_education",
+    "relation": "reads",
+    "target": "database:content_categories",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/seed_patient_education.py:16:seed_patient_education",
+    "relation": "reads",
+    "target": "database:posts",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/seed_social_accounts.py:16:seed_social_accounts",
+    "relation": "writes",
+    "target": "database:social_accounts",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/scripts/test_materiali_migration.py:159:test_migration_status",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/test_materiali_migration.py:159:test_migration_status",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/verify_migration.py:19:verify_migration",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/scripts/verify_reminder_deploy.py:66:test_bot_postgres",
+    "relation": "reads",
+    "target": "database:studiobot_pazienti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/appointment_reminder_service.py:239:check_whatsapp",
+    "relation": "reads",
+    "target": "database:pazienti_wa_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/appointment_reminder_service.py:294:_save_wa_cache",
+    "relation": "writes",
+    "target": "database:pazienti_wa_cache",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/appointment_reminder_service.py:383:_already_sent",
+    "relation": "reads",
+    "target": "database:patient_communications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/appointment_reminder_service.py:406:_log_communication",
+    "relation": "writes",
+    "target": "database:patient_communications",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/appointment_reminder_service.py:432:get_appointments_pending_followup",
+    "relation": "reads",
+    "target": "database:patient_communications",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/appointment_reminder_service.py:432:get_appointments_pending_followup",
+    "relation": "reads",
+    "target": "database:appointment_confirmations",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/automation_log_service.py:51:log_message",
+    "relation": "writes",
+    "target": "database:automation_message_log",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/automation_log_service.py:76:list_messages",
+    "relation": "reads",
+    "target": "database:automation_message_log",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/callback_service.py:28:get_all",
+    "relation": "reads",
+    "target": "database:callback_preparate",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/callback_service.py:45:create",
+    "relation": "writes",
+    "target": "database:callback_preparate",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/cbct_service.py:201:get_lista_esami",
+    "relation": "reads",
+    "target": "database:cbct_downloads",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/classificazioni_service.py:35:get_fornitori_classificati",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/classificazioni_service.py:114:get_classificazione_fornitore",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/classificazioni_service.py:138:rimuovi_classificazione_fornitore",
+    "relation": "writes",
+    "target": "database:classificazioni_costi",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/classificazioni_service.py:165:get_supplier_ids_by_classification",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:26:get_all_conti",
+    "relation": "reads",
+    "target": "database:conti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:51:get_conto_by_id",
+    "relation": "reads",
+    "target": "database:conti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:80:create_conto",
+    "relation": "writes",
+    "target": "database:conti",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:117:update_conto",
+    "relation": "writes",
+    "target": "database:conti",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:158:delete_conto",
+    "relation": "reads",
+    "target": "database:branche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:158:delete_conto",
+    "relation": "writes",
+    "target": "database:conti",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:197:get_branche",
+    "relation": "reads",
+    "target": "database:branche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:244:get_sottoconti",
+    "relation": "reads",
+    "target": "database:sottoconti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:310:get_branca_by_id",
+    "relation": "reads",
+    "target": "database:branche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:347:create_branca",
+    "relation": "reads",
+    "target": "database:conti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:347:create_branca",
+    "relation": "writes",
+    "target": "database:branche",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:398:update_branca",
+    "relation": "writes",
+    "target": "database:branche",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:398:update_branca",
+    "relation": "reads",
+    "target": "database:branche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:451:delete_branca",
+    "relation": "reads",
+    "target": "database:sottoconti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:451:delete_branca",
+    "relation": "writes",
+    "target": "database:branche",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:488:get_sottoconto_by_id",
+    "relation": "reads",
+    "target": "database:sottoconti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:530:create_sottoconto",
+    "relation": "reads",
+    "target": "database:branche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:530:create_sottoconto",
+    "relation": "writes",
+    "target": "database:sottoconti",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:589:update_sottoconto",
+    "relation": "writes",
+    "target": "database:sottoconti",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:589:update_sottoconto",
+    "relation": "reads",
+    "target": "database:sottoconti",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:647:delete_sottoconto",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:647:delete_sottoconto",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/conti_service.py:647:delete_sottoconto",
+    "relation": "writes",
+    "target": "database:sottoconti",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/database_service.py:166:_test_local_database",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/database_service.py:335:list_tables",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/economics/monthly_aggregator.py:93:_ensure_cache_table",
+    "relation": "writes",
+    "target": "database:economics_monthly_cache",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/economics/monthly_aggregator.py:136:_get_cached_data",
+    "relation": "reads",
+    "target": "database:economics_monthly_cache",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/economics/monthly_aggregator.py:136:_get_cached_data",
+    "relation": "writes",
+    "target": "database:economics_monthly_cache",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/economics/monthly_aggregator.py:198:invalidate_cache",
+    "relation": "writes",
+    "target": "database:economics_monthly_cache",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/economics/monthly_aggregator.py:262:_load_classificazioni_fornitori",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/fornitori_service.py:38:get_fornitori_paginated",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/fornitori_service.py:198:get_fornitore_by_id",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/link_tracker_service.py:31:create_tracked_link",
+    "relation": "writes",
+    "target": "database:tracked_links",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_migration_service.py:647:migrate_materials_to_db",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_migration_service.py:647:migrate_materials_to_db",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_migration_service.py:791:_get_existing_material_classification",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_migration_service.py:837:_get_classification_data",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_migration_service.py:876:_load_existing_patterns",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:18:get_all_materiali",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:43:get_materiali_paginated",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:110:get_materiale_by_id",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:134:create_materiale",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:177:update_materiale",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:216:update_materiale_conti",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:252:delete_materiale",
+    "relation": "writes",
+    "target": "database:materiali",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:287:search_materials",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/materiali_service.py:399:get_statistics",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/monitoring_service.py:288:_process_trigger_for_change",
+    "relation": "reads",
+    "target": "database:automation_rules",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/pazienti_service.py:342:_merge_with_richiami_data",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/push_notification_service.py:33:subscribe_user",
+    "relation": "writes",
+    "target": "database:push_subscriptions",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/push_notification_service.py:77:unsubscribe_user",
+    "relation": "writes",
+    "target": "database:push_subscriptions",
+    "statement": "DELETE FROM"
+  },
+  {
+    "source": "python:function:server_v2/services/push_notification_service.py:206:send_notification_to_all",
+    "relation": "reads",
+    "target": "database:push_subscriptions",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/push_notification_service.py:231:_get_user_subscriptions",
+    "relation": "reads",
+    "target": "database:push_subscriptions",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/reminder_dispatch_engine.py:24:get_config",
+    "relation": "reads",
+    "target": "database:studio_opening_hours",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/reminder_dispatch_engine.py:105:get_all_config",
+    "relation": "reads",
+    "target": "database:studio_opening_hours",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/reminder_dispatch_engine.py:122:update_config",
+    "relation": "writes",
+    "target": "database:studio_opening_hours",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/ricette_db_service.py:138:save_ricetta",
+    "relation": "writes",
+    "target": "database:ricette_elettroniche",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/ricette_db_service.py:233:get_ricetta_by_nre",
+    "relation": "reads",
+    "target": "database:ricette_elettroniche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/ricette_db_service.py:263:get_ricette_by_paziente",
+    "relation": "reads",
+    "target": "database:ricette_elettroniche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/ricette_db_service.py:294:get_all_ricette",
+    "relation": "reads",
+    "target": "database:ricette_elettroniche",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/ricette_db_service.py:325:update_ricetta_stato",
+    "relation": "writes",
+    "target": "database:ricette_elettroniche",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:68:create_richiamo",
+    "relation": "writes",
+    "target": "database:richiami",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:114:update_richiamo_status",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:114:update_richiamo_status",
+    "relation": "writes",
+    "target": "database:richiami",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:183:update_richiamo_config",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:183:update_richiamo_config",
+    "relation": "writes",
+    "target": "database:richiami",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:269:get_richiamo_by_id",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:297:get_richiami_paziente",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:325:get_richiami_da_fare",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:362:get_statistiche_richiami",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/services/richiami_service.py:400:mark_sms_sent",
+    "relation": "writes",
+    "target": "database:richiami",
+    "statement": "UPDATE"
+  },
+  {
+    "source": "python:function:server_v2/tests/test_richiamo_ok.py:17:check_paziente",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:server_v2/tests/test_richiamo_ok.py:42:ultimi_richiamati",
+    "relation": "reads",
+    "target": "database:richiami",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/demo.py:33:create_demo_database",
+    "relation": "writes",
+    "target": "database:demo_entities",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/demo.py:71:demo_database_manager",
+    "relation": "reads",
+    "target": "database:demo_entities",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/demo.py:71:demo_database_manager",
+    "relation": "writes",
+    "target": "database:demo_entities",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/simple_demo.py:18:create_test_database",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/simple_demo.py:43:test_database_manager",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/simple_demo.py:43:test_database_manager",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_base_repository.py:64:_init_test_database",
+    "relation": "writes",
+    "target": "database:test_entities",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_base_repository.py:178:test_soft_delete",
+    "relation": "reads",
+    "target": "database:test_entities",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_base_repository.py:198:test_hard_delete",
+    "relation": "reads",
+    "target": "database:test_entities",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_base_repository.py:307:test_custom_query",
+    "relation": "reads",
+    "target": "database:test_entities",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_base_repository.py:343:test_build_queries",
+    "relation": "reads",
+    "target": "database:test_entities",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_base_repository.py:343:test_build_queries",
+    "relation": "writes",
+    "target": "database:test_entities",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_crud.py:34:get_database_manager",
+    "relation": "writes",
+    "target": "database:test_crud_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_crud.py:34:get_database_manager",
+    "relation": "reads",
+    "target": "database:test_crud_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_crud.py:34:get_database_manager",
+    "relation": "reads",
+    "target": "database:non_existent_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:47:_init_test_database",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:101:test_query_execution",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:124:test_transaction_commit",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:124:test_transaction_commit",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:144:test_transaction_rollback",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:144:test_transaction_rollback",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:166:test_execute_many",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:166:test_execute_many",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:190:test_error_handling",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:208:worker_thread",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:208:worker_thread",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:252:test_statistics",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:252:test_statistics",
+    "relation": "writes",
+    "target": "database:test_table",
+    "statement": "INSERT INTO"
+  },
+  {
+    "source": "python:function:tests/test_database_manager.py:305:test_database_manager_context",
+    "relation": "reads",
+    "target": "database:test_table",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_quick.py:15:test_database_manager",
+    "relation": "reads",
+    "target": "database:sqlite_master",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_quick.py:15:test_database_manager",
+    "relation": "reads",
+    "target": "database:fornitori",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_quick.py:15:test_database_manager",
+    "relation": "reads",
+    "target": "database:materiali",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_quick.py:15:test_database_manager",
+    "relation": "reads",
+    "target": "database:classificazioni_costi",
+    "statement": "SELECT"
+  },
+  {
+    "source": "python:function:tests/test_service_layer.py:60:_create_test_tables",
+    "relation": "writes",
+    "target": "database:conti",
+    "statement": "INSERT INTO"
+  }
+]

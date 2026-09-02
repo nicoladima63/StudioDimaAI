@@ -183,6 +183,10 @@ class TaskRepository(BaseRepository):
                 update_data['completed_at'] = datetime.datetime.now()
                 if user_id:
                     update_data['completed_by'] = user_id
+            else:
+                # A phase returned to the workflow must no longer retain completion data.
+                update_data['completed_at'] = None
+                update_data['completed_by'] = None
             
             fields = list(update_data.keys())
             values = list(update_data.values())

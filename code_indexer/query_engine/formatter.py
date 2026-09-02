@@ -96,7 +96,8 @@ def format_context(context):
         [
             symbol for symbol in result.symbols
             if symbol.get("path") in focus_paths
-        ]
+        ],
+        limit=10,
     )
 
     result.connections = [

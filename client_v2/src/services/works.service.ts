@@ -86,5 +86,10 @@ export const worksService = {
   completeStep: async (taskId: number, stepId: number): Promise<Task> => {
     const response = await apiClient.post<any>(`${TASKS_URL}/${taskId}/steps/${stepId}/complete`);
     return response.data.data;
+  },
+
+  undoCompleteStep: async (taskId: number, stepId: number): Promise<Task> => {
+    const response = await apiClient.post<any>(`${TASKS_URL}/${taskId}/steps/${stepId}/undo-complete`);
+    return response.data.data;
   }
 };

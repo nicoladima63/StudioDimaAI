@@ -91,6 +91,19 @@ def complete_step(task_id, step_id):
         logger.error(f"Error completing step {step_id} for task {task_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@tasks_bp.route('/tasks/<int:task_id>/steps/<int:step_id>/undo-complete', methods=['POST'])
+def undo_complete_step(task_id, step_id):
+    """Restore the most recently completed step as the active step."""
+    try:
+        service = get_work_service()
+        task = service.undo_complete_step(task_id, step_id)
+        if not task:
+            return jsonify({'success': False, 'error': 'Step or task not found'}), 404
+        return jsonify({'success': True, 'data': task})
+    except Exception as e:
+        logger.error(f"Error undoing step {step_id} for task {task_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
 @tasks_bp.route('/tasks/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
     """Delete a task."""

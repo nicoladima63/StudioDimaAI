@@ -152,6 +152,8 @@ def build_prompt_context(context: QueryContext):
             f"{code_slice.get('end_line')}) ---"
         )
         lines.append(code_slice.get("code", ""))
+        if code_slice.get('truncated'):
+            lines.append('# … snippet truncated; inspect the source file for the remaining lines')
 
 
     lines.append(

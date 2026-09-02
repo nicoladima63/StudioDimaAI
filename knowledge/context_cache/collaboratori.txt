@@ -1,0 +1,237 @@
+QUERY: collaboratori
+
+=== PRIORITY FILES ===
+- server_v2/services/economics/collaboratori_engine.py | role=service | score=24 | structural=14 | query=10 | matched=collaboratori
+- client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx | role=page | score=20 | structural=14 | query=6 | matched=collaboratori
+- client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx | role=component | score=13 | structural=7 | query=6 | matched=collaboratori
+- client_v2/src/features/spese/services/spese.service.ts | role=service | score=12 | structural=12 | query=0 | matched=none
+- client_v2/src/features/spese/types.ts | role=feature | score=10 | structural=10 | query=0 | matched=none
+
+=== ARCHITECTURE ===
+
+SERVICE
+- server_v2/services/economics/collaboratori_engine.py
+- client_v2/src/features/spese/services/spese.service.ts
+
+PAGE
+- client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx
+
+COMPONENT
+- client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx
+
+FEATURE
+- client_v2/src/features/spese/types.ts
+
+=== SYMBOLS ===
+- get_collaboratori_redditivita | server_v2/services/economics/collaboratori_engine.py | kind=function | category=support | score=39
+- loadProduction | client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx | kind=component | category=support | score=24
+- loadYears | client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx | kind=component | category=support | score=24
+- handleYearChange | client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx | kind=component | category=support | score=14
+- formatCurrency | client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx | kind=component | category=support | score=9
+- _safe | server_v2/services/economics/collaboratori_engine.py | kind=function | category=internal | score=9
+- _safe_float | server_v2/services/economics/collaboratori_engine.py | kind=function | category=internal | score=9
+- _build_onorario_map | server_v2/services/economics/collaboratori_engine.py | kind=function | category=internal | score=9
+
+=== RELEVANT CODE ===
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\economics\collaboratori_engine.py::get_collaboratori_redditivita (lines 66-235) ---
+def get_collaboratori_redditivita(anno: Optional[int] = None) -> Dict[str, Any]:
+    """
+    Calcola la redditivita per ogni collaboratore.
+
+    Per ogni medico restituisce:
+    - produzione: totale prestazioni eseguite
+    - compenso: costo del collaboratore (% o per intervento)
+    - margine_studio: quanto resta allo studio
+    - margine_pct: margine % su produzione
+    - dettaglio branche con importi e conteggi
+
+    Args:
+        anno: Anno di riferimento (default: anno corrente)
+
+    Returns:
+        Dict con collaboratori e totali
+    """
+    if anno is None:
+        anno = datetime.now().year
+
+    config = get_config()
+    preventivi_path = config.get_dbf_path('preventivi')
+
+    # 1. Mappa onorario per categorie
+    onorario_map = _build_onorario_map()
+
+    # 2. Leggi preventivi eseguiti nell'anno
+    start_date = date(anno, 1, 1)
+    end_date = date(anno, 12, 31)
+
+    col = COLONNE['preventivi']
+    f_stato = col['stato_prestazione'].lower()
+    f_data = col['data_prestazione'].lower()
+    f_medico = col['medico'].lower()
+    f_spesa = col['spesa'].lower()
+    f_codice = col['id_prestazione'].lower()
+
+    # Stats: {medico_id: {produzione, num_prestazioni, branche: {nome: {importo, count, cat_id}}}}
+    stats = {}
+
+    try:
+        with dbf.Table(preventivi_path, codepage='cp1252') as table:
+            for record in table:
+                try:
+                    status = clean_dbf_value(getattr(record, f_stato, None))
+                    if status != 3:
+                        continue
+
+                    data_prest = getattr(record, f_data, None)
+                    if not data_prest:
+                        continue
+                    if isinstance(data_prest, datetime):
+                        data_prest = data_prest.date()
+                    if not (start_date <= data_prest <= end_date):
+                        continue
+
+                    medico_id = clean_dbf_value(getattr(record, f_medico, None))
+                    if medico_id is None:
+                        continue
+                    try:
+                        medico_id = int(medico_id)
+                    except (ValueError, TypeError):
+                        continue
+
+                    importo = _safe_float(clean_dbf_value(getattr(record, f_spesa, 0)))
+                    if importo == 0:
+                        continue
+
+                    # Categoria prestazione
+                    prest_code = str(clean_dbf_value(getattr(record, f_codice, '')) or '').strip()
+                    cat_id = onorario_map.get(prest_code)
+                    cat_nome = CATEGORIE_PRESTAZIONI.get(cat_id, 'Non Definito') if cat_id else 'Non Definito'
+
+                    if medico_id not in stats:
+                        stats[medico_id] = {
+                            'produzione': 0,
+                            'num_prestazioni': 0,
+                            'branche': {},
+                        }
+
+                    stats[medico_id]['produzione'] += importo
+                    stats[medico_id]['num_prestazioni'] += 1
+
+                    if cat_nome not in stats[medico_id]['branche']:
+                        stats[medico_id]['branche'][cat_nome] = {'importo': 0, 'count': 0, 'cat_id': cat_id}
+                    stats[medico_id]['branche'][cat_nome]['importo'] += importo
+                    stats[medico_id]['branche'][cat_nome]['count'] += 1
+
+                except Exception:
+                    continue
+
+    except Exception as e:
+        logger.error(f"Errore lettura PREVENT.DBF: {e}")
+        return {'anno': anno, 'collaboratori': [], 'totali': {}}
+
+    # 3. Calcola redditivita per collaboratore
+    # Includi TUTTI i collaboratori configurati, anche quelli senza dati
+    risultati = []
+    all_medici_ids = set(stats.keys()) | set(COMPENSI_COLLABORATORI.keys())
+
+# … snippet truncated; inspect the source file for the remaining lines
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\features\collaboratori\pages\CollaboratoriPage.tsx::loadProduction (lines 25-40) ---
+    const loadProduction = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await speseFornitioriService.getAnalisiProduzioneOperatore(startDate, endDate);
+            if (response.success) {
+                setProductionData(response.data);
+            } else {
+                setError(response.message || 'Errore durante il caricamento della produzione');
+            }
+        } catch (err: any) {
+            setError(err.message || 'Errore di connessione');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\features\collaboratori\pages\CollaboratoriPage.tsx::loadYears (lines 43-52) ---
+    const loadYears = async () => {
+        try {
+            const response = await speseFornitioriService.getProductionYears();
+            if (response.success && response.data) {
+                setAvailableYears(response.data);
+            }
+        } catch (error) {
+            console.error("Errore caricamento anni:", error);
+        }
+    };
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\features\collaboratori\pages\CollaboratoriPage.tsx::handleYearChange (lines 55-60) ---
+    const handleYearChange = (year: string) => {
+        if (year) {
+            setStartDate(`${year}-01-01`);
+            setEndDate(`${year}-12-31`);
+        }
+    };
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\features\collaboratori\components\AnalisiProduzione.tsx::formatCurrency (lines 24-26) ---
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(amount);
+    };
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\economics\collaboratori_engine.py::_safe (lines 20-30) ---
+def _safe(val, default=0):
+    """Converte NaN/Inf in un valore sicuro per JSON."""
+    if val is None:
+        return default
+    try:
+        f = float(val)
+        if math.isnan(f) or math.isinf(f):
+            return default
+        return f
+    except (TypeError, ValueError):
+        return default
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\economics\collaboratori_engine.py::_safe_float (lines 33-39) ---
+def _safe_float(value, default=0.0):
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\economics\collaboratori_engine.py::_build_onorario_map (lines 42-63) ---
+def _build_onorario_map():
+    """Costruisce mappa codice_prestazione -> categoria_id da ONORARIO.DBF."""
+    config = get_config()
+    onorario_path = config.get_dbf_path('onorario')
+
+    col = COLONNE['onorario']
+    onorario_map = {}
+
+    try:
+        with dbf.Table(onorario_path, codepage='cp1252') as table:
+            for record in table:
+                code = clean_dbf_value(getattr(record, col['id_prestazione'].lower(), None))
+                cat_id = clean_dbf_value(getattr(record, col['categoria'].lower(), None))
+                if code:
+                    try:
+                        onorario_map[str(code).strip()] = int(cat_id) if cat_id is not None else None
+                    except (ValueError, TypeError):
+                        onorario_map[str(code).strip()] = None
+    except Exception as e:
+        logger.error(f"Errore lettura ONORARIO.DBF: {e}")
+
+    return onorario_map
+
+=== CONNECTIONS ===
+- client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx
+  internal:
+    - client_v2/src/features/spese/types.ts
+- client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx
+  internal:
+    - client_v2/src/components/layout/PageLayout.tsx
+    - client_v2/src/features/spese/services/spese.service.ts
+    - client_v2/src/features/spese/types.ts

@@ -1,0 +1,841 @@
+{
+  "schema_version": 1,
+  "task": "pazienti",
+  "files": [
+    {
+      "path": "client_v2/src/store/pazienti.store.tsx",
+      "role": "state",
+      "score": 42,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "zustand",
+        "zustand/middleware",
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/components/selects/PazientiSelect.tsx",
+        "file:client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+        "file:client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+        "file:client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+        "file:client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+        "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+        "file:client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+        "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+        "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+        "file:client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx"
+      ]
+    },
+    {
+      "path": "server_v2/api/v2_pazienti.py",
+      "role": "api",
+      "score": 29,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "logging",
+        "flask",
+        "flask_jwt_extended",
+        "services.pazienti_service",
+        "app_v2",
+        "core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/pazienti_service.py",
+      "role": "service",
+      "score": 29,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "pandas",
+        "logging",
+        "typing",
+        ".base_service",
+        "core.exceptions",
+        "os",
+        "pathlib",
+        "dbf",
+        "utils.dbf_utils",
+        "core.config_manager"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "role": "page",
+      "score": 23,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "react",
+        "@coreui/react",
+        "file:client_v2/src/components/layout/PageLayout.tsx",
+        "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+        "file:client_v2/src/components/modals/index.ts",
+        "file:client_v2/src/store/pazienti.store.tsx",
+        "FiltriPazienti,",
+        "../components/FiltriPazienti",
+        "../components/BroadcastModal"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "role": "page",
+      "score": 21,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/components/layout/PageLayout.tsx",
+        "file:client_v2/src/services/api/client.ts",
+        "file:client_v2/src/features/pazienti/services/richiami.service.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/pazienti/services/richiami.service.ts",
+      "role": "service",
+      "score": 20,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "role": "component",
+      "score": 20,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "react",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/store/pazienti.store.tsx",
+        "file:client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+        "../services/richiami.service"
+      ],
+      "callers": [
+        "file:client_v2/src/features/pazienti/components/PazientiTable.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/pazienti/services/marketing.service.ts",
+      "role": "service",
+      "score": 20,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/settings/pages/TemplatesPage.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "role": "component",
+      "score": 18,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "react",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/components/tables/DataTable.tsx",
+        "file:client_v2/src/store/pazienti.store.tsx",
+        "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx"
+      ],
+      "callers": [
+        "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "role": "component",
+      "score": 17,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "file:client_v2/src/store/pazienti.store.tsx",
+        "file:client_v2/src/components/selects/SlimSelect.tsx"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+      "role": "page",
+      "score": 17,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "react",
+        "react-router-dom",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/components/layout/PageLayout.tsx",
+        "../services/richiami.service",
+        "../services/richiami.service"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+      "role": "component",
+      "score": 16,
+      "matched_terms": [
+        "pazienti"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/store/pazienti.store.tsx",
+        "../services/richiami.service"
+      ],
+      "callers": [
+        "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx"
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "name": "usePazienti",
+      "kind": "hook",
+      "path": "client_v2/src/store/pazienti.store.tsx",
+      "line": 294,
+      "information_score": 63,
+      "category": "domain"
+    },
+    {
+      "name": "PazientiService",
+      "kind": "class",
+      "path": "server_v2/services/pazienti_service.py",
+      "line": 45,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "loadTaskAndPatients",
+      "kind": "component",
+      "path": "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "line": 41,
+      "information_score": 45,
+      "category": "support"
+    },
+    {
+      "name": "get_pazienti_paginated",
+      "kind": "function",
+      "path": "server_v2/services/pazienti_service.py",
+      "line": 47,
+      "information_score": 39,
+      "category": "domain"
+    },
+    {
+      "name": "search_pazienti",
+      "kind": "function",
+      "path": "server_v2/services/pazienti_service.py",
+      "line": 226,
+      "information_score": 39,
+      "category": "domain"
+    },
+    {
+      "name": "get_pazienti",
+      "kind": "function",
+      "path": "server_v2/api/v2_pazienti.py",
+      "line": 79,
+      "information_score": 38,
+      "category": "domain"
+    },
+    {
+      "name": "search_pazienti",
+      "kind": "function",
+      "path": "server_v2/api/v2_pazienti.py",
+      "line": 168,
+      "information_score": 38,
+      "category": "domain"
+    },
+    {
+      "name": "get_pazienti_stats",
+      "kind": "function",
+      "path": "server_v2/api/v2_pazienti.py",
+      "line": 208,
+      "information_score": 38,
+      "category": "domain"
+    },
+    {
+      "name": "getPatientName",
+      "kind": "component",
+      "path": "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "line": 69,
+      "information_score": 30,
+      "category": "support"
+    },
+    {
+      "name": "seed_patient_education",
+      "kind": "function",
+      "path": "server_v2/scripts/seed_patient_education.py",
+      "line": 16,
+      "information_score": 30,
+      "category": "support"
+    },
+    {
+      "name": "getCampiAnagrafica",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "line": 53,
+      "information_score": 26,
+      "category": "support"
+    },
+    {
+      "name": "sortIcon",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "line": 179,
+      "information_score": 24,
+      "category": "ui"
+    },
+    {
+      "name": "get_paziente_by_id",
+      "kind": "function",
+      "path": "server_v2/services/pazienti_service.py",
+      "line": 198,
+      "information_score": 24,
+      "category": "domain"
+    },
+    {
+      "name": "_get_pazienti_dbf_path",
+      "kind": "function",
+      "path": "server_v2/services/pazienti_service.py",
+      "line": 414,
+      "information_score": 24,
+      "category": "internal"
+    },
+    {
+      "name": "get_paziente",
+      "kind": "function",
+      "path": "server_v2/api/v2_pazienti.py",
+      "line": 140,
+      "information_score": 23,
+      "category": "domain"
+    },
+    {
+      "name": "calcolaEta",
+      "kind": "function",
+      "path": "client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "line": 35,
+      "information_score": 22,
+      "category": "support"
+    },
+    {
+      "name": "applicaFiltri",
+      "kind": "function",
+      "path": "client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "line": 43,
+      "information_score": 22,
+      "category": "support"
+    },
+    {
+      "name": "hasGestionaleData",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "line": 26,
+      "information_score": 21,
+      "category": "support"
+    },
+    {
+      "name": "getRichiamoType",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "line": 33,
+      "information_score": 21,
+      "category": "domain"
+    },
+    {
+      "name": "calcolaProssimoRichiamo",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "line": 73,
+      "information_score": 21,
+      "category": "domain"
+    },
+    {
+      "name": "decodificaTipoRichiamo",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "line": 86,
+      "information_score": 21,
+      "category": "domain"
+    },
+    {
+      "name": "styled",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "line": 145,
+      "information_score": 21,
+      "category": "ui"
+    },
+    {
+      "name": "carica",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+      "line": 52,
+      "information_score": 20,
+      "category": "support"
+    },
+    {
+      "name": "calcolaProssimoRichiamo",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+      "line": 145,
+      "information_score": 19,
+      "category": "domain"
+    },
+    {
+      "name": "getStatusBadge",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+      "line": 157,
+      "information_score": 19,
+      "category": "ui"
+    },
+    {
+      "name": "handleForceRefresh",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "line": 28,
+      "information_score": 16,
+      "category": "support"
+    },
+    {
+      "name": "handleView",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "line": 33,
+      "information_score": 16,
+      "category": "support"
+    },
+    {
+      "name": "closeAnagraficaModal",
+      "kind": "component",
+      "path": "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "line": 38,
+      "information_score": 16,
+      "category": "ui"
+    },
+    {
+      "name": "getUserName",
+      "kind": "component",
+      "path": "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "line": 74,
+      "information_score": 15,
+      "category": "support"
+    },
+    {
+      "name": "verify_plans",
+      "kind": "function",
+      "path": "server_v2/scripts/verify_patient_plans.py",
+      "line": 18,
+      "information_score": 15,
+      "category": "support"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/components/selects/PazientiSelect.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/components/selects/PazientiSelect.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/lavorazioni/WorkDetailsPage.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "target": "file:client_v2/src/components/selects/SlimSelect.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+      "to": "file:client_v2/src/components/selects/SlimSelect.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "target": "file:client_v2/src/components/tables/DataTable.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "to": "file:client_v2/src/components/tables/DataTable.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "target": "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "to": "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "target": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "to": "file:client_v2/src/features/pazienti/components/PazientiTable.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "target": "file:client_v2/src/components/modals/index.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "to": "file:client_v2/src/components/modals/index.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "target": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "to": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/ricetta-elettronica/hooks/usePazienteModals.ts",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/ricetta-elettronica/hooks/usePazienteModals.ts",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx",
+      "target": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx",
+      "to": "file:client_v2/src/store/pazienti.store.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/pages/TemplatesPage.tsx",
+      "target": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/pages/TemplatesPage.tsx",
+      "to": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/store/pazienti.store.tsx",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/store/pazienti.store.tsx",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "file:client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+      "relation": "calls_route",
+      "target": "route:/richiami/pazienti-da-richiamare",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+      "relation": "calls_route",
+      "target": "route:/marketing/templates",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/marketing.service.ts",
+      "relation": "calls_route",
+      "target": "route:/marketing/broadcast",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "relation": "calls_route",
+      "target": "route:/richiami/statistiche",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "relation": "calls_route",
+      "target": "route:/richiami/da-fare",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "relation": "calls_route",
+      "target": "route:/richiami/pazienti-da-richiamare",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "relation": "calls_route",
+      "target": "route:/richiami/migrate-from-dbf",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/pazienti/services/richiami.service.ts",
+      "relation": "calls_route",
+      "target": "route:/richiami/anteprima-messaggio",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "calls_route",
+      "target": "route:/pazienti?per_page=50",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/store/pazienti.store.tsx",
+      "relation": "calls_route",
+      "target": "route:/pazienti?all=1",
+      "method": "GET"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_pazienti.py:79:get_pazienti",
+      "relation": "exposes_route",
+      "target": "route:/pazienti",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_pazienti.py:140:get_paziente",
+      "relation": "exposes_route",
+      "target": "route:/pazienti/<paziente_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_pazienti.py:168:search_pazienti",
+      "relation": "exposes_route",
+      "target": "route:/pazienti/search",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_pazienti.py:208:get_pazienti_stats",
+      "relation": "exposes_route",
+      "target": "route:/pazienti/stats",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/scripts/seed_patient_education.py:16:seed_patient_education",
+      "relation": "reads",
+      "target": "database:content_categories",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/scripts/seed_patient_education.py:16:seed_patient_education",
+      "relation": "reads",
+      "target": "database:content_templates",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/scripts/seed_patient_education.py:16:seed_patient_education",
+      "relation": "reads",
+      "target": "database:posts",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/scripts/seed_patient_education.py:16:seed_patient_education",
+      "relation": "writes",
+      "target": "database:content_templates",
+      "statement": "INSERT INTO"
+    },
+    {
+      "source": "python:function:server_v2/services/pazienti_service.py:342:_merge_with_richiami_data",
+      "relation": "reads",
+      "target": "database:richiami",
+      "statement": "SELECT"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:pazienti",
+      "name": "pazienti",
+      "files": [
+        "client_v2/src/features/pazienti/components/BroadcastModal.tsx",
+        "client_v2/src/features/pazienti/components/FiltriPazienti.tsx",
+        "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx",
+        "client_v2/src/features/pazienti/components/PazientiTable.tsx",
+        "client_v2/src/features/pazienti/components/RichiamoGestione.tsx",
+        "client_v2/src/features/pazienti/components/RichiamoStatus.tsx",
+        "client_v2/src/features/pazienti/pages/PazientiPage.tsx",
+        "client_v2/src/features/pazienti/pages/RichiamiPage.tsx",
+        "client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx",
+        "client_v2/src/features/pazienti/services/marketing.service.ts",
+        "client_v2/src/features/pazienti/services/richiami.service.ts"
+      ],
+      "roles": {
+        "component": 6,
+        "page": 3,
+        "service": 2
+      },
+      "entities_count": 31,
+      "relationships_count": 74
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\pazienti.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\pazienti.json"
+}

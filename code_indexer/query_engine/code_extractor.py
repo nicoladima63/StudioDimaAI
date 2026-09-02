@@ -7,6 +7,7 @@ import tree_sitter_typescript
 
 PY_LANGUAGE = Language(tree_sitter_python.language())
 TS_LANGUAGE = Language(tree_sitter_typescript.language_typescript())
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _parser(language):
@@ -50,8 +51,10 @@ def _symbol_node(root, symbol):
     return match
 
 
-def extract_symbol_code(symbol):
+def extract_symbol_code(symbol, max_lines=100):
     path = Path(symbol.get("path", ""))
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
 
     if not path.is_file():
         return None
@@ -82,21 +85,23 @@ def extract_symbol_code(symbol):
     end_line = node.end_point[0] + 1
     source_lines = source.splitlines()
 
+    code_lines = source_lines[start_line - 1:end_line]
     return {
         "path": str(path),
         "symbol": symbol.get("name"),
         "kind": symbol.get("kind"),
         "start_line": start_line,
         "end_line": end_line,
-        "code": "\n".join(source_lines[start_line - 1:end_line])
+        "code": "\n".join(code_lines[:max_lines]),
+        "truncated": len(code_lines) > max_lines,
     }
 
 
-def extract_context_code(symbols, limit=20):
+def extract_context_code(symbols, limit=10, max_lines=100):
     slices = []
 
     for symbol in symbols[:limit]:
-        code_slice = extract_symbol_code(symbol)
+        code_slice = extract_symbol_code(symbol, max_lines=max_lines)
 
         if code_slice is not None:
             slices.append(code_slice)

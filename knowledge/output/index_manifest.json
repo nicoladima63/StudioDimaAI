@@ -1,0 +1,2267 @@
+{
+  "schema_version": 2,
+  "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+  "generated_at": "2026-09-01T17:24:41.787043+00:00",
+  "files": {
+    "client_v2/postcss.config.js": {
+      "hash": "190c877db466995bf1482f4a16abd06e04a89ede3119341e2a86ff96e1737b27",
+      "symbols": 0
+    },
+    "client_v2/public/service-worker.js": {
+      "hash": "51a9a4d45ab5055dcb29a93ec713e0d41f21c6fe3b4edffaa7aaaac042bd4674",
+      "symbols": 0
+    },
+    "client_v2/src/App.tsx": {
+      "hash": "10606820c5aa669984754c615eccd0b9d11b2f5e8e8d2606fee382db73000caf",
+      "symbols": 1
+    },
+    "client_v2/src/components/environment/base/EnvironmentCard.tsx": {
+      "hash": "55dedc8b5e3fa6449ee1574b490a90a0e459019cea67ade481d9003fcc8727ab",
+      "symbols": 4
+    },
+    "client_v2/src/components/environment/base/EnvironmentPanel.tsx": {
+      "hash": "53ea0d9e18399613ffb631b7bcee7668176031612039819550f750dc5b498c99",
+      "symbols": 5
+    },
+    "client_v2/src/components/environment/base/EnvironmentStatus.tsx": {
+      "hash": "7b857f5b6920309a012aecfc5d37bfaed1db760a7ea878bbb0ad172f7ea11ac5",
+      "symbols": 3
+    },
+    "client_v2/src/components/environment/base/EnvironmentSwitch.tsx": {
+      "hash": "908abd9cf359fccdd6aa7755f561ea1e2cca4bb69bb93c83f113e47528e98a26",
+      "symbols": 5
+    },
+    "client_v2/src/components/environment/base/index.ts": {
+      "hash": "5ebd5acfa362e0d6428b0aae55a1ff7fb65f597d7ed79c418c59d21b2df18ab4",
+      "symbols": 0
+    },
+    "client_v2/src/components/environment/specialized/DatabaseModeSwitch.tsx": {
+      "hash": "6aa81f01dd029a1362a16e511ab45e2888571f53d66b78d00ae3c8eff675bdbd",
+      "symbols": 4
+    },
+    "client_v2/src/components/environment/specialized/index.ts": {
+      "hash": "cb2a845eeb0e3bc3afd162c293c8699822b2f917407ba54d6c5d191b21b3c73d",
+      "symbols": 0
+    },
+    "client_v2/src/components/environment/specialized/RentriModeSwitch.tsx": {
+      "hash": "3797da04d62876db7258f2cbcc3975114fc024f21d4d605e07f0a4ac90732075",
+      "symbols": 8
+    },
+    "client_v2/src/components/environment/specialized/RicettaModeSwitch.tsx": {
+      "hash": "c99555c6e742eabcb411179ba1398ade3c113a0bfcddffac78673f8b1a73382a",
+      "symbols": 5
+    },
+    "client_v2/src/components/environment/specialized/SMSModeSwitch.tsx": {
+      "hash": "d3517b6a5c3950de3f85ce90a13fdeb010d83f1e43be2d68a81954a09e317fb4",
+      "symbols": 4
+    },
+    "client_v2/src/components/forms/MaterialClassificationForm.tsx": {
+      "hash": "aa8a06000fe657a1ffb9240c45cdbc2514c230c4bd44cdea1ca889ea8c8539dc",
+      "symbols": 5
+    },
+    "client_v2/src/components/layout/_nav-01.tsx": {
+      "hash": "da4910391bc67dcf108ff5a9f50056a17a23925e8b8cb075413a6b90fe2a01a8",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/_nav-02.tsx": {
+      "hash": "cc05dcf39400248e1902039d8653cbfaf92f9724a0db1093507a7f405c7adb82",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/_nav-03.tsx": {
+      "hash": "881a4416e3fcfaa8f347bf41888c6d5de14f9668e023bef25161fa6c3f5c6d96",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/_nav-04.tsx": {
+      "hash": "8749deae10c2a1438d517d0a7ed069549f044aa2fda592de5d0dc2627c0e1592",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/_nav.01.tsx": {
+      "hash": "c9a8d84432ba952cb21c208db41323c52f3342adef7ebceb7596ee71316af2cf",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/_nav.02.tsx": {
+      "hash": "65e7237cb8ac66442ad83409dc5fcf9c7f458f680367775d684eec3e90ba1410",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/_nav.03.tsx": {
+      "hash": "14ed24fe1d0f63919825698d58bc4f09b51bbc672838fc6fd11e752a419c17cf",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/_nav.tsx": {
+      "hash": "295dca9230c31a5ae5a61e7ed817614e314c7c951ea32e28cd995a00092279bf",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/AppSidebar.tsx": {
+      "hash": "e9c604cfa58f6dc89e23b10e41c356e49e6a568cfcd61c8e0ac6f6c7af7f4319",
+      "symbols": 3
+    },
+    "client_v2/src/components/layout/AppSidebarNav.tsx": {
+      "hash": "82e16e55074c92fa0d9b0384ac336b1743344757f6b29bfa343e4492e16f83e6",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/BottomNav.tsx": {
+      "hash": "6836e76ebd94815834ab5dac9f71aee8670cf7c6c85618d23663964c373dba07",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/Header.tsx": {
+      "hash": "44cc1a4837d45d675bfaa6d4efaf27bc9f6e6cd62ffa6b55bf8507b09eb9e84f",
+      "symbols": 3
+    },
+    "client_v2/src/components/layout/Layout.tsx": {
+      "hash": "cdbf961389c53b4570aabde3912df5f8dbff7b032b415a47f006336b1ec97390",
+      "symbols": 3
+    },
+    "client_v2/src/components/layout/MobileDrawer.tsx": {
+      "hash": "256ffc7e3bcf20a89dc45149fbd6d5431d304ee47b26db0285d90bf330f93a87",
+      "symbols": 1
+    },
+    "client_v2/src/components/layout/PageLayout.tsx": {
+      "hash": "b85fc493c1a73efe3ad9496ac717033c1eea3d022c8d1386669908916e9f66b1",
+      "symbols": 1
+    },
+    "client_v2/src/components/layout/PageTemplate.tsx": {
+      "hash": "3aa59f951165fbe840ecdc2bf368c57152485dd6c563dac9e34f1a073e8a66c0",
+      "symbols": 0
+    },
+    "client_v2/src/components/layout/ProtectedRoute.tsx": {
+      "hash": "013f5285ccfc5eafb40ad1a8222bd2f4f652f93136b0a1a0d8f1c177c8c1c4a7",
+      "symbols": 1
+    },
+    "client_v2/src/components/modals/ConfirmActionModal.tsx": {
+      "hash": "a0a6bcf8fb75374999ce94da95a3ebc5b1082646b63d789ffb8acbed8851ad39",
+      "symbols": 4
+    },
+    "client_v2/src/components/modals/ConfirmDeleteModal.tsx": {
+      "hash": "4354b4420a3f5e8214bf6d4612eba90c328bcd83f2c91681918de188c158e596",
+      "symbols": 1
+    },
+    "client_v2/src/components/modals/DetailViewModal.tsx": {
+      "hash": "3d77f2f14037320ec85c9abf5a2766de01e1dcba2a7413b213b411e7eefe02e7",
+      "symbols": 2
+    },
+    "client_v2/src/components/modals/EditModal.tsx": {
+      "hash": "3bfdedbad283da168d2f1db62077cab7a0782ef529e808a0ee93c84ca3c230e9",
+      "symbols": 6
+    },
+    "client_v2/src/components/modals/index.ts": {
+      "hash": "6ceadd72ab00ef4e0347ce58b42944fd58fef648b48f699d7812d8eb2e828a7b",
+      "symbols": 0
+    },
+    "client_v2/src/components/modals/ModalAnagrafica.tsx": {
+      "hash": "91177a1f6d79995037d7e04493a802c71467f3421f78760a97319ec06c1e7f1c",
+      "symbols": 0
+    },
+    "client_v2/src/components/modals/ModalFatturaDetail.tsx": {
+      "hash": "30cc83e35bf1bd6b7b2f25e4048541a3abbbdae0e936e37921731a2178433adb",
+      "symbols": 6
+    },
+    "client_v2/src/components/modals/ModalFattureElenco.tsx": {
+      "hash": "7714d0ca215ca24d6e4ce64c9eb497c872ed12eea7ebac23f2fcd6d0a06c7381",
+      "symbols": 8
+    },
+    "client_v2/src/components/PushNotificationToggle.tsx": {
+      "hash": "e6946691ef6d88c0ecef6048a3f2769a0372b3049a41f59814373d98d85f601b",
+      "symbols": 2
+    },
+    "client_v2/src/components/selects/BrancheSelect.tsx": {
+      "hash": "95aa90ce85aaae4106adf2b388de2ec3ed98b7b6f9934aca3a8dbfe56b895274",
+      "symbols": 0
+    },
+    "client_v2/src/components/selects/ContiSelect.tsx": {
+      "hash": "63de40dcf498f777c06f590c5530c3f83a4af0fec64f4766cab6726bbd624145",
+      "symbols": 0
+    },
+    "client_v2/src/components/selects/FornitoriSelect.tsx": {
+      "hash": "535124c44e4f3ab659984299e53f90cb46a0dc73eef85d5f4b31109d1550b656",
+      "symbols": 1
+    },
+    "client_v2/src/components/selects/MaterialiSelect.tsx": {
+      "hash": "974e19f1f6d01ff03e20470b80aaea38842c22d5e35c8781209ce456b6d4b693",
+      "symbols": 2
+    },
+    "client_v2/src/components/selects/PazientiSelect.tsx": {
+      "hash": "2198496031ca750bee1f8e845ebc95bea9804da169388978846a7447d0e8f4fa",
+      "symbols": 0
+    },
+    "client_v2/src/components/selects/PeriodoSelect.tsx": {
+      "hash": "5b0f7a2ae9b1a2d9ad9bb3050a29bac4d49c8e91561b5171a8907119f2f36e64",
+      "symbols": 0
+    },
+    "client_v2/src/components/selects/PrestazioniSelect.tsx": {
+      "hash": "5c20d65f5100741d56c661b2f876f8263d5a834b080e1c2f7eda45aac5484339",
+      "symbols": 5
+    },
+    "client_v2/src/components/selects/SlimSelect.tsx": {
+      "hash": "4128463ba1c9bd3db151217e454a016f7365a54cdbc989617a3d2cfbd4c638f0",
+      "symbols": 1
+    },
+    "client_v2/src/components/selects/SottocontiSelect.tsx": {
+      "hash": "1e645e571392225111132631f9a8017118a8e1f63b77959ba2ee5cbe6808439d",
+      "symbols": 0
+    },
+    "client_v2/src/components/tables/DataTable.tsx": {
+      "hash": "0abbc69cf12d5f87273f0e02ce843a4d63211160c96444d1db0a9e90c131e051",
+      "symbols": 9
+    },
+    "client_v2/src/components/tables/DataTable2.tsx": {
+      "hash": "876c104c9b6b712935e7265eb5c9b7ad52232b763ee634d8b59b42c5ba0a3151",
+      "symbols": 5
+    },
+    "client_v2/src/components/TheoreticalModeToggle.tsx": {
+      "hash": "c61e52a2b77b76213a81162efcf8edf6efbc2fbb0f78b91c1d86740b255bb7ab",
+      "symbols": 2
+    },
+    "client_v2/src/components/toggle/databaseToggle.tsx": {
+      "hash": "1ea220ea65d7b77e49f6ee0c73d87264ec34e19020a71b826670b24ad40675d6",
+      "symbols": 4
+    },
+    "client_v2/src/components/ui/avatar.tsx": {
+      "hash": "70187a9897933d1b1067a174b34c7ecbb7e554b2385b997c7044628e764f10e6",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/badge.tsx": {
+      "hash": "f0a7b74d079231a3f0ad07d5f05daf1e878e109995568eb3a278c06abdd17b52",
+      "symbols": 1
+    },
+    "client_v2/src/components/ui/button.tsx": {
+      "hash": "189e5e7581b8b02af65872936c687c65a501d91f52fe0f89652a3fd3042b848d",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/card.tsx": {
+      "hash": "f74b144edf4c376315eff4fed01bcd75b13af8ecf93fa04416b1d42e7b9e46ae",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/dialog.tsx": {
+      "hash": "d7d754c5049cc40e283088f4cfb3727e2e8b163495849b1d6c1b0a8d33058488",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/dropdown-menu.tsx": {
+      "hash": "eb1b241d0a4561317138a3baef808bee617b091145734334ea063a926233f1c0",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/ErrorFallback.tsx": {
+      "hash": "91ab7aa5512a646da0e0780bd68ad57d45059bf1e257decfd4e3f753cd778fa4",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/input.tsx": {
+      "hash": "c73289e1403ed5a2d14fbd6819a5a8f7f6853e5568447f6d047ff172d3eeded3",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/label.tsx": {
+      "hash": "83230ff1d2ff41bb1f469d6b04edcc3ff8318f4f4c4ba955611905b86766c232",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/NotFoundPage.tsx": {
+      "hash": "acc19ca07c080a2611b8266387da38cbb7d2f7988ff03c12732ff67fa3a05d02",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/NotificationBell.tsx": {
+      "hash": "7c72abbe6f398cf15a5d4a396cf31cdda0c3269cd792818abea9b5fe15aa696f",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/NotificationCenter.tsx": {
+      "hash": "0fd3662cfb720720e273e633c3b55955ffb04e2f7e25c7487c7cfeba1a6a945e",
+      "symbols": 5
+    },
+    "client_v2/src/components/ui/scroll-area.tsx": {
+      "hash": "3e43fe1f6ffc5577457655d108a459f7dbab6a3a53a6ce0410051cf8dc739104",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/separator.tsx": {
+      "hash": "48de7a8ab1188c2ddcf11de2139614dd51303bb446ab86d4810e232ad2be3ae5",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/sheet.tsx": {
+      "hash": "ed83e54ec3b2c66bf3aca5a5a52caf0eacafdd438f9f90e3a2f3bac35a67d81c",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/skeleton.tsx": {
+      "hash": "86cca8e1a1256bc320f9b3d31ee958344db35bab462ca900814fc0dcf74f4bed",
+      "symbols": 1
+    },
+    "client_v2/src/components/ui/switch.tsx": {
+      "hash": "4fc0958a4ce591c9b9e2ee6a67488fd8b21112274b5fa26f2d5561442ff84448",
+      "symbols": 0
+    },
+    "client_v2/src/components/ui/tabs.tsx": {
+      "hash": "083f51510cb10bd4fe309176079249009a73975ad1e077ceb9cbed928decbf49",
+      "symbols": 0
+    },
+    "client_v2/src/features/admin/services/adminService.ts": {
+      "hash": "cea9a832f585344d92dd42fa000c263db7669017355d399d46e1930110661727",
+      "symbols": 0
+    },
+    "client_v2/src/features/auth/pages/LoginPage.tsx": {
+      "hash": "b13b99f332d810460d8e017407e9b215ebe49bc81ba8a0bfabbe71ef771545f0",
+      "symbols": 1
+    },
+    "client_v2/src/features/auth/pages/RegisterPage.tsx": {
+      "hash": "21f31a5aa19cf64015c65d8fe711e634da3339d4745df765d51b6181f025ee16",
+      "symbols": 2
+    },
+    "client_v2/src/features/automation/pages/AutomationMessages.tsx": {
+      "hash": "03b1cfc60948386d3ccf6fbe1fe0864952256b5bf24495b81fc047847f963775",
+      "symbols": 3
+    },
+    "client_v2/src/features/automation/services/automationMessagesService.ts": {
+      "hash": "e49041dc11ecb2b2b4d6b1e986e322b875917f2ac073b1ea33f80d6fd5fb01ec",
+      "symbols": 0
+    },
+    "client_v2/src/features/bot/components/ConversazioniTab.tsx": {
+      "hash": "14878ae1bf63b935c585dc8c96135ee0e969fbb17cabde8ce76a03c92851e745",
+      "symbols": 6
+    },
+    "client_v2/src/features/bot/components/ReminderRepliesTab.tsx": {
+      "hash": "45248085761f33b049b905b5f8aeb6588bd97a2d9bcbfbd0d241bcaa0ac19aae",
+      "symbols": 4
+    },
+    "client_v2/src/features/bot/components/ServiziTab.tsx": {
+      "hash": "7a09cf8458910c90647021e5ac4c1c0b3ea07edbdf1f806604671dbdab1b6d64",
+      "symbols": 3
+    },
+    "client_v2/src/features/bot/components/SimulazioneTab.tsx": {
+      "hash": "6ac679d1ae6f66fa417bd91b9ab7b138fa1d1dfb565f2d68c850b2b489fc0acd",
+      "symbols": 4
+    },
+    "client_v2/src/features/bot/components/StoricoComunicazioniTab.tsx": {
+      "hash": "a4856768de6acc0b1181cda2a697e9de48ef57a0ff84b18279b67873d7ffbe2d",
+      "symbols": 3
+    },
+    "client_v2/src/features/bot/components/StudioInfoTab.tsx": {
+      "hash": "2cc4b4196216aa275e17ff461ea2d72c3ae637fc7b8aaf7e09f028674e551ad7",
+      "symbols": 5
+    },
+    "client_v2/src/features/bot/pages/BotPage.tsx": {
+      "hash": "f0ca5609f490d9f1fa93d3d7568d94527e322658ac1e700fb15e97f135622d7d",
+      "symbols": 0
+    },
+    "client_v2/src/features/bot/services/botService.ts": {
+      "hash": "c04af880656ba520f53e8d0f97b1fa8aa1d2aedad7a01c6fbbc8c9afa0c78afc",
+      "symbols": 0
+    },
+    "client_v2/src/features/bot/types/bot.types.ts": {
+      "hash": "3a828920fd9267f88aef0b029486e93811b5c18d20d3a9413a0593ce953a3be8",
+      "symbols": 0
+    },
+    "client_v2/src/features/calendar/components/AutoSyncModal.tsx": {
+      "hash": "bb327bbf84f5ef630ab27bdecd4204f5c10434141f2431baac5b11c59f924cc7",
+      "symbols": 2
+    },
+    "client_v2/src/features/calendar/components/CalendarHealthCheck.tsx": {
+      "hash": "6b72ff843a6d543c2a8137aad4315ae73c457856564c0150cd4f05a505092731",
+      "symbols": 0
+    },
+    "client_v2/src/features/calendar/components/CalendarMainContent.tsx": {
+      "hash": "373e7d3183711160f38fd4eab825d6643d181853c9f133b337e1f7af437a4e52",
+      "symbols": 10
+    },
+    "client_v2/src/features/calendar/components/CalendarSettingsContent.tsx": {
+      "hash": "619cf4fa72134aba34a36eb2ebf798152b04511722282a3a106ab244a1d6d72a",
+      "symbols": 11
+    },
+    "client_v2/src/features/calendar/hook/useCalendarHealth.ts": {
+      "hash": "170843496578ab6c403c1793d540fe623b08df87b71b2a2decaf6b12d0055b72",
+      "symbols": 3
+    },
+    "client_v2/src/features/calendar/pages/CalendarPage.tsx": {
+      "hash": "f1a3a927ef05ee7c057257830cb487e491b7080a20bf8c9a5fc378fe0c6f4deb",
+      "symbols": 1
+    },
+    "client_v2/src/features/calendar/services/calendar.service.ts": {
+      "hash": "01c9da73c477e2aec467fce69ed1c040e985c507620d5851bddfd63bf3b11cf1",
+      "symbols": 0
+    },
+    "client_v2/src/features/calendar/services/calendarHealthCheck.ts": {
+      "hash": "45ca8edacc5b55259aaba7b07052601efad0459abb70aaf3e85813d62dd0ec79",
+      "symbols": 0
+    },
+    "client_v2/src/features/cbct/pages/DownloadTacPage.tsx": {
+      "hash": "c98373d257ed56bcf849580d6c43b6174d65814c9a651a61a252768aa207f4b4",
+      "symbols": 1
+    },
+    "client_v2/src/features/cbct/services/cbct.service.ts": {
+      "hash": "053d15e4dd09af22b95f4f794e5bc17dcf3303a1942862389c8f33e06410224e",
+      "symbols": 1
+    },
+    "client_v2/src/features/collaboratori/components/AnalisiProduzione.tsx": {
+      "hash": "9e9f2a6c31541e0c969810a318cd6f6e46659e7314612cc4c9084c418bdf73f0",
+      "symbols": 1
+    },
+    "client_v2/src/features/collaboratori/pages/CollaboratoriPage.tsx": {
+      "hash": "51e3d032a2b166e776c685db4d29870775be4dc4ac6477b2e497017c7aad5423",
+      "symbols": 3
+    },
+    "client_v2/src/features/conti/components/ColumnDefinition.ts": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "client_v2/src/features/conti/components/ContiTable.tsx": {
+      "hash": "df6510d59eef9e50ac9b29bef91461d416fb9b9e445179f48fbc506c33ba4fe1",
+      "symbols": 2
+    },
+    "client_v2/src/features/conti/components/SmartTable.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "client_v2/src/features/conti/pages/ContiPage.tsx": {
+      "hash": "cbc7bf441fcbc4c09f2e4cb7d086e384c0037b161936fa282050b78ac9e0af40",
+      "symbols": 10
+    },
+    "client_v2/src/features/dashboard/components/ActiveWorkCard.tsx": {
+      "hash": "8b2b7b3e225c0f571e8f1adf32b5f695a92fba82ae164ec54952b7b833f269e0",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/CalendarAutomation.tsx": {
+      "hash": "d52434e9f289334cbd71fbba151c6018f9fd0c521a0b581c16309cdadf0dbd09",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/DashboardStats.tsx": {
+      "hash": "3526b5c1f25e592b1a7dcee48b5a68557295c79d779539291d2b20e787099b10",
+      "symbols": 1
+    },
+    "client_v2/src/features/dashboard/components/DatabaseStatusCard.tsx": {
+      "hash": "98aaca01d9b1230003020a6915c81cd6b7ca408185b6956dee686f51d3b848da",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/MonitorRules.tsx": {
+      "hash": "b5b23a8ea2645498a97f918a54593ca218b596426ffc91b31a8a9fd7fb50ed12",
+      "symbols": 2
+    },
+    "client_v2/src/features/dashboard/components/NewTodoModal.tsx": {
+      "hash": "06781bd12360ce994ccba32abba5800add889906c41be7e4ce407f22a7fd8ebf",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/RecallAutomationCard.tsx": {
+      "hash": "0995885c9b820dba0f722463e1885594601f04485207c7d09a28b0b94dfd06a5",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/ReminderAutomationCard.tsx": {
+      "hash": "b488b57d6ce58c2527f67e47f41dbe0637fb36cbbddc8681db80074fef6dc54b",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/ServicesStatusSection.tsx": {
+      "hash": "f8b543b6ea889de2198ba55df052ce6b579f5fea0cd0f90e3e8ad5e89fc6da43",
+      "symbols": 6
+    },
+    "client_v2/src/features/dashboard/components/ServiceStatusCard.tsx": {
+      "hash": "f262fe549ea2fd08f7203d3b7eb3c2d7b2efda7cb352714f91f9edfe04ea7103",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/TodoModal.tsx": {
+      "hash": "b1cb76728e832b4f2028e2f9e690b58513778fa2f3ea4a0c01d70fd4eeab1acd",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/components/TodoWidget.tsx": {
+      "hash": "0b37892dd6db683fed245f7e304ceeec4cebb7194660628657169e1e28db9a4b",
+      "symbols": 8
+    },
+    "client_v2/src/features/dashboard/components/WhatsAppStatusWidget.tsx": {
+      "hash": "39cd9851e64a6f4430d46a6dc568301e5ae905330015c46d74899d491fc7520e",
+      "symbols": 3
+    },
+    "client_v2/src/features/dashboard/pages/Dashboard.tsx": {
+      "hash": "6b0bfde17cd184e46a5a634358862857e543f105ed580cb8100b05bf9a7de7af",
+      "symbols": 6
+    },
+    "client_v2/src/features/economics/components/BreakEvenIndicator.tsx": {
+      "hash": "3509ce5bdcaf6a7deb77766616f31436ea358d59e8c3913a85054925edfd78be",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/CollaboratoriRedditivita.tsx": {
+      "hash": "c3a01879db1ab93dd2efe7b3497adf503afec6d82d271528eb04b9ef7be16d54",
+      "symbols": 4
+    },
+    "client_v2/src/features/economics/components/ComparisonChart.tsx": {
+      "hash": "655265baaee1f24441da5dc0f30feac2830cdeac19602651fc178d05b7fd4cf1",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/DashboardTab.tsx": {
+      "hash": "c2319c76bf538652a659e0b66912d9ef82398159264a9df734456972061721f4",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/ForecastChart.tsx": {
+      "hash": "d432da44c079f7d581a4d4fe5c6aa49aba09c8a3594cce02c5bc4ace6b84b48c",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/ForecastTab.tsx": {
+      "hash": "a4a97ff911defd986f5048ce557d99983c96e51af87bb82eca219a158d8a9b7e",
+      "symbols": 2
+    },
+    "client_v2/src/features/economics/components/HealthPulse.tsx": {
+      "hash": "1a0569f0440bb3ad6d5c6e539fac06b6c4485b8572ee5004c9469ad49dec3384",
+      "symbols": 4
+    },
+    "client_v2/src/features/economics/components/KpiCard.tsx": {
+      "hash": "d25142e09dbca914efd1b951f60287d08c117a78b3b434323c13d033f351451d",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/MonthlyChart.tsx": {
+      "hash": "4bbe8b560805a7cda67d70a4b9822febc327d0402ea5c37f458a2d5d84a54d82",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/MultiYearChart.tsx": {
+      "hash": "55228ef8f8d4a9790dc33be7fb73a44a67c60ceb2b7d55990b448dabc13b0393",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/ReportAppuntamenti.tsx": {
+      "hash": "f7b3bcbd0464cf2fc85d4ffaf459f96cf6c60685b3efc2452aacc25464501384",
+      "symbols": 0
+    },
+    "client_v2/src/features/economics/components/ReportPrestazioni.tsx": {
+      "hash": "29d8979cc003bf98d64badb93a947fc9b0a4e12320162feceebb98fc874e9f20",
+      "symbols": 3
+    },
+    "client_v2/src/features/economics/components/SimulatoreTab.tsx": {
+      "hash": "f50e6c3424cd2d689b7f34fba37a82011aafde5c0c3015135aa5bd3f89da9246",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/components/TrimesterForecastCard.tsx": {
+      "hash": "d8952a1bc02eaaaf953b8a1e16e4fcf907f01f969aaf5b762995ee305cf8a812",
+      "symbols": 1
+    },
+    "client_v2/src/features/economics/pages/AnalisiComparativaPage.tsx": {
+      "hash": "73dc31c766967b29767563a4c5012350815e16bf72440d3e05cb828f801bef3a",
+      "symbols": 3
+    },
+    "client_v2/src/features/economics/pages/CentroCostoPage.tsx": {
+      "hash": "0540844468489518e409c38a93ce44e88f92ba30f7e897b0b8994ba9540669b2",
+      "symbols": 2
+    },
+    "client_v2/src/features/economics/pages/EconomicsPage.tsx": {
+      "hash": "4ad17c153ad49f3314b9d0fb8d5aea641d68d8fcdecc8058037e88a11ce830dc",
+      "symbols": 0
+    },
+    "client_v2/src/features/economics/services/economics.service.ts": {
+      "hash": "541cd5da344c99f5fa64d8f9ebcf77d535d9ac9b53e5a1034b3def6e01767710",
+      "symbols": 0
+    },
+    "client_v2/src/features/economics/types.ts": {
+      "hash": "05047f3e3c09fe59e46e6dc2f13a497f80265da64ca3059174c26abb4da8e7fc",
+      "symbols": 0
+    },
+    "client_v2/src/features/email/components/EmailAiConfig.tsx": {
+      "hash": "3c4c2db0158e849c19044735edce7bcddb9fa614f47203d832fde8531f07fc2e",
+      "symbols": 2
+    },
+    "client_v2/src/features/email/components/EmailDetail.tsx": {
+      "hash": "82a2fb168c8bec769656ab1c3920fbbf36cf20f1b0cb073f5df06365dc2268d0",
+      "symbols": 4
+    },
+    "client_v2/src/features/email/components/EmailList.tsx": {
+      "hash": "ed12f150222910cbb3a408f3910ae6595b6701d8104c8ad9eed3290c9866a15b",
+      "symbols": 3
+    },
+    "client_v2/src/features/email/components/EmailOAuthSetup.tsx": {
+      "hash": "277818c06641e01ede620713d79135f2395785327a1fc45b4ae40a722d5521b8",
+      "symbols": 1
+    },
+    "client_v2/src/features/email/components/EmailRulesManager.tsx": {
+      "hash": "0fed61a20fd936709e6ee8b37bb44a8583385fb2b56fdc21d4c48ee305ed87e1",
+      "symbols": 7
+    },
+    "client_v2/src/features/email/components/EmailScopeFilter.tsx": {
+      "hash": "401955374d349d228a108f3f85e74f6dbf65d778965d616a39cfdc5792114d64",
+      "symbols": 1
+    },
+    "client_v2/src/features/email/components/EmailScopesManager.tsx": {
+      "hash": "4c11fde0a7b44568df73cbbc13691a54a864de4d0c3872ef632959d89bbf78a3",
+      "symbols": 4
+    },
+    "client_v2/src/features/email/components/TagInput.tsx": {
+      "hash": "8f027db774b7d623cbd0771c15e6cb23dd6013137443e66d0689bc7cf7db9128",
+      "symbols": 4
+    },
+    "client_v2/src/features/email/pages/EmailPage.tsx": {
+      "hash": "7146c9f15e142f984d0a1deea40aadfee3b02de208aedbb85bc0882ce69149fc",
+      "symbols": 1
+    },
+    "client_v2/src/features/email/services/emailService.ts": {
+      "hash": "5f36580c60b3ea7ac5b792c5a27df9e03f7519f4f447b43e47ea18eb026f7c7a",
+      "symbols": 0
+    },
+    "client_v2/src/features/email/store/email.store.ts": {
+      "hash": "b847ea4d9acc088b0093bd78257f38d854b268ca01b131f0290924760bad23a6",
+      "symbols": 0
+    },
+    "client_v2/src/features/email/types/email.types.ts": {
+      "hash": "c561a950eb0be56a301e1e2e3010e322680427b0e074a6aeea1fba61f5bb330f",
+      "symbols": 0
+    },
+    "client_v2/src/features/fornitori/components/ClassificazioneCompleta.tsx": {
+      "hash": "5ec783a94eee35030862ba7d49f3feeeb96a2923ac5591785bff3be0a2052a16",
+      "symbols": 6
+    },
+    "client_v2/src/features/fornitori/components/ClassificazioneGerarchica.tsx": {
+      "hash": "2608cdd1f1ae107c20cb29110601515c905b500a44a0c871c8dee95bee345a1f",
+      "symbols": 4
+    },
+    "client_v2/src/features/fornitori/components/ClassificazioneStatus.tsx": {
+      "hash": "caa03f19feb84a09cef7a45d4f6f3c67c291270e0743cba41161ea050d6f8124",
+      "symbols": 6
+    },
+    "client_v2/src/features/fornitori/components/ClassificazioneToggle.tsx": {
+      "hash": "2399817be1f50f77ddb29b50068cedccd01e962136d0e5ab85bc4d768b13dec7",
+      "symbols": 2
+    },
+    "client_v2/src/features/fornitori/components/FornitoriTable.tsx": {
+      "hash": "cf2988d32ab86e7af63030b7d78905dc57676432f3c0d7dda91c2b72ef0b8dd3",
+      "symbols": 1
+    },
+    "client_v2/src/features/fornitori/hooks/useFornitoreModals.ts": {
+      "hash": "b6b39884b0888629565c169745853d191a7121da054fbd811fc085bf2ce9ed3a",
+      "symbols": 13
+    },
+    "client_v2/src/features/fornitori/pages/FornitoriClassificazione.tsx": {
+      "hash": "59f1cb8ed989559d4078406c74f6d8e603059c4c880c2b78b9f2de67e758f4f3",
+      "symbols": 4
+    },
+    "client_v2/src/features/fornitori/pages/FornitoriPage.tsx": {
+      "hash": "27709abbf99545acf4529f2eb42f173d6b95272ff3da09bcc485f0744341f019",
+      "symbols": 6
+    },
+    "client_v2/src/features/fornitori/services/classificazioni.service.ts": {
+      "hash": "2d975a606556cf3cae8cc1d983ed5cbcb02f4b6a7d392a9e3ca5ecff80c43ba5",
+      "symbols": 0
+    },
+    "client_v2/src/features/fornitori/types/index.ts": {
+      "hash": "df28337b5952abc3a0ddc05288c85f0027d3dcf9388d292f2338b13f90aed4e9",
+      "symbols": 0
+    },
+    "client_v2/src/features/lavorazioni/ProvidersPage.tsx": {
+      "hash": "48b88c69b84b62e3559cf1c955a3391e3c04e68cd2ed48fa5f36d03a208c1c57",
+      "symbols": 4
+    },
+    "client_v2/src/features/lavorazioni/StepsPage.tsx": {
+      "hash": "e3b5a0c986823dc78e4404da5fccb80bc27f28f9f6244d36a59dfbb3cdb6f4b1",
+      "symbols": 1
+    },
+    "client_v2/src/features/lavorazioni/TasksPage.tsx": {
+      "hash": "ca9cb53fb4790de7c289a3d58cec9fde6741167f736ac7e513c9af81ec0f131d",
+      "symbols": 13
+    },
+    "client_v2/src/features/lavorazioni/WorkDetailsPage.tsx": {
+      "hash": "7e58a56ab7e645d35410ad29b3d65b467a79b160b2abc2c0d497801b1c225847",
+      "symbols": 4
+    },
+    "client_v2/src/features/lavorazioni/WorksPage.tsx": {
+      "hash": "b993d11c3e9af5261a2cb643bd273caab5fde482bd74617505148a75eef3dcba",
+      "symbols": 9
+    },
+    "client_v2/src/features/lavorazioni/WorkStepItem.tsx": {
+      "hash": "9c9298bbab8f6ecea79fb62c2cbec4554ba0d902917ad920fc1dd4c0467c6d3e",
+      "symbols": 0
+    },
+    "client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx": {
+      "hash": "4d4f3ac141a623775b6975de44ca785ae5d7ba7dd3f7600cd792167029f7140d",
+      "symbols": 1
+    },
+    "client_v2/src/features/materiali/components/MaterialiAccordion.tsx": {
+      "hash": "a87f879801c700a564487cc40b3cc9c07df9ca75c8e47b2cf913c1c76c216a64",
+      "symbols": 0
+    },
+    "client_v2/src/features/materiali/components/MaterialiTable.tsx": {
+      "hash": "b5e10f9ab3164a56c88278d07bad44264038913f1ae29b96b4cc34e0bae91981",
+      "symbols": 1
+    },
+    "client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx": {
+      "hash": "109be6d36d56e0f7062ba32df6e5598433e064df5c35e5eb41f11e7491a5ec12",
+      "symbols": 10
+    },
+    "client_v2/src/features/materiali/pages/MaterialiPage.tsx": {
+      "hash": "731a7496fb220ea685601e8c515c4fd82d67cf250e0aa159708046004cdcf5de",
+      "symbols": 9
+    },
+    "client_v2/src/features/materiali/pages/RicercaArticoli.tsx": {
+      "hash": "d2ce6b84e04a186dd54d1710b9f0022fd9e61ffa22a9f94674a1b32535c2b167",
+      "symbols": 16
+    },
+    "client_v2/src/features/materiali/services/materiali-classification.service.ts": {
+      "hash": "2008f79f9da914560fc273d4d8a7fb3273fed698b6cf2e32db39a07ab833bd8e",
+      "symbols": 0
+    },
+    "client_v2/src/features/materiali/services/materiali-migration.service.ts": {
+      "hash": "2eef01e72b96055beaa9d0a49f38ee94541c68a69a52128c3cdcfadb42562951",
+      "symbols": 0
+    },
+    "client_v2/src/features/pazienti/components/BroadcastModal.tsx": {
+      "hash": "f51bc586dbebbb05e0d6948708f11fe567518292a8e65f62c0be2244b126cc0f",
+      "symbols": 3
+    },
+    "client_v2/src/features/pazienti/components/FiltriPazienti.tsx": {
+      "hash": "c3cbc450e710dab4102322739c73e3d8ac83293355a4c9f420324f7f652bb6be",
+      "symbols": 3
+    },
+    "client_v2/src/features/pazienti/components/ModalRichiamoGestione.tsx": {
+      "hash": "b836d263735c2645016307063e291eecb6eaad3c621bfb2b3d58fcf3ae6e4bb3",
+      "symbols": 4
+    },
+    "client_v2/src/features/pazienti/components/PazientiTable.tsx": {
+      "hash": "a24820b2bf44c8e160346385ae533d13ab43a48cccbd0a6a622736948c2f9873",
+      "symbols": 0
+    },
+    "client_v2/src/features/pazienti/components/RichiamoGestione.tsx": {
+      "hash": "de276557143e7d148996955433c80da59991549857e847ff8fcc45b3cc97ce59",
+      "symbols": 3
+    },
+    "client_v2/src/features/pazienti/components/RichiamoStatus.tsx": {
+      "hash": "b2ea8533752596b183f2c572ca74a46765ad53591bec60ef35059a416d911435",
+      "symbols": 6
+    },
+    "client_v2/src/features/pazienti/pages/PazientiPage.tsx": {
+      "hash": "533845c5597e98dd9152dbe963af6609dea48e28d156978112a0b7bffc634506",
+      "symbols": 4
+    },
+    "client_v2/src/features/pazienti/pages/RichiamiPage.tsx": {
+      "hash": "b25dcd77f325ee78c1fb059143c3cdd7cb1c76d4fbc646b0118a7c667d1af8a0",
+      "symbols": 4
+    },
+    "client_v2/src/features/pazienti/pages/SlotLiberiPage.tsx": {
+      "hash": "4c067a507b8a0226f43763a59a288cede7ee3cc3494a2370891296001d2aa8e5",
+      "symbols": 4
+    },
+    "client_v2/src/features/pazienti/services/marketing.service.ts": {
+      "hash": "caf09e106253b58f5ed60373a6e7e93810238ec727c483156c5896c459b272f8",
+      "symbols": 0
+    },
+    "client_v2/src/features/pazienti/services/richiami.service.ts": {
+      "hash": "89c351c093529724acc31cfe6fb0bd7fb112c72870c3047da9df700aeceb004d",
+      "symbols": 0
+    },
+    "client_v2/src/features/ricetta-elettronica/components/ListaRicetteTest.tsx": {
+      "hash": "5ae74c21fa4cd500e7502d4376a27e4653f9b46f651d3769af2fa89cc8255b83",
+      "symbols": 1
+    },
+    "client_v2/src/features/ricetta-elettronica/components/RicettaAuthStatus.tsx": {
+      "hash": "edd077c8d0d7f26074099100fa0d08bbcb6405553511e9123b3522255c42afc5",
+      "symbols": 1
+    },
+    "client_v2/src/features/ricetta-elettronica/components/RicettaAvanzata.tsx": {
+      "hash": "bf36c1297cb8ff9183bae32a7635cb3f922c00968a06766297dc0d81909004e0",
+      "symbols": 8
+    },
+    "client_v2/src/features/ricetta-elettronica/components/RicettePaziente.tsx": {
+      "hash": "974ece72ab955e801872cada53357d9e6075b344815f3b6741d1bf9bf469edd8",
+      "symbols": 4
+    },
+    "client_v2/src/features/ricetta-elettronica/components/RicetteTSPaziente.tsx": {
+      "hash": "0bd266e0cb7ba2bf482d4fff857edd75d811ff9928d2010746a45cd47fe24f61",
+      "symbols": 11
+    },
+    "client_v2/src/features/ricetta-elettronica/components/TestInvioRicetta.tsx": {
+      "hash": "4e102a2325615ab70c18dae9d71aae4e19bd7dc5f260166950e7a0248b8c7b6a",
+      "symbols": 5
+    },
+    "client_v2/src/features/ricetta-elettronica/components/TestSistemaTSRaw.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "client_v2/src/features/ricetta-elettronica/hooks/usePazienteModals.ts": {
+      "hash": "c819e0e02ecfabed76daa5734238dd4d87f8eba6496ce390a565ed13d432dcb0",
+      "symbols": 13
+    },
+    "client_v2/src/features/ricetta-elettronica/pages/RicettaElettronicaPage.tsx": {
+      "hash": "72351e41c3854ff962e2bd99f449d28ac6d5e9391f857d63ae1b4f161af9c1ed",
+      "symbols": 3
+    },
+    "client_v2/src/features/ricetta-elettronica/pages/RNETestPage.tsx": {
+      "hash": "20c7b10f6345685bdeae18ab1cbe3b29fb6bd996c9caaa116d5f23893af6be18",
+      "symbols": 1
+    },
+    "client_v2/src/features/scheduler/pages/SchedulerPage.tsx": {
+      "hash": "eab7067ba7d189cf71d5f34686bdd05fa925cd8c7fd9c65e1b96f003ffe27066",
+      "symbols": 9
+    },
+    "client_v2/src/features/scheduler/services/remindersService.ts": {
+      "hash": "208bf0849c9b0ed18f28c5c83eff7521873c4f117641cf722b2f1ef9623ffdec",
+      "symbols": 0
+    },
+    "client_v2/src/features/scheduler/services/schedulerService.ts": {
+      "hash": "0473e147005d9d40a83724cc81a562b764926ba583d29e0c774988b3191427ac",
+      "symbols": 0
+    },
+    "client_v2/src/features/seo/pages/SeoPage.tsx": {
+      "hash": "34fcd6fb3ce1e71f1f4d7e02232ad323f428437aa92c193c54d7b164e98fd59c",
+      "symbols": 9
+    },
+    "client_v2/src/features/seo/services/seoService.ts": {
+      "hash": "e7791a521675c65c236a44504c1fd73cd70a4d4e803aa6d7b4b56e5157ffd5c7",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/components/monitor/CallbackCard.tsx": {
+      "hash": "1ad48f246c4af8b0cee4929a36d5274faeaecc1260e9577d992c9b706efed6e9",
+      "symbols": 6
+    },
+    "client_v2/src/features/settings/components/monitor/CreateMonitorModal.tsx": {
+      "hash": "d65d0981d53b74823c96e334c2016e25c729c89405ab60edba62a17c8904b55c",
+      "symbols": 2
+    },
+    "client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx": {
+      "hash": "94df560b8c69dfee37a84576f2fd2a8dc571f5a17537f0ea1a476856595246c5",
+      "symbols": 2
+    },
+    "client_v2/src/features/settings/components/monitor/ListaRegole.tsx": {
+      "hash": "55a712cebfa0b44e84b9a61d6a31597509d2d03b0ad39120c9aeb7a62bb1e998",
+      "symbols": 1
+    },
+    "client_v2/src/features/settings/components/monitor/LogMonitorCard.tsx": {
+      "hash": "d7c2bb0957538b874cb445cbe46790259c0f393ca019c19f66cadc8303a973b6",
+      "symbols": 3
+    },
+    "client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx": {
+      "hash": "b3000d610d8a92914f98beaa9647edb0a50454c5becad5bc6748c6d699d1b5cb",
+      "symbols": 6
+    },
+    "client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx": {
+      "hash": "2245d97f044ae482217852c35a2d85c1855dcadd94fe4697634acb5a3f75079d",
+      "symbols": 8
+    },
+    "client_v2/src/features/settings/components/monitor/StatoMonitorCard.tsx": {
+      "hash": "851d8358cab7e20a6a525b59c0bcdfcdf4302700e5dc82a6a3de3ed419e45c3d",
+      "symbols": 1
+    },
+    "client_v2/src/features/settings/components/monitor/TipiAppuntamentoSelect.tsx": {
+      "hash": "66ebba2f80cbbb038697b26529c68a4ece3ec232863065c9067a24c63be64967",
+      "symbols": 1
+    },
+    "client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx": {
+      "hash": "eeeec970c2a4508f3654f777ea8616b4ac56700c315d817c310ae92fa5110ddc",
+      "symbols": 1
+    },
+    "client_v2/src/features/settings/components/SmsSettingsCard.tsx": {
+      "hash": "a632036e38000db595b2b69aa47f9d205f93e838fe31e3e2cce5e8efde577539",
+      "symbols": 3
+    },
+    "client_v2/src/features/settings/components/TemplateEditor.tsx": {
+      "hash": "c17a627d9acc0afd80f222161cce99b411cea4f3a98ad78f52f914ac692fb1c6",
+      "symbols": 6
+    },
+    "client_v2/src/features/settings/pages/AutomationPage.tsx": {
+      "hash": "77c7cffae9f694348ba92a1567aaddc4b565969daeb1e1e0d63a619eef72dffd",
+      "symbols": 1
+    },
+    "client_v2/src/features/settings/pages/CalendarSettings.tsx": {
+      "hash": "a7b7a23fe7cf305020f26828f98a2b5c265a4cfc27ea1572b0c9d4398c795aab",
+      "symbols": 13
+    },
+    "client_v2/src/features/settings/pages/DayReminderSettings.tsx": {
+      "hash": "3df87fc9c3fd170645e52bc7907c9f0cce2dd810c2085982e7f5edf482dff1b0",
+      "symbols": 5
+    },
+    "client_v2/src/features/settings/pages/EvolutionSettingsPage.tsx": {
+      "hash": "f499f442c50b31edf4baba97d9b5c062ef6e5faf6c9a1669c42371507b3ef3d5",
+      "symbols": 6
+    },
+    "client_v2/src/features/settings/pages/MonitoringSettings.tsx": {
+      "hash": "1e0255017d23e17b4ef864801e2e7898908ab945bec435784ce57b0724fb29f4",
+      "symbols": 4
+    },
+    "client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx": {
+      "hash": "243cf7d49feaa02147ae4652edc01b8f850561101a1fa36cb0c5e90ae91ef566",
+      "symbols": 10
+    },
+    "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx": {
+      "hash": "51cd20989b45a0d150d1dc9aefb2ff1cca5546670f9562b84380d529c987fea5",
+      "symbols": 10
+    },
+    "client_v2/src/features/settings/pages/TemplatesPage copy.tsx": {
+      "hash": "47d43c9e9aa4aac6b0a4dc0c839e464afd4770981efbf9ce705b1025259a643a",
+      "symbols": 5
+    },
+    "client_v2/src/features/settings/pages/TemplatesPage.tsx": {
+      "hash": "a898e2038160512e60649a5be6227fb2d99ae53373a7d72259fb3827c11942b3",
+      "symbols": 8
+    },
+    "client_v2/src/features/settings/services/automation.service.ts": {
+      "hash": "0a14754452b0c0f4ca6edaed7c752ea70c97b0ed7d6114b294e5f2e759f20374",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/services/changes.service.ts": {
+      "hash": "820a11af5a87863b7d3a9864376c49c2da8fcdc06e9c8785c81b0d46afb63943",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/services/dayReminder.service.ts": {
+      "hash": "794fe3b4c9efeb497489948ca5a58a75fac78873ff4d236023bfdd4279740d9a",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/services/environment.service.ts": {
+      "hash": "7d599896742ba9955bfaec12db75d9bf94713f0e246132f4d9573513a469c19b",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/services/evolution.service.ts": {
+      "hash": "a6e3b8ede983963f41efecf78318a09d4d08d768f664f5a503e5dc17cce953f1",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/services/monitoring.service.ts": {
+      "hash": "573ff1bef35742caca0b3c8099b5cfcdcf490130413159907b49db441288b729",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/services/regoleMonitoraggio.service.ts": {
+      "hash": "91f4236e0eca6d442c361f97216bcbea55962760c76cae71b724802c1cc1e18d",
+      "symbols": 0
+    },
+    "client_v2/src/features/settings/services/templates.service.ts": {
+      "hash": "8159d150e5f3ccbbd5a6d8f011afb8fd866e754d0f65beb2bd1e77a7523bcae8",
+      "symbols": 0
+    },
+    "client_v2/src/features/simulation/components/EmailSimulationTab.tsx": {
+      "hash": "3ec3d0eddd433f409e1eb34948412f5726c0d19d67f7de5cc0c8c1f89c09a60a",
+      "symbols": 0
+    },
+    "client_v2/src/features/simulation/components/PreviewDialog.tsx": {
+      "hash": "6d34ebea88db9097e1914d0bee3f5558f101fecd6875d211122f116d9e85ee0a",
+      "symbols": 0
+    },
+    "client_v2/src/features/simulation/components/RecallSimulationTab.tsx": {
+      "hash": "7cd5cecd18f0d8a4309d75c9661ba288a7700704e117b100bb8617aa95f00506",
+      "symbols": 0
+    },
+    "client_v2/src/features/simulation/components/ReminderSimulationTab.tsx": {
+      "hash": "4f08252d776881bfbe32a6893b2a7b847200f70e3aaa8812f8770ec1864628f2",
+      "symbols": 0
+    },
+    "client_v2/src/features/simulation/pages/SimulationDashboard.tsx": {
+      "hash": "9af13d349b48a32bbf5561f4eccd859a8fc7b477779b54393dc242396a7ed8e2",
+      "symbols": 2
+    },
+    "client_v2/src/features/simulation/services/simulation.service.ts": {
+      "hash": "52f7ce0793abcd1af5afb6088b0779cd8d2e92a38b5147184ac5dc34a35073eb",
+      "symbols": 0
+    },
+    "client_v2/src/features/spese/components/RiepilogoSpeseTab.tsx": {
+      "hash": "243b772e75a811fd7de2dc0f65bf5b217a41552aa3a7606578f901b9a3031d5e",
+      "symbols": 2
+    },
+    "client_v2/src/features/spese/components/SpeseAggregatedTable.tsx": {
+      "hash": "a56c7a4c1a10af708a9ce26d33669363b9e674ad346e8a9f07204c8f3c5b7db4",
+      "symbols": 0
+    },
+    "client_v2/src/features/spese/components/SpeseFilters.tsx": {
+      "hash": "e16e3fb25b696a016995c0b011ed045594f1369e8a7de9000ba1c4c3099aaefd",
+      "symbols": 6
+    },
+    "client_v2/src/features/spese/components/SpeseStats.tsx": {
+      "hash": "8fb523f70e75aab7bcfdbce9a1a2cc27794eea91c478ffa17aeb926fa31646e0",
+      "symbols": 1
+    },
+    "client_v2/src/features/spese/components/SpeseTable.tsx": {
+      "hash": "c91e136cd6b4d7c564d37839778d4ece696e91642cb2edc1172936a83886eae8",
+      "symbols": 1
+    },
+    "client_v2/src/features/spese/hooks/useAutoCategorization.ts": {
+      "hash": "6127d6e439ff2c1904718b63fbf33c6bea4c8ba02092817cf6e64d1f87a1e6e4",
+      "symbols": 0
+    },
+    "client_v2/src/features/spese/index.ts": {
+      "hash": "c5616c84c0ab9425f1daca2806432bfdf61816eaaa6ef6ee349c776c26cc57d7",
+      "symbols": 0
+    },
+    "client_v2/src/features/spese/pages/SpesePage.tsx": {
+      "hash": "582c26633d12f030a409df39ba58330c0a8fc85505d69e5b0e990656e07b4607",
+      "symbols": 5
+    },
+    "client_v2/src/features/spese/services/spese.service.ts": {
+      "hash": "24a7490768941f5a9d7b8d9222bdaa0cd4cc810d6d89f4ac94415c08e874f6af",
+      "symbols": 0
+    },
+    "client_v2/src/features/spese/types.ts": {
+      "hash": "c710820263252b1d335d694cb4ed935712cf1fe6885742c269fb20e7c73bebc1",
+      "symbols": 0
+    },
+    "client_v2/src/features/spese/utils/autoCategorization.ts": {
+      "hash": "53b64bf4df00c2350cf14927d4581a30447eaac85ccd812abc6ed1b5663ab3dd",
+      "symbols": 2
+    },
+    "client_v2/src/features/spese/utils/autoLearning.ts": {
+      "hash": "80e523fd328df2fd6a151f80b6785c18331e34f57af3382b3d0b93f06f080cba",
+      "symbols": 0
+    },
+    "client_v2/src/features/spese/utils/studioClassification.ts": {
+      "hash": "8b8fa8cdaa570a5a0dde9a292ef05116777864bb4f16720af4cd83cf229f9e53",
+      "symbols": 4
+    },
+    "client_v2/src/features/spese/utils/testCategorization.ts": {
+      "hash": "e1dff22bd0df8e258efec1d74c698b3a4e7f2139869400a9dc10988bb39b9a3b",
+      "symbols": 2
+    },
+    "client_v2/src/features/tempo/pages/TempoPage.tsx": {
+      "hash": "2abd7940d6eb91004ad0792c9ea7ff1dcfc2a21bb90834c45067f3f4445d9cf1",
+      "symbols": 15
+    },
+    "client_v2/src/features/test/TestSelectPage.tsx": {
+      "hash": "8e8ff55863c291b7e28cd88d2a5dc69e886044cfefbca7220941e95a40707f21",
+      "symbols": 2
+    },
+    "client_v2/src/features/todos/pages/TodosPage.tsx": {
+      "hash": "0bc158d883bc92750f2864eed83c100b979857578d2d712aa4f3242be33db366",
+      "symbols": 10
+    },
+    "client_v2/src/features/users/UserForm.tsx": {
+      "hash": "5afa216feb94ada2a4ceaf7919614fcc37734ae84f5f7478ed55fb2f9fd4ad59",
+      "symbols": 1
+    },
+    "client_v2/src/features/users/UserListPage.tsx": {
+      "hash": "75b800d5506b13db9515e54b33400a700572abb50e8fe998eca2b75e0cf4a427",
+      "symbols": 5
+    },
+    "client_v2/src/hooks/usePermissions.ts": {
+      "hash": "f6fffc33b0a2b4dad437d20440878a039a8b5d49ca5adcc334732db774fb77c8",
+      "symbols": 1
+    },
+    "client_v2/src/hooks/usePushNotifications.ts": {
+      "hash": "4b5be9b17541764d48531959bcecbab30fe4981bc398f52dac241479470db638",
+      "symbols": 2
+    },
+    "client_v2/src/hooks/useRealtimeNotifications.ts": {
+      "hash": "6d2a0bd108733b58d12f31629e306ba37ae1a907aa66e39110a0795d7be21ecc",
+      "symbols": 4
+    },
+    "client_v2/src/hooks/useTheme.ts": {
+      "hash": "f45e5c863995857a711669784d59b7ecdf8012ea207e31a43653902b9cffbcfe",
+      "symbols": 4
+    },
+    "client_v2/src/hooks/useWebSocket.ts": {
+      "hash": "b99c211d4aba399457324c85d3411f38cea184057eadb5cdfe0fc2497b956b6a",
+      "symbols": 1
+    },
+    "client_v2/src/lib/utils.ts": {
+      "hash": "746e4d9beb1a5b6f0e047ec19d5f1c542c9f8117f4ea7c80d7b9bd0fe2128e91",
+      "symbols": 1
+    },
+    "client_v2/src/main.tsx": {
+      "hash": "354ccce7367ca0656d99a465389bab17029b4bfadfde6fad0b58b996c59ecd0f",
+      "symbols": 0
+    },
+    "client_v2/src/router/index.tsx": {
+      "hash": "7b1a33d57b29ea4fcbfe239d3e2f1c3875d874519a7d3cbaa4b61bcf60791dbe",
+      "symbols": 1
+    },
+    "client_v2/src/services/api/auth.service.ts": {
+      "hash": "8477d5bbfc6222b926d0919d729ddc1ef0443e9813a2bdbef946499e54ba7174",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/automation-settings.service.ts": {
+      "hash": "9d674a57ae83f397877a3d629af8aa4103700816e916134c9c528db8f5672ddd",
+      "symbols": 2
+    },
+    "client_v2/src/services/api/base.service.ts": {
+      "hash": "985020856e15b6743d3d8fc8e259818c8381b21b940943283e292317c43570b7",
+      "symbols": 1
+    },
+    "client_v2/src/services/api/client.ts": {
+      "hash": "048b5f71db89ce348928541cc95bbc1c7d23063a0194b944898890cdb156c0f9",
+      "symbols": 4
+    },
+    "client_v2/src/services/api/environment.service.ts": {
+      "hash": "975ff8506a7140cbb91f31ce740487b34f5ace453195a41d53414e65db75173d",
+      "symbols": 3
+    },
+    "client_v2/src/services/api/fattura.service.ts": {
+      "hash": "61c0963646c83188b271be845a40b545bc2bd8aebe44f1a1501af684b20195d7",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/index.ts": {
+      "hash": "4b116bdb5cd2cd55c08fef4af8eeed6a21f8b57a0e685105a2abd008cb244c98",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/monitorPrestazioni.ts": {
+      "hash": "d5469f24b25f6e1a7682ce649589977c534758b36d726ba8a547a4e0756e27f7",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/notifications.service.ts": {
+      "hash": "73ac7e60ef4b07ce40995b20f3eeacbf3ca7225dba73381dcd2484c5301ff10f",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/prestazioneWorkMapping.service.ts": {
+      "hash": "c604709a975f8e1cc6e2a5eedc9b12c478f6f93bf6243bbf6024d08fca97a1da",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/ricetta.service.ts": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/services-status.service.ts": {
+      "hash": "e41fd8460c99117f8a91ec366eedd52230ecb02aab04195a6a9f0c88f8026e0c",
+      "symbols": 3
+    },
+    "client_v2/src/services/api/todos.ts": {
+      "hash": "d08b522432b0cf42aabec0eeb4ec0c87e336e693f5d85a1dd296d43ab5e7f049",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/user.service.ts": {
+      "hash": "c3c275233cb0269c23b51484b86b21513fee3d65949be61e32c7a936f1899b85",
+      "symbols": 0
+    },
+    "client_v2/src/services/api/works.service.ts": {
+      "hash": "1e0edd61bfbb559d4f8d83c4a130086b48c43a4b3a859aeb0279753cfc4d6655",
+      "symbols": 0
+    },
+    "client_v2/src/services/pushService.ts": {
+      "hash": "7dbc1b638b2360869aa7bdd93fbe5eaee911d37dd67034fdbfa8f3fef6ea2891",
+      "symbols": 2
+    },
+    "client_v2/src/services/ricette_ts.service.ts": {
+      "hash": "f1b90157ceae8c75175aaf9057fead6ea7a29f6b290494c0e9fad458ba783ff4",
+      "symbols": 1
+    },
+    "client_v2/src/services/works.service.ts": {
+      "hash": "1861686b9850dac930ca6ccaa03e6bd5950fe26754eae8b0531d0d621cf0ac58",
+      "symbols": 0
+    },
+    "client_v2/src/store/auth.store.ts": {
+      "hash": "586955a61e1f0fd876ca23033d4ac2a848d5359f9ba766bba81feba7d0bfaa2a",
+      "symbols": 0
+    },
+    "client_v2/src/store/classificazioni.store.ts": {
+      "hash": "af9368aff396c932eb61ab92037a1fd2d09cd0790d27368bca1698e8988d75ae",
+      "symbols": 1
+    },
+    "client_v2/src/store/conti.store.ts": {
+      "hash": "a17bf315a6870e3cbb1f24da5437857be79e0ef5f529341e205161c1f9762b95",
+      "symbols": 3
+    },
+    "client_v2/src/store/environment.store.ts": {
+      "hash": "69a605afcd33ca20566d687bb7cbcee55f1168f7c4580b254aa22ea0d1077330",
+      "symbols": 5
+    },
+    "client_v2/src/store/fake.ricetta.store.ts": {
+      "hash": "a1c256323350964263c825d5839172f08e6f16bcfdf462d5f677d31097cd5207",
+      "symbols": 4
+    },
+    "client_v2/src/store/fornitori.store.ts": {
+      "hash": "9040b05e987c00b105fc65677dde4f0e8059ea65b766ae3b34bbb3fcdbcad867",
+      "symbols": 2
+    },
+    "client_v2/src/store/materiali.store.ts": {
+      "hash": "86ad8f88d20affa3cfdb72b1fd9ec68b94ebf91c3adb3d2db4fe8cc719a2d001",
+      "symbols": 4
+    },
+    "client_v2/src/store/notifications.store.ts": {
+      "hash": "5cee57efeaf47a72c868179df79357851de0c2a3db6ba9d1eeb6f682494c27ed",
+      "symbols": 0
+    },
+    "client_v2/src/store/pazienti.store.tsx": {
+      "hash": "3418af4dfb9467888b213e76f71d189ccbcc66850ff8b3fd1bac28639bd686fd",
+      "symbols": 1
+    },
+    "client_v2/src/store/prestazioni.store.ts": {
+      "hash": "e1973eaf3aa0ca9e2d84d7cb4991b91f10607ff951552f46d5397878ff5cd3d1",
+      "symbols": 3
+    },
+    "client_v2/src/store/provider.store.ts": {
+      "hash": "7d2ab1fc560f925710c706aee6610a9070a7404bef8379b99105890995b18328",
+      "symbols": 0
+    },
+    "client_v2/src/store/ricette.store.ts": {
+      "hash": "6fd9829cbb7ea3344535a98bf6349420615527bc1851b26516a1163f0b44ba43",
+      "symbols": 3
+    },
+    "client_v2/src/store/user.store.ts": {
+      "hash": "d28ac3f74113900607d093c691cdba5f924758c58422eafa2504ea926630f29f",
+      "symbols": 0
+    },
+    "client_v2/src/store/works.store.ts": {
+      "hash": "656afdcfdb2630891c989e12696e987b6271d4f36ca706f2b91fc2e9cc76cb27",
+      "symbols": 0
+    },
+    "client_v2/src/test/setup.ts": {
+      "hash": "7367ecdbab11a211fe94d48c9f71b49b3ee79d5a79a6abbbd4c7a2ce0ae6b0ae",
+      "symbols": 0
+    },
+    "client_v2/src/types/classifcazioni.types.ts": {
+      "hash": "279afb5bf4ca377f743209946d56def9218a17ee001a2a302c110deb10f0430e",
+      "symbols": 0
+    },
+    "client_v2/src/types/environment.types.ts": {
+      "hash": "509bbddb8c2a2d4fc4de88c7e37835c09796f52f02cebf2d6fd4d9bc9f9087ed",
+      "symbols": 0
+    },
+    "client_v2/src/types/fatture.ts": {
+      "hash": "3775f77acf500724887952c739c0eb61d60a2e0ee4ad7999b81b17f8e2f06141",
+      "symbols": 0
+    },
+    "client_v2/src/types/index.ts": {
+      "hash": "8cd5ec0dca088ae32ba8e0f1c06f07522a427196b59ca0588ea9060bbc3878f6",
+      "symbols": 0
+    },
+    "client_v2/src/types/ricetta.types.ts": {
+      "hash": "31a82cdda652772b4fca4616233709f2e5bbdd184daba0934012274e1edacc07",
+      "symbols": 0
+    },
+    "client_v2/src/types/works.types.ts": {
+      "hash": "49e72e02bebdcd5ec15295db81ada87f49483bad96dc737c650a26a4e5dddc55",
+      "symbols": 0
+    },
+    "client_v2/src/utils/config.ts": {
+      "hash": "e555726baeebf78c850ebe64ae0b79e81306e08574ffe8378b281410988d8310",
+      "symbols": 0
+    },
+    "client_v2/src/utils/index.ts": {
+      "hash": "20e41a7a82279046bdd2760fb639d4d373950aa7cd4a8377a75607ae67075e8c",
+      "symbols": 9
+    },
+    "client_v2/src/vite-env.d.ts": {
+      "hash": "03015d63adb19b1b6183dbd2b399f1bcede00dae714561b7c1bca4e290d4acda",
+      "symbols": 0
+    },
+    "client_v2/tailwind.config.ts": {
+      "hash": "e072900e4d2d6d7b5544fe863d529fd4fb23db73fd1804bacd93fec58a640a1e",
+      "symbols": 0
+    },
+    "client_v2/vite.config.ts": {
+      "hash": "b4256fd567676df96036cb6b26437d63173924e6df9e098056d40f25c3b16462",
+      "symbols": 0
+    },
+    "client_v2/vitest.config.ts": {
+      "hash": "bd6396730768447009ccbf551508b3c43bf132105e6161a1725320c2cdc5b3dd",
+      "symbols": 0
+    },
+    "server_v2/__init__.py": {
+      "hash": "ad536d9aec3bb67e62357df3907acf5bc6212ca323f63ff5e4b77fb463c1a4f3",
+      "symbols": 0
+    },
+    "server_v2/api/__init__.py": {
+      "hash": "c0e9e3249098dbbd017ca2ed5290d08e66a3d7d7c07406a329dcfcaecc3a5a40",
+      "symbols": 0
+    },
+    "server_v2/api/api_monitoring.py": {
+      "hash": "502dde3034d34d03f5262b3a5855538c5d39ce5a22842593bf3eee142dfcaf57",
+      "symbols": 16
+    },
+    "server_v2/api/compatibility_bridge.py": {
+      "hash": "2cd10ff2918a29f8ac7b270803bcac891922712c00fa0126dd95317bd469eb76",
+      "symbols": 25
+    },
+    "server_v2/api/v2_admin.py": {
+      "hash": "059a345e294eeb3a74b5f811265d32e2f98789ad06ca57f64b041ecbab0f9698",
+      "symbols": 4
+    },
+    "server_v2/api/v2_auth.py": {
+      "hash": "97e8d59c6e02b446aa496290cba68ea067275bcf09599a28c8db46c5ee9515fc",
+      "symbols": 5
+    },
+    "server_v2/api/v2_automation_logs.py": {
+      "hash": "297099da785daeecb4dd381936dbe6f5426373d047f9a278903bd614d2cf5131",
+      "symbols": 1
+    },
+    "server_v2/api/v2_automation_rules.py": {
+      "hash": "6d45772320536e4c1cddcb9102782f814d64e7129aa54d646cf0024b3eec8c6a",
+      "symbols": 8
+    },
+    "server_v2/api/v2_automation_settings.py": {
+      "hash": "ef832e879083ab7bebfbe3873052e3a0b7a0d3ddf0e4597783384f55e843ff71",
+      "symbols": 2
+    },
+    "server_v2/api/v2_bot.py": {
+      "hash": "998e72398b5feee2342270a259097a35a32e521e7c15e8c4c3e53487c90eb729",
+      "symbols": 41
+    },
+    "server_v2/api/v2_calendar.py": {
+      "hash": "571ecb47a5b286b3400cefe708b2b636b750a6eae479dfeb726507919806b27f",
+      "symbols": 29
+    },
+    "server_v2/api/v2_cbct.py": {
+      "hash": "f817eb86cd7d3eb5c8ca3a0762e2b4968bdddaa5f1eed5fef4fbeb4cd4a7a33b",
+      "symbols": 2
+    },
+    "server_v2/api/v2_classificazioni.py": {
+      "hash": "086026d92a4dd3bcc913fa3a88ccdd624649c999e87a95ee43d8c3611f4b03d7",
+      "symbols": 10
+    },
+    "server_v2/api/v2_conti.py": {
+      "hash": "0e6204a3928df548d80818ddd13c76eed11165140c8cabc54532751170e16820",
+      "symbols": 16
+    },
+    "server_v2/api/v2_economics.py": {
+      "hash": "bc1aa57c990d7c10bbb1ce845e8737c426f0e119055915dd9e2d4a599605ad69",
+      "symbols": 16
+    },
+    "server_v2/api/v2_email.py": {
+      "hash": "b42599e48855ff4c2bbc66f13db0452bb8c7b76e3c2a528754f13a3110f0b4dc",
+      "symbols": 18
+    },
+    "server_v2/api/v2_endpoints.py": {
+      "hash": "e4d2ab9e1722c221d88f82beb6f3d5a001ea7d60cdbb53498319afe158df81a3",
+      "symbols": 13
+    },
+    "server_v2/api/v2_environment.py": {
+      "hash": "f943ec5e83e566043dfcee9ee76df7e5a6619a2eb3580dc93f11af6d346ad51d",
+      "symbols": 16
+    },
+    "server_v2/api/v2_fornitori.py": {
+      "hash": "ea8fe177855153cbcb78a772a543bc12601787445bf55835af49d48efd7e4baf",
+      "symbols": 8
+    },
+    "server_v2/api/v2_marketing.py": {
+      "hash": "188c16e3ebc15d974c03d6c2cc0b282ad932d5138a341387613c03e2ce46ddcb",
+      "symbols": 8
+    },
+    "server_v2/api/v2_materiali.py": {
+      "hash": "45fa8d9d7df259be92e4148497a59548fc77661edc3fb933be0434d7bbfab470",
+      "symbols": 17
+    },
+    "server_v2/api/v2_monitoring_changes.py": {
+      "hash": "e940a1b2ce7061c75b9bf0d03b524282d6f3f7697164ae33337abe761db691fb",
+      "symbols": 8
+    },
+    "server_v2/api/v2_notifications.py": {
+      "hash": "795bb909e0cf6cde9d96924d931cf186512fa98123e6900b9678c550ed4ee720",
+      "symbols": 4
+    },
+    "server_v2/api/v2_pazienti.py": {
+      "hash": "e8d07795cbad1afa5628bb0b0073e2bf16411ca732c437c3183f164045d452a0",
+      "symbols": 10
+    },
+    "server_v2/api/v2_piani_cura.py": {
+      "hash": "e34ba549b62b126a06f49591efdcee31ef375590d2d639f608a932f4c7b789ea",
+      "symbols": 5
+    },
+    "server_v2/api/v2_prestazione_work_mapping.py": {
+      "hash": "554f4001e76c9a11b9c7af518e59a5185e0c3b93863d3f67a0f498da18fa7a20",
+      "symbols": 4
+    },
+    "server_v2/api/v2_prestazioni.py": {
+      "hash": "347ebbff9088b0f3d7c6945708f30f553556b287b20dd8f2f0d2b3b385888ab2",
+      "symbols": 3
+    },
+    "server_v2/api/v2_providers.py": {
+      "hash": "a93412d70a4d95ccbe30c3460cd8ac4db6e7118d78ba9949c630455eab8c3df8",
+      "symbols": 5
+    },
+    "server_v2/api/v2_push.py": {
+      "hash": "54e5764faffb989b2455c4399d303e0d4e7e7dc17538faf3b1aa61e5db303add",
+      "symbols": 5
+    },
+    "server_v2/api/v2_reminders.py": {
+      "hash": "ad7a845b34dfc67640b3df5ef6b2e396adf225f80c036dcba7045070ea4916c5",
+      "symbols": 11
+    },
+    "server_v2/api/v2_ricetta.py": {
+      "hash": "d840996b75692c560aa21c60cd9ea830ea64a263851e8798eea0e2c71ae96f61",
+      "symbols": 23
+    },
+    "server_v2/api/v2_ricetta_admin.py": {
+      "hash": "fdc17403fa2aabc20fbb4ce48a83abbcee54f497190a30afa0f398c7739f9f21",
+      "symbols": 9
+    },
+    "server_v2/api/v2_richiami.py": {
+      "hash": "08b1562f7162087f80dd81998d964b84822307a6df8fa40882c761df435c91da",
+      "symbols": 22
+    },
+    "server_v2/api/v2_scheduler.py": {
+      "hash": "a6dcf27e6b321b7b73608ddd253b92c8173eb5437f41692bb7acf71a36d8e80b",
+      "symbols": 8
+    },
+    "server_v2/api/v2_seo.py": {
+      "hash": "ec51658b122178674c761e91140cf05beffc99e5b782f23f18acf71780fddcd9",
+      "symbols": 10
+    },
+    "server_v2/api/v2_simulation.py": {
+      "hash": "39ce8151aa5539eda879da09421d0bc629b40d5afa2387c6e8d8cf02e54086a0",
+      "symbols": 2
+    },
+    "server_v2/api/v2_sms.py": {
+      "hash": "be333074e48effb1446e12e233583efb0ed8341d8ba7842be2defd98e0ce951c",
+      "symbols": 9
+    },
+    "server_v2/api/v2_sms_tracking.py": {
+      "hash": "8dac21c4236518abd49f535b7f7b7da1a650d3722b0e8ef42be21855b07cfc55",
+      "symbols": 3
+    },
+    "server_v2/api/v2_spese_fornitori.py": {
+      "hash": "ebfd6b2b213564adcd8755f3e5e039942266544f6402114c981a8c1d74cdd164",
+      "symbols": 12
+    },
+    "server_v2/api/v2_statistiche.py": {
+      "hash": "79ffbc17e7173a4224b295a8f67fddb57fae21a3b0923d1673d12ba4abd56451",
+      "symbols": 5
+    },
+    "server_v2/api/v2_steps.py": {
+      "hash": "1997ca4388837763d3692b269e4369db3beb3013e6eacc1b44f24e79df522ee2",
+      "symbols": 2
+    },
+    "server_v2/api/v2_tables.py": {
+      "hash": "865f4cb901b1d9dd6f19e38517e80bb36ebd7f90744f3f1cf7e815d4472adcf5",
+      "symbols": 1
+    },
+    "server_v2/api/v2_tasks.py": {
+      "hash": "4a5fbb16c816f67b855db67bb8f9383db8cd52452df79e85caa9a486ef483ec7",
+      "symbols": 9
+    },
+    "server_v2/api/v2_templates.py": {
+      "hash": "5015b1cdb8f81f6157bae50444d1c707c03d4aa338259930f6e7607d209ea5de",
+      "symbols": 5
+    },
+    "server_v2/api/v2_tipi_messaggi.py": {
+      "hash": "e9db8b69fe65f90516c6b001decff8053e06742297e591dba70a2e341171546a",
+      "symbols": 5
+    },
+    "server_v2/api/v2_todos.py": {
+      "hash": "5b6b1a0bc904afbfeb901a16cfeda4ddd9bf800b705adf3e6d454656fd97ee91",
+      "symbols": 13
+    },
+    "server_v2/api/v2_tracker.py": {
+      "hash": "429e687596c272f4fccdb65cde96d1cac99b9d21ed16d9fc6f018278239ae00d",
+      "symbols": 1
+    },
+    "server_v2/api/v2_users.py": {
+      "hash": "6b64b65df9add5c4d0eac9373ee69a4a90a299ea339cdd320e157366df58c102",
+      "symbols": 6
+    },
+    "server_v2/api/v2_works.py": {
+      "hash": "a7464cfaaac26ef62a2d233c7b8c0ebd67ec81df3607d6cbb1e211e142c9df19",
+      "symbols": 6
+    },
+    "server_v2/app_v2.py": {
+      "hash": "90a2d16165d716a54c9905823d6e07659001c688ecc4f3a1e2b6644b1985d159",
+      "symbols": 30
+    },
+    "server_v2/certs/rentri/extract_cert.py": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "server_v2/certs/rentri/rentri copy.py": {
+      "hash": "86c0c2d86dd4883a031cb052cd86edf33be9cbcfc69d9d56673489d7ff35d08d",
+      "symbols": 4
+    },
+    "server_v2/certs/rentri/rentri.py": {
+      "hash": "383799de616436c95bf9d0a1706a246ca24b63380bfae3cfa238dd39c1924dbf",
+      "symbols": 6
+    },
+    "server_v2/config/__init__.py": {
+      "hash": "6501281f2a850a1f3bde2253d88d3ff4e7fe176ead05f17fe24eb3ef946c6925",
+      "symbols": 0
+    },
+    "server_v2/config/flask_config.py": {
+      "hash": "daeacb83ee6103f058c029b20f9fa0e73cade6c24d4487ff1908af3375adc650",
+      "symbols": 8
+    },
+    "server_v2/convert_vapid_to_base64.py": {
+      "hash": "33389e78ad1b3e1e433c927100142f982ca9a2c11ea0cd43aa70884576181015",
+      "symbols": 0
+    },
+    "server_v2/convert_vapid_to_standard_base64.py": {
+      "hash": "485ac7c9beca9a0f43d5298a52b8b1e8575b0f8ba93a1290d18fe0ade599c377",
+      "symbols": 0
+    },
+    "server_v2/core/__init__.py": {
+      "hash": "fbb3f669b8562d54f3a9914fcbcc7ef13fe9fa837115555eec0f5deab7052b5b",
+      "symbols": 0
+    },
+    "server_v2/core/action_registry.py": {
+      "hash": "e88a9e5ca0fc9b65817a0197fb640d90b95fabadb7ad977465b597efe1858b7c",
+      "symbols": 2
+    },
+    "server_v2/core/appointment_normalizer.py": {
+      "hash": "dbe285fb74c2e7a5ffd82cfe9165974280797d71a5e284199a1bcf6f9c3ea69c",
+      "symbols": 10
+    },
+    "server_v2/core/automation_config.py": {
+      "hash": "8813380ac87574a825e530b8cd6a8de923262f7340e5a6ceaf2e422fd3c602bf",
+      "symbols": 3
+    },
+    "server_v2/core/base_repository.py": {
+      "hash": "0c74f61b6413b46de88a966386b650587d6bcac185d81c7202f4de004d621a81",
+      "symbols": 20
+    },
+    "server_v2/core/config.py": {
+      "hash": "f8e8c067d2c444e3ef051ea6fd872b2f54c9fb752e75927c946935b064e720f1",
+      "symbols": 25
+    },
+    "server_v2/core/config_manager.py": {
+      "hash": "80ce328d513e931696d2bd193a5debac43443108f9375cad6502ad97e298424f",
+      "symbols": 23
+    },
+    "server_v2/core/constants_v2.py": {
+      "hash": "ab4ec7d3501b369b182dfeb317a826bf7a9f9342064b9004ba777f166ce328cd",
+      "symbols": 12
+    },
+    "server_v2/core/database_manager.py": {
+      "hash": "a4c07a88d9f094d7f8793ba50235927365e109d05e29e835312c22947839849c",
+      "symbols": 21
+    },
+    "server_v2/core/environment_manager.py": {
+      "hash": "30da65d8eef90e5defada6fe2c2fd14e0e53286bd1ca083a3ee492480c6be0b7",
+      "symbols": 42
+    },
+    "server_v2/core/exceptions.py": {
+      "hash": "0a81f54678ad6820a0fd786b1a9a0d79b5421fa9113a2aeab19c291d840a3fa6",
+      "symbols": 34
+    },
+    "server_v2/core/google_calendar_client.py": {
+      "hash": "49fdc8a6c63c70c66b5290008131b514a25fab2e32395b4dc1de490e2a1db576",
+      "symbols": 13
+    },
+    "server_v2/core/google_event_factory.py": {
+      "hash": "d4fc84a5e0097b27066f26f9bf1ccdb263c6ecd8ed93057c7f2392ca98cb3750",
+      "symbols": 3
+    },
+    "server_v2/core/google_gmail_client.py": {
+      "hash": "ebec9242b732c850f54c6db5da74ff8e5112cb939f9f4b0d560c8753a6deb9dd",
+      "symbols": 13
+    },
+    "server_v2/core/paths.py": {
+      "hash": "fd6a0bd9ec9885a93ca01edc470b62986c8d3ecd940cd92eaf196fb657303825",
+      "symbols": 1
+    },
+    "server_v2/core/reminder_db.py": {
+      "hash": "a9a6bc5ad4072d4a51ca9f6aafcdd494eb9d81085bd761934597b1f693f24322",
+      "symbols": 6
+    },
+    "server_v2/core/ricetta_config.py": {
+      "hash": "093d653503a130e9c45f2f0ba2b348fe195ab9067b7c08e8a0b12433138f92b6",
+      "symbols": 10
+    },
+    "server_v2/core/schemas.py": {
+      "hash": "f68371fec09a0e51d9a36ea17a565a907222a8f1f1a97ce2fc7da07f43bc68e6",
+      "symbols": 5
+    },
+    "server_v2/core/ssl_manager.py": {
+      "hash": "cc764bb8d34bfb63975c578084d2465fb194a0cb6d4ff19b5367be19ee8c675e",
+      "symbols": 8
+    },
+    "server_v2/core/template_manager copy.py": {
+      "hash": "c400b03fdd58637f17a2937d5a89b4cb10a0a0a237619dee05ea549913e076ec",
+      "symbols": 14
+    },
+    "server_v2/core/template_manager.py": {
+      "hash": "b6a31a175cf05c5b39ac9856decb0b92f7a34795f75fddb35d3be428c739cb21",
+      "symbols": 14
+    },
+    "server_v2/debug_igiene_paziente.py": {
+      "hash": "89feef12e9da520cc04d7ecc3c27b1e530aaddfb9daf91ad2d7189546d4cc5bf",
+      "symbols": 0
+    },
+    "server_v2/genera_gmail_token.py": {
+      "hash": "a360d472650c830a97040a6a785babc12a0ad014a33d9e9453c18210732bef5c",
+      "symbols": 0
+    },
+    "server_v2/generate_vapid_keys.py": {
+      "hash": "206e6d67cb8b20587e38be0b6514e92dd1ed101abd2d9dce5b481cd0f3d03e44",
+      "symbols": 1
+    },
+    "server_v2/legacy_ricetta/__init__.py": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "server_v2/legacy_ricetta/ricetta_service.py": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "server_v2/legacy_ricetta/ssl_legacy_helper.py": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "server_v2/legacy_ricetta/utils.py": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "server_v2/repositories/__init__.py": {
+      "hash": "0de73041fd78525372f51afb9ddce7d48fe4a150c805bd186966730ae09334ed",
+      "symbols": 0
+    },
+    "server_v2/repositories/calendar_repository.py": {
+      "hash": "01db3aa9c500de8726dc82afd026983ddeb71c01d6ce70ec9c31c075d58b97ae",
+      "symbols": 16
+    },
+    "server_v2/repositories/email_repository.py": {
+      "hash": "9ec21e203ee6809bea2f81900d32a08a0c6e2528030f087a1477bebafed76ce2",
+      "symbols": 30
+    },
+    "server_v2/repositories/fornitori_repository.py": {
+      "hash": "ecea7ca2dd35edfe99259e20fc6437c42f1381db320f1b740a485eccc64b6f1c",
+      "symbols": 16
+    },
+    "server_v2/repositories/materiali_repository.py": {
+      "hash": "5e529b5d7ec26246c77db91d3b23453a1a2d063ed19de776873ce7df55db32e3",
+      "symbols": 17
+    },
+    "server_v2/repositories/notification_repository.py": {
+      "hash": "7d84a6b513870299d96b49d4425f9b819fd1f34b2ee3af6472188cecb1f019c7",
+      "symbols": 7
+    },
+    "server_v2/repositories/piani_cura_repository.py": {
+      "hash": "454f4311623ce8d1e0a0a8f0f64f573ca1b739991bd6e55ea048d30f9ceecead",
+      "symbols": 7
+    },
+    "server_v2/repositories/prestazione_work_mapping_repository.py": {
+      "hash": "fdc6f6ade22b6efad9d4df54b3ba9d1b1f92a7907531e42dc3878fbfa63c44ac",
+      "symbols": 10
+    },
+    "server_v2/repositories/provider_repository.py": {
+      "hash": "a2bda66b19f178c1afa8932862ab0b5fba057b7eb5d05c09e13f9503a9d9b922",
+      "symbols": 5
+    },
+    "server_v2/repositories/statistiche_repository.py": {
+      "hash": "e70cb24e5e80c15872b803ca4245b91fecc6123558a2084a0ceaa5091cee6176",
+      "symbols": 16
+    },
+    "server_v2/repositories/task_repository.py": {
+      "hash": "7f651f6f518c92cab5e56de4ed99a0e209f77f759525bb4d5a81eb93fc4e385d",
+      "symbols": 11
+    },
+    "server_v2/repositories/todo_repository.py": {
+      "hash": "d0f926b0db246d9e799b2416244f5a37e9ab6518405111665f51944f0534b404",
+      "symbols": 16
+    },
+    "server_v2/repositories/user_repository.py": {
+      "hash": "71a623d107d2c6c6cebbf0d2bb94434b76d0bc0440f06bd711eb4aac553929e5",
+      "symbols": 8
+    },
+    "server_v2/repositories/work_repository.py": {
+      "hash": "d1ba00dec65208fb1caaa957299bae96cd056beb271b0d716be56bd02dc24c64",
+      "symbols": 10
+    },
+    "server_v2/run_v2.py": {
+      "hash": "06f865c0b4a1890cd69e345ed7993cc9e30d8ae506fdd1f47423567984cf0526",
+      "symbols": 9
+    },
+    "server_v2/scripts/add_user_id_to_steps.py": {
+      "hash": "a4a8b8843a2e662abff0805506a93456ce66ed18cae6419d62a1115a17a8609a",
+      "symbols": 1
+    },
+    "server_v2/scripts/analyze_2026_types.py": {
+      "hash": "414cb6a1ac6f840f5b70e9e7c81f9a094ce00b4bc48157da17254ffca8720d72",
+      "symbols": 1
+    },
+    "server_v2/scripts/analyze_deep_types.py": {
+      "hash": "c3ea112e643b3bff8dce4bf5f15baff77bda0206499e91b35c9ed0b0229a3311",
+      "symbols": 1
+    },
+    "server_v2/scripts/check_field_values.py": {
+      "hash": "6d247e2490ad8209f9139b8b97a2bbcebbbf9c53e3270e6229008e679da2850b",
+      "symbols": 1
+    },
+    "server_v2/scripts/compare_elenco.py": {
+      "hash": "662be4b5c46b600bcfe86a428f367b7858c59b97d42e4b847917a8dc79c394cb",
+      "symbols": 1
+    },
+    "server_v2/scripts/compare_prevent_items.py": {
+      "hash": "3824b18eaf720c03321ee44338640f13ab8929fd9573fe8308c0ac6cf44bba81",
+      "symbols": 1
+    },
+    "server_v2/scripts/debug_first_visits.py": {
+      "hash": "e367d5bb789c141b3e04bbef3f4a7e2b71c8a6b2be2e2854d6c6eea28835c478",
+      "symbols": 1
+    },
+    "server_v2/scripts/debug_monitor_start.py": {
+      "hash": "117f851ab34cf3527d3988c9b04ff355c57d1e5716a305081948581e980aed91",
+      "symbols": 1
+    },
+    "server_v2/scripts/find_link_in_prevent.py": {
+      "hash": "818cd0d8a2692973b19f30453176fb00187c3a407f06110d6344a6ac08543203",
+      "symbols": 1
+    },
+    "server_v2/scripts/hunt_link.py": {
+      "hash": "43f86f56fd1bf2573bd59716426b12d13b2cab2c24e38922c7ab085a99fe1991",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_candidates.py": {
+      "hash": "afb48efacdb0d2b2cf0e70dfaae73984d7746a5d0b6cb75a88a42dd1b6518dc5",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_dbf_guardia.py": {
+      "hash": "c8a7fe504b7ee33a69da6fb121cec6db20a084a5fd703173d510eb9482b8b3e7",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_elenco.py": {
+      "hash": "33e5fd86eda4e19b8d29e718e32810597db4b398d81e229c9c7580d22e55e3ca",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_plan_details.py": {
+      "hash": "d7395634c1a912269309294e95d1b720c1d47910c13677e10c8bb796edfe0006",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_planning_schema.py": {
+      "hash": "c1d83d8872eaf87fd041cd423393609db6fbd64607f66c2bb1fdbc3e7e82b2b9",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_planning_xx.py": {
+      "hash": "6fc7217d4007aaee00aee80d3f8219044b027912eb905c91e041b303c3c5e433",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_prevent_columns.py": {
+      "hash": "8921d4ec59e799dc173497e327be2f4a084e51cd7371c5d2ff2fd6b398a6568f",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_prevent_links.py": {
+      "hash": "0a2a29a4e3b14cf847ee27978c9d74c1cc7c8b8ba8f63c6ab840502dd47660d0",
+      "symbols": 1
+    },
+    "server_v2/scripts/inspect_social_db.py": {
+      "hash": "80747847f3688913cd498ccf940353e2754bf51481e2d72fb5466a58d5c84409",
+      "symbols": 3
+    },
+    "server_v2/scripts/migrate_legacy_data.py": {
+      "hash": "74ea426e9adfcfe0a51a85b63efeca3bb1cb9ebc0d03b7c627fffbd5be8a6d4d",
+      "symbols": 2
+    },
+    "server_v2/scripts/migrate_richiami_batch.py": {
+      "hash": "21cf7c544b5d68ea3ca7c04f81643312584ec4f3aec350d2947204e67160265e",
+      "symbols": 3
+    },
+    "server_v2/scripts/reset_admin_password.py": {
+      "hash": "d30ad37b4a2a5232e2f37db5fe3fabdbe5339f3b5966e0216bf15603deb09e42",
+      "symbols": 1
+    },
+    "server_v2/scripts/reset_users.py": {
+      "hash": "fc4de1c7a740e1c031804fe143352519bca344704c6fc0cf4ea6d9f1529c8632",
+      "symbols": 0
+    },
+    "server_v2/scripts/run_user_query.py": {
+      "hash": "3c7dae1bc4f436631c9c932dc1f52cf8ea79144524ff49ff6dd6ad4e309f69bd",
+      "symbols": 1
+    },
+    "server_v2/scripts/search_elenco_data.py": {
+      "hash": "048eac0afb0901744403fbc7970447c99481ab36786e2c38d278ee0d65699a4a",
+      "symbols": 1
+    },
+    "server_v2/scripts/seed_patient_education.py": {
+      "hash": "eb1a9f60618a792a72a8c8afdb5c79b12f57d56d2e5046d8739d64b2e14bcf81",
+      "symbols": 1
+    },
+    "server_v2/scripts/seed_social_accounts.py": {
+      "hash": "c355e43774aeff1747ff86d8e3538807b984b49a009bd86da2a5361e4666e757",
+      "symbols": 1
+    },
+    "server_v2/scripts/test_calvisi_analysis.py": {
+      "hash": "4658ec81b6a085061fa2ebe6dbcf63ed0efc59e9064976fe5d04131668bcec44",
+      "symbols": 1
+    },
+    "server_v2/scripts/test_materiali_migration.py": {
+      "hash": "659349de4e37b600da0b53a116ffc501053da0cda25367e637ab8a535ae4b50e",
+      "symbols": 6
+    },
+    "server_v2/scripts/verify_classification.py": {
+      "hash": "3f368ac0f489c19b8abf54ed0031c6c88fefbe6fa5cf3c9330c66a783c0a6ba8",
+      "symbols": 1
+    },
+    "server_v2/scripts/verify_migration.py": {
+      "hash": "64a29fdaa94f8e9d378eaffc65e10b119099681e504f67433003e2c1655c83d9",
+      "symbols": 1
+    },
+    "server_v2/scripts/verify_patient_plans.py": {
+      "hash": "ae9de296adf72de238ae1846b9681abb985d251e00ea0705716784c7a8a3c1c1",
+      "symbols": 1
+    },
+    "server_v2/scripts/verify_patient_preventivi.py": {
+      "hash": "32accd892490633608da79d8d6ee5c6a001d34a079e71c51fea0c60c90889579",
+      "symbols": 1
+    },
+    "server_v2/scripts/verify_provider_automation.py": {
+      "hash": "bb7029da7a954bb8028556e5de806e5fb47bd1b2cd68639be11aa127e427278f",
+      "symbols": 3
+    },
+    "server_v2/scripts/verify_reminder_deploy.py": {
+      "hash": "a0b9e29e05a24a8138774162322b5653ae7a55d546d48487638ae808c5c1f3af",
+      "symbols": 12
+    },
+    "server_v2/scripts/verify_scheduler_job.py": {
+      "hash": "03b272a4f5475ee665fc5f090c9601f267daf7296b35b21526ceb30492c1869d",
+      "symbols": 1
+    },
+    "server_v2/scripts/verify_stats_migration.py": {
+      "hash": "738644e757abe5b066d7b6c1cb12b4ae2c0cb92cbaccf7380e52e185fbf797a7",
+      "symbols": 1
+    },
+    "server_v2/scripts/verify_user_notification.py": {
+      "hash": "3d91b78ce25c7aa72af65fc79a865a91983e48821f93f744170fd15d0c323d5b",
+      "symbols": 4
+    },
+    "server_v2/services/__init__.py": {
+      "hash": "8383fc3ad8f4b504f278414d0acf80716a92615a6f870e6b66c35840f9faaed0",
+      "symbols": 0
+    },
+    "server_v2/services/actions/system_actions.py": {
+      "hash": "a9682963cc656f948af8ccb0a92fde198a48bb563c8a40065f780f03a588a4c3",
+      "symbols": 9
+    },
+    "server_v2/services/appointment_reminder_service.py": {
+      "hash": "ea9e15928a41b4881665b430b6b18feba13bb27d27e3c8ccaa21d1fb49c3d21f",
+      "symbols": 19
+    },
+    "server_v2/services/automation_log_service.py": {
+      "hash": "35e8a5e169f75b818eca82d34d25e73efe1cb14a79c2ea48f690f5aadab70251",
+      "symbols": 6
+    },
+    "server_v2/services/automation_service.py": {
+      "hash": "3a8c1d97d75ac03c8d42ac3ee4465e805a214b0b6ae011e3d47de6d14b16a13f",
+      "symbols": 14
+    },
+    "server_v2/services/base_service.py": {
+      "hash": "097a11c91f5976f8fd5c6c30a439271c15203a61fe2943c9073097abb5c0b13b",
+      "symbols": 8
+    },
+    "server_v2/services/calendar_service.py": {
+      "hash": "132a1694c07d373494eb619485566550de322696b103addbeb73bc2286493e32",
+      "symbols": 6
+    },
+    "server_v2/services/calendar_sync_engine.py": {
+      "hash": "3888f8ea1e425749061229f771f12322617466e389c0214a14883c281006a8eb",
+      "symbols": 9
+    },
+    "server_v2/services/calendar_sync_job.py": {
+      "hash": "3138a33406877bde0563e593bd76039c900db0d5cb339c71b961277906a99408",
+      "symbols": 7
+    },
+    "server_v2/services/callback_service.py": {
+      "hash": "88c0760e742adbb354c68dfb8a8b022eb0b10a3299fd132ea3b0322391e7769b",
+      "symbols": 5
+    },
+    "server_v2/services/cbct_service.py": {
+      "hash": "e34afe239fa545715a027bb436128e49f9c11c0b3310794275791efe8c081ae0",
+      "symbols": 20
+    },
+    "server_v2/services/change_detector.py": {
+      "hash": "32dbddb0e5acf74328e31b550609b415cdc353dbef65e8aeab102b045403b8d3",
+      "symbols": 8
+    },
+    "server_v2/services/change_logger.py": {
+      "hash": "e02f5ecc5df1d24955d3f7c0f4e9c7e2f6b437fc45d5ad253ae7a5dfe4165f04",
+      "symbols": 7
+    },
+    "server_v2/services/classificazioni_service.py": {
+      "hash": "de1a1af16879e43523772e3d18d9838c2e473779026f955ff13dbead314742e5",
+      "symbols": 11
+    },
+    "server_v2/services/conti_service.py": {
+      "hash": "e7a7613c18c92d06aba9822a7b99d5698cd326064eb9846be3d9b90bf795693e",
+      "symbols": 17
+    },
+    "server_v2/services/database_service.py": {
+      "hash": "85beb60872fbb519310f1aead23399c2e38720e09d3205c02833fb157b63bb79",
+      "symbols": 20
+    },
+    "server_v2/services/dbf_data_service.py": {
+      "hash": "ca474eb7ab8d6c52fb974ea0d545b1559a72ec3974de3b1845f2206e6db3a6ac",
+      "symbols": 8
+    },
+    "server_v2/services/economics/__init__.py": {
+      "hash": "1aaf38ba3724ffaf87be11c9c2fd1283b94ab9d5a05c4e54b27942d2ca11bb08",
+      "symbols": 0
+    },
+    "server_v2/services/economics/collaboratori_engine.py": {
+      "hash": "693ac3110f289f759e1cc4c4e14ae6780d4d0d4d0b156c7f0afb4a8bf2c18168",
+      "symbols": 4
+    },
+    "server_v2/services/economics/comparison_engine.py": {
+      "hash": "8baa2a0f0eef9c0cae0730913e6f9dcaee44083d4ebd3192966b62db17f64f81",
+      "symbols": 6
+    },
+    "server_v2/services/economics/data_normalizer.py": {
+      "hash": "2f85123e538e906ba8dd94b62669d17d1dcba97bc5851105a237acc7b3026bd6",
+      "symbols": 11
+    },
+    "server_v2/services/economics/forecast_engine.py": {
+      "hash": "2ab0a24643383b4269c7e2b0ddf3fbe3e2809d3ee14681bec6235e1fe5c7a108",
+      "symbols": 5
+    },
+    "server_v2/services/economics/kpi_engine.py": {
+      "hash": "73a9f5e2281b675d604d1d13f35f9be7231bc18f8e9426f9d3191c9da1e4bc8a",
+      "symbols": 6
+    },
+    "server_v2/services/economics/monthly_aggregator.py": {
+      "hash": "b4924ffb559fa84f663315df6bc104217da1dd45e33a8823b94507ff315b0cb6",
+      "symbols": 9
+    },
+    "server_v2/services/economics/prestazioni_engine.py": {
+      "hash": "ed2e7c142731ee57abaa3c37bf473695d0b67aea8b3fdada9064d75703008622",
+      "symbols": 7
+    },
+    "server_v2/services/economics/scenario_engine.py": {
+      "hash": "d735dd151f0cfd979b54db84f8958054e9d640fb61306376ee3ba7818fb1576c",
+      "symbols": 3
+    },
+    "server_v2/services/economics/seasonality_model.py": {
+      "hash": "1603b3f58e875f781dd70a1a4f66509a06866469614cc05fc3089e1a284973c9",
+      "symbols": 2
+    },
+    "server_v2/services/economics/trend_model.py": {
+      "hash": "8a631fbec00b99bf870eda23b1f8d51c985b534d1b6fbbc770e3865f45de8730",
+      "symbols": 3
+    },
+    "server_v2/services/email_service.py": {
+      "hash": "37a32c3d32a7bd8021426d520a29572a31f5f8250adaaf899de8907a835b39b8",
+      "symbols": 36
+    },
+    "server_v2/services/file_watcher.py": {
+      "hash": "85a06fadad355dfb19711efff959350bba4d3019cbd2499bfd4e100f2e126cab",
+      "symbols": 12
+    },
+    "server_v2/services/fornitori_service.py": {
+      "hash": "a4f63eb9c8bb42e442e6184c4701872d7a42163a36b6119e9acf08b5dc0d5753",
+      "symbols": 8
+    },
+    "server_v2/services/link_tracker_service.py": {
+      "hash": "5496fa048aeeb471e8fd1e17111a156e90e39928c95a25a94be5d0a177007889",
+      "symbols": 4
+    },
+    "server_v2/services/materiali_migration_service.py": {
+      "hash": "d7a355aa9878a66c26696654bf5e120ce0a96e9cc67ad958d7cbaa56a7942045",
+      "symbols": 24
+    },
+    "server_v2/services/materiali_service.py": {
+      "hash": "83f51995e86abcde306670332e3b866e2dbc098ad979b3c503195ffb8a38dafa",
+      "symbols": 11
+    },
+    "server_v2/services/monitoring_service.py": {
+      "hash": "6b450bd419d3e0355062b7716d7334e3a558f57c13d62e7445b5e89bf10ef9e6",
+      "symbols": 23
+    },
+    "server_v2/services/notification_service.py": {
+      "hash": "db2b79b2fe149b57d7864a5bbfc9aaf56e18a6bc4019a81a131b17e0eb55968f",
+      "symbols": 5
+    },
+    "server_v2/services/pazienti_service.py": {
+      "hash": "c58d776cbf804f05194c936d424a67b590553bda3037e98d23235d87fd761a48",
+      "symbols": 9
+    },
+    "server_v2/services/piani_cura_service.py": {
+      "hash": "b313e4abbb5fdcce75407b44e290146e24fd89fa6c773b1d1472a3a28d852c21",
+      "symbols": 4
+    },
+    "server_v2/services/provider_automation_service.py": {
+      "hash": "91578502a85d0cf93946afd149eaf3ebd2dff6caa592bfb75d7df7ea22238b11",
+      "symbols": 3
+    },
+    "server_v2/services/provider_service.py": {
+      "hash": "eb602040c313096eff6e3ff162905e1af667ce0431ab06ff36269f50cd90ef3a",
+      "symbols": 7
+    },
+    "server_v2/services/push_notification_service.py": {
+      "hash": "23baf0de19e7160f93d60f338a618d629c980c41a0c61fb9728a724f4595d0d8",
+      "symbols": 7
+    },
+    "server_v2/services/reminder_dispatch_engine.py": {
+      "hash": "503bb9df16b58a495e75dda580d449b12b2a88c93d05e594d30d2d4cdcc97e55",
+      "symbols": 8
+    },
+    "server_v2/services/rentri_service.py": {
+      "hash": "29514c5aa812c769f7111b5cb252c6a36e69ebf3a3d2a2ddde0b411f2b743dc2",
+      "symbols": 16
+    },
+    "server_v2/services/ricetta_email_service.py": {
+      "hash": "516b1ede2d6824a98a52ef06340cf101fdc52f75dc41cef6476f833156dab463",
+      "symbols": 1
+    },
+    "server_v2/services/ricette_db_service.py": {
+      "hash": "36d5ab43990f3381d0ef5d07c0ccd0ab5ff1d3c6d70e114c33e16f94ba7da358",
+      "symbols": 10
+    },
+    "server_v2/services/ricette_ts_service.py": {
+      "hash": "4cf1b512538c7b05e142055282619183ae5d345b1a9bd1a72c359fed8ff2f465",
+      "symbols": 34
+    },
+    "server_v2/services/richiami_service.py": {
+      "hash": "524266ff13644344523ad22beaa9d925da90d33af8488379b46c254d9fcaa67a",
+      "symbols": 12
+    },
+    "server_v2/services/scheduler_service.py": {
+      "hash": "9353005c8cb2054fcb4f131775d25588e02cb12bff7638f5701e5f6b779036f0",
+      "symbols": 22
+    },
+    "server_v2/services/seo/__init__.py": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "server_v2/services/seo/competitor_analysis copy.py": {
+      "hash": "c1bd1f4adfed67876b5f27b02cbc6f087a7acf54d003100ce49f1c3e1d4649bf",
+      "symbols": 4
+    },
+    "server_v2/services/seo/competitor_analysis.py": {
+      "hash": "ed0e8e27ca91999c125c2ceceda693b2be3993c88d512876871c5906c545cf2b",
+      "symbols": 6
+    },
+    "server_v2/services/seo/google_maps_competitors.py": {
+      "hash": "a10923a33fab088a312fc51e5e92e5a69834ac204e9795adbd4cc44ad3b112e1",
+      "symbols": 1
+    },
+    "server_v2/services/seo/keyword_search copy.py": {
+      "hash": "b34d5cbe5dfbe8a85d26bec689f0026a5843f9310c295c93115bc8eac6b7dd17",
+      "symbols": 1
+    },
+    "server_v2/services/seo/keyword_search.py": {
+      "hash": "116457cc8a501876ee2698fcc0194e88c9f52c4e20beb32e92f0b40389e48b4f",
+      "symbols": 3
+    },
+    "server_v2/services/seo/seo_service.py": {
+      "hash": "c6d9c28b18c7299fe41f79b75ab6a510bf03ff2b0b282350d1e0e0de29f3da66",
+      "symbols": 12
+    },
+    "server_v2/services/simulation_service.py": {
+      "hash": "8f4a48e80575f10478c4f8a8b56ddb19506042c0ad121ad2769b89c9d2ec50fe",
+      "symbols": 7
+    },
+    "server_v2/services/slot_finder_service.py": {
+      "hash": "f7792d1037e6bea5033d27fbe8cbe58cd5a730f4bd8edee3777c45686910c71d",
+      "symbols": 11
+    },
+    "server_v2/services/sms_service.py": {
+      "hash": "70008991258c6fca3828b704aa964e519db800a03a70e549efcf2dbb68ab4b55",
+      "symbols": 27
+    },
+    "server_v2/services/snapshot_manager.py": {
+      "hash": "40bf6601bb871aea3658aa4b5abb85067b550af6312e18be4154f4cfb9b32a31",
+      "symbols": 24
+    },
+    "server_v2/services/spese_fornitori_service.py": {
+      "hash": "4b40e0b842ebf955a83ea2db09ffb38107164fc304527427039644a60b46bc6a",
+      "symbols": 15
+    },
+    "server_v2/services/statistiche_service.py": {
+      "hash": "7e135040dd5c08f83305a6f68aa309927a8fdcd84560e1e1e6507c7b3debb114",
+      "symbols": 6
+    },
+    "server_v2/services/sync_state_manager.py": {
+      "hash": "7ac5c539031146b209a7b112b5f92a2673f2b2eaab891bb4739492ad056616cc",
+      "symbols": 17
+    },
+    "server_v2/services/template_manager.py": {
+      "hash": "6f4ffcabbbedaf3f9ec11d5e6e780198c919b090bcc160d96bc2951cc9157d14",
+      "symbols": 9
+    },
+    "server_v2/services/todo_escalation_job.py": {
+      "hash": "a2b0b37162184ec333b4e77da201b55ddfc891c92ed87c29eddc095800fe5379",
+      "symbols": 5
+    },
+    "server_v2/services/todo_service.py": {
+      "hash": "9a148b5ddbb711253506b54d1c667927e4aa67efcdb50fb4b29c91502303e3ab",
+      "symbols": 20
+    },
+    "server_v2/services/trigger_config.py": {
+      "hash": "0e7a5d7a24a85ea2860d1e5559a132e638607169655d3841ee05a925c1083d16",
+      "symbols": 14
+    },
+    "server_v2/services/websocket_service.py": {
+      "hash": "9dbdf71843d820e9986df4b3647dbe6005eb77de2aaeefac153154076b286662",
+      "symbols": 11
+    },
+    "server_v2/services/work_service.py": {
+      "hash": "f72ed48bb8fd0e05ca514534e660cfe6e4d3d0f5a1a76fc5c0b79a0283ebefbf",
+      "symbols": 16
+    },
+    "server_v2/tests/__init__.py": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symbols": 0
+    },
+    "server_v2/tests/test_cbct_service.py": {
+      "hash": "be9f6ca1f897171ab9a237c872c814b1559b67e803458bce531ddc0e55cbf2d2",
+      "symbols": 5
+    },
+    "server_v2/tests/test_create_task_notification.py": {
+      "hash": "274ea4caba4c7246aaa08d984d4105276135c83c640b6014a73a9aefb46a9eda",
+      "symbols": 11
+    },
+    "server_v2/tests/test_paz_da_richiamare.py": {
+      "hash": "c61cc30d542e74fb7d6602aa0d7181bf5fe934d073d53262fbb30cd5e4677f33",
+      "symbols": 3
+    },
+    "server_v2/tests/test_push_notification.py": {
+      "hash": "cd308f8dc314a970b45045d8eb93f88fb3e707943708314f0b8d8649a67165de",
+      "symbols": 1
+    },
+    "server_v2/tests/test_ricetta_fixes.py": {
+      "hash": "49e7bbd8fe8d113c458efb9dda070ab807295be7e71f2d5d507779ef4766efa9",
+      "symbols": 3
+    },
+    "server_v2/tests/test_richiamo_ok.py": {
+      "hash": "12b7cf5002295c00e2eeb1fd00ca9dd14040641b8c3f18eaa089a78250379911",
+      "symbols": 2
+    },
+    "server_v2/tests/test_scraping.py": {
+      "hash": "1307ab6c0d53cde72307bdb199ede68844f731f89c3d58c56d758d8d4dc740da",
+      "symbols": 1
+    },
+    "server_v2/tests/test_seo_service.py": {
+      "hash": "6ca9481fad2a41782f8c54310fd653257a5e7b9bbc6d181fd6049776e867d3ab",
+      "symbols": 0
+    },
+    "server_v2/tests/test_slot_finder.py": {
+      "hash": "fb67dc6c7a0e8740bf4567106b7a9b668554957e2a8c9336e23578bfc840d96f",
+      "symbols": 2
+    },
+    "server_v2/utils/__init__.py": {
+      "hash": "e187f5ea21f26fbfdf3a50ae6c9f0fa588c70c6bdb3c205c3e99281b731fe0a1",
+      "symbols": 0
+    },
+    "server_v2/utils/auth_utils.py": {
+      "hash": "4724e13848da6b092a8c54cf474ac023744d16449c614a5ee85ecefc5d5bdfc2",
+      "symbols": 3
+    },
+    "server_v2/utils/dbf_utils.py": {
+      "hash": "24fd169410bc6ed88891c8c1f1c90c6d228a818e79327bd4c5cdc7051c501e17",
+      "symbols": 49
+    },
+    "server_v2/utils/old_automation_service.py": {
+      "hash": "425b2fed5f15c4d7588fcfe9ea127bd5b841fac874bce591a299cc87eafc055b",
+      "symbols": 21
+    },
+    "server_v2/utils/ricetta_utils.py": {
+      "hash": "452e3d5fe2344817e4b6d07dce91d037982483e0fc247697ee948b6ee4edfb1f",
+      "symbols": 23
+    },
+    "tests/__init__.py": {
+      "hash": "dc0ebfc20852fc2afeef8268b1f57cd6a10bbc5639d5f539a5c060c44bb76833",
+      "symbols": 0
+    },
+    "tests/complete_oauth_flow.py": {
+      "hash": "23bcde2c597eb6f022b3206de92c8d9e2ea6c9ee624f1acb3aefae0fabdf40ab",
+      "symbols": 7
+    },
+    "tests/debug_dbf_fields.py": {
+      "hash": "643207ffe660a711abe2524c4da48534aa741a9dd742054940bdfb8a12f8e2b3",
+      "symbols": 1
+    },
+    "tests/debug_routes.py": {
+      "hash": "e6aaff7665af9d87fef2759272d21ca5dc6b592409eaff2dd47dcccaadc3a2bb",
+      "symbols": 1
+    },
+    "tests/demo.py": {
+      "hash": "97bcf01b77c943f3f04110f8a3acebb779c52183a5498a4dbeeeb75a24f6ff98",
+      "symbols": 8
+    },
+    "tests/generate_auth_url.py": {
+      "hash": "b5f8c26bee481b2e9edfabf7ee89bde72e655d2d760e91ee467e63d735f36332",
+      "symbols": 1
+    },
+    "tests/production_oauth_handler.py": {
+      "hash": "500f6240d545cf85bffe8b8df2703a431cf9d93f668cb4aa213dc92079a09392",
+      "symbols": 9
+    },
+    "tests/run_tests.py": {
+      "hash": "8e6eccc2cf88a69e4f8383964ffbb321022acab687ec3232674f0e3cfeaaa344",
+      "symbols": 9
+    },
+    "tests/setup_calendar_auth.py": {
+      "hash": "2f87a5cd87d60c8e5bf19ebe219a232aa3edb22fb5e63f953d4087b1d3064fa3",
+      "symbols": 3
+    },
+    "tests/simple_demo.py": {
+      "hash": "43d969def8f01111c46670918d2dce459d030182a28ec724405530f5f2531612",
+      "symbols": 4
+    },
+    "tests/test_base_repository.py": {
+      "hash": "9d8472ef818f9abb059e749d5684610010a3571b4dcc300533cb1e8f96bf9970",
+      "symbols": 30
+    },
+    "tests/test_calendar_auth.py": {
+      "hash": "8d0891aefe652e7482f87a33acd8279c903cc2f63b5cf6c8d461fb364d823cd9",
+      "symbols": 5
+    },
+    "tests/test_calendar_auth_simple.py": {
+      "hash": "c1df9366b16fc6d1d15d0ee4fb7d248ad0318adbb8485834fcb02d4577d7e1cd",
+      "symbols": 5
+    },
+    "tests/test_calendar_event.py": {
+      "hash": "5e914c5959d65b8c23219250b665cb5a9f7630e19c835d915929bd3a46be66bd",
+      "symbols": 6
+    },
+    "tests/test_calendar_simple.py": {
+      "hash": "044d64924bb3b013e2023d9fbf46a0c446773cb1856a50403507687ab836d931",
+      "symbols": 6
+    },
+    "tests/test_calendar_v2.py": {
+      "hash": "e21e3f057494a75654471907b14ab23268bb32d51cbf1be368a3204174184588",
+      "symbols": 7
+    },
+    "tests/test_calendar_v2_complete.py": {
+      "hash": "9721e74106f3430463ea6549964552456db7ecf389f125c093149337485679eb",
+      "symbols": 7
+    },
+    "tests/test_calendar_with_data.py": {
+      "hash": "25e2f2af5db95ebd398adac06865b3173beabd35ef83d7ee01a0a30ba15e80e8",
+      "symbols": 1
+    },
+    "tests/test_check_id_sessione.py": {
+      "hash": "e90c841f74d23675a4f8e64ebdb311dda82d4a2a3986923cdcc6d9a9da53cd53",
+      "symbols": 1
+    },
+    "tests/test_chiamata_reale_ts.py": {
+      "hash": "a7b476d5386411e73faeac246c6ca6dae2934b5859b2ef0565802564ea1907bb",
+      "symbols": 1
+    },
+    "tests/test_cifratura_kit.py": {
+      "hash": "ecd2ad26ed745befb120b1537f77f8c59806e7574141fa92301e51a0210eac1d",
+      "symbols": 1
+    },
+    "tests/test_compatibility_bridge.py": {
+      "hash": "b5939f59b76a1e74bf1095c060c7e00cafc9785e1fb2db1ade5506ae64850c62",
+      "symbols": 33
+    },
+    "tests/test_config_integration.py": {
+      "hash": "77a9402b4e3e0b27028cd4ebda602f96a70fb9b15eca48b4033347049d63cc71",
+      "symbols": 4
+    },
+    "tests/test_crud.py": {
+      "hash": "782ac1a57a1f0d841410d7c7fd33ea3c255a28c83a7db595166d58dd344c0ce3",
+      "symbols": 5
+    },
+    "tests/test_database_manager.py": {
+      "hash": "d10a168bc4355d74d1106030daaeacba08020a9bbeea6ec73ed8c9424b80ea23",
+      "symbols": 20
+    },
+    "tests/test_dbf_utils.py": {
+      "hash": "3f8fcb8b0a49e24c7161bf976c6353fc2026dd8a388be9e2bad7ba32cc900f52",
+      "symbols": 30
+    },
+    "tests/test_enriched_appointments.py": {
+      "hash": "bf85330567752b82be544ddc5bfba6583b6a4bae827b3e30f65e980697cc47cd",
+      "symbols": 1
+    },
+    "tests/test_environment_manager_fixes.py": {
+      "hash": "6e28f8f3c44a5655740569b78f03fc1c8705fe1a76450462f0177bf9c4f0648c",
+      "symbols": 13
+    },
+    "tests/test_event_format.py": {
+      "hash": "f433b58e235916daae881bbf4d6fbdf7129ae9308aaab3fc3a3946b11b9284e3",
+      "symbols": 2
+    },
+    "tests/test_event_format_simple.py": {
+      "hash": "c01db5ba6d9c666c6d23de1e95d0609e6e17bd6dc926016594079dd5e2f6866d",
+      "symbols": 5
+    },
+    "tests/test_event_safe.py": {
+      "hash": "b5d467b4f56da741bd191af011bc581e609155ed2ad90eb618ae2e9af2e3a315",
+      "symbols": 3
+    },
+    "tests/test_genera_id_sessione.py": {
+      "hash": "63a0b19f93cdab4ea2364cfb4e9f1183ca2c0254cd13bbba9a1570cda8606502",
+      "symbols": 1
+    },
+    "tests/test_integrated_calendar.py": {
+      "hash": "f29edb1398a180b5608c2147d5c940d3e06ba0e0895e97317006d83c4cdbe54d",
+      "symbols": 8
+    },
+    "tests/test_login.py": {
+      "hash": "0d029b005b67601e84d4443540d9d1877b001d5606d538acedc3dbaf133a7b3f",
+      "symbols": 7
+    },
+    "tests/test_login_simple.py": {
+      "hash": "a294fdabf4eba2eb0375b19dd1e42cd56354024e69be8e605d049571c35da505",
+      "symbols": 6
+    },
+    "tests/test_quick.py": {
+      "hash": "090ca15e9a0d61bc85cb819c51ede48dfb7a80f663a407208ae4d57bc8d3b05d",
+      "symbols": 7
+    },
+    "tests/test_regole.py": {
+      "hash": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
+      "symbols": 0
+    },
+    "tests/test_ricetta_integration.py": {
+      "hash": "a2c4bf6601fafd64e0b068c7d02f39306442308f5dc56697b5b685d84b289510",
+      "symbols": 12
+    },
+    "tests/test_service_layer.py": {
+      "hash": "69e904ff44011d9df4a7d74d3c565fb5b286556595c6a790949f7520a992ba28",
+      "symbols": 37
+    },
+    "tests/test_simple_calendar_v2.py": {
+      "hash": "a1a02cd87773e355bfd1aecaa81c17f0c80a4ae5383b3e4acee1cc30dcd89c0d",
+      "symbols": 5
+    },
+    "tests/test_sms_templates_integration.py": {
+      "hash": "223f6adba0d1c10c0b6d403bc0ca67910a08adade52eded2955a59db37de9da1",
+      "symbols": 6
+    }
+  }
+}

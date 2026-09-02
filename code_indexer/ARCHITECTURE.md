@@ -244,6 +244,13 @@ server/services/docker.py
 
 L'LLM riceve solo ciò che serve.
 
+### Output per agenti
+
+Il Context Builder produce un *task packet* JSON e una versione testuale del
+contesto. Il packet contiene file prioritari, simboli, dipendenze, caller e
+relazioni semantiche (route HTTP e tabelle database), così un agente può
+iniziare un task senza una scansione indiscriminata del repository.
+
 Query Engine
 
 Espone interrogazioni:
@@ -259,6 +266,23 @@ find_dependencies()
 find_callers()
 
 build_context()
+
+## Uso
+
+```bash
+# aggiorna l'indice; i file invariati vengono riusati dalla cache
+python -m code_indexer index
+
+# rigenera integralmente l'indice
+python -m code_indexer index --force
+
+# restituisce contesto e task packet per un dominio o un task
+python -m code_indexer query calendar
+python -m code_indexer query "calendar sincronizzazione appuntamenti"
+```
+
+Gli artefatti sono salvati in `knowledge/output/`; i task packet generati sono
+salvati in `knowledge/context_cache/`.
 Skill Layer
 
 La Skill non contiene la logica di analisi.

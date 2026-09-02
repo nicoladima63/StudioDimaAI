@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   CCard, CCardBody, CCardHeader,
   CButton, CSpinner, CBadge, CAlert,
@@ -41,6 +41,23 @@ function statoBadge(stato: string) {
   }
   return <CBadge color={map[stato] ?? 'secondary'}>{stato}</CBadge>
 }
+
+function messageTypeBadge(type: RecentComm['type']) {
+  const labels: Record<RecentComm['type'], string> = {
+    '24h': '24 ore',
+    '2h': '2 ore',
+    followup: 'Follow-up',
+  }
+  const colors: Record<RecentComm['type'], string> = {
+    '24h': 'info',
+    '2h': 'warning',
+    followup: 'secondary',
+  }
+  return <CBadge color={colors[type]}>{labels[type]}</CBadge>
+}
+
+type SortColumn = 'patient' | 'appointment' | 'sent'
+type SortDirection = 'asc' | 'desc'
 
 // ---------------------------------------------------------------------------
 // StatusCard
@@ -89,6 +106,57 @@ const EvolutionSettingsPage: React.FC = () => {
   const [convMessages, setConvMessages] = useState<EvoMessage[]>([])
   const [convLoading, setConvLoading] = useState(false)
   const [convError, setConvError] = useState<string | null>(null)
+  const [sortColumn, setSortColumn] = useState<SortColumn>('sent')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(direction => direction === 'asc' ? 'desc' : 'asc')
+      return
+    }
+    setSortColumn(column)
+    setSortDirection(column === 'patient' ? 'asc' : 'desc')
+  }
+
+  const sortedCommunications = useMemo(() => {
+    if (!status) return []
+
+    return [...status.recent_communications].sort((a, b) => {
+      const values: Record<SortColumn, [string, string]> = {
+        patient: [a.patient_name, b.patient_name],
+        appointment: [`${a.appointment_date} ${a.appointment_time}`, `${b.appointment_date} ${b.appointment_time}`],
+        sent: [a.created_at, b.created_at],
+      }
+      const [aValue, bValue] = values[sortColumn]
+      const comparison = aValue.localeCompare(bValue, 'it', { numeric: true })
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+  }, [status, sortColumn, sortDirection])
+
+  const sortIndicator = (column: SortColumn) => (
+    <span className="ms-1" aria-hidden="true">
+      {sortColumn === column ? (sortDirection === 'asc' ? '↑' : '↓') : '↕'}
+    </span>
+  )
+
+  const sortableHeader = (label: string, column: SortColumn) => (
+    <CTableHeaderCell
+      role="button"
+      tabIndex={0}
+      className="user-select-none text-nowrap"
+      style={{ cursor: 'pointer' }}
+      onClick={() => handleSort(column)}
+      onKeyDown={event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          handleSort(column)
+        }
+      }}
+      aria-sort={sortColumn === column ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+    >
+      {label}{sortIndicator(column)}
+    </CTableHeaderCell>
+  )
 
   const handleOpenConversation = async (c: RecentComm) => {
     setSelectedComm(c)
@@ -362,32 +430,34 @@ const EvolutionSettingsPage: React.FC = () => {
               </CAlert>
             )}
 
-            {/* Log reminder + QR affiancati */}
+            {/* Tabella reminder a larghezza piena con scorrimento interno */}
             <CRow className="g-3 align-items-start">
-              <CCol xs={12} md={8}>
-                <CCard>
+              <CCol xs={12}>
+                <CCard className="d-flex flex-column" style={{ height: 'calc(100vh - 330px)', minHeight: 360 }}>
                   <CCardHeader><strong>Reminder inviati</strong></CCardHeader>
-                  <CCardBody className="p-0">
+                  <CCardBody className="p-0 flex-grow-1 overflow-hidden">
                     {status.recent_communications.length === 0 ? (
                       <div className="text-muted text-center py-4">Nessuna comunicazione registrata</div>
                     ) : (
-                      <div style={{ maxHeight: 500, overflowY: 'auto' }}>
+                      <div className="h-100" style={{ overflowY: 'auto' }}>
                       <CTable hover responsive small className="mb-0">
                         <CTableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                           <CTableRow>
-                            <CTableHeaderCell>Paziente</CTableHeaderCell>
-                            <CTableHeaderCell>Appuntamento</CTableHeaderCell>
+                            {sortableHeader('Paziente', 'patient')}
+                            {sortableHeader('Appuntamento', 'appointment')}
+                            <CTableHeaderCell>Tipo</CTableHeaderCell>
                             <CTableHeaderCell>Canale</CTableHeaderCell>
                             <CTableHeaderCell>Stato</CTableHeaderCell>
-                            <CTableHeaderCell>Inviato</CTableHeaderCell>
+                            {sortableHeader('Inviato', 'sent')}
                             <CTableHeaderCell></CTableHeaderCell>
                           </CTableRow>
                         </CTableHead>
                         <CTableBody>
-                          {status.recent_communications.map(c => (
+                          {sortedCommunications.map(c => (
                             <CTableRow key={c.id}>
                               <CTableDataCell className="fw-semibold">{c.patient_name}</CTableDataCell>
                               <CTableDataCell className="text-nowrap">{c.appointment_date} {c.appointment_time}</CTableDataCell>
+                              <CTableDataCell>{messageTypeBadge(c.type)}</CTableDataCell>
                               <CTableDataCell>{channelBadge(c.channel)}</CTableDataCell>
                               <CTableDataCell>{statoBadge(c.stato)}</CTableDataCell>
                               <CTableDataCell className="text-muted small text-nowrap">
@@ -413,7 +483,7 @@ const EvolutionSettingsPage: React.FC = () => {
 
               {/* QR card: visibile solo se istanza esiste e non ancora connessa */}
               {status.instance_exists && status.wa_state !== 'open' && (
-              <CCol xs={12} md={4}>
+              <CCol xs={12}>
                 <CCard>
                   <CCardHeader><strong>QR WhatsApp</strong></CCardHeader>
                   <CCardBody className="d-flex flex-column align-items-center gap-3">
