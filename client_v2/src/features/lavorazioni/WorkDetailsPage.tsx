@@ -178,22 +178,21 @@ const WorkDetailsPage: React.FC = () => {
                                             </div>
 
                                             <div>
+                                                {isCompleted && (
+                                                    <span className="text-success small fw-bold me-3">Completato il {new Date(step.updated_at).toLocaleDateString()}</span>
+                                                )}
                                                 {((isActive && (step.user_id === 'tutti' || (step.user_id && currentUser && step.user_id.toString() === currentUser.id.toString()))) || isCompleted) && (
                                                     <CButton
                                                         color={isCompleted ? 'warning' : 'success'}
-                                                        {...(isCompleted ? { variant: 'outline' as const } : {})}
                                                         className={isCompleted ? '' : 'text-white'}
                                                         onClick={() => isCompleted ? handleUndoCompleteStep(step.id) : handleCompleteStep(step.id)}
                                                     >
                                                         <CIcon icon={isCompleted ? cilActionUndo : cilCheckCircle} className="me-2" />
-                                                        {isCompleted ? 'Da eseguire' : 'Fatto'}
+                                                        {isCompleted ? 'Fatto/Annulla' : 'Da fare'}
                                                     </CButton>
                                                 )}
                                                 {isActive && step.user_id !== 'tutti' && (!step.user_id || !currentUser || step.user_id.toString() !== currentUser.id.toString()) && (
                                                     <span className="text-muted small">Assegnato a: {getUserName(step.user_id)}</span>
-                                                )}
-                                                {isCompleted && (
-                                                    <span className="text-success small fw-bold me-3">Completato il {new Date(step.updated_at).toLocaleDateString()}</span>
                                                 )}
                                                 {isPending && <span className="text-muted small">In attesa</span>}
                                             </div>

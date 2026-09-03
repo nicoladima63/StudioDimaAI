@@ -256,18 +256,23 @@ class TodoRepository(BaseRepository):
                 logger.warning(f"User {user_id} attempted to snooze message {message_id}, but is not the recipient")
                 return False
 
-            # Calculate new due_date
+            # Calculate the new due date. A snooze from the dashboard must
+            # always make an overdue todo actionable again: adding one day to
+            # an old deadline would leave it overdue (potentially for months).
             current_due_date = message.get('due_date')
             if current_due_date:
-                if 'T' in current_due_date:
-                    due_date_obj = datetime.fromisoformat(current_due_date.replace('Z', '+00:00'))
+                if isinstance(current_due_date, datetime):
+                    due_date_obj = current_due_date
                 else:
-                    due_date_obj = datetime.strptime(current_due_date, '%Y-%m-%d')
+                    due_date_obj = datetime.fromisoformat(
+                        str(current_due_date).replace('Z', '+00:00')
+                    )
 
-                new_due_date = due_date_obj + timedelta(days=days)
+                base_date = max(due_date_obj.date(), datetime.now().date())
+                new_due_date = base_date + timedelta(days=days)
             else:
-                # If no due_date, set to X days from now
-                new_due_date = datetime.now() + timedelta(days=days)
+                # If no due date is set, schedule it X days from today.
+                new_due_date = datetime.now().date() + timedelta(days=days)
 
             # Calculate effective urgency (same logic as frontend getEffectiveUrgency)
             current_urgency = message.get('urgency_level', 'normal')

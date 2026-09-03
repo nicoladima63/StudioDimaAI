@@ -1,0 +1,707 @@
+{
+  "schema_version": 1,
+  "task": "todos",
+  "files": [
+    {
+      "path": "client_v2/src/services/api/todos.ts",
+      "role": "api",
+      "score": 33,
+      "matched_terms": [
+        "todo"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+        "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+        "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+        "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+        "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+        "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+        "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+        "file:client_v2/src/services/api/index.ts"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+      "role": "page",
+      "score": 33,
+      "matched_terms": [
+        "todo"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/store/auth.store.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/services/api/user.service.ts",
+        "file:client_v2/src/types/index.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/todo_service.py",
+      "role": "service",
+      "score": 30,
+      "matched_terms": [
+        "todo"
+      ],
+      "dependencies": [
+        "logging",
+        "typing",
+        "datetime",
+        "core.database_manager",
+        "core.exceptions",
+        "repositories.todo_repository",
+        "services.base_service",
+        "core.base_repository",
+        "services.notification_service",
+        "app_v2"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/api/v2_todos.py",
+      "role": "api",
+      "score": 29,
+      "matched_terms": [
+        "todo"
+      ],
+      "dependencies": [
+        "flask",
+        "flask_jwt_extended",
+        "core.database_manager",
+        "services.todo_service",
+        "logging"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/repositories/todo_repository.py",
+      "role": "repository",
+      "score": 28,
+      "matched_terms": [
+        "todo"
+      ],
+      "dependencies": [
+        "logging",
+        "typing",
+        "core.base_repository",
+        "core.database_manager",
+        "core.exceptions",
+        "datetime",
+        "datetime"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/todo_escalation_job.py",
+      "role": "service",
+      "score": 21,
+      "matched_terms": [
+        "todo"
+      ],
+      "dependencies": [
+        "logging",
+        "datetime",
+        "typing",
+        "core.database_manager",
+        "repositories.todo_repository",
+        "services.notification_service",
+        "app_v2"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/dashboard/components/TodoWidget.tsx",
+      "role": "component",
+      "score": 16,
+      "matched_terms": [],
+      "dependencies": [
+        "react",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "react-router-dom",
+        "file:client_v2/src/store/auth.store.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/features/dashboard/components/TodoModal.tsx"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "role": "component",
+      "score": 13,
+      "matched_terms": [],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "file:client_v2/src/store/auth.store.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/services/api/user.service.ts",
+        "file:client_v2/src/types/index.ts",
+        "react-hot-toast"
+      ],
+      "callers": [
+        "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+        "file:client_v2/src/features/todos/pages/TodosPage.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/services/api/index.ts",
+      "role": "api",
+      "score": 11,
+      "matched_terms": [],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts",
+        "file:client_v2/src/services/api/auth.service.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/services/api/base.service.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/store/auth.store.ts"
+      ]
+    },
+    {
+      "path": "client_v2/src/services/api/user.service.ts",
+      "role": "api",
+      "score": 11,
+      "matched_terms": [],
+      "dependencies": [
+        "file:client_v2/src/services/api/base.service.ts",
+        "file:client_v2/src/types/index.ts",
+        "file:client_v2/src/types/index.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+        "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+        "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+        "file:client_v2/src/store/user.store.ts"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+      "role": "component",
+      "score": 9,
+      "matched_terms": [],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "file:client_v2/src/store/auth.store.ts",
+        "file:client_v2/src/services/api/todos.ts",
+        "file:client_v2/src/services/api/user.service.ts",
+        "file:client_v2/src/types/index.ts",
+        "react-hot-toast"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/store/auth.store.ts",
+      "role": "state",
+      "score": 9,
+      "matched_terms": [],
+      "dependencies": [
+        "zustand",
+        "zustand/middleware",
+        "file:client_v2/src/types/index.ts",
+        "file:client_v2/src/services/api/index.ts",
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/App.tsx",
+        "file:client_v2/src/components/layout/AppSidebar.tsx",
+        "file:client_v2/src/components/layout/AppSidebarNav.tsx",
+        "file:client_v2/src/components/layout/Header.tsx",
+        "file:client_v2/src/components/layout/Layout.tsx",
+        "file:client_v2/src/components/layout/MobileDrawer.tsx",
+        "file:client_v2/src/components/layout/ProtectedRoute.tsx",
+        "file:client_v2/src/components/ui/NotificationBell.tsx",
+        "file:client_v2/src/features/auth/pages/LoginPage.tsx",
+        "file:client_v2/src/features/auth/pages/RegisterPage.tsx"
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "name": "TodoEscalationJob",
+      "kind": "class",
+      "path": "server_v2/services/todo_escalation_job.py",
+      "line": 12,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "TodoService",
+      "kind": "class",
+      "path": "server_v2/services/todo_service.py",
+      "line": 13,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "loadTodos",
+      "kind": "component",
+      "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+      "line": 69,
+      "information_score": 45,
+      "category": "support"
+    },
+    {
+      "name": "TodoRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/todo_repository.py",
+      "line": 10,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "create_todo",
+      "kind": "function",
+      "path": "server_v2/services/todo_service.py",
+      "line": 23,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "create_todo_from_step",
+      "kind": "function",
+      "path": "server_v2/services/todo_service.py",
+      "line": 78,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_all_todos",
+      "kind": "function",
+      "path": "server_v2/services/todo_service.py",
+      "line": 131,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "update_todo",
+      "kind": "function",
+      "path": "server_v2/services/todo_service.py",
+      "line": 163,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "auto_complete_step_todos",
+      "kind": "function",
+      "path": "server_v2/services/todo_service.py",
+      "line": 184,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "snooze_todo",
+      "kind": "function",
+      "path": "server_v2/services/todo_service.py",
+      "line": 251,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "postpone_task_todos",
+      "kind": "function",
+      "path": "server_v2/services/todo_service.py",
+      "line": 280,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_todo_service",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 12,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_todos",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 18,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_todo",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 72,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "create_todo",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 139,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "update_todo",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 171,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "delete_todo",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 196,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "complete_todo",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 216,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "mark_todo_read",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 236,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "snooze_todo",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 256,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "postpone_task_todos",
+      "kind": "function",
+      "path": "server_v2/api/v2_todos.py",
+      "line": 282,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_overdue_todos",
+      "kind": "function",
+      "path": "server_v2/repositories/todo_repository.py",
+      "line": 208,
+      "information_score": 37,
+      "category": "support"
+    },
+    {
+      "name": "snooze_todo",
+      "kind": "function",
+      "path": "server_v2/repositories/todo_repository.py",
+      "line": 242,
+      "information_score": 37,
+      "category": "support"
+    },
+    {
+      "name": "loadTodos",
+      "kind": "component",
+      "path": "client_v2/src/features/dashboard/components/TodoWidget.tsx",
+      "line": 25,
+      "information_score": 30,
+      "category": "support"
+    },
+    {
+      "name": "loadUsers",
+      "kind": "component",
+      "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+      "line": 95,
+      "information_score": 30,
+      "category": "support"
+    },
+    {
+      "name": "getEffectiveUrgency",
+      "kind": "component",
+      "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+      "line": 185,
+      "information_score": 30,
+      "category": "support"
+    },
+    {
+      "name": "getUrgencyBadge",
+      "kind": "component",
+      "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+      "line": 198,
+      "information_score": 30,
+      "category": "ui"
+    },
+    {
+      "name": "getStatusBadge",
+      "kind": "component",
+      "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+      "line": 215,
+      "information_score": 30,
+      "category": "ui"
+    },
+    {
+      "name": "getUserName",
+      "kind": "component",
+      "path": "client_v2/src/features/todos/pages/TodosPage.tsx",
+      "line": 237,
+      "information_score": 30,
+      "category": "support"
+    },
+    {
+      "name": "check_and_escalate",
+      "kind": "function",
+      "path": "server_v2/services/todo_escalation_job.py",
+      "line": 23,
+      "information_score": 24,
+      "category": "support"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/dashboard/components/NewTodoModal.tsx",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/dashboard/components/TodoWidget.tsx",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "target": "file:client_v2/src/store/auth.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "to": "file:client_v2/src/store/auth.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "target": "file:client_v2/src/services/api/user.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "to": "file:client_v2/src/services/api/user.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "target": "file:client_v2/src/types/index.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "to": "file:client_v2/src/types/index.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "target": "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/todos/pages/TodosPage.tsx",
+      "to": "file:client_v2/src/features/dashboard/components/TodoModal.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/services/api/index.ts",
+      "target": "file:client_v2/src/services/api/todos.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/services/api/index.ts",
+      "to": "file:client_v2/src/services/api/todos.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/services/api/todos.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/services/api/todos.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "file:client_v2/src/services/api/todos.ts",
+      "relation": "calls_route",
+      "target": "route:/todos",
+      "method": "POST"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:18:get_todos",
+      "relation": "exposes_route",
+      "target": "route:/todos",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:72:get_todo",
+      "relation": "exposes_route",
+      "target": "route:/todos/<int:todo_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:88:get_inbox",
+      "relation": "exposes_route",
+      "target": "route:/todos/inbox",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:105:get_sent",
+      "relation": "exposes_route",
+      "target": "route:/todos/sent",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:122:get_pending",
+      "relation": "exposes_route",
+      "target": "route:/todos/pending",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:139:create_todo",
+      "relation": "exposes_route",
+      "target": "route:/todos",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:171:update_todo",
+      "relation": "exposes_route",
+      "target": "route:/todos/<int:todo_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:196:delete_todo",
+      "relation": "exposes_route",
+      "target": "route:/todos/<int:todo_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:216:complete_todo",
+      "relation": "exposes_route",
+      "target": "route:/todos/<int:todo_id>/complete",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:236:mark_todo_read",
+      "relation": "exposes_route",
+      "target": "route:/todos/<int:todo_id>/read",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:256:snooze_todo",
+      "relation": "exposes_route",
+      "target": "route:/todos/<int:todo_id>/snooze",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_todos.py:282:postpone_task_todos",
+      "relation": "exposes_route",
+      "target": "route:/tasks/<int:task_id>/todos/postpone",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/repositories/todo_repository.py:110:get_pending_for_user",
+      "relation": "reads",
+      "target": "database:todo_messages",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/todo_repository.py:166:get_related_to_task",
+      "relation": "reads",
+      "target": "database:todo_messages",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/todo_repository.py:187:get_related_to_step",
+      "relation": "reads",
+      "target": "database:todo_messages",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/todo_repository.py:208:get_overdue_todos",
+      "relation": "reads",
+      "target": "database:todo_messages",
+      "statement": "SELECT"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:todos",
+      "name": "todos",
+      "files": [
+        "client_v2/src/features/todos/pages/TodosPage.tsx"
+      ],
+      "roles": {
+        "page": 1
+      },
+      "entities_count": 10,
+      "relationships_count": 12
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\todos.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\todos.json"
+}

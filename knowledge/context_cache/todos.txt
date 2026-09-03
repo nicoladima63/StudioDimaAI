@@ -1,0 +1,632 @@
+QUERY: todos
+
+=== PRIORITY FILES ===
+- client_v2/src/services/api/todos.ts | role=api | score=33 | structural=27 | query=6 | matched=todo
+- client_v2/src/features/todos/pages/TodosPage.tsx | role=page | score=33 | structural=27 | query=6 | matched=todo
+- server_v2/services/todo_service.py | role=service | score=30 | structural=20 | query=10 | matched=todo
+- server_v2/api/v2_todos.py | role=api | score=29 | structural=19 | query=10 | matched=todo
+- server_v2/repositories/todo_repository.py | role=repository | score=28 | structural=18 | query=10 | matched=todo
+- server_v2/services/todo_escalation_job.py | role=service | score=21 | structural=15 | query=6 | matched=todo
+- client_v2/src/features/dashboard/components/TodoWidget.tsx | role=component | score=16 | structural=16 | query=0 | matched=none
+- client_v2/src/features/dashboard/components/TodoModal.tsx | role=component | score=13 | structural=13 | query=0 | matched=none
+- client_v2/src/services/api/index.ts | role=api | score=11 | structural=11 | query=0 | matched=none
+- client_v2/src/services/api/user.service.ts | role=api | score=11 | structural=11 | query=0 | matched=none
+- client_v2/src/features/dashboard/components/NewTodoModal.tsx | role=component | score=9 | structural=9 | query=0 | matched=none
+- client_v2/src/store/auth.store.ts | role=state | score=9 | structural=9 | query=0 | matched=none
+- client_v2/src/types/index.ts | role=types | score=4 | structural=4 | query=0 | matched=none
+
+=== ARCHITECTURE ===
+
+API
+- client_v2/src/services/api/todos.ts
+- server_v2/api/v2_todos.py
+- client_v2/src/services/api/index.ts
+- client_v2/src/services/api/user.service.ts
+
+PAGE
+- client_v2/src/features/todos/pages/TodosPage.tsx
+
+SERVICE
+- server_v2/services/todo_service.py
+- server_v2/services/todo_escalation_job.py
+
+REPOSITORY
+- server_v2/repositories/todo_repository.py
+
+COMPONENT
+- client_v2/src/features/dashboard/components/TodoWidget.tsx
+- client_v2/src/features/dashboard/components/TodoModal.tsx
+- client_v2/src/features/dashboard/components/NewTodoModal.tsx
+
+STATE
+- client_v2/src/store/auth.store.ts
+
+TYPES
+- client_v2/src/types/index.ts
+
+=== SYMBOLS ===
+- TodoEscalationJob | server_v2/services/todo_escalation_job.py | kind=class | category=core | score=46
+- TodoService | server_v2/services/todo_service.py | kind=class | category=core | score=46
+- loadTodos | client_v2/src/features/todos/pages/TodosPage.tsx | kind=component | category=support | score=45
+- TodoRepository | server_v2/repositories/todo_repository.py | kind=class | category=core | score=44
+- create_todo | server_v2/services/todo_service.py | kind=function | category=support | score=39
+- create_todo_from_step | server_v2/services/todo_service.py | kind=function | category=support | score=39
+- get_all_todos | server_v2/services/todo_service.py | kind=function | category=support | score=39
+- update_todo | server_v2/services/todo_service.py | kind=function | category=support | score=39
+- auto_complete_step_todos | server_v2/services/todo_service.py | kind=function | category=support | score=39
+- snooze_todo | server_v2/services/todo_service.py | kind=function | category=support | score=39
+- postpone_task_todos | server_v2/services/todo_service.py | kind=function | category=support | score=39
+- get_todo_service | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- get_todos | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- get_todo | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- create_todo | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- update_todo | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- delete_todo | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- complete_todo | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- mark_todo_read | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- snooze_todo | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- postpone_task_todos | server_v2/api/v2_todos.py | kind=function | category=support | score=38
+- get_overdue_todos | server_v2/repositories/todo_repository.py | kind=function | category=support | score=37
+- snooze_todo | server_v2/repositories/todo_repository.py | kind=function | category=support | score=37
+- loadTodos | client_v2/src/features/dashboard/components/TodoWidget.tsx | kind=component | category=support | score=30
+- loadUsers | client_v2/src/features/todos/pages/TodosPage.tsx | kind=component | category=support | score=30
+- getEffectiveUrgency | client_v2/src/features/todos/pages/TodosPage.tsx | kind=component | category=support | score=30
+- getUrgencyBadge | client_v2/src/features/todos/pages/TodosPage.tsx | kind=component | category=ui | score=30
+- getStatusBadge | client_v2/src/features/todos/pages/TodosPage.tsx | kind=component | category=ui | score=30
+- getUserName | client_v2/src/features/todos/pages/TodosPage.tsx | kind=component | category=support | score=30
+- check_and_escalate | server_v2/services/todo_escalation_job.py | kind=function | category=support | score=24
+- get_pending_for_user | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- get_inbox | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- get_sent | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- get_by_id | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- mark_as_read | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- mark_as_completed | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- archive_message | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- get_related_to_task | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- get_related_to_step | server_v2/services/todo_service.py | kind=function | category=support | score=24
+- _broadcast_todo | server_v2/services/todo_service.py | kind=function | category=internal | score=24
+- get_inbox | server_v2/api/v2_todos.py | kind=function | category=support | score=23
+- get_sent | server_v2/api/v2_todos.py | kind=function | category=support | score=23
+- get_pending | server_v2/api/v2_todos.py | kind=function | category=support | score=23
+- table_name | server_v2/repositories/todo_repository.py | kind=function | category=support | score=22
+- get_inbox | server_v2/repositories/todo_repository.py | kind=function | category=support | score=22
+- get_sent | server_v2/repositories/todo_repository.py | kind=function | category=support | score=22
+- mark_as_read | server_v2/repositories/todo_repository.py | kind=function | category=support | score=22
+- update_status | server_v2/repositories/todo_repository.py | kind=function | category=support | score=22
+- get_pending_for_user | server_v2/repositories/todo_repository.py | kind=function | category=support | score=22
+- mark_as_completed | server_v2/repositories/todo_repository.py | kind=function | category=support | score=22
+
+=== RELEVANT CODE ===
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_escalation_job.py::TodoEscalationJob (lines 12-163) ---
+class TodoEscalationJob:
+    """
+    Scheduled job to check for overdue todos and escalate them.
+    Runs daily to update urgency levels and send reminder notifications.
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.todo_repository = TodoRepository(db_manager)
+        self.notification_service = NotificationService(db_manager)
+    
+    def check_and_escalate(self) -> Dict[str, Any]:
+        """
+        Check all overdue todos and escalate based on days overdue.
+        Returns summary of actions taken.
+        """
+        try:
+            logger.info("Starting todo escalation check...")
+            
+            # Get all overdue todos
+            overdue_todos = self.todo_repository.get_overdue_todos()
+            
+            if not overdue_todos:
+                logger.info("No overdue todos found")
+                return {
+                    'success': True,
+                    'overdue_count': 0,
+                    'escalated_count': 0
+                }
+            
+            logger.info(f"Found {len(overdue_todos)} overdue todos")
+            
+            escalated_count = 0
+            today = date.today()
+            
+            for todo in overdue_todos:
+                try:
+                    # Calculate days overdue
+                    due_date_str = todo.get('due_date')
+                    if not due_date_str:
+                        continue
+                    
+                    # Parse due_date (format: YYYY-MM-DD or ISO datetime)
+                    if 'T' in due_date_str:
+                        due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00')).date()
+                    else:
+                        due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date()
+                    
+                    days_overdue = (today - due_date).days
+                    
+                    # Determine urgency level
+                    old_urgency = todo.get('urgency_level', 'normal')
+                    new_urgency = self._calculate_urgency_level(days_overdue)
+                    
+                    # Only escalate if urgency changed
+                    if new_urgency != old_urgency:
+                        # Update urgency level
+                        self.todo_repository.update_urgency_level(todo['id'], new_urgency)
+                        
+                        # Send reminder notification
+                        self._send_reminder_notification(todo, new_urgency, days_overdue)
+                        
+                        escalated_count += 1
+                        logger.info(f"Escalated todo {todo['id']} from {old_urgency} to {new_urgency} ({days_overdue} days overdue)")
+                
+                except Exception as e:
+                    logger.error(f"Failed to escalate todo {todo.get('id')}: {e}")
+                    continue
+            
+            logger.info(f"Escalation check complete: {escalated_count}/{len(overdue_todos)} todos escalated")
+            
+            return {
+                'success': True,
+                'overdue_count': len(overdue_todos),
+                'escalated_count': escalated_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to run escalation check: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def _calculate_urgency_level(self, days_overdue: int) -> str:
+        """
+        Calculate urgency level based on days overdue.
+
+        - 0 days: attention (appena scaduto)
+        - 1-2 days: urgent (insistent reminder)
+        - 3+ days: critical (very insistent reminder)
+        """
+        if days_overdue > 2:  # 3+ giorni
+            return 'critical'
+        elif days_overdue >= 1:  # 1-2 giorni
+            return 'urgent'
+        else:  # 0 giorni (appena scaduto)
+            return 'attention'
+    
+    def _send_reminder_notification(self, todo: Dict[str, Any], urgency_level: str, days_overdue: int) -> None:
+# … snippet truncated; inspect the source file for the remaining lines
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_service.py::TodoService (lines 13-325) ---
+class TodoService(BaseService):
+    """
+    Service for managing Todo Messages.
+    Handles business logic, validation, and integration with notifications.
+    """
+    
+    def __init__(self, db_manager: DatabaseManager):
+        super().__init__(db_manager)
+        self.todo_repository = TodoRepository(db_manager)
+        
+    def create_todo(
+        self,
+        sender_id: int,
+        recipient_id: int,
+        subject: str,
+        message: str = None,
+        priority: str = 'medium',
+        due_date: str = None,
+        type: str = 'general',
+        related_task_id: int = None,
+        related_step_id: int = None
+    ) -> Dict[str, Any]:
+        """
+        Create a new todo message.
+        Sends notification and broadcasts via WebSocket.
+        """
+        try:
+            # Validation
+            if not sender_id or not recipient_id:
+                raise ValidationError("sender_id and recipient_id are required")
+            
+            if not subject:
+                raise ValidationError("subject is required")
+            
+            # Prepare data
+            todo_data = {
+                'sender_id': sender_id,
+                'recipient_id': recipient_id,
+                'subject': subject,
+                'message': message,
+                'priority': priority,
+                'due_date': due_date,
+                'type': type,
+                'related_task_id': related_task_id,
+                'related_step_id': related_step_id,
+                'status': 'pending',
+                'urgency_level': 'normal'
+            }
+            
+            # Create todo
+            todo = self.todo_repository.create(todo_data)
+            
+            # Send notification
+            self._send_notification(todo)
+            
+            # Broadcast via WebSocket
+            self._broadcast_todo(todo)
+            
+            logger.info(f"Created todo {todo['id']} from user {sender_id} to user {recipient_id}")
+            return todo
+            
+        except Exception as e:
+            logger.error(f"Failed to create todo: {e}")
+            raise ServiceError(f"Failed to create todo: {str(e)}")
+    
+    def create_todo_from_step(
+        self,
+        step: Dict[str, Any],
+        task: Dict[str, Any],
+        sender_id: int = 1
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Create a todo from a task step (automation integration).
+        """
+        try:
+            recipient_id = step.get('user_id')
+            if not recipient_id:
+                logger.warning(f"Step {step.get('id')} has no assigned user, skipping todo creation")
+                return None
+            
+            # Calculate due_date based on task due_date or default to 7 days
+            due_date = task.get('due_date')
+            if not due_date:
+                due_date = (datetime.now() + timedelta(days=7)).isoformat()
+            
+            subject = f"Nuova fase: {step['name']}"
+            message = f"Hai una nuova fase da completare per il task '{task.get('description', 'N/A')}'"
+            
+            return self.create_todo(
+                sender_id=sender_id,
+                recipient_id=recipient_id,
+                subject=subject,
+                message=message,
+                priority='medium',
+                due_date=due_date,
+                type='notification',
+                related_task_id=task.get('id'),
+                related_step_id=step.get('id')
+            )
+            
+# … snippet truncated; inspect the source file for the remaining lines
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\features\todos\pages\TodosPage.tsx::loadTodos (lines 69-93) ---
+    const loadTodos = async () => {
+        if (!user?.id) return;
+        setLoading(true);
+        try {
+            let response;
+            if (isAdmin) {
+                // Admin vede tutti i todos
+                response = await todoService.getAll(undefined, {
+                    status: statusFilter || undefined,
+                    priority: priorityFilter || undefined,
+                    mode: 'all',
+                });
+            } else {
+                // User normale vede solo i suoi
+                response = await todoService.getInbox(user.id);
+            }
+            if (response.success && response.data) {
+                setTodos(response.data);
+            }
+        } catch (error) {
+            toast.error('Errore nel caricamento todos');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\todo_repository.py::TodoRepository (lines 10-306) ---
+class TodoRepository(BaseRepository):
+    """
+    Repository for managing Todo Messages (internal messaging and tasking).
+    """
+    
+    @property
+    def table_name(self) -> str:
+        return 'todo_messages'
+        
+    def __init__(self, db_manager: Optional[DatabaseManager] = None):
+        super().__init__(db_manager)
+        self._ensure_tables_exist()
+        
+    def _ensure_tables_exist(self) -> None:
+        """Ensure necessary tables exist."""
+        try:
+            with self.db_manager.transaction() as conn:
+                cursor = conn.cursor()
+                
+                # Todo Messages Table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS todo_messages (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        sender_id INTEGER NOT NULL,
+                        recipient_id INTEGER NOT NULL,
+                        subject TEXT NOT NULL,
+                        message TEXT,
+                        priority TEXT DEFAULT 'medium', -- low, medium, high, urgent
+                        due_date TIMESTAMP,
+                        status TEXT DEFAULT 'pending', -- pending, read, completed, archived
+                        type TEXT DEFAULT 'general', -- general, approval, request, notification
+                        related_task_id INTEGER,
+                        related_step_id INTEGER,
+                        urgency_level TEXT DEFAULT 'normal', -- normal, attention, urgent, critical
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        deleted_at TIMESTAMP NULL,
+                        FOREIGN KEY (related_task_id) REFERENCES tasks(id),
+                        FOREIGN KEY (related_step_id) REFERENCES steps(id)
+                    )
+                ''')
+                
+                # Indexes
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_todos_recipient ON todo_messages(recipient_id)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_todos_sender ON todo_messages(sender_id)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_todos_status ON todo_messages(status)')
+
+                # Migration: add urgency_level column if missing
+                cursor.execute("PRAGMA table_info(todo_messages)")
+                columns = [row[1] for row in cursor.fetchall()]
+                if 'urgency_level' not in columns:
+                    cursor.execute("ALTER TABLE todo_messages ADD COLUMN urgency_level TEXT DEFAULT 'normal'")
+                    logger.info("Added urgency_level column to todo_messages table")
+
+                cursor.close()
+                
+        except Exception as e:
+            logger.error(f"Failed to ensure todo_messages table: {e}")
+            raise RepositoryError(f"Failed to ensure todo_messages table: {str(e)}", cause=e)
+
+    def get_inbox(self, user_id: int, options: Optional[QueryOptions] = None) -> QueryResult:
+        """Get received messages for a user."""
+        options = options or QueryOptions()
+        if not options.filters:
+            options.filters = {}
+        options.filters['recipient_id'] = user_id
+        # Exclude deleted by default in base repo, but allow archiving via status
+        
+        return self.list(options)
+
+    def get_sent(self, user_id: int, options: Optional[QueryOptions] = None) -> QueryResult:
+        """Get sent messages by a user."""
+        options = options or QueryOptions()
+        if not options.filters:
+            options.filters = {}
+        options.filters['sender_id'] = user_id
+        
+        return self.list(options)
+    
+    def mark_as_read(self, message_id: int, user_id: int) -> bool:
+        """Mark a message as read if recipient matches."""
+        message = self.get_by_id(message_id)
+        if not message:
+            return False
+            
+        # Ensure only recipient can mark read
+        if str(message['recipient_id']) != str(user_id):
+            logger.warning(f"User {user_id} attempted to mark message {message_id} as read, but is not the recipient")
+            return False
+            
+        return self.update_status(message_id, 'read')
+
+    def update_status(self, message_id: int, status: str) -> bool:
+        """Update message status."""
+        try:
+            self.update(message_id, {'status': status})
+            return True
+        except Exception:
+            return False
+    
+# … snippet truncated; inspect the source file for the remaining lines
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_service.py::create_todo (lines 23-76) ---
+    def create_todo(
+        self,
+        sender_id: int,
+        recipient_id: int,
+        subject: str,
+        message: str = None,
+        priority: str = 'medium',
+        due_date: str = None,
+        type: str = 'general',
+        related_task_id: int = None,
+        related_step_id: int = None
+    ) -> Dict[str, Any]:
+        """
+        Create a new todo message.
+        Sends notification and broadcasts via WebSocket.
+        """
+        try:
+            # Validation
+            if not sender_id or not recipient_id:
+                raise ValidationError("sender_id and recipient_id are required")
+            
+            if not subject:
+                raise ValidationError("subject is required")
+            
+            # Prepare data
+            todo_data = {
+                'sender_id': sender_id,
+                'recipient_id': recipient_id,
+                'subject': subject,
+                'message': message,
+                'priority': priority,
+                'due_date': due_date,
+                'type': type,
+                'related_task_id': related_task_id,
+                'related_step_id': related_step_id,
+                'status': 'pending',
+                'urgency_level': 'normal'
+            }
+            
+            # Create todo
+            todo = self.todo_repository.create(todo_data)
+            
+            # Send notification
+            self._send_notification(todo)
+            
+            # Broadcast via WebSocket
+            self._broadcast_todo(todo)
+            
+            logger.info(f"Created todo {todo['id']} from user {sender_id} to user {recipient_id}")
+            return todo
+            
+        except Exception as e:
+            logger.error(f"Failed to create todo: {e}")
+            raise ServiceError(f"Failed to create todo: {str(e)}")
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_service.py::create_todo_from_step (lines 78-115) ---
+    def create_todo_from_step(
+        self,
+        step: Dict[str, Any],
+        task: Dict[str, Any],
+        sender_id: int = 1
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Create a todo from a task step (automation integration).
+        """
+        try:
+            recipient_id = step.get('user_id')
+            if not recipient_id:
+                logger.warning(f"Step {step.get('id')} has no assigned user, skipping todo creation")
+                return None
+            
+            # Calculate due_date based on task due_date or default to 7 days
+            due_date = task.get('due_date')
+            if not due_date:
+                due_date = (datetime.now() + timedelta(days=7)).isoformat()
+            
+            subject = f"Nuova fase: {step['name']}"
+            message = f"Hai una nuova fase da completare per il task '{task.get('description', 'N/A')}'"
+            
+            return self.create_todo(
+                sender_id=sender_id,
+                recipient_id=recipient_id,
+                subject=subject,
+                message=message,
+                priority='medium',
+                due_date=due_date,
+                type='notification',
+                related_task_id=task.get('id'),
+                related_step_id=step.get('id')
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to create todo from step: {e}")
+            return None
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_service.py::get_all_todos (lines 131-137) ---
+    def get_all_todos(self, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+        """Get all todos with optional filters."""
+        from core.base_repository import QueryOptions
+        
+        options = QueryOptions(filters=filters or {})
+        result = self.todo_repository.list(options)
+        return result.data if hasattr(result, 'data') else result
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_service.py::update_todo (lines 163-174) ---
+    def update_todo(self, todo_id: int, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Update a todo."""
+        try:
+            updated = self.todo_repository.update(todo_id, updates)
+            
+            if updated:
+                self._broadcast_todo(updated, event_type='updated')
+            
+            return updated
+        except Exception as e:
+            logger.error(f"Failed to update todo {todo_id}: {e}")
+            return None
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_service.py::auto_complete_step_todos (lines 184-205) ---
+    def auto_complete_step_todos(self, step_id: int) -> int:
+        """
+        Auto-complete all todos related to a step.
+        Returns number of todos completed.
+        """
+        try:
+            todos = self.get_related_to_step(step_id)
+            completed_count = 0
+            
+            for todo in todos:
+                if todo['status'] in ('pending', 'read'):
+                    # Use system user (1) to auto-complete
+                    if self.todo_repository.update_status(todo['id'], 'completed'):
+                        completed_count += 1
+                        self._broadcast_todo(todo, event_type='auto_completed')
+            
+            logger.info(f"Auto-completed {completed_count} todos for step {step_id}")
+            return completed_count
+            
+        except Exception as e:
+            logger.error(f"Failed to auto-complete todos for step {step_id}: {e}")
+            return 0
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\todo_service.py::snooze_todo (lines 251-278) ---
+    def snooze_todo(self, todo_id: int, days: int, user_id: int) -> bool:
+        """
+        Snooze/postpone a todo by X days.
+        Resets urgency and broadcasts update.
+        """
+        success = self.todo_repository.snooze_todo(todo_id, days, user_id)
+        
+        if success:
+            # Broadcast update
+            todo = self.get_by_id(todo_id)
+            if todo:
+                self._broadcast_todo(todo, event_type='snoozed')
+                
+                # Send notification
+                try:
+                    from services.notification_service import NotificationService
+                    notification_service = NotificationService(self.db_manager)
+                    
+                    notification_service.notify_user(
+                        user_id=todo['recipient_id'],
+                        message=f"Todo '{todo['subject']}' posticipato di {days} giorni",
+                        type='info',
+                        link=f"/todos/{todo_id}"
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send snooze notification: {e}")
+        
+        return success
+
+=== CONNECTIONS ===
+- client_v2/src/features/dashboard/components/NewTodoModal.tsx
+  internal:
+    - client_v2/src/services/api/todos.ts
+- client_v2/src/features/dashboard/components/TodoModal.tsx
+  internal:
+    - client_v2/src/services/api/todos.ts
+- client_v2/src/features/dashboard/components/TodoWidget.tsx
+  internal:
+    - client_v2/src/services/api/todos.ts
+- client_v2/src/features/todos/pages/TodosPage.tsx
+  internal:
+    - client_v2/src/features/dashboard/components/TodoModal.tsx
+    - client_v2/src/services/api/todos.ts
+    - client_v2/src/services/api/user.service.ts
+    - client_v2/src/store/auth.store.ts
+    - client_v2/src/types/index.ts
+- client_v2/src/services/api/index.ts
+  internal:
+    - client_v2/src/services/api/todos.ts
+- client_v2/src/services/api/todos.ts
+  internal:
+    - client_v2/src/services/api/client.ts

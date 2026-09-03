@@ -7,12 +7,14 @@ import { useAuthStore } from '@/store/auth.store';
 import { todoService } from '@/services/api/todos';
 import type { Todo } from '@/services/api/todos';
 import TodoModal from './TodoModal';
+import toast from 'react-hot-toast';
 
 const TodoWidget: React.FC = () => {
     const { user } = useAuthStore();
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(true);
     const [completingId, setCompletingId] = useState<number | null>(null);
+    const [snoozingId, setSnoozingId] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
@@ -53,14 +55,22 @@ const TodoWidget: React.FC = () => {
     };
 
     const handleSnooze = async (todoId: number) => {
+        if (snoozingId !== null) return;
+
         try {
+            setSnoozingId(todoId);
             const response = await todoService.snooze(todoId, user!.id, 1);
             if (response.success) {
-                // Ricarica la lista per vedere la nuova data
-                loadTodos();
+                await loadTodos();
+                toast.success('Scadenza posticipata a domani');
+            } else {
+                toast.error('Impossibile posticipare il todo');
             }
         } catch (error) {
             console.error('Error snoozing todo:', error);
+            toast.error('Errore nel posticipo del todo');
+        } finally {
+            setSnoozingId(null);
         }
     };
 
@@ -238,9 +248,16 @@ const TodoWidget: React.FC = () => {
                                             size="sm"
                                             variant="outline"
                                             onClick={() => handleSnooze(todo.id)}
+                                            disabled={snoozingId !== null}
                                         >
-                                            <CIcon icon={cilClock} className="me-1" size="sm" />
-                                            +1 giorno
+                                            {snoozingId === todo.id ? (
+                                                <CSpinner size="sm" />
+                                            ) : (
+                                                <>
+                                                    <CIcon icon={cilClock} className="me-1" size="sm" />
+                                                    +1 giorno
+                                                </>
+                                            )}
                                         </CButton>
                                     </div>
                                     <CButton
