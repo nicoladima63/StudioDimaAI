@@ -81,6 +81,45 @@ def get_reminders_status():
     })
 
 
+@reminders_v2_bp.route('/reminders/upcoming-24h', methods=['GET'])
+@jwt_required()
+def get_upcoming_24h_reminders():
+    """Riscansiona il DBF e mostra i reminder pianificati per domani, senza inviarli."""
+    try:
+        from services.appointment_reminder_service import get_upcoming_appointments, _is_mobile
+
+        items = []
+        # È una visualizzazione: non deve essere condizionata dal calendario
+        # di invio automatico, altrimenti il pulsante di scansione sembrerebbe
+        # non funzionare nei giorni disabilitati.
+        for appointment in get_upcoming_appointments('24h', respect_schedule=False):
+            cell = appointment.get('cell', '').strip()
+            tel = appointment.get('tel', '').strip()
+            if cell and _is_mobile(cell):
+                contact_status = 'automatico'
+                phone = cell
+            elif tel:
+                contact_status = 'solo_fisso'
+                phone = tel
+            else:
+                contact_status = 'mancante'
+                phone = ''
+
+            items.append({
+                'patient_id': appointment['patient_id'],
+                'patient_name': appointment['patient_name'],
+                'appointment_date': appointment['appointment_date'],
+                'appointment_time': appointment['appointment_time'],
+                'phone': phone,
+                'contact_status': contact_status,
+            })
+
+        return format_response({'items': items, 'total': len(items)})
+    except Exception as e:
+        logger.error(f"Errore scansione reminder 24h: {e}")
+        return format_response(success=False, error=str(e)), 500
+
+
 @reminders_v2_bp.route('/reminders/trigger-24h', methods=['POST'])
 @jwt_required()
 def trigger_24h():

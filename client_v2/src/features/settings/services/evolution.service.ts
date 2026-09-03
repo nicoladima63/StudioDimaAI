@@ -19,6 +19,15 @@ export interface EvoMessage {
   timestamp: number
 }
 
+export interface UpcomingReminder {
+  patient_id: string
+  patient_name: string
+  appointment_date: string
+  appointment_time: string
+  phone: string
+  contact_status: 'automatico' | 'solo_fisso' | 'mancante'
+}
+
 export interface EvolutionStatus {
   docker_daemon_running: boolean
   docker_running: boolean
@@ -89,6 +98,14 @@ const evolutionService = {
     const { data } = await apiClient.get('/bot/evolution/conversation', { params: { phone } })
     if (!data.success) {
       throw new Error(data.error || 'Errore recupero conversazione')
+    }
+    return data.data
+  },
+
+  async apiGetUpcoming24hReminders(): Promise<{ items: UpcomingReminder[]; total: number }> {
+    const { data } = await apiClient.get('/reminders/upcoming-24h')
+    if (!data.success) {
+      throw new Error(data.error || 'Impossibile riscansionare gli appuntamenti di domani')
     }
     return data.data
   },

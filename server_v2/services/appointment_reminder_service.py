@@ -108,7 +108,11 @@ def _normalize_phone(phone: str) -> str:
 # Lettura appuntamenti e pazienti
 # ---------------------------------------------------------------------------
 
-def get_upcoming_appointments(reminder_type: str, slot: str = 'all') -> list[dict]:
+def get_upcoming_appointments(
+    reminder_type: str,
+    slot: str = 'all',
+    respect_schedule: bool = True,
+) -> list[dict]:
     """
     Legge APPUNTA.DBF e restituisce gli appuntamenti da notificare.
 
@@ -133,8 +137,10 @@ def get_upcoming_appointments(reminder_type: str, slot: str = 'all') -> list[dic
     tomorrow_weekday = tomorrow.weekday()  # 0=Lun, ..., 6=Dom
     tomorrow_day_of_week = (tomorrow_weekday + 1)  # Converti a nostro formato (1=Lun, ..., 7=Dom)
     
-    # Se domani è disabilitato nel config, non mandare reminder
-    if not engine.should_send_today(tomorrow_weekday):
+    # Il job automatico rispetta la configurazione del giorno. Le schermate di
+    # monitoraggio devono invece poter leggere gli appuntamenti futuri anche
+    # quando l'invio automatico è disabilitato.
+    if respect_schedule and not engine.should_send_today(tomorrow_weekday):
         return []
     
     # Ottieni soglia mattina/pomeriggio per domani (usato solo in split mode)
@@ -663,6 +669,11 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
     if stats['skipped_fisso']:
         _notify_staff_fisso(stats['skipped_fisso'], reminder_type)
 
+    # Alert importante: non esiste alcun recapito in anagrafica, quindi il
+    # reminder non può essere inviato né gestito manualmente al telefono.
+    if stats['no_phone']:
+        _notify_staff_no_phone(stats['no_phone'], reminder_type)
+
     # Log su file (stesso pattern scheduler esistente)
     _write_log(reminder_type, stats)
 
@@ -670,7 +681,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
 
 
 def _notify_staff_fisso(pazienti_fisso: list, reminder_type: str):
-    """Invia push notification alla segreteria per pazienti senza cellulare."""
+    """Invia un alert ad alta priorità per pazienti con solo telefono fisso."""
     try:
         from app_v2 import push_service
         if not push_service:
@@ -681,12 +692,40 @@ def _notify_staff_fisso(pazienti_fisso: list, reminder_type: str):
             f"{'e' if len(pazienti_fisso)==1 else 'i'} senza cellulare — contattare manualmente: {nomi}"
         )
         push_service.send_notification_to_all(
-            title="Reminder: contattare manualmente",
+            title="⚠️ Reminder bloccato: solo telefono fisso",
             body=message,
-            data={'type': 'reminder_manual', 'pazienti': pazienti_fisso}
+            data={'type': 'reminder_manual', 'pazienti': pazienti_fisso},
+            urgency='high',
         )
     except Exception as e:
         logger.warning(f"Errore notifica segreteria fisso: {e}")
+
+
+def _notify_staff_no_phone(pazienti_senza_telefono: list, reminder_type: str):
+    """Invia un alert ad alta priorità per anagrafiche prive di recapiti."""
+    try:
+        from app_v2 import push_service
+        if not push_service:
+            return
+
+        dettagli = ', '.join(
+            f"{p['name']} ({p['ap_date']} {p['ap_time']})"
+            for p in pazienti_senza_telefono
+        )
+        count = len(pazienti_senza_telefono)
+        message = (
+            f"Reminder {reminder_type}: {count} pazient"
+            f"{'e' if count == 1 else 'i'} senza alcun numero di telefono in anagrafica — "
+            f"aggiornare il recapito: {dettagli}"
+        )
+        push_service.send_notification_to_all(
+            title="⚠️ Reminder bloccato: recapito mancante",
+            body=message,
+            data={'type': 'reminder_no_phone', 'pazienti': pazienti_senza_telefono},
+            urgency='high',
+        )
+    except Exception as e:
+        logger.warning(f"Errore alert reminder senza telefono: {e}")
 
 
 def _write_log(reminder_type: str, stats: dict):

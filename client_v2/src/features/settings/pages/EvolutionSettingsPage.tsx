@@ -14,7 +14,7 @@ import {
   cilMediaPlay, cilMediaStop, cilChatBubble,
 } from '@coreui/icons'
 import PageLayout from '@/components/layout/PageLayout'
-import evolutionService, { type EvolutionStatus, type RecentComm, type EvoMessage } from '../services/evolution.service'
+import evolutionService, { type EvolutionStatus, type RecentComm, type EvoMessage, type UpcomingReminder } from '../services/evolution.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -54,6 +54,15 @@ function messageTypeBadge(type: RecentComm['type']) {
     followup: 'secondary',
   }
   return <CBadge color={colors[type]}>{labels[type]}</CBadge>
+}
+
+function upcomingContactBadge(status: UpcomingReminder['contact_status']) {
+  const config = {
+    automatico: { color: 'success', label: 'Automatico' },
+    solo_fisso: { color: 'warning', label: 'Solo fisso' },
+    mancante: { color: 'danger', label: 'Recapito mancante' },
+  }[status]
+  return <CBadge color={config.color}>{config.label}</CBadge>
 }
 
 type SortColumn = 'patient' | 'appointment' | 'sent'
@@ -109,6 +118,8 @@ const EvolutionSettingsPage: React.FC = () => {
   const [convError, setConvError] = useState<string | null>(null)
   const [sortColumn, setSortColumn] = useState<SortColumn>('sent')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [upcomingReminders, setUpcomingReminders] = useState<UpcomingReminder[]>([])
+  const [upcomingLoading, setUpcomingLoading] = useState(false)
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -133,6 +144,15 @@ const EvolutionSettingsPage: React.FC = () => {
       return sortDirection === 'asc' ? comparison : -comparison
     })
   }, [status, sortColumn, sortDirection])
+
+  const todayCommunications = useMemo(() => {
+    const dateParts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(new Date())
+    const part = (type: Intl.DateTimeFormatPartTypes) => dateParts.find(item => item.type === type)?.value
+    const today = `${part('year')}-${part('month')}-${part('day')}`
+    return sortedCommunications.filter(c => c.created_at?.slice(0, 10) === today)
+  }, [sortedCommunications])
 
   const sortIndicator = (column: SortColumn) => (
     <span className="ms-1" aria-hidden="true">
@@ -186,7 +206,22 @@ const EvolutionSettingsPage: React.FC = () => {
     }
   }, [])
 
-  useEffect(() => { loadStatus() }, [loadStatus])
+  const loadUpcomingReminders = useCallback(async () => {
+    setUpcomingLoading(true)
+    try {
+      const result = await evolutionService.apiGetUpcoming24hReminders()
+      setUpcomingReminders(result.items)
+    } catch (err: unknown) {
+      setAlert({ color: 'danger', msg: err instanceof Error ? err.message : 'Impossibile riscansionare gli appuntamenti di domani' })
+    } finally {
+      setUpcomingLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadStatus()
+    loadUpcomingReminders()
+  }, [loadStatus, loadUpcomingReminders])
 
   // Avvio smart: se Docker Desktop non risponde lo lancia, altrimenti compose up
   const handleSmartStart = async () => {
@@ -404,114 +439,117 @@ const EvolutionSettingsPage: React.FC = () => {
           <div className="text-center py-5"><CSpinner color="primary" /></div>
         ) : status ? (
           <>
-            {/* 6 status card sulla stessa riga */}
-            <div className="d-flex gap-2 mb-3 pb-1" style={{ overflowX: 'auto' }}>
-              {(
-                [
-                  {
-                    label: 'Docker',
-                    color: (status.docker_running ? 'success' : 'warning') as TrafficLight,
-                    icon: cilSettings, action: dockerAction,
-                  },
-                  {
-                    label: 'Evolution API',
-                    color: statusColor(status.evolution_reachable),
-                    icon: cilLink, action: evolutionAction,
-                  },
-                  {
-                    label: 'WhatsApp',
-                    color: (status.wa_state === 'open' ? 'success' : status.wa_state === 'connecting' ? 'warning' : status.wa_state === 'close' ? 'danger' : 'secondary') as TrafficLight,
-                    icon: cilPhone, action: waAction,
-                  },
-                  {
-                    label: 'Webhook',
-                    color: statusColor(status.webhook_configured),
-                    detail: status.webhook_configured ? 'Configurato' : 'Non configurato',
-                    icon: cilCheckCircle,
-                  },
-                  {
-                    label: 'Reminder 24h',
-                    color: statusColor(status.reminder_24h_enabled),
-                    detail: status.reminder_24h_enabled ? 'Attivo' : 'Spento',
-                    icon: cilBell,
-                  },
-                  {
-                    label: 'Reminder 2h',
-                    color: statusColor(status.reminder_2h_enabled),
-                    detail: status.reminder_2h_enabled ? 'Attivo' : 'Spento',
-                    icon: cilBell,
-                  },
-                ] as StatusCardProps[]
-              ).map(c => (
-                <div key={c.label} style={{ minWidth: 130, flex: '1 1 0' }}>
-                  <StatusCard {...c} />
-                </div>
-              ))}
-            </div>
-
-            {/* Output comando docker */}
-            {cmdOutput && (
-              <CAlert color={cmdOutput.ok ? 'primary' : 'danger'} className="mb-3 py-2">
-                <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap', maxHeight: 100, overflowY: 'auto' }}>
-                  {cmdOutput.text}
-                </pre>
-              </CAlert>
-            )}
-
-            {/* Tabella reminder a larghezza piena con scorrimento interno */}
             <CRow className="g-3 align-items-start">
-              <CCol xs={12}>
-                <CCard className="d-flex flex-column" style={{ height: 'calc(100vh - 330px)', minHeight: 360 }}>
-                  <CCardHeader><strong>Reminder inviati</strong></CCardHeader>
-                  <CCardBody className="p-0 flex-grow-1 overflow-hidden">
-                    {status.recent_communications.length === 0 ? (
-                      <div className="text-muted text-center py-4">Nessuna comunicazione registrata</div>
-                    ) : (
-                      <div className="h-100" style={{ overflowY: 'auto' }}>
-                      <CTable hover responsive small className="mb-0">
-                        <CTableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-                          <CTableRow>
-                            {sortableHeader('Paziente', 'patient')}
-                            {sortableHeader('Appuntamento', 'appointment')}
-                            <CTableHeaderCell>Tipo</CTableHeaderCell>
-                            <CTableHeaderCell>Canale</CTableHeaderCell>
-                            <CTableHeaderCell>Stato</CTableHeaderCell>
-                            {sortableHeader('Inviato', 'sent')}
-                            <CTableHeaderCell></CTableHeaderCell>
-                          </CTableRow>
-                        </CTableHead>
-                        <CTableBody>
-                          {sortedCommunications.map(c => (
-                            <CTableRow key={c.id}>
-                              <CTableDataCell className="fw-semibold">{c.patient_name}</CTableDataCell>
-                              <CTableDataCell className="text-nowrap">{c.appointment_date} {c.appointment_time}</CTableDataCell>
-                              <CTableDataCell>{messageTypeBadge(c.type)}</CTableDataCell>
-                              <CTableDataCell>{channelBadge(c.channel)}</CTableDataCell>
-                              <CTableDataCell>{statoBadge(c.stato)}</CTableDataCell>
-                              <CTableDataCell className="text-muted small text-nowrap">
-                                {c.created_at?.slice(0, 16).replace('T', ' ')}
-                              </CTableDataCell>
-                              <CTableDataCell>
-                                {c.channel === 'whatsapp' && (
-                                  <CButton color="success" variant="outline" size="sm"
-                                    onClick={() => handleOpenConversation(c)} title="Vedi conversazione">
-                                    <CIcon icon={cilChatBubble} />
-                                  </CButton>
-                                )}
-                              </CTableDataCell>
-                            </CTableRow>
-                          ))}
-                        </CTableBody>
-                      </CTable>
-                      </div>
-                    )}
-                  </CCardBody>
-                </CCard>
+              <CCol xs={12} lg={10}>
+                {cmdOutput && (
+                  <CAlert color={cmdOutput.ok ? 'primary' : 'danger'} className="mb-3 py-2">
+                    <pre className="mb-0 small" style={{ whiteSpace: 'pre-wrap', maxHeight: 100, overflowY: 'auto' }}>{cmdOutput.text}</pre>
+                  </CAlert>
+                )}
+                <CRow className="g-3">
+                  <CCol xs={12} xl={6}>
+                    <CCard className="d-flex flex-column" style={{ height: 'calc(100vh - 210px)', minHeight: 400 }}>
+                      <CCardHeader><strong>Messaggi inviati oggi</strong></CCardHeader>
+                      <CCardBody className="p-0 flex-grow-1 overflow-hidden">
+                        {todayCommunications.length === 0 ? (
+                          <div className="text-muted text-center py-4">Nessun messaggio inviato oggi</div>
+                        ) : (
+                          <div className="h-100" style={{ overflowY: 'auto' }}>
+                            <CTable hover responsive small className="mb-0">
+                              <CTableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                                <CTableRow>
+                                  {sortableHeader('Paziente', 'patient')}
+                                  {sortableHeader('Appuntamento', 'appointment')}
+                                  <CTableHeaderCell>Tipo</CTableHeaderCell>
+                                  <CTableHeaderCell>Canale</CTableHeaderCell>
+                                  <CTableHeaderCell>Stato</CTableHeaderCell>
+                                  <CTableHeaderCell></CTableHeaderCell>
+                                </CTableRow>
+                              </CTableHead>
+                              <CTableBody>
+                                {todayCommunications.map(c => (
+                                  <CTableRow key={c.id}>
+                                    <CTableDataCell className="fw-semibold">{c.patient_name}</CTableDataCell>
+                                    <CTableDataCell className="text-nowrap">{c.appointment_date} {c.appointment_time}</CTableDataCell>
+                                    <CTableDataCell>{messageTypeBadge(c.type)}</CTableDataCell>
+                                    <CTableDataCell>{channelBadge(c.channel)}</CTableDataCell>
+                                    <CTableDataCell>{statoBadge(c.stato)}</CTableDataCell>
+                                    <CTableDataCell>
+                                      {c.channel === 'whatsapp' && (
+                                        <CButton color="success" variant="outline" size="sm" onClick={() => handleOpenConversation(c)} title="Vedi conversazione">
+                                          <CIcon icon={cilChatBubble} />
+                                        </CButton>
+                                      )}
+                                    </CTableDataCell>
+                                  </CTableRow>
+                                ))}
+                              </CTableBody>
+                            </CTable>
+                          </div>
+                        )}
+                      </CCardBody>
+                    </CCard>
+                  </CCol>
+
+                  <CCol xs={12} xl={6}>
+                    <CCard className="d-flex flex-column" style={{ height: 'calc(100vh - 210px)', minHeight: 400 }}>
+                      <CCardHeader className="d-flex align-items-center justify-content-between gap-2">
+                        <strong>Reminder per domani</strong>
+                        <CButton size="sm" color="info" variant="outline" onClick={loadUpcomingReminders} disabled={upcomingLoading} title="Rileggi APPUNTA.DBF e PAZIENTI.DBF">
+                          {upcomingLoading ? <CSpinner size="sm" /> : <><CIcon icon={cilReload} className="me-1" />Riscansiona DB</>}
+                        </CButton>
+                      </CCardHeader>
+                      <CCardBody className="p-0 flex-grow-1 overflow-hidden">
+                        {upcomingLoading && upcomingReminders.length === 0 ? (
+                          <div className="text-center py-4"><CSpinner color="primary" /></div>
+                        ) : upcomingReminders.length === 0 ? (
+                          <div className="text-muted text-center py-4">Nessun reminder pianificato per domani</div>
+                        ) : (
+                          <div className="h-100" style={{ overflowY: 'auto' }}>
+                            <CTable hover responsive small className="mb-0">
+                              <CTableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                                <CTableRow>
+                                  <CTableHeaderCell>Paziente</CTableHeaderCell>
+                                  <CTableHeaderCell>Appuntamento</CTableHeaderCell>
+                                  <CTableHeaderCell>Recapito</CTableHeaderCell>
+                                </CTableRow>
+                              </CTableHead>
+                              <CTableBody>
+                                {upcomingReminders.map(reminder => (
+                                  <CTableRow key={`${reminder.patient_id}-${reminder.appointment_date}-${reminder.appointment_time}`}>
+                                    <CTableDataCell className="fw-semibold">{reminder.patient_name}</CTableDataCell>
+                                    <CTableDataCell className="text-nowrap">{reminder.appointment_date} {reminder.appointment_time}</CTableDataCell>
+                                    <CTableDataCell>
+                                      {upcomingContactBadge(reminder.contact_status)}
+                                      {reminder.phone && <div className="small text-muted mt-1">{reminder.phone}</div>}
+                                    </CTableDataCell>
+                                  </CTableRow>
+                                ))}
+                              </CTableBody>
+                            </CTable>
+                          </div>
+                        )}
+                      </CCardBody>
+                    </CCard>
+                  </CCol>
+                </CRow>
               </CCol>
 
-              {/* QR card: visibile solo se istanza esiste e non ancora connessa */}
-              {status.instance_exists && status.wa_state !== 'open' && (
-              <CCol xs={12}>
+              <CCol xs={12} lg={2}>
+                <div className="d-flex flex-column gap-2">
+                  {(
+                    [
+                      { label: 'Docker', color: (status.docker_running ? 'success' : 'warning') as TrafficLight, icon: cilSettings, action: dockerAction },
+                      { label: 'Evolution API', color: statusColor(status.evolution_reachable), icon: cilLink, action: evolutionAction },
+                      { label: 'WhatsApp', color: (status.wa_state === 'open' ? 'success' : status.wa_state === 'connecting' ? 'warning' : status.wa_state === 'close' ? 'danger' : 'secondary') as TrafficLight, icon: cilPhone, action: waAction },
+                      { label: 'Webhook', color: statusColor(status.webhook_configured), detail: status.webhook_configured ? 'Configurato' : 'Non configurato', icon: cilCheckCircle },
+                      { label: 'Reminder 24h', color: statusColor(status.reminder_24h_enabled), detail: status.reminder_24h_enabled ? 'Attivo' : 'Spento', icon: cilBell },
+                      { label: 'Reminder 2h', color: statusColor(status.reminder_2h_enabled), detail: status.reminder_2h_enabled ? 'Attivo' : 'Spento', icon: cilBell },
+                    ] as StatusCardProps[]
+                  ).map(c => <StatusCard key={c.label} {...c} />)}
+                </div>
+
+                {status.instance_exists && status.wa_state !== 'open' && (
                 <CCard>
                   <CCardHeader><strong>QR WhatsApp</strong></CCardHeader>
                   <CCardBody className="d-flex flex-column align-items-center gap-3">
@@ -549,8 +587,8 @@ const EvolutionSettingsPage: React.FC = () => {
                     )}
                   </CCardBody>
                 </CCard>
+                )}
               </CCol>
-              )}
             </CRow>
           </>
         ) : null}

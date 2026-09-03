@@ -1,5 +1,6 @@
 @echo off
-etlocal enabledelayedexpnsion
+setlocal EnableExtensions EnableDelayedExpansion
+cd /d "%~dp0"
 :: LOGGING SU FILE
 set "LOGFILE=%~dp0deploy_log.txt"
 echo ========================================== > "%LOGFILE%"
@@ -286,6 +287,13 @@ if exist ".env" (
 
 if exist "cloudflared" (
     robocopy "cloudflared" "%DEPLOY_PATH%\cloudflared" /MIR /R:2 /W:2 /NP >> "%LOGFILE%" 2>&1
+    set "ROBO_EXIT_CLOUDFLARED=!ERRORLEVEL!"
+    if !ROBO_EXIT_CLOUDFLARED! geq 8 (
+        echo   [ERRORE] Sincronizzazione cloudflared fallita con codice !ROBO_EXIT_CLOUDFLARED!
+        echo   [ERRORE] Sincronizzazione cloudflared fallita con codice !ROBO_EXIT_CLOUDFLARED! >> "%LOGFILE%"
+        pause
+        exit /b 1
+    )
     echo   [OK] cloudflared/ sincronizzato.
     echo   [OK] cloudflared/ sincronizzato. >> "%LOGFILE%"
 ) else (
