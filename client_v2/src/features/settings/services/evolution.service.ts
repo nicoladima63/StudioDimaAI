@@ -42,6 +42,27 @@ export interface EvolutionStatus {
   recent_communications: RecentComm[]
 }
 
+export interface MissedReminderRecoveryResult {
+  examined: number
+  dry_run: boolean
+  sent_wa: number
+  already_sent: number
+  confirmed: number
+  skipped_no_mobile: Array<{ patient_id: string; name: string }>
+  skipped_no_whatsapp: Array<{ patient_id: string; name: string }>
+  errors: Array<{ patient: string; error: string }>
+  simulated_actions: Array<{
+    patient_id: string
+    patient_name: string
+    appointment_date: string
+    appointment_time: string
+    type: '24h' | '2h'
+    message: string
+  }>
+  snapshot_id?: string
+  snapshot_expires_in_minutes?: number
+}
+
 const evolutionService = {
   async apiGetStatus(): Promise<EvolutionStatus> {
     const { data } = await apiClient.get('/bot/evolution/status')
@@ -106,6 +127,25 @@ const evolutionService = {
     const { data } = await apiClient.get('/reminders/upcoming-24h')
     if (!data.success) {
       throw new Error(data.error || 'Impossibile riscansionare gli appuntamenti di domani')
+    }
+    return data.data
+  },
+
+  async apiSendMissedWhatsAppReminder(snapshotId: string, actionIndex: number): Promise<MissedReminderRecoveryResult> {
+    const { data } = await apiClient.post('/reminders/recover-missed-whatsapp/send', {
+      snapshot_id: snapshotId,
+      action_index: actionIndex,
+    })
+    if (!data.success) {
+      throw new Error(data.error || 'Impossibile inviare il reminder WhatsApp')
+    }
+    return data.data
+  },
+
+  async apiTestMissedWhatsAppReminders(): Promise<MissedReminderRecoveryResult> {
+    const { data } = await apiClient.post('/reminders/recover-missed-whatsapp', { dry_run: true })
+    if (!data.success) {
+      throw new Error(data.error || 'Impossibile confrontare agenda e reminder')
     }
     return data.data
   },

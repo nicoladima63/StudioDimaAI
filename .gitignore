@@ -64,6 +64,7 @@ yarn-error.log*
 
 **/test*.py
 !server_v2/tests/test_whatsapp_verification_cache.py
+!server_v2/tests/test_missed_whatsapp_reminders.py
 
 app.log
 
@@ -127,3 +128,6 @@ prompt.md
 
 # Deploy log (generato automaticamente, inutile nel repo)
 deploy_log.txt
+
+# Backup locali creati da sync_prod_instance_to_local.bat
+/_local_instance_backups/

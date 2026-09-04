@@ -151,6 +151,10 @@ export default function DayReminderSettingsPage() {
             <CardTitle className="text-base">Configurazione Reminder per Giorno</CardTitle>
           </CardHeader>
           <CardContent>
+            <p className="mb-4 text-sm text-muted-foreground">
+              L&apos;abilitazione vale per la data dell&apos;appuntamento: disabilitando sabato e domenica
+              non sarà inviato alcun reminder per gli appuntamenti inseriti in quei giorni.
+            </p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

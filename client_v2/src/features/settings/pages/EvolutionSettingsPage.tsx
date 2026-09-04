@@ -14,7 +14,7 @@ import {
   cilMediaPlay, cilMediaStop, cilChatBubble,
 } from '@coreui/icons'
 import PageLayout from '@/components/layout/PageLayout'
-import evolutionService, { type EvolutionStatus, type RecentComm, type EvoMessage, type UpcomingReminder } from '../services/evolution.service'
+import evolutionService, { type EvolutionStatus, type RecentComm, type EvoMessage, type UpcomingReminder, type MissedReminderRecoveryResult } from '../services/evolution.service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -67,6 +67,7 @@ function upcomingContactBadge(status: UpcomingReminder['contact_status']) {
 
 type SortColumn = 'patient' | 'appointment' | 'sent'
 type SortDirection = 'asc' | 'desc'
+type CommunicationsView = 'today' | 'history'
 
 // ---------------------------------------------------------------------------
 // StatusCard
@@ -118,8 +119,13 @@ const EvolutionSettingsPage: React.FC = () => {
   const [convError, setConvError] = useState<string | null>(null)
   const [sortColumn, setSortColumn] = useState<SortColumn>('sent')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [communicationsView, setCommunicationsView] = useState<CommunicationsView>('today')
   const [upcomingReminders, setUpcomingReminders] = useState<UpcomingReminder[]>([])
   const [upcomingLoading, setUpcomingLoading] = useState(false)
+  const [testingReminders, setTestingReminders] = useState(false)
+  const [sendingReminderIndex, setSendingReminderIndex] = useState<number | null>(null)
+  const [sentReminderIndexes, setSentReminderIndexes] = useState<Set<number>>(() => new Set())
+  const [recoveryPreview, setRecoveryPreview] = useState<MissedReminderRecoveryResult | null>(null)
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -145,14 +151,26 @@ const EvolutionSettingsPage: React.FC = () => {
     })
   }, [status, sortColumn, sortDirection])
 
-  const todayCommunications = useMemo(() => {
+  const todayReminders = useMemo(() => {
     const dateParts = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit',
     }).formatToParts(new Date())
     const part = (type: Intl.DateTimeFormatPartTypes) => dateParts.find(item => item.type === type)?.value
     const today = `${part('year')}-${part('month')}-${part('day')}`
-    return sortedCommunications.filter(c => c.created_at?.slice(0, 10) === today)
+    return sortedCommunications.filter(c => c.appointment_date === today)
   }, [sortedCommunications])
+
+  const sortedUpcomingReminders = useMemo(() => (
+    [...upcomingReminders].sort((a, b) => {
+      const appointmentComparison = `${a.appointment_date} ${a.appointment_time}`
+        .localeCompare(`${b.appointment_date} ${b.appointment_time}`, 'it', { numeric: true })
+      return appointmentComparison || a.patient_name.localeCompare(b.patient_name, 'it')
+    })
+  ), [upcomingReminders])
+
+  const displayedCommunications = communicationsView === 'today'
+    ? todayReminders
+    : sortedCommunications
 
   const sortIndicator = (column: SortColumn) => (
     <span className="ms-1" aria-hidden="true">
@@ -217,6 +235,51 @@ const EvolutionSettingsPage: React.FC = () => {
       setUpcomingLoading(false)
     }
   }, [])
+
+  const handleSendMissedReminder = async (actionIndex: number) => {
+    if (!recoveryPreview?.snapshot_id) return
+    setSendingReminderIndex(actionIndex)
+    setAlert(null)
+    try {
+      const result = await evolutionService.apiSendMissedWhatsAppReminder(recoveryPreview.snapshot_id, actionIndex)
+      if (result.sent_wa || result.already_sent || result.confirmed) {
+        setSentReminderIndexes(current => new Set(current).add(actionIndex))
+      }
+      setAlert({
+        color: result.errors.length ? 'warning' : 'success',
+        msg: result.sent_wa
+          ? 'Reminder WhatsApp inviato.'
+          : result.already_sent
+            ? 'Reminder gia inviato: nessun duplicato creato.'
+            : result.confirmed
+              ? 'Appuntamento gia confermato: nessun reminder inviato.'
+              : 'Reminder non inviato: il contatto non risulta raggiungibile su WhatsApp.',
+      })
+      await Promise.all([loadStatus(), loadUpcomingReminders()])
+    } catch (err: unknown) {
+      setAlert({ color: 'danger', msg: err instanceof Error ? err.message : 'Invio reminder WhatsApp fallito' })
+    } finally {
+      setSendingReminderIndex(null)
+    }
+  }
+
+  const handleTestMissedReminders = async () => {
+    setTestingReminders(true)
+    setAlert(null)
+    try {
+      const result = await evolutionService.apiTestMissedWhatsAppReminders()
+      setRecoveryPreview(result)
+      setSentReminderIndexes(new Set())
+      setAlert({
+        color: 'info',
+        msg: `Test completato: ${result.simulated_actions.length} reminder pronti all'invio, ${result.already_sent} gia registrati. L'invio usera questa stessa lista per ${result.snapshot_expires_in_minutes} minuti.`,
+      })
+    } catch (err: unknown) {
+      setAlert({ color: 'danger', msg: err instanceof Error ? err.message : 'Test confronto agenda fallito' })
+    } finally {
+      setTestingReminders(false)
+    }
+  }
 
   useEffect(() => {
     loadStatus()
@@ -359,7 +422,7 @@ const EvolutionSettingsPage: React.FC = () => {
   // Docker: 2 stati — Avvia / Ferma
   const dockerAction = status ? (
     status.docker_running ? (
-      <CButton size="sm" color="danger" className="w-50" onClick={handleStop} disabled={stopping}>
+      <CButton size="sm" color="success" className="w-50" onClick={handleStop} disabled={stopping}>
         {stopping ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
       </CButton>
@@ -375,7 +438,7 @@ const EvolutionSettingsPage: React.FC = () => {
   // Evolution: 2 stati — Avvia Evolution / Ferma Evolution
   const evolutionAction = status ? (
     status.evolution_reachable ? (
-      <CButton size="sm" color="danger" className="w-50" onClick={handleStop} disabled={stopping}>
+      <CButton size="sm" color="success" className="w-50" onClick={handleStop} disabled={stopping}>
         {stopping ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
       </CButton>
@@ -412,6 +475,16 @@ const EvolutionSettingsPage: React.FC = () => {
         headerAction={
           <div className="d-flex gap-2">
             <CButton
+              color="info"
+              variant="outline"
+              onClick={handleTestMissedReminders}
+              disabled={testingReminders || sendingReminderIndex !== null}
+              title="Confronta agenda e registro reminder senza inviare messaggi"
+            >
+              {testingReminders ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilCheckCircle} className="me-1" />}
+              Test e confronta agenda
+            </CButton>
+            <CButton
               color="primary"
               variant="outline"
               onClick={handleSyncHistory}
@@ -435,6 +508,59 @@ const EvolutionSettingsPage: React.FC = () => {
           </CAlert>
         )}
 
+        {recoveryPreview && (
+          <CCard className="mb-3 border-info">
+            <CCardHeader className="d-flex justify-content-between align-items-center">
+              <strong>Anteprima reminder da inviare</strong>
+              <CBadge color="info">Valida {recoveryPreview.snapshot_expires_in_minutes} min</CBadge>
+            </CCardHeader>
+            <CCardBody className="p-0">
+              {recoveryPreview.simulated_actions.length === 0 ? (
+                <div className="text-muted p-3">Nessun reminder da inviare: agenda e registro sono gia allineati.</div>
+              ) : (
+                <CTable responsive hover small className="mb-0">
+                  <CTableHead>
+                    <CTableRow>
+                      <CTableHeaderCell className="text-end">#</CTableHeaderCell>
+                      <CTableHeaderCell>Paziente</CTableHeaderCell>
+                      <CTableHeaderCell>Appuntamento</CTableHeaderCell>
+                      <CTableHeaderCell>Reminder</CTableHeaderCell>
+                      <CTableHeaderCell>Messaggio</CTableHeaderCell>
+                      <CTableHeaderCell></CTableHeaderCell>
+                    </CTableRow>
+                  </CTableHead>
+                  <CTableBody>
+                    {recoveryPreview.simulated_actions.map((action, index) => (
+                      <CTableRow key={`${action.patient_id}-${action.appointment_date}-${action.appointment_time}-${action.type}`}>
+                        <CTableDataCell className="text-end text-muted">{index + 1}</CTableDataCell>
+                        <CTableDataCell className="fw-semibold">{action.patient_name}</CTableDataCell>
+                        <CTableDataCell className="text-nowrap">{action.appointment_date} {action.appointment_time}</CTableDataCell>
+                        <CTableDataCell>{messageTypeBadge(action.type)}</CTableDataCell>
+                        <CTableDataCell className="small">{action.message}</CTableDataCell>
+                        <CTableDataCell className="text-nowrap">
+                          {sentReminderIndexes.has(index) ? (
+                            <CBadge color="success">Gestito</CBadge>
+                          ) : (
+                            <CButton
+                              size="sm"
+                              color="warning"
+                              onClick={() => handleSendMissedReminder(index)}
+                              disabled={sendingReminderIndex !== null || status?.wa_state !== 'open'}
+                              title="Invia soltanto questo reminder WhatsApp"
+                            >
+                              {sendingReminderIndex === index ? <CSpinner size="sm" /> : 'Invia'}
+                            </CButton>
+                          )}
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              )}
+            </CCardBody>
+          </CCard>
+        )}
+
         {loading && !status ? (
           <div className="text-center py-5"><CSpinner color="primary" /></div>
         ) : status ? (
@@ -449,15 +575,40 @@ const EvolutionSettingsPage: React.FC = () => {
                 <CRow className="g-3">
                   <CCol xs={12} xl={6}>
                     <CCard className="d-flex flex-column" style={{ height: 'calc(100vh - 210px)', minHeight: 400 }}>
-                      <CCardHeader><strong>Messaggi inviati oggi</strong></CCardHeader>
+                      <CCardHeader className="d-flex align-items-center justify-content-between gap-2">
+                        <strong>{communicationsView === 'today' ? 'Reminder per oggi' : 'Storico messaggi'}</strong>
+                        <div className="btn-group" role="group" aria-label="Visualizzazione messaggi">
+                          <CButton
+                            size="sm"
+                            color="info"
+                            variant={communicationsView === 'today' ? undefined : 'outline'}
+                            onClick={() => setCommunicationsView('today')}
+                            aria-pressed={communicationsView === 'today'}
+                          >
+                            Oggi
+                          </CButton>
+                          <CButton
+                            size="sm"
+                            color="info"
+                            variant={communicationsView === 'history' ? undefined : 'outline'}
+                            onClick={() => setCommunicationsView('history')}
+                            aria-pressed={communicationsView === 'history'}
+                          >
+                            Storico
+                          </CButton>
+                        </div>
+                      </CCardHeader>
                       <CCardBody className="p-0 flex-grow-1 overflow-hidden">
-                        {todayCommunications.length === 0 ? (
-                          <div className="text-muted text-center py-4">Nessun messaggio inviato oggi</div>
+                        {displayedCommunications.length === 0 ? (
+                          <div className="text-muted text-center py-4">
+                            {communicationsView === 'today' ? 'Nessun reminder per oggi' : 'Nessun messaggio nello storico'}
+                          </div>
                         ) : (
                           <div className="h-100" style={{ overflowY: 'auto' }}>
                             <CTable hover responsive small className="mb-0">
                               <CTableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                                 <CTableRow>
+                                  <CTableHeaderCell className="text-end">#</CTableHeaderCell>
                                   {sortableHeader('Paziente', 'patient')}
                                   {sortableHeader('Appuntamento', 'appointment')}
                                   <CTableHeaderCell>Tipo</CTableHeaderCell>
@@ -467,8 +618,9 @@ const EvolutionSettingsPage: React.FC = () => {
                                 </CTableRow>
                               </CTableHead>
                               <CTableBody>
-                                {todayCommunications.map(c => (
+                                {displayedCommunications.map((c, index) => (
                                   <CTableRow key={c.id}>
+                                    <CTableDataCell className="text-end text-muted">{index + 1}</CTableDataCell>
                                     <CTableDataCell className="fw-semibold">{c.patient_name}</CTableDataCell>
                                     <CTableDataCell className="text-nowrap">{c.appointment_date} {c.appointment_time}</CTableDataCell>
                                     <CTableDataCell>{messageTypeBadge(c.type)}</CTableDataCell>
@@ -509,14 +661,16 @@ const EvolutionSettingsPage: React.FC = () => {
                             <CTable hover responsive small className="mb-0">
                               <CTableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                                 <CTableRow>
+                                  <CTableHeaderCell className="text-end">#</CTableHeaderCell>
                                   <CTableHeaderCell>Paziente</CTableHeaderCell>
                                   <CTableHeaderCell>Appuntamento</CTableHeaderCell>
                                   <CTableHeaderCell>Recapito</CTableHeaderCell>
                                 </CTableRow>
                               </CTableHead>
                               <CTableBody>
-                                {upcomingReminders.map(reminder => (
+                                {sortedUpcomingReminders.map((reminder, index) => (
                                   <CTableRow key={`${reminder.patient_id}-${reminder.appointment_date}-${reminder.appointment_time}`}>
+                                    <CTableDataCell className="text-end text-muted">{index + 1}</CTableDataCell>
                                     <CTableDataCell className="fw-semibold">{reminder.patient_name}</CTableDataCell>
                                     <CTableDataCell className="text-nowrap">{reminder.appointment_date} {reminder.appointment_time}</CTableDataCell>
                                     <CTableDataCell>

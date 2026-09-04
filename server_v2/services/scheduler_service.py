@@ -3,6 +3,7 @@ import logging
 import json
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List
+import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from dateutil.relativedelta import relativedelta
@@ -19,10 +20,24 @@ logging.getLogger('apscheduler.jobstores').setLevel(logging.WARNING)
 logging.getLogger('tzlocal').setLevel(logging.WARNING)
 
 logger = logging.getLogger("scheduler_v2")
+ROME_TZ = pytz.timezone('Europe/Rome')
 
 class SchedulerService:
     def __init__(self):
-        self.scheduler = BackgroundScheduler()
+        # Il server può girare con timezone UTC (Docker/Windows service). I
+        # promemoria, invece, sono sempre riferiti all'orario dello studio.
+        # Dichiararlo qui e nei trigger evita che venerdì/sabato venga
+        # calcolato nel giorno sbagliato durante cambi di ora legale.
+        self.scheduler = BackgroundScheduler(
+            timezone=ROME_TZ,
+            job_defaults={
+                'coalesce': True,
+                'max_instances': 1,
+                # Dopo un riavvio breve esegui il job perso invece di
+                # scartarlo con il default di APScheduler (un solo minuto).
+                'misfire_grace_time': 12 * 60 * 60,
+            },
+        )
         self._current_reminder_job = None
         self._current_recall_job = None
         self._current_calendar_sync_job = None
@@ -385,10 +400,9 @@ class SchedulerService:
             def job_24h_morning():
                 from services.appointment_reminder_service import run_reminders
                 from services.reminder_dispatch_engine import get_dispatch_engine
-                from datetime import datetime
-                
+
                 engine = get_dispatch_engine()
-                tomorrow_weekday = datetime.now().weekday()  # 0=Lun, ..., 6=Dom
+                tomorrow_weekday = datetime.now(ROME_TZ).weekday()  # 0=Lun, ..., 6=Dom
                 tomorrow_day_of_week = ((tomorrow_weekday + 1) % 7) + 1  # Converti (1=Lun, ..., 7=Dom)
                 
                 # Se continuous, manda TUTTO al mattino; altrimenti solo mattina
@@ -403,10 +417,9 @@ class SchedulerService:
             def job_24h_afternoon():
                 from services.appointment_reminder_service import run_reminders
                 from services.reminder_dispatch_engine import get_dispatch_engine
-                from datetime import datetime
-                
+
                 engine = get_dispatch_engine()
-                tomorrow_weekday = datetime.now().weekday()
+                tomorrow_weekday = datetime.now(ROME_TZ).weekday()
                 tomorrow_day_of_week = ((tomorrow_weekday + 1) % 7) + 1
                 
                 # Se continuous, salta (è stato mandato tutto al mattino); altrimenti manda pomeriggio
@@ -421,15 +434,14 @@ class SchedulerService:
 
             # ore 8: appuntamenti di domani (mattina oppure tutto a seconda di continuous_hours)
             self._current_reminder_24h_morning_job = self.scheduler.add_job(
-                job_24h_morning, CronTrigger(hour=8, minute=0),
+                job_24h_morning, CronTrigger(hour=8, minute=0, timezone=ROME_TZ),
                 id='appt_reminder_24h_morning', replace_existing=True
             )
             # ore 14: appuntamenti di domani pomeriggio (solo se split mode)
             self._current_reminder_24h_afternoon_job = self.scheduler.add_job(
-                job_24h_afternoon, CronTrigger(hour=14, minute=0),
+                job_24h_afternoon, CronTrigger(hour=14, minute=0, timezone=ROME_TZ),
                 id='appt_reminder_24h_afternoon', replace_existing=True
             )
-
         if enabled_2h:
             def job_2h():
                 from services.appointment_reminder_service import run_reminders

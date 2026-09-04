@@ -13,6 +13,7 @@ Flusso per ogni appuntamento:
 import os
 import logging
 import sqlite3
+import re
 import requests
 import dbf
 import pytz
@@ -58,6 +59,7 @@ REMINDER_MESSAGES = {
 
 
 _sent_this_session: set[str] = set()  # chiave: "patient_id|ap_date|ap_time|type"
+_NEW_PATIENT_TYPE = 'V'  # "Prima visita" in DB_GUARDIA
 
 
 def _session_key(patient_id: str, ap_date: str, ap_time: str, reminder_type: str) -> str:
@@ -104,6 +106,42 @@ def _normalize_phone(phone: str) -> str:
     return phone
 
 
+def _new_patient_phone_from_notes(notes: object) -> Optional[str]:
+    """Estrae il cellulare dalla prima riga delle note di una prima visita.
+
+    Per convenzione della segreteria la prima riga è riservata al recapito;
+    le righe successive possono contenere annotazioni libere e non devono
+    quindi essere interpretate come numero di telefono.
+    """
+    lines = str(notes or '').splitlines()
+    first_line = lines[0].strip() if lines else ''
+    match = re.search(r'(?<!\d)(?:\+?39[\s.-]*)?3(?:[\s.-]*\d){8,9}(?!\d)', first_line)
+    if not match:
+        return None
+
+    digits = re.sub(r'\D', '', match.group(0))
+    if len(digits) == 12 and digits.startswith('39'):
+        digits = digits[2:]
+    if not _is_mobile(digits):
+        return None
+    return _normalize_phone(digits)
+
+
+def _new_patient_reminder_id(phone: str) -> str:
+    """Identificativo stabile per deduplicare un paziente non ancora censito."""
+    return f"new-patient:{_normalize_phone(phone)}"
+
+
+def _recovery_reminder_type(ap_dt: datetime, now: datetime) -> Optional[str]:
+    """Restituisce il tipo di reminder da recuperare, oppure ``None``."""
+    if ap_dt.date() == (now + timedelta(days=1)).date():
+        return '24h'
+    delta_hours = (ap_dt - now).total_seconds() / 3600
+    if ap_dt.date() == now.date() and 0 < delta_hours < 8:
+        return '2h'
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Lettura appuntamenti e pazienti
 # ---------------------------------------------------------------------------
@@ -120,7 +158,9 @@ def get_upcoming_appointments(
       slot='morning'   -> ore < morning_end (da config DB)
       slot='afternoon' -> ore >= morning_end (da config DB)
       slot='all'       -> tutti (fallback)
-    reminder_type '2h':  appuntamenti tra 90 e 150 minuti da adesso
+    reminder_type '2h':       appuntamenti tra 90 e 150 minuti da adesso
+    reminder_type 'recovery': appuntamenti futuri di oggi (entro 8 ore) e di
+                              domani, usati dal recupero manuale post-disservizio.
     """
     from services.reminder_dispatch_engine import get_dispatch_engine
     
@@ -133,18 +173,26 @@ def get_upcoming_appointments(
     # --- Leggi config dispatch engine ---
     engine = get_dispatch_engine()
     
-    # Determina giorno di domani per check abilitazione
-    tomorrow_weekday = tomorrow.weekday()  # 0=Lun, ..., 6=Dom
-    tomorrow_day_of_week = (tomorrow_weekday + 1)  # Converti a nostro formato (1=Lun, ..., 7=Dom)
-    
+    # La configurazione è riferita alla data dell'appuntamento. I reminder
+    # 24h riguardano domani, quelli 2h riguardano oggi: usare sempre lo stesso
+    # giorno per entrambi era il motivo per cui il filtro non copriva in modo
+    # affidabile sabato/domenica.
+    appointment_day = tomorrow if reminder_type == '24h' else now.date()
+    appointment_day_of_week = appointment_day.weekday() + 1  # 1=Lun, ..., 7=Dom
+
     # Il job automatico rispetta la configurazione del giorno. Le schermate di
     # monitoraggio devono invece poter leggere gli appuntamenti futuri anche
     # quando l'invio automatico è disabilitato.
-    if respect_schedule and not engine.should_send_today(tomorrow_weekday):
+    if respect_schedule and not engine.is_day_enabled(appointment_day_of_week):
+        logger.info(
+            "Reminder %s saltato: gli appuntamenti del giorno %s sono disabilitati",
+            reminder_type,
+            appointment_day.isoformat(),
+        )
         return []
     
     # Ottieni soglia mattina/pomeriggio per domani (usato solo in split mode)
-    morning_threshold = engine.get_morning_threshold_hour(tomorrow_day_of_week)
+    morning_threshold = engine.get_morning_threshold_hour(appointment_day_of_week)
     if morning_threshold is None:
         morning_threshold = 13  # Default fallback
 
@@ -161,8 +209,23 @@ def get_upcoming_appointments(
                 if hasattr(ap_date, 'date'):
                     ap_date = ap_date.date()
                 paz_id = str(record['DB_APPACOD']).strip()
+                appointment_type = str(record['DB_GUARDIA']).strip()
+                new_patient_phone = None
                 if not paz_id:
-                    continue
+                    # Le prime visite non hanno ancora un'anagrafica. Per
+                    # convenzione il numero è nella prima riga di DB_NOTE:
+                    # trattiamole come appuntamenti normali, senza creare un
+                    # record paziente fittizio nel DBF.
+                    if appointment_type != _NEW_PATIENT_TYPE:
+                        continue
+                    new_patient_phone = _new_patient_phone_from_notes(record['DB_NOTE'])
+                    if not new_patient_phone:
+                        logger.warning(
+                            "Prima visita senza ID o cellulare nella prima riga delle note: %s",
+                            str(record['DB_APDESCR']).strip(),
+                        )
+                        continue
+                    paz_id = _new_patient_reminder_id(new_patient_phone)
 
                 ora_raw = str(record['DB_APOREIN']).strip()
                 ora_fmt = _ora_fmt(ora_raw)
@@ -177,20 +240,35 @@ def get_upcoming_appointments(
                         match = (ap_dt.hour >= morning_threshold)
                     else:
                         match = True
-                else:
+                elif reminder_type == '2h':
                     # Appuntamenti tra 90 e 150 minuti da adesso
                     delta = (ap_dt - now).total_seconds() / 60
                     match = (90 <= delta <= 150)
+                elif reminder_type == 'recovery':
+                    # Il recupero non deve anticipare gli appuntamenti di oggi
+                    # troppo lontani: il job ordinario 2h li gestira' in seguito.
+                    recovery_type = _recovery_reminder_type(ap_dt, now)
+                    match = recovery_type is not None
+                else:
+                    raise ValueError(f"Tipo reminder non supportato: {reminder_type}")
 
                 if match:
-                    rows.append({
+                    row = {
                         'patient_id': paz_id,
                         'appointment_date': str(ap_date),
                         'appointment_time': ora_fmt,
-                        'tipo': str(record['DB_GUARDIA']).strip(),
+                        'tipo': appointment_type,
                         'studio': str(record['DB_APSTUDI']).strip(),
                         'nome_dbf': str(record['DB_APDESCR']).strip(),
-                    })
+                    }
+                    if new_patient_phone:
+                        row['cell'] = new_patient_phone
+                        row['is_new_patient'] = True
+                    if reminder_type == 'recovery':
+                        # Gli appuntamenti di domani ricevono sempre il testo
+                        # "domani", anche se il recupero viene eseguito tardi.
+                        row['recovery_type'] = recovery_type
+                    rows.append(row)
             except Exception:
                 continue
         table.close()
@@ -230,7 +308,7 @@ def get_upcoming_appointments(
     for row in rows:
         paz = pazienti.get(row['patient_id'], {})
         row['patient_name'] = paz.get('nome') or row['nome_dbf']
-        row['cell'] = paz.get('cell', '')
+        row['cell'] = row.get('cell') or paz.get('cell', '')
         row['tel'] = paz.get('tel', '')
     return rows
 
@@ -516,6 +594,18 @@ def run_followup_reminders(hours_before: int = 3, dry_run: bool = False) -> dict
     Riusa il canale originale (WA o SMS) già registrato in patient_communications.
     """
     ensure_reminder_tables()
+    from services.reminder_dispatch_engine import get_dispatch_engine
+
+    now = datetime.now(ROME_TZ).replace(tzinfo=None)
+    if not get_dispatch_engine().is_day_enabled(now.weekday() + 1):
+        logger.info("Follow-up saltato: gli appuntamenti di oggi sono disabilitati")
+        stats = {
+            'sent_wa': 0, 'sent_sms': 0, 'errors': [], 'dry_run': dry_run,
+            'hours_before': hours_before, 'simulated_actions': [],
+        }
+        _write_log('followup', stats)
+        return stats
+
     appointments = get_appointments_pending_followup(hours_before)
     stats = {'sent_wa': 0, 'sent_sms': 0, 'errors': [], 'dry_run': dry_run, 'hours_before': hours_before, 'simulated_actions': []}
 
@@ -677,6 +767,116 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
     # Log su file (stesso pattern scheduler esistente)
     _write_log(reminder_type, stats)
 
+    return stats
+
+
+def _recovery_message(patient_name: str, ap_date: str, ap_time: str, reminder_type: str) -> str:
+    """Genera il testo usato sia dall'anteprima sia dall'invio effettivo."""
+    parts = patient_name.split() if patient_name else []
+    nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
+    if reminder_type == '24h':
+        data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
+        return REMINDER_MESSAGES['24h']['wa'].format(nome=nome, data=data_fmt, ora=ap_time)
+    return (
+        f"Ciao {nome}! Oggi alle {ap_time} hai un appuntamento dal dentista "
+        "(Studio Dr. Di Martino). A presto!"
+    )
+
+
+def run_missed_whatsapp_reminders(
+    dry_run: bool = False, appointments: Optional[list[dict]] = None,
+) -> dict:
+    """Recupera i reminder WA saltati dopo un fermo del servizio.
+
+    Considera soltanto appuntamenti ancora futuri: quelli di domani ricevono il
+    reminder 24h (anche se mancano meno di 24 ore), quelli di oggi entro otto
+    ore ricevono il reminder "oggi alle". La stessa chiave di deduplicazione
+    dei job automatici impedisce di inviare una seconda volta lo stesso tipo.
+    Non viene mai usato l'SMS come fallback: e' un'azione dedicata a WhatsApp.
+    """
+    ensure_reminder_tables()
+    # Se presente, ``appointments`` proviene dall'anteprima appena eseguita:
+    # non rileggiamo l'agenda. Prima dell'invio controlliamo comunque di nuovo
+    # il registro, per non duplicare invii avvenuti nel frattempo.
+    appointments = appointments if appointments is not None else get_upcoming_appointments(
+        'recovery', respect_schedule=False
+    )
+    stats = {
+        'examined': len(appointments),
+        'dry_run': dry_run,
+        'sent_wa': 0,
+        'already_sent': 0,
+        'confirmed': 0,
+        'skipped_no_mobile': [],
+        'skipped_no_whatsapp': [],
+        'errors': [],
+        'simulated_actions': [],
+        'snapshot_appointments': [],
+    }
+
+    for ap in appointments:
+        pid = ap['patient_id']
+        name = ap['patient_name']
+        ap_date = ap['appointment_date']
+        ap_time = ap['appointment_time']
+        reminder_type = ap['recovery_type']
+        cell = ap.get('cell', '').strip()
+
+        if _already_sent(pid, ap_date, ap_time, reminder_type):
+            stats['already_sent'] += 1
+            continue
+        if reminder_type == '2h' and is_appointment_confirmed(pid, ap_date, ap_time):
+            stats['confirmed'] += 1
+            continue
+        if not cell or not _is_mobile(cell):
+            stats['skipped_no_mobile'].append({'patient_id': pid, 'name': name})
+            continue
+
+        text = _recovery_message(name, ap_date, ap_time, reminder_type)
+        if dry_run:
+            stats['simulated_actions'].append({
+                'patient_id': pid,
+                'patient_name': name,
+                'appointment_date': ap_date,
+                'appointment_time': ap_time,
+                'type': reminder_type,
+                'message': text,
+            })
+            stats['snapshot_appointments'].append({
+                'patient_id': pid,
+                'patient_name': name,
+                'appointment_date': ap_date,
+                'appointment_time': ap_time,
+                'recovery_type': reminder_type,
+                'cell': cell,
+            })
+            continue
+
+        has_wa, _ = check_whatsapp(pid, cell)
+        if not has_wa:
+            stats['skipped_no_whatsapp'].append({'patient_id': pid, 'name': name})
+            continue
+
+        result = send_whatsapp_text(cell, text)
+
+        stato = 'sent' if result.get('success') else 'failed'
+        _log_communication(
+            pid, name, cell, 'whatsapp', reminder_type, ap_date, ap_time,
+            stato, result.get('message_id', ''),
+        )
+        if result.get('success'):
+            stats['sent_wa'] += 1
+        else:
+            stats['errors'].append({'patient': name, 'error': result.get('error', '')})
+
+    if not dry_run:
+        _write_log('recovery', {
+            'sent_wa': stats['sent_wa'],
+            'sent_sms': 0,
+            'skipped_fisso': stats['skipped_no_mobile'],
+            'no_phone': stats['skipped_no_whatsapp'],
+            'errors': stats['errors'],
+        })
     return stats
 
 

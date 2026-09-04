@@ -49,14 +49,20 @@ class ReminderDispatchEngine:
         Returns:
             True se domani è abilitato per i reminder, False altrimenti.
         """
-        # Converti da datetime.weekday() (0=Mon) a nostro formato (1=Mon)
-        tomorrow_weekday = ((today_weekday + 1) % 7) + 1
-        config = self.get_config(tomorrow_weekday)
-        
-        if not config:
-            return False
-        
-        return config['enabled'] == 1
+        # Converti da datetime.weekday() (0=Mon) a nostro formato (1=Mon).
+        # Questo metodo rimane per compatibilità con chi decide i reminder 24h.
+        tomorrow_day_of_week = ((today_weekday + 1) % 7) + 1
+        return self.is_day_enabled(tomorrow_day_of_week)
+
+    def is_day_enabled(self, day_of_week: int) -> bool:
+        """True solo se è consentito inviare reminder per quel giorno.
+
+        Il giorno configurato è sempre il giorno *dell'appuntamento*, non il
+        giorno in cui gira il job. Ciò permette di escludere gli appuntamenti
+        fittizi di sabato/domenica da 24h, 2h e follow-up.
+        """
+        config = self.get_config(day_of_week)
+        return bool(config and config.get('enabled') == 1)
 
     def dispatch_mode(self, day_of_week: int) -> Optional[str]:
         """

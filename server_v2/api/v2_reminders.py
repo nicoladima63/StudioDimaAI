@@ -6,6 +6,9 @@ import json
 import logging
 import os
 import sqlite3
+import threading
+import uuid
+from datetime import datetime, timedelta
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
@@ -16,6 +19,10 @@ from core.reminder_db import ensure_reminder_tables
 logger = logging.getLogger(__name__)
 
 reminders_v2_bp = Blueprint('reminders_v2', __name__)
+
+_RECOVERY_PREVIEWS: dict[str, dict] = {}
+_RECOVERY_PREVIEWS_LOCK = threading.Lock()
+_RECOVERY_PREVIEW_TTL = timedelta(minutes=15)
 
 @reminders_v2_bp.route('/reminders/settings', methods=['GET'])
 @jwt_required()
@@ -50,7 +57,9 @@ def update_reminder_settings():
                 s[f] = body[f]
         save_automation_settings(s)
         # Riprogramma i job con le nuove impostazioni
-        from app_v2 import scheduler_service as svc
+        # run_v2 avvia questa istanza singleton: usare quella evita di
+        # salvare il flag senza aggiornare i job già in esecuzione.
+        from services.scheduler_service import scheduler_service as svc
         if svc:
             svc.schedule_appointment_reminders()
         return format_response({k: s[k] for k in fields if k in s})
@@ -149,6 +158,64 @@ def trigger_2h():
         return format_response(stats)
     except Exception as e:
         logger.error(f"Errore trigger 2h: {e}")
+        return format_response(success=False, error=str(e)), 500
+
+
+@reminders_v2_bp.route('/reminders/recover-missed-whatsapp', methods=['POST'])
+@jwt_required()
+def recover_missed_whatsapp_reminders():
+    """Crea l'anteprima dei reminder WA mancati, senza inviare messaggi."""
+    from services.appointment_reminder_service import run_missed_whatsapp_reminders
+    body = request.get_json(silent=True) or {}
+    dry_run = bool(body.get('dry_run', False))
+    try:
+        if not dry_run:
+            return format_response(success=False, error='Esegui il test e invia i reminder singolarmente.'), 400
+        stats = run_missed_whatsapp_reminders(dry_run=True)
+        appointments = stats.pop('snapshot_appointments', [])
+        snapshot_id = str(uuid.uuid4())
+        with _RECOVERY_PREVIEWS_LOCK:
+            now = datetime.now()
+            expired = [key for key, value in _RECOVERY_PREVIEWS.items()
+                       if value['expires_at'] <= now]
+            for key in expired:
+                del _RECOVERY_PREVIEWS[key]
+            _RECOVERY_PREVIEWS[snapshot_id] = {
+                'appointments': appointments,
+                'expires_at': now + _RECOVERY_PREVIEW_TTL,
+            }
+        stats['snapshot_id'] = snapshot_id
+        stats['snapshot_expires_in_minutes'] = 15
+        return format_response(stats)
+    except Exception as e:
+        logger.error(f"Errore recupero reminder WhatsApp mancati: {e}")
+        return format_response(success=False, error=str(e)), 500
+
+
+@reminders_v2_bp.route('/reminders/recover-missed-whatsapp/send', methods=['POST'])
+@jwt_required()
+def send_missed_whatsapp_reminder():
+    """Invia un solo reminder selezionato dall'anteprima corrente."""
+    from services.appointment_reminder_service import run_missed_whatsapp_reminders
+    body = request.get_json(silent=True) or {}
+    snapshot_id = body.get('snapshot_id')
+    action_index = body.get('action_index')
+    if not isinstance(snapshot_id, str) or not isinstance(action_index, int):
+        return format_response(success=False, error='Anteprima o appuntamento non validi.'), 400
+
+    with _RECOVERY_PREVIEWS_LOCK:
+        preview = _RECOVERY_PREVIEWS.get(snapshot_id)
+    if not preview or preview['expires_at'] <= datetime.now():
+        return format_response(success=False, error='Anteprima scaduta: esegui di nuovo il test.'), 400
+    appointments = preview['appointments']
+    if not 0 <= action_index < len(appointments):
+        return format_response(success=False, error='Appuntamento non presente nell’anteprima.'), 400
+
+    try:
+        # run_missed... ricontrolla comunque il log anti-duplicati prima dell'invio.
+        return format_response(run_missed_whatsapp_reminders(appointments=[appointments[action_index]]))
+    except Exception as e:
+        logger.error(f"Errore invio reminder WhatsApp selezionato: {e}")
         return format_response(success=False, error=str(e)), 500
 
 
@@ -330,7 +397,7 @@ def update_reminder_schedule(day_of_week: int):
         # Leggi config aggiornata
         updated = engine.get_config(day_of_week)
         
-        # Reschedula APScheduler job
+        # Riprogramma l'unica istanza effettivamente avviata da run_v2.
         try:
             from services.scheduler_service import scheduler_service
             if scheduler_service:

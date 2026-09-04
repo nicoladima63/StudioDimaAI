@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { CTable, CTableHead, CTableBody, CTableRow, CTableHeaderCell, CTableDataCell, CSpinner, CAlert, CButton } from '@coreui/react'
 import automationMessagesService, { AutomationMessage } from '../services/automationMessagesService'
 
-const fmtDateTime = (s: string) => new Date(s).toLocaleString('it-IT')
+const fmtDateTime = (s: string) => {
+  // SQLite CURRENT_TIMESTAMP produces UTC values without an offset.
+  const iso = s.replace(' ', 'T')
+  const utcIso = /(?:Z|[+-]\d{2}:?\d{2})$/.test(iso) ? iso : `${iso}Z`
+
+  return new Date(utcIso).toLocaleString('it-IT', { timeZone: 'Europe/Rome' })
+}
 
 const AutomationMessages: React.FC = () => {
   const [items, setItems] = useState<AutomationMessage[]>([])
