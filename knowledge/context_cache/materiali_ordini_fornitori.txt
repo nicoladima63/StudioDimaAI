@@ -1,63 +1,28 @@
-QUERY: materiali
+QUERY: materiali ordini fornitori
 
 === PRIORITY FILES ===
-- client_v2/src/features/materiali/pages/MaterialiPage.tsx | role=page | score=38 | structural=32 | query=6 | matched=materiali
-- client_v2/src/features/materiali/pages/RicercaArticoli.tsx | role=page | score=33 | structural=27 | query=6 | matched=materiali
+- server_v2/api/v2_materiali.py | role=api | score=33 | structural=19 | query=14 | matched=materiali, supplier
+- server_v2/services/materiali_migration_service.py | role=service | score=30 | structural=20 | query=10 | matched=materiali, supplier
 - server_v2/services/materiali_service.py | role=service | score=30 | structural=20 | query=10 | matched=materiali
-- server_v2/api/v2_materiali.py | role=api | score=29 | structural=19 | query=10 | matched=materiali
-- client_v2/src/store/materiali.store.ts | role=state | score=27 | structural=21 | query=6 | matched=materiali
-- server_v2/services/materiali_migration_service.py | role=service | score=26 | structural=20 | query=6 | matched=materiali
-- client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx | role=page | score=25 | structural=19 | query=6 | matched=materiali
-- server_v2/repositories/materiali_repository.py | role=repository | score=24 | structural=18 | query=6 | matched=materiali
 - client_v2/src/features/materiali/services/materiali-classification.service.ts | role=service | score=20 | structural=14 | query=6 | matched=materiali
 - client_v2/src/features/materiali/services/materiali-migration.service.ts | role=service | score=18 | structural=12 | query=6 | matched=materiali
-- client_v2/src/features/materiali/components/MaterialiTable.tsx | role=component | score=17 | structural=11 | query=6 | matched=materiali
-- client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx | role=component | score=15 | structural=9 | query=6 | matched=materiali
-- client_v2/src/components/forms/MaterialClassificationForm.tsx | role=component | score=13 | structural=13 | query=0 | matched=none
-- client_v2/src/store/fornitori.store.ts | role=state | score=13 | structural=13 | query=0 | matched=none
-- client_v2/src/features/materiali/components/MaterialiAccordion.tsx | role=component | score=12 | structural=6 | query=6 | matched=materiali
-- client_v2/src/store/conti.store.ts | role=state | score=12 | structural=12 | query=0 | matched=none
-- client_v2/src/services/api/fattura.service.ts | role=api | score=11 | structural=11 | query=0 | matched=none
 
 === ARCHITECTURE ===
 
-PAGE
-- client_v2/src/features/materiali/pages/MaterialiPage.tsx
-- client_v2/src/features/materiali/pages/RicercaArticoli.tsx
-- client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx
-
-SERVICE
-- server_v2/services/materiali_service.py
-- server_v2/services/materiali_migration_service.py
-- client_v2/src/features/materiali/services/materiali-classification.service.ts
-- client_v2/src/features/materiali/services/materiali-migration.service.ts
-
 API
 - server_v2/api/v2_materiali.py
-- client_v2/src/services/api/fattura.service.ts
 
-STATE
-- client_v2/src/store/materiali.store.ts
-- client_v2/src/store/fornitori.store.ts
-- client_v2/src/store/conti.store.ts
-
-REPOSITORY
-- server_v2/repositories/materiali_repository.py
-
-COMPONENT
-- client_v2/src/features/materiali/components/MaterialiTable.tsx
-- client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
-- client_v2/src/components/forms/MaterialClassificationForm.tsx
-- client_v2/src/features/materiali/components/MaterialiAccordion.tsx
+SERVICE
+- server_v2/services/materiali_migration_service.py
+- server_v2/services/materiali_service.py
+- client_v2/src/features/materiali/services/materiali-classification.service.ts
+- client_v2/src/features/materiali/services/materiali-migration.service.ts
 
 === SYMBOLS ===
 - MaterialiMigrationService | server_v2/services/materiali_migration_service.py | kind=class | category=core | score=46
 - MaterialiService | server_v2/services/materiali_service.py | kind=class | category=core | score=46
-- useMateriali | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=45
-- useMaterialiByFornitore | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=45
-- useMaterialiByConto | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=45
-- useMaterialiSearch | client_v2/src/store/materiali.store.ts | kind=hook | category=support | score=45
-- MaterialiRepository | server_v2/repositories/materiali_repository.py | kind=class | category=core | score=44
+- normalize_supplier_name | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=39
+- import_materials_for_supplier | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=39
 - get_all_materiali | server_v2/services/materiali_service.py | kind=function | category=support | score=39
 - get_materiali_paginated | server_v2/services/materiali_service.py | kind=function | category=support | score=39
 - get_materiali | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
@@ -66,28 +31,14 @@ COMPONENT
 - get_materiali_stats | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
 - ricerca_materiali_classificati | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
 - salva_classificazione_materiali_bulk | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
-- cercaArticoli | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- confirmDeleteMateriale | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- cancelDeleteMateriale | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- getArticoloKey | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- caricaClassificazioniEsistenti | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- handleSearchSubmit | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleSearchClear | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleSuggestionClick | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleSearchBlur | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleEdit | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleDelete | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleConfirmDelete | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleViewFattura | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
-- handleSaveClassification | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
+- import_supplier_materials | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
+- _initialize_supplier_mappings | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=24
 - classify_material_type | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
 - is_dental_material | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
-- normalize_supplier_name | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
 - read_spesafo_data | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
 - filter_materials_by_classification | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
 - migrate_materials_to_db | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
 - run_full_migration | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
-- import_materials_for_supplier | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
 - search_articles_in_spesafo | server_v2/services/materiali_migration_service.py | kind=function | category=support | score=24
 - get_materiale_by_id | server_v2/services/materiali_service.py | kind=function | category=support | score=24
 - create_materiale | server_v2/services/materiali_service.py | kind=function | category=support | score=24
@@ -97,10 +48,27 @@ COMPONENT
 - search_materials | server_v2/services/materiali_service.py | kind=function | category=support | score=24
 - get_classification_suggestions | server_v2/services/materiali_service.py | kind=function | category=support | score=24
 - get_statistics | server_v2/services/materiali_service.py | kind=function | category=support | score=24
-- getBadgeColor | client_v2/src/features/materiali/components/MaterialiTable.tsx | kind=component | category=ui | score=23
 - get_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
 - create_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
 - update_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- update_materiale_conti | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- delete_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- get_classificazione_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- salva_classificazione_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- ricerca_articoli | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- preview_migration | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- import_all_materials | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- __init__ | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _compile_regex_patterns | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _manage_cache_size | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _is_material_useful | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _clean_dbf_value | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _safe_float | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _get_existing_material_classification | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _get_classification_data | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _load_existing_patterns | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _find_pattern_match | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
+- _clean_material_name | server_v2/services/materiali_migration_service.py | kind=function | category=internal | score=9
 
 === RELEVANT CODE ===
 
@@ -310,161 +278,140 @@ class MaterialiService(BaseService):
         Args:
 # … snippet truncated; inspect the source file for the remaining lines
 
---- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\store\materiali.store.ts::useMateriali (lines 320-335) ---
-export const useMateriali = () => {
-  const store = useMaterialiStore();
-  
-  return {
-    materiali: store.materialiFiltered,
-    isLoading: store.isLoading,
-    error: store.error,
-    filtriAttivi: store.filtriAttivi,
-    load: store.loadMateriali,
-    applyFiltri: store.applyFiltri,
-    clearFiltri: store.clearFiltri,
-    deleteMateriale: store.deleteMateriale,
-    updateMateriale: store.updateMateriale,
-    updateMaterialeConti: store.updateMaterialeConti
-  };
-};
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\materiali_migration_service.py::normalize_supplier_name (lines 308-338) ---
+    def normalize_supplier_name(self, supplier_name: str) -> str:
+        """
+        Normalizza il nome del fornitore per aggregazione intelligente.
+        
+        Args:
+            supplier_name: Nome originale del fornitore
+            
+        Returns:
+            Nome normalizzato del fornitore
+        """
+        if not supplier_name:
+            return supplier_name
+        
+        # Cache per performance
+        cache_key = supplier_name.lower().strip()
+        if cache_key in self._supplier_cache:
+            return self._supplier_cache[cache_key]
+        
+        supplier_lower = supplier_name.lower().strip()
+        
+        # Cerca corrispondenze con fornitori simili
+        for normalized_name, variations in self.similar_suppliers.items():
+            for variation in variations:
+                if variation in supplier_lower:
+                    self._supplier_cache[cache_key] = normalized_name.title()
+                    return normalized_name.title()
+        
+        # Se non trova corrispondenze, normalizza il nome originale
+        normalized = supplier_name.strip().title()
+        self._supplier_cache[cache_key] = normalized
+        return normalized
 
---- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\store\materiali.store.ts::useMaterialiByFornitore (lines 338-347) ---
-export const useMaterialiByFornitore = (fornitoreid: string | null) => {
-  const store = useMaterialiStore();
-  
-  return {
-    materiali: fornitoreid ? store.getMaterialiByFornitore(fornitoreid) : [],
-    isLoading: store.isLoading,
-    error: store.error,
-    load: store.loadMateriali
-  };
-};
-
---- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\store\materiali.store.ts::useMaterialiByConto (lines 350-359) ---
-export const useMaterialiByConto = (contoid: number | null) => {
-  const store = useMaterialiStore();
-  
-  return {
-    materiali: contoid ? store.getMaterialiByConto(contoid) : [],
-    isLoading: store.isLoading,
-    error: store.error,
-    load: store.loadMateriali
-  };
-};
-
---- C:\Users\NICOLA\Desktop\StudioDimaAI\client_v2\src\store\materiali.store.ts::useMaterialiSearch (lines 362-371) ---
-export const useMaterialiSearch = () => {
-  const store = useMaterialiStore();
-  
-  return {
-    search: store.searchMateriali,
-    isLoading: store.isLoading,
-    error: store.error,
-    load: store.loadMateriali
-  };
-};
-
---- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\repositories\materiali_repository.py::MaterialiRepository (lines 25-563) ---
-class MaterialiRepository(BaseRepository):
-    """
-    Repository for managing materials data with advanced classification capabilities.
-    
-    Features:
-    - Material CRUD operations with classification support
-    - Supplier relationship management
-    - DBF integration for invoice processing
-    - Auto-classification based on patterns and history
-    - Price tracking and statistics
-    - Bulk operations for performance
-    """
-    
-    @property
-    def table_name(self) -> str:
-        return 'materiali'
-    
-    def __init__(self, db_manager: Optional[DatabaseManager] = None):
-        super().__init__(db_manager)
-        self._ensure_table_exists()
-    
-    def _ensure_table_exists(self) -> None:
-        """Ensure the materiali table exists with all required fields."""
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\materiali_migration_service.py::import_materials_for_supplier (lines 1157-1264) ---
+    def import_materials_for_supplier(self, supplier_name: str, materials: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Importa i materiali per un fornitore specifico.
+        
+        Args:
+            supplier_name: Nome del fornitore
+            materials: Lista di materiali da importare
+            
+        Returns:
+            Dizionario con statistiche dell'importazione
+        """
         try:
-            create_table_sql = '''
-                CREATE TABLE IF NOT EXISTS materiali (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    codicearticolo TEXT,
-                    nome TEXT NOT NULL,
-                    fornitoreid TEXT,
-                    fornitorenome TEXT,
-                    contoid INTEGER,
-                    contonome TEXT,
-                    brancaid INTEGER,
-                    brancanome TEXT,
-                    sottocontoid INTEGER,
-                    sottocontonome TEXT,
-                    metodo_classificazione TEXT DEFAULT 'manuale',
-                    confidence INTEGER DEFAULT 0,
-                    confermato INTEGER DEFAULT 0,
-                    occorrenze INTEGER DEFAULT 0,
-                    conto_codice TEXT,
-                    sottoconto_codice TEXT,
-                    categoria_contabile TEXT,
-                    data_fattura DATE,
-                    costo_unitario REAL,
-                    fattura_id TEXT,
-                    riga_fattura_id TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    deleted_at TIMESTAMP NULL
-                )
-            '''
+            stats = {
+                'supplier_name': supplier_name,
+                'materials_imported': 0,
+                'materials_updated': 0,
+                'materials_skipped': 0,
+                'total_processed': len(materials),
+                'errors': []
+            }
             
-            # Create indexes for performance
-            indexes = [
-                'CREATE INDEX IF NOT EXISTS idx_materiali_fornitore ON materiali(fornitoreid)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_conto ON materiali(contoid)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_branca ON materiali(brancaid)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_sottoconto ON materiali(sottocontoid)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_lookup ON materiali(nome, fornitoreid, confermato, contoid)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_confidence ON materiali(confidence DESC, id DESC)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_codice ON materiali(codicearticolo)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_fattura ON materiali(fattura_id)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_data ON materiali(data_fattura)',
-                'CREATE INDEX IF NOT EXISTS idx_materiali_deleted ON materiali(deleted_at)'
-            ]
-            
-            with self.db_manager.transaction() as conn:
+            with self.db_manager.get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute(create_table_sql)
                 
-                for index_sql in indexes:
-                    cursor.execute(index_sql)
-                    
-                cursor.close()
+                for material in materials:
+                    try:
+                        # Verifica se il materiale esiste già
+                        existing_query = """
+                            SELECT id FROM materiali 
+                            WHERE codicearticolo = ? AND fornitoreid = ?
+                        """
+                        existing = cursor.execute(existing_query, (
+                            material.get('codicearticolo', ''),
+                            material.get('fornitoreid', 0)
+                        )).fetchone()
+                        
+                        if existing:
+                            # Aggiorna materiale esistente
+                            update_query = """
+                                UPDATE materiali SET
+                                    nome = ?, fornitorenome = ?, costo_unitario = ?,
+                                    confidence = ?, confermato = ?, occorrenze = ?,
+                                    categoria_contabile = ?, contoid = ?, brancaid = ?, sottocontoid = ?,
+                                    contonome = ?, brancanome = ?, sottocontonome = ?,
+                                    updated_at = CURRENT_TIMESTAMP
+                                WHERE id = ?
+                            """
+                            cursor.execute(update_query, (
+                                material.get('nome', ''),
+                                material.get('fornitorenome', ''),
+                                material.get('costo_unitario', 0.0),
+                                material.get('confidence', 0),
+                                material.get('confermato', False),
+                                material.get('occorrenze', 1),
+                                material.get('categoria_contabile', ''),
+                                material.get('contoid'),
+                                material.get('brancaid'),
+                                material.get('sottocontoid'),
+                                material.get('contonome'),
+                                material.get('brancanome'),
+                                material.get('sottocontonome'),
+                                existing[0]
+                            ))
+                            stats['materials_updated'] += 1
+                        else:
+                            # Inserisci nuovo materiale
+                            insert_query = """
+                                INSERT INTO materiali (
+                                    codicearticolo, nome, fornitoreid, fornitorenome,
+                                    costo_unitario, confidence, confermato, occorrenze,
+                                    categoria_contabile, contoid, brancaid, sottocontoid,
+                                    contonome, brancanome, sottocontonome,
+                                    source_file, migrated_at, created_at
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                            """
+                            cursor.execute(insert_query, (
+                                material.get('codicearticolo', ''),
+                                material.get('nome', ''),
+                                material.get('fornitoreid', 0),
+                                material.get('fornitorenome', ''),
+                                material.get('costo_unitario', 0.0),
+                                material.get('confidence', 0),
+                                material.get('confermato', False),
+                                material.get('occorrenze', 1),
+                                material.get('categoria_contabile', ''),
+                                material.get('contoid'),
+                                material.get('brancaid'),
+                                material.get('sottocontoid'),
+                                material.get('contonome'),
+                                material.get('brancanome'),
+                                material.get('sottocontonome'),
+                                'VOCISPES.DBF'
+                            ))
+                            stats['materials_imported'] += 1
+                            
+                    except Exception as e:
+                        logger.error(f"Errore nell'importazione materiale {material.get('nome', '')}: {e}")
+                        stats['errors'].append(f"Materiale {material.get('nome', '')}: {str(e)}")
+                        stats['materials_skipped'] += 1
                 
-            logger.info("Materiali table and indexes ensured")
-            
-        except Exception as e:
-            logger.error(f"Failed to ensure materiali table: {e}")
-            raise RepositoryError(f"Failed to ensure materiali table: {str(e)}", cause=e)
-    
-    def _validate_entity_data(self, data: Dict[str, Any], is_update: bool = False) -> None:
-        """Validate materiali entity data."""
-        super()._validate_entity_data(data, is_update)
-        
-        # Required fields for creation
-        if not is_update:
-            required_fields = ['nome', 'fornitoreid', 'fornitorenome']
-            for field in required_fields:
-                if not data.get(field) or not str(data[field]).strip():
-                    raise ValidationError(f"Field '{field}' is required and cannot be empty")
-        
-        # Validate numeric fields
-        numeric_fields = ['contoid', 'brancaid', 'sottocontoid', 'confidence', 'occorrenze']
-        for field in numeric_fields:
-            if field in data and data[field] is not None:
-                try:
-                    data[field] = int(data[field])
 # … snippet truncated; inspect the source file for the remaining lines
 
 --- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\services\materiali_service.py::get_all_materiali (lines 18-41) ---
@@ -646,49 +593,155 @@ def get_materiali():
             error="An unexpected error occurred"
         ), 500
 
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_materiali.py::get_all_materiali (lines 115-153) ---
+def get_all_materiali():
+    """
+    Get all materials without pagination, filters, or sorting.
+    
+    Returns:
+        JSON response with all materials raw data
+    """
+    try:
+        user_id = require_auth()
+        
+        # Get materials using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        materiali = materiali_service.get_all_materiali()
+        
+        # Clean DBF data for JSON response
+        clean_data = handle_dbf_data(materiali)
+        
+        return format_response(
+            data={
+                'materiali': clean_data,
+                'total': len(clean_data)
+            },
+            message=f"Trovati {len(clean_data)} materiali"
+        )
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_all_materiali: {e}")
+        return format_response(
+            data=None,
+            message="Errore database",
+            success=False
+        ), 500
+    except Exception as e:
+        logger.error(f"Unexpected error in get_all_materiali: {e}")
+        return format_response(
+            data=None,
+            message="Errore interno del server",
+            success=False
+        ), 500
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_materiali.py::search_materiali (lines 467-534) ---
+def search_materiali():
+    """
+    Advanced material search with intelligent suggestions.
+    
+    Query Parameters:
+        q (str): Search query (required)
+        limit (int): Max results (default: 20, max: 100)
+        include_suggestions (bool): Include intelligent suggestions
+        
+    Returns:
+        JSON response with search results and suggestions
+    """
+    try:
+        user_id = require_auth()
+        
+        # Parse query parameters
+        query = request.args.get('q', '').strip()
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        include_suggestions = request.args.get('include_suggestions', True, type=bool)
+        
+        if not query:
+            return format_response(
+                success=False,
+                error="Search query 'q' is required"
+            ), 400
+        
+        # Search using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        results = materiali_service.search_materiali(
+            query=query,
+            limit=limit,
+            include_suggestions=include_suggestions
+        )
+        
+        # Clean DBF data
+        clean_results = handle_dbf_data(results['materiali'])
+        clean_suggestions = handle_dbf_data(results.get('suggestions', []))
+        
+        return format_response(
+            data={
+                'materiali': clean_results,
+                'suggestions': clean_suggestions,
+                'query': query,
+                'total_found': len(clean_results)
+            },
+            message=f"Found {len(clean_results)} materials"
+        )
+        
+    except ValidationError as e:
+        logger.warning(f"Validation error in search_materiali: {e}")
+        return format_response(
+            success=False,
+            error=str(e)
+        ), 400
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in search_materiali: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in search_materiali: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
+
+--- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_materiali.py::get_materiali_stats (lines 539-570) ---
+def get_materiali_stats():
+    """
+    Get materials statistics and analytics.
+    
+    Returns:
+        JSON response with statistics
+    """
+    try:
+        user_id = require_auth()
+        
+        # Get statistics using service layer
+        materiali_service = MaterialiService(g.database_manager)
+        stats = materiali_service.get_statistics()
+        
+        return format_response(
+            data=stats,
+            message="Statistics retrieved successfully"
+        )
+        
+    except DatabaseError as e:
+        logger.error(f"Database error in get_materiali_stats: {e}")
+        return format_response(
+            success=False,
+            error="Database error occurred"
+        ), 500
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in get_materiali_stats: {e}", exc_info=True)
+        return format_response(
+            success=False,
+            error="An unexpected error occurred"
+        ), 500
+
 === CONNECTIONS ===
-- client_v2/src/components/forms/MaterialClassificationForm.tsx
-  internal:
-    - client_v2/src/features/materiali/services/materiali-classification.service.ts
-- client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
-  internal:
-    - client_v2/src/store/materiali.store.ts
-- client_v2/src/features/materiali/components/MaterialiAccordion.tsx
-  internal:
-    - client_v2/src/store/materiali.store.ts
-- client_v2/src/features/materiali/components/MaterialiTable.tsx
-  internal:
-    - client_v2/src/components/tables/DataTable.tsx
-    - client_v2/src/store/materiali.store.ts
-- client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx
-  internal:
-    - client_v2/src/components/forms/MaterialClassificationForm.tsx
-    - client_v2/src/store/fornitori.store.ts
-- client_v2/src/features/materiali/pages/MaterialiPage.tsx
-  internal:
-    - client_v2/src/components/layout/PageLayout.tsx
-    - client_v2/src/components/modals/ConfirmDeleteModal.tsx
-    - client_v2/src/components/modals/ModalFatturaDetail.tsx
-    - client_v2/src/components/selects/FornitoriSelect.tsx
-    - client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
-    - client_v2/src/features/materiali/components/MaterialiTable.tsx
-    - client_v2/src/services/api/fattura.service.ts
-    - client_v2/src/store/fornitori.store.ts
-    - client_v2/src/store/materiali.store.ts
-- client_v2/src/features/materiali/pages/RicercaArticoli.tsx
-  internal:
-    - client_v2/src/components/layout/PageLayout.tsx
-    - client_v2/src/components/selects/BrancheSelect.tsx
-    - client_v2/src/components/selects/ContiSelect.tsx
-    - client_v2/src/components/selects/SlimSelect.tsx
-    - client_v2/src/components/selects/SottocontiSelect.tsx
-    - client_v2/src/store/conti.store.ts
 - client_v2/src/features/materiali/services/materiali-classification.service.ts
   internal:
     - client_v2/src/services/api/client.ts
 - client_v2/src/features/materiali/services/materiali-migration.service.ts
-  internal:
-    - client_v2/src/services/api/client.ts
-- client_v2/src/store/materiali.store.ts
   internal:
     - client_v2/src/services/api/client.ts

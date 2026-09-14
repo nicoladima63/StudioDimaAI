@@ -10,6 +10,7 @@ from flask import Blueprint, request, jsonify, g
 from flask_jwt_extended import jwt_required
 
 from services.materiali_service import MaterialiService
+from services.ordini_service import OrdiniService
 from services.materiali_migration_service import MaterialiMigrationService
 from app_v2 import require_auth, format_response, handle_dbf_data
 from core.exceptions import ValidationError, DatabaseError, DbfProcessingError
@@ -21,6 +22,106 @@ logger = logging.getLogger(__name__)
 
 # Create blueprint
 materiali_v2_bp = Blueprint('materiali_v2', __name__)
+
+
+def _inbox_operation(operation):
+    require_auth()
+    try:
+        from dbfread import DBF
+        from core.config_manager import get_config
+        from services.materiali_inbox_service import MaterialiInboxService
+        suppliers = [{'id': str(r.get('DB_CODE', '')).strip(),
+                      'nome': str(r.get('DB_FONOME', '')).strip(),
+                      'partita_iva': str(r.get('DB_FOPAIVA', '')).strip()}
+                     for r in DBF(get_config().get_dbf_path('fornitori'), encoding='latin-1')]
+        return format_response(data=operation(MaterialiInboxService(g.database_manager, suppliers)))
+    except ValueError as exc:
+        return format_response(success=False, error=str(exc)), 400
+    except Exception:
+        logger.exception('Errore prodotti da classificare')
+        return format_response(success=False, error='Impossibile elaborare i prodotti. Verifica la disponibilità dell’anagrafica fornitori.'), 500
+
+
+@materiali_v2_bp.route('/materiali/da-classificare', methods=['GET'])
+@jwt_required()
+def list_materiali_inbox():
+    return _inbox_operation(lambda service: service.list())
+
+
+@materiali_v2_bp.route('/materiali/da-classificare/email', methods=['POST'])
+@jwt_required()
+def scan_materiali_email():
+    return _inbox_operation(lambda service: service.scan_email_folder())
+
+
+@materiali_v2_bp.route('/materiali/da-classificare/revisione', methods=['POST'])
+@jwt_required()
+def save_materiali_review():
+    return _inbox_operation(lambda service: service.save_review(request.get_json(silent=True)))
+
+
+@materiali_v2_bp.route('/materiali/da-classificare/conferma-proposte', methods=['POST'])
+@jwt_required()
+def confirm_materiali_review():
+    return _inbox_operation(lambda service: service.confirm_review(request.get_json(silent=True)))
+
+
+@materiali_v2_bp.route('/materiali/da-classificare/xml', methods=['POST'])
+@jwt_required()
+def upload_materiali_inbox():
+    if request.content_length and request.content_length > 25 * 1024 * 1024:
+        return format_response(success=False, error='Carica al massimo 25 MB alla volta'), 413
+    return _inbox_operation(lambda service: service.ingest([
+        (f.filename, f.stream.read(5 * 1024 * 1024 + 1)) for f in request.files.getlist('files')]))
+
+
+@materiali_v2_bp.route('/materiali/da-classificare/conferma', methods=['POST'])
+@jwt_required()
+def confirm_materiali_inbox():
+    return _inbox_operation(lambda service: service.confirm(request.get_json(silent=True)))
+
+
+def _ordini_operation(operation):
+    require_auth()
+    try:
+        return format_response(data=operation(OrdiniService(g.database_manager)))
+    except ValueError as exc:
+        return format_response(success=False, error=str(exc)), 400
+    except Exception:
+        logger.exception('Errore gestione ordini materiali')
+        return format_response(success=False, error='Impossibile aggiornare gli ordini'), 500
+
+
+@materiali_v2_bp.route('/materiali/ordini', methods=['GET'])
+@jwt_required()
+def list_ordini_materiali():
+    return _ordini_operation(lambda service: service.list())
+
+
+@materiali_v2_bp.route('/materiali/ordini/piani/<int:material_id>', methods=['PUT'])
+@jwt_required()
+def save_piano_materiale(material_id):
+    return _ordini_operation(lambda service: service.save(material_id, request.get_json(silent=True)))
+
+
+@materiali_v2_bp.route('/materiali/ordini/lista/<int:material_id>/<action>', methods=['POST'])
+@jwt_required()
+def queue_ordine_materiale(material_id, action):
+    return _ordini_operation(lambda service: service.queue(material_id, action))
+
+
+@materiali_v2_bp.route('/materiali/ordini', methods=['POST'])
+@jwt_required()
+def create_ordine_materiali():
+    payload = request.get_json(silent=True)
+    ids = payload.get('materiale_ids') if isinstance(payload, dict) else None
+    return _ordini_operation(lambda service: service.create_order(ids))
+
+
+@materiali_v2_bp.route('/materiali/ordini/<int:order_id>/<action>', methods=['POST'])
+@jwt_required()
+def transition_ordine_materiali(order_id, action):
+    return _ordini_operation(lambda service: service.transition(order_id, action))
 
 
 @materiali_v2_bp.route('/materiali', methods=['GET'])
@@ -1410,3 +1511,31 @@ def import_all_materials():
             error="An unexpected error occurred during migration"
         ), 500
 
+
+
+@materiali_v2_bp.route('/materiali/storico-acquisti', methods=['GET'])
+@jwt_required()
+def storico_acquisti():
+    require_auth()
+    try:
+        from core.config_manager import get_config
+        from services.storico_acquisti_service import StoricoAcquistiService
+        return format_response(data=StoricoAcquistiService(g.database_manager, get_config()).load())
+    except Exception:
+        logger.exception('Errore lettura storico acquisti')
+        return format_response(success=False, error='Impossibile leggere lo storico acquisti dal gestionale.'), 500
+
+
+@materiali_v2_bp.route('/materiali/storico-acquisti/conferma-classificazione', methods=['POST'])
+@jwt_required()
+def conferma_classificazione_storico():
+    user_id = require_auth()
+    try:
+        from core.config_manager import get_config
+        from services.storico_acquisti_service import StoricoAcquistiService
+        return format_response(data=StoricoAcquistiService(g.database_manager, get_config()).confirm(request.get_json(silent=True), user_id))
+    except ValueError as exc:
+        return format_response(success=False, error=str(exc)), 400
+    except Exception:
+        logger.exception('Errore conferma classificazione storico')
+        return format_response(success=False, error='Impossibile salvare la classificazione.'), 500

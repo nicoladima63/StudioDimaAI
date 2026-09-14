@@ -161,6 +161,10 @@ export const useMaterialiStore = create<MaterialiState>()(
             state.materiali.length > 0 && 
             state.lastUpdated && 
             Date.now() - state.lastUpdated < CACHE_DURATION) {
+          // Lo storage persistente conserva `materiali`, ma non la sua vista
+          // filtrata. Dopo un refresh la ricostruiamo dalla cache invece di
+          // lasciare le pagine dipendenti da `materialiFiltered` senza dati.
+          set({ materialiFiltered: state.materiali, isLoading: false, error: null });
           return;
         }
 

@@ -75,6 +75,15 @@ def _dbf_path(table_name: str) -> str:
     return config.get_dbf_path(table_name)
 
 
+def _is_reminder_excluded(record) -> bool:
+    # Windent: quarta posizione, senza strip (le altre posizioni sono altri flag).
+    return str(record['DB_APOPZIO'] or '')[3:4] in {'R', 'X'}
+
+
+def _appointment_key(appointment: dict) -> tuple:
+    return tuple(appointment[k] for k in ('patient_id', 'appointment_date', 'appointment_time'))
+
+
 def _ora_fmt(ora_raw: str) -> str:
     """Converte '9.4' → '09:40', '14.3' → '14:30'."""
     ora_raw = str(ora_raw).strip()
@@ -205,6 +214,8 @@ def get_upcoming_appointments(
             if dbf.is_deleted(record):
                 continue
             try:
+                if _is_reminder_excluded(record):
+                    continue
                 ap_date = record['DB_APDATA']
                 if hasattr(ap_date, 'date'):
                     ap_date = ap_date.date()
@@ -244,6 +255,8 @@ def get_upcoming_appointments(
                     # Appuntamenti tra 90 e 150 minuti da adesso
                     delta = (ap_dt - now).total_seconds() / 60
                     match = (90 <= delta <= 150)
+                elif reminder_type == 'followup':
+                    match = ap_date == now.date() and ap_dt > now
                 elif reminder_type == 'recovery':
                     # Il recupero non deve anticipare gli appuntamenti di oggi
                     # troppo lontani: il job ordinario 2h li gestira' in seguito.
@@ -547,7 +560,7 @@ def get_appointments_pending_followup(hours_before: int = 3) -> list[dict]:
     """
     Legge patient_communications per trovare appuntamenti di oggi con reminder
     inviato ma senza risposta, che sono a `hours_before` ore di distanza.
-    Non tocca i DBF — i dati sono già nel log.
+    Ricontrolla l'agenda per escludere appuntamenti rinviati o saltati dopo l'invio.
     """
     now = datetime.now(ROME_TZ).replace(tzinfo=None)
     today = now.strftime('%Y-%m-%d')
@@ -582,7 +595,10 @@ def get_appointments_pending_followup(hours_before: int = 3) -> list[dict]:
         """, (today, current_time, cutoff_time))
         rows = [dict(r) for r in cur.fetchall()]
         conn.close()
-        return rows
+        if not rows:
+            return []
+        eligible = {_appointment_key(ap) for ap in get_upcoming_appointments('followup')}
+        return [ap for ap in rows if _appointment_key(ap) in eligible]
     except Exception as e:
         logger.error(f"Errore lettura pending followup: {e}")
         return []
@@ -795,12 +811,13 @@ def run_missed_whatsapp_reminders(
     Non viene mai usato l'SMS come fallback: e' un'azione dedicata a WhatsApp.
     """
     ensure_reminder_tables()
-    # Se presente, ``appointments`` proviene dall'anteprima appena eseguita:
-    # non rileggiamo l'agenda. Prima dell'invio controlliamo comunque di nuovo
-    # il registro, per non duplicare invii avvenuti nel frattempo.
-    appointments = appointments if appointments is not None else get_upcoming_appointments(
-        'recovery', respect_schedule=False
-    )
+    # Rivalida anche le anteprime: lo stato puo' cambiare prima dell'invio.
+    current = get_upcoming_appointments('recovery', respect_schedule=False)
+    if appointments is None:
+        appointments = current
+    else:
+        eligible = {_appointment_key(ap) for ap in current}
+        appointments = [ap for ap in appointments if _appointment_key(ap) in eligible]
     stats = {
         'examined': len(appointments),
         'dry_run': dry_run,

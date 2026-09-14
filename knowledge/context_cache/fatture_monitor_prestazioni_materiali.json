@@ -1,0 +1,1040 @@
+{
+  "schema_version": 1,
+  "task": "fatture monitor prestazioni materiali",
+  "files": [
+    {
+      "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "role": "page",
+      "score": 38,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "react",
+        "@coreui/react",
+        "react-hot-toast",
+        "file:client_v2/src/components/layout/PageLayout.tsx",
+        "file:client_v2/src/features/materiali/components/MaterialiTable.tsx",
+        "file:client_v2/src/components/selects/FornitoriSelect.tsx",
+        "file:client_v2/src/store/materiali.store.ts",
+        "file:client_v2/src/store/fornitori.store.ts",
+        "file:client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+        "file:client_v2/src/components/modals/ModalFatturaDetail.tsx"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/materiali_service.py",
+      "role": "service",
+      "score": 30,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "logging",
+        "typing",
+        ".base_service",
+        "core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/api/v2_materiali.py",
+      "role": "api",
+      "score": 29,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "logging",
+        "flask",
+        "flask_jwt_extended",
+        "services.materiali_service",
+        "services.materiali_migration_service",
+        "app_v2",
+        "core.exceptions",
+        "core.database_manager",
+        "datetime",
+        "traceback"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/store/materiali.store.ts",
+      "role": "state",
+      "score": 27,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "zustand",
+        "zustand/middleware",
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+        "file:client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+        "file:client_v2/src/features/materiali/components/MaterialiTable.tsx",
+        "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx"
+      ]
+    },
+    {
+      "path": "server_v2/services/materiali_migration_service.py",
+      "role": "service",
+      "score": 26,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "logging",
+        "os",
+        "re",
+        "pathlib",
+        "typing",
+        "datetime",
+        ".base_service",
+        "utils.dbf_utils",
+        "core.exceptions",
+        "core.paths"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+      "role": "page",
+      "score": 25,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "MaterialClassificationForm,",
+        "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+        "{",
+        "../services/materiali-migration.service",
+        "../services/materiali-classification.service",
+        "file:client_v2/src/store/fornitori.store.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/repositories/materiali_repository.py",
+      "role": "repository",
+      "score": 24,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "sqlite3",
+        "pandas",
+        "logging",
+        "typing",
+        "datetime",
+        "..core.base_repository",
+        "..core.database_manager",
+        "..core.exceptions",
+        "..utils.dbf_utils"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "role": "service",
+      "score": 20,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/components/forms/MaterialClassificationForm.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "role": "service",
+      "score": 18,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+      "role": "component",
+      "score": 15,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "file:client_v2/src/store/materiali.store.ts",
+        "file:client_v2/src/components/selects/ContiSelect.tsx",
+        "file:client_v2/src/components/selects/BrancheSelect.tsx",
+        "file:client_v2/src/components/selects/SottocontiSelect.tsx",
+        "file:client_v2/src/store/conti.store.ts",
+        "@/store/branche.store",
+        "@/store/sottoconti.store"
+      ],
+      "callers": [
+        "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/materiali/components/MaterialiTable.tsx",
+      "role": "component",
+      "score": 15,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "react",
+        "@coreui/react",
+        "@coreui/icons-react",
+        "@coreui/icons",
+        "file:client_v2/src/components/tables/DataTable.tsx",
+        "file:client_v2/src/store/materiali.store.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+      "role": "component",
+      "score": 12,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "react",
+        "{",
+        "@coreui/react",
+        "file:client_v2/src/store/materiali.store.ts"
+      ],
+      "callers": []
+    }
+  ],
+  "symbols": [
+    {
+      "name": "usePrestazioniByCategoria",
+      "kind": "hook",
+      "path": "client_v2/src/store/prestazioni.store.ts",
+      "line": 180,
+      "information_score": 51,
+      "category": "support"
+    },
+    {
+      "name": "usePrestazioniByCodiceBreve",
+      "kind": "hook",
+      "path": "client_v2/src/store/prestazioni.store.ts",
+      "line": 196,
+      "information_score": 51,
+      "category": "support"
+    },
+    {
+      "name": "MaterialiMigrationService",
+      "kind": "class",
+      "path": "server_v2/services/materiali_migration_service.py",
+      "line": 24,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "MaterialiService",
+      "kind": "class",
+      "path": "server_v2/services/materiali_service.py",
+      "line": 15,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "useMateriali",
+      "kind": "hook",
+      "path": "client_v2/src/store/materiali.store.ts",
+      "line": 320,
+      "information_score": 45,
+      "category": "support"
+    },
+    {
+      "name": "useMaterialiByFornitore",
+      "kind": "hook",
+      "path": "client_v2/src/store/materiali.store.ts",
+      "line": 338,
+      "information_score": 45,
+      "category": "support"
+    },
+    {
+      "name": "useMaterialiByConto",
+      "kind": "hook",
+      "path": "client_v2/src/store/materiali.store.ts",
+      "line": 350,
+      "information_score": 45,
+      "category": "support"
+    },
+    {
+      "name": "useMaterialiSearch",
+      "kind": "hook",
+      "path": "client_v2/src/store/materiali.store.ts",
+      "line": 362,
+      "information_score": 45,
+      "category": "support"
+    },
+    {
+      "name": "MaterialiRepository",
+      "kind": "class",
+      "path": "server_v2/repositories/materiali_repository.py",
+      "line": 25,
+      "information_score": 44,
+      "category": "core"
+    },
+    {
+      "name": "get_distribuzione_prestazioni",
+      "kind": "function",
+      "path": "server_v2/services/economics/prestazioni_engine.py",
+      "line": 350,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_all_materiali",
+      "kind": "function",
+      "path": "server_v2/services/materiali_service.py",
+      "line": 18,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_materiali_paginated",
+      "kind": "function",
+      "path": "server_v2/services/materiali_service.py",
+      "line": 43,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_materiali",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 28,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_all_materiali",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 115,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "search_materiali",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 467,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_materiali_stats",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 539,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "ricerca_materiali_classificati",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 574,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "salva_classificazione_materiali_bulk",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 860,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_prestazioni_from_dbf",
+      "kind": "function",
+      "path": "server_v2/api/v2_prestazioni.py",
+      "line": 25,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_prestazioni",
+      "kind": "function",
+      "path": "server_v2/api/v2_prestazioni.py",
+      "line": 94,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "usePrestazioneById",
+      "kind": "hook",
+      "path": "client_v2/src/store/prestazioni.store.ts",
+      "line": 188,
+      "information_score": 36,
+      "category": "domain"
+    },
+    {
+      "name": "loadMonitorDetails",
+      "kind": "component",
+      "path": "client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+      "line": 90,
+      "information_score": 34,
+      "category": "support"
+    },
+    {
+      "name": "requestDeleteMonitor",
+      "kind": "component",
+      "path": "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+      "line": 165,
+      "information_score": 29,
+      "category": "support"
+    },
+    {
+      "name": "confirmDeleteMonitor",
+      "kind": "component",
+      "path": "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+      "line": 170,
+      "information_score": 29,
+      "category": "support"
+    },
+    {
+      "name": "openRulesForMonitor",
+      "kind": "component",
+      "path": "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+      "line": 190,
+      "information_score": 29,
+      "category": "support"
+    },
+    {
+      "name": "handleSearchSubmit",
+      "kind": "component",
+      "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "line": 113,
+      "information_score": 26,
+      "category": "support"
+    },
+    {
+      "name": "handleSearchClear",
+      "kind": "component",
+      "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "line": 121,
+      "information_score": 26,
+      "category": "support"
+    },
+    {
+      "name": "handleSuggestionClick",
+      "kind": "component",
+      "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "line": 127,
+      "information_score": 26,
+      "category": "support"
+    },
+    {
+      "name": "handleSearchBlur",
+      "kind": "component",
+      "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "line": 134,
+      "information_score": 26,
+      "category": "support"
+    },
+    {
+      "name": "handleEdit",
+      "kind": "component",
+      "path": "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "line": 142,
+      "information_score": 26,
+      "category": "support"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+      "target": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+      "to": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/components/selects/PrestazioniSelect.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/components/selects/PrestazioniSelect.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+      "target": "file:client_v2/src/store/materiali.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+      "to": "file:client_v2/src/store/materiali.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+      "target": "file:client_v2/src/store/materiali.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+      "to": "file:client_v2/src/store/materiali.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/components/MaterialiTable.tsx",
+      "target": "file:client_v2/src/store/materiali.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/components/MaterialiTable.tsx",
+      "to": "file:client_v2/src/store/materiali.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+      "target": "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+      "to": "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+      "target": "file:client_v2/src/store/fornitori.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+      "to": "file:client_v2/src/store/fornitori.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/components/layout/PageLayout.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/features/materiali/components/MaterialiTable.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/features/materiali/components/MaterialiTable.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/components/selects/FornitoriSelect.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/components/selects/FornitoriSelect.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/store/materiali.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/store/materiali.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/store/fornitori.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/store/fornitori.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/components/modals/ModalFatturaDetail.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/components/modals/ModalFatturaDetail.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/components/modals/ConfirmDeleteModal.tsx",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/components/modals/ConfirmDeleteModal.tsx",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "target": "file:client_v2/src/services/api/fattura.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+      "to": "file:client_v2/src/services/api/fattura.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/components/monitor/ListaRegole.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/components/monitor/ListaRegole.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+      "target": "file:client_v2/src/store/prestazioni.store.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+      "to": "file:client_v2/src/store/prestazioni.store.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/store/materiali.store.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/store/materiali.store.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/classificazione",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/classificazione/bulk",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/classificazione/statistiche",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/migrazione/preview",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/migrazione/import-all",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/store/materiali.store.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali_all",
+      "method": "GET"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:28:get_materiali",
+      "relation": "exposes_route",
+      "target": "route:/materiali",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:115:get_all_materiali",
+      "relation": "exposes_route",
+      "target": "route:/materiali_all",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:158:get_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:213:create_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:286:update_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:356:update_materiale_conti",
+      "relation": "exposes_route",
+      "target": "route:/materiali-update/conti/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:416:delete_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:467:search_materiali",
+      "relation": "exposes_route",
+      "target": "route:/materiali/search",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:539:get_materiali_stats",
+      "relation": "exposes_route",
+      "target": "route:/materiali/stats",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:574:ricerca_materiali_classificati",
+      "relation": "exposes_route",
+      "target": "route:/materiali/ricerca-classificati",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:662:get_classificazione_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/classificazione/<codice_articolo>/<fattura_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/classificazione",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+      "relation": "exposes_route",
+      "target": "route:/materiali/classificazione/bulk",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1036:ricerca_articoli",
+      "relation": "exposes_route",
+      "target": "route:/materiali/ricerca-articoli",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1233:preview_migration",
+      "relation": "exposes_route",
+      "target": "route:/materiali/migrazione/preview",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1322:import_supplier_materials",
+      "relation": "exposes_route",
+      "target": "route:/materiali/migrazione/import/<supplier_name>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1377:import_all_materials",
+      "relation": "exposes_route",
+      "target": "route:/materiali/migrazione/import-all",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:574:ricerca_materiali_classificati",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:662:get_classificazione_materiale",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/repositories/materiali_repository.py:250:get_classification_suggestions",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/materiali_repository.py:396:_find_existing_material",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/materiali_repository.py:459:get_price_history",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/materiali_repository.py:517:get_unclassified_materials",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/repositories/materiali_repository.py:537:confirm_auto_classifications",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:647:migrate_materials_to_db",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:647:migrate_materials_to_db",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:791:_get_existing_material_classification",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:837:_get_classification_data",
+      "relation": "reads",
+      "target": "database:classificazioni_costi",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:876:_load_existing_patterns",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:18:get_all_materiali",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:43:get_materiali_paginated",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:110:get_materiale_by_id",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:134:create_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "INSERT INTO"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:177:update_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:216:update_materiale_conti",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:252:delete_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "DELETE FROM"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:287:search_materials",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:399:get_statistics",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:materiali",
+      "name": "materiali",
+      "files": [
+        "client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+        "client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+        "client_v2/src/features/materiali/components/MaterialiTable.tsx",
+        "client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+        "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+        "client_v2/src/features/materiali/pages/RicercaArticoli.tsx",
+        "client_v2/src/features/materiali/services/materiali-classification.service.ts",
+        "client_v2/src/features/materiali/services/materiali-migration.service.ts"
+      ],
+      "roles": {
+        "component": 3,
+        "page": 3,
+        "service": 2
+      },
+      "entities_count": 37,
+      "relationships_count": 58
+    },
+    {
+      "id": "feature:settings",
+      "name": "settings",
+      "files": [
+        "client_v2/src/features/settings/components/SmsSettingsCard.tsx",
+        "client_v2/src/features/settings/components/TemplateEditor.tsx",
+        "client_v2/src/features/settings/components/monitor/CallbackCard.tsx",
+        "client_v2/src/features/settings/components/monitor/CreateMonitorModal.tsx",
+        "client_v2/src/features/settings/components/monitor/GestioneRegoleCard.tsx",
+        "client_v2/src/features/settings/components/monitor/ListaRegole.tsx",
+        "client_v2/src/features/settings/components/monitor/LogMonitorCard.tsx",
+        "client_v2/src/features/settings/components/monitor/MappingPrestazioniCard.tsx",
+        "client_v2/src/features/settings/components/monitor/MonitorRulesModal.tsx",
+        "client_v2/src/features/settings/components/monitor/StatoMonitorCard.tsx",
+        "client_v2/src/features/settings/components/monitor/TipiAppuntamentoSelect.tsx",
+        "client_v2/src/features/settings/components/monitor/TriggerSourceSelector.tsx",
+        "client_v2/src/features/settings/pages/AutomationPage.tsx",
+        "client_v2/src/features/settings/pages/CalendarSettings.tsx",
+        "client_v2/src/features/settings/pages/DayReminderSettings.tsx",
+        "client_v2/src/features/settings/pages/EvolutionSettingsPage.tsx",
+        "client_v2/src/features/settings/pages/MonitorPrestazioniPage.tsx",
+        "client_v2/src/features/settings/pages/MonitorPrestazioniStandalonePage.tsx",
+        "client_v2/src/features/settings/pages/MonitoringSettings.tsx",
+        "client_v2/src/features/settings/pages/TemplatesPage copy.tsx",
+        "client_v2/src/features/settings/pages/TemplatesPage.tsx",
+        "client_v2/src/features/settings/services/automation.service.ts",
+        "client_v2/src/features/settings/services/changes.service.ts",
+        "client_v2/src/features/settings/services/dayReminder.service.ts",
+        "client_v2/src/features/settings/services/environment.service.ts",
+        "client_v2/src/features/settings/services/evolution.service.ts",
+        "client_v2/src/features/settings/services/monitoring.service.ts",
+        "client_v2/src/features/settings/services/regoleMonitoraggio.service.ts",
+        "client_v2/src/features/settings/services/templates.service.ts"
+      ],
+      "roles": {
+        "component": 12,
+        "page": 9,
+        "service": 8
+      },
+      "entities_count": 102,
+      "relationships_count": 178
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\fatture_monitor_prestazioni_materiali.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\fatture_monitor_prestazioni_materiali.json"
+}

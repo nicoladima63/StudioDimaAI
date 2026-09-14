@@ -28,6 +28,10 @@ GOOGLE_OAUTH_STATE_PATH = Path(
 ).resolve()
 
 # Gmail OAuth files (separate token from Calendar)
+GMAIL_CREDENTIALS_PATH = Path(
+    os.getenv("GMAIL_CREDENTIALS_PATH", str(DATA_DIR / "gmail_credential.json"))
+).resolve()
+
 GMAIL_TOKEN_PATH = Path(
     os.getenv("GMAIL_TOKEN_PATH", str(DATA_DIR / "gmail_token.json"))
 ).resolve()

@@ -1,8 +1,7 @@
-QUERY: materiali
+QUERY: fatture monitor prestazioni materiali
 
 === PRIORITY FILES ===
 - client_v2/src/features/materiali/pages/MaterialiPage.tsx | role=page | score=38 | structural=32 | query=6 | matched=materiali
-- client_v2/src/features/materiali/pages/RicercaArticoli.tsx | role=page | score=33 | structural=27 | query=6 | matched=materiali
 - server_v2/services/materiali_service.py | role=service | score=30 | structural=20 | query=10 | matched=materiali
 - server_v2/api/v2_materiali.py | role=api | score=29 | structural=19 | query=10 | matched=materiali
 - client_v2/src/store/materiali.store.ts | role=state | score=27 | structural=21 | query=6 | matched=materiali
@@ -11,19 +10,14 @@ QUERY: materiali
 - server_v2/repositories/materiali_repository.py | role=repository | score=24 | structural=18 | query=6 | matched=materiali
 - client_v2/src/features/materiali/services/materiali-classification.service.ts | role=service | score=20 | structural=14 | query=6 | matched=materiali
 - client_v2/src/features/materiali/services/materiali-migration.service.ts | role=service | score=18 | structural=12 | query=6 | matched=materiali
-- client_v2/src/features/materiali/components/MaterialiTable.tsx | role=component | score=17 | structural=11 | query=6 | matched=materiali
 - client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx | role=component | score=15 | structural=9 | query=6 | matched=materiali
-- client_v2/src/components/forms/MaterialClassificationForm.tsx | role=component | score=13 | structural=13 | query=0 | matched=none
-- client_v2/src/store/fornitori.store.ts | role=state | score=13 | structural=13 | query=0 | matched=none
+- client_v2/src/features/materiali/components/MaterialiTable.tsx | role=component | score=15 | structural=9 | query=6 | matched=materiali
 - client_v2/src/features/materiali/components/MaterialiAccordion.tsx | role=component | score=12 | structural=6 | query=6 | matched=materiali
-- client_v2/src/store/conti.store.ts | role=state | score=12 | structural=12 | query=0 | matched=none
-- client_v2/src/services/api/fattura.service.ts | role=api | score=11 | structural=11 | query=0 | matched=none
 
 === ARCHITECTURE ===
 
 PAGE
 - client_v2/src/features/materiali/pages/MaterialiPage.tsx
-- client_v2/src/features/materiali/pages/RicercaArticoli.tsx
 - client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx
 
 SERVICE
@@ -34,20 +28,16 @@ SERVICE
 
 API
 - server_v2/api/v2_materiali.py
-- client_v2/src/services/api/fattura.service.ts
 
 STATE
 - client_v2/src/store/materiali.store.ts
-- client_v2/src/store/fornitori.store.ts
-- client_v2/src/store/conti.store.ts
 
 REPOSITORY
 - server_v2/repositories/materiali_repository.py
 
 COMPONENT
-- client_v2/src/features/materiali/components/MaterialiTable.tsx
 - client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
-- client_v2/src/components/forms/MaterialClassificationForm.tsx
+- client_v2/src/features/materiali/components/MaterialiTable.tsx
 - client_v2/src/features/materiali/components/MaterialiAccordion.tsx
 
 === SYMBOLS ===
@@ -66,11 +56,6 @@ COMPONENT
 - get_materiali_stats | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
 - ricerca_materiali_classificati | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
 - salva_classificazione_materiali_bulk | server_v2/api/v2_materiali.py | kind=function | category=support | score=38
-- cercaArticoli | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- confirmDeleteMateriale | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- cancelDeleteMateriale | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- getArticoloKey | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
-- caricaClassificazioniEsistenti | client_v2/src/features/materiali/pages/RicercaArticoli.tsx | kind=component | category=support | score=30
 - handleSearchSubmit | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
 - handleSearchClear | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
 - handleSuggestionClick | client_v2/src/features/materiali/pages/MaterialiPage.tsx | kind=component | category=support | score=26
@@ -97,10 +82,15 @@ COMPONENT
 - search_materials | server_v2/services/materiali_service.py | kind=function | category=support | score=24
 - get_classification_suggestions | server_v2/services/materiali_service.py | kind=function | category=support | score=24
 - get_statistics | server_v2/services/materiali_service.py | kind=function | category=support | score=24
-- getBadgeColor | client_v2/src/features/materiali/components/MaterialiTable.tsx | kind=component | category=ui | score=23
 - get_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
 - create_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
 - update_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- update_materiale_conti | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- delete_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- get_classificazione_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- salva_classificazione_materiale | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- ricerca_articoli | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
+- preview_migration | server_v2/api/v2_materiali.py | kind=function | category=support | score=23
 
 === RELEVANT CODE ===
 
@@ -561,95 +551,7 @@ class MaterialiRepository(BaseRepository):
             self.logger.error(f"Error in get_materiali_paginated: {e}")
             raise DatabaseError(f"Failed to retrieve materials: {str(e)}")
 
---- C:\Users\NICOLA\Desktop\StudioDimaAI\server_v2\api\v2_materiali.py::get_materiali (lines 28-110) ---
-def get_materiali():
-    """
-    Get list of materials with pagination and filtering.
-    
-    Query Parameters:
-        page (int): Page number (default: 1)
-        per_page (int): Items per page (default: 50, max: 100)
-        search (str): Search term for name/description
-        categoria (str): Filter by category
-        fornitore_id (int): Filter by supplier ID
-        classificato (bool): Filter by classification status
-        
-    Returns:
-        JSON response with materials list and pagination info
-    """
-    try:
-        user_id = require_auth()
-        
-        # Parse query parameters
-        page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 50, type=int), 100)
-        search = request.args.get('search', '').strip()
-        categoria = request.args.get('categoria', '').strip()
-        fornitore_id = request.args.get('fornitore_id', type=int)
-        classificato = request.args.get('classificato', type=bool)
-        
-        # Build filters
-        filters = {}
-        if search:
-            filters['search'] = search
-        if categoria:
-            filters['categoria'] = categoria
-        if fornitore_id:
-            filters['fornitore_id'] = fornitore_id
-        if classificato is not None:
-            filters['classificato'] = classificato
-        
-        # Get materials using service layer
-        materiali_service = MaterialiService(g.database_manager)
-        result = materiali_service.get_materiali_paginated(
-            page=page,
-            per_page=per_page,
-            filters=filters
-        )
-        
-        # Clean DBF data for JSON response
-        clean_data = handle_dbf_data(result['materiali'])
-        
-        return format_response(
-            data={
-                'materiali': clean_data,
-                'pagination': {
-                    'page': page,
-                    'per_page': per_page,
-                    'total': result['total'],
-                    'pages': result['pages'],
-                    'has_next': result['has_next'],
-                    'has_prev': result['has_prev']
-                }
-            },
-            message=f"Retrieved {len(clean_data)} materials"
-        )
-        
-    except ValidationError as e:
-        logger.warning(f"Validation error in get_materiali: {e}")
-        return format_response(
-            success=False,
-            error=str(e)
-        ), 400
-        
-    except DatabaseError as e:
-        logger.error(f"Database error in get_materiali: {e}")
-        return format_response(
-            success=False,
-            error="Database error occurred"
-        ), 500
-        
-    except Exception as e:
-        logger.error(f"Unexpected error in get_materiali: {e}", exc_info=True)
-        return format_response(
-            success=False,
-            error="An unexpected error occurred"
-        ), 500
-
 === CONNECTIONS ===
-- client_v2/src/components/forms/MaterialClassificationForm.tsx
-  internal:
-    - client_v2/src/features/materiali/services/materiali-classification.service.ts
 - client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx
   internal:
     - client_v2/src/store/materiali.store.ts
@@ -658,7 +560,6 @@ def get_materiali():
     - client_v2/src/store/materiali.store.ts
 - client_v2/src/features/materiali/components/MaterialiTable.tsx
   internal:
-    - client_v2/src/components/tables/DataTable.tsx
     - client_v2/src/store/materiali.store.ts
 - client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx
   internal:
@@ -675,14 +576,6 @@ def get_materiali():
     - client_v2/src/services/api/fattura.service.ts
     - client_v2/src/store/fornitori.store.ts
     - client_v2/src/store/materiali.store.ts
-- client_v2/src/features/materiali/pages/RicercaArticoli.tsx
-  internal:
-    - client_v2/src/components/layout/PageLayout.tsx
-    - client_v2/src/components/selects/BrancheSelect.tsx
-    - client_v2/src/components/selects/ContiSelect.tsx
-    - client_v2/src/components/selects/SlimSelect.tsx
-    - client_v2/src/components/selects/SottocontiSelect.tsx
-    - client_v2/src/store/conti.store.ts
 - client_v2/src/features/materiali/services/materiali-classification.service.ts
   internal:
     - client_v2/src/services/api/client.ts

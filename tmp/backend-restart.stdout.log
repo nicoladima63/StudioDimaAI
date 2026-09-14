@@ -1,0 +1,394 @@
+2026-09-08 12:59:19,475 INFO [app_v2] WebSocket service initialized
+2026-09-08 12:59:19,487 INFO [app_v2] Push notification service initialized successfully
+2026-09-08 12:59:19,515 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2026-09-08 12:59:19,890 INFO [__main__] ==================================================
+2026-09-08 12:59:19,897 INFO [__main__] STARTUP HEALTH CHECK
+2026-09-08 12:59:19,898 INFO [__main__] ==================================================
+2026-09-08 12:59:19,903 ERROR [services.calendar_service] Google connection test failed: No valid credentials found. Re-authentication is required.
+2026-09-08 12:59:19,903 ERROR [__main__] Google Calendar: DISCONNECTED
+2026-09-08 12:59:19,903 WARNING [__main__] Sincronizzazione calendario NON disponibile
+2026-09-08 12:59:19,903 WARNING [__main__]   Ri-autenticare tramite interfaccia web: http://localhost:5001/settings/calendar
+2026-09-08 12:59:19,903 INFO [__main__] ==================================================
+2026-09-08 12:59:19,910 INFO [scheduler_v2] [CALENDAR SYNC] Job schedulato alle 21:00 (id=calendar_sync_job_v2_0)
+2026-09-08 12:59:19,912 INFO [scheduler_v2] Automazione escalation todo schedulata alle 09:00.
+2026-09-08 12:59:19,983 INFO [core.config_manager] Configuration loaded: mode=prod
+2026-09-08 12:59:19,984 INFO [services.snapshot_manager] SnapshotManager initialized: dir=data\snapshots
+2026-09-08 12:59:19,986 INFO [services.trigger_config] Loaded 2 trigger configurations from config\trigger_configs.json
+Evolution API: Docker non disponibile, skip
+Logging level set to: WARNING
+Avvio scheduler...
+Scheduler avviato
+Inizializzazione servizio di monitoraggio...
+DEBUG: MonitoringService.__init__ started
+DEBUG: Initializing AutomationService...
+DEBUG: Initializing SnapshotManager...
+DEBUG: Initializing FileWatcher...
+DEBUG: Initializing DbfReader...
+DEBUG: Initializing DbfDataService...
+DEBUG: Initializing TriggerConfigManager...
+DEBUG: Loading settings...
+DEBUG: Loading saved configs...
+DEBUG: MonitoringService.__init__ finished
+Servizio di monitoraggio pronto (avvio manuale via API).
+Server con WebSocket avviato su http://0.0.0.0:5001
+Press Ctrl+C to stop the server
+
+ * Serving Flask app 'app_v2'
+ * Debug mode: off
+2026-09-08 12:59:31,193 INFO [services.websocket_service] Client connected: VEOOCAZgAHPQo32YAAAB
+2026-09-08 12:59:31,193 INFO [services.websocket_service] User 1 (session VEOOCAZgAHPQo32YAAAB) joined room user_1
+2026-09-08 12:59:33,181 INFO [services.websocket_service] Client connected: 8hsHLq31XUVaW-77AAAD
+2026-09-08 12:59:33,181 INFO [services.websocket_service] User 1 (session 8hsHLq31XUVaW-77AAAD) joined room user_1
+2026-09-08 12:59:33,429 INFO [core.database_manager] Shutting down DatabaseManager...
+2026-09-08 12:59:38,438 INFO [core.database_manager] DatabaseManager shutdown complete
+2026-09-08 12:59:38,445 INFO [core.database_manager] DatabaseManager initialized with pool_size=10
+2026-09-08 12:59:56,940 INFO [services.websocket_service] Client disconnected: 8hsHLq31XUVaW-77AAAD
+2026-09-08 12:59:57,529 INFO [services.websocket_service] Client connected: SUNV9RQHkl_kwwtXAAAG
+2026-09-08 12:59:57,537 INFO [services.websocket_service] User 1 (session SUNV9RQHkl_kwwtXAAAG) joined room user_1
+2026-09-08 13:00:00,936 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: liuzzo maria stella
+2026-09-08 13:00:00,962 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: rinaldi mattia nipote di nerozzi linda
+2026-09-08 13:00:00,989 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: rinaldi mattia
+2026-09-08 13:00:01,170 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: marzini serena 3497059588
+2026-09-08 13:00:01,249 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: yoshikawa hinako
+2026-09-08 13:00:01,279 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: frashni vasse
+2026-09-08 13:00:01,307 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: macaluso maria grazia
+2026-09-08 13:00:01,307 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: leka giorgia e giorg
+2026-09-08 13:00:01,361 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Mancini Laura 0574/718887
+2026-09-08 13:00:01,365 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: rotolo maria 3332897111
+2026-09-08 13:00:01,369 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: reale loredana
+2026-09-08 13:00:01,375 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: carletti sofia bimba di cristiano
+2026-09-08 13:00:01,378 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: corrente carmela 3703768774
+2026-09-08 13:00:01,381 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Yoshikawa sasuke
+2026-09-08 13:00:01,389 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: campestre angelo e maria
+2026-09-08 13:00:01,402 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: babbo della vale manna
+2026-09-08 13:00:01,408 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: votino lorenzo
+2026-09-08 13:00:01,409 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fredducci claudio 3335898946
+2026-09-08 13:00:01,411 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: gabbanini gabriella moglie di fredducci
+2026-09-08 13:00:01,424 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: figlio di pratesi nicola 3384852401
+2026-09-08 13:00:01,469 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vettori martina
+2026-09-08 13:00:01,495 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: giannini claudio
+2026-09-08 13:00:01,570 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: hernandez kimberly alexandra
+2026-09-08 13:00:01,591 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: gazzo samuele 3402641507
+2026-09-08 13:00:01,614 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: sperandini enzo marito di maria rosa
+2026-09-08 13:00:01,617 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: esposito olivia bimba di manzo loredana
+2026-09-08 13:00:01,619 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bimba di mari irene per controllo
+2026-09-08 13:00:01,620 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ponzecchi andrea
+2026-09-08 13:00:01,629 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: benabdessadek moncef 3405607586 gessica
+2026-09-08 13:00:01,637 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: sodano sara
+2026-09-08 13:00:01,637 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: de riggi angela
+2026-09-08 13:00:01,640 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bonacchi raffaele 3496839899
+2026-09-08 13:00:01,641 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: talini massimo
+2026-09-08 13:00:01,642 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: GORI GIOVANNI
+2026-09-08 13:00:01,642 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: aurora bimba di maria estetista
+2026-09-08 13:00:01,642 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Nesi Dario
+2026-09-08 13:00:01,642 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: guardabascio isenia
+2026-09-08 13:00:01,642 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: serio giuseppe 3476433571
+2026-09-08 13:00:01,930 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ceneda cesare
+2026-09-08 13:00:01,936 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: lagana domenico + moglie
+2026-09-08 13:00:01,939 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: MELANI MARIA ASSUNTA
+2026-09-08 13:00:01,942 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: zini riccardo
+2026-09-08 13:00:01,943 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: conti lucia
+2026-09-08 13:00:01,944 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: calabrese letizia
+2026-09-08 13:00:01,947 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: barone paola
+2026-09-08 13:00:01,951 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Ciardi Damiano
+2026-09-08 13:00:01,961 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: palermo aurora
+2026-09-08 13:00:01,961 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: naldi stefano
+2026-09-08 13:00:01,964 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Iandiorio Roberto
+2026-09-08 13:00:01,966 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bencini ettore
+2026-09-08 13:00:01,967 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: via
+2026-09-08 13:00:01,968 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: WAVE MUSTAFA
+2026-09-08 13:00:01,968 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: papi achille bimbo di mimmo angela
+2026-09-08 13:00:01,970 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cacace matilde 3287422091
+2026-09-08 13:00:01,972 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: angela moglie di pasquale palumbo
+2026-09-08 13:00:01,980 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ponzecchi maurizio
+2026-09-08 13:00:01,988 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: calvaruso mario
+2026-09-08 13:00:01,990 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Salvini Vibio
+2026-09-08 13:00:01,991 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: salvini vibio
+2026-09-08 13:00:02,001 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: moglie di avellino
+2026-09-08 13:00:02,002 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pieri leonardo
+2026-09-08 13:00:02,007 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bimbe di di ninni marco
+2026-09-08 13:00:02,009 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: borgioli stefano
+2026-09-08 13:00:02,010 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: santini paolo nuovo
+2026-09-08 13:00:02,013 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: tomasello renata
+2026-09-08 13:00:02,014 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Catani Alessandro
+2026-09-08 13:00:02,015 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mannarino lucrezia
+2026-09-08 13:00:02,020 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: marzini monica
+2026-09-08 13:00:02,025 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: franchi tosca
+2026-09-08 13:00:02,031 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ejilli joel 3275876950
+2026-09-08 13:00:02,052 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: paglialonga carmela
+2026-09-08 13:00:02,061 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Piacquadio Jessica
+2026-09-08 13:00:02,061 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vivio amedeo
+2026-09-08 13:00:02,061 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: crisci mario
+2026-09-08 13:00:02,061 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: DE PASCALIS ELISABETTA
+2026-09-08 13:00:02,077 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: matija erion babbo elisa
+2026-09-08 13:00:02,079 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: colare impronta bettocchi
+2026-09-08 13:00:02,079 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: rosini ginevra
+2026-09-08 13:00:02,079 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: simone tea bimba di margherita
+2026-09-08 13:00:02,079 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: dainotto marco
+2026-09-08 13:00:02,079 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fratello di laiba per preventivo
+2026-09-08 13:00:02,079 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: guarducci iris zia di
+2026-09-08 13:00:02,079 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: GIACOMELLI LUCA
+2026-09-08 13:00:02,095 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: di paola donatella
+2026-09-08 13:00:02,095 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: dalise leonardo
+2026-09-08 13:00:02,095 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: meoni matteo
+2026-09-08 13:00:02,095 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Tesi Alessio
+2026-09-08 13:00:02,109 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mangiavacchi babbo di maurizio
+2026-09-08 13:00:02,109 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: CAPECE ROBERTO
+2026-09-08 13:00:02,112 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: morales yamile
+2026-09-08 13:00:02,112 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cappelli gianni
+2026-09-08 13:00:02,118 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: chiappetta tessa
+2026-09-08 13:00:02,121 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: beatrice aldo
+2026-09-08 13:00:02,122 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: marini mattia
+2026-09-08 13:00:02,123 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fotia maria
+2026-09-08 13:00:02,128 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Brunelli Luigina
+2026-09-08 13:00:02,140 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: matera enrico
+2026-09-08 13:00:02,146 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: chiarandà valentina
+2026-09-08 13:00:02,146 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: corsi marzia
+2026-09-08 13:00:02,151 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fischietti edoardo
+2026-09-08 13:00:02,151 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: coraggio francesca
+2026-09-08 13:00:02,161 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: tucci loredana
+2026-09-08 13:00:02,161 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fiorenzano salvatore
+2026-09-08 13:00:02,161 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: biancalani daniela
+2026-09-08 13:00:02,173 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: TOMA
+2026-09-08 13:00:02,175 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pontieri serena
+2026-09-08 13:00:02,181 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: greco emma
+2026-09-08 13:00:02,185 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bartolozzi ilaria
+2026-09-08 13:00:02,189 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: franja claudio
+2026-09-08 13:00:02,190 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Daconto Simone
+2026-09-08 13:00:02,191 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Daconto Gabriele
+2026-09-08 13:00:02,195 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: tucci alessandro
+2026-09-08 13:00:02,204 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bimba di cristina cinese
+2026-09-08 13:00:02,210 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: GABBANINI GABRIELLA
+2026-09-08 13:00:02,215 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: solidoro anna
+2026-09-08 13:00:02,215 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vannoni filippo
+2026-09-08 13:00:02,222 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: MANENTI osvalda
+2026-09-08 13:00:02,225 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cavaciocchi debora
+2026-09-08 13:00:02,235 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: baldino rita
+2026-09-08 13:00:02,237 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: esposito enea
+2026-09-08 13:00:02,241 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Becheri Giacomo
+2026-09-08 13:00:02,241 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: calvano stefano
+2026-09-08 13:00:02,257 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: tartaglia monica3450960023
+2026-09-08 13:00:02,257 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: BARDUZZA FRANCESCA
+2026-09-08 13:00:02,257 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Cecchi Anna
+2026-09-08 13:00:02,264 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: riggillo andrea
+2026-09-08 13:00:02,266 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: laganà figlio
+2026-09-08 13:00:02,268 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mancini laura
+2026-09-08 13:00:02,275 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: romagnoli fiorella
+2026-09-08 13:00:02,275 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: leka emily
+2026-09-08 13:00:02,275 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: marito di barbuzza
+2026-09-08 13:00:02,281 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Noligni Giada
+2026-09-08 13:00:02,285 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: di gianni maria teresa
+2026-09-08 13:00:02,291 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: badiani letizia
+2026-09-08 13:00:02,296 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: chelazzi eleonora
+2026-09-08 13:00:02,299 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cecchi sara
+2026-09-08 13:00:02,303 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Bellissimo Mattia
+2026-09-08 13:00:02,308 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Stella Vincenzo
+2026-09-08 13:00:02,312 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mannelli ileana
+2026-09-08 13:00:02,314 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: paoli marta
+2026-09-08 13:00:02,315 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: el hamri fadwa
+2026-09-08 13:00:02,316 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: di massa ilaria
+2026-09-08 13:00:02,318 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: giannini silvia
+2026-09-08 13:00:02,322 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: chiti barbara
+2026-09-08 13:00:02,323 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fucà gandolfo
+2026-09-08 13:00:02,332 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: d'oria giulia
+2026-09-08 13:00:02,338 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: donato agnese
+2026-09-08 13:00:02,338 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: dami sara
+2026-09-08 13:00:02,348 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: valli silvia
+2026-09-08 13:00:02,350 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: giusti mariangela
+2026-09-08 13:00:02,351 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mileto lucia
+2026-09-08 13:00:02,352 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ciervo luisa
+2026-09-08 13:00:02,352 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: longo francesco
+2026-09-08 13:00:02,359 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: MARTINI PAMELA
+2026-09-08 13:00:02,361 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: galardini mattia
+2026-09-08 13:00:02,366 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: martelli massimiliano
+2026-09-08 13:00:02,371 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: NENCETTI PIERO
+2026-09-08 13:00:02,374 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: lopes antonina
+2026-09-08 13:00:02,378 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: abdullari flora
+2026-09-08 13:00:02,380 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: BINDI LAURA
+2026-09-08 13:00:02,380 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: seregni beatrice
+2026-09-08 13:00:02,382 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: polvani monica
+2026-09-08 13:00:02,386 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: kistermann franco
+2026-09-08 13:00:02,388 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Cobucci ANTONELLA
+2026-09-08 13:00:02,390 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: giusti pietro
+2026-09-08 13:00:02,392 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cardilli angela
+2026-09-08 13:00:02,394 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pignataro roberto
+2026-09-08 13:00:02,395 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pieraccioli elisa
+2026-09-08 13:00:02,398 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: righini andrea
+2026-09-08 13:00:02,401 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cappellini marzio
+2026-09-08 13:00:02,404 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vannacci alfredo
+2026-09-08 13:00:02,408 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: salvi francesco
+2026-09-08 13:00:02,413 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: catalano giuseppe
+2026-09-08 13:00:02,414 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vitali maria
+2026-09-08 13:00:02,417 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: michelacci fabio
+2026-09-08 13:00:02,421 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: raffaele marzia
+2026-09-08 13:00:02,422 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: palermo pasquale
+2026-09-08 13:00:02,424 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ARENA ELENA PER MAMMA
+2026-09-08 13:00:02,437 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: COLZI EMANUELE
+2026-09-08 13:00:02,442 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vaccarini stefano
+2026-09-08 13:00:02,445 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: risaliti alberto
+2026-09-08 13:00:02,446 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: paci veronica
+2026-09-08 13:00:02,451 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: della volpe francesca
+2026-09-08 13:00:02,452 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: absamad simpe
+2026-09-08 13:00:02,455 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: montelione calogera
+2026-09-08 13:00:02,456 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Di Martino Serafim Levi
+2026-09-08 13:00:02,457 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Di Ninni Rosilda
+2026-09-08 13:00:02,460 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: simone alessandro
+2026-09-08 13:00:02,463 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: sforzi alessandro
+2026-09-08 13:00:02,465 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bimbe di virginia
+2026-09-08 13:00:02,474 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: halavuk Anastasia
+2026-09-08 13:00:02,476 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mari giuseppina
+2026-09-08 13:00:02,477 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: el ghalbi soufiane
+2026-09-08 13:00:02,478 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: confietto niccolò
+2026-09-08 13:00:02,480 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: lacentra teresa
+2026-09-08 13:00:02,482 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: LAZZARINI LUCA
+2026-09-08 13:00:02,483 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: lisi marco
+2026-09-08 13:00:02,492 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: MARAIA SABATINO
+2026-09-08 13:00:02,493 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vannucci sauro
+2026-09-08 13:00:02,496 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: coppi claudia
+2026-09-08 13:00:02,502 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: urigu antonio
+2026-09-08 13:00:02,504 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: piazzalunga alessandra
+2026-09-08 13:00:02,505 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Chiti David
+2026-09-08 13:00:02,511 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: nesi vittoria
+2026-09-08 13:00:02,512 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mazzei marzia patrizia
+2026-09-08 13:00:02,516 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ciprietti lucia
+2026-09-08 13:00:02,518 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: caramelli graziella
+2026-09-08 13:00:02,524 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Ferrini Vittoria
+2026-09-08 13:00:02,525 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Viscillo Veronica
+2026-09-08 13:00:02,531 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: musella luigi
+2026-09-08 13:00:02,532 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: caputo silvia
+2026-09-08 13:00:02,533 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: FEDI LAURA
+2026-09-08 13:00:02,535 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: venditto maria
+2026-09-08 13:00:02,539 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bertoco anedio
+2026-09-08 13:00:02,546 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: LUNGHI IVAN
+2026-09-08 13:00:02,548 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: maraldi carlotta
+2026-09-08 13:00:02,550 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vannucci nazzareno
+2026-09-08 13:00:02,550 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: lombardi sara
+2026-09-08 13:00:02,554 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: luise edoardo marito di della volpe
+2026-09-08 13:00:02,555 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: zaccone isabella
+2026-09-08 13:00:02,559 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Zanollo Benett
+2026-09-08 13:00:02,563 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: santi vittoria
+2026-09-08 13:00:02,564 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vanni elena
+2026-09-08 13:00:02,567 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: TOY
+2026-09-08 13:00:02,568 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bernardini danilo
+2026-09-08 13:00:02,571 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fattori alessio
+2026-09-08 13:00:02,579 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pieraccini laura
+2026-09-08 13:00:02,580 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pukri giulio
+2026-09-08 13:00:02,584 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Niccolai Alessandro
+2026-09-08 13:00:02,587 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: franchi stefano
+2026-09-08 13:00:02,587 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mangoni riccardo
+2026-09-08 13:00:02,588 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: lastrucci alessia
+2026-09-08 13:00:02,589 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: esposito raffaello
+2026-09-08 13:00:02,590 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pavia alberto
+2026-09-08 13:00:02,591 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: candia andrea
+2026-09-08 13:00:02,592 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: el hatbi wassima
+2026-09-08 13:00:02,594 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: castaldo mariagrazia
+2026-09-08 13:00:02,594 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: colligiani chanel
+2026-09-08 13:00:02,598 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cannavò matilde
+2026-09-08 13:00:02,599 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: MELANI ALDO
+2026-09-08 13:00:02,602 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: melani aldo
+2026-09-08 13:00:02,605 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: di paolo antonio
+2026-09-08 13:00:02,612 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cinti giovanna
+2026-09-08 13:00:02,613 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: gjokaj niccolò
+2026-09-08 13:00:02,615 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: gaudio lorenzo
+2026-09-08 13:00:02,627 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pagnini paola moglie di anedio
+2026-09-08 13:00:02,629 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: virga valentina
+2026-09-08 13:00:02,632 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bandinelli andrea
+2026-09-08 13:00:02,640 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: monteforte melissa
+2026-09-08 13:00:02,644 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: capobianco nicole
+2026-09-08 13:00:02,647 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: traversini maria
+2026-09-08 13:00:02,649 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: aiuti gemma
+2026-09-08 13:00:02,711 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Pierozzi Massimo
+2026-09-08 13:00:02,713 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ragazza di dario chelazzi
+2026-09-08 13:00:02,717 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: scatizzi alessia
+2026-09-08 13:00:02,723 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Raugei Viola
+2026-09-08 13:00:02,726 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pesci sara
+2026-09-08 13:00:02,736 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: tanveer Hameera
+2026-09-08 13:00:02,739 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: tonaj alessio
+2026-09-08 13:00:02,744 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: verzotti franco
+2026-09-08 13:00:02,746 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: parisi maria
+2026-09-08 13:00:02,750 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: leporatti sabrina
+2026-09-08 13:00:02,755 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: gepponi giulia
+2026-09-08 13:00:02,758 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: giusti ginevra
+2026-09-08 13:00:02,759 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: raimondi paolo
+2026-09-08 13:00:02,759 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: villafiorita michela
+2026-09-08 13:00:02,759 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: barni tiziana
+2026-09-08 13:00:02,771 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: zouhair amira sorella di inas
+2026-09-08 13:00:02,806 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cappelli alice
+2026-09-08 13:00:02,807 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: giunti bruna
+2026-09-08 13:00:02,808 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: botta giulia
+2026-09-08 13:00:02,810 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: saggese barbara
+2026-09-08 13:00:02,811 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: fredducci elisa
+2026-09-08 13:00:02,813 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: gallina veronica
+2026-09-08 13:00:02,816 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: MARTALò CLAUDIA
+2026-09-08 13:00:02,816 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: amelia bimba di arta balliu
+2026-09-08 13:00:02,826 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: choukri tourya
+2026-09-08 13:00:02,828 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Mosmalej Melissa
+2026-09-08 13:00:02,830 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: villano vito
+2026-09-08 13:00:02,832 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: plepi arisa
+2026-09-08 13:00:02,835 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: dott. daloia
+2026-09-08 13:00:02,837 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: ciprietti arturo
+2026-09-08 13:00:02,838 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vernaccini alba
+2026-09-08 13:00:02,840 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: arfan muhammad
+2026-09-08 13:00:02,852 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: canaccini massimiliano
+2026-09-08 13:00:02,856 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: pintore paola
+2026-09-08 13:00:02,859 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Kamal Dinar
+2026-09-08 13:00:02,860 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: biagini angela
+2026-09-08 13:00:02,861 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: NERI LETIZIA
+2026-09-08 13:00:02,864 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mazza saverio
+2026-09-08 13:00:02,865 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: trombetta stefano
+2026-09-08 13:00:02,867 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: parlascino mirea + jacopo
+2026-09-08 13:00:02,870 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: vignati erica
+2026-09-08 13:00:02,873 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: gjura gentian
+2026-09-08 13:00:02,877 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: loriga irene
+2026-09-08 13:00:02,878 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: furfaro arcangelo
+2026-09-08 13:00:02,879 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: nistri emiliano
+2026-09-08 13:00:02,881 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: nanni osanna
+2026-09-08 13:00:02,884 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: bonomo annachiara
+2026-09-08 13:00:02,885 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: de fazio michele
+2026-09-08 13:00:02,889 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: romano rosario
+2026-09-08 13:00:02,890 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: russo gaya
+2026-09-08 13:00:02,893 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: franzini tommaso
+2026-09-08 13:00:02,893 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: figlio di Neri Martina
+2026-09-08 13:00:02,898 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: benini enzo
+2026-09-08 13:00:02,901 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: REGINA ALICE
+2026-09-08 13:00:02,903 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: amato luca
+2026-09-08 13:00:02,903 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: michele
+2026-09-08 13:00:02,909 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: maia careccia del 2020
+2026-09-08 13:00:02,911 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: canaccini niccolò
+2026-09-08 13:00:02,912 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: manna rossella
+2026-09-08 13:00:02,921 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: calussi tommaso
+2026-09-08 13:00:02,924 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: chiappinelli luca
+2026-09-08 13:00:02,926 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Intrieri Lorenzo
+2026-09-08 13:00:02,929 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: mei matilde
+2026-09-08 13:00:02,933 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Tonini Enrico
+2026-09-08 13:00:02,934 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: baldi renzo
+2026-09-08 13:00:02,939 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: cuguro martina
+2026-09-08 13:00:02,944 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: castellani lisa
+2026-09-08 13:00:02,946 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: Fischietti Thiago
+2026-09-08 13:00:02,953 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: marito di mencarelli chiara
+2026-09-08 13:00:02,954 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: quercioli claudio
+2026-09-08 13:00:02,954 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: valentina compagna leo manetti
+2026-09-08 13:00:02,960 WARNING [services.appointment_reminder_service] Prima visita senza ID o cellulare nella prima riga delle note: nannini osanna
+2026-09-08 13:00:23,692 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:00:29,204 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:00:36,191 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:00:41,693 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:01:05,364 ERROR [services.push_notification_service] Failed to send push to endpoint https://fcm.googleapis.com/fcm/send/fuxsN_RQQ7k:APA91bEJ3molyE9UZrA05MD6ZxNlhMz4Jc689N58bj4rk7bExDrA0MkT1pbfqh4mN4kjq4MapIdcl5ccT5j6b65ymJUMTI-rruH5LElc6YpeD0ApS-qQDuo73iHy6JkfXzhVRT1vi3x2: WebPushException: Push failed: 410 Gone
+Response body:push subscription has unsubscribed or expired.
+, Response push subscription has unsubscribed or expired.
+
+2026-09-08 13:01:05,563 INFO [services.push_notification_service] Push notification sent to user 1 (endpoint: https://fcm.googleapis.com/fcm/send/eZwQ0Fx3Fio:AP...)
+2026-09-08 13:01:05,689 ERROR [services.push_notification_service] Failed to send push to endpoint https://fcm.googleapis.com/fcm/send/dFOBXc70Elk:APA91bGF02DmBa06o8EfAq1ooIHJXGIkMtE1vf6isXBmeoGPkbvmCXClFNJSipKteqA43r1c8A-aGyQ_zh03FBs9Cu4TMW6E-5jnYd6Lv5HhQavQksSKRlsj6hKNkCxuk-81Y4TC92xD: WebPushException: Push failed: 410 Gone
+Response body:push subscription has unsubscribed or expired.
+, Response push subscription has unsubscribed or expired.
+
+2026-09-08 13:01:06,000 INFO [services.push_notification_service] Push notification sent to user 3 (endpoint: https://fcm.googleapis.com/fcm/send/eeojnWF6Egc:AP...)
+2026-09-08 13:03:49,199 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:03:57,198 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:04:02,688 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:04:20,195 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:04:25,688 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:04:51,202 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:04:56,693 WARNING [core.config_manager] Ambiente PROD non raggiungibile, fallback automatico a DEV
+2026-09-08 13:07:23,705 INFO [services.websocket_service] Client disconnected: VEOOCAZgAHPQo32YAAAB
+2026-09-08 13:07:23,705 INFO [services.websocket_service] Client disconnected: SUNV9RQHkl_kwwtXAAAG

@@ -63,6 +63,9 @@ yarn-error.log*
 .DS_Store
 
 **/test*.py
+!tests/test_materiali_inbox_service.py
+!tests/test_ordini_service.py
+!tests/test_acquisti_storico_extractor.py
 !server_v2/tests/test_whatsapp_verification_cache.py
 !server_v2/tests/test_missed_whatsapp_reminders.py
 

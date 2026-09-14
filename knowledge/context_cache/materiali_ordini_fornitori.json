@@ -1,0 +1,668 @@
+{
+  "schema_version": 1,
+  "task": "materiali ordini fornitori",
+  "files": [
+    {
+      "path": "server_v2/api/v2_materiali.py",
+      "role": "api",
+      "score": 33,
+      "matched_terms": [
+        "materiali",
+        "supplier"
+      ],
+      "dependencies": [
+        "logging",
+        "flask",
+        "flask_jwt_extended",
+        "services.materiali_service",
+        "services.materiali_migration_service",
+        "app_v2",
+        "core.exceptions",
+        "core.database_manager",
+        "datetime",
+        "traceback"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/materiali_migration_service.py",
+      "role": "service",
+      "score": 30,
+      "matched_terms": [
+        "materiali",
+        "supplier"
+      ],
+      "dependencies": [
+        "logging",
+        "os",
+        "re",
+        "pathlib",
+        "typing",
+        "datetime",
+        ".base_service",
+        "utils.dbf_utils",
+        "core.exceptions",
+        "core.paths"
+      ],
+      "callers": []
+    },
+    {
+      "path": "server_v2/services/materiali_service.py",
+      "role": "service",
+      "score": 30,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "logging",
+        "typing",
+        ".base_service",
+        "core.exceptions"
+      ],
+      "callers": []
+    },
+    {
+      "path": "client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "role": "service",
+      "score": 20,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": [
+        "file:client_v2/src/components/forms/MaterialClassificationForm.tsx"
+      ]
+    },
+    {
+      "path": "client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "role": "service",
+      "score": 18,
+      "matched_terms": [
+        "materiali"
+      ],
+      "dependencies": [
+        "file:client_v2/src/services/api/client.ts"
+      ],
+      "callers": []
+    }
+  ],
+  "symbols": [
+    {
+      "name": "get_providers",
+      "kind": "function",
+      "path": "server_v2/api/v2_providers.py",
+      "line": 15,
+      "information_score": 59,
+      "category": "support"
+    },
+    {
+      "name": "get_all_providers",
+      "kind": "function",
+      "path": "server_v2/services/provider_service.py",
+      "line": 15,
+      "information_score": 54,
+      "category": "support"
+    },
+    {
+      "name": "get_active_suppliers",
+      "kind": "function",
+      "path": "server_v2/services/spese_fornitori_service.py",
+      "line": 191,
+      "information_score": 54,
+      "category": "support"
+    },
+    {
+      "name": "get_active_suppliers_list",
+      "kind": "function",
+      "path": "server_v2/api/v2_spese_fornitori.py",
+      "line": 92,
+      "information_score": 53,
+      "category": "support"
+    },
+    {
+      "name": "FornitoriService",
+      "kind": "class",
+      "path": "server_v2/services/fornitori_service.py",
+      "line": 36,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "MaterialiMigrationService",
+      "kind": "class",
+      "path": "server_v2/services/materiali_migration_service.py",
+      "line": 24,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "MaterialiService",
+      "kind": "class",
+      "path": "server_v2/services/materiali_service.py",
+      "line": 15,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "ProviderAutomationService",
+      "kind": "class",
+      "path": "server_v2/services/provider_automation_service.py",
+      "line": 9,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "ProviderService",
+      "kind": "class",
+      "path": "server_v2/services/provider_service.py",
+      "line": 10,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "SpeseFornitoriService",
+      "kind": "class",
+      "path": "server_v2/services/spese_fornitori_service.py",
+      "line": 42,
+      "information_score": 46,
+      "category": "core"
+    },
+    {
+      "name": "get_provider",
+      "kind": "function",
+      "path": "server_v2/api/v2_providers.py",
+      "line": 27,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "create_provider",
+      "kind": "function",
+      "path": "server_v2/api/v2_providers.py",
+      "line": 41,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "update_provider",
+      "kind": "function",
+      "path": "server_v2/api/v2_providers.py",
+      "line": 56,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "delete_provider",
+      "kind": "function",
+      "path": "server_v2/api/v2_providers.py",
+      "line": 71,
+      "information_score": 44,
+      "category": "support"
+    },
+    {
+      "name": "get_fornitori_paginated",
+      "kind": "function",
+      "path": "server_v2/services/fornitori_service.py",
+      "line": 38,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "normalize_supplier_name",
+      "kind": "function",
+      "path": "server_v2/services/materiali_migration_service.py",
+      "line": 308,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "import_materials_for_supplier",
+      "kind": "function",
+      "path": "server_v2/services/materiali_migration_service.py",
+      "line": 1157,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_all_materiali",
+      "kind": "function",
+      "path": "server_v2/services/materiali_service.py",
+      "line": 18,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_materiali_paginated",
+      "kind": "function",
+      "path": "server_v2/services/materiali_service.py",
+      "line": 43,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_provider_by_id",
+      "kind": "function",
+      "path": "server_v2/services/provider_service.py",
+      "line": 19,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "create_provider",
+      "kind": "function",
+      "path": "server_v2/services/provider_service.py",
+      "line": 23,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "update_provider",
+      "kind": "function",
+      "path": "server_v2/services/provider_service.py",
+      "line": 33,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "delete_provider",
+      "kind": "function",
+      "path": "server_v2/services/provider_service.py",
+      "line": 41,
+      "information_score": 39,
+      "category": "support"
+    },
+    {
+      "name": "get_fornitori",
+      "kind": "function",
+      "path": "server_v2/api/v2_fornitori.py",
+      "line": 26,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_fornitori_stats",
+      "kind": "function",
+      "path": "server_v2/api/v2_fornitori.py",
+      "line": 286,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_materiali",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 28,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_all_materiali",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 115,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "search_materiali",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 467,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "get_materiali_stats",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 539,
+      "information_score": 38,
+      "category": "support"
+    },
+    {
+      "name": "ricerca_materiali_classificati",
+      "kind": "function",
+      "path": "server_v2/api/v2_materiali.py",
+      "line": 574,
+      "information_score": 38,
+      "category": "support"
+    }
+  ],
+  "connections": [
+    {
+      "source": "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+      "target": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/components/forms/MaterialClassificationForm.tsx",
+      "to": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "target": "file:client_v2/src/services/api/client.ts",
+      "relation": "imports",
+      "from": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "to": "file:client_v2/src/services/api/client.ts",
+      "type": "imports"
+    }
+  ],
+  "semantic_relationships": [
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/classificazione",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/classificazione/bulk",
+      "method": "POST"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-classification.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/classificazione/statistiche",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/migrazione/preview",
+      "method": "GET"
+    },
+    {
+      "source": "file:client_v2/src/features/materiali/services/materiali-migration.service.ts",
+      "relation": "calls_route",
+      "target": "route:/materiali/migrazione/import-all",
+      "method": "POST"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:28:get_materiali",
+      "relation": "exposes_route",
+      "target": "route:/materiali",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:115:get_all_materiali",
+      "relation": "exposes_route",
+      "target": "route:/materiali_all",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:158:get_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:213:create_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:286:update_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:356:update_materiale_conti",
+      "relation": "exposes_route",
+      "target": "route:/materiali-update/conti/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:416:delete_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/<int:materiale_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:467:search_materiali",
+      "relation": "exposes_route",
+      "target": "route:/materiali/search",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:539:get_materiali_stats",
+      "relation": "exposes_route",
+      "target": "route:/materiali/stats",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:574:ricerca_materiali_classificati",
+      "relation": "exposes_route",
+      "target": "route:/materiali/ricerca-classificati",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:662:get_classificazione_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/classificazione/<codice_articolo>/<fattura_id>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+      "relation": "exposes_route",
+      "target": "route:/materiali/classificazione",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+      "relation": "exposes_route",
+      "target": "route:/materiali/classificazione/bulk",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1036:ricerca_articoli",
+      "relation": "exposes_route",
+      "target": "route:/materiali/ricerca-articoli",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1233:preview_migration",
+      "relation": "exposes_route",
+      "target": "route:/materiali/migrazione/preview",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1322:import_supplier_materials",
+      "relation": "exposes_route",
+      "target": "route:/materiali/migrazione/import/<supplier_name>",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:1377:import_all_materials",
+      "relation": "exposes_route",
+      "target": "route:/materiali/migrazione/import-all",
+      "method": "http"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:574:ricerca_materiali_classificati",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:662:get_classificazione_materiale",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:736:salva_classificazione_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/api/v2_materiali.py:860:salva_classificazione_materiali_bulk",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:647:migrate_materials_to_db",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:647:migrate_materials_to_db",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:791:_get_existing_material_classification",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:837:_get_classification_data",
+      "relation": "reads",
+      "target": "database:classificazioni_costi",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_migration_service.py:876:_load_existing_patterns",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:18:get_all_materiali",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:43:get_materiali_paginated",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:110:get_materiale_by_id",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:134:create_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "INSERT INTO"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:177:update_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:216:update_materiale_conti",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "UPDATE"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:252:delete_materiale",
+      "relation": "writes",
+      "target": "database:materiali",
+      "statement": "DELETE FROM"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:287:search_materials",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    },
+    {
+      "source": "python:function:server_v2/services/materiali_service.py:399:get_statistics",
+      "relation": "reads",
+      "target": "database:materiali",
+      "statement": "SELECT"
+    }
+  ],
+  "features": [
+    {
+      "id": "feature:fornitori",
+      "name": "fornitori",
+      "files": [
+        "client_v2/src/features/fornitori/components/ClassificazioneCompleta.tsx",
+        "client_v2/src/features/fornitori/components/ClassificazioneGerarchica.tsx",
+        "client_v2/src/features/fornitori/components/ClassificazioneStatus.tsx",
+        "client_v2/src/features/fornitori/components/ClassificazioneToggle.tsx",
+        "client_v2/src/features/fornitori/components/FornitoriTable.tsx",
+        "client_v2/src/features/fornitori/hooks/useFornitoreModals.ts",
+        "client_v2/src/features/fornitori/pages/FornitoriClassificazione.tsx",
+        "client_v2/src/features/fornitori/pages/FornitoriPage.tsx",
+        "client_v2/src/features/fornitori/services/classificazioni.service.ts",
+        "client_v2/src/features/fornitori/types/index.ts"
+      ],
+      "roles": {
+        "component": 5,
+        "hook": 1,
+        "page": 2,
+        "service": 1,
+        "types": 1
+      },
+      "entities_count": 42,
+      "relationships_count": 74
+    },
+    {
+      "id": "feature:materiali",
+      "name": "materiali",
+      "files": [
+        "client_v2/src/features/materiali/components/ClassificazioneMaterialeModal.tsx",
+        "client_v2/src/features/materiali/components/MaterialiAccordion.tsx",
+        "client_v2/src/features/materiali/components/MaterialiTable.tsx",
+        "client_v2/src/features/materiali/pages/MaterialiMigrazione.tsx",
+        "client_v2/src/features/materiali/pages/MaterialiPage.tsx",
+        "client_v2/src/features/materiali/pages/RicercaArticoli.tsx",
+        "client_v2/src/features/materiali/services/materiali-classification.service.ts",
+        "client_v2/src/features/materiali/services/materiali-migration.service.ts"
+      ],
+      "roles": {
+        "component": 3,
+        "page": 3,
+        "service": 2
+      },
+      "entities_count": 37,
+      "relationships_count": 58
+    }
+  ],
+  "index": {
+    "schema_version": 2,
+    "project_root": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI",
+    "indexed_files": 565
+  },
+  "context_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\materiali_ordini_fornitori.txt",
+  "packet_file": "C:\\Users\\NICOLA\\Desktop\\StudioDimaAI\\knowledge\\context_cache\\materiali_ordini_fornitori.json"
+}

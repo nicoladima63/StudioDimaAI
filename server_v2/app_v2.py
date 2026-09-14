@@ -20,6 +20,7 @@ from core.paths import (
     GOOGLE_CREDENTIALS_PATH,
     GOOGLE_OAUTH_STATE_PATH,
     GOOGLE_TOKEN_PATH,
+    GMAIL_CREDENTIALS_PATH,
     GMAIL_TOKEN_PATH,
     GMAIL_OAUTH_STATE_PATH,
     STUDIO_DIMA_DB_PATH,
@@ -562,7 +563,7 @@ def register_health_check(app: Flask) -> None:
                 return redirect("/oauth-result?success=false&error=missing_code_or_state")
 
             client = GoogleGmailClient(
-                credentials_path=GOOGLE_CREDENTIALS_PATH,
+                credentials_path=GMAIL_CREDENTIALS_PATH,
                 token_path=GMAIL_TOKEN_PATH,
                 oauth_state_path=GMAIL_OAUTH_STATE_PATH,
             )

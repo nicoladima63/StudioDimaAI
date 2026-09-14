@@ -6,7 +6,7 @@ from email.utils import parseaddr
 from html import unescape
 
 from core.google_gmail_client import GoogleGmailClient
-from core.paths import GOOGLE_CREDENTIALS_PATH, GMAIL_TOKEN_PATH, GMAIL_OAUTH_STATE_PATH
+from core.paths import GMAIL_CREDENTIALS_PATH, GMAIL_TOKEN_PATH, GMAIL_OAUTH_STATE_PATH
 from core.exceptions import GmailCredentialsNotFoundError, GmailApiError
 from repositories.email_repository import (
     EmailScopeRepository,
@@ -29,7 +29,7 @@ class EmailService:
 
     def _get_gmail_client(self) -> GoogleGmailClient:
         return GoogleGmailClient(
-            credentials_path=GOOGLE_CREDENTIALS_PATH,
+            credentials_path=GMAIL_CREDENTIALS_PATH,
             token_path=GMAIL_TOKEN_PATH,
             oauth_state_path=GMAIL_OAUTH_STATE_PATH,
         )

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CButton, CForm, CFormInput } from '@coreui/react';
 import toast from 'react-hot-toast';
 
@@ -197,6 +198,8 @@ const MaterialiPage: React.FC = () => {
         title='Gestione Materiali'
         headerAction={
           <div className='d-flex gap-2'>
+            <Link className='btn btn-outline-primary' to='/materiali/ordini'>Ordini materiali</Link>
+            <Link className='btn btn-outline-primary' to='/materiali/da-classificare'>Prodotti da classificare</Link>
             <CButton color='primary' onClick={() => load(true)} disabled={isLoading}>
               {isLoading ? 'Caricamento...' : 'Aggiorna'}
             </CButton>

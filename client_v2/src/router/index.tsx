@@ -11,6 +11,9 @@ const Dashboard = React.lazy(() => import('@/features/dashboard/pages/Dashboard'
 const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
 const RegisterPage = React.lazy(() => import('@/features/auth/pages/RegisterPage'))
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
+const ProvaRicercaMaterialiPage = React.lazy(() => import('@/features/materiali/pages/ProvaRicercaMaterialiPage'))
+const OrdiniPage = React.lazy(() => import('@/features/materiali/pages/OrdiniPage'))
+const ProdottiDaClassificarePage = React.lazy(() => import('@/features/materiali/pages/ProdottiDaClassificarePage'))
 const MaterialiMigrazione = React.lazy(() => import('@/features/materiali/pages/MaterialiMigrazione'))
 const RicercaArticoli = React.lazy(() => import('@/features/materiali/pages/RicercaArticoli'))
 const FornitoriPage = React.lazy(() => import('@/features/fornitori/pages/FornitoriPage'))
@@ -92,6 +95,9 @@ const AppRouter: React.FC = () => {
           {/* Feature routes */}
           <Route path='eisenhower' element={<EisenhowerMatrixPage />} />
           <Route path='materiali' element={<MaterialiPage />} />
+          <Route path='materiali/prova-ricerca' element={<ProvaRicercaMaterialiPage />} />
+          <Route path='materiali/ordini' element={<OrdiniPage />} />
+          <Route path='materiali/da-classificare' element={<ProdottiDaClassificarePage />} />
           <Route path='materiali/migrazione' element={<MaterialiMigrazione />} />
           <Route path='materiali/ricerca' element={<RicercaArticoli />} />
           <Route path='automation/primevisite' element={<PrimeVisitePage />} />
