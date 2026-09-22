@@ -221,27 +221,16 @@ def get_upcoming_appointments(
                     ap_date = ap_date.date()
                 paz_id = str(record['DB_APPACOD']).strip()
                 appointment_type = str(record['DB_GUARDIA']).strip()
-                new_patient_phone = None
-                if not paz_id:
-                    # Le prime visite non hanno ancora un'anagrafica. Per
-                    # convenzione il numero è nella prima riga di DB_NOTE:
-                    # trattiamole come appuntamenti normali, senza creare un
-                    # record paziente fittizio nel DBF.
-                    if appointment_type != _NEW_PATIENT_TYPE:
-                        continue
-                    new_patient_phone = _new_patient_phone_from_notes(record['DB_NOTE'])
-                    if not new_patient_phone:
-                        logger.warning(
-                            "Prima visita senza ID o cellulare nella prima riga delle note: %s",
-                            str(record['DB_APDESCR']).strip(),
-                        )
-                        continue
-                    paz_id = _new_patient_reminder_id(new_patient_phone)
 
                 ora_raw = str(record['DB_APOREIN']).strip()
                 ora_fmt = _ora_fmt(ora_raw)
                 ap_dt = datetime.combine(ap_date, datetime.strptime(ora_fmt, '%H:%M').time())
 
+                # Filtro di rilevanza temporale PRIMA di qualunque controllo su
+                # anagrafica/note: una prima visita fuori dalla finestra di
+                # questo job (passata, o troppo lontana) non deve generare
+                # warning ne' essere elaborata — ci pensera' il job giusto
+                # quando sara' il suo turno.
                 if reminder_type == '24h':
                     if ap_date != tomorrow:
                         continue
@@ -265,23 +254,42 @@ def get_upcoming_appointments(
                 else:
                     raise ValueError(f"Tipo reminder non supportato: {reminder_type}")
 
-                if match:
-                    row = {
-                        'patient_id': paz_id,
-                        'appointment_date': str(ap_date),
-                        'appointment_time': ora_fmt,
-                        'tipo': appointment_type,
-                        'studio': str(record['DB_APSTUDI']).strip(),
-                        'nome_dbf': str(record['DB_APDESCR']).strip(),
-                    }
-                    if new_patient_phone:
-                        row['cell'] = new_patient_phone
-                        row['is_new_patient'] = True
-                    if reminder_type == 'recovery':
-                        # Gli appuntamenti di domani ricevono sempre il testo
-                        # "domani", anche se il recupero viene eseguito tardi.
-                        row['recovery_type'] = recovery_type
-                    rows.append(row)
+                if not match:
+                    continue
+
+                new_patient_phone = None
+                if not paz_id:
+                    # Le prime visite non hanno ancora un'anagrafica. Per
+                    # convenzione il numero è nella prima riga di DB_NOTE:
+                    # trattiamole come appuntamenti normali, senza creare un
+                    # record paziente fittizio nel DBF.
+                    if appointment_type != _NEW_PATIENT_TYPE:
+                        continue
+                    new_patient_phone = _new_patient_phone_from_notes(record['DB_NOTE'])
+                    if not new_patient_phone:
+                        logger.warning(
+                            "Prima visita senza ID o cellulare nella prima riga delle note: %s",
+                            str(record['DB_APDESCR']).strip(),
+                        )
+                        continue
+                    paz_id = _new_patient_reminder_id(new_patient_phone)
+
+                row = {
+                    'patient_id': paz_id,
+                    'appointment_date': str(ap_date),
+                    'appointment_time': ora_fmt,
+                    'tipo': appointment_type,
+                    'studio': str(record['DB_APSTUDI']).strip(),
+                    'nome_dbf': str(record['DB_APDESCR']).strip(),
+                }
+                if new_patient_phone:
+                    row['cell'] = new_patient_phone
+                    row['is_new_patient'] = True
+                if reminder_type == 'recovery':
+                    # Gli appuntamenti di domani ricevono sempre il testo
+                    # "domani", anche se il recupero viene eseguito tardi.
+                    row['recovery_type'] = recovery_type
+                rows.append(row)
             except Exception:
                 continue
         table.close()
