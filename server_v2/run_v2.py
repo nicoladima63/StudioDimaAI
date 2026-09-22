@@ -19,6 +19,8 @@ import sys
 import argparse
 import logging
 import subprocess
+import threading
+import time
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
@@ -221,6 +223,41 @@ def ensure_evolution_running():
         print(f"Evolution API: errore ({e}), continuo senza")
 
 
+def start_restart_flag_watcher(flag_path: Path, poll_interval: float = 3.0):
+    """
+    Sorveglia instance/restart.flag: deploy_v2.bat lo tocca come ultimo passo
+    dopo aver copiato i file aggiornati. Quando cambia, il processo esce con
+    codice 75 — lo stesso usato da POST /admin/restart — e il wrapper
+    (start_server_v2.bat) lo rilancia da solo, applicando il codice nuovo
+    senza dover riavviare manualmente sul server.
+    """
+    logger = logging.getLogger(__name__)
+    try:
+        baseline = flag_path.stat().st_mtime if flag_path.exists() else None
+    except OSError:
+        baseline = None
+
+    def _poll():
+        nonlocal baseline
+        while True:
+            time.sleep(poll_interval)
+            try:
+                if not flag_path.exists():
+                    continue
+                mtime = flag_path.stat().st_mtime
+                if baseline is None:
+                    baseline = mtime
+                    continue
+                if mtime > baseline:
+                    logger.warning("Riavvio richiesto da deploy (restart.flag aggiornato)")
+                    time.sleep(1)
+                    os._exit(75)
+            except OSError:
+                continue
+
+    threading.Thread(target=_poll, daemon=True, name='restart-flag-watcher').start()
+
+
 def run_with_waitress(app, args):
     """Run server using SocketIO (WebSocket support)."""
     try:
@@ -351,7 +388,12 @@ def main():
         
         # Create Flask application
         app = create_app_v2(args.config)
-        
+
+        # Riavvio automatico dopo deploy (solo produzione, richiede il wrapper
+        # start_server_v2.bat che rilancia il processo su exit code 75)
+        if args.config == 'production':
+            start_restart_flag_watcher(Path(__file__).parent / 'instance' / 'restart.flag')
+
         # HEALTH CHECK - Aggiungi qui!
         startup_health_check()
         

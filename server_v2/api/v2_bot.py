@@ -872,6 +872,25 @@ def _parse_evo_messages(raw) -> list:
     return parsed
 
 
+def _fetch_evo_messages(jid: str, key_field: str) -> list:
+    """Interroga POST /chat/findMessages filtrando su un campo di 'key' (remoteJid o remoteJidAlt)."""
+    r = requests.post(
+        f'{EVOLUTION_BASE_URL}/chat/findMessages/{EVOLUTION_INSTANCE}',
+        headers=_evo_headers(),
+        # Evolution usa "offset" per la dimensione pagina; "limit" viene
+        # ignorato. Non filtrare per fromMe: devono essere restituiti sia i
+        # messaggi dello studio sia quelli ricevuti dal paziente.
+        json={
+            'where': {'key': {key_field: jid}},
+            'offset': 100,
+            'page': 1,
+        },
+        timeout=10,
+    )
+    r.raise_for_status()
+    return _parse_evo_messages(r.json())
+
+
 @bot_v2_bp.route('/bot/evolution/conversation', methods=['GET'])
 @jwt_required()
 def get_evolution_conversation():
@@ -882,22 +901,23 @@ def get_evolution_conversation():
 
     jid = _normalize_phone_to_jid(phone)
     try:
-        r = requests.post(
-            f'{EVOLUTION_BASE_URL}/chat/findMessages/{EVOLUTION_INSTANCE}',
-            headers=_evo_headers(),
-            # Evolution usa "offset" per la dimensione pagina; "limit" viene
-            # ignorato. Non filtrare per fromMe: devono essere restituiti sia i
-            # messaggi dello studio sia quelli ricevuti dal paziente.
-            json={
-                'where': {'key': {'remoteJid': jid}},
-                'offset': 100,
-                'page': 1,
-            },
-            timeout=10,
-        )
-        if r.status_code != 200:
-            return format_response(success=False, error=f'Evolution API {r.status_code}', state='warning')
-        messages = _parse_evo_messages(r.json())
+        # WhatsApp puo' aver migrato il contatto a un JID "@lid" (Linked ID,
+        # privacy multi-device): i messaggi finiscono allora sotto quel nuovo
+        # remoteJid, con il numero originale conservato in "remoteJidAlt" su
+        # ogni messaggio della chat. Serve percio' interrogare entrambe le
+        # chiavi e unire i risultati, altrimenti si vedono solo i messaggi
+        # dello studio inviati prima della migrazione (es. i reminder) e non
+        # le risposte dei pazienti.
+        by_remote_jid = _fetch_evo_messages(jid, 'remoteJid')
+        by_remote_jid_alt = _fetch_evo_messages(jid, 'remoteJidAlt')
+        seen = set()
+        messages = []
+        for m in by_remote_jid + by_remote_jid_alt:
+            if m['id'] in seen:
+                continue
+            seen.add(m['id'])
+            messages.append(m)
+        messages.sort(key=lambda m: m['timestamp'])
         return format_response({'messages': messages, 'jid': jid})
     except Exception as e:
         logger.warning(f'Errore recupero conversazione Evolution ({jid}): {e}')

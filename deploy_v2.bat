@@ -502,6 +502,16 @@ echo   [OK] reset_sync_state.bat creato.
 echo   [OK] reset_sync_state.bat creato. >> "%LOGFILE%"
 
 :: ============================================================================
+:: [7.5/7] Trigger riavvio automatico server (restart.flag)
+:: ============================================================================
+echo [7.5/7] Trigger riavvio server...
+echo [7.5/7] Trigger riavvio server... >> "%LOGFILE%"
+echo %TIMESTAMP% > "%DEPLOY_PATH%\instance\restart.flag"
+echo   [OK] restart.flag aggiornato - il server lo rileva ed esce con codice 75;
+echo        start_server_v2.bat lo rilancia in automatico entro ~5 secondi.
+echo   [OK] restart.flag aggiornato - riavvio automatico in corso. >> "%LOGFILE%"
+
+:: ============================================================================
 :: COMPLETATO
 :: ============================================================================
 echo.
@@ -516,7 +526,10 @@ echo.
 echo ----------------------------------------
 echo  PROSSIMI PASSI SU SERVERDIMA:
 echo ----------------------------------------
-echo  1. Riavvia il server Flask (se non si riavvia da solo)
+echo  1. Il server si riavvia da solo entro pochi secondi (restart.flag).
+echo     Se NON riparte, e' in esecuzione con codice vecchio (senza il
+echo     watcher): vai su serverdima e rilancia start_server_v2.bat a mano
+echo     una volta sola - da quel momento i deploy successivi saranno automatici.
 echo  2. Se hai modificato docker-compose.yml:
 echo     esegui  restart_docker.bat  nella cartella deployata
 echo ----------------------------------------
