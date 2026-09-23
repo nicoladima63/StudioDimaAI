@@ -399,57 +399,71 @@ echo   [OK] Frontend deployato. >> "%LOGFILE%"
 :: ============================================================================
 :: [6/7] Generazione script avvio
 :: ============================================================================
-echo [6/7] Generazione start script...
-echo [6/7] Generazione start script... >> "%LOGFILE%"
-(
-echo @echo off
-echo setlocal enabledelayedexpansion
-echo cd /d "%%~dp0"
-echo.
-echo echo ==========================================
-echo echo    STUDIO DIMA AI V2 - STARTING SERVER
-echo echo ==========================================
-echo.
-echo set "STUDIODIMAAI_DATA_DIR=%%~dp0instance"
-echo set "GOOGLE_CREDENTIALS_PATH=%%~dp0instance\credentials.json"
-echo set "GOOGLE_TOKEN_PATH=%%~dp0instance\token.json"
-echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
-echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
-echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"
-echo.
-echo if not exist venv ^(
-echo     echo Creazione virtual environment...
-echo     python -m venv venv
-echo ^)
-echo.
-echo call venv\Scripts\activate.bat
-echo.
-echo echo Verifica dipendenze...
-echo pip install -r requirements.txt --quiet
-echo.
-echo :restart_loop
-echo echo ==========================================
-echo echo Server in avvio su porta 5001...
-echo echo ==========================================
-echo set "RESTART_REASON=motivo sconosciuto"
-echo if exist instance\last_restart_reason.txt set /p RESTART_REASON=^<instance\last_restart_reason.txt
-echo python run_v2.py --config production --port 5001
-echo set EXIT_CODE=%%ERRORLEVEL%%
-echo if %%EXIT_CODE%% EQU 75 ^(
-echo     echo Riavvio richiesto ^(%%RESTART_REASON%%^). Attendo 3 secondi...
-echo     timeout /t 3 /nobreak ^>nul
-echo     goto restart_loop
-echo ^)
-echo echo Server terminato con codice %%EXIT_CODE%%.
-echo pause
-) > "%DEPLOY_PATH%\start_server_v2.bat"
+:: start_server_v2.bat contiene un loop con "goto": resta aperto con un unico
+:: file-handle per tutta la sua vita (giorni/settimane). Se lo si riscrive
+:: MENTRE sta girando, cmd.exe continua a leggere da un offset byte ormai
+:: disallineato rispetto al nuovo contenuto — risultato: righe corrotte,
+:: errori fantasma tipo "Impossibile trovare il file specificato", a volte
+:: un giro di troppo. La soluzione robusta non e' "dividerlo in due file"
+:: (un worker chiamato con CALL resta comunque aperto per tutta la durata
+:: di python, quindi e' vulnerabile allo stesso modo) ma non riscriverlo
+:: mai piu' dopo la prima creazione: se serve cambiarlo, si cancella a mano
+:: sul server una volta sola e il prossimo deploy lo rigenera da capo.
+echo [6/7] Generazione script avvio...
+echo [6/7] Generazione script avvio... >> "%LOGFILE%"
 
-if not exist "%DEPLOY_PATH%\start_server_v2.bat" (
-    echo   [ERRORE] start_server_v2.bat non creato - problema scrittura sulla share!
-    echo   [ERRORE] start_server_v2.bat non creato >> "%LOGFILE%"
+if exist "%DEPLOY_PATH%\start_server_v2.bat" (
+    echo   [OK] start_server_v2.bat gia' presente, non toccato - evita corruzione mentre gira.
+    echo   [OK] start_server_v2.bat gia' presente, non toccato. >> "%LOGFILE%"
 ) else (
-    echo   [OK] start_server_v2.bat creato.
-    echo   [OK] start_server_v2.bat creato. >> "%LOGFILE%"
+    (
+    echo @echo off
+    echo setlocal enabledelayedexpansion
+    echo cd /d "%%~dp0"
+    echo.
+    echo set "STUDIODIMAAI_DATA_DIR=%%~dp0instance"
+    echo set "GOOGLE_CREDENTIALS_PATH=%%~dp0instance\credentials.json"
+    echo set "GOOGLE_TOKEN_PATH=%%~dp0instance\token.json"
+    echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
+    echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
+    echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"
+    echo.
+    echo if not exist venv ^(
+    echo     echo Creazione virtual environment...
+    echo     python -m venv venv
+    echo ^)
+    echo.
+    echo call venv\Scripts\activate.bat
+    echo.
+    echo :loop
+    echo echo ==========================================
+    echo echo    STUDIO DIMA AI V2 - STARTING SERVER
+    echo echo ==========================================
+    echo echo Verifica dipendenze...
+    echo pip install -r requirements.txt --quiet
+    echo echo ==========================================
+    echo echo Server in avvio su porta 5001...
+    echo echo ==========================================
+    echo python run_v2.py --config production --port 5001
+    echo set EXIT_CODE=%%ERRORLEVEL%%
+    echo if %%EXIT_CODE%% EQU 75 ^(
+    echo     set "RESTART_REASON=motivo sconosciuto"
+    echo     if exist instance\last_restart_reason.txt set /p RESTART_REASON=^<instance\last_restart_reason.txt
+    echo     echo Riavvio richiesto ^(^^^!RESTART_REASON^^^!^). Attendo 3 secondi...
+    echo     timeout /t 3 /nobreak ^>nul
+    echo     goto loop
+    echo ^)
+    echo echo Server terminato con codice %%EXIT_CODE%%.
+    echo pause
+    ) > "%DEPLOY_PATH%\start_server_v2.bat"
+
+    if not exist "%DEPLOY_PATH%\start_server_v2.bat" (
+        echo   [ERRORE] start_server_v2.bat non creato - problema scrittura sulla share!
+        echo   [ERRORE] start_server_v2.bat non creato >> "%LOGFILE%"
+    ) else (
+        echo   [OK] start_server_v2.bat creato ^(prima volta^).
+        echo   [OK] start_server_v2.bat creato ^(prima volta^). >> "%LOGFILE%"
+    )
 )
 
 :: ============================================================================
