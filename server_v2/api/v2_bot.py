@@ -796,6 +796,7 @@ def get_evolution_dashboard_status():
         s = get_automation_settings()
         status['reminder_24h_enabled'] = bool(s.get('appointment_reminder_24h_enabled', False))
         status['reminder_2h_enabled'] = bool(s.get('appointment_reminder_2h_enabled', True))
+        status['reminder_recovery_enabled'] = bool(s.get('appointment_reminder_recovery_enabled', True))
         status['followup_enabled'] = bool(s.get('appointment_followup_enabled', False))
     except Exception:
         pass

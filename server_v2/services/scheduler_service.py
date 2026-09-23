@@ -45,6 +45,7 @@ class SchedulerService:
         self._current_reminder_24h_morning_job = None
         self._current_reminder_24h_afternoon_job = None
         self._current_reminder_2h_job = None
+        self._current_reminder_recovery_job = None
 
     def start(self):
         """Avvia lo scheduler e programma tutti i job"""
@@ -374,19 +375,25 @@ class SchedulerService:
         Schedula i job reminder appuntamenti.
 
         24h: due esecuzioni giornaliere (ore 8 per appuntamenti mattina, ore 14 per pomeriggio).
-             Il dispatch engine decide dinamicamente se mandare split (morning+afternoon) 
+             Il dispatch engine decide dinamicamente se mandare split (morning+afternoon)
              o continuous (tutto insieme nella mattina) basandosi su studio_opening_hours.
         2h:  ogni 30 minuti dalle 7 alle 20.
+        recovery: ogni 30 minuti dalle 7 alle 19, stessa cadenza del 2h. Rete di
+             sicurezza per gli appuntamenti che i job a finestra fissa non
+             possono intercettare (creati dopo l'ultimo giro 24h per domani,
+             o creati a meno di 90 minuti dall'orario per oggi).
         """
         settings = get_automation_settings()
         enabled_24h = settings.get('appointment_reminder_24h_enabled', True)
         enabled_2h = settings.get('appointment_reminder_2h_enabled', True)
+        enabled_recovery = settings.get('appointment_reminder_recovery_enabled', True)
 
         # Rimuovi job esistenti
         for attr, job_id in [
             ('_current_reminder_24h_morning_job', 'appt_reminder_24h_morning'),
             ('_current_reminder_24h_afternoon_job', 'appt_reminder_24h_afternoon'),
             ('_current_reminder_2h_job', 'appt_reminder_2h'),
+            ('_current_reminder_recovery_job', 'appt_reminder_recovery'),
         ]:
             job = getattr(self, attr, None)
             if job:
@@ -454,6 +461,24 @@ class SchedulerService:
             self._current_reminder_2h_job = self.scheduler.add_job(
                 job_2h, CronTrigger(hour='7-19', minute='0,30'),
                 id='appt_reminder_2h', replace_existing=True
+            )
+
+        if enabled_recovery:
+            def job_recovery():
+                from services.appointment_reminder_service import run_missed_whatsapp_reminders
+                try:
+                    run_missed_whatsapp_reminders()
+                except Exception as e:
+                    logger.error(f"[REMINDER RECOVERY] Errore: {e}")
+
+            # Stessa frequenza del 2h ma sfalsata di 15 minuti: la finestra
+            # 'recovery' include anche gli appuntamenti già coperti dal job 2h
+            # (90-150 min prima), quindi sullo stesso minuto i due job
+            # scriverebbero in concorrenza su patient_communications prima che
+            # il controllo anti-duplicati dell'uno veda l'insert dell'altro.
+            self._current_reminder_recovery_job = self.scheduler.add_job(
+                job_recovery, CronTrigger(hour='7-19', minute='15,45'),
+                id='appt_reminder_recovery', replace_existing=True
             )
 
         # Follow-up: ogni ora dalle 7 alle 20

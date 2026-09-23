@@ -810,13 +810,15 @@ def _recovery_message(patient_name: str, ap_date: str, ap_time: str, reminder_ty
 def run_missed_whatsapp_reminders(
     dry_run: bool = False, appointments: Optional[list[dict]] = None,
 ) -> dict:
-    """Recupera i reminder WA saltati dopo un fermo del servizio.
+    """Rete di sicurezza per appuntamenti non coperti dai job a finestra fissa.
 
     Considera soltanto appuntamenti ancora futuri: quelli di domani ricevono il
     reminder 24h (anche se mancano meno di 24 ore), quelli di oggi entro otto
     ore ricevono il reminder "oggi alle". La stessa chiave di deduplicazione
     dei job automatici impedisce di inviare una seconda volta lo stesso tipo.
-    Non viene mai usato l'SMS come fallback: e' un'azione dedicata a WhatsApp.
+    Usa WhatsApp quando disponibile, altrimenti fallback SMS (stesso canale
+    del job normale run_reminders) cosi' da coprire anche i pazienti senza
+    WhatsApp.
     """
     ensure_reminder_tables()
     # Rivalida anche le anteprime: lo stato puo' cambiare prima dell'invio.
@@ -830,6 +832,7 @@ def run_missed_whatsapp_reminders(
         'examined': len(appointments),
         'dry_run': dry_run,
         'sent_wa': 0,
+        'sent_sms': 0,
         'already_sent': 0,
         'confirmed': 0,
         'skipped_no_mobile': [],
@@ -878,26 +881,30 @@ def run_missed_whatsapp_reminders(
             continue
 
         has_wa, _ = check_whatsapp(pid, cell)
-        if not has_wa:
-            stats['skipped_no_whatsapp'].append({'patient_id': pid, 'name': name})
-            continue
-
-        result = send_whatsapp_text(cell, text)
+        if has_wa:
+            result = send_whatsapp_text(cell, text)
+            channel = 'whatsapp'
+        else:
+            result = send_sms_reminder(cell, name, ap_date, ap_time, reminder_type)
+            channel = 'sms'
 
         stato = 'sent' if result.get('success') else 'failed'
         _log_communication(
-            pid, name, cell, 'whatsapp', reminder_type, ap_date, ap_time,
+            pid, name, cell, channel, reminder_type, ap_date, ap_time,
             stato, result.get('message_id', ''),
         )
         if result.get('success'):
-            stats['sent_wa'] += 1
+            if channel == 'whatsapp':
+                stats['sent_wa'] += 1
+            else:
+                stats['sent_sms'] += 1
         else:
             stats['errors'].append({'patient': name, 'error': result.get('error', '')})
 
     if not dry_run:
         _write_log('recovery', {
             'sent_wa': stats['sent_wa'],
-            'sent_sms': 0,
+            'sent_sms': stats['sent_sms'],
             'skipped_fisso': stats['skipped_no_mobile'],
             'no_phone': stats['skipped_no_whatsapp'],
             'errors': stats['errors'],

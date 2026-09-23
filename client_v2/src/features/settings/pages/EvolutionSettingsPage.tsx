@@ -242,18 +242,20 @@ const EvolutionSettingsPage: React.FC = () => {
     setAlert(null)
     try {
       const result = await evolutionService.apiSendMissedWhatsAppReminder(recoveryPreview.snapshot_id, actionIndex)
-      if (result.sent_wa || result.already_sent || result.confirmed) {
+      if (result.sent_wa || result.sent_sms || result.already_sent || result.confirmed) {
         setSentReminderIndexes(current => new Set(current).add(actionIndex))
       }
       setAlert({
         color: result.errors.length ? 'warning' : 'success',
         msg: result.sent_wa
           ? 'Reminder WhatsApp inviato.'
-          : result.already_sent
-            ? 'Reminder gia inviato: nessun duplicato creato.'
-            : result.confirmed
-              ? 'Appuntamento gia confermato: nessun reminder inviato.'
-              : 'Reminder non inviato: il contatto non risulta raggiungibile su WhatsApp.',
+          : result.sent_sms
+            ? 'WhatsApp non disponibile: reminder inviato via SMS.'
+            : result.already_sent
+              ? 'Reminder gia inviato: nessun duplicato creato.'
+              : result.confirmed
+                ? 'Appuntamento gia confermato: nessun reminder inviato.'
+                : 'Reminder non inviato: nessun contatto raggiungibile.',
       })
       await Promise.all([loadStatus(), loadUpcomingReminders()])
     } catch (err: unknown) {

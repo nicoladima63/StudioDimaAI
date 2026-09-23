@@ -46,6 +46,7 @@ export interface MissedReminderRecoveryResult {
   examined: number
   dry_run: boolean
   sent_wa: number
+  sent_sms: number
   already_sent: number
   confirmed: number
   skipped_no_mobile: Array<{ patient_id: string; name: string }>

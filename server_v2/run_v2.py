@@ -223,6 +223,19 @@ def ensure_evolution_running():
         print(f"Evolution API: errore ({e}), continuo senza")
 
 
+def write_restart_reason(instance_dir: Path, reason: str):
+    """
+    Scrive instance/last_restart_reason.txt: exit code 75 e' condiviso da due
+    trigger distinti (deploy via restart.flag, pulsante admin via API) e lo
+    script wrapper (start_server_v2.bat) non ha altrimenti modo di sapere
+    quale dei due ha causato il riavvio che sta per rilanciare.
+    """
+    try:
+        (instance_dir / 'last_restart_reason.txt').write_text(reason, encoding='utf-8')
+    except OSError:
+        pass
+
+
 def start_restart_flag_watcher(flag_path: Path, poll_interval: float = 3.0):
     """
     Sorveglia instance/restart.flag: deploy_v2.bat lo tocca come ultimo passo
@@ -250,6 +263,7 @@ def start_restart_flag_watcher(flag_path: Path, poll_interval: float = 3.0):
                     continue
                 if mtime > baseline:
                     logger.warning("Riavvio richiesto da deploy (restart.flag aggiornato)")
+                    write_restart_reason(flag_path.parent, 'deploy')
                     time.sleep(1)
                     os._exit(75)
             except OSError:

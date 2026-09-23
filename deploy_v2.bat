@@ -431,10 +431,12 @@ echo :restart_loop
 echo echo ==========================================
 echo echo Server in avvio su porta 5001...
 echo echo ==========================================
+echo set "RESTART_REASON=motivo sconosciuto"
+echo if exist instance\last_restart_reason.txt set /p RESTART_REASON=^<instance\last_restart_reason.txt
 echo python run_v2.py --config production --port 5001
 echo set EXIT_CODE=%%ERRORLEVEL%%
 echo if %%EXIT_CODE%% EQU 75 ^(
-echo     echo Riavvio richiesto via API. Attendo 3 secondi...
+echo     echo Riavvio richiesto ^(%%RESTART_REASON%%^). Attendo 3 secondi...
 echo     timeout /t 3 /nobreak ^>nul
 echo     goto restart_loop
 echo ^)

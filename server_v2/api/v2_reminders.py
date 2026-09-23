@@ -33,6 +33,7 @@ def get_reminder_settings():
     return format_response({
         'appointment_reminder_24h_enabled': s.get('appointment_reminder_24h_enabled', True),
         'appointment_reminder_2h_enabled': s.get('appointment_reminder_2h_enabled', True),
+        'appointment_reminder_recovery_enabled': s.get('appointment_reminder_recovery_enabled', True),
         'appointment_followup_enabled': s.get('appointment_followup_enabled', True),
         'appointment_followup_hours_before': s.get('appointment_followup_hours_before', 3),
     })
@@ -49,6 +50,7 @@ def update_reminder_settings():
         fields = [
             'appointment_reminder_24h_enabled',
             'appointment_reminder_2h_enabled',
+            'appointment_reminder_recovery_enabled',
             'appointment_followup_enabled',
             'appointment_followup_hours_before',
         ]
