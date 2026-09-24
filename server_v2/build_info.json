@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
-  "build": 45,
-  "built_at": "2026-09-23T16:52:05",
-  "git_hash": "unknown",
+  "build": 46,
+  "built_at": "2026-09-23T17:59:33",
+  "git_hash": "b4ec33d",
   "env": "production"
 }
