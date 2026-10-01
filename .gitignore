@@ -66,6 +66,10 @@ yarn-error.log*
 !tests/test_materiali_inbox_service.py
 !tests/test_ordini_service.py
 !tests/test_acquisti_storico_extractor.py
+!tools/pensione/test_fatturato_branca.py
+!tools/pensione/test_produzione_personale.py
+!tools/pensione/test_produzione_collaboratori.py
+!tools/pensione/test_margine_operatore.py
 !server_v2/tests/test_whatsapp_verification_cache.py
 !server_v2/tests/test_missed_whatsapp_reminders.py
 

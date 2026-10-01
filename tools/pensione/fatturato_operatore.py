@@ -45,9 +45,9 @@ def digest(path):
     return h.hexdigest()
 
 
-def records(path, wanted):
-    # Only identifiers, numeric fields and dates are needed: strict ASCII.
-    # Text/memo decoding is intentionally outside this extractor's scope.
+def records(path, wanted, encoding='ascii'):
+    # ASCII by default; callers reading character descriptions may opt into cp1252.
+    # Memo fields remain outside this reader's scope.
     with path.open('rb') as stream:
         header = stream.read(32)
         if len(header) != 32:
@@ -74,21 +74,23 @@ def records(path, wanted):
                 raise ValueError('Invalid record')
             if row[:1] == b'*':
                 continue
-            values = [row[fields[k][0]:sum(fields[k])].decode('ascii').strip()
+            values = [row[fields[k][0]:sum(fields[k])].decode(encoding).strip()
                       for k in wanted]
             yield (number, *values)
 
 
-def stage(db, source):
-    paths = {name: source / (name + '.DBF') for name in FIELDS}
+def stage(db, source, fields_by_table=None):
+    fields_by_table = fields_by_table or FIELDS
+    paths = {name: source / (name + '.DBF') for name in fields_by_table}
     before = {name: signature(path) for name, path in paths.items()}
     hashes = {name: digest(path) for name, path in paths.items()}
     db.execute('CREATE TABLE IF NOT EXISTS manifest(name PRIMARY KEY, hash)')
     old = dict(db.execute('SELECT name,hash FROM manifest'))
     counts = {}
     with db:
-        for name, fields in FIELDS.items():
-            if old.get(name) != hashes[name]:
+        for name, fields in fields_by_table.items():
+            existing = [r[1] for r in db.execute(f'PRAGMA table_info({name})')]
+            if old.get(name) != hashes[name] or existing != ['record', *fields]:
                 db.execute(f'DROP TABLE IF EXISTS {name}')
                 db.execute(f'CREATE TABLE {name}(record INTEGER PRIMARY KEY,' +
                            ','.join(f'{f} TEXT' for f in fields) + ')')
@@ -104,10 +106,14 @@ def stage(db, source):
         if any(signature(paths[k]) != before[k] for k in paths):
             raise RuntimeError('Sources changed during staging: retry acquisition')
         db.execute('CREATE UNIQUE INDEX IF NOT EXISTS invoice_id ON FATTURE(DB_CODE)')
-        db.execute('CREATE UNIQUE INDEX IF NOT EXISTS plan_id ON ELENCO(DB_CODE)')
+        if 'ELENCO' in fields_by_table:
+            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS plan_id ON ELENCO(DB_CODE)')
         db.execute('CREATE INDEX IF NOT EXISTS invoice_lines ON VOCIFA(DB_VOFACOD)')
-        db.execute('CREATE INDEX IF NOT EXISTS performance ON PREVENT'
-                   '(DB_PRELCOD,DB_PRONCOD,DB_PRDATA,DB_GUARDIA)')
+        if 'PREVENT' in fields_by_table:
+            db.execute('CREATE INDEX IF NOT EXISTS performance ON PREVENT'
+                       '(DB_PRELCOD,DB_PRONCOD,DB_PRDATA,DB_GUARDIA)')
+        if 'ONORARIO' in fields_by_table:
+            db.execute('CREATE UNIQUE INDEX IF NOT EXISTS service_id ON ONORARIO(DB_CODE)')
     return hashes, counts
 
 
