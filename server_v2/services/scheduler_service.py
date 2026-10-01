@@ -467,7 +467,7 @@ class SchedulerService:
             def job_recovery():
                 from services.appointment_reminder_service import run_missed_whatsapp_reminders
                 try:
-                    run_missed_whatsapp_reminders()
+                    run_missed_whatsapp_reminders(automatic=True)
                 except Exception as e:
                     logger.error(f"[REMINDER RECOVERY] Errore: {e}")
 

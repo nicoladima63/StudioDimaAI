@@ -4,7 +4,7 @@ import {
   CButton, CSpinner, CBadge, CAlert,
   CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell,
-  CRow, CCol,
+  CRow, CCol, CTooltip,
   CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -35,11 +35,13 @@ function channelBadge(channel: string) {
   )
 }
 
-function statoBadge(stato: string) {
+function statoBadge(stato: string, error?: string | null) {
   const map: Record<string, string> = {
     sent: 'primary', confirmed: 'success', cancelled: 'warning', failed: 'danger',
   }
-  return <CBadge color={map[stato] ?? 'secondary'}>{stato}</CBadge>
+  const badge = <CBadge color={map[stato] ?? 'secondary'}>{stato}</CBadge>
+  if (stato !== 'failed' || !error) return badge
+  return <CTooltip content={error}><span>{badge}</span></CTooltip>
 }
 
 function messageTypeBadge(type: RecentComm['type']) {
@@ -627,7 +629,7 @@ const EvolutionSettingsPage: React.FC = () => {
                                     <CTableDataCell className="text-nowrap">{c.appointment_date} {c.appointment_time}</CTableDataCell>
                                     <CTableDataCell>{messageTypeBadge(c.type)}</CTableDataCell>
                                     <CTableDataCell>{channelBadge(c.channel)}</CTableDataCell>
-                                    <CTableDataCell>{statoBadge(c.stato)}</CTableDataCell>
+                                    <CTableDataCell>{statoBadge(c.stato, c.error)}</CTableDataCell>
                                     <CTableDataCell>
                                       {c.channel === 'whatsapp' && (
                                         <CButton color="success" variant="outline" size="sm" onClick={() => handleOpenConversation(c)} title="Vedi conversazione">

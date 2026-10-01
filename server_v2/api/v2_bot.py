@@ -808,7 +808,7 @@ def get_evolution_dashboard_status():
         cur = conn.cursor()
         cur.execute("""
             SELECT id, patient_name, phone, channel, type, stato,
-                   appointment_date, appointment_time, created_at
+                   appointment_date, appointment_time, created_at, error
             FROM patient_communications
             ORDER BY created_at DESC LIMIT 50
         """)

@@ -10,6 +10,7 @@ export interface RecentComm {
   appointment_date: string
   appointment_time: string
   created_at: string
+  error?: string | null
 }
 
 export interface EvoMessage {
