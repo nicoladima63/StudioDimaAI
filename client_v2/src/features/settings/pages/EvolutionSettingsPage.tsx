@@ -86,13 +86,13 @@ interface StatusCardProps {
 function StatusCard({ label, color = 'secondary', detail, icon, action }: StatusCardProps) {
   return (
     <CCard className="text-center">
-      <CCardBody className="py-2 d-flex flex-column gap-2">
+      <CCardBody className="py-2">
         <div className="d-flex align-items-center gap-2">
           <CIcon icon={icon} size="lg" className={`text-${color} flex-shrink-0`} />
-          <div className="fw-semibold small text-truncate">{label}</div>
+          <div className="fw-semibold small text-truncate" style={{ minWidth: 0 }}>{label}</div>
           {detail && <CBadge color={color} className="px-2 py-1 ms-auto">{detail}</CBadge>}
+          {action && <div className="text-nowrap ms-auto">{action}</div>}
         </div>
-        {action && <div className="text-nowrap">{action}</div>}
       </CCardBody>
     </CCard>
   )
@@ -426,12 +426,12 @@ const EvolutionSettingsPage: React.FC = () => {
   // Docker: 2 stati — Avvia / Ferma
   const dockerAction = status ? (
     status.docker_running ? (
-      <CButton size="sm" color="success" className="w-50" onClick={handleStop} disabled={stopping}>
+      <CButton size="sm" color="success"  onClick={handleStop} disabled={stopping}>
         {stopping ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
       </CButton>
     ) : (
-      <CButton size="sm" color="success" className="w-50" onClick={handleSmartStart}
+      <CButton size="sm" color="success"  onClick={handleSmartStart}
         disabled={starting || launchingDesktop}>
         {(starting || launchingDesktop) ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaPlay} className="me-1" />}
         Avvia
@@ -442,12 +442,12 @@ const EvolutionSettingsPage: React.FC = () => {
   // Evolution: 2 stati — Avvia Evolution / Ferma Evolution
   const evolutionAction = status ? (
     status.evolution_reachable ? (
-      <CButton size="sm" color="success" className="w-50" onClick={handleStop} disabled={stopping}>
+      <CButton size="sm" color="success"  onClick={handleStop} disabled={stopping}>
         {stopping ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
       </CButton>
     ) : (
-      <CButton size="sm" color="success" className="w-50" onClick={handleSmartStart}
+      <CButton size="sm" color="success"  onClick={handleSmartStart}
         disabled={starting || launchingDesktop}>
         {(starting || launchingDesktop) ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaPlay} className="me-1" />}
         Avvia
@@ -458,13 +458,13 @@ const EvolutionSettingsPage: React.FC = () => {
   // WhatsApp: 2 stati — Crea istanza / Termina istanza
   const waAction = status ? (
     !status.instance_exists ? (
-      <CButton size="sm" color="success" className="w-50" onClick={handleCreateInstance}
+      <CButton size="sm" color="success"  onClick={handleCreateInstance}
         disabled={creating || !status.evolution_reachable}>
         {creating ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaPlay} className="me-1" />}
         Avvia
       </CButton>
     ) : (
-      <CButton size="sm" color="success" className="w-50" onClick={handleTerminateInstance}
+      <CButton size="sm" color="success"  onClick={handleTerminateInstance}
         disabled={terminating}>
         {terminating ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
@@ -488,7 +488,7 @@ const EvolutionSettingsPage: React.FC = () => {
               {testingReminders ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilCheckCircle} className="me-1" />}
               Test e confronta agenda
             </CButton>
-            <CButton
+            <CButton size="sm"
               color="primary"
               variant="outline"
               onClick={handleSyncHistory}
