@@ -105,6 +105,9 @@ class ProductionConfig(FlaskConfig):
     TESTING = False
     # Default INFO: con WARNING sparivano job, invii push e richieste dal log. Modificabile da .env (LOG_LEVEL).
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO').upper()
+    # Il server gira in una finestra di terminale: senza questo setup_logging non crea il
+    # gestore della console e il terminale resta muto. Disattivabile da .env (LOG_TO_STDOUT=false).
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT', 'true').lower() == 'true'
 
     # Override with environment variables for production
     SECRET_KEY = os.environ.get('SECRET_KEY')
