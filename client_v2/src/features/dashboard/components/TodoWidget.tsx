@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { CCard, CCardBody, CCardHeader, CButton, CBadge, CSpinner } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { cilBell, cilCheckCircle, cilClock, cilArrowRight, cilPlus, cilPencil } from '@coreui/icons';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
-import { todoService, snoozesLeft } from '@/services/api/todos';
+import { todoService, snoozesLeft, todoOriginLink } from '@/services/api/todos';
 import type { Todo } from '@/services/api/todos';
 import TodoModal from './TodoModal';
 import toast from 'react-hot-toast';
 
 const TodoWidget: React.FC = () => {
     const { user } = useAuthStore();
+    const navigate = useNavigate();
     const [todos, setTodos] = useState<Todo[]>([]);
     const [loading, setLoading] = useState(true);
     const [completingId, setCompletingId] = useState<number | null>(null);
@@ -197,6 +198,7 @@ const TodoWidget: React.FC = () => {
                     <div className="d-flex flex-column gap-3">
                         {todos.map((todo) => {
                             const effectiveUrgency = getEffectiveUrgency(todo);
+                            const origin = todoOriginLink(todo);
                             return (
                             <div
                                 key={todo.id}
@@ -234,6 +236,18 @@ const TodoWidget: React.FC = () => {
                                             <small className="text-muted">Descrizione: </small>
                                             <span>{todo.message}</span>
                                         </div>
+                                    )}
+                                    {origin && (
+                                        <CButton
+                                            color="info"
+                                            variant="outline"
+                                            size="sm"
+                                            className="mt-2"
+                                            onClick={() => navigate(origin.path)}
+                                        >
+                                            <CIcon icon={cilArrowRight} className="me-1" size="sm" />
+                                            {origin.label}
+                                        </CButton>
                                     )}
                                 </div>
 

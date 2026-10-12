@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   CNav,
   CNavItem,
@@ -17,6 +18,8 @@ import EmailScopesManager from '../components/EmailScopesManager'
 import EmailRulesManager from '../components/EmailRulesManager'
 import EmailAiConfig from '../components/EmailAiConfig'
 import EmailOAuthSetup from '../components/EmailOAuthSetup'
+import EmailAlertsConfig from '../components/EmailAlertsConfig'
+import { useAuthStore } from '@/store/auth.store'
 import { useEmailStore } from '../store/email.store'
 import type { EmailMessage } from '../types/email.types'
 import type { RulePreset } from '../components/EmailDetail'
@@ -27,6 +30,8 @@ const EmailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0)
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null)
   const [detailVisible, setDetailVisible] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const isAdmin = useAuthStore(state => state.user?.role === 'admin')
   const [rulePreset, setRulePreset] = useState<{ field: string; operator: string; value: string } | null>(null)
 
   const {
@@ -55,6 +60,26 @@ const EmailPage: React.FC = () => {
       fetchScopes()
     }
   }, [authenticated, fetchScopes])
+
+  // Link diretto a una email (da todo e notifiche): /email?message=<id>
+  useEffect(() => {
+    const messageId = searchParams.get('message')
+    if (!messageId || !authenticated) return
+    setSelectedEmail({
+      id: messageId,
+      thread_id: '',
+      subject: '',
+      from_name: '',
+      from_email: '',
+      to: '',
+      date: '',
+      snippet: '',
+      label_ids: [],
+      is_unread: false,
+    })
+    setDetailVisible(true)
+    setSearchParams({}, { replace: true })
+  }, [authenticated, searchParams, setSearchParams])
 
   const [initialLoadDone, setInitialLoadDone] = useState(false)
 
@@ -217,7 +242,10 @@ const EmailPage: React.FC = () => {
             <CTabPane visible={activeTab === 2}>
               <CRow className="g-4">
                 <CCol md={6}>
-                  <EmailOAuthSetup />
+                  <div className="d-flex flex-column gap-4">
+                    <EmailOAuthSetup />
+                    {isAdmin && <EmailAlertsConfig />}
+                  </div>
                 </CCol>
                 <CCol md={6}>
                   <EmailAiConfig />

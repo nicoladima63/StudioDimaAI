@@ -20,10 +20,10 @@ import {
     CPaginationItem,
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilCheckCircle, cilClock, cilPencil, cilTrash, cilPlus, cilFilter } from '@coreui/icons';
+import { cilCheckCircle, cilClock, cilPencil, cilTrash, cilPlus, cilFilter, cilArrowRight } from '@coreui/icons';
 import { useAuthStore } from '@/store/auth.store';
-import { useSearchParams } from 'react-router-dom';
-import { todoService, snoozesLeft } from '@/services/api/todos';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { todoService, snoozesLeft, todoOriginLink } from '@/services/api/todos';
 import type { Todo } from '@/services/api/todos';
 import { userService } from '@/services/api/user.service';
 import type { User } from '@/types';
@@ -32,6 +32,7 @@ import toast from 'react-hot-toast';
 
 const TodosPage: React.FC = () => {
     const { user } = useAuthStore();
+    const navigate = useNavigate();
     const isAdmin = user?.role === 'admin';
 
     const [todos, setTodos] = useState<Todo[]>([]);
@@ -443,6 +444,20 @@ const TodosPage: React.FC = () => {
                                         <CTableDataCell>{formatDate(todo.due_date)}</CTableDataCell>
                                         <CTableDataCell>
                                             <div className="d-flex gap-1">
+                                                {(() => {
+                                                    const origin = todoOriginLink(todo);
+                                                    return origin ? (
+                                                        <CButton
+                                                            color="info"
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            title={origin.label}
+                                                            onClick={() => navigate(origin.path)}
+                                                        >
+                                                            <CIcon icon={cilArrowRight} />
+                                                        </CButton>
+                                                    ) : null;
+                                                })()}
                                                 {user?.id === todo.recipient_id && (
                                                     <>
                                                         {todo.status !== 'completed' && todo.status !== 'archived' && (

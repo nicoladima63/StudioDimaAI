@@ -135,7 +135,7 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, visible, onClose, onCr
     <CModal visible={visible} onClose={onClose} size="xl" scrollable>
       <CModalHeader>
         <CModalTitle className="text-truncate" style={{ maxWidth: '90%' }}>
-          {email?.subject || '(nessun oggetto)'}
+          {email?.subject || detail?.subject || '(nessun oggetto)'}
         </CModalTitle>
       </CModalHeader>
       <CModalBody>

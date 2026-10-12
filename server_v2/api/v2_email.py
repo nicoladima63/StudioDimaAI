@@ -8,7 +8,8 @@ from flask_jwt_extended import jwt_required
 
 from app_v2 import format_response
 from services.email_service import email_service
-from core.exceptions import GmailCredentialsNotFoundError, GmailApiError
+from core.exceptions import GmailCredentialsNotFoundError, GmailApiError, ValidationError
+from utils.auth_utils import roles_required
 
 logger = logging.getLogger(__name__)
 
@@ -568,3 +569,75 @@ def clear_cache():
             message='Errore svuotamento cache',
             state='error'
         ), 500
+
+
+# =============================================================================
+# Avvisi su email importanti (per scopo)
+# =============================================================================
+
+
+def _alert_error(e, message):
+    if isinstance(e, ValidationError):
+        return format_response(success=False, error=str(e), message=str(e), state='error'), 400
+    logger.error(f"{message}: {e}", exc_info=True)
+    return format_response(success=False, error=str(e), message=message, state='error'), 500
+
+
+@email_v2_bp.route('/email/alerts/config', methods=['GET'])
+@jwt_required()
+@roles_required('admin')
+def get_alert_config():
+    """Configurazione avvisi per ogni scopo."""
+    try:
+        from services.email_alert_service import build_email_alert_service
+        return format_response(
+            success=True, data=build_email_alert_service().get_config(), state='success'
+        ), 200
+    except Exception as e:
+        return _alert_error(e, 'Errore recupero configurazione avvisi')
+
+
+@email_v2_bp.route('/email/alerts/config/<int:scope_id>', methods=['PUT'])
+@jwt_required()
+@roles_required('admin')
+def save_alert_config(scope_id):
+    """Salva modalita, destinatario, priorita e scadenza degli avvisi di uno scopo."""
+    try:
+        from services.email_alert_service import build_email_alert_service
+        item = build_email_alert_service().save_config(scope_id, request.get_json() or {})
+        return format_response(
+            success=True, data=item, message='Avviso aggiornato', state='success'
+        ), 200
+    except Exception as e:
+        return _alert_error(e, 'Errore salvataggio avviso')
+
+
+@email_v2_bp.route('/email/alerts/run', methods=['POST'])
+@jwt_required()
+@roles_required('admin')
+def run_alerts():
+    """Esegue subito il controllo; con dry_run elenca cosa scatterebbe senza inviare."""
+    try:
+        from services.email_alert_service import build_email_alert_service
+        data = request.get_json(silent=True) or {}
+        result = build_email_alert_service().run(dry_run=bool(data.get('dry_run', True)), force=True)
+        return format_response(
+            success=True, data=result, message=result.get('message'), state=result['state']
+        ), 200
+    except Exception as e:
+        return _alert_error(e, 'Errore esecuzione avvisi')
+
+
+@email_v2_bp.route('/email/alerts/log', methods=['GET'])
+@jwt_required()
+@roles_required('admin')
+def get_alert_log():
+    """Ultimi avvisi inviati."""
+    try:
+        from services.email_alert_service import build_email_alert_service
+        limit = min(request.args.get('limit', 20, type=int), 100)
+        return format_response(
+            success=True, data=build_email_alert_service().get_recent_alerts(limit), state='success'
+        ), 200
+    except Exception as e:
+        return _alert_error(e, 'Errore recupero registro avvisi')

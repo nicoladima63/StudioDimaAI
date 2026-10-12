@@ -69,6 +69,8 @@ class TodoRepository(BaseRepository):
                     ('reminder_count', "INTEGER DEFAULT 0"),
                     ('last_reminder_at', "TEXT"),
                     ('snooze_count', "INTEGER DEFAULT 0"),
+                    # Id del messaggio Gmail da cui nasce il todo (origine "email")
+                    ('related_email_id', "TEXT"),
                 ):
                     if column not in columns:
                         cursor.execute(f"ALTER TABLE todo_messages ADD COLUMN {column} {ddl}")

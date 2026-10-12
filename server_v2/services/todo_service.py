@@ -1,7 +1,7 @@
 
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from core.database_manager import DatabaseManager
 from core.exceptions import ServiceError, ValidationError
@@ -9,6 +9,22 @@ from repositories.todo_repository import MAX_SNOOZES, TodoRepository
 from services.base_service import BaseService
 
 logger = logging.getLogger(__name__)
+
+
+def clamp_phase_due_date(due_date: str, today: Optional[date] = None) -> str:
+    """
+    Scadenza del todo di una fase: la consegna della lavorazione, ma mai nel passato.
+    Se la lavorazione e' in ritardo la fase che si attiva oggi scade oggi, altrimenti
+    il todo nascerebbe gia' scaduto e i richiami partirebbero al primo giro.
+    Un valore illeggibile resta com'e'.
+    """
+    try:
+        due = datetime.strptime(str(due_date)[:10], '%Y-%m-%d').date()
+    except ValueError:
+        return due_date
+    today = today or date.today()
+    return today.isoformat() if due < today else due_date
+
 
 class TodoService(BaseService):
     """
@@ -32,7 +48,8 @@ class TodoService(BaseService):
         related_task_id: int = None,
         related_step_id: int = None,
         notification_message: str = None,
-        notification_link: str = None
+        notification_link: str = None,
+        related_email_id: str = None
     ) -> Dict[str, Any]:
         """
         Create a new todo message.
@@ -62,6 +79,7 @@ class TodoService(BaseService):
                 'type': type,
                 'related_task_id': related_task_id,
                 'related_step_id': related_step_id,
+                'related_email_id': related_email_id,
                 'status': 'pending',
                 'urgency_level': 'normal'
             }
@@ -105,6 +123,8 @@ class TodoService(BaseService):
             due_date = task.get('due_date')
             if not due_date:
                 due_date = (datetime.now() + timedelta(days=7)).isoformat()
+            else:
+                due_date = clamp_phase_due_date(due_date)
             
             subject = f"Nuova fase: {step['name']}"
             message = f"Hai una nuova fase da completare per il task '{task.get('description', 'N/A')}'"

@@ -17,7 +17,7 @@ import {
     CCol,
 } from '@coreui/react';
 import { useAuthStore } from '@/store/auth.store';
-import { todoService } from '@/services/api/todos';
+import { todoService, todoOriginLink } from '@/services/api/todos';
 import type { Todo } from '@/services/api/todos';
 import { userService } from '@/services/api/user.service';
 import type { User } from '@/types';
@@ -90,16 +90,14 @@ const TodoModal: React.FC<TodoModalProps> = ({ visible, onClose, onSaved, editTo
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    // Solo i todo nati da una lavorazione hanno un'origine a cui rimandare;
-    // i messaggi diretti tra utenti non hanno related_task_id e non mostrano nulla.
-    const originTaskId = isEditing ? editTodo?.related_task_id : undefined;
-    const originStepId = isEditing ? editTodo?.related_step_id : undefined;
+    // Solo i todo nati da una lavorazione o da un'email hanno un'origine a cui rimandare;
+    // i messaggi diretti tra utenti non ne hanno e non mostrano nulla.
+    const origin = isEditing && editTodo ? todoOriginLink(editTodo) : null;
 
     const handleGoToOrigin = () => {
-        if (!originTaskId) return;
-        const query = originStepId ? `?step=${originStepId}` : '';
+        if (!origin) return;
         onClose();
-        navigate(`/works/${originTaskId}${query}`);
+        navigate(origin.path);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -163,11 +161,11 @@ const TodoModal: React.FC<TodoModalProps> = ({ visible, onClose, onSaved, editTo
             </CModalHeader>
             <CForm onSubmit={handleSubmit}>
                 <CModalBody>
-                    {originTaskId && (
+                    {origin && (
                         <CRow className="mb-3">
                             <CCol md={12}>
                                 <CButton color="info" variant="outline" size="sm" onClick={handleGoToOrigin}>
-                                    {originStepId ? 'Vai alla fase' : 'Vai alla lavorazione'}
+                                    {origin.label}
                                 </CButton>
                             </CCol>
                         </CRow>

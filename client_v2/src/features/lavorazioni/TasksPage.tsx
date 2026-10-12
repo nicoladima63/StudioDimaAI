@@ -37,6 +37,14 @@ import { useAuthStore } from '../../store/auth.store';
 
 import { useNavigate } from 'react-router-dom';
 
+// Oggi come 'YYYY-MM-DD' nel fuso del browser (toISOString darebbe il giorno UTC)
+const todayIso = (): string => {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${now.getFullYear()}-${month}-${day}`;
+};
+
 const TasksPage: React.FC = () => {
     const navigate = useNavigate();
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -128,6 +136,10 @@ const TasksPage: React.FC = () => {
             toast.error('Seleziona un paziente e una lavorazione');
             return;
         }
+        if (newTask.due_date && newTask.due_date < todayIso()) {
+            toast.error('La data di consegna non puo essere precedente a oggi');
+            return;
+        }
 
         setIsSaving(true);
         try {
@@ -141,9 +153,9 @@ const TasksPage: React.FC = () => {
             toast.success('Lavorazione creata con successo');
             setModalVisible(false);
             fetchTasks();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating task:', error);
-            toast.error('Errore durante la creazione della lavorazione');
+            toast.error(error?.response?.data?.error || 'Errore durante la creazione della lavorazione');
         } finally {
             setIsSaving(false);
         }
@@ -444,6 +456,7 @@ const TasksPage: React.FC = () => {
                             <CFormLabel>Data Scadenza (Opzionale)</CFormLabel>
                             <CFormInput
                                 type="date"
+                                min={todayIso()}
                                 value={newTask.due_date}
                                 onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
                             />

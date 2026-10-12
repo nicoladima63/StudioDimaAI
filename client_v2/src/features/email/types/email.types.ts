@@ -47,6 +47,63 @@ export interface EmailScope {
   created_at: string
 }
 
+export type EmailAlertMode = 'none' | 'alert' | 'todo'
+export type EmailAlertPriority = 'low' | 'medium' | 'high' | 'urgent'
+
+export interface EmailAlertConfigItem {
+  scope_id: number
+  scope_label: string
+  scope_color: string | null
+  scope_active: boolean
+  mode: EmailAlertMode
+  recipient_id: number | null
+  recipient_username: string | null
+  priority: EmailAlertPriority
+  due_days: number
+}
+
+export interface EmailAlertConfig {
+  items: EmailAlertConfigItem[]
+  default_recipient_id: number | null
+}
+
+export interface EmailAlertConfigPayload {
+  mode: EmailAlertMode
+  recipient_id: number | null
+  priority: EmailAlertPriority
+  due_days: number
+}
+
+export interface EmailAlertPreviewItem {
+  message_id: string
+  mode: EmailAlertMode
+  scope_label: string
+  sender: string
+  subject: string
+}
+
+export interface EmailAlertRunResult {
+  state: 'success' | 'warning' | 'error'
+  message: string
+  checked: number
+  matched: number
+  alerts: number
+  todos: number
+  failed: number
+  would_send: EmailAlertPreviewItem[]
+}
+
+export interface EmailAlertLogItem {
+  message_id: string
+  scope_label: string | null
+  action: 'alert' | 'todo'
+  recipient_username: string | null
+  todo_id: number | null
+  subject: string | null
+  sender: string | null
+  processed_at: number
+}
+
 export interface EmailFilterRule {
   id: number
   scope_id: number

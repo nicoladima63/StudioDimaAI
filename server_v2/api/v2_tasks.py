@@ -1,6 +1,7 @@
 
 from flask import Blueprint, request, jsonify
 from core.database_manager import get_database_manager
+from core.exceptions import ValidationError
 from services.work_service import WorkService
 import logging
 
@@ -73,7 +74,9 @@ def create_task():
         )
         
         return jsonify({'success': True, 'data': new_task}), 201
-        
+
+    except ValidationError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
     except Exception as e:
         logger.error(f"Error creating task: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500

@@ -8,6 +8,11 @@ import type {
   EmailListResponse,
   RelevantEmailsResponse,
   GmailLabel,
+  EmailAlertConfig,
+  EmailAlertConfigItem,
+  EmailAlertConfigPayload,
+  EmailAlertRunResult,
+  EmailAlertLogItem,
 } from '../types/email.types'
 
 interface ApiResponse<T = unknown> {
@@ -273,6 +278,65 @@ export const emailService = {
       return {
         success: false,
         error: error.response?.data?.error || 'Errore test classificazione AI',
+        state: 'error',
+      }
+    }
+  },
+
+  // =========================================================================
+  // Avvisi su email importanti
+  // =========================================================================
+
+  async apiGetAlertConfig(): Promise<ApiResponse<EmailAlertConfig>> {
+    try {
+      const response = await apiClient.get('/email/alerts/config')
+      return response.data
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Errore recupero configurazione avvisi',
+        state: 'error',
+      }
+    }
+  },
+
+  async apiSaveAlertConfig(
+    scopeId: number,
+    data: EmailAlertConfigPayload
+  ): Promise<ApiResponse<EmailAlertConfigItem>> {
+    try {
+      const response = await apiClient.put(`/email/alerts/config/${scopeId}`, data)
+      return response.data
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Errore salvataggio avviso',
+        state: 'error',
+      }
+    }
+  },
+
+  async apiRunAlerts(dryRun: boolean): Promise<ApiResponse<EmailAlertRunResult>> {
+    try {
+      const response = await apiClient.post('/email/alerts/run', { dry_run: dryRun })
+      return response.data
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Errore controllo avvisi',
+        state: 'error',
+      }
+    }
+  },
+
+  async apiGetAlertLog(limit = 10): Promise<ApiResponse<EmailAlertLogItem[]>> {
+    try {
+      const response = await apiClient.get('/email/alerts/log', { params: { limit } })
+      return response.data
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Errore recupero registro avvisi',
         state: 'error',
       }
     }

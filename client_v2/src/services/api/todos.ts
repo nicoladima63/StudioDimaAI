@@ -9,9 +9,10 @@ export interface Todo {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   due_date?: string;
   status: 'pending' | 'read' | 'completed' | 'archived';
-  type: 'general' | 'approval' | 'request' | 'notification';
+  type: 'general' | 'approval' | 'request' | 'notification' | 'email';
   related_task_id?: number;
   related_step_id?: number;
+  related_email_id?: string | null;
   urgency_level: 'normal' | 'attention' | 'urgent' | 'critical' | 'lowered';
   reminder_count?: number;
   last_reminder_at?: string | null;
@@ -19,6 +20,21 @@ export interface Todo {
   created_at: string;
   updated_at: string;
 }
+
+// Dove porta un todo: la fase della lavorazione o l'email da cui e' nato (null = nessuna origine)
+export const todoOriginLink = (todo: Todo): { label: string; path: string } | null => {
+  if (todo.related_task_id) {
+    const query = todo.related_step_id ? `?step=${todo.related_step_id}` : '';
+    return {
+      label: todo.related_step_id ? 'Vai alla fase' : 'Vai alla lavorazione',
+      path: `/works/${todo.related_task_id}${query}`,
+    };
+  }
+  if (todo.related_email_id) {
+    return { label: "Vai all'email", path: `/email?message=${encodeURIComponent(todo.related_email_id)}` };
+  }
+  return null;
+};
 
 // Posticipi consentiti per ogni todo: allineato a MAX_SNOOZES del backend (todo_repository.py)
 export const MAX_SNOOZES = 5;

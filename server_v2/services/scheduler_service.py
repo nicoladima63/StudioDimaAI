@@ -42,6 +42,7 @@ class SchedulerService:
         self._current_recall_job = None
         self._current_calendar_sync_job = None
         self._current_todo_escalation_job = None
+        self._current_email_alert_job = None
         self._current_reminder_24h_morning_job = None
         self._current_reminder_24h_afternoon_job = None
         self._current_reminder_2h_job = None
@@ -58,6 +59,7 @@ class SchedulerService:
         self.schedule_recall_job()
         self.schedule_calendar_sync_job()
         self.schedule_todo_escalation_job()
+        self.schedule_email_alert_job()
         self.schedule_appointment_reminders()
         
     def shutdown(self):
@@ -377,6 +379,49 @@ class SchedulerService:
     def reschedule_todo_escalation_job(self):
         """Riprogramma job escalation todo quando cambia la configurazione"""
         self.schedule_todo_escalation_job()
+
+    def schedule_email_alert_job(self):
+        """
+        Schedula il controllo delle email importanti (avvisi per scopo).
+
+        Gira ogni 10 minuti dalle 8 alle 19, sui minuti :04 :14 :24 :34 :44 :54 (nessuna
+        coincidenza con i job dei reminder e dei richiami). Il servizio verifica da solo
+        gli orari dello studio, quindi fuori orario non fa nulla e le email arrivate nel
+        frattempo vengono riprese al primo giro utile.
+        """
+        settings = get_automation_settings()
+        enabled = settings.get("email_alerts_enabled", True)
+
+        if self._current_email_alert_job:
+            try:
+                self.scheduler.remove_job(self._current_email_alert_job.id)
+            except Exception:
+                pass
+            self._current_email_alert_job = None
+
+        if not enabled:
+            logger.info("Avvisi email disattivati.")
+            return
+
+        def job():
+            """Passaggio del controllo email"""
+            try:
+                from services.email_alert_service import build_email_alert_service
+
+                result = build_email_alert_service().run()
+                if result.get('alerts') or result.get('todos') or result.get('failed'):
+                    logger.info(f"[EMAIL ALERTS] {result.get('message')}")
+                elif result.get('state') == 'warning':
+                    logger.warning(f"[EMAIL ALERTS] {result.get('message')}")
+
+            except Exception as e:
+                logger.error(f"[EMAIL ALERTS] Errore esecuzione job: {e}", exc_info=True)
+
+        trigger = CronTrigger(hour='8-19', minute='4,14,24,34,44,54')
+        self._current_email_alert_job = self.scheduler.add_job(
+            job, trigger, id="email_alert_job_v2", replace_existing=True
+        )
+        logger.info("Avvisi email schedulati ogni 10 minuti dalle 08:04 alle 19:54.")
 
     def schedule_appointment_reminders(self):
         """

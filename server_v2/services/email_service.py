@@ -97,6 +97,47 @@ class EmailService:
             logger.error(f"Failed to get emails: {e}")
             raise GmailApiError(f"Failed to get emails: {str(e)}")
 
+    def list_inbox_message_ids(self, since_epoch: int, max_pages: int = 3,
+                               page_size: int = 100) -> List[str]:
+        """Id delle email ricevute dopo since_epoch (esclusa la posta inviata da noi)."""
+        try:
+            service = self._get_gmail_service()
+            params = {
+                'userId': 'me',
+                'maxResults': page_size,
+                'q': f"in:inbox -from:me after:{int(since_epoch)}",
+            }
+            ids: List[str] = []
+            for _ in range(max_pages):
+                results = service.users().messages().list(**params).execute()
+                ids.extend(m['id'] for m in results.get('messages', []))
+                next_token = results.get('nextPageToken')
+                if not next_token:
+                    break
+                params['pageToken'] = next_token
+            return ids
+        except GmailCredentialsNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to list inbox message ids: {e}")
+            raise GmailApiError(f"Failed to list inbox message ids: {str(e)}")
+
+    def get_message_summaries(self, message_ids: List[str]) -> List[Dict[str, Any]]:
+        """Riassunto (mittente, oggetto, anteprima) di una lista di email."""
+        try:
+            service = self._get_gmail_service()
+            summaries = []
+            for message_id in message_ids:
+                summary = self._get_message_summary(service, message_id)
+                if summary:
+                    summaries.append(summary)
+            return summaries
+        except GmailCredentialsNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get message summaries: {e}")
+            raise GmailApiError(f"Failed to get message summaries: {str(e)}")
+
     def get_email_detail(self, message_id: str) -> Dict[str, Any]:
         """Get full detail of a single email."""
         try:

@@ -2,7 +2,9 @@
 import logging
 import json
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import date, datetime
+
+import pytz
 
 from core.database_manager import DatabaseManager
 from core.exceptions import ServiceError, ValidationError
@@ -11,6 +13,26 @@ from repositories.task_repository import TaskRepository
 from services.base_service import BaseService
 
 logger = logging.getLogger(__name__)
+
+ROME_TZ = pytz.timezone('Europe/Rome')
+
+
+def validate_task_due_date(due_date: Any, today: Optional[date] = None) -> None:
+    """
+    La consegna di una lavorazione e' facoltativa, ma se c'e' non puo' cadere prima di oggi:
+    il todo della fase nascerebbe gia' scaduto e i richiami partirebbero subito.
+    Conta solo il giorno ('YYYY-MM-DD' o datetime ISO).
+    """
+    if not due_date:
+        return
+    try:
+        due = datetime.strptime(str(due_date)[:10], '%Y-%m-%d').date()
+    except ValueError:
+        raise ValidationError("Data di consegna non valida")
+    today = today or datetime.now(ROME_TZ).date()
+    if due < today:
+        raise ValidationError("La data di consegna non puo essere precedente a oggi")
+
 
 class WorkService(BaseService):
     """
@@ -68,6 +90,7 @@ class WorkService(BaseService):
         Create a new Task instance from a Work template.
         Copies all StepTemplates to Steps.
         """
+        validate_task_due_date(due_date)
         try:
             # 1. Get Work Template
             work = self.work_repository.get_work_with_steps(work_id)
@@ -163,7 +186,9 @@ class WorkService(BaseService):
 
             logger.info(f"Created Task {task['id']} for Patient {patient_id} from Work {work_id}")
             return task
-            
+
+        except ValidationError:
+            raise
         except Exception as e:
             logger.error(f"Failed to create task from work: {e}")
             raise ServiceError(f"Failed to create task: {str(e)}")
