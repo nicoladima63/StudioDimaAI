@@ -103,8 +103,9 @@ class ProductionConfig(FlaskConfig):
     """Production configuration with security hardening."""
     DEBUG = False
     TESTING = False
-    LOG_LEVEL = 'WARNING'
-    
+    # Default INFO: con WARNING sparivano job, invii push e richieste dal log. Modificabile da .env (LOG_LEVEL).
+    LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO').upper()
+
     # Override with environment variables for production
     SECRET_KEY = os.environ.get('SECRET_KEY')
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
