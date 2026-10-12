@@ -12,6 +12,13 @@ logger = logging.getLogger(__name__)
 push_bp = Blueprint('push_v2', __name__)
 
 
+@push_bp.after_request
+def log_push_request(response):
+    """Traccia ogni richiesta push, compresi i rifiuti JWT (401/422) che altrimenti non lasciano log."""
+    logger.info(f"Push API {request.method} {request.path} -> {response.status_code}")
+    return response
+
+
 @push_bp.route('/push/subscribe', methods=['POST'])
 @jwt_required()
 def subscribe():
@@ -103,6 +110,44 @@ def unsubscribe():
 
     except Exception as e:
         logger.error(f"Error in push unsubscribe: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@push_bp.route('/push/status', methods=['POST'])
+@jwt_required()
+def subscription_status():
+    """Tell whether the server holds the given browser subscription for the current user."""
+    try:
+        from app_v2 import push_service
+
+        if not push_service:
+            return jsonify({
+                'success': False,
+                'error': 'Push notifications not configured'
+            }), 503
+
+        data = request.json or {}
+        endpoint = data.get('endpoint')
+
+        if not endpoint:
+            return jsonify({
+                'success': False,
+                'error': 'endpoint is required'
+            }), 400
+
+        user = get_jwt_identity()
+        user_id = user['id'] if isinstance(user, dict) else user
+
+        return jsonify({
+            'success': True,
+            'subscribed': push_service.is_subscribed(user_id, endpoint)
+        })
+
+    except Exception as e:
+        logger.error(f"Error in push status: {e}")
         return jsonify({
             'success': False,
             'error': str(e)

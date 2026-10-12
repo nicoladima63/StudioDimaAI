@@ -15,8 +15,7 @@ import CIcon from '@coreui/icons-react'
 import { useAuthStore } from '@/store/auth.store'
 import NotificationBell from '@/components/ui/NotificationBell'
 import PushNotificationToggle from '@/components/PushNotificationToggle'
-import { useState } from 'react'
-import { CToast, CToastBody, CToastClose, CToaster, CButton, CTooltip } from '@coreui/react'
+import toast from 'react-hot-toast'
 import pushService from '@/services/pushService'
 import { cilPaperPlane } from '@coreui/icons'
 import TheoreticalModeToggle from '@/components/TheoreticalModeToggle'
@@ -24,11 +23,13 @@ import TheoreticalModeToggle from '@/components/TheoreticalModeToggle'
 const Header: React.FC = () => {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
-  const [toast, setToast] = useState<{ message: string; color: string } | null>(null)
 
   const showToast = (message: string, color: 'success' | 'danger') => {
-    setToast({ message, color })
-    setTimeout(() => setToast(null), 3000)
+    if (color === 'success') {
+      toast.success(message)
+    } else {
+      toast.error(message)
+    }
   }
 
   const handleLogout = () => {
@@ -124,17 +125,6 @@ const Header: React.FC = () => {
           </CDropdownMenu>
         </CDropdown>
       </div>
-
-      {toast && (
-        <CToaster placement="top-end" className="p-3">
-          <CToast autohide={true} visible={true} color={toast.color}>
-            <CToastBody>
-              {toast.message}
-              <CToastClose className="me-2 m-auto" />
-            </CToastBody>
-          </CToast>
-        </CToaster>
-      )}
     </>
   )
 }
