@@ -42,6 +42,34 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         checkSubscription();
     }, [isSupported]);
 
+    // Follow permission changes made from the browser settings while the app is open
+    useEffect(() => {
+        if (!isSupported) return;
+
+        const refreshPermission = () => {
+            setPermission(pushService.getPermission());
+            pushService.isSubscribed().then(setIsSubscribed).catch(() => undefined);
+        };
+
+        let permissionStatus: PermissionStatus | null = null;
+        navigator.permissions
+            ?.query({ name: 'notifications' })
+            .then((status) => {
+                permissionStatus = status;
+                status.onchange = refreshPermission;
+            })
+            .catch(() => undefined);
+
+        window.addEventListener('focus', refreshPermission);
+
+        return () => {
+            window.removeEventListener('focus', refreshPermission);
+            if (permissionStatus) {
+                permissionStatus.onchange = null;
+            }
+        };
+    }, [isSupported]);
+
     // Subscribe to push notifications
     const subscribe = useCallback(async () => {
         setIsLoading(true);

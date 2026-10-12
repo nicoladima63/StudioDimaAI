@@ -13,6 +13,31 @@ export interface PushSubscriptionData {
     };
 }
 
+// Timeout per passaggio: senza, un passaggio bloccato lascia l'utente senza alcun feedback
+const PERMISSION_TIMEOUT_MS = 60000;
+const SERVICE_WORKER_TIMEOUT_MS = 15000;
+const PUSH_SUBSCRIBE_TIMEOUT_MS = 20000;
+const STATUS_CHECK_TIMEOUT_MS = 10000;
+
+/**
+ * Reject with the given message if the promise does not settle in time
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(message)), ms);
+        promise.then(
+            (value) => {
+                clearTimeout(timer);
+                resolve(value);
+            },
+            (error) => {
+                clearTimeout(timer);
+                reject(error);
+            }
+        );
+    });
+}
+
 /**
  * Convert VAPID public key from base64 to Uint8Array
  */
@@ -94,11 +119,14 @@ class PushService {
                 { scope: '/' }
             );
 
-            console.log('Service Worker registered:', registration);
             this.serviceWorkerRegistration = registration;
 
             // Wait for service worker to be ready
-            await navigator.serviceWorker.ready;
+            await withTimeout(
+                navigator.serviceWorker.ready,
+                SERVICE_WORKER_TIMEOUT_MS,
+                'Service worker non attivo: ricarica la pagina e riprova'
+            );
 
             return registration;
         } catch (error) {
@@ -121,75 +149,122 @@ class PushService {
     }
 
     /**
+     * Convert the server VAPID key (standard base64, DER or raw EC point) to the raw EC point
+     */
+    private async getApplicationServerKey(): Promise<Uint8Array<ArrayBuffer>> {
+        const vapidPublicKeyBase64 = await this.getVapidPublicKey();
+        // Decode from standard base64 directly using browser API
+        const binaryString = window.atob(vapidPublicKeyBase64);
+        const key = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            key[i] = binaryString.charCodeAt(i);
+        }
+
+        if (key.length === 91 && key[0] === 0x30) {
+            // DER-encoded key: extract the 65-byte EC point (starts at byte 26)
+            return key.slice(26, 91);
+        }
+        if (key.length === 65 && key[0] === 0x04) {
+            // Already raw EC point format
+            return key;
+        }
+        throw new Error(`Invalid VAPID key format: ${key.length} bytes starting with 0x${key[0].toString(16)}`);
+    }
+
+    /**
+     * Create the browser subscription, replacing a stale one made with a different key
+     */
+    private async createBrowserSubscription(
+        registration: ServiceWorkerRegistration,
+        applicationServerKey: Uint8Array<ArrayBuffer>
+    ): Promise<PushSubscription> {
+        const subscribe = () => withTimeout(
+            registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey
+            }),
+            PUSH_SUBSCRIBE_TIMEOUT_MS,
+            'Il browser non riesce a contattare il servizio push (controlla rete, DNS o firewall)'
+        );
+
+        try {
+            return await subscribe();
+        } catch (error) {
+            // Esiste una sottoscrizione fatta con un'altra chiave VAPID: va annullata prima
+            if (error instanceof DOMException && error.name === 'InvalidStateError') {
+                const existing = await registration.pushManager.getSubscription();
+                if (existing) {
+                    await existing.unsubscribe();
+                    return await subscribe();
+                }
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Send a browser subscription to the server
+     */
+    private async saveSubscription(subscription: PushSubscription): Promise<PushSubscriptionData> {
+        const subscriptionJSON = subscription.toJSON();
+        if (!subscriptionJSON.endpoint || !subscriptionJSON.keys?.p256dh || !subscriptionJSON.keys?.auth) {
+            throw new Error('Sottoscrizione del browser incompleta');
+        }
+
+        const subscriptionData: PushSubscriptionData = {
+            endpoint: subscriptionJSON.endpoint,
+            keys: {
+                p256dh: subscriptionJSON.keys.p256dh,
+                auth: subscriptionJSON.keys.auth
+            }
+        };
+
+        try {
+            await apiClient.post('/push/subscribe', {
+                subscription: subscriptionData
+            });
+        } catch (error) {
+            const detail = (error as { message?: string })?.message || 'errore sconosciuto';
+            throw new Error(`Sottoscrizione creata nel browser ma non salvata sul server: ${detail}`);
+        }
+
+        return subscriptionData;
+    }
+
+    /**
      * Subscribe to push notifications
      */
     async subscribe(): Promise<PushSubscriptionData> {
         // 1. Check support
         if (!this.isSupported()) {
-            throw new Error('Push notifications not supported');
+            throw new Error('Notifiche push non supportate da questo browser');
         }
 
         // 2. Request permission
-        const permission = await this.requestPermission();
+        const permission = await withTimeout(
+            this.requestPermission(),
+            PERMISSION_TIMEOUT_MS,
+            'Nessuna risposta alla richiesta di permesso del browser'
+        );
+        if (permission === 'denied') {
+            throw new Error('Permesso notifiche negato: abilitalo dalle impostazioni del sito');
+        }
         if (permission !== 'granted') {
-            throw new Error('Notification permission denied');
+            throw new Error('Permesso notifiche non concesso: conferma la richiesta del browser');
         }
 
         // 3. Register service worker if not already registered
         if (!this.serviceWorkerRegistration) {
             await this.registerServiceWorker();
         }
+        const registration = this.serviceWorkerRegistration!;
 
-        // 4. Get VAPID public key from server (in standard base64 format)
-        const vapidPublicKeyBase64 = await this.getVapidPublicKey();
-        // Decode from standard base64 directly using browser API
-        const binaryString = window.atob(vapidPublicKeyBase64);
-        const applicationServerKey = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            applicationServerKey[i] = binaryString.charCodeAt(i);
-        }
+        // 4. Get VAPID key from server and create the browser subscription
+        const applicationServerKey = await this.getApplicationServerKey();
+        const subscription = await this.createBrowserSubscription(registration, applicationServerKey);
 
-        // Handle VAPID key format (DER vs raw EC point)
-        let subscription: PushSubscription;
-
-        if (applicationServerKey.length === 91 && applicationServerKey[0] === 0x30) {
-            // DER-encoded key: extract the 65-byte EC point (starts at byte 26)
-            const ecPoint = applicationServerKey.slice(26, 91);
-            console.log('Using DER-encoded VAPID key, extracting EC point');
-
-            subscription = await this.serviceWorkerRegistration!.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: ecPoint
-            });
-        } else if (applicationServerKey.length === 65 && applicationServerKey[0] === 0x04) {
-            // Already raw EC point format
-            console.log('Using raw EC point VAPID key');
-
-            subscription = await this.serviceWorkerRegistration!.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: applicationServerKey
-            });
-        } else {
-            throw new Error(`Invalid VAPID key format: ${applicationServerKey.length} bytes starting with 0x${applicationServerKey[0].toString(16)}`);
-        }
-
-        // 6. Convert subscription to our format
-        const subscriptionJSON = subscription.toJSON();
-        const subscriptionData: PushSubscriptionData = {
-            endpoint: subscriptionJSON.endpoint!,
-            keys: {
-                p256dh: subscriptionJSON.keys!.p256dh!,
-                auth: subscriptionJSON.keys!.auth!
-            }
-        };
-
-        // 7. Send subscription to server
-        await apiClient.post('/push/subscribe', {
-            subscription: subscriptionData
-        });
-
-        console.log('Successfully subscribed to push notifications');
-        return subscriptionData;
+        // 5. Send subscription to server
+        return await this.saveSubscription(subscription);
     }
 
     /**
@@ -210,7 +285,6 @@ class PushService {
         const subscription = await this.serviceWorkerRegistration.pushManager.getSubscription();
 
         if (!subscription) {
-            console.log('No active push subscription found');
             return;
         }
 
@@ -222,12 +296,12 @@ class PushService {
         await apiClient.post('/push/unsubscribe', {
             endpoint: subscriptionJSON.endpoint
         });
-
-        console.log('Successfully unsubscribed from push notifications');
     }
 
     /**
-     * Check if user is currently subscribed
+     * Check if user is currently subscribed.
+     * The browser subscription is only valid if the server holds it too: when the browser
+     * has one that the server lost, it is sent again so the two sides stay aligned.
      */
     async isSubscribed(): Promise<boolean> {
         if (!this.isSupported()) {
@@ -236,7 +310,11 @@ class PushService {
 
         try {
             // Wait for service worker to be ready
-            await navigator.serviceWorker.ready;
+            await withTimeout(
+                navigator.serviceWorker.ready,
+                STATUS_CHECK_TIMEOUT_MS,
+                'Service worker non attivo'
+            );
 
             const registration = await navigator.serviceWorker.getRegistration();
             if (!registration) {
@@ -244,9 +322,42 @@ class PushService {
             }
 
             const subscription = await registration.pushManager.getSubscription();
-            return subscription !== null;
+            if (!subscription) {
+                return false;
+            }
+
+            return await this.ensureSavedOnServer(subscription);
         } catch (error) {
             console.error('Error checking subscription status:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Make sure the server holds the given browser subscription
+     */
+    private async ensureSavedOnServer(subscription: PushSubscription): Promise<boolean> {
+        let savedOnServer: boolean;
+        try {
+            const response = await apiClient.post('/push/status', {
+                endpoint: subscription.endpoint
+            });
+            savedOnServer = Boolean(response.data.subscribed);
+        } catch (error) {
+            // Verifica impossibile (rete, server non raggiungibile): ci si fida del browser
+            console.error('Error verifying subscription on server:', error);
+            return true;
+        }
+
+        if (savedOnServer) {
+            return true;
+        }
+
+        try {
+            await this.saveSubscription(subscription);
+            return true;
+        } catch (error) {
+            console.error('Error re-syncing subscription with server:', error);
             return false;
         }
     }
@@ -277,7 +388,6 @@ class PushService {
      */
     async sendTestNotification(): Promise<void> {
         await apiClient.post('/push/test');
-        console.log('Test notification sent');
     }
 }
 

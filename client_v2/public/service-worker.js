@@ -32,7 +32,10 @@ self.addEventListener('push', (event) => {
             body: data.body || 'Hai una nuova notifica',
             icon: data.icon || '/vite.svg',
             badge: data.badge || '/vite.svg',
-            tag: data.tag || 'default-notification',
+            // Tag univoco se assente: con un tag fisso le notifiche si sostituirebbero a vicenda in silenzio
+            tag: data.tag || ('push-' + Date.now()),
+            // Una notifica con tag gia' presente deve comunque segnalarsi di nuovo
+            renotify: true,
             data: {
                 url: data.data?.url || '/',
                 timestamp: Date.now()
@@ -43,7 +46,11 @@ self.addEventListener('push', (event) => {
         };
 
         event.waitUntil(
-            self.registration.showNotification(data.title || 'Studio Dima AI', options)
+            self.registration
+                .showNotification(data.title || 'Studio Dima AI', options)
+                .catch((error) => {
+                    console.error('showNotification failed:', error);
+                })
         );
     } catch (error) {
         console.error('Error processing push notification:', error);
