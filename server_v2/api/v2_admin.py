@@ -55,6 +55,9 @@ def restart_server():
     logger.warning("Riavvio server richiesto via API")
 
     def _delayed_exit():
+        from run_v2 import write_restart_reason
+        from core.paths import DATA_DIR
+        write_restart_reason(DATA_DIR, 'admin (pannello)')
         time.sleep(2)
         os._exit(75)
 

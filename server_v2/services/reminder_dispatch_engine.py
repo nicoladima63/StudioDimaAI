@@ -4,13 +4,50 @@ Motore di dispatch reminder - gestisce logica continuos/split basata su config D
 
 import logging
 import sqlite3
-from datetime import date, timedelta
+import time
+from datetime import date, datetime, timedelta
 from typing import Optional, Dict, Any
 
 from core.paths import STUDIO_DIMA_DB_PATH
 from core.reminder_db import ensure_reminder_tables
 
 logger = logging.getLogger(__name__)
+
+_LOCK_RETRY_ATTEMPTS = 4
+_LOCK_RETRY_DELAY_SECONDS = 2.0
+_ALERT_THROTTLE_MINUTES = 20
+_last_config_error_alert: dict[int, datetime] = {}
+
+
+def _alert_config_read_failure(day_of_week: int, error: Exception) -> None:
+    """Avvisa lo staff quando la config reminder resta illeggibile dopo i retry.
+
+    Senza questo alert un 'database is locked' persistente viene interpretato
+    a valle come 'giorno disabilitato' e i reminder saltano in silenzio (e'
+    successo il 22/09: nessun errore visibile, solo un log INFO che sembrava
+    una scelta intenzionale).
+    """
+    now = datetime.now()
+    last = _last_config_error_alert.get(day_of_week)
+    if last and (now - last).total_seconds() < _ALERT_THROTTLE_MINUTES * 60:
+        return
+    _last_config_error_alert[day_of_week] = now
+    try:
+        from app_v2 import push_service
+        if not push_service:
+            return
+        push_service.send_notification_to_all(
+            title="Reminder appuntamenti a rischio",
+            body=(
+                f"Impossibile leggere la configurazione orari (giorno {day_of_week}): "
+                f"{error}. I reminder per quel giorno potrebbero non essere partiti — "
+                "controllare manualmente."
+            ),
+            data={'type': 'reminder_config_error', 'day_of_week': day_of_week},
+            urgency='high',
+        )
+    except Exception as e:
+        logger.warning(f"Errore invio alert config reminder: {e}")
 
 
 class ReminderDispatchEngine:
@@ -25,19 +62,33 @@ class ReminderDispatchEngine:
         """
         Legge config per un giorno specifico (1=Lun, 2=Mar, ..., 7=Dom).
         Ritorna dict con tutti i campi della tabella, o None se errore.
+
+        In caso di 'database is locked' ritenta piu' volte prima di
+        arrendersi: sono blocchi quasi sempre transitori (WAL checkpoint,
+        scritture concorrenti) e un retry evita di trattare un guasto
+        temporaneo del DB come un giorno regolarmente disabilitato.
         """
         ensure_reminder_tables()
-        try:
-            conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM studio_opening_hours WHERE day_of_week = ?", (day_of_week,))
-            row = cur.fetchone()
-            conn.close()
-            return dict(row) if row else None
-        except Exception as e:
-            logger.error(f"Errore lettura config per giorno {day_of_week}: {e}")
-            return None
+        last_error: Optional[Exception] = None
+        for attempt in range(_LOCK_RETRY_ATTEMPTS):
+            try:
+                conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH), timeout=5.0)
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM studio_opening_hours WHERE day_of_week = ?", (day_of_week,))
+                row = cur.fetchone()
+                conn.close()
+                return dict(row) if row else None
+            except Exception as e:
+                last_error = e
+                is_lock = 'locked' in str(e).lower()
+                if is_lock and attempt < _LOCK_RETRY_ATTEMPTS - 1:
+                    time.sleep(_LOCK_RETRY_DELAY_SECONDS)
+                    continue
+                break
+        logger.error(f"Errore lettura config per giorno {day_of_week}: {last_error}")
+        _alert_config_read_failure(day_of_week, last_error)
+        return None
 
     def should_send_today(self, today_weekday: int) -> bool:
         """

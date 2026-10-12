@@ -132,24 +132,29 @@ def create_app_v2(config_name: Optional[str] = None) -> Flask:
 def setup_logging(app: Flask) -> None:
     """Configure application logging."""
     log_level = getattr(logging, app.config.get('LOG_LEVEL', 'INFO'))
-    
+
     # Create logs directory
     log_dir = 'logs'
     os.makedirs(log_dir, exist_ok=True)
-    
+
     # Configure logging format
     formatter = logging.Formatter(
         '%(asctime)s %(levelname)s [%(name)s] %(message)s'
     )
-    
+
+    # Configure root logger - rimuove prima gli handler gia' installati da
+    # run_v2.py (logging.basicConfig in setup_logging(args), usato per i log
+    # di avvio prima che l'app Flask esista). Senza questo, ogni messaggio
+    # veniva emesso due volte con due formati diversi.
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+    root_logger.setLevel(log_level)
+
     # File handler - encoding esplicito per evitare UnicodeEncodeError su caratteri non-ASCII nei dati
     file_handler = logging.FileHandler(os.path.join(log_dir, 'server_v2.log'), encoding='utf-8')
     file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
-
-    # Configure root logger
-    root_logger = logging.getLogger()
-    root_logger.setLevel(log_level)
     root_logger.addHandler(file_handler)
 
     # Disabilita completamente log delle richieste HTTP

@@ -4,7 +4,7 @@ import {
   CButton, CSpinner, CBadge, CAlert,
   CTable, CTableHead, CTableRow, CTableHeaderCell,
   CTableBody, CTableDataCell,
-  CRow, CCol,
+  CRow, CCol, CTooltip,
   CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -35,11 +35,13 @@ function channelBadge(channel: string) {
   )
 }
 
-function statoBadge(stato: string) {
+function statoBadge(stato: string, error?: string | null) {
   const map: Record<string, string> = {
     sent: 'primary', confirmed: 'success', cancelled: 'warning', failed: 'danger',
   }
-  return <CBadge color={map[stato] ?? 'secondary'}>{stato}</CBadge>
+  const badge = <CBadge color={map[stato] ?? 'secondary'}>{stato}</CBadge>
+  if (stato !== 'failed' || !error) return badge
+  return <CTooltip content={error}><span>{badge}</span></CTooltip>
 }
 
 function messageTypeBadge(type: RecentComm['type']) {
@@ -84,13 +86,13 @@ interface StatusCardProps {
 function StatusCard({ label, color = 'secondary', detail, icon, action }: StatusCardProps) {
   return (
     <CCard className="text-center">
-      <CCardBody className="py-2 d-flex flex-column gap-2">
+      <CCardBody className="py-2">
         <div className="d-flex align-items-center gap-2">
           <CIcon icon={icon} size="lg" className={`text-${color} flex-shrink-0`} />
-          <div className="fw-semibold small text-truncate">{label}</div>
+          <div className="fw-semibold small text-truncate" style={{ minWidth: 0 }}>{label}</div>
           {detail && <CBadge color={color} className="px-2 py-1 ms-auto">{detail}</CBadge>}
+          {action && <div className="text-nowrap ms-auto">{action}</div>}
         </div>
-        {action && <div className="text-nowrap">{action}</div>}
       </CCardBody>
     </CCard>
   )
@@ -242,18 +244,20 @@ const EvolutionSettingsPage: React.FC = () => {
     setAlert(null)
     try {
       const result = await evolutionService.apiSendMissedWhatsAppReminder(recoveryPreview.snapshot_id, actionIndex)
-      if (result.sent_wa || result.already_sent || result.confirmed) {
+      if (result.sent_wa || result.sent_sms || result.already_sent || result.confirmed) {
         setSentReminderIndexes(current => new Set(current).add(actionIndex))
       }
       setAlert({
         color: result.errors.length ? 'warning' : 'success',
         msg: result.sent_wa
           ? 'Reminder WhatsApp inviato.'
-          : result.already_sent
-            ? 'Reminder gia inviato: nessun duplicato creato.'
-            : result.confirmed
-              ? 'Appuntamento gia confermato: nessun reminder inviato.'
-              : 'Reminder non inviato: il contatto non risulta raggiungibile su WhatsApp.',
+          : result.sent_sms
+            ? 'WhatsApp non disponibile: reminder inviato via SMS.'
+            : result.already_sent
+              ? 'Reminder gia inviato: nessun duplicato creato.'
+              : result.confirmed
+                ? 'Appuntamento gia confermato: nessun reminder inviato.'
+                : 'Reminder non inviato: nessun contatto raggiungibile.',
       })
       await Promise.all([loadStatus(), loadUpcomingReminders()])
     } catch (err: unknown) {
@@ -422,12 +426,12 @@ const EvolutionSettingsPage: React.FC = () => {
   // Docker: 2 stati — Avvia / Ferma
   const dockerAction = status ? (
     status.docker_running ? (
-      <CButton size="sm" color="success" className="w-50" onClick={handleStop} disabled={stopping}>
+      <CButton size="sm" color="success"  onClick={handleStop} disabled={stopping}>
         {stopping ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
       </CButton>
     ) : (
-      <CButton size="sm" color="success" className="w-50" onClick={handleSmartStart}
+      <CButton size="sm" color="success"  onClick={handleSmartStart}
         disabled={starting || launchingDesktop}>
         {(starting || launchingDesktop) ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaPlay} className="me-1" />}
         Avvia
@@ -438,12 +442,12 @@ const EvolutionSettingsPage: React.FC = () => {
   // Evolution: 2 stati — Avvia Evolution / Ferma Evolution
   const evolutionAction = status ? (
     status.evolution_reachable ? (
-      <CButton size="sm" color="success" className="w-50" onClick={handleStop} disabled={stopping}>
+      <CButton size="sm" color="success"  onClick={handleStop} disabled={stopping}>
         {stopping ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
       </CButton>
     ) : (
-      <CButton size="sm" color="success" className="w-50" onClick={handleSmartStart}
+      <CButton size="sm" color="success"  onClick={handleSmartStart}
         disabled={starting || launchingDesktop}>
         {(starting || launchingDesktop) ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaPlay} className="me-1" />}
         Avvia
@@ -454,13 +458,13 @@ const EvolutionSettingsPage: React.FC = () => {
   // WhatsApp: 2 stati — Crea istanza / Termina istanza
   const waAction = status ? (
     !status.instance_exists ? (
-      <CButton size="sm" color="success" className="w-50" onClick={handleCreateInstance}
+      <CButton size="sm" color="success"  onClick={handleCreateInstance}
         disabled={creating || !status.evolution_reachable}>
         {creating ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaPlay} className="me-1" />}
         Avvia
       </CButton>
     ) : (
-      <CButton size="sm" color="success" className="w-50" onClick={handleTerminateInstance}
+      <CButton size="sm" color="success"  onClick={handleTerminateInstance}
         disabled={terminating}>
         {terminating ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilMediaStop} className="me-1" />}
         Ferma
@@ -484,7 +488,7 @@ const EvolutionSettingsPage: React.FC = () => {
               {testingReminders ? <CSpinner size="sm" className="me-1" /> : <CIcon icon={cilCheckCircle} className="me-1" />}
               Test e confronta agenda
             </CButton>
-            <CButton
+            <CButton size="sm"
               color="primary"
               variant="outline"
               onClick={handleSyncHistory}
@@ -625,7 +629,7 @@ const EvolutionSettingsPage: React.FC = () => {
                                     <CTableDataCell className="text-nowrap">{c.appointment_date} {c.appointment_time}</CTableDataCell>
                                     <CTableDataCell>{messageTypeBadge(c.type)}</CTableDataCell>
                                     <CTableDataCell>{channelBadge(c.channel)}</CTableDataCell>
-                                    <CTableDataCell>{statoBadge(c.stato)}</CTableDataCell>
+                                    <CTableDataCell>{statoBadge(c.stato, c.error)}</CTableDataCell>
                                     <CTableDataCell>
                                       {c.channel === 'whatsapp' && (
                                         <CButton color="success" variant="outline" size="sm" onClick={() => handleOpenConversation(c)} title="Vedi conversazione">

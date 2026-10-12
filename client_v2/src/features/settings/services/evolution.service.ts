@@ -10,6 +10,7 @@ export interface RecentComm {
   appointment_date: string
   appointment_time: string
   created_at: string
+  error?: string | null
 }
 
 export interface EvoMessage {
@@ -46,6 +47,7 @@ export interface MissedReminderRecoveryResult {
   examined: number
   dry_run: boolean
   sent_wa: number
+  sent_sms: number
   already_sent: number
   confirmed: number
   skipped_no_mobile: Array<{ patient_id: string; name: string }>

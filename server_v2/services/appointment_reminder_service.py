@@ -141,12 +141,48 @@ def _new_patient_reminder_id(phone: str) -> str:
     return f"new-patient:{_normalize_phone(phone)}"
 
 
-def _recovery_reminder_type(ap_dt: datetime, now: datetime) -> Optional[str]:
-    """Restituisce il tipo di reminder da recuperare, oppure ``None``."""
+# Tentativi di invio falliti per uno stesso reminder prima di arrendersi e avvisare la segreteria
+MAX_FAILED_ATTEMPTS = 3
+
+# Orari dei job 24h in scheduler_service.py (da mantenere allineati)
+REMINDER_24H_MORNING_HOUR = 8
+REMINDER_24H_AFTERNOON_HOUR = 14
+# Inizio della finestra del job 2h: sotto questa soglia il job 2h l'ha gia' perso
+REMINDER_2H_WINDOW_START_MINUTES = 90
+
+
+def _24h_job_already_ran(ap_dt: datetime, now: datetime, engine) -> bool:
+    """True se il job 24h che copre questo appuntamento e' gia' passato oggi.
+
+    Rispecchia scheduler_service: in 'split' la mattina parte alle 8 e il
+    pomeriggio alle 14, altrimenti tutto alle 8.
+    """
+    day_of_week = ap_dt.date().weekday() + 1
+    start_hour = REMINDER_24H_MORNING_HOUR
+    if engine.dispatch_mode(day_of_week) == 'split':
+        threshold = engine.get_morning_threshold_hour(day_of_week) or 13
+        if ap_dt.hour >= threshold:
+            start_hour = REMINDER_24H_AFTERNOON_HOUR
+    return now.hour >= start_hour
+
+
+def _recovery_reminder_type(ap_dt: datetime, now: datetime, engine=None) -> Optional[str]:
+    """Restituisce il tipo di reminder da recuperare, oppure ``None``.
+
+    Senza ``engine`` (recupero manuale, con anteprima) la finestra e' ampia:
+    domani qualsiasi ora, oggi entro otto ore. Con ``engine`` (job automatico)
+    il recupero scatta solo dopo che il job ordinario ha avuto la sua
+    occasione, altrimenti anticiperebbe i reminder fuori orario.
+    """
+    if engine is not None and not engine.is_day_enabled(ap_dt.date().weekday() + 1):
+        return None
     if ap_dt.date() == (now + timedelta(days=1)).date():
+        if engine is not None and not _24h_job_already_ran(ap_dt, now, engine):
+            return None
         return '24h'
-    delta_hours = (ap_dt - now).total_seconds() / 3600
-    if ap_dt.date() == now.date() and 0 < delta_hours < 8:
+    delta_minutes = (ap_dt - now).total_seconds() / 60
+    max_minutes = 8 * 60 if engine is None else REMINDER_2H_WINDOW_START_MINUTES
+    if ap_dt.date() == now.date() and 0 < delta_minutes < max_minutes:
         return '2h'
     return None
 
@@ -159,6 +195,7 @@ def get_upcoming_appointments(
     reminder_type: str,
     slot: str = 'all',
     respect_schedule: bool = True,
+    automatic: bool = False,
 ) -> list[dict]:
     """
     Legge APPUNTA.DBF e restituisce gli appuntamenti da notificare.
@@ -170,6 +207,9 @@ def get_upcoming_appointments(
     reminder_type '2h':       appuntamenti tra 90 e 150 minuti da adesso
     reminder_type 'recovery': appuntamenti futuri di oggi (entro 8 ore) e di
                               domani, usati dal recupero manuale post-disservizio.
+                              Con automatic=True (job schedulato) solo quelli
+                              che i job 24h/2h hanno gia' mancato, nel rispetto
+                              di giorni abilitati e fasce mattina/pomeriggio.
     """
     from services.reminder_dispatch_engine import get_dispatch_engine
     
@@ -221,27 +261,16 @@ def get_upcoming_appointments(
                     ap_date = ap_date.date()
                 paz_id = str(record['DB_APPACOD']).strip()
                 appointment_type = str(record['DB_GUARDIA']).strip()
-                new_patient_phone = None
-                if not paz_id:
-                    # Le prime visite non hanno ancora un'anagrafica. Per
-                    # convenzione il numero è nella prima riga di DB_NOTE:
-                    # trattiamole come appuntamenti normali, senza creare un
-                    # record paziente fittizio nel DBF.
-                    if appointment_type != _NEW_PATIENT_TYPE:
-                        continue
-                    new_patient_phone = _new_patient_phone_from_notes(record['DB_NOTE'])
-                    if not new_patient_phone:
-                        logger.warning(
-                            "Prima visita senza ID o cellulare nella prima riga delle note: %s",
-                            str(record['DB_APDESCR']).strip(),
-                        )
-                        continue
-                    paz_id = _new_patient_reminder_id(new_patient_phone)
 
                 ora_raw = str(record['DB_APOREIN']).strip()
                 ora_fmt = _ora_fmt(ora_raw)
                 ap_dt = datetime.combine(ap_date, datetime.strptime(ora_fmt, '%H:%M').time())
 
+                # Filtro di rilevanza temporale PRIMA di qualunque controllo su
+                # anagrafica/note: una prima visita fuori dalla finestra di
+                # questo job (passata, o troppo lontana) non deve generare
+                # warning ne' essere elaborata — ci pensera' il job giusto
+                # quando sara' il suo turno.
                 if reminder_type == '24h':
                     if ap_date != tomorrow:
                         continue
@@ -260,28 +289,48 @@ def get_upcoming_appointments(
                 elif reminder_type == 'recovery':
                     # Il recupero non deve anticipare gli appuntamenti di oggi
                     # troppo lontani: il job ordinario 2h li gestira' in seguito.
-                    recovery_type = _recovery_reminder_type(ap_dt, now)
+                    recovery_type = _recovery_reminder_type(
+                        ap_dt, now, engine if automatic else None)
                     match = recovery_type is not None
                 else:
                     raise ValueError(f"Tipo reminder non supportato: {reminder_type}")
 
-                if match:
-                    row = {
-                        'patient_id': paz_id,
-                        'appointment_date': str(ap_date),
-                        'appointment_time': ora_fmt,
-                        'tipo': appointment_type,
-                        'studio': str(record['DB_APSTUDI']).strip(),
-                        'nome_dbf': str(record['DB_APDESCR']).strip(),
-                    }
-                    if new_patient_phone:
-                        row['cell'] = new_patient_phone
-                        row['is_new_patient'] = True
-                    if reminder_type == 'recovery':
-                        # Gli appuntamenti di domani ricevono sempre il testo
-                        # "domani", anche se il recupero viene eseguito tardi.
-                        row['recovery_type'] = recovery_type
-                    rows.append(row)
+                if not match:
+                    continue
+
+                new_patient_phone = None
+                if not paz_id:
+                    # Le prime visite non hanno ancora un'anagrafica. Per
+                    # convenzione il numero è nella prima riga di DB_NOTE:
+                    # trattiamole come appuntamenti normali, senza creare un
+                    # record paziente fittizio nel DBF.
+                    if appointment_type != _NEW_PATIENT_TYPE:
+                        continue
+                    new_patient_phone = _new_patient_phone_from_notes(record['DB_NOTE'])
+                    if not new_patient_phone:
+                        logger.warning(
+                            "Prima visita senza ID o cellulare nella prima riga delle note: %s",
+                            str(record['DB_APDESCR']).strip(),
+                        )
+                        continue
+                    paz_id = _new_patient_reminder_id(new_patient_phone)
+
+                row = {
+                    'patient_id': paz_id,
+                    'appointment_date': str(ap_date),
+                    'appointment_time': ora_fmt,
+                    'tipo': appointment_type,
+                    'studio': str(record['DB_APSTUDI']).strip(),
+                    'nome_dbf': str(record['DB_APDESCR']).strip(),
+                }
+                if new_patient_phone:
+                    row['cell'] = new_patient_phone
+                    row['is_new_patient'] = True
+                if reminder_type == 'recovery':
+                    # Gli appuntamenti di domani ricevono sempre il testo
+                    # "domani", anche se il recupero viene eseguito tardi.
+                    row['recovery_type'] = recovery_type
+                rows.append(row)
             except Exception:
                 continue
         table.close()
@@ -334,11 +383,13 @@ def _evo_headers() -> dict:
     return {'apikey': os.getenv('EVOLUTION_API_KEY', ''), 'Content-Type': 'application/json'}
 
 
-def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
+def check_whatsapp(patient_id: str, phone: str) -> tuple[Optional[bool], Optional[str]]:
     """
     Controlla se il numero ha WhatsApp.
     Ordine: cache SQLite → studiobot_pazienti PostgreSQL → Evolution API.
-    Ritorna (has_whatsapp, wa_jid).
+    Ritorna (has_whatsapp, wa_jid). has_whatsapp e' None quando l'esito non e'
+    determinabile (Evolution non raggiungibile o risposta non valida): chi
+    chiama non deve scambiarlo per "il paziente non ha WhatsApp".
     """
     ensure_reminder_tables()
     phone_norm = _normalize_phone(phone)
@@ -385,7 +436,7 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
                 data = r.json() if r.text.strip() else {}
             except ValueError:
                 logger.warning(f"Evolution API risposta non JSON: {r.text[:200]}")
-                return False, None
+                return None, None
             results = data if isinstance(data, list) else data.get('data', [])
             for item in results:
                 if item.get('exists'):
@@ -398,9 +449,9 @@ def check_whatsapp(patient_id: str, phone: str) -> tuple[bool, Optional[str]]:
     except Exception as e:
         logger.warning(f"Errore Evolution API check WA: {e}")
 
-    # Non inventare un esito positivo quando Evolution non risponde: l'invio WA
-    # potrebbe fallire senza consegnare il reminder. Non salviamo questo esito.
-    return False, None
+    # Evolution non risponde: l'esito e' sconosciuto, non "senza WhatsApp".
+    # Non lo salviamo in cache e non ripieghiamo sull'SMS al posto del chiamante.
+    return None, None
 
 
 def _save_wa_cache(patient_id: str, phone: str, has_wa: bool, jid: Optional[str]):
@@ -508,7 +559,11 @@ def send_sms_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str,
 # ---------------------------------------------------------------------------
 
 def _already_sent(patient_id: str, ap_date: str, ap_time: str, reminder_type: str) -> bool:
-    """Verifica che non sia già stato inviato un reminder per questo appuntamento."""
+    """Verifica se per questo appuntamento non serve (o non si deve piu') inviare.
+
+    True se il reminder e' gia' stato inviato, oppure se i tentativi falliti
+    hanno raggiunto MAX_FAILED_ATTEMPTS (niente ritenti infiniti a ogni giro).
+    """
     key = _session_key(patient_id, ap_date, ap_time, reminder_type)
     if key in _sent_this_session:
         return True
@@ -516,15 +571,16 @@ def _already_sent(patient_id: str, ap_date: str, ap_time: str, reminder_type: st
         conn = sqlite3.connect(str(STUDIO_DIMA_DB_PATH))
         cur = conn.cursor()
         cur.execute("""
-            SELECT id FROM patient_communications
+            SELECT COALESCE(SUM(stato != 'failed'), 0), COALESCE(SUM(stato = 'failed'), 0)
+            FROM patient_communications
             WHERE patient_id = ? AND appointment_date = ? AND appointment_time = ? AND type = ?
-            AND stato != 'failed'
         """, (patient_id, ap_date, ap_time, reminder_type))
-        exists = cur.fetchone() is not None
+        delivered, failed = cur.fetchone()
         conn.close()
-        if exists:
+        if delivered:
             _sent_this_session.add(key)
-        return exists
+            return True
+        return failed >= MAX_FAILED_ATTEMPTS
     except Exception as e:
         logger.warning(f"Errore check duplicati: {e}")
         return False
@@ -532,7 +588,7 @@ def _already_sent(patient_id: str, ap_date: str, ap_time: str, reminder_type: st
 
 def _log_communication(patient_id: str, patient_name: str, phone: str,
                         channel: str, reminder_type: str, ap_date: str, ap_time: str,
-                        stato: str, message_id: str = '') -> int:
+                        stato: str, message_id: str = '', error: str = '') -> int:
     if stato == 'sent':
         _sent_this_session.add(_session_key(patient_id, ap_date, ap_time, reminder_type))
     try:
@@ -540,16 +596,49 @@ def _log_communication(patient_id: str, patient_name: str, phone: str,
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO patient_communications
-                (patient_id, patient_name, phone, channel, type, appointment_date, appointment_time, stato, message_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (patient_id, patient_name, phone, channel, reminder_type, ap_date, ap_time, stato, message_id))
+                (patient_id, patient_name, phone, channel, type, appointment_date, appointment_time,
+                 stato, message_id, error)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (patient_id, patient_name, phone, channel, reminder_type, ap_date, ap_time,
+              stato, message_id, error or None))
         comm_id = cur.lastrowid
+        failed = 0
+        if stato == 'failed':
+            failed = cur.execute("""
+                SELECT COUNT(*) FROM patient_communications
+                WHERE patient_id = ? AND appointment_date = ? AND appointment_time = ?
+                  AND type = ? AND stato = 'failed'
+            """, (patient_id, ap_date, ap_time, reminder_type)).fetchone()[0]
         conn.commit()
         conn.close()
+        if failed == MAX_FAILED_ATTEMPTS:
+            _notify_staff_send_failed(patient_name, ap_date, ap_time, reminder_type, channel, error)
         return comm_id
     except Exception as e:
         logger.error(f"Errore log comunicazione: {e}")
         return 0
+
+
+def _notify_staff_send_failed(patient_name: str, ap_date: str, ap_time: str,
+                              reminder_type: str, channel: str, error: str):
+    """Avvisa la segreteria quando i tentativi di invio sono esauriti."""
+    try:
+        from app_v2 import push_service
+        if not push_service:
+            return
+        push_service.send_notification_to_all(
+            title="Reminder non inviato",
+            body=(
+                f"Reminder {reminder_type} a {patient_name} ({ap_date} {ap_time}) non inviato dopo "
+                f"{MAX_FAILED_ATTEMPTS} tentativi via {channel}: {error or 'errore sconosciuto'}. "
+                "Contattare il paziente manualmente."
+            ),
+            data={'type': 'reminder_send_failed', 'patient_name': patient_name,
+                  'appointment_date': ap_date, 'appointment_time': ap_time},
+            urgency='high',
+        )
+    except Exception as e:
+        logger.warning(f"Errore notifica segreteria invio fallito: {e}")
 
 
 # ---------------------------------------------------------------------------
@@ -662,7 +751,7 @@ def run_followup_reminders(hours_before: int = 3, dry_run: bool = False) -> dict
 
         stato = 'sent' if result['success'] else 'failed'
         _log_communication(pid, name, phone, channel, 'followup', ap_date, ap_time,
-                           stato, result.get('message_id', ''))
+                           stato, result.get('message_id', ''), result.get('error') or '')
         if result['success']:
             if channel == 'whatsapp':
                 stats['sent_wa'] += 1
@@ -695,7 +784,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
         appointments = [a for a in appointments if a['patient_id'] == patient_filter]
 
     stats = {'sent_wa': 0, 'sent_sms': 0, 'skipped_fisso': [], 'errors': [], 'no_phone': [],
-             'dry_run': dry_run, 'simulated_actions': []}
+             'wa_unavailable': [], 'dry_run': dry_run, 'simulated_actions': []}
 
     for ap in appointments:
         pid = ap['patient_id']
@@ -717,6 +806,13 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
         if cell and _is_mobile(cell):
             phone = cell
             has_wa, _ = check_whatsapp(pid, phone)
+            if has_wa is None:
+                # Evolution non risponde: non sappiamo se ha WhatsApp. Niente
+                # SMS al posto suo e niente riga failed: si riprova al prossimo giro.
+                logger.warning(f"Reminder {reminder_type} rimandato per {name}: verifica WhatsApp non disponibile")
+                stats['wa_unavailable'].append({'patient_id': pid, 'name': name,
+                                                'ap_date': ap_date, 'ap_time': ap_time})
+                continue
             if dry_run:
                 channel = 'whatsapp' if has_wa else 'sms'
                 logger.info(f"[DRY RUN] {name} -> {channel} ({phone})")
@@ -754,7 +850,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
                 channel = result.get('channel', 'sms')
                 stato = 'sent' if result['success'] else 'failed'
                 _log_communication(pid, name, phone, channel, reminder_type, ap_date, ap_time,
-                                   stato, result.get('message_id', ''))
+                                   stato, result.get('message_id', ''), result.get('error') or '')
                 if result['success']:
                     if channel == 'whatsapp':
                         stats['sent_wa'] += 1
@@ -801,18 +897,22 @@ def _recovery_message(patient_name: str, ap_date: str, ap_time: str, reminder_ty
 
 def run_missed_whatsapp_reminders(
     dry_run: bool = False, appointments: Optional[list[dict]] = None,
+    automatic: bool = False,
 ) -> dict:
-    """Recupera i reminder WA saltati dopo un fermo del servizio.
+    """Rete di sicurezza per appuntamenti non coperti dai job a finestra fissa.
 
     Considera soltanto appuntamenti ancora futuri: quelli di domani ricevono il
     reminder 24h (anche se mancano meno di 24 ore), quelli di oggi entro otto
     ore ricevono il reminder "oggi alle". La stessa chiave di deduplicazione
     dei job automatici impedisce di inviare una seconda volta lo stesso tipo.
-    Non viene mai usato l'SMS come fallback: e' un'azione dedicata a WhatsApp.
+    Usa WhatsApp quando disponibile, altrimenti fallback SMS (stesso canale
+    del job normale run_reminders) cosi' da coprire anche i pazienti senza
+    WhatsApp.
     """
     ensure_reminder_tables()
     # Rivalida anche le anteprime: lo stato puo' cambiare prima dell'invio.
-    current = get_upcoming_appointments('recovery', respect_schedule=False)
+    current = get_upcoming_appointments(
+        'recovery', respect_schedule=False, automatic=automatic)
     if appointments is None:
         appointments = current
     else:
@@ -822,10 +922,12 @@ def run_missed_whatsapp_reminders(
         'examined': len(appointments),
         'dry_run': dry_run,
         'sent_wa': 0,
+        'sent_sms': 0,
         'already_sent': 0,
         'confirmed': 0,
         'skipped_no_mobile': [],
         'skipped_no_whatsapp': [],
+        'wa_unavailable': [],
         'errors': [],
         'simulated_actions': [],
         'snapshot_appointments': [],
@@ -870,26 +972,34 @@ def run_missed_whatsapp_reminders(
             continue
 
         has_wa, _ = check_whatsapp(pid, cell)
-        if not has_wa:
-            stats['skipped_no_whatsapp'].append({'patient_id': pid, 'name': name})
+        if has_wa is None:
+            logger.warning(f"Recupero rimandato per {name}: verifica WhatsApp non disponibile")
+            stats['wa_unavailable'].append({'patient_id': pid, 'name': name})
             continue
-
-        result = send_whatsapp_text(cell, text)
+        if has_wa:
+            result = send_whatsapp_text(cell, text)
+            channel = 'whatsapp'
+        else:
+            result = send_sms_reminder(cell, name, ap_date, ap_time, reminder_type)
+            channel = 'sms'
 
         stato = 'sent' if result.get('success') else 'failed'
         _log_communication(
-            pid, name, cell, 'whatsapp', reminder_type, ap_date, ap_time,
-            stato, result.get('message_id', ''),
+            pid, name, cell, channel, reminder_type, ap_date, ap_time,
+            stato, result.get('message_id', ''), result.get('error') or '',
         )
         if result.get('success'):
-            stats['sent_wa'] += 1
+            if channel == 'whatsapp':
+                stats['sent_wa'] += 1
+            else:
+                stats['sent_sms'] += 1
         else:
             stats['errors'].append({'patient': name, 'error': result.get('error', '')})
 
     if not dry_run:
         _write_log('recovery', {
             'sent_wa': stats['sent_wa'],
-            'sent_sms': 0,
+            'sent_sms': stats['sent_sms'],
             'skipped_fisso': stats['skipped_no_mobile'],
             'no_phone': stats['skipped_no_whatsapp'],
             'errors': stats['errors'],

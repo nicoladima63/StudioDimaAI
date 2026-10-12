@@ -24,6 +24,7 @@ _REMINDER_SCHEMA_SQL = """
         appointment_time TEXT,
         stato TEXT DEFAULT 'sent',
         message_id TEXT,
+        error TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_pc_patient_date
@@ -85,6 +86,7 @@ def _migrate_sqlite(conn: sqlite3.Connection):
     }:
         _add_column_if_missing(conn, "patient_communications", "stato", "stato TEXT DEFAULT 'sent'")
         _add_column_if_missing(conn, "patient_communications", "message_id", "message_id TEXT")
+        _add_column_if_missing(conn, "patient_communications", "error", "error TEXT")
         _add_column_if_missing(conn, "patient_communications", "created_at", "created_at TEXT")
 
     if "appointment_confirmations" in {

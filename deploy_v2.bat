@@ -41,8 +41,10 @@ if exist "%LOCAL_BUILD_INFO%" (
 )
 set /a BUILD_NUMBER+=1
 
-:: Ottieni git hash
-for /f %%i in ('git -C "%~dp0" rev-parse --short HEAD 2^>nul') do set GIT_HASH=%%i
+:: Ottieni git hash. NON usare -C "%~dp0": la barra finale prima delle
+:: virgolette viene letta come escape e manda in pappa l'argomento - lo
+:: script ha gia' fatto cd /d "%~dp0" sopra, quindi basta rev-parse.
+for /f %%i in ('git rev-parse --short HEAD 2^>nul') do set GIT_HASH=%%i
 if not defined GIT_HASH set GIT_HASH=unknown
 
 :: Scrivi build_info.json locale (verra' deployato da robocopy)
@@ -71,10 +73,10 @@ echo.
 pause
 
 :: ============================================================================
-:: [0/7] BACKUP FILE SENSIBILI
+:: [1/14] BACKUP FILE SENSIBILI
 :: ============================================================================
-echo [0/7] Backup file sensibili...
-echo [0/7] Backup file sensibili... >> "%LOGFILE%"
+echo [1/14] Backup file sensibili...
+echo [1/14] Backup file sensibili... >> "%LOGFILE%"
 
 set "BACKUP_ROOT=%DEPLOY_PATH%\_deploy_backups"
 set "BACKUP_DIR=%BACKUP_ROOT%\backup_%TIMESTAMP%"
@@ -122,10 +124,10 @@ echo Backup completato in: %BACKUP_DIR% >> "%LOGFILE%"
 
 
 :: ============================================================================
-:: [1/7] Preparazione cartelle server
+:: [2/14] Preparazione cartelle server
 :: ============================================================================
-echo [1/7] Verifica cartelle server...
-echo [1/7] Verifica cartelle server... >> "%LOGFILE%"
+echo [2/14] Verifica cartelle server...
+echo [2/14] Verifica cartelle server... >> "%LOGFILE%"
 if not exist "%DEPLOY_PATH%" mkdir "%DEPLOY_PATH%"
 if not exist "%DEPLOY_PATH%\static" mkdir "%DEPLOY_PATH%\static"
 if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
@@ -134,10 +136,10 @@ if not exist "%DEPLOY_PATH%\logs" mkdir "%DEPLOY_PATH%\logs"
 if not exist "%DEPLOY_PATH%\_deploy_backups" mkdir "%DEPLOY_PATH%\_deploy_backups"
 
 :: ============================================================================
-:: [2/7] Sincronizzazione Server V2 (ROBOCOPY)
+:: [3/14] Sincronizzazione Server V2 (ROBOCOPY)
 :: ============================================================================
-echo [2/7] Sincronizzazione Server V2...
-echo [2/7] Sincronizzazione Server V2... >> "%LOGFILE%"
+echo [3/14] Sincronizzazione Server V2...
+echo [3/14] Sincronizzazione Server V2... >> "%LOGFILE%"
 
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
     /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" "instance" "tokens" "_deploy_backups" ^
@@ -158,10 +160,10 @@ echo   [OK] Sync Server V2 completata.
 echo   [OK] Sync Server V2 completata. >> "%LOGFILE%"
 
 :: ============================================================================
-:: [2.5/7] Verifica e ripristino file sensibili (PROD ha priorita')
+:: [4/14] Verifica e ripristino file sensibili (PROD ha priorita')
 :: ============================================================================
-echo [2.5/7] Verifica file sensibili post-sync (prod ha priorita')...
-echo [2.5/7] Verifica file sensibili post-sync (prod ha priorita')... >> "%LOGFILE%"
+echo [4/14] Verifica file sensibili post-sync (prod ha priorita')...
+echo [4/14] Verifica file sensibili post-sync (prod ha priorita')... >> "%LOGFILE%"
 
 :: Crea le directory necessarie
 if not exist "%DEPLOY_PATH%\instance" mkdir "%DEPLOY_PATH%\instance"
@@ -209,10 +211,10 @@ echo Verifica file sensibili completata.
 echo Verifica file sensibili completata. >> "%LOGFILE%"
 
 :: ============================================================================
-:: [2.6/7] Creazione database_mode.txt per PROD
+:: [5/14] Creazione database_mode.txt per PROD
 :: ============================================================================
-echo [2.6/7] Creazione database_mode.txt per produzione...
-echo [2.6/7] Creazione database_mode.txt per produzione... >> "%LOGFILE%"
+echo [5/14] Creazione database_mode.txt per produzione...
+echo [5/14] Creazione database_mode.txt per produzione... >> "%LOGFILE%"
 
 :: Verifica che la directory instance esista
 if not exist "%DEPLOY_PATH%\instance" (
@@ -227,7 +229,7 @@ echo   [OK] database_mode.txt creato con modalità PROD
 echo   [OK] database_mode.txt creato con modalità PROD >> "%LOGFILE%"
 
 :: ============================================================================
-:: [2.7/7] Creazione sms_mode.txt per PROD (se assente)
+:: [6/14] Creazione sms_mode.txt per PROD (se assente)
 :: ============================================================================
 if not exist "%DEPLOY_PATH%\instance\sms_mode.txt" (
     echo prod > "%DEPLOY_PATH%\instance\sms_mode.txt"
@@ -237,10 +239,10 @@ if not exist "%DEPLOY_PATH%\instance\sms_mode.txt" (
 )
 
 :: ============================================================================
-:: [3/7] Aggiornamento .env
+:: [7/14] Aggiornamento .env
 :: ============================================================================
-echo [3/7] Copia file .env...
-echo [3/7] Copia file .env... >> "%LOGFILE%"
+echo [7/14] Copia file .env...
+echo [7/14] Copia file .env... >> "%LOGFILE%"
 copy "server_v2\.env" "%DEPLOY_PATH%" /Y >nul
 if errorlevel 1 (
     echo ERRORE: Copia server_v2\.env fallita.
@@ -252,10 +254,10 @@ echo   [OK] .env aggiornato (da server_v2).
 echo   [OK] .env aggiornato (da server_v2). >> "%LOGFILE%"
 
 :: ============================================================================
-:: [3.5/7] File Docker (docker-compose.yml + .env root)
+:: [8/14] File Docker (docker-compose.yml + .env root)
 :: ============================================================================
-echo [3.5/7] Copia file Docker...
-echo [3.5/7] Copia file Docker... >> "%LOGFILE%"
+echo [8/14] Copia file Docker...
+echo [8/14] Copia file Docker... >> "%LOGFILE%"
 
 if exist "docker-compose.yml" (
     copy "docker-compose.yml" "%DEPLOY_PATH%\docker-compose.yml" /Y >nul 2>&1
@@ -324,10 +326,10 @@ echo   [OK] restart_docker.bat generato.
 echo   [OK] restart_docker.bat generato. >> "%LOGFILE%"
 
 :: ============================================================================
-:: [4/7] Build Frontend React V2
+:: [9/14] Build Frontend React V2
 :: ============================================================================
-echo [4/7] Build frontend React V2...
-echo [4/7] Build frontend React V2... >> "%LOGFILE%"
+echo [9/14] Build frontend React V2...
+echo [9/14] Build frontend React V2... >> "%LOGFILE%"
 
 if not exist "client_v2" (
     echo ERRORE: Cartella client_v2 non trovata!
@@ -370,10 +372,10 @@ echo   [OK] Build completata.
 echo   [OK] Build completata. >> "%LOGFILE%"
 
 :: ============================================================================
-:: [5/7] Deploy Frontend (ROBOCOPY)
+:: [10/14] Deploy Frontend (ROBOCOPY)
 :: ============================================================================
-echo [5/7] Deploy frontend in static...
-echo [5/7] Deploy frontend in static... >> "%LOGFILE%"
+echo [10/14] Deploy frontend in static...
+echo [10/14] Deploy frontend in static... >> "%LOGFILE%"
 
 if not exist "client_v2\dist" (
     echo ERRORE: Cartella dist non trovata! Build fallita?
@@ -397,64 +399,80 @@ echo   [OK] Frontend deployato.
 echo   [OK] Frontend deployato. >> "%LOGFILE%"
 
 :: ============================================================================
-:: [6/7] Generazione script avvio
+:: [11/14] Generazione script avvio
 :: ============================================================================
-echo [6/7] Generazione start script...
-echo [6/7] Generazione start script... >> "%LOGFILE%"
-(
-echo @echo off
-echo setlocal enabledelayedexpansion
-echo cd /d "%%~dp0"
-echo.
-echo echo ==========================================
-echo echo    STUDIO DIMA AI V2 - STARTING SERVER
-echo echo ==========================================
-echo.
-echo set "STUDIODIMAAI_DATA_DIR=%%~dp0instance"
-echo set "GOOGLE_CREDENTIALS_PATH=%%~dp0instance\credentials.json"
-echo set "GOOGLE_TOKEN_PATH=%%~dp0instance\token.json"
-echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
-echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
-echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"
-echo.
-echo if not exist venv ^(
-echo     echo Creazione virtual environment...
-echo     python -m venv venv
-echo ^)
-echo.
-echo call venv\Scripts\activate.bat
-echo.
-echo echo Verifica dipendenze...
-echo pip install -r requirements.txt --quiet
-echo.
-echo :restart_loop
-echo echo ==========================================
-echo echo Server in avvio su porta 5001...
-echo echo ==========================================
-echo python run_v2.py --config production --port 5001 --log-level INFO
-echo set EXIT_CODE=%%ERRORLEVEL%%
-echo if %%EXIT_CODE%% EQU 75 ^(
-echo     echo Riavvio richiesto via API. Attendo 3 secondi...
-echo     timeout /t 3 /nobreak ^>nul
-echo     goto restart_loop
-echo ^)
-echo echo Server terminato con codice %%EXIT_CODE%%.
-echo pause
-) > "%DEPLOY_PATH%\start_server_v2.bat"
+:: start_server_v2.bat contiene un loop con "goto": resta aperto con un unico
+:: file-handle per tutta la sua vita (giorni/settimane). Se lo si riscrive
+:: MENTRE sta girando, cmd.exe continua a leggere da un offset byte ormai
+:: disallineato rispetto al nuovo contenuto — risultato: righe corrotte,
+:: errori fantasma tipo "Impossibile trovare il file specificato", a volte
+:: un giro di troppo. La soluzione robusta non e' "dividerlo in due file"
+:: (un worker chiamato con CALL resta comunque aperto per tutta la durata
+:: di python, quindi e' vulnerabile allo stesso modo) ma non riscriverlo
+:: mai piu' dopo la prima creazione: se serve cambiarlo, si cancella a mano
+:: sul server una volta sola e il prossimo deploy lo rigenera da capo.
+echo [11/14] Generazione script avvio...
+echo [11/14] Generazione script avvio... >> "%LOGFILE%"
 
-if not exist "%DEPLOY_PATH%\start_server_v2.bat" (
-    echo   [ERRORE] start_server_v2.bat non creato - problema scrittura sulla share!
-    echo   [ERRORE] start_server_v2.bat non creato >> "%LOGFILE%"
+if exist "%DEPLOY_PATH%\start_server_v2.bat" (
+    echo   [OK] start_server_v2.bat gia' presente, non toccato - evita corruzione mentre gira.
+    echo   [OK] start_server_v2.bat gia' presente, non toccato. >> "%LOGFILE%"
 ) else (
-    echo   [OK] start_server_v2.bat creato.
-    echo   [OK] start_server_v2.bat creato. >> "%LOGFILE%"
+    (
+    echo @echo off
+    echo setlocal enabledelayedexpansion
+    echo cd /d "%%~dp0"
+    echo.
+    echo set "STUDIODIMAAI_DATA_DIR=%%~dp0instance"
+    echo set "GOOGLE_CREDENTIALS_PATH=%%~dp0instance\credentials.json"
+    echo set "GOOGLE_TOKEN_PATH=%%~dp0instance\token.json"
+    echo set "GOOGLE_OAUTH_STATE_PATH=%%~dp0instance\oauth_state.json"
+    echo set "CALENDAR_SYNC_STATE_PATH=%%~dp0instance\sync_state.json"
+    echo set "STUDIO_DIMA_DB_PATH=%%~dp0instance\studio_dima.db"
+    echo.
+    echo if not exist venv ^(
+    echo     echo Creazione virtual environment...
+    echo     python -m venv venv
+    echo ^)
+    echo.
+    echo call venv\Scripts\activate.bat
+    echo.
+    echo :loop
+    echo echo ==========================================
+    echo echo    STUDIO DIMA AI V2 - STARTING SERVER
+    echo echo ==========================================
+    echo echo Verifica dipendenze...
+    echo pip install -r requirements.txt --quiet
+    echo echo ==========================================
+    echo echo Server in avvio su porta 5001...
+    echo echo ==========================================
+    echo python run_v2.py --config production --port 5001 --log-level INFO
+    echo set EXIT_CODE=%%ERRORLEVEL%%
+    echo if %%EXIT_CODE%% EQU 75 ^(
+    echo     set "RESTART_REASON=motivo sconosciuto"
+    echo     if exist instance\last_restart_reason.txt set /p RESTART_REASON=^<instance\last_restart_reason.txt
+    echo     echo Riavvio richiesto ^(^^^!RESTART_REASON^^^!^). Attendo 3 secondi...
+    echo     timeout /t 3 /nobreak ^>nul
+    echo     goto loop
+    echo ^)
+    echo echo Server terminato con codice %%EXIT_CODE%%.
+    echo pause
+    ) > "%DEPLOY_PATH%\start_server_v2.bat"
+
+    if not exist "%DEPLOY_PATH%\start_server_v2.bat" (
+        echo   [ERRORE] start_server_v2.bat non creato - problema scrittura sulla share!
+        echo   [ERRORE] start_server_v2.bat non creato >> "%LOGFILE%"
+    ) else (
+        echo   [OK] start_server_v2.bat creato ^(prima volta^).
+        echo   [OK] start_server_v2.bat creato ^(prima volta^). >> "%LOGFILE%"
+    )
 )
 
 :: ============================================================================
-:: [6.5/7] Deploy Auto-Start Scripts (Task Scheduler)
+:: [12/14] Deploy Auto-Start Scripts (Task Scheduler)
 :: ============================================================================
-echo [6.5/7] Deploy auto-start scripts...
-echo [6.5/7] Deploy auto-start scripts... >> "%LOGFILE%"
+echo [12/14] Deploy auto-start scripts...
+echo [12/14] Deploy auto-start scripts... >> "%LOGFILE%"
 
 if exist "start_server.ps1" (
     copy "start_server.ps1" "%DEPLOY_PATH%\start_server.ps1" /Y >nul 2>&1
@@ -484,10 +502,10 @@ if exist "AUTOSTART_SETUP.md" (
 )
 
 :: ============================================================================
-:: [7/7] Utility Script
+:: [13/14] Utility Script
 :: ============================================================================
-echo [7/7] Generazione utility reset...
-echo [7/7] Generazione utility reset... >> "%LOGFILE%"
+echo [13/14] Generazione utility reset...
+echo [13/14] Generazione utility reset... >> "%LOGFILE%"
 (
 echo @echo off
 echo cd /d "%%~dp0"
@@ -500,6 +518,16 @@ echo pause
 
 echo   [OK] reset_sync_state.bat creato.
 echo   [OK] reset_sync_state.bat creato. >> "%LOGFILE%"
+
+:: ============================================================================
+:: [14/14] Trigger riavvio automatico server (restart.flag)
+:: ============================================================================
+echo [14/14] Trigger riavvio server...
+echo [14/14] Trigger riavvio server... >> "%LOGFILE%"
+echo %TIMESTAMP% > "%DEPLOY_PATH%\instance\restart.flag"
+echo   [OK] restart.flag aggiornato - il server lo rileva ed esce con codice 75;
+echo        start_server_v2.bat lo rilancia in automatico entro ~5 secondi.
+echo   [OK] restart.flag aggiornato - riavvio automatico in corso. >> "%LOGFILE%"
 
 :: ============================================================================
 :: COMPLETATO
@@ -516,7 +544,10 @@ echo.
 echo ----------------------------------------
 echo  PROSSIMI PASSI SU SERVERDIMA:
 echo ----------------------------------------
-echo  1. Riavvia il server Flask (se non si riavvia da solo)
+echo  1. Il server si riavvia da solo entro pochi secondi (restart.flag).
+echo     Se NON riparte, e' in esecuzione con codice vecchio (senza il
+echo     watcher): vai su serverdima e rilancia start_server_v2.bat a mano
+echo     una volta sola - da quel momento i deploy successivi saranno automatici.
 echo  2. Se hai modificato docker-compose.yml:
 echo     esegui  restart_docker.bat  nella cartella deployata
 echo ----------------------------------------
