@@ -30,11 +30,18 @@ class TodoService(BaseService):
         due_date: str = None,
         type: str = 'general',
         related_task_id: int = None,
-        related_step_id: int = None
+        related_step_id: int = None,
+        notification_message: str = None,
+        notification_link: str = None
     ) -> Dict[str, Any]:
         """
         Create a new todo message.
         Sends notification and broadcasts via WebSocket.
+
+        notification_message / notification_link sostituiscono testo e link
+        della notifica standard del todo: chi crea il todo per conto di un
+        evento (es. fase completata) passa qui il proprio contesto invece di
+        mandare una seconda notifica a parte.
         """
         try:
             # Validation
@@ -63,7 +70,7 @@ class TodoService(BaseService):
             todo = self.todo_repository.create(todo_data)
             
             # Send notification
-            self._send_notification(todo)
+            self._send_notification(todo, notification_message, notification_link)
             
             # Broadcast via WebSocket
             self._broadcast_todo(todo)
@@ -79,10 +86,14 @@ class TodoService(BaseService):
         self,
         step: Dict[str, Any],
         task: Dict[str, Any],
-        sender_id: int = 1
+        sender_id: int = 1,
+        notification_message: str = None,
+        notification_link: str = None
     ) -> Optional[Dict[str, Any]]:
         """
         Create a todo from a task step (automation integration).
+        Invia una sola notifica al destinatario: quella del todo, con il
+        testo e il link opzionali forniti dal chiamante.
         """
         try:
             recipient_id = step.get('user_id')
@@ -107,7 +118,9 @@ class TodoService(BaseService):
                 due_date=due_date,
                 type='notification',
                 related_task_id=task.get('id'),
-                related_step_id=step.get('id')
+                related_step_id=step.get('id'),
+                notification_message=notification_message,
+                notification_link=notification_link
             )
             
         except Exception as e:
@@ -204,7 +217,12 @@ class TodoService(BaseService):
             logger.error(f"Failed to auto-complete todos for step {step_id}: {e}")
             return 0
     
-    def _send_notification(self, todo: Dict[str, Any]) -> None:
+    def _send_notification(
+        self,
+        todo: Dict[str, Any],
+        message: str = None,
+        link: str = None
+    ) -> None:
         """Send push notification for a todo."""
         try:
             from services.notification_service import NotificationService
@@ -222,9 +240,9 @@ class TodoService(BaseService):
             
             notification_service.notify_user(
                 user_id=todo['recipient_id'],
-                message=todo['subject'],
+                message=message or todo['subject'],
                 type=notif_type,
-                link=f"/todos/{todo['id']}"
+                link=link or f"/todos/{todo['id']}"
             )
             
         except Exception as e:

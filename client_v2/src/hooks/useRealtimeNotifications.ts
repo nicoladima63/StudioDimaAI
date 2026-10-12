@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useWebSocket } from './useWebSocket';
 import { useNotificationStore } from '@/store/notifications.store';
+import pushService from '@/services/pushService';
 import toast from 'react-hot-toast';
 
 interface NotificationPayload {
@@ -44,8 +45,12 @@ export const useRealtimeNotifications = () => {
       return;
     }
 
-    const handleNewNotification = (data: NotificationPayload) => {
-      console.log('[Realtime] New notification:', data);
+    const handleNewNotification = async (data: NotificationPayload) => {
+      // Lo stesso evento trasporta anche aggiornamenti dei todo ({ type: 'todo', ... })
+      // che non hanno un messaggio: non sono notifiche e non vanno mostrate.
+      if (!data || typeof data.message !== 'string' || !data.message) {
+        return;
+      }
 
       // Increment unread count in store
       incrementUnread();
@@ -69,9 +74,13 @@ export const useRealtimeNotifications = () => {
          toast(data.message, { ...toastOptions, icon: 'ℹ️' });
       }
 
-      // Show browser notification if permitted
+      // Con la sottoscrizione push attiva la notifica di sistema la mostra gia' il service worker:
+      // crearne una seconda dalla pagina la duplicherebbe.
       if (permission === 'granted') {
-        showBrowserNotification(data);
+        const pushSubscription = await pushService.getSubscription();
+        if (!pushSubscription) {
+          showBrowserNotification(data);
+        }
       }
     };
 
@@ -89,7 +98,7 @@ export const useRealtimeNotifications = () => {
         icon: '/logo.png',
         badge: '/logo.png',
         tag: `notification-${data.id}`,
-        requireInteraction: true, // Persistent - stays until user clicks
+        requireInteraction: data.type === 'error', // Persistente solo per gli errori
       });
 
       // Handle click on notification - navigate to task page

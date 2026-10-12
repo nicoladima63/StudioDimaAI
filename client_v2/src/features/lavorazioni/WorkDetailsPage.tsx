@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
     CCard,
     CCardBody,
@@ -25,6 +25,8 @@ import { useAuthStore } from '../../store/auth.store';
 const WorkDetailsPage: React.FC = () => {
     const { taskId } = useParams<{ taskId: string }>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const highlightedStepId = searchParams.get('step');
     const [task, setTask] = useState<Task | null>(null);
     const [loading, setLoading] = useState(false);
     const { allPazienti, loadAll: loadPazienti } = usePazienti();
@@ -37,6 +39,12 @@ const WorkDetailsPage: React.FC = () => {
             loadUsers();
         }
     }, [taskId]);
+
+    // Se si arriva da un rimando a una fase (?step=ID), porta la fase in vista
+    useEffect(() => {
+        if (!task || !highlightedStepId) return;
+        document.getElementById(`step-${highlightedStepId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, [task, highlightedStepId]);
 
     const loadTaskAndPatients = async (id: number) => {
         setLoading(true);
@@ -158,6 +166,8 @@ const WorkDetailsPage: React.FC = () => {
                                     return (
                                         <CListGroupItem
                                             key={step.id}
+                                            id={`step-${step.id}`}
+                                            style={String(step.id) === highlightedStepId ? { outline: '2px solid var(--cui-warning, #f9b115)', outlineOffset: '-2px' } : undefined}
                                             className={`d-flex justify-content-between align-items-center p-3 ${isActive ? 'bg-light border-start border-primary border-4' : ''}`}
                                         >
                                             <div className="d-flex align-items-center">

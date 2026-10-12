@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { Menu, Sun, Moon, LogOut, Badge } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { useAuthStore } from '@/store/auth.store'
 import { useTheme } from '@/hooks/useTheme'
 import AppSidebar from './AppSidebar'
@@ -130,7 +131,12 @@ const Layout: React.FC = () => {
                     </div>
                     <DropdownMenuSeparator />
                     <div className="px-2 py-1">
-                      <PushNotificationToggle showLabel={true} size="sm" onSuccess={() => {}} onError={() => {}} />
+                      <PushNotificationToggle
+                        showLabel={true}
+                        size="sm"
+                        onSuccess={(message) => toast.success(message)}
+                        onError={(message) => toast.error(message)}
+                      />
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     CModal,
     CModalHeader,
@@ -31,6 +32,7 @@ interface TodoModalProps {
 
 const TodoModal: React.FC<TodoModalProps> = ({ visible, onClose, onSaved, editTodo }) => {
     const { user } = useAuthStore();
+    const navigate = useNavigate();
     const [users, setUsers] = useState<User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -86,6 +88,18 @@ const TodoModal: React.FC<TodoModalProps> = ({ visible, onClose, onSaved, editTo
 
     const handleChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    // Solo i todo nati da una lavorazione hanno un'origine a cui rimandare;
+    // i messaggi diretti tra utenti non hanno related_task_id e non mostrano nulla.
+    const originTaskId = isEditing ? editTodo?.related_task_id : undefined;
+    const originStepId = isEditing ? editTodo?.related_step_id : undefined;
+
+    const handleGoToOrigin = () => {
+        if (!originTaskId) return;
+        const query = originStepId ? `?step=${originStepId}` : '';
+        onClose();
+        navigate(`/works/${originTaskId}${query}`);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -149,6 +163,15 @@ const TodoModal: React.FC<TodoModalProps> = ({ visible, onClose, onSaved, editTo
             </CModalHeader>
             <CForm onSubmit={handleSubmit}>
                 <CModalBody>
+                    {originTaskId && (
+                        <CRow className="mb-3">
+                            <CCol md={12}>
+                                <CButton color="info" variant="outline" size="sm" onClick={handleGoToOrigin}>
+                                    {originStepId ? 'Vai alla fase' : 'Vai alla lavorazione'}
+                                </CButton>
+                            </CCol>
+                        </CRow>
+                    )}
                     <CRow className="mb-3">
                         <CCol md={6}>
                             <CFormLabel>Destinatario *</CFormLabel>
