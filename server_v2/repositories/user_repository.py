@@ -18,6 +18,24 @@ logger = logging.getLogger(__name__)
 _current_dir = os.path.dirname(__file__)
 DB_PATH = os.path.abspath(os.path.join(_current_dir, '..', 'instance', 'users.db'))
 
+_COLUMNS_READY = False
+
+
+def _ensure_user_columns(conn: sqlite3.Connection) -> None:
+    """Aggiunge la colonna phone alla tabella user se manca (una volta per sessione)."""
+    global _COLUMNS_READY
+    if _COLUMNS_READY:
+        return
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(user)")}
+    if not columns:
+        return  # tabella non ancora creata: ci pensera' chi la crea
+    if 'phone' not in columns:
+        conn.execute("ALTER TABLE user ADD COLUMN phone TEXT")
+        conn.commit()
+        logger.info("Added phone column to user table")
+    _COLUMNS_READY = True
+
+
 @contextmanager
 def get_db_connection():
     """Provides a database connection context."""
@@ -26,6 +44,7 @@ def get_db_connection():
         logger.debug(f"Connecting to user database at: {DB_PATH}")
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
+        _ensure_user_columns(conn)
         yield conn
     except sqlite3.Error as e:
         logger.error(f"Database connection error to {DB_PATH}: {e}")
@@ -89,14 +108,14 @@ class UserRepository:
         try:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute("SELECT id, username, role, created_at FROM user ORDER BY username")
+                cursor.execute("SELECT id, username, role, phone, created_at FROM user ORDER BY username")
                 users = cursor.fetchall()
                 return [dict(row) for row in users]
         except sqlite3.Error as e:
             logger.error(f"Error getting all users: {e}")
             return []
 
-    def create(self, username: str, password: str, role: str) -> Optional[Dict[str, Any]]:
+    def create(self, username: str, password: str, role: str, phone: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Creates a new user in the database.
 
@@ -104,6 +123,7 @@ class UserRepository:
             username: The username for the new user.
             password: The plain-text password for the new user.
             role: The role for the new user ('admin' or 'user').
+            phone: Cellulare per i richiami WhatsApp/SMS (opzionale).
 
         Returns:
             A dictionary representing the newly created user, or None on failure.
@@ -113,8 +133,8 @@ class UserRepository:
             with get_db_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO user (username, password_hash, role, created_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
-                    (username, password_hash, role)
+                    "INSERT INTO user (username, password_hash, role, phone, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                    (username, password_hash, role, (phone or '').strip() or None)
                 )
                 conn.commit()
                 new_user_id = cursor.lastrowid
@@ -126,7 +146,7 @@ class UserRepository:
             logger.error(f"Error creating user '{username}': {e}")
             return None
 
-    def update(self, user_id: int, username: Optional[str] = None, password: Optional[str] = None, role: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def update(self, user_id: int, username: Optional[str] = None, password: Optional[str] = None, role: Optional[str] = None, phone: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Updates an existing user's information.
 
@@ -135,6 +155,7 @@ class UserRepository:
             username: The new username (if changing).
             password: The new plain-text password (if changing).
             role: The new role (if changing).
+            phone: The new phone (if changing). None = unchanged, empty string = remove it.
 
         Returns:
             The updated user dictionary, or None if the user was not found or on failure.
@@ -151,6 +172,9 @@ class UserRepository:
         if role:
             fields.append("role = ?")
             params.append(role)
+        if phone is not None:
+            fields.append("phone = ?")
+            params.append(phone.strip() or None)
 
         if not fields:
             return self.find_by_id(user_id) # No update to perform

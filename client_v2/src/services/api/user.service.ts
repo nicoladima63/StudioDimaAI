@@ -6,12 +6,15 @@ interface CreateUserPayload {
   username: string
   password: string
   role: UserRole
+  phone?: string
 }
 
 interface UpdateUserPayload {
   username?: string
   password?: string
   role?: UserRole
+  // Stringa vuota = rimuovi il numero; assente = lascia invariato
+  phone?: string
 }
 
 /**

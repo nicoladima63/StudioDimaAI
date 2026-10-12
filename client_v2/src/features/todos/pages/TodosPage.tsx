@@ -22,7 +22,8 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilCheckCircle, cilClock, cilPencil, cilTrash, cilPlus, cilFilter } from '@coreui/icons';
 import { useAuthStore } from '@/store/auth.store';
-import { todoService } from '@/services/api/todos';
+import { useSearchParams } from 'react-router-dom';
+import { todoService, snoozesLeft } from '@/services/api/todos';
 import type { Todo } from '@/services/api/todos';
 import { userService } from '@/services/api/user.service';
 import type { User } from '@/types';
@@ -65,6 +66,21 @@ const TodosPage: React.FC = () => {
     useEffect(() => {
         applyFilters();
     }, [todos, statusFilter, priorityFilter, userFilter, searchText]);
+
+    // Link /todos?open=ID (notifiche e banner): apre il todo indicato appena la lista e' caricata
+    const [searchParams, setSearchParams] = useSearchParams();
+    const openTodoId = searchParams.get('open');
+    useEffect(() => {
+        if (!openTodoId || loading) return;
+        const target = todos.find(t => String(t.id) === openTodoId);
+        if (target) {
+            setEditingTodo(target);
+            setShowModal(true);
+        } else {
+            toast('Todo non trovato: potrebbe essere gia\' stato completato');
+        }
+        setSearchParams({}, { replace: true });
+    }, [openTodoId, loading, todos]);
 
     const loadTodos = async () => {
         if (!user?.id) return;
@@ -160,7 +176,10 @@ const TodosPage: React.FC = () => {
                 loadTodos();
             }
         } catch (error) {
-            toast.error('Errore nel posticipo');
+            // 409 = posticipi esauriti: il motivo e' gia' stato mostrato dal client API
+            if ((error as { status?: number })?.status !== 409) {
+                toast.error('Errore nel posticipo');
+            }
         } finally {
             setActionLoading(null);
         }
@@ -442,9 +461,9 @@ const TodosPage: React.FC = () => {
                                                                     color="info"
                                                                     size="sm"
                                                                     variant="ghost"
-                                                                    title="+1 giorno"
+                                                                    title={snoozesLeft(todo) === 0 ? 'Posticipi esauriti: va completato' : `+1 giorno (posticipi rimasti: ${snoozesLeft(todo)})`}
                                                                     onClick={() => handleSnooze(todo.id)}
-                                                                    disabled={actionLoading === todo.id}
+                                                                    disabled={actionLoading === todo.id || snoozesLeft(todo) === 0}
                                                                 >
                                                                     <CIcon icon={cilClock} />
                                                                 </CButton>

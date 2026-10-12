@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from core.database_manager import get_database_manager
+from core.exceptions import ValidationError
 from services.todo_service import TodoService
 import logging
 
@@ -115,6 +116,21 @@ def get_sent():
         return jsonify({'success': True, 'data': todos})
     except Exception as e:
         logger.error(f"Error getting sent todos: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@todos_bp.route('/todos/attention', methods=['GET'])
+@jwt_required()
+def get_attention():
+    """Todo in scadenza oggi o scaduti per un utente (banner in pagina)."""
+    try:
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'error': 'user_id is required'}), 400
+
+        service = get_todo_service()
+        return jsonify({'success': True, 'data': service.get_attention(int(user_id))})
+    except Exception as e:
+        logger.error(f"Error getting attention todos: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @todos_bp.route('/todos/pending', methods=['GET'])
@@ -267,11 +283,15 @@ def snooze_todo(todo_id):
             return jsonify({'success': False, 'error': 'days must be a positive integer'}), 400
         
         service = get_todo_service()
-        success = service.snooze_todo(todo_id, days, int(user_id))
-        
+        try:
+            success = service.snooze_todo(todo_id, days, int(user_id))
+        except ValidationError as e:
+            # Posticipi esauriti: non e' un guasto, e' la regola. 409 con il motivo per la UI.
+            return jsonify({'success': False, 'error': str(e), 'code': 'snooze_limit'}), 409
+
         if not success:
             return jsonify({'success': False, 'error': 'Todo not found or unauthorized'}), 404
-        
+
         return jsonify({'success': True, 'days': days})
     except Exception as e:
         logger.error(f"Error snoozing todo {todo_id}: {e}")

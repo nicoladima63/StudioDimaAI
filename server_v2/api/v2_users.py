@@ -3,6 +3,7 @@ API for User Management in StudioDimaAI Server V2.
 """
 
 import logging
+import re
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt
 
@@ -14,6 +15,18 @@ logger = logging.getLogger(__name__)
 users_v2_bp = Blueprint('users_v2', __name__)
 user_repo = UserRepository()
 
+# Cellulare per i richiami WhatsApp/SMS: cifre, spazi e un + iniziale opzionale
+_PHONE_RE = re.compile(r'^\+?[0-9 ]{8,16}$')
+
+
+def _invalid_phone(phone):
+    """Messaggio di errore se il numero non e' valido, altrimenti None. Vuoto = nessun numero (ammesso)."""
+    if phone is None or str(phone).strip() == '':
+        return None
+    if not _PHONE_RE.match(str(phone).strip()):
+        return "Numero di telefono non valido: usa solo cifre, spazi e un + iniziale (8-16 caratteri)"
+    return None
+
 @users_v2_bp.route('/users', methods=['GET'])
 @jwt_required()
 def get_all_users():
@@ -23,10 +36,14 @@ def get_all_users():
     """
     try:
         users = user_repo.get_all()
+        is_admin = get_jwt().get('sub', {}).get('role') == 'admin'
         # Remove password hashes from response for security
         for user in users:
             if 'password_hash' in user:
                 del user['password_hash']
+            # La lista serve a tutti per assegnare i lavori: il cellulare e' solo per l'admin
+            if not is_admin:
+                user.pop('phone', None)
         return format_response(data=users), 200
     except Exception as e:
         logger.error(f"Error getting all users: {e}", exc_info=True)
@@ -44,9 +61,14 @@ def create_user():
     username = data.get('username')
     password = data.get('password')
     role = data.get('role', 'user')
+    phone = data.get('phone')
 
     if not username or not password:
         return format_response(success=False, error="Username and password are required"), 400
+
+    phone_error = _invalid_phone(phone)
+    if phone_error:
+        return format_response(success=False, error=phone_error), 400
     
     if role not in VALID_ROLES:
         return format_response(success=False, error=f"Ruolo non valido. Valori ammessi: {', '.join(VALID_ROLES)}"), 400
@@ -56,7 +78,7 @@ def create_user():
         if existing_user:
             return format_response(success=False, error="Username already exists"), 409
 
-        new_user = user_repo.create(username, password, role)
+        new_user = user_repo.create(username, password, role, phone)
         if not new_user:
             return format_response(success=False, error="Failed to create user"), 500
         
@@ -99,9 +121,14 @@ def update_user(user_id):
     username = data.get('username')
     password = data.get('password')
     role = data.get('role')
+    phone = data.get('phone')  # None = invariato, stringa vuota = rimuovi
 
     if role and role not in VALID_ROLES:
         return format_response(success=False, error=f"Ruolo non valido. Valori ammessi: {', '.join(VALID_ROLES)}"), 400
+
+    phone_error = _invalid_phone(phone)
+    if phone_error:
+        return format_response(success=False, error=phone_error), 400
 
     try:
         # Check if user exists
@@ -114,7 +141,7 @@ def update_user(user_id):
             if existing_user and existing_user['id'] != user_id:
                 return format_response(success=False, error="Username already in use"), 409
 
-        updated_user = user_repo.update(user_id, username, password, role)
+        updated_user = user_repo.update(user_id, username, password, role, phone)
         if not updated_user:
             return format_response(success=False, error="Failed to update user"), 500
             

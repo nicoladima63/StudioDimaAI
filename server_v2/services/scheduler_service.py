@@ -321,12 +321,16 @@ class SchedulerService:
         self.schedule_calendar_sync_job()
     
     def schedule_todo_escalation_job(self):
-        """Schedula job escalation todo scaduti"""
+        """
+        Schedula i richiami dei todo (anticipo, scadenza, ritardo).
+
+        Gira ogni ora dalle 9 alle 18, al minuto 20 (non coincide con i job dei reminder
+        che usano :00, :15, :30 e :45). Il motore decide da solo se l'ora corrente e' una
+        fascia di richiamo in base a studio_opening_hours, quindi fuori orario non fa nulla.
+        """
         settings = get_automation_settings()
-        hour = int(settings.get("todo_escalation_hour", 9))
-        minute = int(settings.get("todo_escalation_minute", 0))
         enabled = settings.get("todo_escalation_enabled", True)
-        
+
         # Rimuovi job precedente se esiste
         if self._current_todo_escalation_job:
             try:
@@ -336,36 +340,40 @@ class SchedulerService:
             self._current_todo_escalation_job = None
 
         if not enabled:
-            logger.info("Automazione escalation todo disattivata.")
+            logger.info("Richiami todo disattivati.")
             return
 
         def job():
-            """Job di escalation todo scaduti"""
-            logger.info(f"[TODO ESCALATION] Avvio controllo todo scaduti.")
-            
+            """Passaggio del motore dei richiami todo"""
             try:
                 from core.database_manager import get_database_manager
-                from services.todo_escalation_job import TodoEscalationJob
-                
-                db_manager = get_database_manager()
-                escalation_job = TodoEscalationJob(db_manager)
-                result = escalation_job.check_and_escalate()
-                
-                if result.get('success'):
-                    logger.info(f"[TODO ESCALATION] Completato: {result.get('escalated_count')}/{result.get('overdue_count')} todo escalati")
-                else:
-                    logger.error(f"[TODO ESCALATION] Errore: {result.get('error')}")
-                    
-            except Exception as e:
-                logger.error(f"[TODO ESCALATION] Errore esecuzione job: {e}", exc_info=True)
+                from repositories.todo_repository import TodoRepository
+                from repositories.user_repository import UserRepository
+                from services.notification_service import NotificationService
+                from services.reminder_dispatch_engine import get_dispatch_engine
+                from services.todo_reminder_engine import TodoReminderEngine, send_staff_message
 
-        # Programma il job
-        trigger = CronTrigger(hour=hour, minute=minute)
+                db_manager = get_database_manager()
+                engine = TodoReminderEngine(
+                    todo_repository=TodoRepository(db_manager),
+                    notification_service=NotificationService(db_manager),
+                    user_repository=UserRepository(),
+                    get_day_config=get_dispatch_engine().get_config,
+                    channel_sender=send_staff_message,
+                )
+                result = engine.run()
+                if result.get('sent') or result.get('recipient_missing'):
+                    logger.info(f"[TODO REMINDERS] {result}")
+
+            except Exception as e:
+                logger.error(f"[TODO REMINDERS] Errore esecuzione job: {e}", exc_info=True)
+
+        trigger = CronTrigger(hour='9-18', minute=20)
         self._current_todo_escalation_job = self.scheduler.add_job(
             job, trigger, id="todo_escalation_job_v2", replace_existing=True
         )
-        logger.info(f"Automazione escalation todo schedulata alle {hour:02d}:{minute:02d}.")
-    
+        logger.info("Richiami todo schedulati ogni ora dalle 09:20 alle 18:20.")
+
     def reschedule_todo_escalation_job(self):
         """Riprogramma job escalation todo quando cambia la configurazione"""
         self.schedule_todo_escalation_job()

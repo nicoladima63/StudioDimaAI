@@ -13,8 +13,8 @@ interface UserState {
 
 interface UserActions {
   loadUsers: () => Promise<void>
-  createUser: (username: string, password: string, role: UserRole) => Promise<User | null>
-  updateUser: (userId: number, payload: { username?: string; password?: string; role?: UserRole }) => Promise<User | null>
+  createUser: (username: string, password: string, role: UserRole, phone?: string) => Promise<User | null>
+  updateUser: (userId: number, payload: { username?: string; password?: string; role?: UserRole; phone?: string }) => Promise<User | null>
   deleteUser: (userId: number) => Promise<boolean>
   selectUser: (userId: number | null) => Promise<void>
   clearSelectedUser: () => void
@@ -41,10 +41,10 @@ export const useUserStore = create<UserState & UserActions>()(
       }
     },
 
-    createUser: async (username, password, role) => {
+    createUser: async (username, password, role, phone) => {
       set(state => { state.loading = 'loading'; state.error = null; });
       try {
-        const response = await userService.apiCreateUser({ username, password, role });
+        const response = await userService.apiCreateUser({ username, password, role, ...(phone ? { phone } : {}) });
         if (response.success && response.data) {
           set(state => { state.users.push(response.data!); state.loading = 'success'; });
           return response.data;

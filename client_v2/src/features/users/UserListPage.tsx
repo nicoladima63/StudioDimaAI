@@ -45,12 +45,21 @@ const UserListPage: React.FC = () => {
       order: 3,
     },
     {
+      key: 'phone',
+      label: 'Cellulare',
+      sortable: false,
+      width: '15%',
+      defaultVisible: true,
+      order: 4,
+      render: (value) => (value ? String(value) : <span className='text-muted'>-</span>),
+    },
+    {
       key: 'created_at',
       label: 'created_at',
       sortable: false,
       width: '15%',
       defaultVisible: true,
-      order: 4,
+      order: 5,
     },
     {
       key: 'id',
@@ -58,7 +67,7 @@ const UserListPage: React.FC = () => {
       sortable: false,
       width: '15%',
       defaultVisible: true,
-      order: 5,
+      order: 6,
       render: (value, user) => (
         <div className='d-flex gap-1 justify-content-end'>
           <CButton

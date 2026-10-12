@@ -21,18 +21,21 @@ const UserForm: React.FC<UserFormProps> = ({ userToEdit, onClose }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<UserRole>('user');
+  const [phone, setPhone] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     if (isEditing && userToEdit) {
       setUsername(userToEdit.username);
       setRole(userToEdit.role);
+      setPhone(userToEdit.phone ?? '');
       setPassword('');
       setConfirmPassword('');
     } else {
       setUsername('');
       setPassword('');
       setRole('user');
+      setPhone('');
       setConfirmPassword('');
     }
   }, [isEditing, userToEdit]);
@@ -67,12 +70,17 @@ const UserForm: React.FC<UserFormProps> = ({ userToEdit, onClose }) => {
         username?: string;
         password?: string;
         role?: UserRole;
+        phone?: string;
       } = { role };
       if (username !== userToEdit.username) {
         payload.username = username;
       }
       if (password) {
         payload.password = password;
+      }
+      // Stringa vuota = rimuovi il numero
+      if (phone.trim() !== (userToEdit.phone ?? '')) {
+        payload.phone = phone.trim();
       }
 
       const updated = await updateUser(userToEdit.id, payload);
@@ -83,7 +91,7 @@ const UserForm: React.FC<UserFormProps> = ({ userToEdit, onClose }) => {
         toast.error(error || "Errore durante l'aggiornamento dell'utente.");
       }
     } else {
-      const newUser = await createUser(username, password, role);
+      const newUser = await createUser(username, password, role, phone.trim());
       if (newUser) {
         toast.success('Utente creato con successo!');
         success = true;
@@ -108,6 +116,25 @@ const UserForm: React.FC<UserFormProps> = ({ userToEdit, onClose }) => {
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
+            disabled={loading === 'loading'}
+          />
+        </CCol>
+      </CRow>
+
+      <CRow>
+        <CCol xs>
+          <CFormLabel htmlFor='phone'>
+            Cellulare:{' '}
+            <span className='text-gray-500 text-xs'>
+              (per i richiami WhatsApp/SMS, es. +39 333 1234567)
+            </span>
+          </CFormLabel>
+          <CFormInput
+            id='phone'
+            type='tel'
+            placeholder='+39 333 1234567'
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
             disabled={loading === 'loading'}
           />
         </CCol>

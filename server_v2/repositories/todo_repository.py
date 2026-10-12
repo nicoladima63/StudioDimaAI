@@ -7,6 +7,9 @@ from core.exceptions import RepositoryError, ValidationError
 
 logger = logging.getLogger(__name__)
 
+# Posticipi consentiti per ogni todo: oltre questo limite l'unica via e' completarlo
+MAX_SNOOZES = 5
+
 class TodoRepository(BaseRepository):
     """
     Repository for managing Todo Messages (internal messaging and tasking).
@@ -60,6 +63,16 @@ class TodoRepository(BaseRepository):
                 if 'urgency_level' not in columns:
                     cursor.execute("ALTER TABLE todo_messages ADD COLUMN urgency_level TEXT DEFAULT 'normal'")
                     logger.info("Added urgency_level column to todo_messages table")
+
+                # Migration: stato dei richiami (promemoria ripetuti) e dei posticipi
+                for column, ddl in (
+                    ('reminder_count', "INTEGER DEFAULT 0"),
+                    ('last_reminder_at', "TEXT"),
+                    ('snooze_count', "INTEGER DEFAULT 0"),
+                ):
+                    if column not in columns:
+                        cursor.execute(f"ALTER TABLE todo_messages ADD COLUMN {column} {ddl}")
+                        logger.info(f"Added {column} column to todo_messages table")
 
                 cursor.close()
                 
@@ -239,10 +252,64 @@ class TodoRepository(BaseRepository):
             logger.error(f"Failed to update urgency level for message {message_id}: {e}")
             return False
     
-    def snooze_todo(self, message_id: int, days: int, user_id: int) -> bool:
+    def get_open_with_due_date(self) -> List[Dict[str, Any]]:
+        """Todo ancora da fare (pending/read) che hanno una scadenza: input del motore dei richiami."""
+        try:
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT * FROM todo_messages
+                    WHERE status IN ('pending', 'read')
+                    AND deleted_at IS NULL
+                    AND due_date IS NOT NULL
+                    ORDER BY due_date ASC
+                ''')
+                columns = [description[0] for description in cursor.description]
+                rows = cursor.fetchall()
+                cursor.close()
+                return [dict(zip(columns, row)) for row in rows]
+        except Exception as e:
+            logger.error(f"Failed to get open todos with due date: {e}")
+            return []
+
+    def get_attention_for_user(self, user_id: int, today_iso: str) -> List[Dict[str, Any]]:
+        """Todo del destinatario che scadono oggi o sono scaduti, dal piu' vecchio."""
+        try:
+            with self.db_manager.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    SELECT * FROM todo_messages
+                    WHERE recipient_id = ?
+                    AND status IN ('pending', 'read')
+                    AND deleted_at IS NULL
+                    AND due_date IS NOT NULL
+                    AND substr(due_date, 1, 10) <= ?
+                    ORDER BY due_date ASC
+                ''', (user_id, today_iso))
+                columns = [description[0] for description in cursor.description]
+                rows = cursor.fetchall()
+                cursor.close()
+                return [dict(zip(columns, row)) for row in rows]
+        except Exception as e:
+            logger.error(f"Failed to get attention todos for user {user_id}: {e}")
+            return []
+
+    def record_reminder(self, message_id: int, sent_at: str) -> None:
+        """Registra un richiamo inviato (serve a non ripeterlo nella stessa fascia oraria)."""
+        with self.db_manager.transaction() as conn:
+            conn.execute('''
+                UPDATE todo_messages
+                SET reminder_count = COALESCE(reminder_count, 0) + 1,
+                    last_reminder_at = ?
+                WHERE id = ?
+            ''', (sent_at, message_id))
+
+    def snooze_todo(self, message_id: int, days: int, user_id: int, count_snooze: bool = True) -> bool:
         """
         Snooze/postpone a todo by X days.
         Updates due_date and lowers urgency by one level.
+        Riparte lo schema dei richiami sulla nuova scadenza. Se count_snooze e' True
+        il posticipo conta verso MAX_SNOOZES (non per i rinvii in blocco di una lavorazione).
         """
         try:
             from datetime import datetime, timedelta
@@ -297,11 +364,16 @@ class TodoRepository(BaseRepository):
             }
             new_urgency = urgency_downgrade.get(current_urgency, 'lowered')
 
-            # Update due_date and lowered urgency
-            self.update(message_id, {
+            # Update due_date and lowered urgency; i richiami ripartono dalla nuova scadenza
+            updates = {
                 'due_date': new_due_date.isoformat(),
-                'urgency_level': new_urgency
-            })
+                'urgency_level': new_urgency,
+                'reminder_count': 0,
+                'last_reminder_at': None,
+            }
+            if count_snooze:
+                updates['snooze_count'] = int(message.get('snooze_count') or 0) + 1
+            self.update(message_id, updates)
 
             logger.info(f"Snoozed todo {message_id} by {days} days, urgency: {current_urgency} -> {new_urgency}")
             return True

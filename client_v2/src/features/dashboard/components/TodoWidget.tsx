@@ -4,7 +4,7 @@ import CIcon from '@coreui/icons-react';
 import { cilBell, cilCheckCircle, cilClock, cilArrowRight, cilPlus, cilPencil } from '@coreui/icons';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
-import { todoService } from '@/services/api/todos';
+import { todoService, snoozesLeft } from '@/services/api/todos';
 import type { Todo } from '@/services/api/todos';
 import TodoModal from './TodoModal';
 import toast from 'react-hot-toast';
@@ -67,8 +67,10 @@ const TodoWidget: React.FC = () => {
                 toast.error('Impossibile posticipare il todo');
             }
         } catch (error) {
-            console.error('Error snoozing todo:', error);
-            toast.error('Errore nel posticipo del todo');
+            // 409 = posticipi esauriti: il motivo e' gia' stato mostrato dal client API
+            if ((error as { status?: number })?.status !== 409) {
+                toast.error('Errore nel posticipo del todo');
+            }
         } finally {
             setSnoozingId(null);
         }
@@ -248,14 +250,15 @@ const TodoWidget: React.FC = () => {
                                             size="sm"
                                             variant="outline"
                                             onClick={() => handleSnooze(todo.id)}
-                                            disabled={snoozingId !== null}
+                                            disabled={snoozingId !== null || snoozesLeft(todo) === 0}
+                                            title={snoozesLeft(todo) === 0 ? 'Posticipi esauriti: va completato' : `Posticipi rimasti: ${snoozesLeft(todo)}`}
                                         >
                                             {snoozingId === todo.id ? (
                                                 <CSpinner size="sm" />
                                             ) : (
                                                 <>
                                                     <CIcon icon={cilClock} className="me-1" size="sm" />
-                                                    +1 giorno
+                                                    {snoozesLeft(todo) === 0 ? 'Non posticipabile' : `+1 giorno (${snoozesLeft(todo)})`}
                                                 </>
                                             )}
                                         </CButton>

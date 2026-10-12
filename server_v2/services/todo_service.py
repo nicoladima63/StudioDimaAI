@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from core.database_manager import DatabaseManager
 from core.exceptions import ServiceError, ValidationError
-from repositories.todo_repository import TodoRepository
+from repositories.todo_repository import MAX_SNOOZES, TodoRepository
 from services.base_service import BaseService
 
 logger = logging.getLogger(__name__)
@@ -242,7 +242,7 @@ class TodoService(BaseService):
                 user_id=todo['recipient_id'],
                 message=message or todo['subject'],
                 type=notif_type,
-                link=link or f"/todos/{todo['id']}"
+                link=link or f"/todos?open={todo['id']}"
             )
             
         except Exception as e:
@@ -269,31 +269,31 @@ class TodoService(BaseService):
     def snooze_todo(self, todo_id: int, days: int, user_id: int) -> bool:
         """
         Snooze/postpone a todo by X days.
-        Resets urgency and broadcasts update.
+        Resets urgency, riavvia i richiami sulla nuova scadenza e broadcasts update.
+        Raises ValidationError se i posticipi consentiti (MAX_SNOOZES) sono esauriti.
         """
+        todo = self.get_by_id(todo_id)
+        if todo and str(todo.get('recipient_id')) == str(user_id):
+            used = int(todo.get('snooze_count') or 0)
+            if used >= MAX_SNOOZES:
+                raise ValidationError(
+                    f"Hai gia' usato tutti i {MAX_SNOOZES} posticipi: il todo va completato"
+                )
+
         success = self.todo_repository.snooze_todo(todo_id, days, user_id)
-        
+
         if success:
-            # Broadcast update
+            # Broadcast update (nessuna notifica: chi posticipa sta guardando lo schermo e la UI conferma)
             todo = self.get_by_id(todo_id)
             if todo:
                 self._broadcast_todo(todo, event_type='snoozed')
-                
-                # Send notification
-                try:
-                    from services.notification_service import NotificationService
-                    notification_service = NotificationService(self.db_manager)
-                    
-                    notification_service.notify_user(
-                        user_id=todo['recipient_id'],
-                        message=f"Todo '{todo['subject']}' posticipato di {days} giorni",
-                        type='info',
-                        link=f"/todos/{todo_id}"
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to send snooze notification: {e}")
-        
+
         return success
+
+    def get_attention(self, user_id: int) -> Dict[str, Any]:
+        """Todo del destinatario in scadenza oggi o scaduti: alimenta il banner in pagina."""
+        todos = self.todo_repository.get_attention_for_user(user_id, datetime.now().date().isoformat())
+        return {'count': len(todos), 'todos': todos, 'max_snoozes': MAX_SNOOZES}
     
     def postpone_task_todos(self, task_id: int, days: int, user_id: int) -> Dict[str, Any]:
         """
@@ -308,7 +308,8 @@ class TodoService(BaseService):
                 # Only postpone pending/read todos
                 if todo['status'] in ('pending', 'read'):
                     # Use repository directly to avoid multiple broadcasts
-                    if self.todo_repository.snooze_todo(todo['id'], days, user_id):
+                    # Il rinvio in blocco (paziente che sposta l'appuntamento) non consuma i posticipi
+                    if self.todo_repository.snooze_todo(todo['id'], days, user_id, count_snooze=False):
                         postponed_count += 1
             
             logger.info(f"Postponed {postponed_count} todos for task {task_id} by {days} days")

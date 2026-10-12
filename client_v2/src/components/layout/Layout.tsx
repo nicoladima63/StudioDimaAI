@@ -9,6 +9,7 @@ import BottomNav from './BottomNav'
 import MobileDrawer from './MobileDrawer'
 import NotificationBell from '@/components/ui/NotificationBell'
 import PushNotificationToggle from '@/components/PushNotificationToggle'
+import TodoAttentionBanner from '@/components/TodoAttentionBanner'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -168,6 +169,7 @@ const Layout: React.FC = () => {
 
         {/* Main content */}
         <main className="flex-1 p-3 md:p-5 pb-20 md:pb-5 page-enter">
+          <TodoAttentionBanner />
           <Outlet />
         </main>
       </div>

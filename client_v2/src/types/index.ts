@@ -6,6 +6,8 @@ export interface User {
   id: number
   username: string
   role: UserRole
+  // Cellulare per i richiami WhatsApp/SMS: il server lo restituisce solo agli admin
+  phone?: string | null
   created_at: string
 }
 

@@ -13,8 +13,26 @@ export interface Todo {
   related_task_id?: number;
   related_step_id?: number;
   urgency_level: 'normal' | 'attention' | 'urgent' | 'critical' | 'lowered';
+  reminder_count?: number;
+  last_reminder_at?: string | null;
+  snooze_count?: number;
   created_at: string;
   updated_at: string;
+}
+
+// Posticipi consentiti per ogni todo: allineato a MAX_SNOOZES del backend (todo_repository.py)
+export const MAX_SNOOZES = 5;
+
+export const snoozesLeft = (todo: Todo): number => Math.max(0, MAX_SNOOZES - (todo.snooze_count ?? 0));
+
+export interface AttentionResponse {
+  success: boolean;
+  data?: {
+    count: number;
+    todos: Todo[];
+    max_snoozes: number;
+  };
+  message?: string;
 }
 
 export interface TodoListResponse {
@@ -85,6 +103,14 @@ class TodoService {
    */
   async getPending(userId: number): Promise<TodoListResponse> {
     const response = await apiClient.get(`/todos/pending?user_id=${userId}`);
+    return response.data;
+  }
+
+  /**
+   * Todo in scadenza oggi o scaduti (banner in pagina)
+   */
+  async apiGetAttention(userId: number): Promise<AttentionResponse> {
+    const response = await apiClient.get(`/todos/attention?user_id=${userId}`);
     return response.data;
   }
 
