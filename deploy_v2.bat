@@ -431,7 +431,7 @@ echo :restart_loop
 echo echo ==========================================
 echo echo Server in avvio su porta 5001...
 echo echo ==========================================
-echo python run_v2.py --config production --port 5001
+echo python run_v2.py --config production --port 5001 --log-level INFO
 echo set EXIT_CODE=%%ERRORLEVEL%%
 echo if %%EXIT_CODE%% EQU 75 ^(
 echo     echo Riavvio richiesto via API. Attendo 3 secondi...

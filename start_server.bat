@@ -9,7 +9,7 @@ timeout /t 5 /nobreak
 
 REM Avvia il server in modalità produzione
 echo [%date% %time%] Avvio StudioDimaAI Server...
-python run_v2.py --config production --log-level WARNING
+python run_v2.py --config production --log-level INFO
 
 REM Se il server si ferma, tenta il restart
 echo [%date% %time%] Server terminato. Tentativo di riavvio tra 10 secondi...
@@ -17,7 +17,7 @@ timeout /t 10 /nobreak
 goto loop
 
 :loop
-python run_v2.py --config production --log-level WARNING
+python run_v2.py --config production --log-level INFO
 goto loop
 
 REM Fine
