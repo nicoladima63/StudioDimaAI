@@ -272,6 +272,60 @@ def start_restart_flag_watcher(flag_path: Path, poll_interval: float = 3.0):
     threading.Thread(target=_poll, daemon=True, name='restart-flag-watcher').start()
 
 
+def disable_console_quickedit():
+    """
+    Disattiva QuickEdit sulla console Windows. Con QuickEdit attivo un click nella
+    finestra del server mette il processo in pausa alla prima scrittura su stdout
+    (le richieste che loggano restano appese finche' non si preme Invio).
+    """
+    if os.name != 'nt':
+        return
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.GetStdHandle(-10)  # STD_INPUT_HANDLE
+        mode = ctypes.c_uint32()
+        if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+            return  # nessuna console (avvio da servizio/task scheduler)
+        ENABLE_QUICK_EDIT_MODE = 0x0040
+        ENABLE_EXTENDED_FLAGS = 0x0080
+        new_mode = (mode.value & ~ENABLE_QUICK_EDIT_MODE) | ENABLE_EXTENDED_FLAGS
+        kernel32.SetConsoleMode(handle, new_mode)
+    except Exception:
+        pass
+
+
+_instance_mutex = None  # tiene vivo l'handle per tutta la vita del processo
+
+
+def acquire_single_instance(port: int, wait_seconds: int = 30) -> bool:
+    """
+    Garantisce una sola istanza del server per porta (mutex nominato di Windows).
+    Dopo un deploy la vecchia istanza sta uscendo (exit 75): si attende che rilasci
+    il mutex. Se resta viva oltre wait_seconds la nuova istanza non parte, perche'
+    su Windows due processi possono legarsi alla stessa porta e le richieste
+    finirebbero a caso anche su un'istanza bloccata.
+    """
+    global _instance_mutex
+    if os.name != 'nt':
+        return True
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    ERROR_ALREADY_EXISTS = 183
+    name = f'Global\\StudioDimaAI_server_{port}'
+    deadline = time.time() + wait_seconds
+    while True:
+        handle = kernel32.CreateMutexW(None, False, name)
+        if handle and kernel32.GetLastError() != ERROR_ALREADY_EXISTS:
+            _instance_mutex = handle
+            return True
+        if handle:
+            kernel32.CloseHandle(handle)
+        if time.time() >= deadline:
+            return False
+        time.sleep(1)
+
+
 def run_with_waitress(app, args):
     """Run server using SocketIO (WebSocket support)."""
     try:
@@ -379,6 +433,15 @@ def main():
         
         # Parse command line arguments
         args = parse_arguments()
+
+        disable_console_quickedit()
+
+        if not acquire_single_instance(args.port):
+            sys.stderr.write(
+                f"ERROR Un'altra istanza del server e' gia' attiva sulla porta {args.port}. "
+                "Chiudi i processi python.exe del server e rilancia.\n"
+            )
+            sys.exit(1)
 
         # Avvia Evolution API via Docker se necessario
         if not args.skip_evolution:
