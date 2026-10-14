@@ -620,7 +620,15 @@ def run_alerts():
     try:
         from services.email_alert_service import build_email_alert_service
         data = request.get_json(silent=True) or {}
-        result = build_email_alert_service().run(dry_run=bool(data.get('dry_run', True)), force=True)
+        lookback_days = data.get('lookback_days')
+        if lookback_days is not None:
+            try:
+                lookback_days = int(lookback_days)
+            except (TypeError, ValueError):
+                raise ValidationError('Giorni non validi')
+        result = build_email_alert_service().run(
+            dry_run=bool(data.get('dry_run', True)), force=True, lookback_days=lookback_days
+        )
         return format_response(
             success=True, data=result, message=result.get('message'), state=result['state']
         ), 200

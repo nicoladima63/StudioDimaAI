@@ -10,10 +10,11 @@ Tutto deterministico: le email si riconoscono solo con le regole dello scopo
 """
 
 import logging
+import re
 import time
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytz
 
@@ -41,6 +42,8 @@ MAX_LOOKBACK_DAYS = 30
 # Tetto di email elaborate per passaggio: il resto viene ripreso al giro successivo
 MAX_NEW_PER_RUN = 100
 SUBJECT_MAX = 120
+# Un avviso identico (stesso destinatario e testo) entro questi giorni non viene rimandato
+DUPLICATE_WINDOW_DAYS = 7
 
 
 def is_open_at(config: Optional[Dict[str, Any]], now: datetime) -> bool:
@@ -66,6 +69,42 @@ def is_open_at(config: Optional[Dict[str, Any]], now: datetime) -> bool:
 def _clean(text: Any, limit: int = SUBJECT_MAX) -> str:
     text = ' '.join(str(text or '').split())
     return text if len(text) <= limit else text[:limit - 3] + '...'
+
+
+_ORDER_LINE = re.compile(r'Segui la spedizione\s+(.+?)(?:\s+(?:SKU:|Scopri i nostri)|$)', re.IGNORECASE)
+_TREATMENT_ACCEPTED = re.compile(r'piano di trattamento del caso appena accettato', re.IGNORECASE)
+TREATMENT_TO_APPROVE_TEXT = 'Nuovo trattamento da approvare. Vai su Nuvola e controlla'
+
+
+def _order_patient_and_reason(snippet: Any) -> Optional[Tuple[str, str]]:
+    """
+    (paziente, motivo) dalle email d'ordine del laboratorio, la cui anteprima ha la
+    forma "... Segui la spedizione cognome nome - TIPO - descrizione SKU: ...".
+    None se l'anteprima non ha quel formato.
+    """
+    found = _ORDER_LINE.search(' '.join(str(snippet or '').split()))
+    if not found:
+        return None
+    parts = [p.strip() for p in found.group(1).split(' - ') if p.strip()]
+    if len(parts) < 2:
+        return None
+    return _clean(parts[0], 60).title(), _clean(parts[1], 60)
+
+
+def _alert_text(scope_label: str, email_data: Dict[str, Any]) -> str:
+    """Testo della notifica per una email; il messaggio generico se non e' un caso noto."""
+    sender = _clean(email_data.get('from_name') or email_data.get('from_email'), 80)
+    snippet = email_data.get('snippet')
+    order = _order_patient_and_reason(snippet)
+    if _TREATMENT_ACCEPTED.search(str(snippet or '')):
+        return TREATMENT_TO_APPROVE_TEXT
+    if order and order[1].upper().startswith('CONTENZION'):
+        return f"Chiamare {order[0]} per la consegna delle contenzioni"
+    if order and order[1].upper().startswith('FASE'):
+        return f"In arrivo le Mascherine di {order[0]} controlla sul calendario"
+    if order:
+        return f"Email da {sender} per {order[0]}: {order[1]}"
+    return f"Email importante ({scope_label}) da {sender}: {_clean(email_data.get('subject'))}"
 
 
 def _received_epoch(email_data: Dict[str, Any]) -> Optional[int]:
@@ -165,22 +204,29 @@ class EmailAlertService:
     # ------------------------------------------------------------------
 
     def run(self, dry_run: bool = False, force: bool = False,
-            now: Optional[datetime] = None) -> Dict[str, Any]:
+            now: Optional[datetime] = None,
+            lookback_days: Optional[int] = None) -> Dict[str, Any]:
         """
         Controlla la posta nuova e manda gli avvisi dovuti.
 
         dry_run: non invia e non registra niente, elenca cosa scatterebbe.
         force: ignora gli orari dello studio (uso manuale).
+        lookback_days: prova retroattiva sulle email degli ultimi giorni, ignorando la
+            data di attivazione e il registro. Solo anteprima: non invia mai.
         """
+        retro = lookback_days is not None
+        if retro:
+            dry_run = True
+            lookback_days = max(1, min(int(lookback_days), MAX_LOOKBACK_DAYS))
         now = (now or datetime.now(ROME_TZ)).replace(tzinfo=None)
         stats: Dict[str, Any] = {
             'state': 'success', 'message': '', 'checked': 0, 'matched': 0,
-            'alerts': 0, 'todos': 0, 'failed': 0, 'would_send': [],
+            'alerts': 0, 'todos': 0, 'duplicates': 0, 'failed': 0, 'would_send': [],
         }
 
         active = {
             sid: cfg for sid, cfg in self.alert_repository.get_all_configs().items()
-            if cfg['mode'] != MODE_NONE and cfg.get('since_at')
+            if cfg['mode'] != MODE_NONE and (retro or cfg.get('since_at'))
         }
         if not active:
             stats['message'] = 'Nessun avviso email attivo'
@@ -196,11 +242,14 @@ class EmailAlertService:
             return stats
 
         oldest_allowed = int(time.time()) - MAX_LOOKBACK_DAYS * 86400
-        since = max(min(cfg['since_at'] for cfg in active.values()), oldest_allowed)
+        if retro:
+            since = max(int(time.time()) - lookback_days * 86400, oldest_allowed)
+        else:
+            since = max(min(cfg['since_at'] for cfg in active.values()), oldest_allowed)
 
         try:
             ids = self.email_service.list_inbox_message_ids(since)
-            known = self.alert_repository.get_known_ids(ids)
+            known = set() if retro else self.alert_repository.get_known_ids(ids)
             new_ids = [i for i in ids if i not in known][:MAX_NEW_PER_RUN]
             emails = self.email_service.get_message_summaries(new_ids)
         except (GmailCredentialsNotFoundError, GmailApiError) as e:
@@ -210,6 +259,8 @@ class EmailAlertService:
             return stats
 
         scopes = {s['id']: s for s in self.email_service.get_scopes()}
+        seen_texts = set()
+        duplicate_since = int(time.time()) - DUPLICATE_WINDOW_DAYS * 86400
         for email_data in emails:
             stats['checked'] += 1
             message_id = email_data['id']
@@ -217,13 +268,32 @@ class EmailAlertService:
             cfg = active.get(match['scope_id']) if match else None
             received = _received_epoch(email_data)
 
-            if not cfg or (received is not None and received < cfg['since_at']):
+            if not cfg or (not retro and received is not None and received < cfg['since_at']):
                 if not dry_run:
                     self.alert_repository.log_message(message_id, match['scope_id'] if match else None, 'none')
                 continue
 
             stats['matched'] += 1
             scope_label = scopes.get(cfg['scope_id'], {}).get('label', '')
+
+            # Stesso avviso allo stesso destinatario (es. ordine "spedito" e poi "in consegna"): ne basta uno
+            alert_text = _alert_text(scope_label, email_data) if cfg['mode'] == MODE_ALERT else None
+            if alert_text:
+                key = (cfg.get('recipient_id'), alert_text)
+                if key in seen_texts or (
+                    not retro and cfg.get('recipient_id')
+                    and self.alert_repository.was_alert_sent(cfg['recipient_id'], alert_text, duplicate_since)
+                ):
+                    stats['duplicates'] += 1
+                    if not dry_run:
+                        self.alert_repository.log_message(
+                            message_id, cfg['scope_id'], 'duplicate', cfg['recipient_id'], None,
+                            _clean(email_data.get('subject')),
+                            _clean(email_data.get('from_name') or email_data.get('from_email'), 80),
+                        )
+                    continue
+                seen_texts.add(key)
+
             if dry_run:
                 stats['would_send'].append({
                     'message_id': message_id,
@@ -231,6 +301,7 @@ class EmailAlertService:
                     'scope_label': scope_label,
                     'sender': _clean(email_data.get('from_name') or email_data.get('from_email'), 80),
                     'subject': _clean(email_data.get('subject')),
+                    'text': alert_text,
                 })
                 continue
 
@@ -247,6 +318,7 @@ class EmailAlertService:
                 message_id, cfg['scope_id'], cfg['mode'], cfg['recipient_id'], todo_id,
                 _clean(email_data.get('subject')),
                 _clean(email_data.get('from_name') or email_data.get('from_email'), 80),
+                alert_text,
             )
 
         if not dry_run:
@@ -272,7 +344,7 @@ class EmailAlertService:
         if cfg['mode'] == MODE_ALERT:
             self.notification_service.notify_user(
                 user_id=int(recipient_id),
-                message=f"Email importante ({scope_label}) da {sender}: {subject}",
+                message=_alert_text(scope_label, email_data),
                 type='warning',
                 link=f"/email?message={email_data['id']}",
             )

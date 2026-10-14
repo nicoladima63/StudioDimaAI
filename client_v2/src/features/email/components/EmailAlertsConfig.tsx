@@ -50,7 +50,9 @@ const STATE_TO_COLOR: Record<string, FeedbackColor> = {
   error: 'danger',
 }
 
-const toPayload = (item: EmailAlertConfigItem): EmailAlertConfigPayload => ({
+const TEST_DAYS_OPTIONS = [1, 3, 7, 14, 30]
+
+const toPayload =(item: EmailAlertConfigItem): EmailAlertConfigPayload => ({
   mode: item.mode,
   recipient_id: item.recipient_id,
   priority: item.priority,
@@ -75,6 +77,7 @@ const EmailAlertsConfig: React.FC = () => {
   const [savingId, setSavingId] = useState<number | null>(null)
   const [previewing, setPreviewing] = useState(false)
   const [preview, setPreview] = useState<EmailAlertRunResult | null>(null)
+  const [testDays, setTestDays] = useState(7)
   const [feedback, setFeedback] = useState<{ color: FeedbackColor; text: string } | null>(null)
 
   const loadAll = useCallback(async () => {
@@ -138,12 +141,12 @@ const EmailAlertsConfig: React.FC = () => {
     }
   }
 
-  const handlePreview = async () => {
+  const handlePreview = async (lookbackDays?: number) => {
     setPreviewing(true)
     setFeedback(null)
     setPreview(null)
     try {
-      const result = await emailService.apiRunAlerts(true)
+      const result = await emailService.apiRunAlerts(true, lookbackDays)
       if (result.success && result.data) {
         setPreview(result.data)
         if (result.data.state !== 'success') {
@@ -305,13 +308,13 @@ const EmailAlertsConfig: React.FC = () => {
           </CListGroup>
         )}
 
-        <div className="mt-3">
+        <div className="mt-3 d-flex flex-wrap gap-2 align-items-center">
           <CButton
             size="sm"
             color="secondary"
             variant="outline"
             disabled={previewing || activeCount === 0}
-            onClick={handlePreview}
+            onClick={() => handlePreview()}
           >
             {previewing ? (
               <CSpinner size="sm" className="me-1" />
@@ -320,13 +323,36 @@ const EmailAlertsConfig: React.FC = () => {
             )}
             Anteprima: cosa scatterebbe ora
           </CButton>
+          <CFormSelect
+            size="sm"
+            style={{ width: 'auto' }}
+            value={testDays}
+            onChange={e => setTestDays(Number(e.target.value))}
+            aria-label="Giorni da controllare"
+          >
+            {TEST_DAYS_OPTIONS.map(days => (
+              <option key={days} value={days}>
+                Ultimi {days} {days === 1 ? 'giorno' : 'giorni'}
+              </option>
+            ))}
+          </CFormSelect>
+          <CButton
+            size="sm"
+            color="info"
+            variant="outline"
+            disabled={previewing || activeCount === 0}
+            onClick={() => handlePreview(testDays)}
+            title="Controlla anche le email arrivate prima dell'attivazione. Non invia nulla."
+          >
+            Prova su email vecchie
+          </CButton>
         </div>
 
         {preview && preview.state === 'success' && (
           <div className="mt-3">
             {preview.would_send.length === 0 ? (
               <p className="text-muted small mb-0">
-                Nessuna email nuova da segnalare (controllate {preview.checked}).
+                Nessuna email da segnalare (controllate {preview.checked}).
               </p>
             ) : (
               <CListGroup flush>
@@ -335,8 +361,8 @@ const EmailAlertsConfig: React.FC = () => {
                     <CBadge color={entry.mode === 'todo' ? 'warning' : 'info'} className="me-2">
                       {entry.mode === 'todo' ? 'Todo' : 'Alert'}
                     </CBadge>
-                    <strong>{entry.scope_label}</strong>: {entry.subject}
-                    <span className="text-muted"> - {entry.sender}</span>
+                    <strong>{entry.scope_label}</strong>: {entry.text ?? entry.subject}
+                    {!entry.text && <span className="text-muted"> - {entry.sender}</span>}
                   </CListGroupItem>
                 ))}
               </CListGroup>

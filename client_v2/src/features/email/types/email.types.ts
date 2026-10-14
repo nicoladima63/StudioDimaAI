@@ -80,6 +80,7 @@ export interface EmailAlertPreviewItem {
   scope_label: string
   sender: string
   subject: string
+  text: string | null
 }
 
 export interface EmailAlertRunResult {

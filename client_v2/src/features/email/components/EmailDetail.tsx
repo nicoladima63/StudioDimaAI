@@ -13,6 +13,7 @@ import {
   CDropdown,
   CDropdownToggle,
   CDropdownMenu,
+  CDropdownHeader,
   CDropdownItem,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -213,6 +214,7 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, visible, onClose, onCr
               Crea Regola da questa email
             </CDropdownToggle>
             <CDropdownMenu>
+              <CDropdownHeader>Scegli quale condizione usare</CDropdownHeader>
               {buildRulePresets().map((preset, idx) => (
                 <CDropdownItem key={idx} onClick={() => handleCreateRule(preset)}>
                   {preset.label}

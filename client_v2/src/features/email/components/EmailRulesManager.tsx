@@ -90,7 +90,7 @@ const EmailRulesManager: React.FC<EmailRulesManagerProps> = ({ preset, onPresetC
     if (preset) {
       setEditing(null)
       setForm({
-        scope_id: scopes.length > 0 ? scopes[0].id : 0,
+        scope_id: 0,
         field: preset.field,
         operator: preset.operator,
         value: preset.value,

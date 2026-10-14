@@ -67,6 +67,9 @@ class EmailAlertRepository(BaseRepository):
                         processed_at INTEGER NOT NULL
                     )
                 ''')
+                cursor.execute("PRAGMA table_info(email_alert_log)")
+                if 'alert_text' not in [row[1] for row in cursor.fetchall()]:
+                    cursor.execute("ALTER TABLE email_alert_log ADD COLUMN alert_text TEXT")
                 cursor.execute(
                     'CREATE INDEX IF NOT EXISTS idx_email_alert_log_processed ON email_alert_log(processed_at)'
                 )
@@ -148,21 +151,34 @@ class EmailAlertRepository(BaseRepository):
 
     def log_message(self, message_id: str, scope_id: Optional[int], action: str,
                     recipient_id: Optional[int] = None, todo_id: Optional[int] = None,
-                    subject: Optional[str] = None, sender: Optional[str] = None) -> None:
+                    subject: Optional[str] = None, sender: Optional[str] = None,
+                    alert_text: Optional[str] = None) -> None:
         """Registra un'email come elaborata (INSERT OR IGNORE: idempotente)."""
         try:
             with self.db_manager.transaction() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
                     '''INSERT OR IGNORE INTO email_alert_log
-                       (message_id, scope_id, action, recipient_id, todo_id, subject, sender, processed_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
-                    (message_id, scope_id, action, recipient_id, todo_id, subject, sender, int(time.time())),
+                       (message_id, scope_id, action, recipient_id, todo_id, subject, sender,
+                        processed_at, alert_text)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (message_id, scope_id, action, recipient_id, todo_id, subject, sender,
+                     int(time.time()), alert_text),
                 )
                 cursor.close()
         except Exception as e:
             logger.error(f"Failed to log email alert {message_id}: {e}")
             raise RepositoryError(f"Failed to log email alert: {str(e)}", cause=e)
+
+    def was_alert_sent(self, recipient_id: int, alert_text: str, since_ts: int) -> bool:
+        """True se a questo destinatario e' gia' arrivato lo stesso testo dopo since_ts."""
+        rows = self.execute_custom_query(
+            '''SELECT 1 FROM email_alert_log
+               WHERE action = 'alert' AND recipient_id = ? AND alert_text = ? AND processed_at >= ?
+               LIMIT 1''',
+            (int(recipient_id), alert_text, int(since_ts)), fetch_all=True,
+        )
+        return bool(rows)
 
     def get_recent_alerts(self, limit: int = 20) -> List[Dict[str, Any]]:
         """Ultimi avvisi effettivamente inviati (alert o todo)."""

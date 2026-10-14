@@ -409,8 +409,12 @@ class SchedulerService:
                 from services.email_alert_service import build_email_alert_service
 
                 result = build_email_alert_service().run()
-                if result.get('alerts') or result.get('todos') or result.get('failed'):
-                    logger.info(f"[EMAIL ALERTS] {result.get('message')}")
+                if result.get('checked') or result.get('alerts') or result.get('todos') or result.get('failed'):
+                    logger.info(
+                        f"[EMAIL ALERTS] controllate {result.get('checked', 0)} email, "
+                        f"{result.get('alerts', 0)} alert, {result.get('todos', 0)} todo, "
+                        f"{result.get('duplicates', 0)} duplicati, {result.get('failed', 0)} falliti"
+                    )
                 elif result.get('state') == 'warning':
                     logger.warning(f"[EMAIL ALERTS] {result.get('message')}")
 

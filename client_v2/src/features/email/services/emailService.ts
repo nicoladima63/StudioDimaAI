@@ -316,9 +316,12 @@ export const emailService = {
     }
   },
 
-  async apiRunAlerts(dryRun: boolean): Promise<ApiResponse<EmailAlertRunResult>> {
+  async apiRunAlerts(dryRun: boolean, lookbackDays?: number): Promise<ApiResponse<EmailAlertRunResult>> {
     try {
-      const response = await apiClient.post('/email/alerts/run', { dry_run: dryRun })
+      const response = await apiClient.post('/email/alerts/run', {
+        dry_run: dryRun,
+        ...(lookbackDays ? { lookback_days: lookbackDays } : {}),
+      })
       return response.data
     } catch (error: any) {
       return {
