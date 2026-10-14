@@ -455,8 +455,9 @@ if exist "%DEPLOY_PATH%\start_server_v2.bat" (
     echo     timeout /t 3 /nobreak ^>nul
     echo     goto loop
     echo ^)
-    echo echo Server terminato con codice %%EXIT_CODE%%.
-    echo pause
+    echo echo [%%date%% %%time%%] Server terminato con codice %%EXIT_CODE%%. Riavvio tra 10 secondi...
+    echo timeout /t 10 /nobreak ^>nul
+    echo goto loop
     ) > "%DEPLOY_PATH%\start_server_v2.bat"
 
     if not exist "%DEPLOY_PATH%\start_server_v2.bat" (
@@ -490,6 +491,15 @@ if exist "start_server.bat" (
 ) else (
     echo   [WARN] start_server.bat non trovato nel repo
     echo   [WARN] start_server.bat non trovato nel repo >> "%LOGFILE%"
+)
+
+if exist "install_autostart.bat" (
+    copy "install_autostart.bat" "%DEPLOY_PATH%\install_autostart.bat" /Y >nul 2>&1
+    echo   [OK] install_autostart.bat deployato
+    echo   [OK] install_autostart.bat deployato >> "%LOGFILE%"
+) else (
+    echo   [WARN] install_autostart.bat non trovato nel repo
+    echo   [WARN] install_autostart.bat non trovato nel repo >> "%LOGFILE%"
 )
 
 if exist "AUTOSTART_SETUP.md" (
