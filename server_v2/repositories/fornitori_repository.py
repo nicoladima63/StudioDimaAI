@@ -21,6 +21,8 @@ from ..utils.dbf_utils import DbfProcessor, clean_dbf_value, safe_get_dbf_field
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 
 class FornitoriRepository(BaseRepository):
     """
@@ -44,7 +46,10 @@ class FornitoriRepository(BaseRepository):
         self._ensure_tables_exist()
     
     def _ensure_tables_exist(self) -> None:
-        """Ensure the classificazioni_costi and related tables exist."""
+        """Ensure the classificazioni_costi and related tables exist (once per process)."""
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
         try:
             # Main classificazioni_costi table
             create_classificazioni_sql = '''
@@ -114,6 +119,7 @@ class FornitoriRepository(BaseRepository):
                     
                 cursor.close()
                 
+            _TABLES_READY = True
             logger.info("Fornitori-related tables and indexes ensured")
             
         except Exception as e:

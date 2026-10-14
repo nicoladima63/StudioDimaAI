@@ -7,6 +7,8 @@ from core.exceptions import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 class NotificationRepository(BaseRepository):
     """
     Repository for managing user notifications.
@@ -21,7 +23,10 @@ class NotificationRepository(BaseRepository):
         self._ensure_tables_exist()
         
     def _ensure_tables_exist(self) -> None:
-        """Ensure notification table exists."""
+        """Ensure notification table exists (once per process)."""
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
         try:
             with self.db_manager.transaction() as conn:
                 cursor = conn.cursor()
@@ -38,6 +43,8 @@ class NotificationRepository(BaseRepository):
                 ''')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, read_at)')
                 
+            _TABLES_READY = True
+
         except Exception as e:
             logger.error(f"Failed to ensure notification table: {e}")
             raise RepositoryError(f"Failed to ensure notification table: {str(e)}", cause=e)

@@ -8,6 +8,8 @@ from core.exceptions import RepositoryError, ValidationError
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 class WorkRepository(BaseRepository):
     """
     Repository for managing Work templates and their associated Step templates.
@@ -36,7 +38,10 @@ class WorkRepository(BaseRepository):
         return result
         
     def _ensure_tables_exist(self) -> None:
-        """Ensure necessary tables exist."""
+        """Ensure necessary tables exist (once per process)."""
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
         try:
             with self.db_manager.transaction() as conn:
                 cursor = conn.cursor()
@@ -82,6 +87,8 @@ class WorkRepository(BaseRepository):
                 
                 cursor.close()
                 
+            _TABLES_READY = True
+
         except Exception as e:
             logger.error(f"Failed to ensure work tables: {e}")
             raise RepositoryError(f"Failed to ensure work tables: {str(e)}", cause=e)

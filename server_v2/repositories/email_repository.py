@@ -6,6 +6,8 @@ from core.exceptions import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 
 class EmailScopeRepository(BaseRepository):
     """Repository for managing email scopes (categories)."""
@@ -19,6 +21,9 @@ class EmailScopeRepository(BaseRepository):
         self._ensure_tables_exist()
 
     def _ensure_tables_exist(self) -> None:
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
         try:
             with self.db_manager.transaction() as conn:
                 cursor = conn.cursor()
@@ -91,6 +96,8 @@ class EmailScopeRepository(BaseRepository):
                         'INSERT INTO email_scopes (name, label, description, icon, color, is_default) VALUES (?, ?, ?, ?, ?, ?)',
                         default_scopes
                     )
+
+            _TABLES_READY = True
 
         except Exception as e:
             logger.error(f"Failed to ensure email tables: {e}")

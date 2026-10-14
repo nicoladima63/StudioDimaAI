@@ -7,6 +7,8 @@ from core.exceptions import RepositoryError, ValidationError
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 class TaskRepository(BaseRepository):
     """
     Repository for managing Tasks (instances of Works) and their associated Steps.
@@ -21,7 +23,10 @@ class TaskRepository(BaseRepository):
         self._ensure_tables_exist()
         
     def _ensure_tables_exist(self) -> None:
-        """Ensure necessary tables exist."""
+        """Ensure necessary tables exist (once per process)."""
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
         try:
             with self.db_manager.transaction() as conn:
                 cursor = conn.cursor()
@@ -78,6 +83,8 @@ class TaskRepository(BaseRepository):
                 
                 cursor.close()
                 
+            _TABLES_READY = True
+
         except Exception as e:
             logger.error(f"Failed to ensure task tables: {e}")
             raise RepositoryError(f"Failed to ensure task tables: {str(e)}", cause=e)

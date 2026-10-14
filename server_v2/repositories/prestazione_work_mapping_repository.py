@@ -6,6 +6,8 @@ from core.exceptions import RepositoryError
 
 logger = logging.getLogger(__name__)
 
+_TABLES_READY = False
+
 class PrestazioneWorkMappingRepository(BaseRepository):
     """Repository per mappare codici prestazione → work_id"""
 
@@ -18,7 +20,10 @@ class PrestazioneWorkMappingRepository(BaseRepository):
         self._ensure_tables_exist()
 
     def _ensure_tables_exist(self) -> None:
-        """Crea la tabella mapping se non esiste."""
+        """Crea la tabella mapping se non esiste (una volta per processo)."""
+        global _TABLES_READY
+        if _TABLES_READY:
+            return
         try:
             with self.db_manager.transaction() as conn:
                 cursor = conn.cursor()
@@ -33,6 +38,7 @@ class PrestazioneWorkMappingRepository(BaseRepository):
                     )
                 ''')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_prestazione_codice ON prestazione_work_mapping(codice_prestazione)')
+            _TABLES_READY = True
         except Exception as e:
             logger.error(f"Failed to ensure prestazione_work_mapping table: {e}")
             raise RepositoryError(f"Failed to ensure table: {str(e)}", cause=e)
