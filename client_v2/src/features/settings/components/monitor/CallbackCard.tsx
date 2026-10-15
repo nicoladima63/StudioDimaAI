@@ -18,7 +18,8 @@ import CIcon from '@coreui/icons-react';
 import { cilList, cilSettings, cilWarning, cilCheckCircle } from '@coreui/icons';
 import { Action, ActionParameter } from '@/features/settings/services/automation.service';
 import templatesService, { SmsTemplate } from '@/features/settings/services/templates.service';
-import worksService, { Work } from '@/services/api/works.service';
+import { worksService } from '@/services/works.service'
+import type { Work } from '@/types/works.types'
 import prestazioneWorkMappingService from '@/services/api/prestazioneWorkMapping.service';
 import type { Trigger } from './TriggerSourceSelector';
 import toast from 'react-hot-toast';
@@ -67,7 +68,7 @@ const CallbackCard: React.FC<CallbackCardProps> = ({
 
     const fetchWorks = async () => {
       try {
-        const data = await worksService.apiGetAll();
+        const data = await worksService.getAllWorks();
         setWorks(data || []);
       } catch (error) {
         console.error("Failed to fetch works", error);

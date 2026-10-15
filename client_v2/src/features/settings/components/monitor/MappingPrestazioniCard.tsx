@@ -23,7 +23,8 @@ import CIcon from '@coreui/icons-react'
 import { cilSettings, cilTrash, cilPlus, cilTask } from '@coreui/icons'
 import prestazioneWorkMappingService, { PrestazioneWorkMapping } from '@/services/api/prestazioneWorkMapping.service'
 import { usePrestazioniStore, Prestazione } from '@/store/prestazioni.store'
-import worksService, { Work } from '@/services/api/works.service'
+import { worksService } from '@/services/works.service'
+import type { Work } from '@/types/works.types'
 import Select from 'react-select'
 import toast from 'react-hot-toast'
 
@@ -62,7 +63,7 @@ const MappingPrestazioniCard: React.FC<MappingPrestazioniCardProps> = ({ onCreat
 
   const loadWorks = async () => {
     try {
-      const data = await worksService.apiGetAll()
+      const data = await worksService.getAllWorks()
       setWorks(data || [])
     } catch (error) {
       console.error('Failed to fetch works', error)

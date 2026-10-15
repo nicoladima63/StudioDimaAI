@@ -11,7 +11,6 @@ const Dashboard = React.lazy(() => import('@/features/dashboard/pages/Dashboard'
 const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
 const RegisterPage = React.lazy(() => import('@/features/auth/pages/RegisterPage'))
 const MaterialiPage = React.lazy(() => import('@/features/materiali/pages/MaterialiPage'))
-const ProvaRicercaMaterialiPage = React.lazy(() => import('@/features/materiali/pages/ProvaRicercaMaterialiPage'))
 const OrdiniPage = React.lazy(() => import('@/features/materiali/pages/OrdiniPage'))
 const ProdottiDaClassificarePage = React.lazy(() => import('@/features/materiali/pages/ProdottiDaClassificarePage'))
 const MaterialiMigrazione = React.lazy(() => import('@/features/materiali/pages/MaterialiMigrazione'))
@@ -28,10 +27,6 @@ const CollaboratoriPage = React.lazy(() => import('@/features/collaboratori/page
 const EisenhowerMatrixPage = React.lazy(() => import('@/features/tempo/pages/TempoPage'))
 const PrimeVisitePage = React.lazy(() => import('@/features/automation/pages/AutomationMessages'))
 const NotFoundPage = React.lazy(() => import('@/components/ui/NotFoundPage'))
-
-//test page
-const TestSelectPage = React.lazy(() => import('@/features/test/TestSelectPage'))
-const RicettaTestPage = React.lazy(() => import('@/features/ricetta-elettronica/pages/RNETestPage'))
 
 //settings page
 const SettingCalendarPage = React.lazy(() => import('@/features/settings/pages/CalendarSettings'))
@@ -95,7 +90,6 @@ const AppRouter: React.FC = () => {
           {/* Feature routes */}
           <Route path='eisenhower' element={<EisenhowerMatrixPage />} />
           <Route path='materiali' element={<MaterialiPage />} />
-          <Route path='materiali/prova-ricerca' element={<ProvaRicercaMaterialiPage />} />
           <Route path='materiali/ordini' element={<OrdiniPage />} />
           <Route path='materiali/da-classificare' element={<ProdottiDaClassificarePage />} />
           <Route path='materiali/migrazione' element={<MaterialiMigrazione />} />
@@ -113,8 +107,6 @@ const AppRouter: React.FC = () => {
           <Route path='collaboratori' element={<CollaboratoriPage />} />
           <Route path='email' element={<EmailPage />} />
           {/* Pagina di test per le select */}
-          <Route path='test' element={<TestSelectPage />} />
-          <Route path='ricetta/test' element={<RicettaTestPage />} />
 
           {/* Pagine di settings */}
           <Route path='settings' element={<Navigate to='/settings/scheduler' replace />} />
@@ -158,13 +150,6 @@ const AppRouter: React.FC = () => {
           {/* CBCT / TAC */}
           <Route path='cbct' element={<DownloadTacPage />} />
 
-          {/* Catch-all for 404 */}
-          {/* Future feature routes will be added here */}
-          {/* 
-          <Route path='fornitori/*' element={<FornitoriRoutes />} />
-          <Route path='materiali/*' element={<MaterialiRoutes />} />
-          <Route path='statistiche/*' element={<StatisticheRoutes />} />
-          */}
         </Route>
 
         {/* 404 route */}

@@ -25,7 +25,6 @@ const navigation: NavItem[] = [
       { name: 'Pazienti', to: '/pazienti', iconName: 'Users' },
       { name: 'Richiami', to: '/pazienti/richiami', iconName: 'Phone' },
       { name: 'Materiali', to: '/materiali', iconName: 'Package' },
-      { name: 'Prova ricerca materiali', to: '/materiali/prova-ricerca', iconName: 'Search' },
       { name: 'Ordini materiali', to: '/materiali/ordini', iconName: 'ShoppingCart' },
       { name: 'Prodotti da classificare', to: '/materiali/da-classificare', iconName: 'ListChecks' },
       { name: 'Conti', to: '/conti', iconName: 'Wallet' },
@@ -39,7 +38,6 @@ const navigation: NavItem[] = [
     iconName: 'FileText',
     items: [
       { name: 'NRE', to: '/ricetta', iconName: 'FileText' },
-      { name: 'Test Ricette', to: '/ricetta/test', iconName: 'TestTube', allowedRoles: ['admin', 'dottore'] },
     ],
   },
   {
