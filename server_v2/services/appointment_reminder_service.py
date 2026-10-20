@@ -48,6 +48,15 @@ REMINDER_MESSAGES = {
         ),
         'sms': "Studio Dr.Di Martino: promemoria visita oggi ore {ora}. Info: 0574712060",
     },
+    # Reminder anticipato al venerdi per le igiene del lunedi pomeriggio: stesso
+    # scopo del 24h (richiesta SI/NO) ma il testo non puo' dire "domani".
+    'early_hygiene': {
+        'wa': (
+            "Ciao {nome}! Lunedi {data} alle {ora} hai un appuntamento dal dentista "
+            "(Studio Dr. Di Martino).\nRispondi SI per confermare o NO per cancellare. Grazie!"
+        ),
+        'sms': "Studio Dr.Di Martino: appuntamento lunedi {data} ore {ora}. Info: 0574712060",
+    },
     'followup': {
         'wa': (
             "Promemoria: il suo appuntamento e oggi alle {ora} (Studio Dr. Di Martino). "
@@ -144,6 +153,27 @@ def _new_patient_reminder_id(phone: str) -> str:
 # Tentativi di invio falliti per uno stesso reminder prima di arrendersi e avvisare la segreteria
 MAX_FAILED_ATTEMPTS = 3
 
+# Reminder anticipato: il venerdi mattina per le igiene di Anet del lunedi
+# pomeriggio, cosi' la segreteria ha il fine settimana per sostituire le rinunce.
+# Nel log comunicazioni e' registrato come '24h': il job 24h della domenica
+# li trova gia' inviati e li salta.
+EARLY_HYGIENE_SEND_WEEKDAY = 4      # venerdi (datetime.weekday())
+EARLY_HYGIENE_TARGET_WEEKDAY = 0    # lunedi
+EARLY_HYGIENE_MEDICO_ID = 5         # Anet (stesso id di _MEDICO_TO_IGIENISTA in v2_bot)
+
+
+def _logged_reminder_type(reminder_type: str) -> str:
+    """Tipo con cui il reminder e' registrato e deduplicato in patient_communications."""
+    return '24h' if reminder_type == 'early_hygiene' else reminder_type
+
+
+def _is_early_hygiene_medico(record) -> bool:
+    try:
+        return int(str(record['DB_APMEDIC']).strip()) == EARLY_HYGIENE_MEDICO_ID
+    except (TypeError, ValueError, KeyError):
+        return False
+
+
 # Orari dei job 24h in scheduler_service.py (da mantenere allineati)
 REMINDER_24H_MORNING_HOUR = 8
 REMINDER_24H_AFTERNOON_HOUR = 14
@@ -226,7 +256,15 @@ def get_upcoming_appointments(
     # 24h riguardano domani, quelli 2h riguardano oggi: usare sempre lo stesso
     # giorno per entrambi era il motivo per cui il filtro non copriva in modo
     # affidabile sabato/domenica.
-    appointment_day = tomorrow if reminder_type == '24h' else now.date()
+    if reminder_type == 'early_hygiene':
+        # Solo il venerdi: l'appuntamento e' il lunedi successivo.
+        if now.weekday() != EARLY_HYGIENE_SEND_WEEKDAY:
+            return []
+        appointment_day = (now + timedelta(days=3)).date()
+    elif reminder_type == '24h':
+        appointment_day = tomorrow
+    else:
+        appointment_day = now.date()
     appointment_day_of_week = appointment_day.weekday() + 1  # 1=Lun, ..., 7=Dom
 
     # Il job automatico rispetta la configurazione del giorno. Le schermate di
@@ -280,6 +318,10 @@ def get_upcoming_appointments(
                         match = (ap_dt.hour >= morning_threshold)
                     else:
                         match = True
+                elif reminder_type == 'early_hygiene':
+                    match = (ap_date == appointment_day
+                             and ap_dt.hour >= morning_threshold
+                             and _is_early_hygiene_medico(record))
                 elif reminder_type == '2h':
                     # Appuntamenti tra 90 e 150 minuti da adesso
                     delta = (ap_dt - now).total_seconds() / 60
@@ -772,13 +814,15 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
     """
     Funzione chiamata dallo scheduler.
 
-    reminder_type:   '24h' o '2h'
+    reminder_type:   '24h', '2h' o 'early_hygiene' (venerdi, igiene Anet del lunedi
+                     pomeriggio; registrato come '24h' per non ripeterlo la domenica)
     slot:            'morning' | 'afternoon' | 'all' (usato solo per 24h)
     dry_run:         se True, simula senza inviare nulla
     patient_filter:  se valorizzato, processa solo il paziente con questo patient_id
     Ritorna statistiche: {sent_wa, sent_sms, skipped_fisso, errors, no_phone}
     """
     ensure_reminder_tables()
+    log_type = _logged_reminder_type(reminder_type)
     appointments = get_upcoming_appointments(reminder_type, slot=slot)
     if patient_filter:
         appointments = [a for a in appointments if a['patient_id'] == patient_filter]
@@ -795,7 +839,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
         tel = ap.get('tel', '').strip()
 
         # Anti-duplicati
-        if _already_sent(pid, ap_date, ap_time, reminder_type):
+        if _already_sent(pid, ap_date, ap_time, log_type):
             continue
 
         # Se ha già confermato (SI alla 24h), non disturbare con il 2h
@@ -849,7 +893,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
 
                 channel = result.get('channel', 'sms')
                 stato = 'sent' if result['success'] else 'failed'
-                _log_communication(pid, name, phone, channel, reminder_type, ap_date, ap_time,
+                _log_communication(pid, name, phone, channel, log_type, ap_date, ap_time,
                                    stato, result.get('message_id', ''), result.get('error') or '')
                 if result['success']:
                     if channel == 'whatsapp':

@@ -45,6 +45,7 @@ class SchedulerService:
         self._current_email_alert_job = None
         self._current_reminder_24h_morning_job = None
         self._current_reminder_24h_afternoon_job = None
+        self._current_reminder_early_hygiene_job = None
         self._current_reminder_2h_job = None
         self._current_reminder_recovery_job = None
 
@@ -449,6 +450,7 @@ class SchedulerService:
         for attr, job_id in [
             ('_current_reminder_24h_morning_job', 'appt_reminder_24h_morning'),
             ('_current_reminder_24h_afternoon_job', 'appt_reminder_24h_afternoon'),
+            ('_current_reminder_early_hygiene_job', 'appt_reminder_early_hygiene'),
             ('_current_reminder_2h_job', 'appt_reminder_2h'),
             ('_current_reminder_recovery_job', 'appt_reminder_recovery'),
         ]:
@@ -505,6 +507,19 @@ class SchedulerService:
             self._current_reminder_24h_afternoon_job = self.scheduler.add_job(
                 job_24h_afternoon, CronTrigger(hour=14, minute=0, timezone=ROME_TZ),
                 id='appt_reminder_24h_afternoon', replace_existing=True
+            )
+            def job_early_hygiene():
+                from services.appointment_reminder_service import run_reminders
+                try:
+                    run_reminders('early_hygiene')
+                except Exception as e:
+                    logger.error(f"[REMINDER early hygiene] Errore: {e}")
+
+            # Venerdi ore 8:10 (sfalsato dal job 24h delle 8:00): igiene di Anet del
+            # lunedi pomeriggio, per avere il fine settimana per sostituire le rinunce
+            self._current_reminder_early_hygiene_job = self.scheduler.add_job(
+                job_early_hygiene, CronTrigger(day_of_week='fri', hour=8, minute=10, timezone=ROME_TZ),
+                id='appt_reminder_early_hygiene', replace_existing=True
             )
         if enabled_2h:
             def job_2h():
