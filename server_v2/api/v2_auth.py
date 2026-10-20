@@ -93,15 +93,6 @@ def login():
         user_repo = UserRepository()
         user = user_repo.find_by_username(username)
         
-        # --- DETAILED DEBUG LOGGING ---
-        if user:
-            logger.info(f"DEBUG: Password ricevuta: '{password}'")
-            logger.info(f"DEBUG: Hash dal DB: '{user['password_hash']}'")
-            is_password_correct = check_password_hash(user['password_hash'], password)
-            logger.info(f"DEBUG: check_password_hash ha restituito: {is_password_correct}")
-        else:
-            logger.warning(f"DEBUG: Utente '{username}' non trovato nel database.")
-        # --- END DETAILED DEBUG LOGGING ---
 
         if not user or not check_password_hash(user['password_hash'], password):
             logger.warning(f"Failed login attempt for username: {username}")

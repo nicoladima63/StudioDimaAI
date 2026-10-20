@@ -3,7 +3,9 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import httplib2
 from google.oauth2.credentials import Credentials
+from google_auth_httplib2 import AuthorizedHttp
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -15,6 +17,9 @@ from .paths import ensure_data_dir
 logger = logging.getLogger(__name__)
 
 GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+
+# Senza un limite, una connessione sospesa con Gmail blocca per sempre il thread che la usa.
+HTTP_TIMEOUT_SECONDS = 30
 
 
 class GoogleGmailClient:
@@ -42,10 +47,11 @@ class GoogleGmailClient:
             except GmailCredentialsNotFoundError:
                 raise
 
+        http = AuthorizedHttp(self.creds, http=httplib2.Http(timeout=HTTP_TIMEOUT_SECONDS))
         return build(
             "gmail",
             "v1",
-            credentials=self.creds,
+            http=http,
             cache_discovery=False,
         )
 

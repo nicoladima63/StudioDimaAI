@@ -19,7 +19,7 @@ const PageLayout: React.FC<PageLayoutProps> & {
   Footer: React.FC<{ text?: string; children?: React.ReactNode; className?: string }>
 } = ({ children, className }) => {
   return (
-    <div className={cn('rounded-lg border border-border bg-card shadow-sm overflow-hidden', className)}>
+    <div className={cn('rounded-lg border border-border bg-card shadow-sm overflow-clip', className)}>
       {children}
     </div>
   )

@@ -25,6 +25,7 @@ const navigation: NavItem[] = [
       { name: 'Pazienti', to: '/pazienti', iconName: 'Users' },
       { name: 'Richiami', to: '/pazienti/richiami', iconName: 'Phone' },
       { name: 'Materiali', to: '/materiali', iconName: 'Package' },
+      { name: 'Aggiungi materiali', to: '/materiali/aggiungi', iconName: 'Search' },
       { name: 'Ordini materiali', to: '/materiali/ordini', iconName: 'ShoppingCart' },
       { name: 'Prodotti da classificare', to: '/materiali/da-classificare', iconName: 'ListChecks' },
       { name: 'Conti', to: '/conti', iconName: 'Wallet' },
