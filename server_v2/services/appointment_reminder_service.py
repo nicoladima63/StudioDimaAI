@@ -48,7 +48,7 @@ REMINDER_MESSAGES = {
         ),
         'sms': "Studio Dr.Di Martino: promemoria visita oggi ore {ora}. Info: 0574712060",
     },
-    # Reminder anticipato al venerdi per le igiene del lunedi pomeriggio: stesso
+    # Reminder anticipato al giovedi per le igiene del lunedi pomeriggio: stesso
     # scopo del 24h (richiesta SI/NO) ma il testo non puo' dire "domani".
     'early_hygiene': {
         'wa': (
@@ -153,11 +153,11 @@ def _new_patient_reminder_id(phone: str) -> str:
 # Tentativi di invio falliti per uno stesso reminder prima di arrendersi e avvisare la segreteria
 MAX_FAILED_ATTEMPTS = 3
 
-# Reminder anticipato: il venerdi mattina per le igiene di Anet del lunedi
+# Reminder anticipato: il giovedi pomeriggio per le igiene di Anet del lunedi
 # pomeriggio, cosi' la segreteria ha il fine settimana per sostituire le rinunce.
 # Nel log comunicazioni e' registrato come '24h': il job 24h della domenica
 # li trova gia' inviati e li salta.
-EARLY_HYGIENE_SEND_WEEKDAY = 4      # venerdi (datetime.weekday())
+EARLY_HYGIENE_SEND_WEEKDAY = 3      # giovedi (datetime.weekday())
 EARLY_HYGIENE_TARGET_WEEKDAY = 0    # lunedi
 EARLY_HYGIENE_MEDICO_ID = 5         # Anet (stesso id di _MEDICO_TO_IGIENISTA in v2_bot)
 
@@ -257,10 +257,10 @@ def get_upcoming_appointments(
     # giorno per entrambi era il motivo per cui il filtro non copriva in modo
     # affidabile sabato/domenica.
     if reminder_type == 'early_hygiene':
-        # Solo il venerdi: l'appuntamento e' il lunedi successivo.
+        # Solo il giovedi: l'appuntamento e' il lunedi successivo.
         if now.weekday() != EARLY_HYGIENE_SEND_WEEKDAY:
             return []
-        appointment_day = (now + timedelta(days=3)).date()
+        appointment_day = (now + timedelta(days=4)).date()
     elif reminder_type == '24h':
         appointment_day = tomorrow
     else:
@@ -814,7 +814,7 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
     """
     Funzione chiamata dallo scheduler.
 
-    reminder_type:   '24h', '2h' o 'early_hygiene' (venerdi, igiene Anet del lunedi
+    reminder_type:   '24h', '2h' o 'early_hygiene' (giovedi, igiene Anet del lunedi
                      pomeriggio; registrato come '24h' per non ripeterlo la domenica)
     slot:            'morning' | 'afternoon' | 'all' (usato solo per 24h)
     dry_run:         se True, simula senza inviare nulla

@@ -515,10 +515,10 @@ class SchedulerService:
                 except Exception as e:
                     logger.error(f"[REMINDER early hygiene] Errore: {e}")
 
-            # Venerdi ore 8:10 (sfalsato dal job 24h delle 8:00): igiene di Anet del
+            # Giovedi ore 14:10 (sfalsato dal job 24h delle 14:00): igiene di Anet del
             # lunedi pomeriggio, per avere il fine settimana per sostituire le rinunce
             self._current_reminder_early_hygiene_job = self.scheduler.add_job(
-                job_early_hygiene, CronTrigger(day_of_week='fri', hour=8, minute=10, timezone=ROME_TZ),
+                job_early_hygiene, CronTrigger(day_of_week='thu', hour=14, minute=10, timezone=ROME_TZ),
                 id='appt_reminder_early_hygiene', replace_existing=True
             )
         if enabled_2h:
