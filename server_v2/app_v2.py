@@ -473,7 +473,8 @@ def register_request_handlers(app: Flask) -> None:
     @app.after_request
     def after_request(response):
         """Process response and log request."""
-        # Calculate request duration
+        # Calculate request duration (0 se before_request e' fallita prima di impostare start_time)
+        duration = 0.0
         if hasattr(g, 'start_time'):
             duration = (datetime.utcnow() - g.start_time).total_seconds()
             response.headers['X-Response-Time'] = f"{duration:.3f}s"
@@ -497,22 +498,6 @@ def register_request_handlers(app: Flask) -> None:
 
 def register_health_check(app: Flask) -> None:
     """Register health check endpoint."""
-    
-    @app.route(f"{app.config['API_PREFIX']}/debug-routes")
-    def debug_routes():
-        """Debug endpoint to list all routes."""
-        routes = []
-        for rule in app.url_map.iter_rules():
-            routes.append({
-                'endpoint': rule.endpoint,
-                'methods': list(rule.methods),
-                'rule': str(rule)
-            })
-        return jsonify({'routes': routes})
-
-    @app.route(f"{app.config['API_PREFIX']}/test-main")
-    def test_main():
-        return "MAIN SERVER OK"
     
     @app.route("/oauth/callback")
     def oauth_callback():

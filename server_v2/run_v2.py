@@ -62,20 +62,6 @@ def parse_arguments():
     )
     
     parser.add_argument(
-        '--threads',
-        type=int,
-        default=6,
-        help='Number of threads for Waitress server (default: 6)'
-    )
-    
-    parser.add_argument(
-        '--use-waitress',
-        action='store_true',
-        default=True,
-        help='Use Waitress WSGI server (recommended for production)'
-    )
-    
-    parser.add_argument(
         '--use-flask-dev',
         action='store_true',
         help='Use Flask development server (not recommended for production)'
@@ -326,8 +312,9 @@ def acquire_single_instance(port: int, wait_seconds: int = 30) -> bool:
         time.sleep(1)
 
 
-def run_with_waitress(app, args):
+def run_with_socketio(app, args):
     """Run server using SocketIO (WebSocket support)."""
+    # shortcut: e' il server Werkzeug (non Waitress), basta per una clinica; per piu' carico servono waitress/gevent con async_mode adatto
     try:
         # Import socketio from app_v2
         from app_v2 import socketio
@@ -490,7 +477,7 @@ def main():
         if args.use_flask_dev:
             run_with_flask_dev(app, args)
         else:
-            run_with_waitress(app, args)
+            run_with_socketio(app, args)
             
     except KeyboardInterrupt:
         sys.stderr.write("\nStartup interrupted by user\n")
