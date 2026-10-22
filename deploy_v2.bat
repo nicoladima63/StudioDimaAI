@@ -1,6 +1,16 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0"
+
+:: Deploy solo da main: il 12/10 un deploy da un altro branch ha riportato indietro la produzione.
+:: Se git non risponde CUR_BRANCH resta vuoto e il deploy si ferma lo stesso.
+for /f %%b in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "CUR_BRANCH=%%b"
+if /i not "!CUR_BRANCH!"=="main" (
+    echo ERRORE: branch corrente "!CUR_BRANCH!", il deploy e' permesso solo da main.
+    pause
+    exit /b 1
+)
+
 :: LOGGING SU FILE
 set "LOGFILE=%~dp0deploy_log.txt"
 echo ========================================== > "%LOGFILE%"
