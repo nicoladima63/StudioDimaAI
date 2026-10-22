@@ -137,3 +137,8 @@ deploy_log.txt
 
 # Backup locali creati da sync_prod_instance_to_local.bat
 /_local_instance_backups/
+
+# Credenziali OAuth Google, log e file temporanei locali
+server_v2/credentials.json
+*.log
+/tmp/
