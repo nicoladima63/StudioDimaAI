@@ -6,6 +6,7 @@ directly from StudioDimaAI without going through n8n UI.
 """
 
 import os
+import hmac
 import logging
 import sqlite3
 import subprocess
@@ -30,8 +31,9 @@ BOT_API_KEY = os.getenv('BOT_API_KEY', '')
 def _require_bot_key(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        key = request.headers.get('X-Bot-Api-Key', '')
-        if not BOT_API_KEY or key != BOT_API_KEY:
+        # ?key= serve al webhook di Evolution, che puo' solo chiamare un URL fisso
+        key = request.headers.get('X-Bot-Api-Key') or request.args.get('key', '')
+        if not BOT_API_KEY or not hmac.compare_digest(key.encode(), BOT_API_KEY.encode()):
             return format_response(success=False, error='Unauthorized'), 401
         return f(*args, **kwargs)
     return decorated
@@ -609,10 +611,11 @@ _EVO_NEGATIVE = {'NO', 'CANCELLO', 'ANNULLO', 'ANNULLA', 'DISDICO', 'DISDETTA', 
 
 
 @bot_v2_bp.route('/bot/whatsapp-webhook', methods=['POST'])
+@_require_bot_key
 def evolution_webhook():
     """
     Riceve eventi da Evolution API (diretto, senza n8n).
-    Accessibile solo da host.docker.internal — nessun JWT richiesto.
+    Nessun JWT: protetto da BOT_API_KEY, da mettere come ?key=... in EVOLUTION_WEBHOOK_URL.
     Gestisce messages.upsert per SI/NO dei pazienti sui reminder.
     """
     payload = request.get_json(silent=True) or {}
@@ -737,7 +740,7 @@ def get_evolution_dashboard_status():
         'evolution_reachable': False,
         'wa_state': 'unknown',
         'instance_exists': False,
-        'webhook_url': os.getenv('EVOLUTION_WEBHOOK_URL', ''),
+        'webhook_url': os.getenv('EVOLUTION_WEBHOOK_URL', '').split('?')[0],  # senza ?key=: il segreto non va mostrato
         'webhook_configured': bool(os.getenv('EVOLUTION_WEBHOOK_URL', '')),
         'reminder_24h_enabled': False,
         'reminder_2h_enabled': False,
