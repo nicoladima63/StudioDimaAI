@@ -13,6 +13,7 @@ from datetime import datetime
 from flask import Flask, jsonify, request, g, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request
+from markupsafe import escape
 from typing import Optional
 from core.google_calendar_client import GoogleCalendarClient
 from core.google_gmail_client import GoogleGmailClient
@@ -366,6 +367,16 @@ def register_blueprints(app: Flask) -> None:
         cbct_v2_bp,
     ]
     
+    # Blueprint le cui route non hanno @jwt_required singolo: il login e' richiesto a livello di blueprint
+    def require_login():
+        # niente return: un valore restituito da before_request diventerebbe la risposta
+        verify_jwt_in_request()
+
+    for blueprint in (monitoring_bp, automation_logs_bp, automation_bp, monitoring_changes_bp,
+                      prestazioni_bp, sms_tracking_bp, steps_bp, tables_bp, tasks_bp,
+                      templates_v2_bp, tipi_messaggi_bp, works_bp):
+        blueprint.before_request(require_login)
+
     # Register standard blueprints with API prefix only
     for i, blueprint in enumerate(blueprints):
         try:
@@ -626,7 +637,7 @@ def register_health_check(app: Flask) -> None:
                 'callback_failed': 'Callback fallito'
             }
             
-            error_msg = error_messages.get(error, f'Errore sconosciuto: {error}')
+            error_msg = error_messages.get(error, f'Errore sconosciuto: {escape(error)}')
             
             return f"""
             <html>

@@ -387,6 +387,7 @@ def get_note_suggestions():
         }), 500
 
 @ricetta_bp.route("/ricetta/invio", methods=['POST'])
+@jwt_required()
 def invia_ricetta():
     """Invia ricetta elettronica al Sistema TS"""
     logger.info("=== DEBUG: Richiesta invio ricetta ricevuta ===")
@@ -880,6 +881,7 @@ def get_ricette_test_funzionanti():
 sanitel_cert = "/path/to/cert.cer"  # percorso certificato
 
 @ricetta_bp.route("/ricetta/cifra-cf", methods=['POST'])
+@jwt_required()
 def encrypt_cf():
     """
     Cifra il cf_assistito usando il certificato SanitelCF
@@ -928,6 +930,7 @@ def encrypt_cf():
         raise
 
 @ricetta_bp.route("/ricetta/cifra-pincode", methods=['POST'])
+@jwt_required()
 def encrypt_pincode():
     """
     Cifra il pincode usando il certificato SanitelCF
