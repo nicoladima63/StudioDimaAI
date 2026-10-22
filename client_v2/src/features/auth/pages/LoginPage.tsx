@@ -1,5 +1,5 @@
 import React, {useState}from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -145,24 +145,6 @@ const LoginPage: React.FC = () => {
                       </CCol>
                     </CRow>
                   </CForm>
-                </CCardBody>
-              </CCard>
-
-              {/* Info card */}
-              <CCard className='text-white bg-primary py-5' style={{ width: '44%' }}>
-                <CCardBody className='text-center d-flex flex-column justify-content-center'>
-                  <div>
-                    <h2>Registrati</h2>
-                    <p>
-                      Non hai un account? Registrati per accedere alle funzionalità
-                      dell'applicazione.
-                    </p>
-                    <Link to='/register'>
-                      <CButton color='primary' className='mt-3' active tabIndex={-1}>
-                        Registrati ora!
-                      </CButton>
-                    </Link>
-                  </div>
                 </CCardBody>
               </CCard>
             </CCardGroup>

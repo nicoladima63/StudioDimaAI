@@ -2,11 +2,44 @@
 Authentication and Authorization Utilities for StudioDimaAI Server V2.
 """
 
+import threading
+import time
 from functools import wraps
 from flask_jwt_extended import get_jwt
 from app_v2 import format_response
 
 VALID_ROLES = ('admin', 'segreteria', 'aso', 'dottore', 'user')
+
+# shortcut: contatore in memoria, vale per un solo processo e si azzera al riavvio; passare al DB se i processi diventano piu' di uno
+MAX_FAILED_LOGINS = 5
+LOGIN_WINDOW_SECONDS = 300
+_failed_logins = {}
+_failed_logins_lock = threading.Lock()
+
+
+def login_blocked(username, now=None):
+    """True se l'utente ha gia' MAX_FAILED_LOGINS login falliti negli ultimi LOGIN_WINDOW_SECONDS."""
+    now = time.time() if now is None else now
+    with _failed_logins_lock:
+        recent = [t for t in _failed_logins.get(username.lower(), []) if now - t < LOGIN_WINDOW_SECONDS]
+    return len(recent) >= MAX_FAILED_LOGINS
+
+
+def record_failed_login(username, now=None):
+    now = time.time() if now is None else now
+    with _failed_logins_lock:
+        _failed_logins.setdefault(username.lower(), []).append(now)
+        # pota le voci scadute di tutti: username casuali non devono far crescere il dizionario
+        for name in list(_failed_logins):
+            _failed_logins[name] = [t for t in _failed_logins[name] if now - t < LOGIN_WINDOW_SECONDS]
+            if not _failed_logins[name]:
+                del _failed_logins[name]
+
+
+def clear_failed_logins(username):
+    with _failed_logins_lock:
+        _failed_logins.pop(username.lower(), None)
+
 
 def roles_required(*required_roles):
     """

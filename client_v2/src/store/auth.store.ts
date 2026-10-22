@@ -8,7 +8,6 @@ import { setTokens, clearTokens, setUnauthorizedCallback } from '@/services/api/
 interface AuthStore extends AuthState {
   // Actions
   login: (username: string, password: string) => Promise<void>
-  register: (username: string, password: string) => Promise<void>
   logout: () => void
   setUser: (user: User) => void
   setTokens: (tokens: AuthTokens) => void
@@ -52,22 +51,6 @@ export const useAuthStore = create<AuthStore>()(
             })
           } else {
             throw new Error(response.error || 'Login fallito')
-          }
-        } catch (error) {
-          set({ isLoading: false })
-          throw error
-        }
-      },
-
-      register: async (username: string, password: string) => {
-        try {
-          set({ isLoading: true })
-          const response = await authService.apiRegister({ username, password })
-          if (response.success) {
-            set({ isLoading: false })
-            // Optionally, you could automatically log the user in here
-          } else {
-            throw new Error(response.error || 'Registrazione fallita')
           }
         } catch (error) {
           set({ isLoading: false })

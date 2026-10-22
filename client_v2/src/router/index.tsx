@@ -9,7 +9,6 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute'
 // Lazy load components per performance
 const Dashboard = React.lazy(() => import('@/features/dashboard/pages/Dashboard'))
 const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
-const RegisterPage = React.lazy(() => import('@/features/auth/pages/RegisterPage'))
 const CatalogoPage = React.lazy(() => import('@/features/materiali/pages/CatalogoPage'))
 const AggiungiMaterialiPage = React.lazy(() => import('@/features/materiali/pages/AggiungiMaterialiPage'))
 const OrdiniPage = React.lazy(() => import('@/features/materiali/pages/OrdiniPage'))
@@ -73,7 +72,6 @@ const AppRouter: React.FC = () => {
       <Routes>
         {/* Public routes */}
         <Route path='/login' element={<LoginPage />} />
-        <Route path='/register' element={<RegisterPage />} />
 
         {/* Protected routes with layout */}
         <Route

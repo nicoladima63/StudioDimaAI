@@ -13,58 +13,13 @@ from werkzeug.security import check_password_hash
 from app_v2 import format_response
 from core.exceptions import ValidationError
 from repositories.user_repository import UserRepository
+from utils.auth_utils import login_blocked, record_failed_login, clear_failed_logins
 
 
 logger = logging.getLogger(__name__)
 
 # Create blueprint (url_prefix will be added at registration)
 auth_v2_bp = Blueprint('auth_v2', __name__)
-
-@auth_v2_bp.route('/auth/register', methods=['POST'])
-def register():
-    """
-    Register a new user.
-    
-    Request Body:
-        username (str): Username (required)
-        password (str): Password (required)
-        
-    Returns:
-        JSON response confirming registration
-    """
-    try:
-        if not request.is_json:
-            return format_response(success=False, error="Content-Type must be application/json"), 400
-        
-        data = request.get_json()
-        username = data.get('username', '').strip()
-        password = data.get('password', '').strip()
-
-        if not username or not password:
-            return format_response(success=False, error="Username and password are required"), 400
-        
-        if len(password) < 6:
-            return format_response(success=False, error="Password must be at least 6 characters long"), 400
-
-        user_repo = UserRepository()
-
-        # Check if user already exists
-        if user_repo.find_by_username(username):
-            return format_response(success=False, error="Username already exists"), 409
-
-        # Create new user with 'user' role by default
-        new_user = user_repo.create(username, password, 'user')
-
-        if not new_user:
-            return format_response(success=False, error="Failed to create user due to a server error"), 500
-
-        logger.info(f"New user registered: {username}")
-        return format_response(message="User registered successfully. You can now log in."), 201
-
-    except Exception as e:
-        logger.error(f"Registration error: {e}", exc_info=True)
-        return format_response(success=False, error="Registration failed due to a server error"), 500
-
 
 @auth_v2_bp.route('/auth/login', methods=['POST'])
 def login():
@@ -88,19 +43,29 @@ def login():
                 success=False,
                 error="Username and password are required"
             ), 400
-        
+
+        if login_blocked(username):
+            logger.warning(f"Login blocked for username: {username}")
+            return format_response(
+                success=False,
+                error="Troppi tentativi falliti, riprova tra qualche minuto"
+            ), 429
+
         # Authenticate user against the database
         user_repo = UserRepository()
         user = user_repo.find_by_username(username)
-        
+
 
         if not user or not check_password_hash(user['password_hash'], password):
+            record_failed_login(username)
             logger.warning(f"Failed login attempt for username: {username}")
             return format_response(
                 success=False,
                 error="Invalid credentials"
             ), 401
-        
+
+        clear_failed_logins(username)
+
         # Create JWT tokens
         user_identity = {
             'id': user['id'],
