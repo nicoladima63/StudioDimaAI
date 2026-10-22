@@ -154,6 +154,7 @@ class WorkRepository(BaseRepository):
                         if 'provider_id' in step:
                             del step['provider_id']
                             
+                        self._check_columns(step)
                         fields = ', '.join(step.keys())
                         placeholders = ', '.join(['?' for _ in step.keys()])
                         values = list(step.values())
@@ -170,33 +171,6 @@ class WorkRepository(BaseRepository):
             logger.error(f"Failed to create work with steps: {e}")
             raise RepositoryError(f"Failed to create work: {str(e)}", cause=e)
 
-    def add_step_template(self, step_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Add a single step template to a work."""
-        try:
-            # Simple direct insert using base logic could be tricky due to table name mismatch
-            # creating a mini-repo or just custom query is better
-            # Ensure user_id usage
-            if 'provider_id' in step_data:
-                del step_data['provider_id']
-            
-            fields = ', '.join(step_data.keys())
-            placeholders = ', '.join(['?' for _ in step_data.keys()])
-            values = list(step_data.values())
-            
-            with self.db_manager.transaction() as conn:
-                cursor = conn.cursor()
-                cursor.execute(f"INSERT INTO step_templates ({fields}) VALUES ({placeholders})", values)
-                step_id = cursor.lastrowid
-                cursor.close()
-                
-                # Fetch back
-                result = self.execute_custom_query(
-                    "SELECT * FROM step_templates WHERE id = ?", (step_id,), fetch_one=True
-                )
-                return dict(result)
-        except Exception as e:
-             logger.error(f"Failed to add step template: {e}")
-             raise RepositoryError(f"Failed to add step: {str(e)}", cause=e)
 
     def update_work_with_steps(self, work_id: int, work_data: Dict[str, Any], steps_data: List[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Update a work and its steps in a transaction."""

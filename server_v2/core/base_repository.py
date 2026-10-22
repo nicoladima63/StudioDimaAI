@@ -5,6 +5,7 @@ Provides a standardized abstract base class for all data access repositories,
 with common CRUD operations, query building utilities, and proper error handling.
 """
 
+import re
 import sqlite3
 import logging
 from abc import ABC, abstractmethod
@@ -15,6 +16,9 @@ from .exceptions import RepositoryError, ValidationError, DatabaseError
 
 
 logger = logging.getLogger(__name__)
+
+# Nomi colonna ammessi (anche tabella.colonna): arrivano spesso da JSON utente e finiscono nell'SQL
+_COLUMN_NAME = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$')
 
 # Generic type for entity models
 T = TypeVar('T')
@@ -138,6 +142,7 @@ class BaseRepository(ABC, Generic[T]):
         
         # Build WHERE conditions
         if options.filters:
+            self._check_columns(options.filters)
             for field, value in options.filters.items():
                 if value is not None:
                     if isinstance(value, (list, tuple)):
@@ -176,6 +181,13 @@ class BaseRepository(ABC, Generic[T]):
         
         return query, tuple(params)
     
+    @staticmethod
+    def _check_columns(columns) -> None:
+        """Rifiuta nomi colonna che non siano identificatori semplici (iniezione SQL dalle chiavi del JSON)."""
+        invalid = [c for c in columns if not _COLUMN_NAME.match(str(c))]
+        if invalid:
+            raise ValidationError(f"Invalid column names: {invalid}")
+
     def _build_insert_query(self, data: Dict[str, Any]) -> Tuple[str, Tuple]:
         """
         Build an INSERT query from data dictionary.
@@ -194,7 +206,9 @@ class BaseRepository(ABC, Generic[T]):
         
         if not filtered_data:
             raise ValidationError("No valid data provided for insert")
-        
+
+        self._check_columns(filtered_data)
+
         fields = list(filtered_data.keys())
         placeholders = ['?' for _ in fields]
         values = list(filtered_data.values())
@@ -229,7 +243,9 @@ class BaseRepository(ABC, Generic[T]):
         
         if not filtered_data:
             raise ValidationError("No valid data provided for update")
-        
+
+        self._check_columns(filtered_data)
+
         set_clauses = [f"{field} = ?" for field in filtered_data.keys()]
         values = list(filtered_data.values())
         values.append(entity_id)
