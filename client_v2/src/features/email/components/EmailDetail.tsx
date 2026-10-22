@@ -189,9 +189,12 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email, visible, onClose, onCr
             {/* Body */}
             <div className="border rounded p-3">
               {detail.body_html ? (
-                <div
-                  dangerouslySetInnerHTML={{ __html: detail.body_html }}
-                  style={{ maxHeight: '500px', overflow: 'auto' }}
+                // sandbox senza allow-scripts/allow-same-origin: l'HTML della mail non puo' eseguire codice ne' leggere il token
+                <iframe
+                  title="Corpo email"
+                  sandbox="allow-popups allow-popups-to-escape-sandbox"
+                  srcDoc={`<base target="_blank">${detail.body_html}`}
+                  style={{ width: '100%', height: '500px', border: 0 }}
                 />
               ) : (
                 <pre style={{ whiteSpace: 'pre-wrap', maxHeight: '500px', overflow: 'auto' }}>
