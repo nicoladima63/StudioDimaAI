@@ -145,9 +145,21 @@ describe('AnagraficaModal', () => {
   })
 
   it('se la richiesta fallisce mostra un errore di rete', async () => {
-    vi.mocked(automationMessagesService.apiGetAnagrafica).mockRejectedValueOnce(new Error('Network Error'))
+    vi.mocked(automationMessagesService.apiGetAnagrafica).mockRejectedValueOnce({ message: 'Errore server', status: 500 })
     open()
-    expect(await screen.findByText('Network Error')).toBeInTheDocument()
+    expect(await screen.findByText('Errore server')).toBeInTheDocument()
+  })
+
+  it('se writeText rifiuta usa il metodo di riserva', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('denied'))
+    const execCommand = vi.fn().mockReturnValue(true)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true })
+    respond([makeSubmission('m1', {}, true)])
+    open()
+    fireEvent.click(await screen.findByRole('button', { name: 'Copia Nome' }))
+    await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'))
+    expect(toast.success).toHaveBeenCalledWith('Copiato')
   })
 
   it('una risposta in ritardo del messaggio precedente non sostituisce quella del nuovo', async () => {

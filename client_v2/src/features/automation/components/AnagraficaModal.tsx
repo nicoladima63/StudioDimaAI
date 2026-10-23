@@ -90,7 +90,7 @@ const AnagraficaModal: React.FC<Props> = ({ messageId, onClose }) => {
       if (matches.length === 1) setSelected(matches[0])
     } catch (err: any) {
       if (request !== requestRef.current) return
-      setError(err?.response?.data?.message || err?.message || 'Errore di rete')
+      setError(err?.message || 'Errore di rete')
     } finally {
       if (request === requestRef.current) setLoading(false)
     }
