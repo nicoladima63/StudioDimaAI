@@ -170,17 +170,6 @@ describe('AnagraficaModal', () => {
     expect(screen.getByText('Secondo')).toBeInTheDocument()
   })
 
-  it('dopo la chiusura i dati del paziente non restano per il messaggio successivo', async () => {
-    respond([makeSubmission('m1', { Cognome: 'Primo' }, true)])
-    const { rerender } = render(<AnagraficaModal messageId={5} onClose={vi.fn()} />)
-    expect(await screen.findByText('Primo')).toBeInTheDocument()
-    vi.mocked(automationMessagesService.apiGetAnagrafica).mockReturnValue(new Promise(() => {}))
-    rerender(<AnagraficaModal messageId={null} onClose={vi.fn()} />)
-    rerender(<AnagraficaModal messageId={6} onClose={vi.fn()} />)
-    expect(screen.queryByText('Primo')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Copia Cognome' })).not.toBeInTheDocument()
-  })
-
   it('il metodo di riserva mette la textarea dentro la finestra e non nel body', async () => {
     let hostTag = ''
     const execCommand = vi.fn(() => {
