@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import toast from 'react-hot-toast'
 import AnagraficaModal from './AnagraficaModal'
 import automationMessagesService from '../services/automationMessagesService'
-import type { AnagraficaSubmission } from '../services/automationMessagesService'
+import type { AnagraficaResponse, AnagraficaSubmission } from '../services/automationMessagesService'
 
 vi.mock('react-hot-toast', () => ({
   default: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
@@ -148,5 +148,53 @@ describe('AnagraficaModal', () => {
     vi.mocked(automationMessagesService.apiGetAnagrafica).mockRejectedValueOnce(new Error('Network Error'))
     open()
     expect(await screen.findByText('Network Error')).toBeInTheDocument()
+  })
+
+  it('una risposta in ritardo del messaggio precedente non sostituisce quella del nuovo', async () => {
+    let resolveFirst: (value: AnagraficaResponse) => void = () => {}
+    vi.mocked(automationMessagesService.apiGetAnagrafica)
+      .mockReturnValueOnce(new Promise<AnagraficaResponse>(resolve => { resolveFirst = resolve }))
+      .mockResolvedValueOnce({
+        state: 'success',
+        data: { submissions: [makeSubmission('m6', { Cognome: 'Secondo' }, true)] },
+      })
+    const { rerender } = render(<AnagraficaModal messageId={5} onClose={vi.fn()} />)
+    rerender(<AnagraficaModal messageId={6} onClose={vi.fn()} />)
+    expect(await screen.findByText('Secondo')).toBeInTheDocument()
+    resolveFirst({
+      state: 'success',
+      data: { submissions: [makeSubmission('m5', { Cognome: 'Primo' }, true)] },
+    })
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(screen.queryByText('Primo')).not.toBeInTheDocument()
+    expect(screen.getByText('Secondo')).toBeInTheDocument()
+  })
+
+  it('dopo la chiusura i dati del paziente non restano per il messaggio successivo', async () => {
+    respond([makeSubmission('m1', { Cognome: 'Primo' }, true)])
+    const { rerender } = render(<AnagraficaModal messageId={5} onClose={vi.fn()} />)
+    expect(await screen.findByText('Primo')).toBeInTheDocument()
+    vi.mocked(automationMessagesService.apiGetAnagrafica).mockReturnValue(new Promise(() => {}))
+    rerender(<AnagraficaModal messageId={null} onClose={vi.fn()} />)
+    rerender(<AnagraficaModal messageId={6} onClose={vi.fn()} />)
+    expect(screen.queryByText('Primo')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Copia Cognome' })).not.toBeInTheDocument()
+  })
+
+  it('il metodo di riserva mette la textarea dentro la finestra e non nel body', async () => {
+    let hostTag = ''
+    const execCommand = vi.fn(() => {
+      const area = document.querySelector('textarea')
+      hostTag = area?.parentElement === document.body ? 'body' : 'dentro'
+      return true
+    })
+    Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true })
+    respond([makeSubmission('m1', {}, true)])
+    open()
+    const button = await screen.findByRole('button', { name: 'Copia Nome' })
+    button.focus() // un click vero sposta il focus sul pulsante, fireEvent no
+    fireEvent.click(button)
+    await waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'))
+    expect(hostTag).toBe('dentro')
   })
 })

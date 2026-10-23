@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import {
   CAlert,
@@ -31,18 +31,23 @@ const copyText = async (text: string): Promise<boolean> => {
   } catch {
     // si passa al metodo di riserva
   }
+  // La finestra CoreUI trattiene il focus: la textarea va dentro la finestra, vicino al pulsante, non nel body
+  const previous = document.activeElement as HTMLElement | null
+  const host = previous && previous !== document.body ? previous.parentElement ?? document.body : document.body
   const area = document.createElement('textarea')
   area.value = text
   area.style.position = 'fixed'
   area.style.opacity = '0'
-  document.body.appendChild(area)
+  host.appendChild(area)
+  area.focus()
   area.select()
   try {
     return document.execCommand('copy')
   } catch {
     return false
   } finally {
-    document.body.removeChild(area)
+    host.removeChild(area)
+    previous?.focus()
   }
 }
 
@@ -63,7 +68,10 @@ const AnagraficaModal: React.FC<Props> = ({ messageId, onClose }) => {
   const [selected, setSelected] = useState<AnagraficaSubmission | null>(null)
   const [fromList, setFromList] = useState(false)
 
+  const requestRef = useRef(0)
+
   const load = useCallback(async (id: number) => {
+    const request = ++requestRef.current
     setLoading(true)
     setError(null)
     setSubmissions([])
@@ -71,6 +79,7 @@ const AnagraficaModal: React.FC<Props> = ({ messageId, onClose }) => {
     setFromList(false)
     try {
       const res = await automationMessagesService.apiGetAnagrafica(id)
+      if (request !== requestRef.current) return
       if (res.state === 'error') {
         setError(res.message || res.error || 'Errore nel recupero dell\'anagrafica')
         return
@@ -80,14 +89,24 @@ const AnagraficaModal: React.FC<Props> = ({ messageId, onClose }) => {
       const matches = found.filter(submission => submission.phone_match)
       if (matches.length === 1) setSelected(matches[0])
     } catch (err: any) {
+      if (request !== requestRef.current) return
       setError(err?.response?.data?.message || err?.message || 'Errore di rete')
     } finally {
-      setLoading(false)
+      if (request === requestRef.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    if (messageId !== null) load(messageId)
+    if (messageId === null) {
+      requestRef.current += 1 // scarta le risposte ancora in arrivo
+      setLoading(false)
+      setError(null)
+      setSubmissions([])
+      setSelected(null)
+      setFromList(false)
+      return
+    }
+    load(messageId)
   }, [messageId, load])
 
   const handleCopy = async (value: string) => {
