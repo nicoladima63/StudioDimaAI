@@ -155,8 +155,11 @@ echo [3/14] Sincronizzazione Server V2... >> "%LOGFILE%"
 :: che vivono solo su prod (script di avvio, docker, cloudflared, static) vanno
 :: esclusi, altrimenti start_server_v2.bat viene cancellato mentre gira e il
 :: server non riparte dopo il restart.flag.
+:: snapshots: gli snapshot dei monitor (data\snapshots) sono stato di runtime, non codice:
+:: quelli del PC di sviluppo sono piu' vecchi di quelli di prod e li sovrascriverebbero,
+:: facendo rilevare al monitor come cambiamenti tutto cio' che e' successo dopo.
 robocopy "server_v2" "%DEPLOY_PATH%" /MIR ^
-    /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" "instance" "tokens" "_deploy_backups" "cloudflared" "static" ^
+    /XD "venv" "__pycache__" ".pytest_cache" ".git" "logs" "legacy_ricetta" "instance" "tokens" "_deploy_backups" "cloudflared" "static" "snapshots" ^
     /XF "*.pyc" "*.log" "*.legacy_ricetta" ".env" "sync_state.json" "database_mode.txt" "credentials.json" "token.json" ^
         "start_server_v2.bat" "start_server.bat" "start_server.ps1" "install_autostart.bat" "AUTOSTART_SETUP.md" ^
         "restart_docker.bat" "reset_sync_state.bat" "docker-compose.yml" ".env.docker" "deploy_log.txt" ^
