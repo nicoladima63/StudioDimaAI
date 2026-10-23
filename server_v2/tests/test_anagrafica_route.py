@@ -2,7 +2,7 @@ import pytest
 from flask_jwt_extended import create_access_token
 
 import api.v2_automation_logs as logs_api
-from app_v2 import create_app_v2
+from .app_cache import get_test_app
 from core.database_manager import close_database_manager
 from core.exceptions import GmailApiError, GmailCredentialsNotFoundError
 
@@ -21,7 +21,7 @@ class FakeLogService:
 
 @pytest.fixture(scope='module')
 def app():
-    app = create_app_v2('testing')
+    app = get_test_app()
     yield app
     close_database_manager()  # le richieste creano il gestore DB globale: non va lasciato agli altri test
 
