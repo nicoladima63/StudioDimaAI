@@ -88,6 +88,15 @@ class AutomationLogService:
             logger.error(f"Error listing automation messages: {e}")
             return []
 
+    def get_message(self, message_id: int) -> Optional[Dict[str, Any]]:
+        try:
+            rows = self.db_manager.execute_query(
+                "SELECT * FROM automation_message_log WHERE id = ?", (message_id,))
+            return dict(rows[0]) if rows else None
+        except Exception as e:
+            logger.error(f"Error reading automation message {message_id}: {e}")
+            return None
+
 
 # Singleton accessor
 _automation_log_service = None

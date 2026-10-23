@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { CTable, CTableHead, CTableBody, CTableRow, CTableHeaderCell, CTableDataCell, CSpinner, CAlert, CButton } from '@coreui/react'
-import automationMessagesService, { AutomationMessage } from '../services/automationMessagesService'
+import CIcon from '@coreui/icons-react'
+import { cilInfo } from '@coreui/icons'
+import automationMessagesService from '../services/automationMessagesService'
+import type { AutomationMessage } from '../services/automationMessagesService'
+import AnagraficaModal from '../components/AnagraficaModal'
 
 const fmtDateTime = (s: string) => {
   // SQLite CURRENT_TIMESTAMP produces UTC values without an offset.
@@ -14,6 +18,7 @@ const AutomationMessages: React.FC = () => {
   const [items, setItems] = useState<AutomationMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [detailId, setDetailId] = useState<number | null>(null)
 
   const load = async () => {
     setLoading(true)
@@ -63,6 +68,7 @@ const AutomationMessages: React.FC = () => {
               <CTableHeaderCell>Destinatario</CTableHeaderCell>
               <CTableHeaderCell>Messaggio</CTableHeaderCell>
               <CTableHeaderCell>Risultato</CTableHeaderCell>
+              <CTableHeaderCell></CTableHeaderCell>
             </CTableRow>
           </CTableHead>
           <CTableBody>
@@ -73,11 +79,18 @@ const AutomationMessages: React.FC = () => {
                 <CTableDataCell><small className="text-muted">{it.recipient}</small></CTableDataCell>
                 <CTableDataCell><small>{it.message_text ? (it.message_text.length > 120 ? it.message_text.slice(0, 120) + '…' : it.message_text) : '—'}</small></CTableDataCell>
                 <CTableDataCell><small>{getResultMessage(it.result_json)}</small></CTableDataCell>
+                <CTableDataCell className="text-end">
+                  <CButton color="primary" variant="ghost" size="sm" aria-label="Dettaglio" onClick={() => setDetailId(it.id)}>
+                    <CIcon icon={cilInfo} />
+                  </CButton>
+                </CTableDataCell>
               </CTableRow>
             ))}
           </CTableBody>
         </CTable>
       )}
+
+      <AnagraficaModal messageId={detailId} onClose={() => setDetailId(null)} />
     </div>
   )
 }

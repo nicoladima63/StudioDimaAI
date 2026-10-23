@@ -14,9 +14,30 @@ export type AutomationMessage = {
   result_json?: string
 }
 
+export type AnagraficaField = { label: string; value: string }
+
+export type AnagraficaSubmission = {
+  email_id: string
+  received_at: string
+  phone_match: boolean
+  fields: AnagraficaField[]
+}
+
+export type AnagraficaResponse = {
+  state: 'success' | 'warning' | 'error'
+  data?: { submissions: AnagraficaSubmission[] }
+  message?: string
+  error?: string
+}
+
 export const automationMessagesService = {
   async list(page = 1, per_page = 50) {
     const res = await apiClient.get('/automation/messages', { params: { page, per_page } })
+    return res.data
+  },
+
+  async apiGetAnagrafica(id: number): Promise<AnagraficaResponse> {
+    const res = await apiClient.get(`/automation/messages/${id}/anagrafica`)
     return res.data
   }
 }
