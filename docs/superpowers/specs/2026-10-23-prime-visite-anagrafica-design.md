@@ -46,9 +46,11 @@ e apre una finestra con i campi, ognuno con il proprio pulsante "Copia" che mett
 7. I campi sono i 13 dell'email, nell'ordine: Cognome, Nome, Data di nascita, Comune di nascita,
    Codice fiscale, Sesso, Indirizzo, CAP, Citta, Provincia, Cellulare, Email, Informativa privacy.
    Un campo non trovato nell'email mostra "-" e il suo "Copia" e' disabilitato.
-8. **Copia:** `navigator.clipboard.writeText(valore)`. L'app gira su `http://serverdima:5001` (senza
-   HTTPS), dove l'API puo' non essere disponibile: in quel caso si usa un `textarea` temporaneo con
-   `document.execCommand('copy')`. Esito: toast verde "Copiato" o rosso "Copia non riuscita".
+8. **Copia:** `navigator.clipboard.writeText(valore)`. L'app e' raggiungibile sia da
+   `https://app.valorian.it` (tunnel Cloudflare, HTTPS: l'API funziona) sia da
+   `http://serverdima:5001` (senza HTTPS: l'API puo' non essere disponibile). Quando manca si usa un
+   `textarea` temporaneo con `document.execCommand('copy')`. Esito: toast verde "Copiato" o rosso
+   "Copia non riuscita".
 
 ## Dati e API
 
