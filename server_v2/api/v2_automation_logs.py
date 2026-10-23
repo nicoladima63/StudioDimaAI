@@ -43,13 +43,15 @@ def get_message_anagrafica(message_id):
         submissions = find_submissions(row, email_service)
     except GmailCredentialsNotFoundError:
         return format_response(success=False, error='GMAIL_AUTH_REQUIRED',
-                               message='Autenticazione Gmail richiesta', state='error'), 200
+                               message='Autenticazione Gmail richiesta: ricollega Gmail dalla pagina Email',
+                               state='error'), 200
     except GmailApiError as e:
         logger.error(f"Gmail error reading anagrafica for message {message_id}: {e}")
-        return format_response(success=False, error=str(e), message='Errore API Gmail',
-                               state='error'), 500
+        return format_response(success=False, error='GMAIL_API_ERROR',
+                               message='Errore di comunicazione con Gmail, riprova tra poco',
+                               state='error'), 200
     except Exception as e:
         logger.error(f"Error reading anagrafica for message {message_id}: {e}", exc_info=True)
-        return format_response(success=False, error='internal_error',
+        return format_response(success=False, error='Errore recupero anagrafica',
                                message='Errore recupero anagrafica', state='error'), 500
     return format_response(data={'submissions': submissions}, state='success'), 200

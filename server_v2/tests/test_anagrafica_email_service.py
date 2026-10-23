@@ -96,13 +96,13 @@ def test_phone_matches(recipient, cellulare, expected):
 def test_la_ricerca_usa_oggetto_e_data_di_invio():
     fake = FakeEmailService([])
     assert find_submissions({'created_at': CREATED_AT, 'recipient': '3331112233'}, fake) == []
-    assert fake.queries == [(15, f'subject:"Nuova anagrafica paziente" after:{CREATED_EPOCH}')]
+    assert fake.queries == [(15, f'subject:"Nuova anagrafica paziente" after:{CREATED_EPOCH} before:{CREATED_EPOCH + 30 * 86400}')]
 
 
 def test_data_di_invio_con_la_t_vale_come_con_lo_spazio():
     fake = FakeEmailService([])
     find_submissions({'created_at': '2026-10-22T16:47:57', 'recipient': '3331112233'}, fake)
-    assert fake.queries[0][1].endswith(f'after:{CREATED_EPOCH}')
+    assert fake.queries[0][1].endswith(f'after:{CREATED_EPOCH} before:{CREATED_EPOCH + 30 * 86400}')
 
 
 def test_la_coincidenza_per_numero_va_per_prima():

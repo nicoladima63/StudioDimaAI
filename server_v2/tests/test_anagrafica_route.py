@@ -56,7 +56,9 @@ def test_senza_token_risponde_401(client):
 def test_messaggio_inesistente_risponde_404(client, auth):
     response = client.get('/api/v2/automation/messages/99/anagrafica', headers=auth)
     assert response.status_code == 404
-    assert response.get_json()['state'] == 'error'
+    body = response.get_json()
+    assert body['state'] == 'error'
+    assert body['error'] == 'not_found'
 
 
 def test_caso_felice_restituisce_le_anagrafiche(client, auth, monkeypatch):
@@ -89,13 +91,21 @@ def test_gmail_non_collegato(client, auth, monkeypatch):
     assert response.status_code == 200
     assert body['state'] == 'error'
     assert body['error'] == 'GMAIL_AUTH_REQUIRED'
+    assert 'Autenticazione Gmail richiesta' in body['message']
 
 
 def test_errore_api_gmail(client, auth, monkeypatch):
-    monkeypatch.setattr(logs_api, 'find_submissions', raising(GmailApiError('quota')))
+    error = GmailApiError(
+        'Failed to get emails: <HttpError 403 when requesting '
+        'https://gmail.googleapis.com/gmail/v1/users/me/messages?q=subject%3A...>')
+    monkeypatch.setattr(logs_api, 'find_submissions', raising(error))
     response = client.get(URL, headers=auth)
-    assert response.status_code == 500
-    assert response.get_json()['state'] == 'error'
+    body = response.get_json()
+    assert response.status_code == 200
+    assert body['state'] == 'error'
+    assert body['error'] == 'GMAIL_API_ERROR'
+    assert 'googleapis' not in str(body)
+    assert 'HttpError' not in str(body)
 
 
 def test_errore_imprevisto_non_espone_i_dettagli(client, auth, monkeypatch):
@@ -103,5 +113,5 @@ def test_errore_imprevisto_non_espone_i_dettagli(client, auth, monkeypatch):
     response = client.get(URL, headers=auth)
     body = response.get_json()
     assert response.status_code == 500
-    assert body['error'] == 'internal_error'
+    assert body['error'] == 'Errore recupero anagrafica'
     assert 'dettaglio interno' not in str(body)

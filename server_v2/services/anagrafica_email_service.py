@@ -19,6 +19,8 @@ ANAGRAFICA_LABELS = [
 
 EMPTY_VALUE = '-'  # lo stesso segnaposto che scrive il sito per un campo vuoto
 MAX_CANDIDATES = 15
+# chi compila il modulo lo fa entro pochi giorni: senza un limite superiore le email recenti riempiono le 15 candidate e quelle piu' vecchie spariscono
+SEARCH_WINDOW_DAYS = 30
 PHONE_DIGITS_COMPARED = 9
 
 
@@ -58,7 +60,8 @@ def find_submissions(row: Dict[str, Any], email_service) -> List[Dict[str, Any]]
     Niente '-from:me' ne' 'in:inbox': il sito puo' spedire dalla stessa casella e la
     posta puo' essere archiviata.
     """
-    query = f'subject:"{ANAGRAFICA_SUBJECT}" after:{_created_at_epoch(row["created_at"])}'
+    sent = _created_at_epoch(row["created_at"])
+    query = f'subject:"{ANAGRAFICA_SUBJECT}" after:{sent} before:{sent + SEARCH_WINDOW_DAYS * 86400}'
     summaries = email_service.get_emails(max_results=MAX_CANDIDATES, query=query).get('emails', [])
 
     submissions: List[Dict[str, Any]] = []
