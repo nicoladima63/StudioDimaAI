@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import AutomationMessages from './AutomationMessages'
 import automationMessagesService from '../services/automationMessagesService'
 
@@ -51,6 +51,7 @@ describe('AutomationMessages', () => {
     fireEvent.click((await screen.findAllByRole('button', { name: 'Dettaglio' }))[0])
     await screen.findByText('Anagrafica non ancora ricevuta')
     fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }))
-    await vi.waitFor(() => expect(screen.queryByText('Anagrafica paziente')).not.toBeInTheDocument())
+    // waitFor di Testing Library (non vi.waitFor): durante l'attesa disattiva il controllo act sull'animazione di chiusura
+    await waitFor(() => expect(screen.queryByText('Anagrafica paziente')).not.toBeInTheDocument())
   })
 })

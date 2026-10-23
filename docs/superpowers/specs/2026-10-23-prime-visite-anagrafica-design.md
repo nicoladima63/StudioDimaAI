@@ -31,9 +31,11 @@ e apre una finestra con i campi, ognuno con il proprio pulsante "Copia" che mett
    (rotta protetta dal login, nello stesso blueprint di `/automation/messages`).
 2. Il server legge la riga del registro (`automation_message_log`): `created_at` (UTC, formato
    `YYYY-MM-DD HH:MM:SS`) e `recipient`. Id inesistente: 404.
-3. Cerca in Gmail con `subject:"Nuova anagrafica paziente" after:<epoch di created_at>`.
-   Senza `-from:me` e senza `in:inbox`: il sito puo' spedire dalla stessa casella e l'email puo'
-   essere archiviata. Al massimo le 15 piu' recenti.
+3. Cerca in Gmail con `subject:"Nuova anagrafica paziente" after:<epoch di created_at> before:<epoch + 30 giorni>`.
+   Il limite superiore serve perche' Gmail restituisce le email piu' recenti per prime: senza, dopo
+   qualche settimana le 15 candidate sarebbero tutte posteriori e l'anagrafica di un paziente piu'
+   vecchio non verrebbe trovata. Senza `-from:me` e senza `in:inbox`: il sito puo' spedire dalla
+   stessa casella e l'email puo' essere archiviata. Al massimo le 15 piu' recenti.
 4. Per ognuna legge il dettaglio (`email_service.get_email_detail`) e ricava i campi dalle righe
    `Etichetta: valore` di `body_text`. Una email senza `body_text` leggibile viene scartata.
 5. Risposta: elenco di anagrafiche, ordinate con prima quelle con `phone_match = true`, poi per
@@ -73,8 +75,14 @@ Risposta (schema a tre stati del progetto):
 }
 ```
 
-- Gmail non collegato (`GmailCredentialsNotFoundError`): `state: error`, messaggio "Autenticazione Gmail richiesta".
-- Errore Gmail (`GmailApiError`): `state: error`.
+- Gmail non collegato (`GmailCredentialsNotFoundError`): HTTP 200, `state: error`, `error: GMAIL_AUTH_REQUIRED`,
+  messaggio "Autenticazione Gmail richiesta: ricollega Gmail dalla pagina Email".
+- Errore Gmail (`GmailApiError`): HTTP 200, `state: error`, `error: GMAIL_API_ERROR` (codice costante, mai il testo
+  dell'eccezione: conterrebbe l'indirizzo interno della richiesta), messaggio "Errore di comunicazione con Gmail,
+  riprova tra poco". Si risponde 200 perche' il client HTTP dell'app, su qualunque altro codice, mostra da solo un
+  toast con il campo `error` e rifiuta con un oggetto senza `response`.
+- Errore imprevisto: HTTP 500, `error` e `message` "Errore recupero anagrafica", senza dettagli interni.
+- Messaggio inesistente: HTTP 404, `error: not_found`.
 - Nessuna anagrafica: `state: success` con `submissions: []`.
 
 ## File
