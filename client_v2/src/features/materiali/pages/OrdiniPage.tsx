@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CButton, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter } from '@coreui/react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { CButton, CCloseButton, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter } from '@coreui/react';
 import toast from 'react-hot-toast';
+import Isotope from 'isotope-layout';
 import Select from 'react-select';
 import PageLayout from '@/components/layout/PageLayout';
 import FornitoriSelect from '@/components/selects/FornitoriSelect';
@@ -11,6 +12,18 @@ import { ordiniService, type OrdiniData, type PianoAcquisto } from '../services/
 
 const formatDate = (value: string | null) => value ? new Date(`${value}T12:00:00`).toLocaleDateString('it-IT') : '—';
 type CarrelloRapido = { materiale: Materiale; quantita: number };
+const quadrato = { width: 28, height: 28, padding: 0, lineHeight: 1 };
+// Una fattura dello stesso fornitore rappresenta un acquisto, anche con più righe.
+function ultimiAcquisti(righe: Materiale[]) {
+  const visti = new Set<string>();
+  return righe.filter(m => {
+    if (!m.data_fattura) return false;
+    const id = m.fattura_id ? `${m.fornitoreid}|${m.fattura_id}` : `riga:${m.id}`;
+    if (visti.has(id)) return false;
+    visti.add(id);
+    return true;
+  }).slice(0, 3);
+}
 
 export default function OrdiniPage() {
   const { materiali, load, isLoading: materialsLoading, error: materialsError } = useMateriali();
@@ -31,6 +44,7 @@ export default function OrdiniPage() {
   const [carrelloRapido, setCarrelloRapido] = useState<Record<number, CarrelloRapido>>({});
   const [ricercaRapida, setRicercaRapida] = useState('');
   const [letteraRapida, setLetteraRapida] = useState('');
+  const [fornitoreRapido, setFornitoreRapido] = useState('');
   const fornitoriMap = useFornitoriStore(state => state.fornitoriMap);
   const loadAllFornitori = useFornitoriStore(state => state.loadAllFornitori);
   useEffect(() => { void loadAllFornitori(); }, [loadAllFornitori]);
@@ -74,16 +88,7 @@ export default function OrdiniPage() {
     });
     return [...grouped.entries()].map(([key, righe]) => {
       righe.sort((a, b) => (b.data_fattura || '').localeCompare(a.data_fattura || '') || b.id - a.id);
-      // Una fattura dello stesso fornitore rappresenta un acquisto, anche con più righe.
-      const visti = new Set<string>();
-      const acquisti = righe.filter(m => {
-        if (!m.data_fattura) return false;
-        const id = m.fattura_id ? `${m.fornitoreid}|${m.fattura_id}` : `riga:${m.id}`;
-        if (visti.has(id)) return false;
-        visti.add(id);
-        return true;
-      }).slice(0, 3);
-      return { key, materiale: righe[0], righe, acquisti };
+      return { key, righe };
     }).sort((a, b) => a.key.localeCompare(b.key, 'it'));
   }, [materiali, fornitoriMap]);
   const iniziale = (nome: string) => {
@@ -94,6 +99,27 @@ export default function OrdiniPage() {
     (!letteraRapida || iniziale(prodotto.key) === letteraRapida) &&
     prodotto.righe.some(m => `${m.nome} ${m.codicearticolo || ''} ${m.fornitorenome}`.toLocaleLowerCase().includes(ricercaRapida.trim().toLocaleLowerCase()))
   );
+  const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(m => m.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
+  // Isotope sposta i nodi del DOM. Quando cambia l'elenco dei risultati ricarica gli item; il filtro
+  // fornitore usa solo arrange(), perché reloadItems() perde lo stato "nascosto" degli item.
+  const ricercaInputRef = useRef<HTMLInputElement>(null);
+  const grigliaRef = useRef<HTMLDivElement>(null);
+  const isotopeRef = useRef<Isotope | null>(null);
+  useLayoutEffect(() => {
+    const griglia = grigliaRef.current;
+    if (!griglia) return;
+    isotopeRef.current ??= new Isotope(griglia, { itemSelector: '.ordine-item', percentPosition: true });
+    // Gli item ricaricati nascono visibili: riapre i nodi rimasti nascosti dal filtro precedente.
+    Array.from(griglia.children).forEach(el => Object.assign((el as HTMLElement).style, { display: '', opacity: '', pointerEvents: '' }));
+    isotopeRef.current.reloadItems();
+    isotopeRef.current.arrange({ filter: '*' });
+  }, [materialiRapidiFiltrati.length, ricercaRapida, letteraRapida]);
+  useLayoutEffect(() => {
+    isotopeRef.current?.arrange({
+      filter: fornitoreRapido ? (item: Element) => (item as HTMLElement).dataset.fornitori!.split('\n').includes(fornitoreRapido) : '*',
+    });
+  }, [fornitoreRapido]);
+  useEffect(() => () => { isotopeRef.current?.destroy(); isotopeRef.current = null; }, []);
   const righeCarrello = Object.values(carrelloRapido).map(line => ({ ...line,
     materiale: { ...line.materiale, fornitorenome: fornitoriMap[line.materiale.fornitoreid]?.nome || line.materiale.fornitorenome },
   })).sort((a, b) => a.materiale.fornitorenome.localeCompare(b.materiale.fornitorenome, 'it') || a.materiale.nome.localeCompare(b.materiale.nome, 'it'));
@@ -171,24 +197,46 @@ export default function OrdiniPage() {
             <div className='mb-2'><h5 className='mb-0'>Materiali ordinabili</h5><p className='text-muted mb-0'>Cerca il prodotto per nome e confronta gli ultimi tre acquisti.</p></div>
             {materialsError && <div className='alert alert-danger' role='alert'>{materialsError}</div>}
             <div className='d-flex flex-wrap gap-2 mb-3' role='group' aria-label='Filtra materiali per iniziale'>
-              <CButton size='sm' color={!letteraRapida ? 'primary' : 'secondary'} onClick={() => setLetteraRapida('')}>Tutti</CButton>
-              {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'].map(lettera => <CButton key={lettera} size='sm' aria-pressed={letteraRapida === lettera} color={letteraRapida === lettera ? 'primary' : 'secondary'} onClick={() => setLetteraRapida(lettera)}>{lettera}</CButton>)}
+              <CButton size='sm' color={!letteraRapida ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(''); setFornitoreRapido(''); }}>Tutti</CButton>
+              {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'].map(lettera => <CButton key={lettera} size='sm' aria-pressed={letteraRapida === lettera} color={letteraRapida === lettera ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(lettera); setFornitoreRapido(''); }}>{lettera}</CButton>)}
             </div>
             <div className='border rounded p-3 mb-3'>
               <label htmlFor='quick-order-search' className='form-label'>Cerca fra tutti i materiali</label>
-              <input id='quick-order-search' className='form-control' autoFocus value={ricercaRapida} onChange={e => setRicercaRapida(e.target.value)} placeholder='Nome commerciale, codice o fornitore' />
+              <div className='position-relative'>
+                <input id='quick-order-search' ref={ricercaInputRef} className='form-control pe-5' autoFocus value={ricercaRapida} onChange={e => { setRicercaRapida(e.target.value); setFornitoreRapido(''); }} placeholder='Nome commerciale, codice o fornitore' />
+                {ricercaRapida && <CCloseButton aria-label='Cancella ricerca' className='position-absolute top-50 end-0 translate-middle-y me-3' onClick={() => { setRicercaRapida(''); setFornitoreRapido(''); ricercaInputRef.current?.focus(); }} />}
+              </div>
+              {ricercaRapida.trim() && fornitoriRisultanti.length > 1 && <div className='d-flex flex-wrap gap-2 mt-2' role='group' aria-label='Filtra per fornitore'>
+                <CButton size='sm' aria-pressed={!fornitoreRapido} color={!fornitoreRapido ? 'primary' : 'secondary'} onClick={() => setFornitoreRapido('')}>Tutti i fornitori</CButton>
+                {fornitoriRisultanti.map(nome => <CButton key={nome} size='sm' aria-pressed={fornitoreRapido === nome} color={fornitoreRapido === nome ? 'primary' : 'secondary'} onClick={() => setFornitoreRapido(nome)}>{nome}</CButton>)}
+              </div>}
             </div>
-            <div className='row g-2'>
-              {materialiRapidiFiltrati.map(({ key, materiale, acquisti }) => <div key={key} className='col-12 col-md-6 col-xl-4'>
+            <div className='row g-2' ref={grigliaRef}>
+              {materialiRapidiFiltrati.map(({ key, righe }) => {
+                // Con un fornitore scelto, scheda e pulsante + usano l'ultimo acquisto di quel fornitore.
+                const righeScelte = fornitoreRapido && righe.some(m => m.fornitorenome === fornitoreRapido) ? righe.filter(m => m.fornitorenome === fornitoreRapido) : righe;
+                const materiale = righeScelte[0];
+                const acquisti = ultimiAcquisti(righeScelte);
+                const nelCarrello = righeCarrello.find(line => line.materiale.fornitoreid === materiale.fornitoreid &&
+                  line.materiale.nome.trim().replace(/\s+/g, ' ').toLocaleLowerCase('it') === key);
+                return <div key={key} className='ordine-item col-12 col-md-6 col-xl-4' data-fornitori={[...new Set(righe.map(m => m.fornitorenome))].join('\n')}>
                 <article className='border rounded p-3 h-100' aria-label={materiale.nome}>
-                  <strong className='d-block mb-2'>{materiale.nome}</strong>
-                  <small className='d-block text-muted mb-2'>Ultimi acquisti · prezzo unitario</small>
-                  {acquisti.length ? <ul className='list-unstyled mb-2'>{acquisti.map(acquisto => <li key={acquisto.id} className='border-top py-1 small' style={{ overflowWrap: 'anywhere' }}>
-                    <strong>{acquisto.fornitorenome}</strong>{' · '}
-                    <span>{formatDate(acquisto.data_fattura!)} · {prezzo(acquisto.costo_unitario)}</span>
-                  </li>)}</ul> : <p className='small text-muted'>Nessun acquisto datato disponibile.</p>}
+                  <div className='d-flex align-items-start justify-content-between gap-2 mb-2'>
+                    <strong>{materiale.nome}</strong>
+                    {nelCarrello
+                      ? <div className='d-flex align-items-center gap-1 flex-shrink-0'>
+                        <CButton color='secondary' style={quadrato} aria-label={`Diminuisci ${materiale.nome}`} onClick={() => cambiaQuantitaRapida(nelCarrello.materiale.id, nelCarrello.quantita - 1)}>−</CButton>
+                        <strong className='px-1'>{nelCarrello.quantita}</strong>
+                        <CButton color='primary' style={quadrato} aria-label={`Aumenta ${materiale.nome}`} onClick={() => aggiungiRapido(materiale)}>+</CButton>
+                      </div>
+                      : <CButton color='primary' className='flex-shrink-0' style={quadrato} aria-label={`Aggiungi ${materiale.nome}`} onClick={() => aggiungiRapido(materiale)}>+</CButton>}
+                  </div>
+                  {acquisti.length ? <ul className='list-unstyled mb-0'>{acquisti.map(acquisto => <li key={acquisto.id} className='border-top py-1 small text-muted' style={{ overflowWrap: 'anywhere' }}>
+                    {acquisto.fornitorenome} · {formatDate(acquisto.data_fattura!)} · {prezzo(acquisto.costo_unitario)}
+                  </li>)}</ul> : <p className='small text-muted mb-0'>Nessun acquisto datato disponibile.</p>}
                 </article>
-              </div>)}
+              </div>;
+              })}
             </div>
             {!materialsLoading && !materialiRapidiFiltrati.length && <p>Nessun materiale corrispondente.</p>}
           </div>
