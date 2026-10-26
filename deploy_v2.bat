@@ -430,6 +430,9 @@ echo   [OK] Frontend deployato. >> "%LOGFILE%"
 :: di python, quindi e' vulnerabile allo stesso modo) ma non riscriverlo
 :: mai piu' dopo la prima creazione: se serve cambiarlo, si cancella a mano
 :: sul server una volta sola e il prossimo deploy lo rigenera da capo.
+:: Nel testo degli echo generati dentro il blocco dell if EXIT_CODE EQU 75 non vanno messe
+:: parentesi: una parentesi chiusa chiude in anticipo l if e cmd termina lo script con
+:: ". non atteso", cosi la finestra si chiude e il server non riparte dopo il deploy.
 echo [11/14] Generazione script avvio...
 echo [11/14] Generazione script avvio... >> "%LOGFILE%"
 
@@ -470,7 +473,7 @@ if exist "%DEPLOY_PATH%\start_server_v2.bat" (
     echo if %%EXIT_CODE%% EQU 75 ^(
     echo     set "RESTART_REASON=motivo sconosciuto"
     echo     if exist instance\last_restart_reason.txt set /p RESTART_REASON=^<instance\last_restart_reason.txt
-    echo     echo Riavvio richiesto ^(^^^!RESTART_REASON^^^!^). Attendo 3 secondi...
+    echo     echo Riavvio richiesto: ^^^!RESTART_REASON^^^!. Attendo 3 secondi...
     echo     timeout /t 3 /nobreak ^>nul
     echo     goto loop
     echo ^)
