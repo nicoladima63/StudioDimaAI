@@ -1,5 +1,5 @@
 """Persistent purchasing plans, reorder queue and order history."""
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 import math
 
 
@@ -25,6 +25,11 @@ class OrdiniService:
             id INTEGER PRIMARY KEY AUTOINCREMENT, ordine_id INTEGER NOT NULL,
             materiale_id INTEGER NOT NULL, nome TEXT NOT NULL, codice TEXT,
             quantita REAL NOT NULL, unita TEXT NOT NULL, note TEXT NOT NULL
+        )''')
+        # Carrello unico condiviso da tutto lo studio: una riga per materiale.
+        conn.execute('''CREATE TABLE IF NOT EXISTS materiali_carrello (
+            materiale_id INTEGER PRIMARY KEY, quantita REAL NOT NULL CHECK(quantita > 0),
+            aggiornato_da TEXT, aggiornato_il TEXT NOT NULL
         )''')
 
     @staticmethod
@@ -129,6 +134,104 @@ class OrdiniService:
                     next_date = (date.today() + timedelta(days=plan['frequenza_giorni'])).isoformat() if plan['frequenza_giorni'] else None
                     conn.execute('UPDATE materiali_acquisti SET da_ordinare=0, prossimo_ordine=? WHERE materiale_id=?', (next_date, plan['materiale_id']))
             return created
+
+    @staticmethod
+    def _carrello(conn):
+        return OrdiniService._rows(conn.execute('''SELECT c.materiale_id, m.nome, m.codicearticolo AS codice,
+            m.fornitoreid AS fornitore_id, m.fornitorenome AS fornitore_nome, c.quantita,
+            c.aggiornato_da, c.aggiornato_il
+            FROM materiali_carrello c JOIN materiali m ON m.id = c.materiale_id
+            ORDER BY m.fornitorenome, m.nome'''))
+
+    def carrello(self):
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            return self._carrello(conn)
+
+    def carrello_modifica(self, material_id, delta=None, quantita=None, utente=None):
+        """Somma delta alla quantita' in carrello (calcolo sul server) oppure la imposta; a 0 la riga sparisce."""
+        if (delta is None) == (quantita is None):
+            raise ValueError('Indica delta oppure quantita')
+        try:
+            value = float(delta if delta is not None else quantita)
+        except (TypeError, ValueError):
+            raise ValueError('Quantita non valida')
+        if not math.isfinite(value) or abs(value) > 1000000:
+            raise ValueError('Quantita non valida')
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            conn.execute('BEGIN IMMEDIATE')
+            if not conn.execute('SELECT 1 FROM materiali WHERE id = ?', (material_id,)).fetchone():
+                raise ValueError('Materiale non trovato')
+            current = conn.execute('SELECT quantita FROM materiali_carrello WHERE materiale_id = ?', (material_id,)).fetchone()
+            new = value if delta is None else (current[0] if current else 0) + value
+            if new <= 0:
+                conn.execute('DELETE FROM materiali_carrello WHERE materiale_id = ?', (material_id,))
+            elif new > 1000000:
+                raise ValueError('Quantita non valida')
+            else:
+                conn.execute('''INSERT INTO materiali_carrello (materiale_id, quantita, aggiornato_da, aggiornato_il)
+                    VALUES (?, ?, ?, ?) ON CONFLICT(materiale_id) DO UPDATE SET quantita=excluded.quantita,
+                    aggiornato_da=excluded.aggiornato_da, aggiornato_il=excluded.aggiornato_il''',
+                    (material_id, new, utente, datetime.now().isoformat(timespec='seconds')))
+            return self._carrello(conn)
+
+    def carrello_rimuovi(self, material_id=None):
+        """Toglie una riga dal carrello, o tutto il carrello se material_id e' None."""
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            if material_id is None:
+                conn.execute('DELETE FROM materiali_carrello')
+            else:
+                conn.execute('DELETE FROM materiali_carrello WHERE materiale_id = ?', (material_id,))
+            return self._carrello(conn)
+
+    def carrello_ordina(self, ids):
+        """Registra nello storico le righe scelte (un ordine per fornitore) e le toglie dal carrello."""
+        if not isinstance(ids, list) or not ids or len(ids) > 500 or any(type(i) is not int for i in ids):
+            raise ValueError('Seleziona da 1 a 500 materiali')
+        ids = list(dict.fromkeys(ids))
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            conn.execute('BEGIN IMMEDIATE')
+            lines = [l for l in self._carrello(conn) if l['materiale_id'] in ids]
+            if len(lines) != len(ids):
+                raise ValueError('Il carrello e\' cambiato: aggiorna la pagina')
+            if any(not str(l['fornitore_id'] or '').strip() for l in lines):
+                raise ValueError('Un materiale selezionato non ha il fornitore')
+            created = []
+            for supplier in dict.fromkeys(str(l['fornitore_id']) for l in lines):
+                group = [l for l in lines if str(l['fornitore_id']) == supplier]
+                order_id = conn.execute('INSERT INTO materiali_ordini (fornitore_id, fornitore_nome, data_ordine) VALUES (?, ?, ?)',
+                    (supplier, group[0]['fornitore_nome'] or '', date.today().isoformat())).lastrowid
+                created.append(order_id)
+                for line in group:
+                    conn.execute('''INSERT INTO materiali_ordini_righe
+                        (ordine_id, materiale_id, nome, codice, quantita, unita, note) VALUES (?, ?, ?, ?, ?, 'confezioni', '')''',
+                        (order_id, line['materiale_id'], line['nome'], line['codice'], line['quantita']))
+            conn.execute('DELETE FROM materiali_carrello WHERE materiale_id IN (' + ','.join('?' for _ in ids) + ')', ids)
+            return {'ordini': created, 'carrello': self._carrello(conn)}
+
+    def carrello_riordina(self, order_id, utente=None):
+        """Rimette nel carrello le righe di un ordine passato; i materiali che non esistono piu' vengono saltati."""
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            conn.execute('BEGIN IMMEDIATE')
+            if not conn.execute('SELECT 1 FROM materiali_ordini WHERE id = ?', (order_id,)).fetchone():
+                raise ValueError('Ordine non trovato')
+            added = skipped = 0
+            now = datetime.now().isoformat(timespec='seconds')
+            for material_id, quantity in conn.execute('SELECT materiale_id, quantita FROM materiali_ordini_righe WHERE ordine_id = ?', (order_id,)).fetchall():
+                if not conn.execute('SELECT 1 FROM materiali WHERE id = ?', (material_id,)).fetchone():
+                    skipped += 1
+                    continue
+                conn.execute('''INSERT INTO materiali_carrello (materiale_id, quantita, aggiornato_da, aggiornato_il)
+                    VALUES (?, ?, ?, ?) ON CONFLICT(materiale_id) DO UPDATE SET
+                    quantita = MIN(materiali_carrello.quantita + excluded.quantita, 1000000),
+                    aggiornato_da=excluded.aggiornato_da, aggiornato_il=excluded.aggiornato_il''',
+                    (material_id, quantity, utente, now))
+                added += 1
+            return {'aggiunte': added, 'saltate': skipped, 'carrello': self._carrello(conn)}
 
     def transition(self, order_id, action):
         if action not in ('ricevuto', 'annullato'):

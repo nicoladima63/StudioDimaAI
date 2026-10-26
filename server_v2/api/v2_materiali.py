@@ -7,7 +7,7 @@ architecture and optimized database access patterns.
 
 import logging
 from flask import Blueprint, request, jsonify, g
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from services.materiali_service import MaterialiService
 from services.ordini_service import OrdiniService
@@ -116,6 +116,48 @@ def create_ordine_materiali():
     payload = request.get_json(silent=True)
     ids = payload.get('materiale_ids') if isinstance(payload, dict) else None
     return _ordini_operation(lambda service: service.create_order(ids))
+
+
+@materiali_v2_bp.route('/materiali/carrello', methods=['GET'])
+@jwt_required()
+def get_carrello_materiali():
+    return _ordini_operation(lambda service: service.carrello())
+
+
+@materiali_v2_bp.route('/materiali/carrello', methods=['DELETE'])
+@jwt_required()
+def svuota_carrello_materiali():
+    return _ordini_operation(lambda service: service.carrello_rimuovi())
+
+
+@materiali_v2_bp.route('/materiali/carrello/<int:material_id>', methods=['POST'])
+@jwt_required()
+def modifica_carrello_materiali(material_id):
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return format_response(success=False, error='Dati non validi'), 400
+    return _ordini_operation(lambda service: service.carrello_modifica(
+        material_id, payload.get('delta'), payload.get('quantita'), str(get_jwt_identity())))
+
+
+@materiali_v2_bp.route('/materiali/carrello/<int:material_id>', methods=['DELETE'])
+@jwt_required()
+def rimuovi_carrello_materiali(material_id):
+    return _ordini_operation(lambda service: service.carrello_rimuovi(material_id))
+
+
+@materiali_v2_bp.route('/materiali/carrello/ordina', methods=['POST'])
+@jwt_required()
+def ordina_carrello_materiali():
+    payload = request.get_json(silent=True)
+    ids = payload.get('materiale_ids') if isinstance(payload, dict) else None
+    return _ordini_operation(lambda service: service.carrello_ordina(ids))
+
+
+@materiali_v2_bp.route('/materiali/carrello/da-ordine/<int:order_id>', methods=['POST'])
+@jwt_required()
+def riordina_carrello_materiali(order_id):
+    return _ordini_operation(lambda service: service.carrello_riordina(order_id, str(get_jwt_identity())))
 
 
 @materiali_v2_bp.route('/materiali/ordini/<int:order_id>/<action>', methods=['POST'])

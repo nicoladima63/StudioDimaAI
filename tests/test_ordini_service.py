@@ -89,5 +89,77 @@ class TestOrdini(unittest.TestCase):
         self.assertTrue(self.service.list()['piani'][0]['da_ordinare'])
 
 
+class TestCarrello(unittest.TestCase):
+    def setUp(self):
+        self.conn = sqlite3.connect(':memory:', isolation_level=None)
+        self.conn.execute('CREATE TABLE materiali (id INTEGER PRIMARY KEY, nome TEXT, codicearticolo TEXT, fornitoreid TEXT, fornitorenome TEXT)')
+        self.conn.executemany('INSERT INTO materiali VALUES (?, ?, ?, ?, ?)',
+            [(1, 'Guanti', 'G1', 'A', 'Alfa'), (2, 'Mascherine', 'M1', 'A', 'Alfa'), (3, 'Garze', 'G2', 'B', 'Beta')])
+        self.service = OrdiniService(self)
+
+    @contextmanager
+    def get_connection(self):
+        yield self.conn
+
+    def tearDown(self):
+        self.conn.close()
+
+    def test_add_adjust_set_and_remove_lines(self):
+        self.service.carrello_modifica(1, delta=1, utente='anna')
+        cart = self.service.carrello_modifica(1, delta=1, utente='anna')
+        self.assertEqual([(l['materiale_id'], l['quantita'], l['fornitore_nome']) for l in cart], [(1, 2.0, 'Alfa')])
+        self.assertEqual(cart[0]['aggiornato_da'], 'anna')
+        self.assertEqual(self.service.carrello_modifica(1, quantita=5)[0]['quantita'], 5.0)
+        self.assertEqual(self.service.carrello_modifica(1, delta=-5), [])
+        self.service.carrello_modifica(2, delta=1)
+        self.service.carrello_modifica(3, delta=1)
+        self.assertEqual([l['materiale_id'] for l in self.service.carrello_rimuovi(2)], [3])
+        self.assertEqual(self.service.carrello_rimuovi(), [])
+
+    def test_cart_is_shared_and_persistent_across_service_instances(self):
+        self.service.carrello_modifica(3, delta=2, utente='anna')
+        self.assertEqual(OrdiniService(self).carrello()[0]['quantita'], 2.0)
+
+    def test_invalid_cart_input(self):
+        for kwargs in [{}, {'delta': 1, 'quantita': 1}, {'delta': 'x'}, {'delta': float('nan')}, {'quantita': 2000000}]:
+            with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
+                self.service.carrello_modifica(1, **kwargs)
+        with self.assertRaises(ValueError):
+            self.service.carrello_modifica(999, delta=1)
+
+    def test_order_selected_lines_groups_by_supplier_and_keeps_the_rest(self):
+        for id in (1, 2, 3):
+            self.service.carrello_modifica(id, delta=id)
+        result = self.service.carrello_ordina([1, 2, 3])
+        self.assertEqual(result['carrello'], [])
+        self.assertEqual(len(result['ordini']), 2)
+        orders = self.service.list()['ordini']
+        self.assertEqual(sorted((o['fornitore_nome'], len(o['righe'])) for o in orders), [('Alfa', 2), ('Beta', 1)])
+        self.service.carrello_modifica(1, delta=1)
+        self.service.carrello_modifica(3, delta=1)
+        rest = self.service.carrello_ordina([1])['carrello']
+        self.assertEqual([l['materiale_id'] for l in rest], [3])
+        with self.assertRaises(ValueError):
+            self.service.carrello_ordina([1])
+        for ids in ([], [True], '1'):
+            with self.assertRaises(ValueError):
+                self.service.carrello_ordina(ids)
+
+    def test_reorder_puts_old_order_back_and_skips_deleted_materials(self):
+        self.service.carrello_modifica(1, delta=2)
+        self.service.carrello_modifica(3, delta=4)
+        order_id = self.service.carrello_ordina([1, 3])['ordini'][0]
+        self.service.carrello_modifica(1, delta=1)
+        self.conn.execute('DELETE FROM materiali WHERE id = 3')
+        result = self.service.carrello_riordina(order_id, 'anna')
+        self.assertEqual((result['aggiunte'], result['saltate']), (1, 0))
+        self.assertEqual({l['materiale_id']: l['quantita'] for l in result['carrello']}, {1: 3.0})
+        others = [o['id'] for o in self.service.list()['ordini'] if o['id'] != order_id]
+        result = self.service.carrello_riordina(others[0])
+        self.assertEqual((result['aggiunte'], result['saltate']), (0, 1))
+        with self.assertRaises(ValueError):
+            self.service.carrello_riordina(999)
+
+
 if __name__ == '__main__':
     unittest.main()

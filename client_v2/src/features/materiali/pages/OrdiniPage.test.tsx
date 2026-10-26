@@ -9,9 +9,35 @@ vi.mock('isotope-layout', async importOriginal => {
   const Real = (await importOriginal<{ default: typeof Isotope }>()).default;
   return { default: class extends Real { constructor(el: HTMLElement, options: Isotope.IsotopeOptions) { super(el, { ...options, transitionDuration: 0 }); } } };
 });
-vi.mock('../services/ordini.service', () => ({ ordiniService: {
-  load: vi.fn(), save: vi.fn(), queue: vi.fn(), order: vi.fn(), transition: vi.fn(),
-} }));
+// Finto server del carrello: lo stato sopravvive allo smontaggio della pagina, come sul server vero.
+const { fakeCart, anagrafica } = vi.hoisted(() => ({
+  fakeCart: { rows: [] as { materiale_id: number; quantita: number }[] },
+  anagrafica: {
+    2: { nome: 'Aghi', codice: 'A2', fornitore_id: 'B', fornitore_nome: 'Dentale' },
+    10: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
+    11: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
+    12: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
+    3: { nome: 'Garze', codice: 'G3', fornitore_id: 'B', fornitore_nome: 'Dentale' },
+    5: { nome: 'Composito', codice: 'C5', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
+  } as Record<number, { nome: string; codice: string; fornitore_id: string; fornitore_nome: string }>,
+}));
+vi.mock('../services/ordini.service', () => {
+  const view = () => fakeCart.rows.map(r => ({ ...anagrafica[r.materiale_id], ...r, aggiornato_da: 'anna', aggiornato_il: '2026-10-26T10:00:00' }));
+  return { ordiniService: {
+    load: vi.fn(), save: vi.fn(), queue: vi.fn(), order: vi.fn(), transition: vi.fn(),
+    carrello: vi.fn(async () => view()),
+    carrelloModifica: vi.fn(async (id: number, change: { delta?: number; quantita?: number }) => {
+      const current = fakeCart.rows.find(r => r.materiale_id === id)?.quantita ?? 0;
+      const next = change.delta !== undefined ? current + change.delta : change.quantita!;
+      fakeCart.rows = fakeCart.rows.filter(r => r.materiale_id !== id);
+      if (next > 0) fakeCart.rows.push({ materiale_id: id, quantita: next });
+      return view();
+    }),
+    carrelloRimuovi: vi.fn(async (id?: number) => { fakeCart.rows = id === undefined ? [] : fakeCart.rows.filter(r => r.materiale_id !== id); return view(); }),
+    carrelloOrdina: vi.fn(async (ids: number[]) => { fakeCart.rows = fakeCart.rows.filter(r => !ids.includes(r.materiale_id)); return { ordini: [1], carrello: view() }; }),
+    carrelloRiordina: vi.fn(async () => { fakeCart.rows.push({ materiale_id: 3, quantita: 2 }); return { aggiunte: 1, saltate: 0, carrello: view() }; }),
+  } };
+});
 const { loadMaterials } = vi.hoisted(() => ({ loadMaterials: vi.fn() }));
 vi.mock('@/store/materiali.store', () => ({ useMateriali: () => ({
   materiali: [
@@ -28,6 +54,7 @@ vi.mock('@/components/selects/FornitoriSelect', () => ({ default: () => <div>For
 describe('Ordini materiali', () => {
   beforeEach(() => {
     cleanup(); vi.clearAllMocks();
+    fakeCart.rows = [];
     vi.mocked(ordiniService.load).mockResolvedValue({ piani: [], ordini: [] });
   });
 
@@ -42,17 +69,66 @@ describe('Ordini materiali', () => {
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Aghi' });
     fireEvent.click(screen.getByRole('button', { name: 'Aggiungi Aghi' }));
+    await screen.findByRole('heading', { name: 'Carrello (1)' });
     const card = within(screen.getByRole('article', { name: 'Aghi' }));
-    expect(card.getByText('1')).toBeInTheDocument();    expect(card.queryByRole('button', { name: 'Aggiungi Aghi' })).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Carrello (1)' })).toBeInTheDocument();
+    expect(card.getByText('1')).toBeInTheDocument();
+    expect(card.queryByRole('button', { name: 'Aggiungi Aghi' })).not.toBeInTheDocument();
     expect(screen.getByLabelText('Quantità Aghi')).toHaveValue(1);
     expect(screen.getByText(/A2 · DENTALE/)).toBeInTheDocument();
+    expect(ordiniService.carrelloModifica).toHaveBeenCalledWith(2, { delta: 1 });
     fireEvent.click(card.getByRole('button', { name: 'Aumenta Aghi' }));
-    expect(screen.getByLabelText('Quantità Aghi')).toHaveValue(2);
+    await waitFor(() => expect(screen.getByLabelText('Quantità Aghi')).toHaveValue(2));
     fireEvent.click(card.getByRole('button', { name: 'Diminuisci Aghi' }));
+    await waitFor(() => expect(screen.getByLabelText('Quantità Aghi')).toHaveValue(1));
     fireEvent.click(card.getByRole('button', { name: 'Diminuisci Aghi' }));
-    expect(screen.getByRole('heading', { name: 'Carrello (0)' })).toBeInTheDocument();
+    await screen.findByRole('heading', { name: 'Carrello (0)' });
     expect(card.getByRole('button', { name: 'Aggiungi Aghi' })).toBeInTheDocument();
+  });
+
+  it('keeps the cart on the server: it survives leaving and returning to the page', async () => {
+    const first = render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Aghi' });
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi Aghi' }));
+    await screen.findByRole('heading', { name: 'Carrello (1)' });
+    first.unmount();
+    render(<OrdiniPage />);
+    expect(await screen.findByRole('heading', { name: 'Carrello (1)' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Quantità Aghi')).toHaveValue(1);
+  });
+
+  it('clears the whole shared cart only after confirmation', async () => {
+    fakeCart.rows = [{ materiale_id: 2, quantita: 1 }, { materiale_id: 3, quantita: 4 }];
+    render(<OrdiniPage />);
+    await screen.findByRole('heading', { name: 'Carrello (2)' });
+    fireEvent.click(screen.getByRole('button', { name: 'Svuota' }));
+    expect(ordiniService.carrelloRimuovi).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByRole('button', { name: 'Svuota tutto' }));
+    await screen.findByRole('heading', { name: 'Carrello (0)' });
+    expect(ordiniService.carrelloRimuovi).toHaveBeenCalledWith();
+  });
+
+  it('marks only the ticked lines as ordered and keeps the others in the cart', async () => {
+    fakeCart.rows = [{ materiale_id: 2, quantita: 1 }, { materiale_id: 3, quantita: 4 }];
+    render(<OrdiniPage />);
+    await screen.findByRole('heading', { name: 'Carrello (2)' });
+    fireEvent.click(screen.getByRole('button', { name: 'Rivedi e stampa' }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Ordinato Garze' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Segna come ordinati (1)' }));
+    await waitFor(() => expect(ordiniService.carrelloOrdina).toHaveBeenCalledWith([2]));
+    await screen.findByRole('heading', { name: 'Carrello (1)' });
+    expect(screen.getByLabelText('Quantità Garze')).toHaveValue(4);
+    expect(screen.queryByLabelText('Quantità Aghi')).not.toBeInTheDocument();
+  });
+
+  it('puts an old order back in the cart with the reorder button', async () => {
+    vi.mocked(ordiniService.load).mockResolvedValue({ piani: [], ordini: [{ id: 7, fornitore_nome: 'Dentale', data_ordine: '2026-10-01', data_ricezione: null, stato: 'ordinato',
+      righe: [{ materiale_id: 3, nome: 'Garze', codice: 'G3', quantita: 2, unita: 'confezioni', note: '' }] }] });
+    render(<OrdiniPage />);
+    const order = within(await screen.findByRole('article', { name: 'Ordine 7' }));
+    expect(order.getByText(/Garze · 2/)).toBeInTheDocument();
+    fireEvent.click(order.getByRole('button', { name: 'Riordina' }));
+    expect(await screen.findByLabelText('Quantità Garze')).toHaveValue(2);
+    expect(ordiniService.carrelloRiordina).toHaveBeenCalledWith(7);
   });
 
   it('filters the search results by supplier and resets the supplier when the query changes', async () => {
@@ -84,7 +160,21 @@ describe('Ordini materiali', () => {
     expect(card.getAllByRole('listitem')).toHaveLength(3);
     expect(card.queryByText(/DENTALE/)).not.toBeInTheDocument();
     fireEvent.click(card.getByRole('button', { name: /Aggiungi/ }));
-    expect(screen.getByText(/OLD · ALTRO FORNITORE/)).toBeInTheDocument();
+    expect(await screen.findByText(/OLD · ALTRO FORNITORE/)).toBeInTheDocument();
+  });
+
+  it('prints the cart list grouped by supplier from a hidden iframe', async () => {
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Aghi' });
+    fireEvent.click(screen.getByRole('button', { name: 'Aggiungi Aghi' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Rivedi e stampa' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Stampa lista' }));
+    const frame = document.querySelector('iframe');
+    expect(frame).not.toBeNull();
+    expect(frame!.srcdoc).toContain('Lista ordine materiali');
+    expect(frame!.srcdoc).toContain('<h2>DENTALE</h2>');
+    expect(frame!.srcdoc).toContain('<td>Aghi</td><td>A2</td><td>1</td>');
+    frame!.remove();
   });
 
   it('clears the search with the x button', async () => {

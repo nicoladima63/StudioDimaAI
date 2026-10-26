@@ -8,10 +8,11 @@ import FornitoriSelect from '@/components/selects/FornitoriSelect';
 import { useMateriali } from '@/store/materiali.store';
 import { useFornitoriStore } from '@/store/fornitori.store';
 import type { Materiale } from '@/store/materiali.store';
-import { ordiniService, type OrdiniData, type PianoAcquisto } from '../services/ordini.service';
+import { ordiniService, type OrdiniData, type PianoAcquisto, type RigaCarrello } from '../services/ordini.service';
 
 const formatDate = (value: string | null) => value ? new Date(`${value}T12:00:00`).toLocaleDateString('it-IT') : '—';
-type CarrelloRapido = { materiale: Materiale; quantita: number };
+type RigaCarrelloVista = { id: number; nome: string; codice: string | null; fornitoreid: string; fornitorenome: string; quantita: number };
+const normalizzaNome = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('it');
 const quadrato = { width: 28, height: 28, padding: 0, lineHeight: 1 };
 // Una fattura dello stesso fornitore rappresenta un acquisto, anche con più righe.
 function ultimiAcquisti(righe: Materiale[]) {
@@ -41,7 +42,10 @@ export default function OrdiniPage() {
   const [selected, setSelected] = useState<number[]>([]);
   const [confirmOrder, setConfirmOrder] = useState(false);
   const [cancelId, setCancelId] = useState<number | null>(null);
-  const [carrelloRapido, setCarrelloRapido] = useState<Record<number, CarrelloRapido>>({});
+  const [carrello, setCarrello] = useState<RigaCarrello[]>([]);
+  const [daOrdinare, setDaOrdinare] = useState<number[]>([]);
+  const [svuotaCarrello, setSvuotaCarrello] = useState(false);
+  const [ordiniVisibili, setOrdiniVisibili] = useState(10);
   const [ricercaRapida, setRicercaRapida] = useState('');
   const [letteraRapida, setLetteraRapida] = useState('');
   const [fornitoreRapido, setFornitoreRapido] = useState('');
@@ -52,7 +56,10 @@ export default function OrdiniPage() {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    try { setData(await ordiniService.load()); setError(''); }
+    try {
+      const [ordini, righe] = await Promise.all([ordiniService.load(), ordiniService.carrello()]);
+      setData(ordini); setCarrello(righe); setError('');
+    }
     catch { setError('Impossibile caricare gli ordini. Riprova con Aggiorna.'); }
     finally { setLoading(false); }
   }, []);
@@ -120,9 +127,10 @@ export default function OrdiniPage() {
     });
   }, [fornitoreRapido]);
   useEffect(() => () => { isotopeRef.current?.destroy(); isotopeRef.current = null; }, []);
-  const righeCarrello = Object.values(carrelloRapido).map(line => ({ ...line,
-    materiale: { ...line.materiale, fornitorenome: fornitoriMap[line.materiale.fornitoreid]?.nome || line.materiale.fornitorenome },
-  })).sort((a, b) => a.materiale.fornitorenome.localeCompare(b.materiale.fornitorenome, 'it') || a.materiale.nome.localeCompare(b.materiale.nome, 'it'));
+  const righeCarrello: RigaCarrelloVista[] = carrello.map(line => ({
+    id: line.materiale_id, nome: line.nome, codice: line.codice, fornitoreid: line.fornitore_id, quantita: line.quantita,
+    fornitorenome: fornitoriMap[line.fornitore_id]?.nome || line.fornitore_nome,
+  })).sort((a, b) => a.fornitorenome.localeCompare(b.fornitorenome, 'it') || a.nome.localeCompare(b.nome, 'it'));
   const prezzo = (value: number | null | undefined) => value == null || !Number.isFinite(value) ? 'Prezzo non disponibile' : value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
 
   function chooseMaterial(id: number) {
@@ -133,37 +141,66 @@ export default function OrdiniPage() {
       da_ordinare: 0, terminato: 0, in_arrivo: false, scaduto: false });
   }
 
+  // Il carrello e' sul server e condiviso: ogni azione restituisce il carrello aggiornato.
+  async function aggiornaCarrello(action: () => Promise<RigaCarrello[]>) {
+    try { setCarrello(await action()); }
+    catch (err) {
+      const apiError = err as { response?: { data?: { error?: string } } };
+      toast.error(apiError.response?.data?.error || 'Carrello non aggiornato. Riprova.');
+    }
+  }
+
   function aggiungiRapido(materiale: Materiale) {
-    setCarrelloRapido(current => {
-      const nome = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('it');
-      const existing = Object.values(current).find(line =>
-        line.materiale.fornitoreid === materiale.fornitoreid && nome(line.materiale.nome) === nome(materiale.nome));
-      const id = existing?.materiale.id ?? materiale.id;
-      return { ...current, [id]: { materiale: existing?.materiale ?? materiale, quantita: (existing?.quantita || 0) + 1 } };
-    });
+    const existing = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && normalizzaNome(line.nome) === normalizzaNome(materiale.nome));
+    void aggiornaCarrello(() => ordiniService.carrelloModifica(existing?.id ?? materiale.id, { delta: 1 }));
+  }
+
+  function diminuisciRapido(id: number) {
+    void aggiornaCarrello(() => ordiniService.carrelloModifica(id, { delta: -1 }));
   }
 
   function cambiaQuantitaRapida(id: number, value: number) {
-    setCarrelloRapido(current => {
-      if (!current[id] || !Number.isFinite(value) || value <= 0) {
-        const { [id]: _, ...remaining } = current;
-        return remaining;
-      }
-      return { ...current, [id]: { ...current[id], quantita: value } };
-    });
+    void aggiornaCarrello(() => !Number.isFinite(value) || value <= 0 ? ordiniService.carrelloRimuovi(id) : ordiniService.carrelloModifica(id, { quantita: value }));
+  }
+
+  function segnaOrdinati() {
+    void run(async () => {
+      const result = await ordiniService.carrelloOrdina(daOrdinare);
+      setCarrello(result.carrello);
+      setCheckoutRapido(false);
+    }, 'Righe segnate come ordinate e tolte dal carrello');
+  }
+
+  async function riordina(orderId: number) {
+    try {
+      const result = await ordiniService.carrelloRiordina(orderId);
+      setCarrello(result.carrello);
+      if (result.saltate) toast(`${result.aggiunte} righe nel carrello, ${result.saltate} non più in anagrafica`);
+      else toast.success('Righe aggiunte al carrello');
+    } catch (err) {
+      const apiError = err as { response?: { data?: { error?: string } } };
+      toast.error(apiError.response?.data?.error || 'Riordino non riuscito. Riprova.');
+    }
   }
 
   function stampaCarrelloRapido() {
-    const popup = window.open('', '_blank', 'noopener,noreferrer');
-    if (!popup) { toast.error('Il browser ha bloccato la finestra di stampa. Consenti i popup e riprova.'); return; }
     const escape = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
-    const groups = new Map<string, CarrelloRapido[]>();
-    righeCarrello.forEach(line => groups.set(line.materiale.fornitoreid || line.materiale.fornitorenome, [...(groups.get(line.materiale.fornitoreid || line.materiale.fornitorenome) || []), line]));
-    const sections = [...groups.entries()].map(([, lines]) => `<section><h2>${escape(lines[0].materiale.fornitorenome)}</h2><table><thead><tr><th>Materiale</th><th>Codice</th><th>Quantità</th></tr></thead><tbody>${lines.map(line => `<tr><td>${escape(line.materiale.nome)}</td><td>${escape(line.materiale.codicearticolo || '—')}</td><td>${escape(line.quantita)}</td></tr>`).join('')}</tbody></table></section>`).join('');
-    popup.document.write(`<!doctype html><html lang="it"><head><title>Lista ordine materiali</title><style>body{font:14px Arial;margin:28px;color:#111}h1{margin-bottom:4px}h2{margin-top:28px;font-size:18px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #777;padding:8px;text-align:left}th{background:#eee}@media print{body{margin:12mm}}</style></head><body><h1>Lista ordine materiali</h1><p>Preparata il ${escape(new Date().toLocaleDateString('it-IT'))}</p>${sections}</body></html>`);
-    popup.document.close();
-    popup.focus();
-    popup.print();
+    const groups = new Map<string, RigaCarrelloVista[]>();
+    righeCarrello.forEach(line => groups.set(line.fornitoreid || line.fornitorenome, [...(groups.get(line.fornitoreid || line.fornitorenome) || []), line]));
+    const sections = [...groups.entries()].map(([, lines]) => `<section><h2>${escape(lines[0].fornitorenome)}</h2><table><thead><tr><th>Materiale</th><th>Codice</th><th>Quantità</th></tr></thead><tbody>${lines.map(line => `<tr><td>${escape(line.nome)}</td><td>${escape(line.codice || '—')}</td><td>${escape(line.quantita)}</td></tr>`).join('')}</tbody></table></section>`).join('');
+    const html = `<!doctype html><html lang="it"><head><title>Lista ordine materiali</title><style>body{font:14px Arial;margin:28px;color:#111}h1{margin-bottom:4px}h2{margin-top:28px;font-size:18px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #777;padding:8px;text-align:left}th{background:#eee}@media print{body{margin:12mm}}</style></head><body><h1>Lista ordine materiali</h1><p>Preparata il ${escape(new Date().toLocaleDateString('it-IT'))}</p>${sections}</body></html>`;
+    // window.open con noopener restituisce null e lascia about:blank: si stampa da un iframe nascosto.
+    const frame = document.createElement('iframe');
+    frame.style.cssText = 'position:fixed;width:0;height:0;border:0';
+    frame.srcdoc = html;
+    frame.onload = () => {
+      const win = frame.contentWindow;
+      if (!win) { frame.remove(); return; }
+      win.onafterprint = () => frame.remove();
+      win.focus();
+      win.print();
+    };
+    document.body.appendChild(frame);
   }
 
   function exportList() {
@@ -217,15 +254,14 @@ export default function OrdiniPage() {
                 const righeScelte = fornitoreRapido && righe.some(m => m.fornitorenome === fornitoreRapido) ? righe.filter(m => m.fornitorenome === fornitoreRapido) : righe;
                 const materiale = righeScelte[0];
                 const acquisti = ultimiAcquisti(righeScelte);
-                const nelCarrello = righeCarrello.find(line => line.materiale.fornitoreid === materiale.fornitoreid &&
-                  line.materiale.nome.trim().replace(/\s+/g, ' ').toLocaleLowerCase('it') === key);
+                const nelCarrello = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && normalizzaNome(line.nome) === key);
                 return <div key={key} className='ordine-item col-12 col-md-6 col-xl-4' data-fornitori={[...new Set(righe.map(m => m.fornitorenome))].join('\n')}>
                 <article className='border rounded p-3 h-100' aria-label={materiale.nome}>
                   <div className='d-flex align-items-start justify-content-between gap-2 mb-2'>
                     <strong>{materiale.nome}</strong>
                     {nelCarrello
                       ? <div className='d-flex align-items-center gap-1 flex-shrink-0'>
-                        <CButton color='secondary' style={quadrato} aria-label={`Diminuisci ${materiale.nome}`} onClick={() => cambiaQuantitaRapida(nelCarrello.materiale.id, nelCarrello.quantita - 1)}>−</CButton>
+                        <CButton color='secondary' style={quadrato} aria-label={`Diminuisci ${materiale.nome}`} onClick={() => diminuisciRapido(nelCarrello.id)}>−</CButton>
                         <strong className='px-1'>{nelCarrello.quantita}</strong>
                         <CButton color='primary' style={quadrato} aria-label={`Aumenta ${materiale.nome}`} onClick={() => aggiungiRapido(materiale)}>+</CButton>
                       </div>
@@ -243,13 +279,27 @@ export default function OrdiniPage() {
           <div className='col-lg-4'><div className='border rounded p-3 bg-light sticky-lg-top'>
             <h5>Carrello ({righeCarrello.length})</h5>
             {!righeCarrello.length && <p className='text-muted mb-0'>Seleziona i materiali da ordinare.</p>}
-            {righeCarrello.map(line => <div key={line.materiale.id} className='border-top py-2'>
-              <strong className='d-block'>{line.materiale.nome}</strong><small className='d-block text-muted'>{line.materiale.codicearticolo || 'senza codice'} · {line.materiale.fornitorenome}</small>
-              <div className='d-flex align-items-center gap-2 mt-2'><CButton size='sm' color='secondary' onClick={() => cambiaQuantitaRapida(line.materiale.id, line.quantita - 1)}>−</CButton><input aria-label={`Quantità ${line.materiale.nome}`} className='form-control form-control-sm' style={{ width: '76px' }} type='number' min='0.001' step='1' value={line.quantita} onChange={e => cambiaQuantitaRapida(line.materiale.id, Number(e.target.value))} /><CButton size='sm' color='secondary' onClick={() => aggiungiRapido(line.materiale)}>+</CButton><CButton size='sm' color='link' className='text-danger' onClick={() => cambiaQuantitaRapida(line.materiale.id, 0)}>Rimuovi</CButton></div>
+            {righeCarrello.map(line => <div key={line.id} className='border-top py-2'>
+              <strong className='d-block'>{line.nome}</strong><small className='d-block text-muted'>{line.codice || 'senza codice'} · {line.fornitorenome}</small>
+              <div className='d-flex align-items-center gap-2 mt-2'><CButton size='sm' color='secondary' onClick={() => diminuisciRapido(line.id)}>−</CButton><input aria-label={`Quantità ${line.nome}`} className='form-control form-control-sm' style={{ width: '76px' }} type='number' min='0.001' step='1' value={line.quantita} onChange={e => cambiaQuantitaRapida(line.id, Number(e.target.value))} /><CButton size='sm' color='secondary' onClick={() => void aggiornaCarrello(() => ordiniService.carrelloModifica(line.id, { delta: 1 }))}>+</CButton><CButton size='sm' color='link' className='text-danger' onClick={() => cambiaQuantitaRapida(line.id, 0)}>Rimuovi</CButton></div>
             </div>)}
-            {!!righeCarrello.length && <div className='d-flex flex-wrap gap-2 mt-3'><CButton color='primary' onClick={() => setCheckoutRapido(true)}>Rivedi e stampa</CButton><CButton color='secondary' onClick={() => setCarrelloRapido({})}>Svuota</CButton></div>}
+            {!!righeCarrello.length && <div className='d-flex flex-wrap gap-2 mt-3'><CButton color='primary' onClick={() => { setDaOrdinare(righeCarrello.map(line => line.id)); setCheckoutRapido(true); }}>Rivedi e stampa</CButton><CButton color='secondary' onClick={() => setSvuotaCarrello(true)}>Svuota</CButton></div>}
           </div></div>
         </div>
+        <section className='mt-4' aria-label='Ordini precedenti'>
+          <h5>Ordini precedenti</h5>
+          {!data.ordini.length && <p className='text-muted'>Non ci sono ancora ordini registrati. Le righe che segni come ordinate le ritrovi qui, pronte da riordinare.</p>}
+          <div className='row g-2'>{data.ordini.slice(0, ordiniVisibili).map(order => <div key={order.id} className='col-12 col-md-6 col-xl-4'>
+            <article className='border rounded p-3 h-100' aria-label={`Ordine ${order.id}`}>
+              <div className='d-flex justify-content-between align-items-start gap-2'>
+                <div><strong>{order.fornitore_nome}</strong><small className='d-block text-muted'>{formatDate(order.data_ordine)}</small></div>
+                <CButton size='sm' color='primary' variant='outline' onClick={() => void riordina(order.id)}>Riordina</CButton>
+              </div>
+              <ul className='list-unstyled small text-muted mt-2 mb-0'>{order.righe.map(line => <li key={line.materiale_id} className='border-top py-1'>{line.nome} · {line.quantita}</li>)}</ul>
+            </article>
+          </div>)}</div>
+          {data.ordini.length > ordiniVisibili && <CButton color='secondary' className='mt-3' onClick={() => setOrdiniVisibili(n => n + 10)}>Mostra altri ordini</CButton>}
+        </section>
       </>}
       {tab === 'piani' && <>
         <label htmlFor='add-order-material' className='form-label'>Aggiungi un materiale dall’anagrafica</label>
@@ -342,8 +392,13 @@ export default function OrdiniPage() {
     </CModal>
     <CModal visible={checkoutRapido} onClose={() => setCheckoutRapido(false)} size='lg'>
       <CModalHeader><CModalTitle>Controlla la lista prima della stampa</CModalTitle></CModalHeader>
-      <CModalBody><p>La stampa non invia l’ordine e non modifica il magazzino. È una lista da verificare con fornitore, codice e quantità.</p><div className='table-responsive'><table className='table'><thead><tr><th>Fornitore</th><th>Materiale</th><th>Codice</th><th>Quantità</th></tr></thead><tbody>{righeCarrello.map(line => <tr key={line.materiale.id}><td>{line.materiale.fornitorenome}</td><td>{line.materiale.nome}</td><td>{line.materiale.codicearticolo || '—'}</td><td>{line.quantita}</td></tr>)}</tbody></table></div></CModalBody>
-      <CModalFooter><CButton color='secondary' onClick={() => setCheckoutRapido(false)}>Torna al carrello</CButton><CButton color='primary' disabled={!righeCarrello.length} onClick={stampaCarrelloRapido}>Stampa lista</CButton></CModalFooter>
+      <CModalBody><p>La stampa non invia l’ordine e non modifica il magazzino. Quando la segretaria ha ordinato, spunta le righe ordinate e premi “Segna come ordinati”: finiscono nello storico e escono dal carrello, le altre restano.</p><div className='table-responsive'><table className='table'><thead><tr><th>Ordinato</th><th>Fornitore</th><th>Materiale</th><th>Codice</th><th>Quantità</th></tr></thead><tbody>{righeCarrello.map(line => <tr key={line.id}><td><input type='checkbox' aria-label={`Ordinato ${line.nome}`} checked={daOrdinare.includes(line.id)} onChange={e => setDaOrdinare(current => e.target.checked ? [...current, line.id] : current.filter(id => id !== line.id))} /></td><td>{line.fornitorenome}</td><td>{line.nome}</td><td>{line.codice || '—'}</td><td>{line.quantita}</td></tr>)}</tbody></table></div></CModalBody>
+      <CModalFooter><CButton color='secondary' onClick={() => setCheckoutRapido(false)}>Torna al carrello</CButton><CButton color='secondary' disabled={!righeCarrello.length} onClick={stampaCarrelloRapido}>Stampa lista</CButton><CButton color='primary' disabled={busy || !daOrdinare.some(id => righeCarrello.some(line => line.id === id))} onClick={segnaOrdinati}>Segna come ordinati ({daOrdinare.filter(id => righeCarrello.some(line => line.id === id)).length})</CButton></CModalFooter>
+    </CModal>
+    <CModal visible={svuotaCarrello} onClose={() => setSvuotaCarrello(false)}>
+      <CModalHeader><CModalTitle>Svuota il carrello</CModalTitle></CModalHeader>
+      <CModalBody>Il carrello è condiviso con tutto lo studio: verranno tolte tutte le righe, senza registrarle come ordinate.</CModalBody>
+      <CModalFooter><CButton color='secondary' onClick={() => setSvuotaCarrello(false)}>Indietro</CButton><CButton color='danger' onClick={() => { setSvuotaCarrello(false); void aggiornaCarrello(() => ordiniService.carrelloRimuovi()); }}>Svuota tutto</CButton></CModalFooter>
     </CModal>
   </PageLayout>;
 }
