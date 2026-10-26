@@ -215,9 +215,10 @@ def send_test_notification():
 
 
 @push_bp.route('/push/test-simple', methods=['POST', 'GET'])
+@jwt_required()
 def send_test_notification_simple():
     """
-    Test endpoint senza JWT per debug.
+    Test endpoint per debug (richiede il login: senza, chiunque poteva mandare una notifica a un utente).
     Accetta user_id, title, body come parametri query o JSON.
     """
     try:
