@@ -187,6 +187,9 @@ class MonitoringService:
             return monitor_id
     
     def start_monitor(self, monitor_id: str) -> bool:
+        from core.dev_guard import blocked
+        if blocked('monitor DBF'):
+            return False
         with self.lock:
             if monitor_id not in self.saved_configs:
                 logger.error(f"Monitor {monitor_id} non trovato")

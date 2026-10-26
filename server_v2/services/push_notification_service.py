@@ -199,6 +199,9 @@ class PushNotificationService:
         Returns:
             Dict with success status and results
         """
+        from core.dev_guard import blocked, BLOCKED_ERROR
+        if blocked('push'):
+            return {'success': False, 'error': BLOCKED_ERROR, 'sent_count': 0}
         try:
             # Get all subscriptions for this user
             subscriptions = self._get_user_subscriptions(user_id)
@@ -338,6 +341,9 @@ class PushNotificationService:
         urgency: str = 'normal',
     ) -> Dict[str, Any]:
         """Invia push notification a tutti gli utenti con subscription attiva."""
+        from core.dev_guard import blocked, BLOCKED_ERROR
+        if blocked('push'):
+            return {'success': False, 'error': BLOCKED_ERROR, 'sent_to': 0, 'sent_count': 0}
         try:
             _ensure_tables(self.db_manager)
             with self.db_manager.get_connection() as conn:

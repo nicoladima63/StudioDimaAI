@@ -125,6 +125,9 @@ def broadcast():
         pazienti : [{id, nome, cellulare}, ...]
         testo    : testo del messaggio (variabile supportata: {nome})
     """
+    from core.dev_guard import blocked
+    if blocked('broadcast whatsapp'):
+        return format_response(success=False, error='Automazioni disabilitate su questo PC'), 503
     _ensure_tables()
     data            = request.get_json() or {}
     pazienti        = data.get('pazienti', [])

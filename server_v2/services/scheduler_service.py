@@ -51,6 +51,9 @@ class SchedulerService:
 
     def start(self):
         """Avvia lo scheduler e programma tutti i job"""
+        from core.dev_guard import blocked
+        if blocked('scheduler'):
+            return
         if not self.scheduler.running:
             self.scheduler.start()
             # logger.info("Scheduler avviato")

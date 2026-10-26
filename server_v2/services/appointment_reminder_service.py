@@ -533,6 +533,9 @@ def _invalidate_wa_cache(patient_id: str) -> None:
 
 def send_whatsapp_text(phone: str, text: str) -> dict:
     """Invia un messaggio WhatsApp con testo libero via Evolution API."""
+    from core.dev_guard import blocked, BLOCKED_ERROR
+    if blocked('whatsapp'):
+        return {'success': False, 'error': BLOCKED_ERROR}
     phone_norm = _normalize_phone(phone)
 
     from core.automation_config import get_automation_settings

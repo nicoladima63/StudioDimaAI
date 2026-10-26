@@ -140,6 +140,9 @@ class SMSService:
         Returns:
             Risultato invio con dettagli
         """
+        from core.dev_guard import blocked, BLOCKED_ERROR
+        if blocked('sms'):
+            return {'success': False, 'error': BLOCKED_ERROR, 'message': 'Automazioni disabilitate su questo PC'}
         from core.automation_config import get_automation_settings
         settings = get_automation_settings()
         if settings.get('theoretical_mode_enabled'):
