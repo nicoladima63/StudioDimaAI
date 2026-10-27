@@ -68,6 +68,7 @@ REMINDER_MESSAGES = {
 
 
 _sent_this_session: set[str] = set()  # chiave: "patient_id|ap_date|ap_time|type"
+_warned_no_phone: set[tuple[str, str]] = set()  # (nome, data): un solo warning per sessione
 _NEW_PATIENT_TYPE = 'V'  # "Prima visita" in DB_GUARDIA
 
 
@@ -350,10 +351,13 @@ def get_upcoming_appointments(
                         continue
                     new_patient_phone = _new_patient_phone_from_notes(record['DB_NOTE'])
                     if not new_patient_phone:
-                        logger.warning(
-                            "Prima visita senza ID o cellulare nella prima riga delle note: %s",
-                            str(record['DB_APDESCR']).strip(),
-                        )
+                        warn_key = (str(record['DB_APDESCR']).strip(), str(ap_date))
+                        if warn_key not in _warned_no_phone:
+                            _warned_no_phone.add(warn_key)
+                            logger.warning(
+                                "Prima visita senza ID o cellulare nella prima riga delle note: %s",
+                                warn_key[0],
+                            )
                         continue
                     paz_id = _new_patient_reminder_id(new_patient_phone)
 
@@ -913,6 +917,10 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
         else:
             stats['no_phone'].append({'patient_id': pid, 'name': name,
                                       'ap_date': ap_date, 'ap_time': ap_time})
+
+    # La simulazione non deve avere effetti collaterali (push alla segreteria, log)
+    if dry_run:
+        return stats
 
     # Notifica segreteria per pazienti con solo fisso
     if stats['skipped_fisso']:
