@@ -1,18 +1,30 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CButton, CCloseButton, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter } from '@coreui/react';
+import { Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Isotope from 'isotope-layout';
 import Select from 'react-select';
 import PageLayout from '@/components/layout/PageLayout';
 import FornitoriSelect from '@/components/selects/FornitoriSelect';
 import { useMateriali } from '@/store/materiali.store';
 import { useFornitoriStore } from '@/store/fornitori.store';
 import type { Materiale } from '@/store/materiali.store';
-import { ordiniService, type OrdiniData, type PianoAcquisto, type RigaCarrello } from '../services/ordini.service';
+import { ordiniService, type OrdiniData, type PianoAcquisto, type RigaCarrello, type Segno } from '../services/ordini.service';
 
 const formatDate = (value: string | null) => value ? new Date(`${value}T12:00:00`).toLocaleDateString('it-IT') : '—';
 type RigaCarrelloVista = { id: number; nome: string; codice: string | null; fornitoreid: string; fornitorenome: string; quantita: number };
 const normalizzaNome = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('it');
+// Il codice articolo serve alle macchine, non alle persone: si toglie dal nome mostrato.
+// shortcut: toglie solo il codice scritto come parola a sé; se è incollato ad altre lettere resta.
+function nomeUmano(nome: string, codice: string | null | undefined) {
+  // Nei dati reali il codice è quasi sempre la prima parola del nome (71430, UC001A3, GL001AS): maiuscole e cifre, almeno 4 caratteri.
+  const senzaPrefisso = nome.trim().replace(/^(?=\S*\d)[A-Z0-9][A-Z0-9,./-]{3,}\s+(?=\S)/, '');
+  const code = codice?.trim().toLocaleLowerCase();
+  if (!code) return senzaPrefisso;
+  const pulito = senzaPrefisso.split(/\s+/).filter(t => t.replace(/^[([]+|[)\]]+$/g, '').toLocaleLowerCase() !== code).join(' ')
+    .replace(/^[-–—:]\s*|\s*[-–—:]$/g, '').trim();
+  return pulito || senzaPrefisso;
+}
 const quadrato = { width: 28, height: 28, padding: 0, lineHeight: 1 };
 // Una fattura dello stesso fornitore rappresenta un acquisto, anche con più righe.
 function ultimiAcquisti(righe: Materiale[]) {
@@ -53,12 +65,19 @@ export default function OrdiniPage() {
   const loadAllFornitori = useFornitoriStore(state => state.loadAllFornitori);
   useEffect(() => { void loadAllFornitori(); }, [loadAllFornitori]);
   const [checkoutRapido, setCheckoutRapido] = useState(false);
+  const [segni, setSegni] = useState<Segno[]>([]);
+  const [soloPreferiti, setSoloPreferiti] = useState(false);
+  const preferitiApplicati = useRef(false);
+  const preferiti = useMemo(() => new Set(segni.filter(s => s.tipo === 'preferito').map(s => s.chiave)), [segni]);
+  const perDopo = useMemo(() => segni.filter(s => s.tipo === 'dopo').map(s => s.chiave), [segni]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [ordini, righe] = await Promise.all([ordiniService.load(), ordiniService.carrello()]);
-      setData(ordini); setCarrello(righe); setError('');
+      const [ordini, righe, marcati] = await Promise.all([ordiniService.load(), ordiniService.carrello(), ordiniService.apiPreferiti()]);
+      setData(ordini); setCarrello(righe); setSegni(marcati); setError('');
+      // All'apertura si parte dai soli preferiti, se ce ne sono; i ricaricamenti successivi non cambiano la scelta.
+      if (!preferitiApplicati.current) { preferitiApplicati.current = true; setSoloPreferiti(marcati.some(s => s.tipo === 'preferito')); }
     }
     catch { setError('Impossibile caricare gli ordini. Riprova con Aggiorna.'); }
     finally { setLoading(false); }
@@ -89,8 +108,9 @@ export default function OrdiniPage() {
       m.brancanome?.trim().toLocaleUpperCase() !== 'SPESE' &&
       Boolean(m.nome.trim() && m.fornitorenome?.trim())
     ).forEach(m => {
-      const key = m.nome.trim().replace(/\s+/g, ' ').toLocaleLowerCase('it');
-      const materiale = { ...m, fornitorenome: fornitoriMap[m.fornitoreid]?.nome || m.fornitorenome.trim() };
+      const nome = nomeUmano(m.nome, m.codicearticolo);
+      const key = normalizzaNome(nome);
+      const materiale = { ...m, nome, fornitorenome: fornitoriMap[m.fornitoreid]?.nome || m.fornitorenome.trim() };
       grouped.set(key, [...(grouped.get(key) || []), materiale]);
     });
     return [...grouped.entries()].map(([key, righe]) => {
@@ -102,33 +122,19 @@ export default function OrdiniPage() {
     const lettera = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').charAt(0).toUpperCase();
     return /^[A-Z]$/.test(lettera) ? lettera : '#';
   };
-  const materialiRapidiFiltrati = materialiRapidi.filter(prodotto =>
+  // Senza preferiti il filtro non ha senso: si vede tutto come prima.
+  const filtroPreferiti = soloPreferiti && preferiti.size > 0;
+  const materialiRapidiFiltrati =materialiRapidi.filter(prodotto =>
     (!letteraRapida || iniziale(prodotto.key) === letteraRapida) &&
+    (!filtroPreferiti || preferiti.has(prodotto.key)) &&
     prodotto.righe.some(m => `${m.nome} ${m.codicearticolo || ''} ${m.fornitorenome}`.toLocaleLowerCase().includes(ricercaRapida.trim().toLocaleLowerCase()))
   );
   const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(m => m.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
-  // Isotope sposta i nodi del DOM. Quando cambia l'elenco dei risultati ricarica gli item; il filtro
-  // fornitore usa solo arrange(), perché reloadItems() perde lo stato "nascosto" degli item.
+  // I chip dei fornitori restano quelli dei risultati; il filtro fornitore restringe solo le schede mostrate.
+  const materialiVisibili = fornitoreRapido ? materialiRapidiFiltrati.filter(p => p.righe.some(m => m.fornitorenome === fornitoreRapido)) : materialiRapidiFiltrati;
   const ricercaInputRef = useRef<HTMLInputElement>(null);
-  const grigliaRef = useRef<HTMLDivElement>(null);
-  const isotopeRef = useRef<Isotope | null>(null);
-  useLayoutEffect(() => {
-    const griglia = grigliaRef.current;
-    if (!griglia) return;
-    isotopeRef.current ??= new Isotope(griglia, { itemSelector: '.ordine-item', percentPosition: true });
-    // Gli item ricaricati nascono visibili: riapre i nodi rimasti nascosti dal filtro precedente.
-    Array.from(griglia.children).forEach(el => Object.assign((el as HTMLElement).style, { display: '', opacity: '', pointerEvents: '' }));
-    isotopeRef.current.reloadItems();
-    isotopeRef.current.arrange({ filter: '*' });
-  }, [materialiRapidiFiltrati.length, ricercaRapida, letteraRapida]);
-  useLayoutEffect(() => {
-    isotopeRef.current?.arrange({
-      filter: fornitoreRapido ? (item: Element) => (item as HTMLElement).dataset.fornitori!.split('\n').includes(fornitoreRapido) : '*',
-    });
-  }, [fornitoreRapido]);
-  useEffect(() => () => { isotopeRef.current?.destroy(); isotopeRef.current = null; }, []);
   const righeCarrello: RigaCarrelloVista[] = carrello.map(line => ({
-    id: line.materiale_id, nome: line.nome, codice: line.codice, fornitoreid: line.fornitore_id, quantita: line.quantita,
+    id: line.materiale_id, nome: nomeUmano(line.nome, line.codice), codice: line.codice, fornitoreid: line.fornitore_id, quantita: line.quantita,
     fornitorenome: fornitoriMap[line.fornitore_id]?.nome || line.fornitore_nome,
   })).sort((a, b) => a.fornitorenome.localeCompare(b.fornitorenome, 'it') || a.nome.localeCompare(b.nome, 'it'));
   const prezzo = (value: number | null | undefined) => value == null || !Number.isFinite(value) ? 'Prezzo non disponibile' : value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
@@ -155,6 +161,23 @@ export default function OrdiniPage() {
     void aggiornaCarrello(() => ordiniService.carrelloModifica(existing?.id ?? materiale.id, { delta: 1 }));
   }
 
+  async function segna(chiave: string, tipo: Segno['tipo'], attivo: boolean) {
+    try { setSegni(await ordiniService.apiPreferitoImposta(chiave, tipo, attivo)); return true; }
+    catch (err) {
+      const apiError = err as { response?: { data?: { error?: string } } };
+      toast.error(apiError.response?.data?.error || 'Operazione non riuscita. Riprova.');
+      return false;
+    }
+  }
+
+  async function salvaPerDopo(line: RigaCarrelloVista) {
+    if (await segna(normalizzaNome(line.nome), 'dopo', true)) void aggiornaCarrello(() => ordiniService.carrelloRimuovi(line.id));
+  }
+
+  async function spostaNelCarrello(materiale: Materiale, chiave: string) {
+    if (await segna(chiave, 'dopo', false)) aggiungiRapido(materiale);
+  }
+
   function diminuisciRapido(id: number) {
     void aggiornaCarrello(() => ordiniService.carrelloModifica(id, { delta: -1 }));
   }
@@ -163,12 +186,15 @@ export default function OrdiniPage() {
     void aggiornaCarrello(() => !Number.isFinite(value) || value <= 0 ? ordiniService.carrelloRimuovi(id) : ordiniService.carrelloModifica(id, { quantita: value }));
   }
 
-  function segnaOrdinati() {
+  // Registra l'ordine (righe spuntate), poi stampa la lista di quelle righe e chiude il checkout.
+  function ordina() {
+    const righe = righeCarrello.filter(line => daOrdinare.includes(line.id));
     void run(async () => {
-      const result = await ordiniService.carrelloOrdina(daOrdinare);
+      const result = await ordiniService.carrelloOrdina(righe.map(line => line.id));
       setCarrello(result.carrello);
       setCheckoutRapido(false);
-    }, 'Righe segnate come ordinate e tolte dal carrello');
+      stampaListaOrdine(righe);
+    }, 'Ordine registrato e tolto dal carrello');
   }
 
   async function riordina(orderId: number) {
@@ -183,10 +209,10 @@ export default function OrdiniPage() {
     }
   }
 
-  function stampaCarrelloRapido() {
+  function stampaListaOrdine(righe: RigaCarrelloVista[]) {
     const escape = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
     const groups = new Map<string, RigaCarrelloVista[]>();
-    righeCarrello.forEach(line => groups.set(line.fornitoreid || line.fornitorenome, [...(groups.get(line.fornitoreid || line.fornitorenome) || []), line]));
+    righe.forEach(line => groups.set(line.fornitoreid || line.fornitorenome, [...(groups.get(line.fornitoreid || line.fornitorenome) || []), line]));
     const sections = [...groups.entries()].map(([, lines]) => `<section><h2>${escape(lines[0].fornitorenome)}</h2><table><thead><tr><th>Materiale</th><th>Codice</th><th>Quantità</th></tr></thead><tbody>${lines.map(line => `<tr><td>${escape(line.nome)}</td><td>${escape(line.codice || '—')}</td><td>${escape(line.quantita)}</td></tr>`).join('')}</tbody></table></section>`).join('');
     const html = `<!doctype html><html lang="it"><head><title>Lista ordine materiali</title><style>body{font:14px Arial;margin:28px;color:#111}h1{margin-bottom:4px}h2{margin-top:28px;font-size:18px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #777;padding:8px;text-align:left}th{background:#eee}@media print{body{margin:12mm}}</style></head><body><h1>Lista ordine materiali</h1><p>Preparata il ${escape(new Date().toLocaleDateString('it-IT'))}</p>${sections}</body></html>`;
     // window.open con noopener restituisce null e lascia about:blank: si stampa da un iframe nascosto.
@@ -217,7 +243,7 @@ export default function OrdiniPage() {
 
   const disabled = busy || loading || !!error;
   return <PageLayout>
-    <PageLayout.Header title='Ordini materiali' headerAction={<CButton color='primary' disabled={busy || loading} onClick={() => void refresh()}>Aggiorna</CButton>} />
+    <PageLayout.Header title='Ordini materiali' headerAction={<div className='d-flex gap-2'><Link className='btn btn-outline-primary' to='/materiali/ordini/gestione'>Gestisci ordini</Link><CButton color='primary' disabled={busy || loading} onClick={() => void refresh()}>Aggiorna</CButton></div>} />
     <PageLayout.ContentHeader>
       <p>Organizza gli acquisti, segnala i materiali terminati e prepara la lista per ciascun fornitore.</p>
       {(tab === 'piani' || tab === 'lista') && <div className='row g-3'>
@@ -234,6 +260,7 @@ export default function OrdiniPage() {
             <div className='mb-2'><h5 className='mb-0'>Materiali ordinabili</h5><p className='text-muted mb-0'>Cerca il prodotto per nome e confronta gli ultimi tre acquisti.</p></div>
             {materialsError && <div className='alert alert-danger' role='alert'>{materialsError}</div>}
             <div className='d-flex flex-wrap gap-2 mb-3' role='group' aria-label='Filtra materiali per iniziale'>
+              <CButton size='sm' aria-pressed={filtroPreferiti} color={filtroPreferiti ? 'danger' : 'secondary'} disabled={!preferiti.size} onClick={() => setSoloPreferiti(!filtroPreferiti)}>Preferiti ({preferiti.size})</CButton>
               <CButton size='sm' color={!letteraRapida ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(''); setFornitoreRapido(''); }}>Tutti</CButton>
               {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'].map(lettera => <CButton key={lettera} size='sm' aria-pressed={letteraRapida === lettera} color={letteraRapida === lettera ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(lettera); setFornitoreRapido(''); }}>{lettera}</CButton>)}
             </div>
@@ -248,17 +275,21 @@ export default function OrdiniPage() {
                 {fornitoriRisultanti.map(nome => <CButton key={nome} size='sm' aria-pressed={fornitoreRapido === nome} color={fornitoreRapido === nome ? 'primary' : 'secondary'} onClick={() => setFornitoreRapido(nome)}>{nome}</CButton>)}
               </div>}
             </div>
-            <div className='row g-2' ref={grigliaRef}>
-              {materialiRapidiFiltrati.map(({ key, righe }) => {
+            {/* Colonne CSS: schede di altezza diversa si impilano senza calcoli di posizione. */}
+            <div style={{ columnWidth: '18rem', columnGap: '0.5rem' }}>
+              {materialiVisibili.map(({ key, righe }) => {
                 // Con un fornitore scelto, scheda e pulsante + usano l'ultimo acquisto di quel fornitore.
                 const righeScelte = fornitoreRapido && righe.some(m => m.fornitorenome === fornitoreRapido) ? righe.filter(m => m.fornitorenome === fornitoreRapido) : righe;
                 const materiale = righeScelte[0];
                 const acquisti = ultimiAcquisti(righeScelte);
                 const nelCarrello = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && normalizzaNome(line.nome) === key);
-                return <div key={key} className='ordine-item col-12 col-md-6 col-xl-4' data-fornitori={[...new Set(righe.map(m => m.fornitorenome))].join('\n')}>
-                <article className='border rounded p-3 h-100' aria-label={materiale.nome}>
+                return <div key={key} className='mb-2' style={{ breakInside: 'avoid' }}>
+                <article className='border rounded p-3' aria-label={materiale.nome}>
                   <div className='d-flex align-items-start justify-content-between gap-2 mb-2'>
                     <strong>{materiale.nome}</strong>
+                    <button type='button' className='btn btn-link p-0 flex-shrink-0 text-danger' aria-pressed={preferiti.has(key)} aria-label={`${preferiti.has(key) ? 'Togli dai preferiti' : 'Metti tra i preferiti'} ${materiale.nome}`} onClick={() => void segna(key, 'preferito', !preferiti.has(key))}>
+                      <Heart size={20} fill={preferiti.has(key) ? 'currentColor' : 'none'} />
+                    </button>
                     {nelCarrello
                       ? <div className='d-flex align-items-center gap-1 flex-shrink-0'>
                         <CButton color='secondary' style={quadrato} aria-label={`Diminuisci ${materiale.nome}`} onClick={() => diminuisciRapido(nelCarrello.id)}>−</CButton>
@@ -274,16 +305,28 @@ export default function OrdiniPage() {
               </div>;
               })}
             </div>
-            {!materialsLoading && !materialiRapidiFiltrati.length && <p>Nessun materiale corrispondente.</p>}
+            {!materialsLoading && !materialiVisibili.length && <p>Nessun materiale corrispondente.</p>}
           </div>
           <div className='col-lg-4'><div className='border rounded p-3 bg-light sticky-lg-top'>
             <h5>Carrello ({righeCarrello.length})</h5>
             {!righeCarrello.length && <p className='text-muted mb-0'>Seleziona i materiali da ordinare.</p>}
             {righeCarrello.map(line => <div key={line.id} className='border-top py-2'>
               <strong className='d-block'>{line.nome}</strong><small className='d-block text-muted'>{line.codice || 'senza codice'} · {line.fornitorenome}</small>
-              <div className='d-flex align-items-center gap-2 mt-2'><CButton size='sm' color='secondary' onClick={() => diminuisciRapido(line.id)}>−</CButton><input aria-label={`Quantità ${line.nome}`} className='form-control form-control-sm' style={{ width: '76px' }} type='number' min='0.001' step='1' value={line.quantita} onChange={e => cambiaQuantitaRapida(line.id, Number(e.target.value))} /><CButton size='sm' color='secondary' onClick={() => void aggiornaCarrello(() => ordiniService.carrelloModifica(line.id, { delta: 1 }))}>+</CButton><CButton size='sm' color='link' className='text-danger' onClick={() => cambiaQuantitaRapida(line.id, 0)}>Rimuovi</CButton></div>
+              <div className='d-flex align-items-center gap-2 mt-2'><CButton size='sm' color='secondary' onClick={() => diminuisciRapido(line.id)}>−</CButton><input aria-label={`Quantità ${line.nome}`} className='form-control form-control-sm' style={{ width: '76px' }} type='number' min='0.001' step='1' value={line.quantita} onChange={e => cambiaQuantitaRapida(line.id, Number(e.target.value))} /><CButton size='sm' color='secondary' onClick={() => void aggiornaCarrello(() => ordiniService.carrelloModifica(line.id, { delta: 1 }))}>+</CButton><CButton size='sm' color='link' onClick={() => void salvaPerDopo(line)}>Salva per dopo</CButton><CButton size='sm' color='link' className='text-danger' onClick={() => cambiaQuantitaRapida(line.id, 0)}>Rimuovi</CButton></div>
             </div>)}
-            {!!righeCarrello.length && <div className='d-flex flex-wrap gap-2 mt-3'><CButton color='primary' onClick={() => { setDaOrdinare(righeCarrello.map(line => line.id)); setCheckoutRapido(true); }}>Rivedi e stampa</CButton><CButton color='secondary' onClick={() => setSvuotaCarrello(true)}>Svuota</CButton></div>}
+            {!!righeCarrello.length && <div className='d-flex flex-wrap gap-2 mt-3'><CButton color='primary' onClick={() => { setDaOrdinare(righeCarrello.map(line => line.id)); setCheckoutRapido(true); }}>Vai al checkout</CButton><CButton color='secondary' onClick={() => setSvuotaCarrello(true)}>Svuota</CButton></div>}
+            <h5 className='mt-4'>Salvati per dopo ({perDopo.length})</h5>
+            {!perDopo.length && <p className='text-muted mb-0'>Metti da parte i prodotti che non ti servono adesso.</p>}
+            {perDopo.map(chiave => {
+              const prodotto = materialiRapidi.find(p => p.key === chiave);
+              return <div key={chiave} className='border-top py-2'>
+                <strong className='d-block'>{prodotto?.righe[0].nome ?? chiave}</strong>
+                <div className='d-flex gap-2 mt-1'>
+                  {prodotto && <CButton size='sm' color='link' onClick={() => void spostaNelCarrello(prodotto.righe[0], chiave)}>Sposta nel carrello</CButton>}
+                  <CButton size='sm' color='link' className='text-danger' onClick={() => void segna(chiave, 'dopo', false)}>Rimuovi</CButton>
+                </div>
+              </div>;
+            })}
           </div></div>
         </div>
         <section className='mt-4' aria-label='Ordini precedenti'>
@@ -391,9 +434,9 @@ export default function OrdiniPage() {
       <CModalFooter><CButton color='secondary' disabled={busy} onClick={() => setCancelId(null)}>Indietro</CButton><CButton color='danger' disabled={disabled} onClick={() => void run(async () => { await ordiniService.transition(cancelId!, 'annullato'); setCancelId(null); }, 'Ordine annullato')}>Conferma annullamento</CButton></CModalFooter>
     </CModal>
     <CModal visible={checkoutRapido} onClose={() => setCheckoutRapido(false)} size='lg'>
-      <CModalHeader><CModalTitle>Controlla la lista prima della stampa</CModalTitle></CModalHeader>
-      <CModalBody><p>La stampa non invia l’ordine e non modifica il magazzino. Quando la segretaria ha ordinato, spunta le righe ordinate e premi “Segna come ordinati”: finiscono nello storico e escono dal carrello, le altre restano.</p><div className='table-responsive'><table className='table'><thead><tr><th>Ordinato</th><th>Fornitore</th><th>Materiale</th><th>Codice</th><th>Quantità</th></tr></thead><tbody>{righeCarrello.map(line => <tr key={line.id}><td><input type='checkbox' aria-label={`Ordinato ${line.nome}`} checked={daOrdinare.includes(line.id)} onChange={e => setDaOrdinare(current => e.target.checked ? [...current, line.id] : current.filter(id => id !== line.id))} /></td><td>{line.fornitorenome}</td><td>{line.nome}</td><td>{line.codice || '—'}</td><td>{line.quantita}</td></tr>)}</tbody></table></div></CModalBody>
-      <CModalFooter><CButton color='secondary' onClick={() => setCheckoutRapido(false)}>Torna al carrello</CButton><CButton color='secondary' disabled={!righeCarrello.length} onClick={stampaCarrelloRapido}>Stampa lista</CButton><CButton color='primary' disabled={busy || !daOrdinare.some(id => righeCarrello.some(line => line.id === id))} onClick={segnaOrdinati}>Segna come ordinati ({daOrdinare.filter(id => righeCarrello.some(line => line.id === id)).length})</CButton></CModalFooter>
+      <CModalHeader><CModalTitle>Checkout</CModalTitle></CModalHeader>
+      <CModalBody><p>“Ordina” stampa la lista, registra l’ordine nello storico e toglie dal carrello le righe spuntate; le altre restano. L’ordine non viene inviato ai fornitori.</p><div className='table-responsive'><table className='table'><thead><tr><th>Includi</th><th>Fornitore</th><th>Materiale</th><th>Codice</th><th>Quantità</th></tr></thead><tbody>{righeCarrello.map(line => <tr key={line.id}><td><input type='checkbox' aria-label={`Includi ${line.nome}`} checked={daOrdinare.includes(line.id)} onChange={e => setDaOrdinare(current => e.target.checked ? [...current, line.id] : current.filter(id => id !== line.id))} /></td><td>{line.fornitorenome}</td><td>{line.nome}</td><td>{line.codice || '—'}</td><td>{line.quantita}</td></tr>)}</tbody></table></div></CModalBody>
+      <CModalFooter><CButton color='secondary' onClick={() => setCheckoutRapido(false)}>Continua ordine</CButton><CButton color='primary' disabled={busy || !daOrdinare.some(id => righeCarrello.some(line => line.id === id))} onClick={ordina}>Ordina</CButton></CModalFooter>
     </CModal>
     <CModal visible={svuotaCarrello} onClose={() => setSvuotaCarrello(false)}>
       <CModalHeader><CModalTitle>Svuota il carrello</CModalTitle></CModalHeader>

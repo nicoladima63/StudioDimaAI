@@ -12,6 +12,7 @@ const LoginPage = React.lazy(() => import('@/features/auth/pages/LoginPage'))
 const CatalogoPage = React.lazy(() => import('@/features/materiali/pages/CatalogoPage'))
 const AggiungiMaterialiPage = React.lazy(() => import('@/features/materiali/pages/AggiungiMaterialiPage'))
 const OrdiniPage = React.lazy(() => import('@/features/materiali/pages/OrdiniPage'))
+const OrdiniGestionePage = React.lazy(() => import('@/features/materiali/pages/OrdiniGestionePage'))
 const ProdottiDaClassificarePage = React.lazy(() => import('@/features/materiali/pages/ProdottiDaClassificarePage'))
 const MaterialiMigrazione = React.lazy(() => import('@/features/materiali/pages/MaterialiMigrazione'))
 const RicercaArticoli = React.lazy(() => import('@/features/materiali/pages/RicercaArticoli'))
@@ -91,6 +92,7 @@ const AppRouter: React.FC = () => {
           <Route path='materiali' element={<CatalogoPage />} />
           <Route path='materiali/aggiungi' element={<AggiungiMaterialiPage />} />
           <Route path='materiali/ordini' element={<OrdiniPage />} />
+          <Route path='materiali/ordini/gestione' element={<OrdiniGestionePage />} />
           <Route path='materiali/da-classificare' element={<ProdottiDaClassificarePage />} />
           <Route path='materiali/migrazione' element={<MaterialiMigrazione />} />
           <Route path='materiali/ricerca' element={<RicercaArticoli />} />

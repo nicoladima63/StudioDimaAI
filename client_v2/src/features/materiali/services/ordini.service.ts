@@ -16,14 +16,22 @@ export interface PianoAcquisto {
   in_arrivo: boolean;
   scaduto: boolean;
 }
+export type StatoOrdine = 'ordinato' | 'ricevuto' | 'annullato';
 export interface OrdineMateriali {
   id: number;
   fornitore_nome: string;
   data_ordine: string;
   data_ricezione: string | null;
-  stato: 'ordinato' | 'ricevuto' | 'annullato';
-  righe: Pick<PianoAcquisto, 'materiale_id' | 'nome' | 'codice' | 'quantita' | 'unita' | 'note'>[];
+  stato: StatoOrdine;
+  righe: (Pick<PianoAcquisto, 'materiale_id' | 'nome' | 'codice' | 'quantita' | 'unita' | 'note'> & { id: number })[];
 }
+export interface OrdineModifica {
+  data_ordine: string;
+  data_ricezione: string | null;
+  stato: StatoOrdine;
+  righe: { id: number; quantita: number; note: string }[];
+}
+export interface Segno { chiave: string; tipo: 'preferito' | 'dopo' }
 export interface OrdiniData { piani: PianoAcquisto[]; ordini: OrdineMateriali[] }
 export interface RigaCarrello {
   materiale_id: number;
@@ -43,6 +51,13 @@ export const ordiniService = {
   async queue(id: number, action: 'aggiungi' | 'terminato' | 'rimuovi') { await apiClient.post(`${base}/lista/${id}/${action}`); },
   async order(ids: number[]) { await apiClient.post(base, { materiale_ids: ids }); },
   async transition(id: number, action: 'ricevuto' | 'annullato') { await apiClient.post(`${base}/${id}/${action}`); },
+  async apiOrdineModifica(id: number, data: OrdineModifica) { await apiClient.put(`${base}/${id}`, data); },
+  async apiOrdineElimina(id: number) { await apiClient.delete(`${base}/${id}`); },
+  // Preferiti e "salva per dopo": la chiave e' il nome normalizzato del prodotto.
+  async apiPreferiti(): Promise<Segno[]> { return (await apiClient.get('/materiali/preferiti')).data.data; },
+  async apiPreferitoImposta(chiave: string, tipo: Segno['tipo'], attivo: boolean): Promise<Segno[]> {
+    return (await apiClient.post('/materiali/preferiti', { chiave, tipo, attivo })).data.data;
+  },
   // Carrello unico condiviso: ogni chiamata restituisce il carrello aggiornato.
   async carrello(): Promise<RigaCarrello[]> { return (await apiClient.get(carrelloBase)).data.data; },
   async carrelloModifica(id: number, change: { delta: number } | { quantita: number }): Promise<RigaCarrello[]> {

@@ -160,6 +160,30 @@ def riordina_carrello_materiali(order_id):
     return _ordini_operation(lambda service: service.carrello_riordina(order_id, str(get_jwt_identity())))
 
 
+@materiali_v2_bp.route('/materiali/ordini/<int:order_id>', methods=['PUT'])
+@jwt_required()
+def update_ordine_materiali(order_id):
+    return _ordini_operation(lambda service: service.ordine_modifica(order_id, request.get_json(silent=True)))
+
+
+@materiali_v2_bp.route('/materiali/ordini/<int:order_id>', methods=['DELETE'])
+@jwt_required()
+def delete_ordine_materiali(order_id):
+    return _ordini_operation(lambda service: service.ordine_elimina(order_id))
+
+
+@materiali_v2_bp.route('/materiali/preferiti', methods=['GET'])
+@jwt_required()
+def get_preferiti_materiali():
+    return _ordini_operation(lambda service: service.preferiti())
+
+
+@materiali_v2_bp.route('/materiali/preferiti', methods=['POST'])
+@jwt_required()
+def set_preferito_materiali():
+    return _ordini_operation(lambda service: service.preferiti_imposta(request.get_json(silent=True)))
+
+
 @materiali_v2_bp.route('/materiali/ordini/<int:order_id>/<action>', methods=['POST'])
 @jwt_required()
 def transition_ordine_materiali(order_id, action):

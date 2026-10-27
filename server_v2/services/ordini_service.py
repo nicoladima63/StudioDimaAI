@@ -31,6 +31,12 @@ class OrdiniService:
             materiale_id INTEGER PRIMARY KEY, quantita REAL NOT NULL CHECK(quantita > 0),
             aggiornato_da TEXT, aggiornato_il TEXT NOT NULL
         )''')
+        # Preferiti e "salva per dopo" condivisi dallo studio; la chiave e' il nome normalizzato del prodotto
+        # (stabile anche quando una nuova fattura cambia l'id della riga piu' recente).
+        conn.execute('''CREATE TABLE IF NOT EXISTS materiali_preferiti (
+            chiave TEXT NOT NULL, tipo TEXT NOT NULL CHECK(tipo IN ('preferito', 'dopo')),
+            PRIMARY KEY (chiave, tipo)
+        )''')
 
     @staticmethod
     def _rows(cursor):
@@ -232,6 +238,77 @@ class OrdiniService:
                     (material_id, quantity, utente, now))
                 added += 1
             return {'aggiunte': added, 'saltate': skipped, 'carrello': self._carrello(conn)}
+
+    def preferiti(self):
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            return self._rows(conn.execute('SELECT chiave, tipo FROM materiali_preferiti ORDER BY chiave'))
+
+    def preferiti_imposta(self, data):
+        if not isinstance(data, dict):
+            raise ValueError('Dati non validi')
+        key = str(data.get('chiave') or '').strip()
+        kind = data.get('tipo')
+        if not key or len(key) > 300 or kind not in ('preferito', 'dopo') or not isinstance(data.get('attivo'), bool):
+            raise ValueError('Dati non validi')
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            if data['attivo']:
+                conn.execute('INSERT OR IGNORE INTO materiali_preferiti (chiave, tipo) VALUES (?, ?)', (key, kind))
+            else:
+                conn.execute('DELETE FROM materiali_preferiti WHERE chiave = ? AND tipo = ?', (key, kind))
+            return self._rows(conn.execute('SELECT chiave, tipo FROM materiali_preferiti ORDER BY chiave'))
+
+    def ordine_modifica(self, order_id, data):
+        """Modifica data, stato e righe di un ordine. 'righe' e' l'elenco completo di quelle da tenere: le altre vengono tolte."""
+        if not isinstance(data, dict) or not isinstance(data.get('righe'), list):
+            raise ValueError('Dati non validi')
+        status = data.get('stato')
+        if status not in ('ordinato', 'ricevuto', 'annullato'):
+            raise ValueError('Stato non valido')
+        try:
+            order_date = date.fromisoformat(data.get('data_ordine')).isoformat()
+            receipt = date.fromisoformat(data['data_ricezione']).isoformat() if status == 'ricevuto' and data.get('data_ricezione') else None
+        except (TypeError, ValueError):
+            raise ValueError('Data non valida')
+        if status == 'ricevuto' and not receipt:
+            receipt = date.today().isoformat()
+        lines = []
+        for line in data['righe']:
+            try:
+                quantity = float(line['quantita'])
+                line_id = line['id']
+                notes = str(line.get('note') or '').strip()
+            except (TypeError, ValueError, KeyError, AttributeError):
+                raise ValueError('Riga non valida')
+            if type(line_id) is not int or not math.isfinite(quantity) or not 0 < quantity <= 1000000 or len(notes) > 2000:
+                raise ValueError('Quantita positiva e note massimo 2000 caratteri richieste')
+            lines.append((line_id, quantity, notes))
+        if not lines or len({l[0] for l in lines}) != len(lines):
+            raise ValueError('L\'ordine deve avere almeno una riga: per toglierlo usa Elimina')
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            conn.execute('BEGIN IMMEDIATE')
+            if not conn.execute('SELECT 1 FROM materiali_ordini WHERE id = ?', (order_id,)).fetchone():
+                raise ValueError('Ordine non trovato')
+            existing = {r[0] for r in conn.execute('SELECT id FROM materiali_ordini_righe WHERE ordine_id = ?', (order_id,))}
+            if not {l[0] for l in lines} <= existing:
+                raise ValueError('Riga non appartenente all\'ordine')
+            conn.execute('UPDATE materiali_ordini SET data_ordine=?, stato=?, data_ricezione=? WHERE id=?',
+                (order_date, status, receipt, order_id))
+            for line_id, quantity, notes in lines:
+                conn.execute('UPDATE materiali_ordini_righe SET quantita=?, note=? WHERE id=?', (quantity, notes, line_id))
+            keep = [l[0] for l in lines]
+            conn.execute('DELETE FROM materiali_ordini_righe WHERE ordine_id=? AND id NOT IN (' + ','.join('?' for _ in keep) + ')',
+                [order_id] + keep)
+
+    def ordine_elimina(self, order_id):
+        with self.db.get_connection() as conn, conn:
+            self._schema(conn)
+            conn.execute('BEGIN IMMEDIATE')
+            conn.execute('DELETE FROM materiali_ordini_righe WHERE ordine_id = ?', (order_id,))
+            if not conn.execute('DELETE FROM materiali_ordini WHERE id = ?', (order_id,)).rowcount:
+                raise ValueError('Ordine non trovato')
 
     def transition(self, order_id, action):
         if action not in ('ricevuto', 'annullato'):

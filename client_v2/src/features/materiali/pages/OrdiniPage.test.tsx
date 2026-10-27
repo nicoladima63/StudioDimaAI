@@ -1,17 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import type Isotope from 'isotope-layout';
 import OrdiniPage from './OrdiniPage';
 import { ordiniService } from '../services/ordini.service';
 
-// In jsdom transitionend non scatta mai: senza durata 0 gli item filtrati non arrivano a display:none.
-vi.mock('isotope-layout', async importOriginal => {
-  const Real = (await importOriginal<{ default: typeof Isotope }>()).default;
-  return { default: class extends Real { constructor(el: HTMLElement, options: Isotope.IsotopeOptions) { super(el, { ...options, transitionDuration: 0 }); } } };
-});
 // Finto server del carrello: lo stato sopravvive allo smontaggio della pagina, come sul server vero.
 const { fakeCart, anagrafica } = vi.hoisted(() => ({
-  fakeCart: { rows: [] as { materiale_id: number; quantita: number }[] },
+  fakeCart: { rows: [] as { materiale_id: number; quantita: number }[], segni: [] as { chiave: string; tipo: string }[] },
   anagrafica: {
     2: { nome: 'Aghi', codice: 'A2', fornitore_id: 'B', fornitore_nome: 'Dentale' },
     10: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
@@ -25,6 +19,12 @@ vi.mock('../services/ordini.service', () => {
   const view = () => fakeCart.rows.map(r => ({ ...anagrafica[r.materiale_id], ...r, aggiornato_da: 'anna', aggiornato_il: '2026-10-26T10:00:00' }));
   return { ordiniService: {
     load: vi.fn(), save: vi.fn(), queue: vi.fn(), order: vi.fn(), transition: vi.fn(),
+    apiPreferiti: vi.fn(async () => fakeCart.segni),
+    apiPreferitoImposta: vi.fn(async (chiave: string, tipo: string, attivo: boolean) => {
+      fakeCart.segni = fakeCart.segni.filter(s => !(s.chiave === chiave && s.tipo === tipo));
+      if (attivo) fakeCart.segni.push({ chiave, tipo });
+      return fakeCart.segni;
+    }),
     carrello: vi.fn(async () => view()),
     carrelloModifica: vi.fn(async (id: number, change: { delta?: number; quantita?: number }) => {
       const current = fakeCart.rows.find(r => r.materiale_id === id)?.quantita ?? 0;
@@ -45,16 +45,19 @@ vi.mock('@/store/materiali.store', () => ({ useMateriali: () => ({
     ...[0, 1, 2].map(i => ({ id: 10 + i, nome: ' aghi ', data_fattura: `2026-08-0${i + 1}`, fattura_id: `OLD${i}`, costo_unitario: 8 + i, codicearticolo: 'OLD', fornitoreid: 'C', fornitorenome: 'Altro fornitore', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' })),
     { id: 3, nome: 'Garze', codicearticolo: 'G3', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'CHIRURGIA' },
     { id: 4, nome: 'Spese di vendita e imballaggio', codicearticolo: 'ZZZZXD', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'SPESE' },
+    { id: 6, nome: '71430 BISICO S4I ligth ribasante', codicearticolo: '', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
     { id: 5, nome: 'Composito', codicearticolo: 'C5', fornitoreid: 'C', fornitorenome: 'Altro fornitore', confermato: 1, contonome: 'MATERIALI', brancanome: 'CONSERVATIVA' },
   ], load: loadMaterials, isLoading: false, error: null,
 }) }));
 vi.mock('@/store/fornitori.store', () => ({ useFornitoriStore: (selector: (state: unknown) => unknown) => selector({ fornitoriMap: { B: { nome: 'DENTALE' }, C: { nome: 'ALTRO FORNITORE' } }, loadAllFornitori: loadMaterials }) }));
+vi.mock('react-router-dom', () => ({ Link: ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => <a href={to} className={className}>{children}</a> }));
 vi.mock('@/components/selects/FornitoriSelect', () => ({ default: () => <div>Fornitore</div> }));
 
 describe('Ordini materiali', () => {
   beforeEach(() => {
     cleanup(); vi.clearAllMocks();
     fakeCart.rows = [];
+    fakeCart.segni = [];
     vi.mocked(ordiniService.load).mockResolvedValue({ piani: [], ordini: [] });
   });
 
@@ -111,10 +114,11 @@ describe('Ordini materiali', () => {
     fakeCart.rows = [{ materiale_id: 2, quantita: 1 }, { materiale_id: 3, quantita: 4 }];
     render(<OrdiniPage />);
     await screen.findByRole('heading', { name: 'Carrello (2)' });
-    fireEvent.click(screen.getByRole('button', { name: 'Rivedi e stampa' }));
-    fireEvent.click(await screen.findByRole('checkbox', { name: 'Ordinato Garze' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Segna come ordinati (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Vai al checkout' }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Includi Garze' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ordina' }));
     await waitFor(() => expect(ordiniService.carrelloOrdina).toHaveBeenCalledWith([2]));
+    document.querySelector('iframe')?.remove();
     await screen.findByRole('heading', { name: 'Carrello (1)' });
     expect(screen.getByLabelText('Quantità Garze')).toHaveValue(4);
     expect(screen.queryByLabelText('Quantità Aghi')).not.toBeInTheDocument();
@@ -122,7 +126,7 @@ describe('Ordini materiali', () => {
 
   it('puts an old order back in the cart with the reorder button', async () => {
     vi.mocked(ordiniService.load).mockResolvedValue({ piani: [], ordini: [{ id: 7, fornitore_nome: 'Dentale', data_ordine: '2026-10-01', data_ricezione: null, stato: 'ordinato',
-      righe: [{ materiale_id: 3, nome: 'Garze', codice: 'G3', quantita: 2, unita: 'confezioni', note: '' }] }] });
+      righe: [{ id: 1, materiale_id: 3, nome: 'Garze', codice: 'G3', quantita: 2, unita: 'confezioni', note: '' }] }] });
     render(<OrdiniPage />);
     const order = within(await screen.findByRole('article', { name: 'Ordine 7' }));
     expect(order.getByText(/Garze · 2/)).toBeInTheDocument();
@@ -167,14 +171,57 @@ describe('Ordini materiali', () => {
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Aghi' });
     fireEvent.click(screen.getByRole('button', { name: 'Aggiungi Aghi' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Rivedi e stampa' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Stampa lista' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Vai al checkout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ordina' }));
+    await waitFor(() => expect(document.querySelector('iframe')).not.toBeNull());
+    expect(ordiniService.carrelloOrdina).toHaveBeenCalledWith([2]);
+    expect(screen.queryByRole('button', { name: 'Continua ordine' })).not.toBeInTheDocument();
     const frame = document.querySelector('iframe');
     expect(frame).not.toBeNull();
     expect(frame!.srcdoc).toContain('Lista ordine materiali');
     expect(frame!.srcdoc).toContain('<h2>DENTALE</h2>');
     expect(frame!.srcdoc).toContain('<td>Aghi</td><td>A2</td><td>1</td>');
     frame!.remove();
+  });
+
+  it('marks favourites with the heart and filters on them', async () => {
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Aghi' });
+    fireEvent.click(screen.getByRole('button', { name: 'Metti tra i preferiti Garze' }));
+    expect(await screen.findByRole('button', { name: 'Togli dai preferiti Garze' })).toBeInTheDocument();
+    expect(ordiniService.apiPreferitoImposta).toHaveBeenCalledWith('garze', 'preferito', true);
+    // Marcare un preferito non cambia l'elenco in corso: il filtro si accende da solo solo all'apertura.
+    expect(screen.getByRole('article', { name: 'Aghi' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Preferiti (1)' }));
+    expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument();
+    expect(screen.getByRole('article', { name: 'Garze' })).toBeInTheDocument();
+  });
+
+  it('opens on favourites only when there are some, and lets you see everything', async () => {
+    fakeCart.segni = [{ chiave: 'garze', tipo: 'preferito' }];
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Garze' });
+    expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Preferiti (1)' }));
+    expect(await screen.findByRole('article', { name: 'Aghi' })).toBeInTheDocument();
+  });
+
+  it('saves a cart line for later and moves it back', async () => {
+    fakeCart.rows = [{ materiale_id: 3, quantita: 4 }];
+    render(<OrdiniPage />);
+    await screen.findByRole('heading', { name: 'Carrello (1)' });
+    fireEvent.click(screen.getByRole('button', { name: 'Salva per dopo' }));
+    await screen.findByRole('heading', { name: 'Carrello (0)' });
+    expect(await screen.findByRole('heading', { name: 'Salvati per dopo (1)' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Sposta nel carrello' }));
+    await screen.findByRole('heading', { name: 'Carrello (1)' });
+    expect(screen.getByRole('heading', { name: 'Salvati per dopo (0)' })).toBeInTheDocument();
+  });
+
+  it('shows the product name without the leading article code', async () => {
+    render(<OrdiniPage />);
+    expect(await screen.findByRole('article', { name: 'BISICO S4I ligth ribasante' })).toBeInTheDocument();
+    expect(screen.queryByText(/71430/)).not.toBeInTheDocument();
   });
 
   it('clears the search with the x button', async () => {
