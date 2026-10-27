@@ -115,7 +115,7 @@ const EvolutionSettingsPage: React.FC = () => {
   const [syncingHistory, setSyncingHistory] = useState(false)
   const [cmdOutput, setCmdOutput] = useState<{ text: string; ok: boolean } | null>(null)
   const [alert, setAlert] = useState<{ color: string; msg: string } | null>(null)
-  const [selectedComm, setSelectedComm] = useState<RecentComm | null>(null)
+  const [selectedComm, setSelectedComm] = useState<Pick<RecentComm, 'patient_name' | 'phone'> | null>(null)
   const [convMessages, setConvMessages] = useState<EvoMessage[]>([])
   const [convLoading, setConvLoading] = useState(false)
   const [convError, setConvError] = useState<string | null>(null)
@@ -199,7 +199,7 @@ const EvolutionSettingsPage: React.FC = () => {
     </CTableHeaderCell>
   )
 
-  const handleOpenConversation = async (c: RecentComm) => {
+  const handleOpenConversation = async (c: Pick<RecentComm, 'patient_name' | 'phone'>) => {
     setSelectedComm(c)
     setConvMessages([])
     setConvError(null)
@@ -669,6 +669,7 @@ const EvolutionSettingsPage: React.FC = () => {
                                   <CTableHeaderCell>Paziente</CTableHeaderCell>
                                   <CTableHeaderCell>Appuntamento</CTableHeaderCell>
                                   <CTableHeaderCell>Recapito</CTableHeaderCell>
+                                  <CTableHeaderCell></CTableHeaderCell>
                                 </CTableRow>
                               </CTableHead>
                               <CTableBody>
@@ -680,6 +681,13 @@ const EvolutionSettingsPage: React.FC = () => {
                                     <CTableDataCell>
                                       {upcomingContactBadge(reminder.contact_status)}
                                       {reminder.phone && <div className="small text-muted mt-1">{reminder.phone}</div>}
+                                    </CTableDataCell>
+                                    <CTableDataCell>
+                                      {reminder.contact_status === 'automatico' && reminder.phone && (
+                                        <CButton color="success" variant="outline" size="sm" onClick={() => handleOpenConversation(reminder)} title="Vedi conversazione">
+                                          <CIcon icon={cilChatBubble} />
+                                        </CButton>
+                                      )}
                                     </CTableDataCell>
                                   </CTableRow>
                                 ))}
