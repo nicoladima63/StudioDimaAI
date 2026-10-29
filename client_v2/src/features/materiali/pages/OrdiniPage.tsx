@@ -25,6 +25,24 @@ function nomeUmano(nome: string, codice: string | null | undefined) {
     .replace(/^[-–—:]\s*|\s*[-–—:]$/g, '').trim();
   return pulito || senzaPrefisso;
 }
+// Il prefisso tolto da nomeUmano (es. UC001A3, GL001AS) è ciò che distingue colore o misura: si mostra sotto il nome.
+const variante = (nome: string) => nome.trim().match(/^(?=\S*\d)([A-Z0-9][A-Z0-9,./-]{3,})\s+(?=\S)/)?.[1] ?? '';
+// shortcut: schema dedotto dai codici Reciproc (V0402 + prodotto + [lunghezza] + misura), non da un listino; altri codici restano grezzi.
+const misuraDentsply = (codice: string | null | undefined) => {
+  const m = codiceUtile(codice).match(/^V0402(\d{2})(\d{3})(\d{3})$/i);
+  if (!m) return '';
+  return m[1] === '52' ? `Misura ${Number(m[3])} · ${Number(m[2])} mm` : `Misura ${Number(m[3])}`;
+};
+// Codice del fornitore leggibile: senza "REF" e senza i segnaposto ZZZ... dell'anagrafica.
+const codiceUtile = (codice: string | null | undefined) => {
+  const pulito = (codice ?? '').trim().replace(/^REF\s+/i, '');
+  return /^Z{3,}/i.test(pulito) ? '' : pulito;
+};
+// Chiave della scheda: il nome, più il codice per i nomi che hanno più articoli (vedi nomiDivisi). Vale anche per le righe del carrello.
+const chiaveProdotto = (nomiDivisi: Set<string>, nome: string, codice: string | null | undefined) => {
+  const chiave = normalizzaNome(nome);
+  return nomiDivisi.has(chiave) ? `${chiave}|${codiceUtile(codice).toLocaleLowerCase()}` : chiave;
+};
 const quadrato = { width: 28, height: 28, padding: 0, lineHeight: 1 };
 // Una fattura dello stesso fornitore rappresenta un acquisto, anche con più righe.
 function ultimiAcquisti(righe: Materiale[]) {
@@ -100,24 +118,39 @@ export default function OrdiniPage() {
   const suppliers = [...new Set(data.piani.map(p => p.fornitore_nome))].sort();
   const selectedPlans = data.piani.filter(p => selected.includes(p.materiale_id) && p.da_ordinare && !p.in_arrivo);
   const availableMaterials = useMemo(() => materiali.filter(m => !data.piani.some(p => p.materiale_id === m.id)), [materiali, data.piani]);
+  const materialiOrdinabili = useMemo(() => materiali.filter(m =>
+    m.confermato === 1 &&
+    m.contonome?.trim().toLocaleUpperCase() === 'MATERIALI' &&
+    m.brancanome?.trim().toLocaleUpperCase() !== 'SPESE' &&
+    Boolean(m.nome.trim() && m.fornitorenome?.trim())
+  ), [materiali]);
+  // Un nome con più codici dello stesso fornitore (es. Reciproc 25 e 40) sono articoli diversi: una scheda per codice.
+  // Per gli altri nomi la scheda resta una sola, anche con fornitori diversi che usano codici propri.
+  const nomiDivisi = useMemo(() => {
+    const codiciPerNome = new Map<string, Map<string, Set<string>>>(); // nome -> fornitore -> codici
+    materialiOrdinabili.forEach(m => {
+      const codice = codiceUtile(m.codicearticolo).toLocaleLowerCase();
+      if (!codice) return;
+      const nome = normalizzaNome(nomeUmano(m.nome, m.codicearticolo));
+      const perFornitore = codiciPerNome.get(nome) ?? new Map<string, Set<string>>();
+      perFornitore.set(m.fornitoreid, (perFornitore.get(m.fornitoreid) ?? new Set<string>()).add(codice));
+      codiciPerNome.set(nome, perFornitore);
+    });
+    return new Set([...codiciPerNome].filter(([, perFornitore]) => [...perFornitore.values()].some(c => c.size > 1)).map(([nome]) => nome));
+  }, [materialiOrdinabili]);
   const materialiRapidi = useMemo(() => {
-    const grouped = new Map<string, Materiale[]>();
-    materiali.filter(m =>
-      m.confermato === 1 &&
-      m.contonome?.trim().toLocaleUpperCase() === 'MATERIALI' &&
-      m.brancanome?.trim().toLocaleUpperCase() !== 'SPESE' &&
-      Boolean(m.nome.trim() && m.fornitorenome?.trim())
-    ).forEach(m => {
+    const grouped = new Map<string, (Materiale & { variante: string })[]>();
+    materialiOrdinabili.forEach(m => {
       const nome = nomeUmano(m.nome, m.codicearticolo);
-      const key = normalizzaNome(nome);
-      const materiale = { ...m, nome, fornitorenome: fornitoriMap[m.fornitoreid]?.nome || m.fornitorenome.trim() };
+      const key = chiaveProdotto(nomiDivisi, nome, m.codicearticolo);
+      const materiale = { ...m, nome, variante: variante(m.nome), fornitorenome: fornitoriMap[m.fornitoreid]?.nome || m.fornitorenome.trim() };
       grouped.set(key, [...(grouped.get(key) || []), materiale]);
     });
     return [...grouped.entries()].map(([key, righe]) => {
       righe.sort((a, b) => (b.data_fattura || '').localeCompare(a.data_fattura || '') || b.id - a.id);
       return { key, righe };
     }).sort((a, b) => a.key.localeCompare(b.key, 'it'));
-  }, [materiali, fornitoriMap]);
+  }, [materialiOrdinabili, nomiDivisi, fornitoriMap]);
   const iniziale = (nome: string) => {
     const lettera = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').charAt(0).toUpperCase();
     return /^[A-Z]$/.test(lettera) ? lettera : '#';
@@ -157,7 +190,7 @@ export default function OrdiniPage() {
   }
 
   function aggiungiRapido(materiale: Materiale) {
-    const existing = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && normalizzaNome(line.nome) === normalizzaNome(materiale.nome));
+    const existing = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && chiaveProdotto(nomiDivisi, line.nome, line.codice) === chiaveProdotto(nomiDivisi, materiale.nome, materiale.codicearticolo));
     void aggiornaCarrello(() => ordiniService.carrelloModifica(existing?.id ?? materiale.id, { delta: 1 }));
   }
 
@@ -171,7 +204,7 @@ export default function OrdiniPage() {
   }
 
   async function salvaPerDopo(line: RigaCarrelloVista) {
-    if (await segna(normalizzaNome(line.nome), 'dopo', true)) void aggiornaCarrello(() => ordiniService.carrelloRimuovi(line.id));
+    if (await segna(chiaveProdotto(nomiDivisi, line.nome, line.codice), 'dopo', true)) void aggiornaCarrello(() => ordiniService.carrelloRimuovi(line.id));
   }
 
   async function spostaNelCarrello(materiale: Materiale, chiave: string) {
@@ -261,7 +294,7 @@ export default function OrdiniPage() {
             {materialsError && <div className='alert alert-danger' role='alert'>{materialsError}</div>}
             <div className='d-flex flex-wrap gap-2 mb-3' role='group' aria-label='Filtra materiali per iniziale'>
               <CButton size='sm' aria-pressed={filtroPreferiti} color={filtroPreferiti ? 'danger' : 'secondary'} disabled={!preferiti.size} onClick={() => setSoloPreferiti(!filtroPreferiti)}>Preferiti ({preferiti.size})</CButton>
-              <CButton size='sm' color={!letteraRapida ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(''); setFornitoreRapido(''); }}>Tutti</CButton>
+              <CButton size='sm' aria-pressed={!letteraRapida && !filtroPreferiti} color={!letteraRapida && !filtroPreferiti ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(''); setFornitoreRapido(''); setSoloPreferiti(false); }}>Tutti</CButton>
               {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'].map(lettera => <CButton key={lettera} size='sm' aria-pressed={letteraRapida === lettera} color={letteraRapida === lettera ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(lettera); setFornitoreRapido(''); }}>{lettera}</CButton>)}
             </div>
             <div className='border rounded p-3 mb-3'>
@@ -282,11 +315,16 @@ export default function OrdiniPage() {
                 const righeScelte = fornitoreRapido && righe.some(m => m.fornitorenome === fornitoreRapido) ? righe.filter(m => m.fornitorenome === fornitoreRapido) : righe;
                 const materiale = righeScelte[0];
                 const acquisti = ultimiAcquisti(righeScelte);
-                const nelCarrello = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && normalizzaNome(line.nome) === key);
+                // Nome con più articoli (es. Reciproc 25 e 40): la scheda è di un solo codice e lo mostra sotto il nome.
+                const dettaglio = materiale.variante || (nomiDivisi.has(normalizzaNome(materiale.nome)) ? misuraDentsply(materiale.codicearticolo) || codiceUtile(materiale.codicearticolo) : '');
+                const nelCarrello = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && chiaveProdotto(nomiDivisi, line.nome, line.codice) === key);
                 return <div key={key} className='mb-2' style={{ breakInside: 'avoid' }}>
                 <article className='border rounded p-3' aria-label={materiale.nome}>
                   <div className='d-flex align-items-start justify-content-between gap-2 mb-2'>
-                    <strong>{materiale.nome}</strong>
+                    <div className='me-auto' style={{ minWidth: 0 }}>
+                      <strong>{materiale.nome}</strong>
+                      {dettaglio && <div className='text-muted' style={{ fontSize: '0.75rem' }}>{dettaglio}</div>}
+                    </div>
                     <button type='button' className='btn btn-link p-0 flex-shrink-0 text-danger' aria-pressed={preferiti.has(key)} aria-label={`${preferiti.has(key) ? 'Togli dai preferiti' : 'Metti tra i preferiti'} ${materiale.nome}`} onClick={() => void segna(key, 'preferito', !preferiti.has(key))}>
                       <Heart size={20} fill={preferiti.has(key) ? 'currentColor' : 'none'} />
                     </button>

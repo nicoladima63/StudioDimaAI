@@ -11,6 +11,8 @@ const { fakeCart, anagrafica } = vi.hoisted(() => ({
     10: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
     11: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
     12: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
+    20: { nome: 'Lime', codice: 'REF Misura 25 · 25 mm', fornitore_id: 'B', fornitore_nome: 'Dentale' },
+    21: { nome: 'Lime', codice: 'REF Misura 40 · 25 mm', fornitore_id: 'B', fornitore_nome: 'Dentale' },
     3: { nome: 'Garze', codice: 'G3', fornitore_id: 'B', fornitore_nome: 'Dentale' },
     5: { nome: 'Composito', codice: 'C5', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
   } as Record<number, { nome: string; codice: string; fornitore_id: string; fornitore_nome: string }>,
@@ -46,6 +48,8 @@ vi.mock('@/store/materiali.store', () => ({ useMateriali: () => ({
     { id: 3, nome: 'Garze', codicearticolo: 'G3', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'CHIRURGIA' },
     { id: 4, nome: 'Spese di vendita e imballaggio', codicearticolo: 'ZZZZXD', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'SPESE' },
     { id: 6, nome: '71430 BISICO S4I ligth ribasante', codicearticolo: '', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
+    { id: 20, nome: 'Lime', data_fattura: '2026-07-01', fattura_id: 'L1', costo_unitario: 90, codicearticolo: 'REF Misura 25 · 25 mm', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
+    { id: 21, nome: 'Lime', data_fattura: '2026-06-01', fattura_id: 'L2', costo_unitario: 90, codicearticolo: 'REF Misura 40 · 25 mm', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
     { id: 5, nome: 'Composito', codicearticolo: 'C5', fornitoreid: 'C', fornitorenome: 'Altro fornitore', confermato: 1, contonome: 'MATERIALI', brancanome: 'CONSERVATIVA' },
   ], load: loadMaterials, isLoading: false, error: null,
 }) }));
@@ -66,6 +70,29 @@ describe('Ordini materiali', () => {
     expect(await screen.findByRole('article', { name: 'Aghi' })).toBeInTheDocument();
     expect(screen.queryByRole('article', { name: 'Spese di vendita e imballaggio' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Aggiungi Aghi' })).toBeInTheDocument();
+  });
+
+  it('shows the stripped code under the name, so variants can be told apart', async () => {
+    render(<OrdiniPage />);
+    const card = await screen.findByRole('article', { name: 'BISICO S4I ligth ribasante' });
+    expect(within(card).getByText('71430')).toBeInTheDocument();
+    expect(within(screen.getByRole('article', { name: 'Aghi' })).queryByText('A2')).not.toBeInTheDocument();
+  });
+
+  it('splits a name with several codes into one card per code, and the + adds that code', async () => {
+    render(<OrdiniPage />);
+    const schede = await screen.findAllByRole('article', { name: 'Lime' });
+    expect(schede).toHaveLength(2);
+    const codici = schede.map(s => ['Misura 25 · 25 mm', 'Misura 40 · 25 mm'].find(c => within(s).queryByText(c)));
+    expect(codici.sort()).toEqual(['Misura 25 · 25 mm', 'Misura 40 · 25 mm']);
+    expect(within(screen.getByRole('article', { name: 'Garze' })).queryByText('G3')).not.toBeInTheDocument();
+    const scheda40 = schede.find(s => within(s).queryByText('Misura 40 · 25 mm'))!;
+    fireEvent.click(within(scheda40).getByRole('button', { name: 'Aggiungi Lime' }));
+    await waitFor(() => expect(ordiniService.carrelloModifica).toHaveBeenCalledWith(21, { delta: 1 }));
+    // la riga nel carrello appartiene solo alla scheda del suo codice: l'altra scheda aggiunge ancora una riga nuova
+    expect(await within(scheda40).findByRole('button', { name: 'Aumenta Lime' })).toBeInTheDocument();
+    const scheda25 = schede.find(s => within(s).queryByText('Misura 25 · 25 mm'))!;
+    expect(within(scheda25).getByRole('button', { name: 'Aggiungi Lime' })).toBeInTheDocument();
   });
 
   it('adds a product to the cart from its card with the latest supplier and adjusts the quantity', async () => {
@@ -206,6 +233,17 @@ describe('Ordini materiali', () => {
     expect(await screen.findByRole('article', { name: 'Aghi' })).toBeInTheDocument();
   });
 
+  it('the Tutti button leaves the favourites filter and the letter filter', async () => {
+    fakeCart.segni = [{ chiave: 'garze', tipo: 'preferito' }];
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Garze' });
+    expect(screen.getByRole('button', { name: 'Tutti' })).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(screen.getByRole('button', { name: 'Tutti' }));
+    expect(await screen.findByRole('article', { name: 'Aghi' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tutti' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Preferiti (1)' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('saves a cart line for later and moves it back', async () => {
     fakeCart.rows = [{ materiale_id: 3, quantita: 4 }];
     render(<OrdiniPage />);
@@ -221,7 +259,7 @@ describe('Ordini materiali', () => {
   it('shows the product name without the leading article code', async () => {
     render(<OrdiniPage />);
     expect(await screen.findByRole('article', { name: 'BISICO S4I ligth ribasante' })).toBeInTheDocument();
-    expect(screen.queryByText(/71430/)).not.toBeInTheDocument();
+    expect(screen.getByText('BISICO S4I ligth ribasante').textContent).not.toMatch(/71430/);
   });
 
   it('clears the search with the x button', async () => {
