@@ -524,6 +524,15 @@ if exist "install_autostart.bat" (
     echo   [WARN] install_autostart.bat non trovato nel repo >> "%LOGFILE%"
 )
 
+if exist "ripristino_server.bat" (
+    copy "ripristino_server.bat" "%DEPLOY_PATH%\ripristino_server.bat" /Y >nul 2>&1
+    echo   [OK] ripristino_server.bat deployato
+    echo   [OK] ripristino_server.bat deployato >> "%LOGFILE%"
+) else (
+    echo   [WARN] ripristino_server.bat non trovato nel repo
+    echo   [WARN] ripristino_server.bat non trovato nel repo >> "%LOGFILE%"
+)
+
 if exist "AUTOSTART_SETUP.md" (
     copy "AUTOSTART_SETUP.md" "%DEPLOY_PATH%\AUTOSTART_SETUP.md" /Y >nul 2>&1
     echo   [OK] AUTOSTART_SETUP.md deployato

@@ -15,10 +15,17 @@ if not exist "start_server_v2.bat" (
     pause
     exit /b 1
 )
+if not exist "ripristino_server.bat" (
+    echo ERRORE: ripristino_server.bat non trovato in %~dp0
+    echo Esegui prima un deploy, oppure copialo qui a mano.
+    pause
+    exit /b 1
+)
 
 set "TASK_NAME=StudioDimaAI_Server"
 
-schtasks /Create /TN "%TASK_NAME%" /TR "\"%~dp0start_server_v2.bat\"" /SC ONLOGON /RL HIGHEST /F
+REM Al logon parte ripristino_server.bat: avvia Docker, i container e il backend, saltando cio' che gira gia'.
+schtasks /Create /TN "%TASK_NAME%" /TR "\"%~dp0ripristino_server.bat\"" /SC ONLOGON /RL HIGHEST /F
 if errorlevel 1 (
     echo ERRORE: creazione del task non riuscita. Riprova da un prompt amministratore.
     pause
