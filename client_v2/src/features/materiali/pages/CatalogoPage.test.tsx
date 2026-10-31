@@ -20,7 +20,7 @@ const prodotto = (id: number, nome: string, extra: Partial<ProdottoCatalogo> = {
   id, nome, stato: 'classificato', archiviato: 0, unita_base: '', soglia_minima: null, note: '',
   contoid: 18, brancaid: 2, sottocontoid: 2, contonome: 'MATERIALI', brancanome: 'CONSERVATIVA', sottocontonome: 'COMPOSITI',
   n_offerte: 1, ultimo_acquisto: '2025-03-10', miglior_prezzo_unitario: 31,
-  offerte: [{ id: id * 10, prodotto_id: id, fornitore_id: 'F2', fornitore_nome: 'Generale Spa', codice: `C${id}`, ultimo_prezzo: 31, pezzi_per_confezione: 1 }],
+  offerte: [{ id: id * 10, prodotto_id: id, fornitore_id: 'F2', fornitore_nome: 'Generale Spa', codice: `C${id}`, ultimo_prezzo: 31, ultimo_acquisto: '2025-03-10', pezzi_per_confezione: 1 }],
   ...extra,
 })
 

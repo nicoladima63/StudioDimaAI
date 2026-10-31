@@ -25,6 +25,7 @@ export interface OffertaSintesi {
   fornitore_nome: string
   codice: string
   ultimo_prezzo: number | null
+  ultimo_acquisto: string | null
   pezzi_per_confezione: number
 }
 

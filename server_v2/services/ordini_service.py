@@ -37,6 +37,13 @@ class OrdiniService:
             chiave TEXT NOT NULL, tipo TEXT NOT NULL CHECK(tipo IN ('preferito', 'dopo')),
             PRIMARY KEY (chiave, tipo)
         )''')
+        # Da qui carrello, righe e piani puntano a materiali_offerte.id (colonne materiale_id) e i preferiti
+        # al prodotto del catalogo: i dati di prova scritti con i vecchi id vanno tolti una volta sola.
+        conn.execute('CREATE TABLE IF NOT EXISTS materiali_ordini_migrazioni (chiave TEXT PRIMARY KEY)')
+        if not conn.execute("SELECT 1 FROM materiali_ordini_migrazioni WHERE chiave = 'offerte'").fetchone():
+            for table in ('materiali_acquisti', 'materiali_ordini_righe', 'materiali_ordini', 'materiali_carrello', 'materiali_preferiti'):
+                conn.execute(f'DELETE FROM {table}')
+            conn.execute("INSERT INTO materiali_ordini_migrazioni (chiave) VALUES ('offerte')")
 
     @staticmethod
     def _rows(cursor):
@@ -84,7 +91,7 @@ class OrdiniService:
             raise ValueError('Fornitore e unità obbligatori; note massimo 2000 caratteri')
         with self.db.get_connection() as conn, conn:
             self._schema(conn)
-            material = conn.execute('SELECT nome, codicearticolo FROM materiali WHERE id = ?', (material_id,)).fetchone()
+            material = conn.execute('SELECT nome, codice FROM materiali_offerte WHERE id = ?', (material_id,)).fetchone()
             if not material:
                 raise ValueError('Materiale non trovato')
             conn.execute('''INSERT INTO materiali_acquisti
@@ -143,11 +150,10 @@ class OrdiniService:
 
     @staticmethod
     def _carrello(conn):
-        return OrdiniService._rows(conn.execute('''SELECT c.materiale_id, m.nome, m.codicearticolo AS codice,
-            m.fornitoreid AS fornitore_id, m.fornitorenome AS fornitore_nome, c.quantita,
-            c.aggiornato_da, c.aggiornato_il
-            FROM materiali_carrello c JOIN materiali m ON m.id = c.materiale_id
-            ORDER BY m.fornitorenome, m.nome'''))
+        return OrdiniService._rows(conn.execute('''SELECT c.materiale_id, o.nome, o.codice,
+            o.fornitore_id, o.fornitore_nome, c.quantita, c.aggiornato_da, c.aggiornato_il
+            FROM materiali_carrello c JOIN materiali_offerte o ON o.id = c.materiale_id
+            ORDER BY o.fornitore_nome, o.nome'''))
 
     def carrello(self):
         with self.db.get_connection() as conn, conn:
@@ -167,7 +173,7 @@ class OrdiniService:
         with self.db.get_connection() as conn, conn:
             self._schema(conn)
             conn.execute('BEGIN IMMEDIATE')
-            if not conn.execute('SELECT 1 FROM materiali WHERE id = ?', (material_id,)).fetchone():
+            if not conn.execute('SELECT 1 FROM materiali_offerte WHERE id = ?', (material_id,)).fetchone():
                 raise ValueError('Materiale non trovato')
             current = conn.execute('SELECT quantita FROM materiali_carrello WHERE materiale_id = ?', (material_id,)).fetchone()
             new = value if delta is None else (current[0] if current else 0) + value
@@ -228,7 +234,7 @@ class OrdiniService:
             added = skipped = 0
             now = datetime.now().isoformat(timespec='seconds')
             for material_id, quantity in conn.execute('SELECT materiale_id, quantita FROM materiali_ordini_righe WHERE ordine_id = ?', (order_id,)).fetchall():
-                if not conn.execute('SELECT 1 FROM materiali WHERE id = ?', (material_id,)).fetchone():
+                if not conn.execute('SELECT 1 FROM materiali_offerte WHERE id = ?', (material_id,)).fetchone():
                     skipped += 1
                     continue
                 conn.execute('''INSERT INTO materiali_carrello (materiale_id, quantita, aggiornato_da, aggiornato_il)

@@ -12,7 +12,9 @@ from .catalogo_materiali_migration import (
 from .catalogo_materiali_parser import norm_code, norm_desc
 from .catalogo_materiali_proposte import FamilyIndex
 
-PAGE_SIZES = (10, 20, 50, 100)
+# 1000 serve alla pagina ordini, che carica tutto il catalogo e filtra nel browser.
+# shortcut: oltre 1000 prodotti la pagina ordini ne vedrebbe solo i primi, da passare a ricerca lato server.
+PAGE_SIZES = (10, 20, 50, 100, 1000)
 SORTS = {'nome': 'p.nome_norm', 'stato': 'p.stato', 'ultimo_acquisto': 'ultimo_acquisto',
          'offerte': 'n_offerte', 'prezzo': 'miglior_prezzo_unitario'}
 CACHE_SECONDS = 10 * 60
@@ -145,7 +147,7 @@ class CatalogoMaterialiService(BaseService):
             if rows:
                 marks = ','.join('?' for _ in rows)
                 offers = rows_as_dicts(conn.execute(
-                    f'SELECT id, prodotto_id, fornitore_id, fornitore_nome, codice, ultimo_prezzo, pezzi_per_confezione '
+                    f'SELECT id, prodotto_id, fornitore_id, fornitore_nome, codice, ultimo_prezzo, ultimo_acquisto, pezzi_per_confezione '
                     f'FROM materiali_offerte WHERE prodotto_id IN ({marks}) ORDER BY fornitore_nome', [r['id'] for r in rows]))
             else:
                 offers = []

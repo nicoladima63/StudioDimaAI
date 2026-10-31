@@ -3,17 +3,17 @@ import { CButton, CCloseButton, CModal, CModalHeader, CModalTitle, CModalBody, C
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Select from 'react-select';
 import PageLayout from '@/components/layout/PageLayout';
 import FornitoriSelect from '@/components/selects/FornitoriSelect';
-import { useMateriali } from '@/store/materiali.store';
 import { useFornitoriStore } from '@/store/fornitori.store';
-import type { Materiale } from '@/store/materiali.store';
+import catalogoService from '../services/catalogo.service';
+import type { ProdottoCatalogo } from '../types/catalogo';
 import { ordiniService, type OrdiniData, type PianoAcquisto, type RigaCarrello, type Segno } from '../services/ordini.service';
 
 const formatDate = (value: string | null) => value ? new Date(`${value}T12:00:00`).toLocaleDateString('it-IT') : '—';
 type RigaCarrelloVista = { id: number; nome: string; codice: string | null; fornitoreid: string; fornitorenome: string; quantita: number };
-const normalizzaNome = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('it');
+// Un'offerta del catalogo = prodotto + fornitore: e' la riga che si mette nel carrello.
+type Offerta = { id: number; codice: string; fornitoreid: string; fornitorenome: string; data: string | null; prezzo: number | null };
 // Il codice articolo serve alle macchine, non alle persone: si toglie dal nome mostrato.
 // shortcut: toglie solo il codice scritto come parola a sé; se è incollato ad altre lettere resta.
 function nomeUmano(nome: string, codice: string | null | undefined) {
@@ -25,39 +25,17 @@ function nomeUmano(nome: string, codice: string | null | undefined) {
     .replace(/^[-–—:]\s*|\s*[-–—:]$/g, '').trim();
   return pulito || senzaPrefisso;
 }
-// Il prefisso tolto da nomeUmano (es. UC001A3, GL001AS) è ciò che distingue colore o misura: si mostra sotto il nome.
-const variante = (nome: string) => nome.trim().match(/^(?=\S*\d)([A-Z0-9][A-Z0-9,./-]{3,})\s+(?=\S)/)?.[1] ?? '';
-// shortcut: schema dedotto dai codici Reciproc (V0402 + prodotto + [lunghezza] + misura), non da un listino; altri codici restano grezzi.
-const misuraDentsply = (codice: string | null | undefined) => {
-  const m = codiceUtile(codice).match(/^V0402(\d{2})(\d{3})(\d{3})$/i);
-  if (!m) return '';
-  return m[1] === '52' ? `Misura ${Number(m[3])} · ${Number(m[2])} mm` : `Misura ${Number(m[3])}`;
-};
 // Codice del fornitore leggibile: senza "REF" e senza i segnaposto ZZZ... dell'anagrafica.
 const codiceUtile = (codice: string | null | undefined) => {
   const pulito = (codice ?? '').trim().replace(/^REF\s+/i, '');
   return /^Z{3,}/i.test(pulito) ? '' : pulito;
 };
-// Chiave della scheda: il nome, più il codice per i nomi che hanno più articoli (vedi nomiDivisi). Vale anche per le righe del carrello.
-const chiaveProdotto = (nomiDivisi: Set<string>, nome: string, codice: string | null | undefined) => {
-  const chiave = normalizzaNome(nome);
-  return nomiDivisi.has(chiave) ? `${chiave}|${codiceUtile(codice).toLocaleLowerCase()}` : chiave;
-};
 const quadrato = { width: 28, height: 28, padding: 0, lineHeight: 1 };
-// Una fattura dello stesso fornitore rappresenta un acquisto, anche con più righe.
-function ultimiAcquisti(righe: Materiale[]) {
-  const visti = new Set<string>();
-  return righe.filter(m => {
-    if (!m.data_fattura) return false;
-    const id = m.fattura_id ? `${m.fornitoreid}|${m.fattura_id}` : `riga:${m.id}`;
-    if (visti.has(id)) return false;
-    visti.add(id);
-    return true;
-  }).slice(0, 3);
-}
 
 export default function OrdiniPage() {
-  const { materiali, load, isLoading: materialsLoading, error: materialsError } = useMateriali();
+  const [prodotti, setProdotti] = useState<ProdottoCatalogo[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(true);
+  const [materialsError, setMaterialsError] = useState('');
   const [data, setData] = useState<OrdiniData>({ piani: [], ordini: [] });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -100,7 +78,16 @@ export default function OrdiniPage() {
     catch { setError('Impossibile caricare gli ordini. Riprova con Aggiorna.'); }
     finally { setLoading(false); }
   }, []);
-  useEffect(() => { void refresh(); void load(); }, [refresh, load]);
+  const caricaCatalogo = useCallback(async () => {
+    setMaterialsLoading(true);
+    try {
+      // Il catalogo e' di qualche centinaio di prodotti: si carica tutto e si filtra qui.
+      const { prodotti: elenco } = await catalogoService.apiRicercaProdotti({ page: 1, per_page: 1000, sort: 'nome', dir: 'asc' });
+      setProdotti(elenco); setMaterialsError('');
+    } catch { setMaterialsError('Impossibile caricare il catalogo materiali.'); }
+    finally { setMaterialsLoading(false); }
+  }, []);
+  useEffect(() => { void refresh(); void caricaCatalogo(); }, [refresh, caricaCatalogo]);
 
   async function run(action: () => Promise<unknown>, message: string) {
     setBusy(true);
@@ -117,68 +104,37 @@ export default function OrdiniPage() {
   const queue = visiblePlans.filter(p => p.da_ordinare);
   const suppliers = [...new Set(data.piani.map(p => p.fornitore_nome))].sort();
   const selectedPlans = data.piani.filter(p => selected.includes(p.materiale_id) && p.da_ordinare && !p.in_arrivo);
-  const availableMaterials = useMemo(() => materiali.filter(m => !data.piani.some(p => p.materiale_id === m.id)), [materiali, data.piani]);
-  const materialiOrdinabili = useMemo(() => materiali.filter(m =>
-    m.confermato === 1 &&
-    m.contonome?.trim().toLocaleUpperCase() === 'MATERIALI' &&
-    m.brancanome?.trim().toLocaleUpperCase() !== 'SPESE' &&
-    Boolean(m.nome.trim() && m.fornitorenome?.trim())
-  ), [materiali]);
-  // Un nome con più codici dello stesso fornitore (es. Reciproc 25 e 40) sono articoli diversi: una scheda per codice.
-  // Per gli altri nomi la scheda resta una sola, anche con fornitori diversi che usano codici propri.
-  const nomiDivisi = useMemo(() => {
-    const codiciPerNome = new Map<string, Map<string, Set<string>>>(); // nome -> fornitore -> codici
-    materialiOrdinabili.forEach(m => {
-      const codice = codiceUtile(m.codicearticolo).toLocaleLowerCase();
-      if (!codice) return;
-      const nome = normalizzaNome(nomeUmano(m.nome, m.codicearticolo));
-      const perFornitore = codiciPerNome.get(nome) ?? new Map<string, Set<string>>();
-      perFornitore.set(m.fornitoreid, (perFornitore.get(m.fornitoreid) ?? new Set<string>()).add(codice));
-      codiciPerNome.set(nome, perFornitore);
-    });
-    return new Set([...codiciPerNome].filter(([, perFornitore]) => [...perFornitore.values()].some(c => c.size > 1)).map(([nome]) => nome));
-  }, [materialiOrdinabili]);
-  const materialiRapidi = useMemo(() => {
-    const grouped = new Map<string, (Materiale & { variante: string })[]>();
-    materialiOrdinabili.forEach(m => {
-      const nome = nomeUmano(m.nome, m.codicearticolo);
-      const key = chiaveProdotto(nomiDivisi, nome, m.codicearticolo);
-      const materiale = { ...m, nome, variante: variante(m.nome), fornitorenome: fornitoriMap[m.fornitoreid]?.nome || m.fornitorenome.trim() };
-      grouped.set(key, [...(grouped.get(key) || []), materiale]);
-    });
-    return [...grouped.entries()].map(([key, righe]) => {
-      righe.sort((a, b) => (b.data_fattura || '').localeCompare(a.data_fattura || '') || b.id - a.id);
-      return { key, righe };
-    }).sort((a, b) => a.key.localeCompare(b.key, 'it'));
-  }, [materialiOrdinabili, nomiDivisi, fornitoriMap]);
+  const materialiRapidi = useMemo(() => prodotti.map(p => ({
+    key: String(p.id), nome: p.nome,
+    // Prima l'offerta piu' recente: e' quella che il + mette nel carrello.
+    righe: [...p.offerte].sort((a, b) => (b.ultimo_acquisto || '').localeCompare(a.ultimo_acquisto || '') || b.id - a.id).map((o): Offerta => ({
+      id: o.id, codice: codiceUtile(o.codice), fornitoreid: o.fornitore_id,
+      fornitorenome: fornitoriMap[o.fornitore_id]?.nome || o.fornitore_nome.trim() || o.fornitore_id,
+      data: o.ultimo_acquisto, prezzo: o.ultimo_prezzo,
+    })),
+  })).filter(p => p.righe.length), [prodotti, fornitoriMap]);
+  const prodottoDiOfferta = useMemo(() => new Map(materialiRapidi.flatMap(p => p.righe.map(o => [o.id, p.key] as const))), [materialiRapidi]);
   const iniziale = (nome: string) => {
-    const lettera = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').charAt(0).toUpperCase();
+    const lettera = nome.normalize('NFD').replace(/[̀-ͯ]/g, '').charAt(0).toUpperCase();
     return /^[A-Z]$/.test(lettera) ? lettera : '#';
   };
   // Senza preferiti il filtro non ha senso: si vede tutto come prima.
   const filtroPreferiti = soloPreferiti && preferiti.size > 0;
-  const materialiRapidiFiltrati =materialiRapidi.filter(prodotto =>
-    (!letteraRapida || iniziale(prodotto.key) === letteraRapida) &&
+  const testoRicerca = ricercaRapida.trim().toLocaleLowerCase();
+  const materialiRapidiFiltrati = materialiRapidi.filter(prodotto =>
+    (!letteraRapida || iniziale(prodotto.nome) === letteraRapida) &&
     (!filtroPreferiti || preferiti.has(prodotto.key)) &&
-    prodotto.righe.some(m => `${m.nome} ${m.codicearticolo || ''} ${m.fornitorenome}`.toLocaleLowerCase().includes(ricercaRapida.trim().toLocaleLowerCase()))
+    `${prodotto.nome} ${prodotto.righe.map(o => `${o.codice} ${o.fornitorenome}`).join(' ')}`.toLocaleLowerCase().includes(testoRicerca)
   );
-  const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(m => m.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
+  const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(o => o.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
   // I chip dei fornitori restano quelli dei risultati; il filtro fornitore restringe solo le schede mostrate.
-  const materialiVisibili = fornitoreRapido ? materialiRapidiFiltrati.filter(p => p.righe.some(m => m.fornitorenome === fornitoreRapido)) : materialiRapidiFiltrati;
+  const materialiVisibili = fornitoreRapido ? materialiRapidiFiltrati.filter(p => p.righe.some(o => o.fornitorenome === fornitoreRapido)) : materialiRapidiFiltrati;
   const ricercaInputRef = useRef<HTMLInputElement>(null);
   const righeCarrello: RigaCarrelloVista[] = carrello.map(line => ({
     id: line.materiale_id, nome: nomeUmano(line.nome, line.codice), codice: line.codice, fornitoreid: line.fornitore_id, quantita: line.quantita,
     fornitorenome: fornitoriMap[line.fornitore_id]?.nome || line.fornitore_nome,
   })).sort((a, b) => a.fornitorenome.localeCompare(b.fornitorenome, 'it') || a.nome.localeCompare(b.nome, 'it'));
   const prezzo = (value: number | null | undefined) => value == null || !Number.isFinite(value) ? 'Prezzo non disponibile' : value.toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
-
-  function chooseMaterial(id: number) {
-    const m = materiali.find(item => item.id === id);
-    if (m) setDraft({ materiale_id: m.id, nome: m.nome, codice: m.codicearticolo,
-      fornitore_id: m.fornitoreid || '', fornitore_nome: m.fornitorenome || '', quantita: 1,
-      unita: 'confezioni', frequenza_giorni: null, prossimo_ordine: null, note: '',
-      da_ordinare: 0, terminato: 0, in_arrivo: false, scaduto: false });
-  }
 
   // Il carrello e' sul server e condiviso: ogni azione restituisce il carrello aggiornato.
   async function aggiornaCarrello(action: () => Promise<RigaCarrello[]>) {
@@ -189,9 +145,8 @@ export default function OrdiniPage() {
     }
   }
 
-  function aggiungiRapido(materiale: Materiale) {
-    const existing = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && chiaveProdotto(nomiDivisi, line.nome, line.codice) === chiaveProdotto(nomiDivisi, materiale.nome, materiale.codicearticolo));
-    void aggiornaCarrello(() => ordiniService.carrelloModifica(existing?.id ?? materiale.id, { delta: 1 }));
+  function aggiungiRapido(offertaId: number) {
+    void aggiornaCarrello(() => ordiniService.carrelloModifica(offertaId, { delta: 1 }));
   }
 
   async function segna(chiave: string, tipo: Segno['tipo'], attivo: boolean) {
@@ -204,11 +159,12 @@ export default function OrdiniPage() {
   }
 
   async function salvaPerDopo(line: RigaCarrelloVista) {
-    if (await segna(chiaveProdotto(nomiDivisi, line.nome, line.codice), 'dopo', true)) void aggiornaCarrello(() => ordiniService.carrelloRimuovi(line.id));
+    const chiave = prodottoDiOfferta.get(line.id);
+    if (chiave && await segna(chiave, 'dopo', true)) void aggiornaCarrello(() => ordiniService.carrelloRimuovi(line.id));
   }
 
-  async function spostaNelCarrello(materiale: Materiale, chiave: string) {
-    if (await segna(chiave, 'dopo', false)) aggiungiRapido(materiale);
+  async function spostaNelCarrello(offertaId: number, chiave: string) {
+    if (await segna(chiave, 'dopo', false)) aggiungiRapido(offertaId);
   }
 
   function diminuisciRapido(id: number) {
@@ -291,7 +247,7 @@ export default function OrdiniPage() {
         <div className='row g-4'>
           <div className='col-lg-8'>
             <div className='mb-2'><h5 className='mb-0'>Materiali ordinabili</h5><p className='text-muted mb-0'>Cerca il prodotto per nome e confronta gli ultimi tre acquisti.</p></div>
-            {materialsError && <div className='alert alert-danger' role='alert'>{materialsError}</div>}
+            {materialsError && <div className='alert alert-danger' role='alert'>{materialsError} <CButton onClick={() => void caricaCatalogo()}>Riprova</CButton></div>}
             <div className='d-flex flex-wrap gap-2 mb-3' role='group' aria-label='Filtra materiali per iniziale'>
               <CButton size='sm' aria-pressed={filtroPreferiti} color={filtroPreferiti ? 'danger' : 'secondary'} disabled={!preferiti.size} onClick={() => setSoloPreferiti(!filtroPreferiti)}>Preferiti ({preferiti.size})</CButton>
               <CButton size='sm' aria-pressed={!letteraRapida && !filtroPreferiti} color={!letteraRapida && !filtroPreferiti ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(''); setFornitoreRapido(''); setSoloPreferiti(false); }}>Tutti</CButton>
@@ -310,14 +266,12 @@ export default function OrdiniPage() {
             </div>
             {/* Colonne CSS: schede di altezza diversa si impilano senza calcoli di posizione. */}
             <div style={{ columnWidth: '18rem', columnGap: '0.5rem' }}>
-              {materialiVisibili.map(({ key, righe }) => {
-                // Con un fornitore scelto, scheda e pulsante + usano l'ultimo acquisto di quel fornitore.
-                const righeScelte = fornitoreRapido && righe.some(m => m.fornitorenome === fornitoreRapido) ? righe.filter(m => m.fornitorenome === fornitoreRapido) : righe;
-                const materiale = righeScelte[0];
-                const acquisti = ultimiAcquisti(righeScelte);
-                // Nome con più articoli (es. Reciproc 25 e 40): la scheda è di un solo codice e lo mostra sotto il nome.
-                const dettaglio = materiale.variante || (nomiDivisi.has(normalizzaNome(materiale.nome)) ? misuraDentsply(materiale.codicearticolo) || codiceUtile(materiale.codicearticolo) : '');
-                const nelCarrello = righeCarrello.find(line => line.fornitoreid === materiale.fornitoreid && chiaveProdotto(nomiDivisi, line.nome, line.codice) === key);
+              {materialiVisibili.map(({ key, nome, righe }) => {
+                // Con un fornitore scelto, scheda e pulsante + usano l'offerta di quel fornitore.
+                const righeScelte = fornitoreRapido && righe.some(o => o.fornitorenome === fornitoreRapido) ? righe.filter(o => o.fornitorenome === fornitoreRapido) : righe;
+                const materiale = { nome, ...righeScelte[0] };
+                const dettaglio = righeScelte.length === 1 ? materiale.codice : '';
+                const nelCarrello = righeCarrello.find(line => righe.some(o => o.id === line.id));
                 return <div key={key} className='mb-2' style={{ breakInside: 'avoid' }}>
                 <article className='border rounded p-3' aria-label={materiale.nome}>
                   <div className='d-flex align-items-start justify-content-between gap-2 mb-2'>
@@ -332,13 +286,13 @@ export default function OrdiniPage() {
                       ? <div className='d-flex align-items-center gap-1 flex-shrink-0'>
                         <CButton color='secondary' style={quadrato} aria-label={`Diminuisci ${materiale.nome}`} onClick={() => diminuisciRapido(nelCarrello.id)}>−</CButton>
                         <strong className='px-1'>{nelCarrello.quantita}</strong>
-                        <CButton color='primary' style={quadrato} aria-label={`Aumenta ${materiale.nome}`} onClick={() => aggiungiRapido(materiale)}>+</CButton>
+                        <CButton color='primary' style={quadrato} aria-label={`Aumenta ${materiale.nome}`} onClick={() => aggiungiRapido(nelCarrello.id)}>+</CButton>
                       </div>
-                      : <CButton color='primary' className='flex-shrink-0' style={quadrato} aria-label={`Aggiungi ${materiale.nome}`} onClick={() => aggiungiRapido(materiale)}>+</CButton>}
+                      : <CButton color='primary' className='flex-shrink-0' style={quadrato} aria-label={`Aggiungi ${materiale.nome}`} onClick={() => aggiungiRapido(materiale.id)}>+</CButton>}
                   </div>
-                  {acquisti.length ? <ul className='list-unstyled mb-0'>{acquisti.map(acquisto => <li key={acquisto.id} className='border-top py-1 small text-muted' style={{ overflowWrap: 'anywhere' }}>
-                    {acquisto.fornitorenome} · {formatDate(acquisto.data_fattura!)} · {prezzo(acquisto.costo_unitario)}
-                  </li>)}</ul> : <p className='small text-muted mb-0'>Nessun acquisto datato disponibile.</p>}
+                  <ul className='list-unstyled mb-0'>{righeScelte.map(o => <li key={o.id} className='border-top py-1 small text-muted' style={{ overflowWrap: 'anywhere' }}>
+                    {o.fornitorenome} · {formatDate(o.data)} · {prezzo(o.prezzo)}{righeScelte.length > 1 && o.codice && ` · ${o.codice}`}
+                  </li>)}</ul>
                 </article>
               </div>;
               })}
@@ -358,9 +312,9 @@ export default function OrdiniPage() {
             {perDopo.map(chiave => {
               const prodotto = materialiRapidi.find(p => p.key === chiave);
               return <div key={chiave} className='border-top py-2'>
-                <strong className='d-block'>{prodotto?.righe[0].nome ?? chiave}</strong>
+                <strong className='d-block'>{prodotto?.nome ?? 'Prodotto non piu in catalogo'}</strong>
                 <div className='d-flex gap-2 mt-1'>
-                  {prodotto && <CButton size='sm' color='link' onClick={() => void spostaNelCarrello(prodotto.righe[0], chiave)}>Sposta nel carrello</CButton>}
+                  {prodotto && <CButton size='sm' color='link' onClick={() => void spostaNelCarrello(prodotto.righe[0].id, chiave)}>Sposta nel carrello</CButton>}
                   <CButton size='sm' color='link' className='text-danger' onClick={() => void segna(chiave, 'dopo', false)}>Rimuovi</CButton>
                 </div>
               </div>;
@@ -381,38 +335,6 @@ export default function OrdiniPage() {
           </div>)}</div>
           {data.ordini.length > ordiniVisibili && <CButton color='secondary' className='mt-3' onClick={() => setOrdiniVisibili(n => n + 10)}>Mostra altri ordini</CButton>}
         </section>
-      </>}
-      {tab === 'piani' && <>
-        <label htmlFor='add-order-material' className='form-label'>Aggiungi un materiale dall’anagrafica</label>
-        <Select
-          inputId='add-order-material'
-          className='mb-3'
-          value={null}
-          isSearchable
-          isDisabled={disabled || materialsLoading}
-          isLoading={materialsLoading}
-          placeholder='Scrivi nome, codice o fornitore...'
-          noOptionsMessage={() => 'Nessun materiale trovato'}
-          loadingMessage={() => 'Caricamento materiali...'}
-          options={availableMaterials.map(m => ({ value: m.id, label: `${m.nome} · ${m.codicearticolo || 'senza codice'} · ${m.fornitorenome}` }))}
-          onChange={option => { if (option) chooseMaterial(option.value); }}
-        />
-        {materialsError && <div className='alert alert-danger' role='alert'>{materialsError} <CButton onClick={() => void load(true)}>Riprova</CButton></div>}
-        <p className='text-muted'>La frequenza è espressa in giorni e decorre dall’ultimo ordine registrato. La data prevista segnala cosa verificare; aggiungi alla lista solo ciò che serve.</p>
-        <div className='table-responsive'><table className='table align-middle'><thead><tr><th>Materiale / fornitore</th><th>Quantità abituale</th><th>Frequenza</th><th>Prossimo ordine</th><th>Stato</th><th>Azioni</th></tr></thead><tbody>
-          {visiblePlans.map(p => <tr key={p.materiale_id}>
-            <td><strong>{p.nome}</strong><div className='small text-muted'>{p.codice} · {p.fornitore_nome}</div></td>
-            <td>{p.quantita} {p.unita}</td><td>{p.frequenza_giorni ? `Ogni ${p.frequenza_giorni} giorni` : 'Al bisogno'}</td>
-            <td>{formatDate(p.prossimo_ordine)}{p.scaduto && <div className='text-warning'>Da verificare</div>}</td>
-            <td>{p.in_arrivo ? 'In attesa di ricezione' : p.da_ordinare ? 'In lista' : 'Disponibile'}{!!p.terminato && <div className='text-danger'>Terminato</div>}</td>
-            <td><div className='d-flex flex-wrap gap-2'>
-              <CButton size='sm' color='secondary' disabled={disabled} onClick={() => setDraft({ ...p })}>Modifica</CButton>
-              <CButton size='sm' color='danger' variant='outline' disabled={disabled || !!p.terminato} onClick={() => void run(() => ordiniService.queue(p.materiale_id, 'terminato'), 'Materiale segnato come terminato e aggiunto alla lista')}>Terminato</CButton>
-              <CButton size='sm' color='primary' variant='outline' disabled={disabled || !!p.da_ordinare || p.in_arrivo} onClick={() => void run(() => ordiniService.queue(p.materiale_id, 'aggiungi'), 'Aggiunto alla lista')}>Da ordinare</CButton>
-            </div></td>
-          </tr>)}
-        </tbody></table></div>
-        {!loading && !visiblePlans.length && <p>Nessun materiale configurato per questi filtri. Seleziona un materiale dall’anagrafica per iniziare.</p>}
       </>}
       {tab === 'lista' && <>
         <div className='d-flex flex-wrap gap-2 mb-3'>

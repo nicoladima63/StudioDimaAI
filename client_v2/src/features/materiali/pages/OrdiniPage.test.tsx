@@ -9,10 +9,8 @@ const { fakeCart, anagrafica } = vi.hoisted(() => ({
   anagrafica: {
     2: { nome: 'Aghi', codice: 'A2', fornitore_id: 'B', fornitore_nome: 'Dentale' },
     10: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
-    11: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
-    12: { nome: ' aghi ', codice: 'OLD', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
-    20: { nome: 'Lime', codice: 'REF Misura 25 · 25 mm', fornitore_id: 'B', fornitore_nome: 'Dentale' },
-    21: { nome: 'Lime', codice: 'REF Misura 40 · 25 mm', fornitore_id: 'B', fornitore_nome: 'Dentale' },
+    20: { nome: 'Lime', codice: 'REF M25', fornitore_id: 'B', fornitore_nome: 'Dentale' },
+    21: { nome: 'Lime', codice: 'REF M40', fornitore_id: 'B', fornitore_nome: 'Dentale' },
     3: { nome: 'Garze', codice: 'G3', fornitore_id: 'B', fornitore_nome: 'Dentale' },
     5: { nome: 'Composito', codice: 'C5', fornitore_id: 'C', fornitore_nome: 'Altro fornitore' },
   } as Record<number, { nome: string; codice: string; fornitore_id: string; fornitore_nome: string }>,
@@ -41,18 +39,17 @@ vi.mock('../services/ordini.service', () => {
   } };
 });
 const { loadMaterials } = vi.hoisted(() => ({ loadMaterials: vi.fn() }));
-vi.mock('@/store/materiali.store', () => ({ useMateriali: () => ({
-  materiali: [
-    { id: 2, data_fattura: '2026-09-01', fattura_id: 'F2', costo_unitario: 10, nome: 'Aghi', codicearticolo: 'A2', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
-    ...[0, 1, 2].map(i => ({ id: 10 + i, nome: ' aghi ', data_fattura: `2026-08-0${i + 1}`, fattura_id: `OLD${i}`, costo_unitario: 8 + i, codicearticolo: 'OLD', fornitoreid: 'C', fornitorenome: 'Altro fornitore', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' })),
-    { id: 3, nome: 'Garze', codicearticolo: 'G3', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'CHIRURGIA' },
-    { id: 4, nome: 'Spese di vendita e imballaggio', codicearticolo: 'ZZZZXD', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'SPESE' },
-    { id: 6, nome: '71430 BISICO S4I ligth ribasante', codicearticolo: '', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
-    { id: 20, nome: 'Lime', data_fattura: '2026-07-01', fattura_id: 'L1', costo_unitario: 90, codicearticolo: 'REF Misura 25 · 25 mm', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
-    { id: 21, nome: 'Lime', data_fattura: '2026-06-01', fattura_id: 'L2', costo_unitario: 90, codicearticolo: 'REF Misura 40 · 25 mm', fornitoreid: 'B', fornitorenome: 'Dentale', confermato: 1, contonome: 'MATERIALI', brancanome: 'DPI' },
-    { id: 5, nome: 'Composito', codicearticolo: 'C5', fornitoreid: 'C', fornitorenome: 'Altro fornitore', confermato: 1, contonome: 'MATERIALI', brancanome: 'CONSERVATIVA' },
-  ], load: loadMaterials, isLoading: false, error: null,
-}) }));
+const offerta = (id: number, prodotto_id: number, fornitore_id: string, fornitore_nome: string, codice: string, ultimo_acquisto: string | null, ultimo_prezzo: number | null) =>
+  ({ id, prodotto_id, fornitore_id, fornitore_nome, codice, ultimo_acquisto, ultimo_prezzo, pezzi_per_confezione: 1 });
+vi.mock('../services/catalogo.service', () => ({ default: { apiRicercaProdotti: vi.fn(async () => ({
+  prodotti: [
+    { id: 1, nome: 'Aghi', offerte: [offerta(2, 1, 'B', 'Dentale', 'A2', '2026-09-01', 10), offerta(10, 1, 'C', 'Altro fornitore', 'OLD', '2026-08-03', 8)] },
+    { id: 2, nome: 'Garze', offerte: [offerta(3, 2, 'B', 'Dentale', 'G3', null, null)] },
+    { id: 3, nome: 'Composito', offerte: [offerta(5, 3, 'C', 'Altro fornitore', 'C5', null, null)] },
+    { id: 4, nome: 'Lime', offerte: [offerta(20, 4, 'B', 'Dentale', 'REF M25', null, null), offerta(21, 4, 'B', 'Dentale', 'REF M40', null, null)] },
+  ],
+  riepilogo: {}, pagination: { page: 1, per_page: 1000, total: 4, pages: 1 },
+})) } }));
 vi.mock('@/store/fornitori.store', () => ({ useFornitoriStore: (selector: (state: unknown) => unknown) => selector({ fornitoriMap: { B: { nome: 'DENTALE' }, C: { nome: 'ALTRO FORNITORE' } }, loadAllFornitori: loadMaterials }) }));
 vi.mock('react-router-dom', () => ({ Link: ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => <a href={to} className={className}>{children}</a> }));
 vi.mock('@/components/selects/FornitoriSelect', () => ({ default: () => <div>Fornitore</div> }));
@@ -65,34 +62,23 @@ describe('Ordini materiali', () => {
     vi.mocked(ordiniService.load).mockResolvedValue({ piani: [], ordini: [] });
   });
 
-  it('shows product cards with an add button and excludes expenses', async () => {
+  it('shows product cards from the catalog with an add button', async () => {
     render(<OrdiniPage />);
     expect(await screen.findByRole('article', { name: 'Aghi' })).toBeInTheDocument();
-    expect(screen.queryByRole('article', { name: 'Spese di vendita e imballaggio' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Aggiungi Aghi' })).toBeInTheDocument();
   });
 
-  it('shows the stripped code under the name, so variants can be told apart', async () => {
+  it('shows the code under the name only when the card has a single offer', async () => {
     render(<OrdiniPage />);
-    const card = await screen.findByRole('article', { name: 'BISICO S4I ligth ribasante' });
-    expect(within(card).getByText('71430')).toBeInTheDocument();
+    expect(within(await screen.findByRole('article', { name: 'Garze' })).getByText('G3')).toBeInTheDocument();
     expect(within(screen.getByRole('article', { name: 'Aghi' })).queryByText('A2')).not.toBeInTheDocument();
   });
 
-  it('splits a name with several codes into one card per code, and the + adds that code', async () => {
+  it('puts the most recent offer in the cart, or the highest id when none is dated', async () => {
     render(<OrdiniPage />);
-    const schede = await screen.findAllByRole('article', { name: 'Lime' });
-    expect(schede).toHaveLength(2);
-    const codici = schede.map(s => ['Misura 25 · 25 mm', 'Misura 40 · 25 mm'].find(c => within(s).queryByText(c)));
-    expect(codici.sort()).toEqual(['Misura 25 · 25 mm', 'Misura 40 · 25 mm']);
-    expect(within(screen.getByRole('article', { name: 'Garze' })).queryByText('G3')).not.toBeInTheDocument();
-    const scheda40 = schede.find(s => within(s).queryByText('Misura 40 · 25 mm'))!;
-    fireEvent.click(within(scheda40).getByRole('button', { name: 'Aggiungi Lime' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Aggiungi Lime' }));
     await waitFor(() => expect(ordiniService.carrelloModifica).toHaveBeenCalledWith(21, { delta: 1 }));
-    // la riga nel carrello appartiene solo alla scheda del suo codice: l'altra scheda aggiunge ancora una riga nuova
-    expect(await within(scheda40).findByRole('button', { name: 'Aumenta Lime' })).toBeInTheDocument();
-    const scheda25 = schede.find(s => within(s).queryByText('Misura 25 · 25 mm'))!;
-    expect(within(scheda25).getByRole('button', { name: 'Aggiungi Lime' })).toBeInTheDocument();
+    expect(await within(screen.getByRole('article', { name: 'Lime' })).findByRole('button', { name: 'Aumenta Lime' })).toBeInTheDocument();
   });
 
   it('adds a product to the cart from its card with the latest supplier and adjusts the quantity', async () => {
@@ -186,9 +172,9 @@ describe('Ordini materiali', () => {
     fireEvent.change(search, { target: { value: 'aghi' } });
     expect(within(screen.getByRole('group', { name: 'Filtra per fornitore' })).getByRole('button', { name: 'Tutti i fornitori' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(within(screen.getByRole('group', { name: 'Filtra per fornitore' })).getByRole('button', { name: 'ALTRO FORNITORE' }));
-    // Con il fornitore scelto la scheda mostra il prodotto di quel fornitore (qui scritto " aghi ").
-    const card = within(screen.getByRole('article', { name: /aghi/i }));
-    expect(card.getAllByRole('listitem')).toHaveLength(3);
+    // Con il fornitore scelto la scheda mostra solo l'offerta di quel fornitore.
+    const card = within(screen.getByRole('article', { name: 'Aghi' }));
+    expect(card.getAllByRole('listitem')).toHaveLength(1);
     expect(card.queryByText(/DENTALE/)).not.toBeInTheDocument();
     fireEvent.click(card.getByRole('button', { name: /Aggiungi/ }));
     expect(await screen.findByText(/OLD · ALTRO FORNITORE/)).toBeInTheDocument();
@@ -216,7 +202,7 @@ describe('Ordini materiali', () => {
     await screen.findByRole('article', { name: 'Aghi' });
     fireEvent.click(screen.getByRole('button', { name: 'Metti tra i preferiti Garze' }));
     expect(await screen.findByRole('button', { name: 'Togli dai preferiti Garze' })).toBeInTheDocument();
-    expect(ordiniService.apiPreferitoImposta).toHaveBeenCalledWith('garze', 'preferito', true);
+    expect(ordiniService.apiPreferitoImposta).toHaveBeenCalledWith('2', 'preferito', true);
     // Marcare un preferito non cambia l'elenco in corso: il filtro si accende da solo solo all'apertura.
     expect(screen.getByRole('article', { name: 'Aghi' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Preferiti (1)' }));
@@ -225,7 +211,7 @@ describe('Ordini materiali', () => {
   });
 
   it('opens on favourites only when there are some, and lets you see everything', async () => {
-    fakeCart.segni = [{ chiave: 'garze', tipo: 'preferito' }];
+    fakeCart.segni = [{ chiave: '2', tipo: 'preferito' }];
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Garze' });
     expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument();
@@ -234,7 +220,7 @@ describe('Ordini materiali', () => {
   });
 
   it('the Tutti button leaves the favourites filter and the letter filter', async () => {
-    fakeCart.segni = [{ chiave: 'garze', tipo: 'preferito' }];
+    fakeCart.segni = [{ chiave: '2', tipo: 'preferito' }];
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Garze' });
     expect(screen.getByRole('button', { name: 'Tutti' })).toHaveAttribute('aria-pressed', 'false');
@@ -254,12 +240,6 @@ describe('Ordini materiali', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sposta nel carrello' }));
     await screen.findByRole('heading', { name: 'Carrello (1)' });
     expect(screen.getByRole('heading', { name: 'Salvati per dopo (0)' })).toBeInTheDocument();
-  });
-
-  it('shows the product name without the leading article code', async () => {
-    render(<OrdiniPage />);
-    expect(await screen.findByRole('article', { name: 'BISICO S4I ligth ribasante' })).toBeInTheDocument();
-    expect(screen.getByText('BISICO S4I ligth ribasante').textContent).not.toMatch(/71430/);
   });
 
   it('clears the search with the x button', async () => {
@@ -286,15 +266,15 @@ describe('Ordini materiali', () => {
     expect(screen.getByRole('article', { name: 'Aghi' })).toBeInTheDocument();
     expect(screen.queryByRole('article', { name: 'Composito' })).not.toBeInTheDocument();
   });
-  it('groups the same product across suppliers and shows the latest three purchases', async () => {
+  it('shows one line per supplier offer, most recent first', async () => {
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Aghi' });
     const card = within(screen.getByRole('article', { name: 'Aghi' }));
-    expect(card.getAllByRole('listitem')).toHaveLength(3);
+    expect(card.getAllByRole('listitem')).toHaveLength(2);
     expect(card.getAllByRole('listitem')[0]).toHaveTextContent('DENTALE');
     expect(card.getAllByRole('listitem')[0]).toHaveTextContent('01/09/2026');
     expect(card.getAllByRole('listitem')[0]).toHaveTextContent('10,00');
-    expect(card.queryByText(/01\/08\/2026/)).not.toBeInTheDocument();
+    expect(card.getAllByRole('listitem')[1]).toHaveTextContent('03/08/2026');
     fireEvent.change(screen.getByRole('textbox', { name: 'Cerca fra tutti i materiali' }), { target: { value: 'garze' } });
     expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument();
     expect(screen.getByRole('article', { name: 'Garze' })).toBeInTheDocument();
