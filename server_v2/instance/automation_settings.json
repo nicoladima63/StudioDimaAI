@@ -20,6 +20,7 @@
                                 "14:00"
                             ],
     "theoretical_mode_enabled":  false,
+    "appointment_reminder_recovery_enabled":  true,
     "appointment_reminder_24h_enabled":  false,
     "appointment_reminder_2h_enabled":  false,
     "appointment_followup_enabled":  false
