@@ -142,3 +142,6 @@ deploy_log.txt
 server_v2/credentials.json
 *.log
 /tmp/
+
+# Scritto dal deploy a ogni rilascio: non va versionato
+server_v2/build_info.json
