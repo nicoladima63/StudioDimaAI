@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CButton, CCloseButton, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter } from '@coreui/react';
+import { CButton, CCloseButton, CDropdown, CDropdownMenu, CDropdownToggle, CFormCheck, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -31,6 +31,7 @@ const codiceUtile = (codice: string | null | undefined) => {
   return /^Z{3,}/i.test(pulito) ? '' : pulito;
 };
 const quadrato = { width: 28, height: 28, padding: 0, lineHeight: 1 };
+const SENZA_DATA = 'nd';
 
 export default function OrdiniPage() {
   const [prodotti, setProdotti] = useState<ProdottoCatalogo[]>([]);
@@ -63,6 +64,7 @@ export default function OrdiniPage() {
   const [checkoutRapido, setCheckoutRapido] = useState(false);
   const [segni, setSegni] = useState<Segno[]>([]);
   const [soloPreferiti, setSoloPreferiti] = useState(false);
+  const [anniScelti, setAnniScelti] = useState<Set<string> | null>(null);
   const preferitiApplicati = useRef(false);
   const preferiti = useMemo(() => new Set(segni.filter(s => s.tipo === 'preferito').map(s => s.chiave)), [segni]);
   const perDopo = useMemo(() => segni.filter(s => s.tipo === 'dopo').map(s => s.chiave), [segni]);
@@ -112,7 +114,11 @@ export default function OrdiniPage() {
       fornitorenome: fornitoriMap[o.fornitore_id]?.nome || o.fornitore_nome.trim() || o.fornitore_id,
       data: o.ultimo_acquisto, prezzo: o.ultimo_prezzo,
     })),
-  })).filter(p => p.righe.length), [prodotti, fornitoriMap]);
+  })).filter(p => p.righe.length).map(p => ({ ...p, anno: p.righe[0].data?.slice(0, 4) || SENZA_DATA })), [prodotti, fornitoriMap]);
+  // Anno dell'ultimo acquisto: all'apertura sono scelti gli ultimi due anni, cosi' non si scorrono prodotti fermi da anni.
+  const anniDisponibili = useMemo(() => [...new Set(materialiRapidi.map(p => p.anno))].sort().reverse(), [materialiRapidi]);
+  const anniAttivi = anniScelti ?? new Set([...anniDisponibili.filter(a => a !== SENZA_DATA).slice(0, 2), SENZA_DATA]);
+  const cambiaAnno = (anno: string) => setAnniScelti(() => { const next = new Set(anniAttivi); if (!next.delete(anno)) next.add(anno); return next; });
   const prodottoDiOfferta = useMemo(() => new Map(materialiRapidi.flatMap(p => p.righe.map(o => [o.id, p.key] as const))), [materialiRapidi]);
   const iniziale = (nome: string) => {
     const lettera = nome.normalize('NFD').replace(/[̀-ͯ]/g, '').charAt(0).toUpperCase();
@@ -123,7 +129,7 @@ export default function OrdiniPage() {
   const testoRicerca = ricercaRapida.trim().toLocaleLowerCase();
   const materialiRapidiFiltrati = materialiRapidi.filter(prodotto =>
     (!letteraRapida || iniziale(prodotto.nome) === letteraRapida) &&
-    (!filtroPreferiti || preferiti.has(prodotto.key)) &&
+    (filtroPreferiti ? preferiti.has(prodotto.key) : anniAttivi.has(prodotto.anno)) &&
     `${prodotto.nome} ${prodotto.righe.map(o => `${o.codice} ${o.fornitorenome}`).join(' ')}`.toLocaleLowerCase().includes(testoRicerca)
   );
   const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(o => o.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
@@ -253,6 +259,15 @@ export default function OrdiniPage() {
               <CButton size='sm' aria-pressed={!letteraRapida && !filtroPreferiti} color={!letteraRapida && !filtroPreferiti ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(''); setFornitoreRapido(''); setSoloPreferiti(false); }}>Tutti</CButton>
               {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'].map(lettera => <CButton key={lettera} size='sm' aria-pressed={letteraRapida === lettera} color={letteraRapida === lettera ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(lettera); setFornitoreRapido(''); }}>{lettera}</CButton>)}
             </div>
+            <div className='d-flex align-items-center gap-2 mb-3'>
+              <CDropdown autoClose='outside'>
+                <CDropdownToggle color='secondary' size='sm' disabled={filtroPreferiti}>Ultimo acquisto: {[...anniAttivi].map(a => a === SENZA_DATA ? 'senza data' : a).sort().reverse().join(', ') || 'nessun anno'}</CDropdownToggle>
+                <CDropdownMenu className='p-2'>
+                  {anniDisponibili.map(anno => <CFormCheck key={anno} id={`anno-${anno}`} className='mb-1' label={anno === SENZA_DATA ? 'Senza data' : anno} checked={anniAttivi.has(anno)} onChange={() => cambiaAnno(anno)} />)}
+                </CDropdownMenu>
+              </CDropdown>
+              {filtroPreferiti && <small className='text-muted'>Con i preferiti attivi l'anno non filtra.</small>}
+            </div>
             <div className='border rounded p-3 mb-3'>
               <label htmlFor='quick-order-search' className='form-label'>Cerca fra tutti i materiali</label>
               <div className='position-relative'>
@@ -297,7 +312,7 @@ export default function OrdiniPage() {
               </div>;
               })}
             </div>
-            {!materialsLoading && !materialiVisibili.length && <p>Nessun materiale corrispondente.</p>}
+            {!materialsLoading && !materialiVisibili.length && <p>Nessun materiale corrispondente.{!filtroPreferiti && anniAttivi.size < anniDisponibili.length && ' Controlla il filtro Ultimo acquisto: alcuni anni sono esclusi.'}</p>}
           </div>
           <div className='col-lg-4'><div className='border rounded p-3 bg-light sticky-lg-top'>
             <h5>Carrello ({righeCarrello.length})</h5>

@@ -45,6 +45,8 @@ vi.mock('../services/catalogo.service', () => ({ default: { apiRicercaProdotti: 
   prodotti: [
     { id: 1, nome: 'Aghi', offerte: [offerta(2, 1, 'B', 'Dentale', 'A2', '2026-09-01', 10), offerta(10, 1, 'C', 'Altro fornitore', 'OLD', '2026-08-03', 8)] },
     { id: 2, nome: 'Garze', offerte: [offerta(3, 2, 'B', 'Dentale', 'G3', null, null)] },
+    { id: 5, nome: 'Intermedio', offerte: [offerta(30, 5, 'B', 'Dentale', 'I1', '2024-05-01', 4)] },
+    { id: 6, nome: 'Vecchio', offerte: [offerta(31, 6, 'B', 'Dentale', 'V1', '2019-05-01', 4)] },
     { id: 3, nome: 'Composito', offerte: [offerta(5, 3, 'C', 'Altro fornitore', 'C5', null, null)] },
     { id: 4, nome: 'Lime', offerte: [offerta(20, 4, 'B', 'Dentale', 'REF M25', null, null), offerta(21, 4, 'B', 'Dentale', 'REF M40', null, null)] },
   ],
@@ -240,6 +242,18 @@ describe('Ordini materiali', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sposta nel carrello' }));
     await screen.findByRole('heading', { name: 'Carrello (1)' });
     expect(screen.getByRole('heading', { name: 'Salvati per dopo (0)' })).toBeInTheDocument();
+  });
+
+  it('hides products not bought in the last two years until their year is ticked', async () => {
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Aghi' });
+    expect(screen.getByRole('article', { name: 'Intermedio' })).toBeInTheDocument();
+    expect(screen.queryByRole('article', { name: 'Vecchio' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Ultimo acquisto/ }));
+    fireEvent.click(await screen.findByLabelText('2019'));
+    expect(await screen.findByRole('article', { name: 'Vecchio' })).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('2026'));
+    await waitFor(() => expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument());
   });
 
   it('clears the search with the x button', async () => {
