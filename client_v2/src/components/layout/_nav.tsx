@@ -27,7 +27,6 @@ const navigation: NavItem[] = [
       { name: 'Materiali', to: '/materiali', iconName: 'Package' },
       { name: 'Aggiungi materiali', to: '/materiali/aggiungi', iconName: 'Search' },
       { name: 'Ordini materiali', to: '/materiali/ordini', iconName: 'ShoppingCart' },
-      { name: 'Prodotti da classificare', to: '/materiali/da-classificare', iconName: 'ListChecks' },
       { name: 'Conti', to: '/conti', iconName: 'Wallet' },
       { name: 'Spese', to: '/spese', iconName: 'Receipt' },
       { name: 'Collaboratori', to: '/collaboratori', iconName: 'UserCheck', allowedRoles: ['admin'] },
@@ -87,14 +86,8 @@ const navigation: NavItem[] = [
       { name: 'Day Reminder', to: '/settings/day-reminder', iconName: 'CalendarCheck', allowedRoles: ['admin','dottore'] },
     ],
   },
-  {
-    name: 'Materiali Utils',
-    iconName: 'Wrench',
-    items: [
-      { name: 'Migrazione', to: '/materiali/migrazione', iconName: 'Upload', allowedRoles: ['admin'] },
-      { name: 'Classifica', to: '/materiali/ricerca', iconName: 'Search'},
-    ],
-  },
+  // Tolte dal menu "Prodotti da classificare", "Migrazione" e "Classifica": scrivono ancora sul vecchio
+  // elenco materiali e non sul catalogo. Le rotte restano raggiungibili da URL.
 ]
 
 export const bottomNavItems = [
