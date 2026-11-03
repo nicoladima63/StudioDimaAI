@@ -129,7 +129,7 @@ export default function OrdiniPage() {
   const testoRicerca = ricercaRapida.trim().toLocaleLowerCase();
   const materialiRapidiFiltrati = materialiRapidi.filter(prodotto =>
     (!letteraRapida || iniziale(prodotto.nome) === letteraRapida) &&
-    (filtroPreferiti ? preferiti.has(prodotto.key) : anniAttivi.has(prodotto.anno)) &&
+    (!filtroPreferiti || preferiti.has(prodotto.key)) && anniAttivi.has(prodotto.anno) &&
     `${prodotto.nome} ${prodotto.righe.map(o => `${o.codice} ${o.fornitorenome}`).join(' ')}`.toLocaleLowerCase().includes(testoRicerca)
   );
   const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(o => o.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
@@ -261,13 +261,11 @@ export default function OrdiniPage() {
             </div>
             <div className='d-flex align-items-center gap-2 mb-3'>
               <CDropdown autoClose='outside'>
-                <CDropdownToggle color='secondary' size='sm' disabled={filtroPreferiti}>Ultimo acquisto: {[...anniAttivi].map(a => a === SENZA_DATA ? 'senza data' : a).sort().reverse().join(', ') || 'nessun anno'}</CDropdownToggle>
+                <CDropdownToggle color='secondary' size='sm'>Ultimo acquisto: {[...anniAttivi].map(a => a === SENZA_DATA ? 'senza data' : a).sort().reverse().join(', ') || 'nessun anno'}</CDropdownToggle>
                 <CDropdownMenu className='p-2'>
                   {anniDisponibili.map(anno => <CFormCheck key={anno} id={`anno-${anno}`} className='mb-1' label={anno === SENZA_DATA ? 'Senza data' : anno} checked={anniAttivi.has(anno)} onChange={() => cambiaAnno(anno)} />)}
                 </CDropdownMenu>
-              </CDropdown>
-              {filtroPreferiti && <small className='text-muted'>Con i preferiti attivi l'anno non filtra.</small>}
-            </div>
+              </CDropdown>            </div>
             <div className='border rounded p-3 mb-3'>
               <label htmlFor='quick-order-search' className='form-label'>Cerca fra tutti i materiali</label>
               <div className='position-relative'>
@@ -312,7 +310,7 @@ export default function OrdiniPage() {
               </div>;
               })}
             </div>
-            {!materialsLoading && !materialiVisibili.length && <p>Nessun materiale corrispondente.{!filtroPreferiti && anniAttivi.size < anniDisponibili.length && ' Controlla il filtro Ultimo acquisto: alcuni anni sono esclusi.'}</p>}
+            {!materialsLoading && !materialiVisibili.length && <p>Nessun materiale corrispondente.{anniAttivi.size < anniDisponibili.length && ' Controlla il filtro Ultimo acquisto: alcuni anni sono esclusi.'}</p>}
           </div>
           <div className='col-lg-4'><div className='border rounded p-3 bg-light sticky-lg-top'>
             <h5>Carrello ({righeCarrello.length})</h5>

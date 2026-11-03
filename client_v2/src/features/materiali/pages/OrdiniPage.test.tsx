@@ -256,6 +256,16 @@ describe('Ordini materiali', () => {
     await waitFor(() => expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument());
   });
 
+  it('applies the year filter to favourites too', async () => {
+    fakeCart.segni = [{ chiave: '6', tipo: 'preferito' }, { chiave: '2', tipo: 'preferito' }];
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Garze' });
+    expect(screen.queryByRole('article', { name: 'Vecchio' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Ultimo acquisto/ }));
+    fireEvent.click(await screen.findByLabelText('2019'));
+    expect(await screen.findByRole('article', { name: 'Vecchio' })).toBeInTheDocument();
+  });
+
   it('clears the search with the x button', async () => {
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Aghi' });
