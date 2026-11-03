@@ -126,15 +126,20 @@ export default function OrdiniPage() {
   };
   // Senza preferiti il filtro non ha senso: si vede tutto come prima.
   const filtroPreferiti = soloPreferiti && preferiti.size > 0;
-  const testoRicerca = ricercaRapida.trim().toLocaleLowerCase();
+  // Ogni parola scritta deve comparire in nome, codice o fornitore, in qualsiasi ordine.
+  const paroleRicerca = ricercaRapida.toLocaleLowerCase().split(/\s+/).filter(Boolean);
   const materialiRapidiFiltrati = materialiRapidi.filter(prodotto =>
     (!letteraRapida || iniziale(prodotto.nome) === letteraRapida) &&
     (!filtroPreferiti || preferiti.has(prodotto.key)) && anniAttivi.has(prodotto.anno) &&
-    `${prodotto.nome} ${prodotto.righe.map(o => `${o.codice} ${o.fornitorenome}`).join(' ')}`.toLocaleLowerCase().includes(testoRicerca)
+    paroleRicerca.every(parola => `${prodotto.nome} ${prodotto.righe.map(o => `${o.codice} ${o.fornitorenome}`).join(' ')}`.toLocaleLowerCase().includes(parola))
   );
   const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(o => o.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
   // I chip dei fornitori restano quelli dei risultati; il filtro fornitore restringe solo le schede mostrate.
-  const materialiVisibili = fornitoreRapido ? materialiRapidiFiltrati.filter(p => p.righe.some(o => o.fornitorenome === fornitoreRapido)) : materialiRapidiFiltrati;
+  const perFornitore = fornitoreRapido ? materialiRapidiFiltrati.filter(p => p.righe.some(o => o.fornitorenome === fornitoreRapido)) : materialiRapidiFiltrati;
+  // Nei preferiti i prodotti fermi da piu' tempo vengono prima (anno e mese crescenti, senza data in fondo): sono quelli da riguardare.
+  const materialiVisibili = filtroPreferiti
+    ? [...perFornitore].sort((a, b) => (a.righe[0].data ?? '9999').localeCompare(b.righe[0].data ?? '9999') || a.nome.localeCompare(b.nome, 'it'))
+    : perFornitore;
   const ricercaInputRef = useRef<HTMLInputElement>(null);
   const righeCarrello: RigaCarrelloVista[] = carrello.map(line => ({
     id: line.materiale_id, nome: nomeUmano(line.nome, line.codice), codice: line.codice, fornitoreid: line.fornitore_id, quantita: line.quantita,

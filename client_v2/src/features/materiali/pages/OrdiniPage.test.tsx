@@ -256,6 +256,13 @@ describe('Ordini materiali', () => {
     await waitFor(() => expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument());
   });
 
+  it('lists favourites from the oldest last purchase to the newest, undated last', async () => {
+    fakeCart.segni = ['1', '2', '5'].map(chiave => ({ chiave, tipo: 'preferito' }));
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Intermedio' });
+    expect(screen.getAllByRole('article').map(a => a.getAttribute('aria-label'))).toEqual(['Intermedio', 'Aghi', 'Garze']);
+  });
+
   it('applies the year filter to favourites too', async () => {
     fakeCart.segni = [{ chiave: '6', tipo: 'preferito' }, { chiave: '2', tipo: 'preferito' }];
     render(<OrdiniPage />);
@@ -264,6 +271,16 @@ describe('Ordini materiali', () => {
     fireEvent.click(screen.getByRole('button', { name: /Ultimo acquisto/ }));
     fireEvent.click(await screen.findByLabelText('2019'));
     expect(await screen.findByRole('article', { name: 'Vecchio' })).toBeInTheDocument();
+  });
+
+  it('matches every typed word in any order across name and supplier', async () => {
+    render(<OrdiniPage />);
+    await screen.findByRole('article', { name: 'Aghi' });
+    fireEvent.change(screen.getByRole('textbox', { name: 'Cerca fra tutti i materiali' }), { target: { value: 'dentale  aghi' } });
+    expect(screen.getByRole('article', { name: 'Aghi' })).toBeInTheDocument();
+    expect(screen.queryByRole('article', { name: 'Garze' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Cerca fra tutti i materiali' }), { target: { value: 'aghi garze' } });
+    expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument();
   });
 
   it('clears the search with the x button', async () => {
