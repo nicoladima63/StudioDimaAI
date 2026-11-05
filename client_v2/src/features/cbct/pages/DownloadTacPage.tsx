@@ -127,7 +127,7 @@ const DownloadTacPage: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          disabled={busyIds.has(e.portal_exam_id) || loading}
+                          disabled={e.gia_scaricato || busyIds.has(e.portal_exam_id) || loading}
                           onClick={() => handleScarica(e)}
                         >
                           {busyIds.has(e.portal_exam_id)
@@ -186,7 +186,7 @@ const DownloadTacPage: React.FC = () => {
                             variant="outline"
                             size="sm"
                             className="gap-1"
-                            disabled={busyIds.has(e.portal_exam_id) || loading}
+                            disabled={e.gia_scaricato || busyIds.has(e.portal_exam_id) || loading}
                             onClick={() => handleScarica(e)}
                           >
                             {busyIds.has(e.portal_exam_id)
