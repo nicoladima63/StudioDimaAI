@@ -35,7 +35,7 @@ const euro = (value: number | null) =>
 /** Proposte con classificazione completa e confidenza alta: si possono aggiungere con un solo clic. */
 const SOGLIA_AFFIDABILE = 90
 const affidabile = (v: VoceGestionale): boolean =>
-  !v.in_catalogo && v.proposta !== null && v.proposta.sottocontoid !== null && v.proposta.confidence >= SOGLIA_AFFIDABILE
+  !v.in_catalogo && v.proposta !== null && v.proposta.completa && v.proposta.confidence >= SOGLIA_AFFIDABILE
 
 const chiave = (v: Pick<VoceGestionale, 'fornitore_id' | 'codice' | 'nome'>) => `${v.fornitore_id}|${v.codice}|${v.nome}`
 

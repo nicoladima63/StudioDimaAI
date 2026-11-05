@@ -86,8 +86,17 @@ def rows_as_dicts(cursor):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-def stato_classificazione(contoid, brancaid, sottocontoid):
-    if contoid and brancaid and sottocontoid:
+def classificazione_completa(contoid, brancaid, sottocontoid, branche_con_sottoconti):
+    """Completa = arrivata all'ultimo livello che esiste: il sottoconto serve solo se la branca ne ha (CAMICI no)."""
+    return bool(contoid and brancaid and (sottocontoid or brancaid not in branche_con_sottoconti))
+
+
+def branche_con_sottoconti(conn):
+    return {r[0] for r in conn.execute('SELECT DISTINCT brancaid FROM sottoconti')}
+
+
+def stato_classificazione(conn, contoid, brancaid, sottocontoid):
+    if classificazione_completa(contoid, brancaid, sottocontoid, branche_con_sottoconti(conn)):
         return 'classificato'
     return 'parziale' if contoid else 'da_classificare'
 
@@ -172,7 +181,7 @@ def salva_offerta(conn, offer, classificazione):
         prodotto_id = conn.execute(
             'INSERT INTO materiali_prodotti (nome, nome_norm, contoid, brancaid, sottocontoid, stato) VALUES (?, ?, ?, ?, ?, ?)',
             (offer['nome'], key[2], contoid, brancaid, sottocontoid,
-             stato_classificazione(contoid, brancaid, sottocontoid))).lastrowid
+             stato_classificazione(conn, contoid, brancaid, sottocontoid))).lastrowid
         offerta_id = conn.execute(
             'INSERT INTO materiali_offerte (prodotto_id, fornitore_id, fornitore_nome, fornitore_norm, codice, codice_norm, '
             'nome, nome_norm, origine) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',

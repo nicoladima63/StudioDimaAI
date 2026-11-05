@@ -8,7 +8,8 @@ from core.exceptions import TransactionError
 
 from .base_service import BaseService
 from .catalogo_materiali_migration import (
-    DbfSource, clean, fornitori_materiali, leggi_gestionale, regole_testa, rows_as_dicts, salva_offerta, stato_classificazione)
+    DbfSource, branche_con_sottoconti, classificazione_completa, clean, fornitori_materiali, leggi_gestionale, regole_testa,
+    rows_as_dicts, salva_offerta, stato_classificazione)
 from .catalogo_materiali_parser import norm_code, norm_desc
 from .catalogo_materiali_proposte import FamilyIndex
 
@@ -98,7 +99,7 @@ class CatalogoMaterialiService(BaseService):
         ids = [_positive_int(i, 'Prodotto') for i in ids]
         with self._tx() as conn:
             cl = self.valida_classificazione(conn, classificazione)
-            stato = stato_classificazione(cl['contoid'], cl['brancaid'], cl['sottocontoid'])
+            stato = stato_classificazione(conn, cl['contoid'], cl['brancaid'], cl['sottocontoid'])
             marks = ','.join('?' for _ in ids)
             updated = conn.execute(
                 f'UPDATE materiali_prodotti SET contoid=?, brancaid=?, sottocontoid=?, stato=?, updated_at=CURRENT_TIMESTAMP '
@@ -275,7 +276,7 @@ class CatalogoMaterialiService(BaseService):
             if ereditata is not None:
                 conn.execute('UPDATE materiali_prodotti SET contoid=?, brancaid=?, sottocontoid=?, stato=? WHERE id=?',
                              (ereditata[1], ereditata[2], ereditata[3],
-                              stato_classificazione(ereditata[1], ereditata[2], ereditata[3]), target_id))
+                              stato_classificazione(conn, ereditata[1], ereditata[2], ereditata[3]), target_id))
             conn.execute(f'DELETE FROM materiali_prodotti WHERE id IN ({marks})', source_ids)
             conn.execute('UPDATE materiali_prodotti SET updated_at=CURRENT_TIMESTAMP WHERE id=?', (target_id,))
         return {'offerte_spostate': spostate, 'classificazioni_diverse_ignorate': diverse}
@@ -396,7 +397,8 @@ class CatalogoMaterialiService(BaseService):
                                  'codice': c['offerta_codice'],
                                  'contoid': c['contoid'], 'brancaid': c['brancaid'], 'sottocontoid': c['sottocontoid']}
                                 for c in classificati])
-        return {'classificati': classificati, 'fornitori': fornitori, 'nomi': nomi, 'famiglia': famiglia}
+        return {'classificati': classificati, 'fornitori': fornitori, 'nomi': nomi, 'famiglia': famiglia,
+                'branche_con_sottoconti': branche_con_sottoconti(conn)}
 
     @classmethod
     def _proposta(cls, contesto, offer):
@@ -406,6 +408,8 @@ class CatalogoMaterialiService(BaseService):
             proposta['contonome'] = nomi['conti'].get(proposta['contoid'])
             proposta['brancanome'] = nomi['branche'].get(proposta['brancaid'])
             proposta['sottocontonome'] = nomi['sottoconti'].get(proposta['sottocontoid'])
+            proposta['completa'] = classificazione_completa(
+                proposta['contoid'], proposta['brancaid'], proposta['sottocontoid'], contesto['branche_con_sottoconti'])
         return proposta
 
     @staticmethod
@@ -419,8 +423,8 @@ class CatalogoMaterialiService(BaseService):
                     'fonte': 'stesso_nome_in_catalogo', 'confidence': 95, 'riferimento': c['nome']}
         fornitore = contesto['fornitori'].get(offer['fornitore_id'])
         famiglia = contesto['famiglia'].propose(offer['nome'], offer['fornitore_id'], codice=offer['codice'])
-        if fornitore and fornitore[0] and fornitore[1] and fornitore[2]:
-            return {'contoid': fornitore[0], 'brancaid': fornitore[1], 'sottocontoid': fornitore[2],
+        if fornitore and classificazione_completa(fornitore[0], fornitore[1], fornitore[2], contesto['branche_con_sottoconti']):
+            return {'contoid': fornitore[0], 'brancaid': fornitore[1], 'sottocontoid': fornitore[2] or None,
                     'fonte': 'fornitore_completo', 'confidence': 95, 'riferimento': offer['fornitore_nome']}
         conto_fornitore = fornitore[0] if fornitore else None
         if famiglia and (famiglia['depth'] >= 2 or not conto_fornitore) and (

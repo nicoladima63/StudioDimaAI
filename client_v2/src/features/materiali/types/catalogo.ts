@@ -105,6 +105,8 @@ export interface RicercaProdottiRisposta {
 
 export interface PropostaClassificazione extends ClassificazioneIds, ClassificazioneNomi {
   fonte: 'stesso_nome_in_catalogo' | 'famiglia_prodotti' | 'fornitore_completo' | 'fornitore_parziale'
+  /** Arrivata all'ultimo livello che esiste: il sottoconto manca solo se la branca non ne ha (es. CAMICI). */
+  completa: boolean
   confidence: number
   riferimento: string
 }

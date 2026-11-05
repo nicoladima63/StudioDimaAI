@@ -18,9 +18,9 @@ vi.mock('../components/ClassificazioneSelect', () => ({
   ),
 }))
 
-const proposta = (branca: number | null, sotto: number | null): PropostaClassificazione => ({
+const proposta = (branca: number | null, sotto: number | null, completa = sotto !== null): PropostaClassificazione => ({
   contoid: 18, brancaid: branca, sottocontoid: sotto, contonome: 'MATERIALI', brancanome: 'IMPLANTOLOGIA', sottocontonome: 'IMPIANTI',
-  fonte: 'famiglia_prodotti', confidence: 97, riferimento: 'SEVEN XD',
+  fonte: 'famiglia_prodotti', completa, confidence: 97, riferimento: 'SEVEN XD',
 })
 
 const voce = (nome: string, prop: PropostaClassificazione | null): VoceGestionale => ({
@@ -61,6 +61,13 @@ describe('Aggiungi materiali: dialog con classificazione unica', () => {
     const dialog = await apriDialogCon(['IMPIANTO L6', 'IMPIANTO L8'])
     expect(dialog.getByTestId('classificazione')).toHaveTextContent('18/4/null')
     expect(dialog.getByText(/non coincidono/)).toBeInTheDocument()
+  })
+
+  it('il + veloce c’è con due livelli se la branca non ha sottoconti, non se ne mancano', async () => {
+    carica([voce('CASACCA BIANCA', proposta(4, null, true)), voce('GUANTI TAGLIA M', proposta(4, null, false))])
+    render(<MemoryRouter><AggiungiMaterialiPage /></MemoryRouter>)
+    await screen.findByLabelText('Seleziona CASACCA BIANCA')
+    expect(screen.getAllByTitle(/Aggiungi con la classificazione proposta/)).toHaveLength(1)
   })
 
   it('senza proposte lascia la classificazione vuota', async () => {
