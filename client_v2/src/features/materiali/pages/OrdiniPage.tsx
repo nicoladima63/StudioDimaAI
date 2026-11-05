@@ -115,9 +115,9 @@ export default function OrdiniPage() {
       data: o.ultimo_acquisto, prezzo: o.ultimo_prezzo,
     })),
   })).filter(p => p.righe.length).map(p => ({ ...p, anno: p.righe[0].data?.slice(0, 4) || SENZA_DATA })), [prodotti, fornitoriMap]);
-  // Anno dell'ultimo acquisto: all'apertura sono scelti gli ultimi due anni, cosi' non si scorrono prodotti fermi da anni.
+  // Anno dell'ultimo acquisto: all'apertura sono scelti gli ultimi tre anni, cosi' non si scorrono prodotti fermi da anni.
   const anniDisponibili = useMemo(() => [...new Set(materialiRapidi.map(p => p.anno))].sort().reverse(), [materialiRapidi]);
-  const anniAttivi = anniScelti ?? new Set([...anniDisponibili.filter(a => a !== SENZA_DATA).slice(0, 2), SENZA_DATA]);
+  const anniAttivi = anniScelti ?? new Set([...anniDisponibili.filter(a => a !== SENZA_DATA).slice(0, 3), SENZA_DATA]);
   const cambiaAnno = (anno: string) => setAnniScelti(() => { const next = new Set(anniAttivi); if (!next.delete(anno)) next.add(anno); return next; });
   const prodottoDiOfferta = useMemo(() => new Map(materialiRapidi.flatMap(p => p.righe.map(o => [o.id, p.key] as const))), [materialiRapidi]);
   const iniziale = (nome: string) => {
@@ -130,16 +130,13 @@ export default function OrdiniPage() {
   const paroleRicerca = ricercaRapida.toLocaleLowerCase().split(/\s+/).filter(Boolean);
   const materialiRapidiFiltrati = materialiRapidi.filter(prodotto =>
     (!letteraRapida || iniziale(prodotto.nome) === letteraRapida) &&
-    (!filtroPreferiti || preferiti.has(prodotto.key)) && anniAttivi.has(prodotto.anno) &&
+    (!filtroPreferiti || preferiti.has(prodotto.key)) && (paroleRicerca.length > 0 || anniAttivi.has(prodotto.anno)) &&
     paroleRicerca.every(parola => `${prodotto.nome} ${prodotto.righe.map(o => `${o.codice} ${o.fornitorenome}`).join(' ')}`.toLocaleLowerCase().includes(parola))
   );
   const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(o => o.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
   // I chip dei fornitori restano quelli dei risultati; il filtro fornitore restringe solo le schede mostrate.
   const perFornitore = fornitoreRapido ? materialiRapidiFiltrati.filter(p => p.righe.some(o => o.fornitorenome === fornitoreRapido)) : materialiRapidiFiltrati;
-  // Nei preferiti i prodotti fermi da piu' tempo vengono prima (anno e mese crescenti, senza data in fondo): sono quelli da riguardare.
-  const materialiVisibili = filtroPreferiti
-    ? [...perFornitore].sort((a, b) => (a.righe[0].data ?? '9999').localeCompare(b.righe[0].data ?? '9999') || a.nome.localeCompare(b.nome, 'it'))
-    : perFornitore;
+  const materialiVisibili = [...perFornitore].sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
   const ricercaInputRef = useRef<HTMLInputElement>(null);
   const righeCarrello: RigaCarrelloVista[] = carrello.map(line => ({
     id: line.materiale_id, nome: nomeUmano(line.nome, line.codice), codice: line.codice, fornitoreid: line.fornitore_id, quantita: line.quantita,

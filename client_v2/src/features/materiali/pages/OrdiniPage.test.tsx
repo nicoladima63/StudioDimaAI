@@ -46,6 +46,7 @@ vi.mock('../services/catalogo.service', () => ({ default: { apiRicercaProdotti: 
     { id: 1, nome: 'Aghi', offerte: [offerta(2, 1, 'B', 'Dentale', 'A2', '2026-09-01', 10), offerta(10, 1, 'C', 'Altro fornitore', 'OLD', '2026-08-03', 8)] },
     { id: 2, nome: 'Garze', offerte: [offerta(3, 2, 'B', 'Dentale', 'G3', null, null)] },
     { id: 5, nome: 'Intermedio', offerte: [offerta(30, 5, 'B', 'Dentale', 'I1', '2024-05-01', 4)] },
+    { id: 7, nome: 'Recente', offerte: [offerta(32, 7, 'B', 'Dentale', 'R1', '2025-05-01', 4)] },
     { id: 6, nome: 'Vecchio', offerte: [offerta(31, 6, 'B', 'Dentale', 'V1', '2019-05-01', 4)] },
     { id: 3, nome: 'Composito', offerte: [offerta(5, 3, 'C', 'Altro fornitore', 'C5', null, null)] },
     { id: 4, nome: 'Lime', offerte: [offerta(20, 4, 'B', 'Dentale', 'REF M25', null, null), offerta(21, 4, 'B', 'Dentale', 'REF M40', null, null)] },
@@ -244,7 +245,7 @@ describe('Ordini materiali', () => {
     expect(screen.getByRole('heading', { name: 'Salvati per dopo (0)' })).toBeInTheDocument();
   });
 
-  it('hides products not bought in the last two years until their year is ticked', async () => {
+  it('hides products not bought in the last three years until their year is ticked', async () => {
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Aghi' });
     expect(screen.getByRole('article', { name: 'Intermedio' })).toBeInTheDocument();
@@ -256,11 +257,11 @@ describe('Ordini materiali', () => {
     await waitFor(() => expect(screen.queryByRole('article', { name: 'Aghi' })).not.toBeInTheDocument());
   });
 
-  it('lists favourites from the oldest last purchase to the newest, undated last', async () => {
+  it('lists favourites alphabetically', async () => {
     fakeCart.segni = ['1', '2', '5'].map(chiave => ({ chiave, tipo: 'preferito' }));
     render(<OrdiniPage />);
     await screen.findByRole('article', { name: 'Intermedio' });
-    expect(screen.getAllByRole('article').map(a => a.getAttribute('aria-label'))).toEqual(['Intermedio', 'Aghi', 'Garze']);
+    expect(screen.getAllByRole('article').map(a => a.getAttribute('aria-label'))).toEqual(['Aghi', 'Garze', 'Intermedio']);
   });
 
   it('applies the year filter to favourites too', async () => {
