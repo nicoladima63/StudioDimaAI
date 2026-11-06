@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { CCard, CCardBody, CCardHeader, CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react'
+import { CButton, CCard, CCardBody, CCardHeader, CNav, CNavItem, CNavLink, CTabContent, CTabPane } from '@coreui/react'
+import toast from 'react-hot-toast'
+import { economicsService } from '../services/economics.service'
 import DashboardTab from '../components/DashboardTab'
 import ForecastTab from '../components/ForecastTab'
 import SimulatoreTab from '../components/SimulatoreTab'
@@ -9,11 +11,30 @@ import ReportPrestazioni from '../components/ReportPrestazioni'
 const EconomicsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('dashboard')
   const [reportSubTab, setReportSubTab] = useState<string>('appuntamenti')
+  const [ricalcolo, setRicalcolo] = useState(false)
+  // Cambiare la key rimonta i tab, che rileggono i dati dal server.
+  const [versione, setVersione] = useState(0)
+
+  const ricalcola = async () => {
+    setRicalcolo(true)
+    try {
+      await economicsService.apiInvalidateCache()
+      setVersione(v => v + 1)
+      toast.success('Cache svuotata: dati ricalcolati dai file del gestionale')
+    } catch {
+      toast.error('Ricalcolo non riuscito. Riprova.')
+    } finally {
+      setRicalcolo(false)
+    }
+  }
 
   return (
     <CCard>
-      <CCardHeader>
+      <CCardHeader className="d-flex justify-content-between align-items-center">
         <strong>Analisi Economica</strong>
+        <CButton color="secondary" size="sm" disabled={ricalcolo} onClick={() => void ricalcola()}>
+          {ricalcolo ? 'Ricalcolo in corso...' : 'Ricalcola dati'}
+        </CButton>
       </CCardHeader>
       <CCardBody>
         <CNav variant="tabs" className="mb-4">
@@ -55,7 +76,7 @@ const EconomicsPage: React.FC = () => {
           </CNavItem>
         </CNav>
 
-        <CTabContent>
+        <CTabContent key={versione}>
           <CTabPane visible={activeTab === 'dashboard'}>
             <DashboardTab />
           </CTabPane>

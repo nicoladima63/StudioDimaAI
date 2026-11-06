@@ -133,6 +133,20 @@ def _ensure_cache_table():
             logger.info("Cache economics invalidata per migrazione nuove colonne")
 
 
+# L'anno in corso cambia ogni giorno (fatture, spese): la sua cache vale poco. Gli anni chiusi restano in cache.
+CACHE_ANNO_CORRENTE_SECONDI = 3600
+
+
+def _is_expired(anno: int, updated_at: str) -> bool:
+    if anno != datetime.now().year:
+        return False
+    try:
+        eta = (datetime.now() - datetime.fromisoformat(updated_at)).total_seconds()
+    except ValueError:
+        return True
+    return eta > CACHE_ANNO_CORRENTE_SECONDI
+
+
 def _get_cached_data(anno: int) -> Optional[List[Dict[str, Any]]]:
     """Recupera dati dalla cache per un anno specifico."""
     try:
@@ -146,6 +160,8 @@ def _get_cached_data(anno: int) -> Optional[List[Dict[str, Any]]]:
             rows = cursor.fetchall()
             if rows:
                 data = [dict(zip(columns, row)) for row in rows]
+                if _is_expired(anno, max(r.get('updated_at') or '' for r in data)):
+                    return None
                 # Controlla se i dati sono stale (costi presenti ma nessuna classificazione)
                 has_costi = any(r.get('costi_totali', 0) > 0 for r in data)
                 has_classif = any(
