@@ -32,6 +32,7 @@ const codiceUtile = (codice: string | null | undefined) => {
 };
 const quadrato = { width: 28, height: 28, padding: 0, lineHeight: 1 };
 const SENZA_DATA = 'nd';
+const SENZA_CATEGORIA = 'Senza categoria';
 
 export default function OrdiniPage() {
   const [prodotti, setProdotti] = useState<ProdottoCatalogo[]>([]);
@@ -58,6 +59,7 @@ export default function OrdiniPage() {
   const [ricercaRapida, setRicercaRapida] = useState('');
   const [letteraRapida, setLetteraRapida] = useState('');
   const [fornitoreRapido, setFornitoreRapido] = useState('');
+  const [categoriaRapida, setCategoriaRapida] = useState('');
   const fornitoriMap = useFornitoriStore(state => state.fornitoriMap);
   const loadAllFornitori = useFornitoriStore(state => state.loadAllFornitori);
   useEffect(() => { void loadAllFornitori(); }, [loadAllFornitori]);
@@ -114,6 +116,7 @@ export default function OrdiniPage() {
       fornitorenome: fornitoriMap[o.fornitore_id]?.nome || o.fornitore_nome.trim() || o.fornitore_id,
       data: o.ultimo_acquisto, prezzo: o.ultimo_prezzo,
     })),
+    categoria: p.brancanome?.trim() || SENZA_CATEGORIA,
   })).filter(p => p.righe.length).map(p => ({ ...p, anno: p.righe[0].data?.slice(0, 4) || SENZA_DATA })), [prodotti, fornitoriMap]);
   // Anno dell'ultimo acquisto: all'apertura sono scelti gli ultimi tre anni, cosi' non si scorrono prodotti fermi da anni.
   const anniDisponibili = useMemo(() => [...new Set(materialiRapidi.map(p => p.anno))].sort().reverse(), [materialiRapidi]);
@@ -128,11 +131,15 @@ export default function OrdiniPage() {
   const filtroPreferiti = soloPreferiti && preferiti.size > 0;
   // Ogni parola scritta deve comparire in nome, codice o fornitore, in qualsiasi ordine.
   const paroleRicerca = ricercaRapida.toLocaleLowerCase().split(/\s+/).filter(Boolean);
-  const materialiRapidiFiltrati = materialiRapidi.filter(prodotto =>
+  const prima = materialiRapidi.filter(prodotto =>
     (!letteraRapida || iniziale(prodotto.nome) === letteraRapida) &&
     (!filtroPreferiti || preferiti.has(prodotto.key)) && (paroleRicerca.length > 0 || anniAttivi.has(prodotto.anno)) &&
     paroleRicerca.every(parola => `${prodotto.nome} ${prodotto.righe.map(o => `${o.codice} ${o.fornitorenome}`).join(' ')}`.toLocaleLowerCase().includes(parola))
   );
+  // Bottoni categoria (branca) solo fra i preferiti; la scelta vale solo se la categoria e' ancora fra quelle presenti.
+  const categorie = filtroPreferiti ? [...prima.reduce((m, p) => m.set(p.categoria, (m.get(p.categoria) || 0) + 1), new Map<string, number>())].sort((a, b) => a[0].localeCompare(b[0], 'it')) : [];
+  const categoriaAttiva = categorie.some(([nome]) => nome === categoriaRapida) ? categoriaRapida : '';
+  const materialiRapidiFiltrati = categoriaAttiva ? prima.filter(p => p.categoria === categoriaAttiva) : prima;
   const fornitoriRisultanti = [...new Set(materialiRapidiFiltrati.flatMap(p => p.righe.map(o => o.fornitorenome)))].sort((a, b) => a.localeCompare(b, 'it'));
   // I chip dei fornitori restano quelli dei risultati; il filtro fornitore restringe solo le schede mostrate.
   const perFornitore = fornitoreRapido ? materialiRapidiFiltrati.filter(p => p.righe.some(o => o.fornitorenome === fornitoreRapido)) : materialiRapidiFiltrati;
@@ -261,6 +268,10 @@ export default function OrdiniPage() {
               <CButton size='sm' aria-pressed={!letteraRapida && !filtroPreferiti} color={!letteraRapida && !filtroPreferiti ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(''); setFornitoreRapido(''); setSoloPreferiti(false); }}>Tutti</CButton>
               {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '#'].map(lettera => <CButton key={lettera} size='sm' aria-pressed={letteraRapida === lettera} color={letteraRapida === lettera ? 'primary' : 'secondary'} onClick={() => { setLetteraRapida(lettera); setFornitoreRapido(''); }}>{lettera}</CButton>)}
             </div>
+            {categorie.length > 1 && <div className='d-flex flex-wrap gap-2 mb-3' role='group' aria-label='Filtra preferiti per categoria'>
+              <CButton size='sm' aria-pressed={!categoriaAttiva} color={!categoriaAttiva ? 'primary' : 'secondary'} onClick={() => setCategoriaRapida('')}>Tutte le categorie</CButton>
+              {categorie.map(([nome, n]) => <CButton key={nome} size='sm' aria-pressed={categoriaAttiva === nome} color={categoriaAttiva === nome ? 'primary' : 'secondary'} onClick={() => setCategoriaRapida(nome)}>{nome} ({n})</CButton>)}
+            </div>}
             <div className='d-flex align-items-center gap-2 mb-3'>
               <CDropdown autoClose='outside'>
                 <CDropdownToggle color='secondary' size='sm'>Ultimo acquisto: {[...anniAttivi].map(a => a === SENZA_DATA ? 'senza data' : a).sort().reverse().join(', ') || 'nessun anno'}</CDropdownToggle>
