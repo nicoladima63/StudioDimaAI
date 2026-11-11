@@ -392,6 +392,13 @@ MEDICI = {
     6: 'Dr.ssa Rossella Pisante'
 }
 
+# DB_APSTUDI in APPUNTA. Corrispondenza ricavata dall'agenda: l'igiene (Lara, Anet) sta per ~90% nello studio 2.
+# Studio 0 / vuoto = note e appuntamenti privati senza medico, esclusi dalle analisi.
+STUDI = {
+    1: 'Studio blu',
+    2: 'Studio giallo',
+}
+
 # =============================================================================
 # COMPENSI COLLABORATORI - Regole di compenso per analisi redditivita
 # tipo: 'titolare' | 'percentuale' | 'per_intervento'
@@ -558,7 +565,7 @@ def get_all_guardia_types() -> dict:
 
 __all__ = [
     'COLONNE', 'DBF_TABLES', 'TIPI_APPUNTAMENTO', 'TIPO_RICHIAMI', 'GUARDIA_MAP',
-    'MEDICI', 'COLORI_APPUNTAMENTO', 'GOOGLE_COLOR_MAP',
+    'MEDICI', 'STUDI', 'COLORI_APPUNTAMENTO', 'GOOGLE_COLOR_MAP',
     'PRIMANOTA_TIPO_CHI', 'PRIMANOTA_TIPO_OPERAZIONE', 'PRIMANOTA_TIPO_CONTO',
     'PRIMANOTA_TIPO_MOVIMENTO', 'PRIMANOTA_TIPO_RICEVUTA', 'PRIMANOTA_MOVIMENTI_INTERNI',
     'get_appointment_type_name', 'get_appointment_color', 'get_google_color_id',

@@ -312,6 +312,7 @@ export interface AppuntamentiPerMedico {
 
 export interface AppuntamentiPerStudio {
   studio: number
+  studio_nome: string
   num_appuntamenti: number
   percentuale: number
   ore_cliniche: number

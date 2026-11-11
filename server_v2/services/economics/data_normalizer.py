@@ -167,6 +167,11 @@ def get_df_appointments(anno: Optional[int] = None) -> pd.DataFrame:
                     ora_inizio = _safe_float(getattr(record, col['ora_inizio'].lower(), 0))
                     ora_fine = _safe_float(getattr(record, col['ora_fine'].lower(), 0))
                     medico_id = _safe_int(getattr(record, col['medico'].lower(), 0))
+                    studio = _safe_int(getattr(record, col['studio'].lower(), 0))
+
+                    # Senza medico e senza studio sono note e appuntamenti privati, non attivita' clinica
+                    if medico_id == 0 and studio == 0:
+                        continue
 
                     # Converte da formato DBF (ore.minuti base 60) a minuti totali
                     min_inizio = _dbf_time_to_minutes(ora_inizio)
@@ -182,7 +187,7 @@ def get_df_appointments(anno: Optional[int] = None) -> pd.DataFrame:
                         'tipo_nome': TIPI_APPUNTAMENTO.get(tipo, f'Tipo sconosciuto ({tipo})'),
                         'medico': medico_id,
                         'medico_nome': MEDICI.get(medico_id, f'Medico {medico_id}'),
-                        'studio': _safe_int(getattr(record, col['studio'].lower(), 1)),
+                        'studio': studio,
                         'durata_minuti': durata_minuti,
                     })
                 except Exception:

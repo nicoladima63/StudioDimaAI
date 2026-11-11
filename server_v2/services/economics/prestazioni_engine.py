@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 
 from core.config_manager import get_config
-from core.constants_v2 import COLONNE, MEDICI, TIPI_APPUNTAMENTO, CATEGORIE_PRESTAZIONI
+from core.constants_v2 import COLONNE, MEDICI, STUDI, TIPI_APPUNTAMENTO, CATEGORIE_PRESTAZIONI
 from utils.dbf_utils import clean_dbf_value
 from services.economics.data_normalizer import get_df_appointments, get_df_estimates
 
@@ -156,6 +156,7 @@ def _calcola_distribuzione_appuntamenti_anno(anno: int) -> Dict[str, Any]:
         ore = round(_safe(group['durata_minuti'].sum() / 60.0), 2)
         result['per_studio'].append({
             'studio': int(studio_id),
+            'studio_nome': STUDI.get(int(studio_id), f'Studio {int(studio_id)}'),
             'num_appuntamenti': count,
             'percentuale': round(count / totale * 100, 2) if totale > 0 else 0.0,
             'ore_cliniche': ore,

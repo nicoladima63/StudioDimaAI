@@ -182,7 +182,7 @@ const ReportAppuntamenti: React.FC = () => {
                   <CCol sm={4} key={s.studio}>
                     <CCard className="mb-3 text-center">
                       <CCardBody>
-                        <div className="text-uppercase text-body-secondary small">Studio {s.studio}</div>
+                        <div className="text-uppercase text-body-secondary small">{s.studio_nome}</div>
                         <div className="fs-4 fw-bold">{s.num_appuntamenti}</div>
                         <div className="text-body-secondary">{s.percentuale}% | {s.ore_cliniche}h</div>
                       </CCardBody>
