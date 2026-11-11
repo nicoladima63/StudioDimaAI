@@ -25,7 +25,7 @@ import {
     CFormSelect
 } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { cilPlus, cilCheckCircle, cilOptions, cilTask, cilList, cilTrash, cilReload, cilDeaf, cilDelete } from '@coreui/icons';
+import { cilPlus, cilCheckCircle, cilOptions, cilTask, cilList, cilTrash, cilReload, cilDeaf, cilDelete, cilPencil } from '@coreui/icons';
 import { worksService } from '../../services/works.service';
 import { Task, CATEGORY_COLORS, CATEGORY_NAMES, Work } from '../../types/works.types';
 import toast from 'react-hot-toast';
@@ -57,6 +57,7 @@ const TasksPage: React.FC = () => {
     // Modal state
     const [modalVisible, setModalVisible] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [newTask, setNewTask] = useState<{
         patient_id: string;
         work_id: number | '';
@@ -120,7 +121,20 @@ const TasksPage: React.FC = () => {
         return Math.round((completed / task.steps.length) * 100);
     };
 
+    const handleOpenEdit = (task: Task) => {
+        setEditingTask(task);
+        setNewTask({
+            patient_id: task.patient_id,
+            work_id: task.work_id,
+            description: task.description || '',
+            start_date: (task.start_date || '').slice(0, 10),
+            due_date: (task.due_date || '').slice(0, 10)
+        });
+        setModalVisible(true);
+    };
+
     const handleOpenModal = () => {
+        setEditingTask(null);
         setNewTask({
             patient_id: '',
             work_id: '',
@@ -136,13 +150,25 @@ const TasksPage: React.FC = () => {
             toast.error('Seleziona un paziente e una lavorazione');
             return;
         }
-        if (newTask.due_date && newTask.due_date < todayIso()) {
+        const dueChanged = !editingTask || newTask.due_date !== (editingTask.due_date || '').slice(0, 10);
+        if (dueChanged && newTask.due_date && newTask.due_date < todayIso()) {
             toast.error('La data di consegna non puo essere precedente a oggi');
             return;
         }
 
         setIsSaving(true);
         try {
+            if (editingTask) {
+                await worksService.updateTask(editingTask.id, {
+                    description: newTask.description,
+                    start_date: newTask.start_date,
+                    due_date: newTask.due_date || ''
+                });
+                toast.success('Lavorazione aggiornata');
+                setModalVisible(false);
+                fetchTasks();
+                return;
+            }
             await worksService.createTask({
                 patient_id: newTask.patient_id,
                 work_id: Number(newTask.work_id),
@@ -323,6 +349,9 @@ const TasksPage: React.FC = () => {
                                         </div>
                                         <div>
 
+                                            <CButton color='primary' variant="outline" size="sm" onClick={() => handleOpenEdit(task)} title='Modifica'>
+                                                <CIcon icon={cilPencil} size='sm' />
+                                            </CButton>
                                             <CButton color='success' variant="outline" size="sm" onClick={() => navigate(`/works/${task.id}`)} title='Dettagli'>
                                                 <CIcon icon={cilList} size='sm' />
                                             </CButton>
@@ -397,7 +426,7 @@ const TasksPage: React.FC = () => {
             {/* CREATE TASK MODAL */}
             <CModal visible={modalVisible} onClose={() => !isSaving && setModalVisible(false)} size="lg">
                 <CModalHeader>
-                    <CModalTitle>Nuova Lavorazione (Task)</CModalTitle>
+                    <CModalTitle>{editingTask ? 'Modifica Lavorazione' : 'Nuova Lavorazione (Task)'}</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     <div className="mb-3">
@@ -407,6 +436,7 @@ const TasksPage: React.FC = () => {
                             onChange={(p) => setNewTask({ ...newTask, patient_id: p ? p.id : '' })}
                             placeholder="Cerca e seleziona un paziente..."
                             hideDetails={true}
+                            disabled={!!editingTask}
                         />
                     </div>
 
@@ -414,6 +444,7 @@ const TasksPage: React.FC = () => {
                         <CFormLabel>Template Lavorazione</CFormLabel>
                         <CFormSelect
                             value={newTask.work_id}
+                            disabled={!!editingTask}
                             onChange={(e) => {
                                 const wid = Number(e.target.value);
                                 const work = worksList.find(w => w.id === wid);
@@ -456,7 +487,7 @@ const TasksPage: React.FC = () => {
                             <CFormLabel>Data Scadenza (Opzionale)</CFormLabel>
                             <CFormInput
                                 type="date"
-                                min={todayIso()}
+                                min={editingTask ? undefined : todayIso()}
                                 value={newTask.due_date}
                                 onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value })}
                             />
@@ -468,7 +499,7 @@ const TasksPage: React.FC = () => {
                         Annulla
                     </CButton>
                     <CButton color="primary" onClick={handleCreateTask} disabled={isSaving}>
-                        {isSaving ? <CSpinner size="sm" /> : 'Crea Lavorazione'}
+                        {isSaving ? <CSpinner size="sm" /> : (editingTask ? 'Salva' : 'Crea Lavorazione')}
                     </CButton>
                 </CModalFooter>
             </CModal>

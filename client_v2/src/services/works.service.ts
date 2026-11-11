@@ -48,6 +48,11 @@ export const worksService = {
     return response.data.data;
   },
   
+  updateTask: async (id: number, data: Partial<Task>): Promise<Task> => {
+    const response = await apiClient.patch<any>(`${TASKS_URL}/${id}`, data);
+    return response.data.data;
+  },
+
   updateTaskStatus: async (id: number, status: string): Promise<Task> => {
     const response = await apiClient.patch<any>(`${TASKS_URL}/${id}/status`, { status });
     return response.data.data;

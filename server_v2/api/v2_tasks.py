@@ -138,6 +138,22 @@ def update_task_status(task_id):
         logger.error(f"Error updating task status {task_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@tasks_bp.route('/tasks/<int:task_id>', methods=['PATCH'])
+def update_task(task_id):
+    """Edit description, start date and due date of a task."""
+    try:
+        data = request.json or {}
+        service = get_work_service()
+        task = service.update_task(task_id, data)
+        if not task:
+            return jsonify({'success': False, 'error': 'Task not found'}), 404
+        return jsonify({'success': True, 'data': task})
+    except ValidationError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Error updating task {task_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @tasks_bp.route('/tasks/<int:task_id>/reset', methods=['POST'])
 def reset_task(task_id):
     """Reset all steps of a task to pending status."""

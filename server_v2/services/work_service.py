@@ -385,6 +385,42 @@ class WorkService(BaseService):
             logger.error(f"Failed to update task status {task_id}: {e}")
             raise ServiceError(f"Failed to update task: {str(e)}")
 
+    def update_task(self, task_id: int, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Modifica descrizione, data inizio e consegna di una lavorazione.
+        Se la consegna cambia, i todo ancora aperti della lavorazione la seguono e
+        i loro richiami ripartono da zero (altrimenti gli alert sulla vecchia data continuano).
+        """
+        task = self.task_repository.get_task_with_steps(task_id)
+        if not task:
+            return None
+
+        updates = {k: data[k] for k in ('description', 'start_date') if k in data}
+        due_changed = 'due_date' in data and (data['due_date'] or None) != (task.get('due_date') or None)
+        if due_changed:
+            validate_task_due_date(data['due_date'])
+            updates['due_date'] = data['due_date'] or None
+        if not updates:
+            return task
+        updates['updated_at'] = datetime.utcnow().isoformat()
+
+        try:
+            updated = self.task_repository.update(task_id, updates)
+            if due_changed and updates['due_date']:
+                from repositories.todo_repository import TodoRepository
+                todo_repo = TodoRepository(self.db_manager)
+                for todo in todo_repo.get_related_to_task(task_id):
+                    if todo['status'] in ('pending', 'read'):
+                        todo_repo.update(todo['id'], {
+                            'due_date': updates['due_date'],
+                            'reminder_count': 0,
+                            'last_reminder_at': None,
+                        })
+            return updated
+        except Exception as e:
+            logger.error(f"Failed to update task {task_id}: {e}")
+            raise ServiceError(f"Failed to update task: {str(e)}")
+
     def reset_task(self, task_id: int) -> Optional[Dict[str, Any]]:
         """
         Reset all steps of a task to pending status.
