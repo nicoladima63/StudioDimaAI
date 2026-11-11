@@ -43,6 +43,7 @@ interface DataTableProps<T> {
   className?: string;
   tableId?: string; // ID univoco per salvare configurazione colonne
   autoDetectColumns?: boolean; // Auto-genera colonne da dati
+  scrollHeight?: string; // Se presente scorre solo il corpo tabella (es. 'calc(100vh - 460px)'), header fisso
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -59,6 +60,7 @@ const DataTable = <T extends Record<string, any>>({
   className = '',
   tableId = 'default-table',
   autoDetectColumns = false,
+  scrollHeight,
 }: DataTableProps<T>) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -795,7 +797,10 @@ const DataTable = <T extends Record<string, any>>({
 
       {/* Tabella */}
       {!loading && (
-        <div className='table-responsive'>
+        <div
+          className={scrollHeight ? 'table-responsive data-table-scroll' : 'table-responsive'}
+          style={scrollHeight ? { maxHeight: scrollHeight, overflowY: 'auto' } : undefined}
+        >
           <CTable striped hover style={{ tableLayout: 'fixed' }}>
             <CTableHead>
               <CTableRow>

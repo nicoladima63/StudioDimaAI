@@ -186,6 +186,7 @@ const PazientiTable: React.FC<PazientiTableProps> = ({
       className="pazienti-table"
       tableId="pazienti-table"
       autoDetectColumns={true}
+      scrollHeight="calc(100vh - 480px)"
     />
   );
 };

@@ -118,3 +118,10 @@ body.resizing {
 body.resizing * {
   user-select: none !important;
 }
+/* Header fisso quando scorre solo il corpo (prop scrollHeight) */
+.data-table .data-table-scroll .table > thead > tr > th {
+  position: sticky !important; /* vince su position: relative !important della regola sopra */
+  top: 0;
+  z-index: 2;
+  background-color: var(--cui-body-bg, #fff);
+}
