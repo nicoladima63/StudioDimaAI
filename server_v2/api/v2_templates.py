@@ -10,6 +10,8 @@ templates_v2_bp = Blueprint('templates_v2', __name__)
 def get_sms_templates():
     """Restituisce tutti i template SMS disponibili."""
     try:
+        from services.appointment_reminder_service import _ensure_reminder_templates
+        _ensure_reminder_templates()  # i testi dei reminder compaiono anche prima del primo invio
         template_manager = get_template_manager()
         templates = template_manager.get_all_templates()
         return jsonify({'success': True, 'data': templates})

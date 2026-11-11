@@ -51,6 +51,10 @@ const PLACEHOLDERS = [
   '{tipo_richiamo}',
   '{medico}',
   '{tempo_richiamo}',
+  // Variabili dei reminder appuntamento
+  '{nome}',
+  '{data}',
+  '{ora}',
 ];
 
 const TemplatesPage: React.FC = () => {
@@ -70,6 +74,8 @@ const TemplatesPage: React.FC = () => {
   // Stato per l'anteprima
   const [previewData, setPreviewData] = useState<any>({
     nome_completo: "Mario Rossi",
+    nome: "Rossi",
+    data: "10/10",
     url: "https://studiodimartino.eu",
     data_appuntamento: "10/10/2025",
     ora_appuntamento: "15:00",
