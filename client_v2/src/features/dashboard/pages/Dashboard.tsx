@@ -5,13 +5,11 @@ import { cilList, cilMediaPlay, cilMediaStop, cilSettings } from '@coreui/icons'
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth.store';
 import CalendarAutomation from '../components/CalendarAutomation';
-import RecallAutomationCard from '../components/RecallAutomationCard';
-import ReminderAutomationCard from '../components/ReminderAutomationCard';
 import MonitorPrestazioniService, { MonitorSummary, } from '@/services/api/monitorPrestazioni';
 import MonitorRules from '../components/MonitorRules';
 import ActiveWorkCard from '../components/ActiveWorkCard';
 import TodoWidget from '../components/TodoWidget';
-import WhatsAppStatusWidget from '../components/WhatsAppStatusWidget';
+import WhatsAppReminderCard from '../components/WhatsAppReminderCard';
 import { AutoSyncModal } from '@/features/calendar/components/AutoSyncModal';
 import { calendarHealthService } from '@/features/calendar/services/calendarHealthCheck';
 import { usePermissions } from '@/hooks/usePermissions'
@@ -186,15 +184,24 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content  */}
       <CRow className="g-3">
+                {/* Impostazioni calendario — solo admin */}
+        {hasRole('admin','dottore') && (
+        <CCol xs={12}>
+          <CalendarAutomation />
+        </CCol>
+        )}
+
         {/* Todo Widget — sempre visibile */}
         <CCol xs={12} md={3}>
           <TodoWidget />
         </CCol>
 
-        {/* Stato WhatsApp — sempre visibile */}
-        <CCol xs={12} md={1}>
-          <WhatsAppStatusWidget />
+        {/* WhatsApp Reminder — solo non admin */}
+        {!hasRole('admin') && (
+        <CCol xs={12} md={4}>
+          <WhatsAppReminderCard />
         </CCol>
+        )}
 
         {/* Active Works — sempre visibile */}
         <CCol xs={12} md={true}>
@@ -286,39 +293,6 @@ const Dashboard: React.FC = () => {
         </CCol>
         )}
 
-        {/* Automazioni — solo admin/dottore */}
-        {hasRole('admin','dottore') && (
-        <CCol xs={12} md={true}>
-          <CCard>
-            <CCardHeader>
-              <CRow>
-                <CCol md={6}>
-                  <h5 className='mb-0'>
-                    <CIcon icon={cilList} className='me-2' />
-                    Automazioni Configurate
-                  </h5>
-                </CCol>
-              </CRow>
-            </CCardHeader>
-            <CCardBody>
-              <CRow>
-                <CCol md={6}>
-                  <h6 className='mb-0'>Sincro Calendario</h6>
-                  <CalendarAutomation />
-                </CCol>
-                <CCol md={3}>
-                  <h6 className='mb-0'>Richiami</h6>
-                  <RecallAutomationCard />
-                </CCol>
-                <CCol md={3}>
-                  <h6 className='mb-0'>Promemoria</h6>
-                  <ReminderAutomationCard />
-                </CCol>
-              </CRow>
-            </CCardBody>
-          </CCard>
-        </CCol>
-        )}
       </CRow>
 
       {/* Auto-Sync Modal */}
