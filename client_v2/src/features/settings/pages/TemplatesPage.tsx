@@ -299,7 +299,7 @@ const TemplatesPage: React.FC = () => {
             {activeTab === 'sms' && (
               <>
                 <CButton color='primary' onClick={() => handleCreateEditClick()} disabled={loading}>
-                  <CIcon icon={cilPlus} className='me-1' />Nuovo Template SMS
+                  <CIcon icon={cilPlus} className='me-1' />Nuovo Template Messaggio
                 </CButton>
                 <CButton color='info' onClick={loadTemplates} disabled={loading}>
                   <CIcon icon={cilReload} className='me-1' />Aggiorna
@@ -324,7 +324,7 @@ const TemplatesPage: React.FC = () => {
         <CNav variant='tabs' className='mb-3'>
           <CNavItem>
             <CNavLink active={activeTab === 'sms'} onClick={() => setActiveTab('sms')} style={{ cursor: 'pointer' }}>
-              Template SMS Reminder
+              Template Messaggi
             </CNavLink>
           </CNavItem>
           <CNavItem>
@@ -343,11 +343,11 @@ const TemplatesPage: React.FC = () => {
 
         <CCard className='mb-4'>
           <CCardHeader>
-            <h5 className='mb-0'>Lista Template SMS</h5>
+            <h5 className='mb-0'>Lista Template Messaggi</h5>
           </CCardHeader>
           <CCardBody>
             {loading && <p>Caricamento template...</p>}
-            {!loading && templates.length === 0 && <p>Nessun template SMS trovato.</p>}
+            {!loading && templates.length === 0 && <p>Nessun template trovato.</p>}
             {!loading && templates.length > 0 && (
               <CTable hover responsive striped>
                 <CTableHead>
@@ -487,7 +487,7 @@ const TemplatesPage: React.FC = () => {
 
       {/* Modal Creazione/Modifica Template SMS */}
       <CModal visible={showModal} onClose={() => setShowModal(false)} backdrop='static' size='xl'>
-        <CModalHeader>Modifica Template SMS</CModalHeader>
+        <CModalHeader>Modifica Template Messaggio</CModalHeader>
         <CModalBody>
           <CRow> {/* Contenitore principale a due colonne */}
             <CCol md={6}> {/* Colonna sinistra: Campi di compilazione */}
@@ -587,7 +587,7 @@ const TemplatesPage: React.FC = () => {
       <CModal visible={showDeleteModal} onClose={() => setShowModal(false)} backdrop='static'>
         <CModalHeader>Conferma Eliminazione</CModalHeader>
         <CModalBody>
-          <p>Sei sicuro di voler eliminare il template SMS "{templateToDelete?.name}"?</p>
+          <p>Sei sicuro di voler eliminare il template "{templateToDelete?.name}"?</p>
           <p className='text-danger'><CIcon icon={cilWarning} className='me-1' /> Attenzione: Se il template è in uso da regole di automazione, l\'eliminazione verrà bloccata.</p>
         </CModalBody>
         <CModalFooter>

@@ -64,7 +64,52 @@ REMINDER_MESSAGES = {
         ),
         'sms': "Studio Dr.Di Martino: promemoria visita OGGI ore {ora}. Info: 0574712060",
     },
+    # Recupero dei reminder saltati (non 24h): l'appuntamento e' oggi
+    'recovery_today': {
+        'wa': (
+            "Ciao {nome}! Oggi alle {ora} hai un appuntamento dal dentista "
+            "(Studio Dr. Di Martino). A presto!"
+        ),
+    },
 }
+
+_TEMPLATES_READY = False
+
+
+def _ensure_reminder_templates() -> None:
+    """Porta in sms_templates i testi di REMINDER_MESSAGES (reminder_<tipo>_<canale>), senza toccare quelli gia' presenti."""
+    global _TEMPLATES_READY
+    if _TEMPLATES_READY:
+        return
+    from core.database_manager import get_database_manager
+    with get_database_manager().transaction() as conn:
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS sms_templates ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, content TEXT NOT NULL, "
+            "description TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+            "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+        )
+        for rtype, channels in REMINDER_MESSAGES.items():
+            for ch, content in channels.items():
+                conn.execute(
+                    "INSERT OR IGNORE INTO sms_templates (name, content, description) VALUES (?, ?, ?)",
+                    (f"reminder_{rtype}_{ch}", content,
+                     f"Reminder appuntamento '{rtype}' via {ch}. Variabili: {{nome}} {{data}} {{ora}}"),
+                )
+    _TEMPLATES_READY = True
+
+
+def _render_reminder(reminder_type: str, channel: str, **values) -> str:
+    """Testo del reminder dal template in DB; se manca o e' rotto (variabile sbagliata) usa il default nel codice."""
+    default = REMINDER_MESSAGES[reminder_type][channel]
+    try:
+        _ensure_reminder_templates()
+        from core.template_manager import get_template_manager
+        tpl = get_template_manager().get_template_by_name(f"reminder_{reminder_type}_{channel}")
+        return (tpl['content'] if tpl else default).format(**values)
+    except Exception as e:
+        logger.warning(f"Template reminder_{reminder_type}_{channel} non utilizzabile ({e}), uso il testo di default")
+        return default.format(**values)
 
 
 _sent_this_session: set[str] = set()  # chiave: "patient_id|ap_date|ap_time|type"
@@ -579,8 +624,7 @@ def send_whatsapp_reminder(phone: str, patient_name: str, ap_date: str, ap_time:
     parts = patient_name.split() if patient_name else []
     nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
     data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
-    tpl = REMINDER_MESSAGES[reminder_type]['wa']
-    text = tpl.format(nome=nome, data=data_fmt, ora=ap_time)
+    text = _render_reminder(reminder_type, 'wa', nome=nome, data=data_fmt, ora=ap_time)
     return send_whatsapp_text(phone, text)
 
 
@@ -589,8 +633,7 @@ def send_sms_reminder(phone: str, patient_name: str, ap_date: str, ap_time: str,
     from services.sms_service import SMSService
     from core.environment_manager import environment_manager, ServiceType, Environment
     data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
-    tpl = REMINDER_MESSAGES[reminder_type]['sms']
-    text = tpl.format(data=data_fmt, ora=ap_time)
+    text = _render_reminder(reminder_type, 'sms', nome=patient_name, data=data_fmt, ora=ap_time)
 
     environment_manager.set_environment(ServiceType.SMS, Environment('prod'))
     svc = SMSService()
@@ -786,9 +829,9 @@ def run_followup_reminders(hours_before: int = 3, dry_run: bool = False) -> dict
                 'type': 'followup',
                 'appointment_date': ap_date,
                 'appointment_time': ap_time,
-                'message': REMINDER_MESSAGES['followup'][channel == 'whatsapp' and 'wa' or 'sms'].format(
-                    data=datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m'), 
-                    ora=ap_time
+                'message': _render_reminder(
+                    'followup', 'wa' if channel == 'whatsapp' else 'sms',
+                    nome=name, data=datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m'), ora=ap_time
                 )
             })
             continue
@@ -873,15 +916,12 @@ def run_reminders(reminder_type: str, dry_run: bool = False, patient_filter: str
                     stats['sent_sms'] += 1
                 
                 # Record simulated action
-                tpl = REMINDER_MESSAGES[reminder_type][channel == 'whatsapp' and 'wa' or 'sms']
                 data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
-                if channel == 'whatsapp':
-                    parts = name.split() if name else []
-                    nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
-                    text = tpl.format(nome=nome, data=data_fmt, ora=ap_time)
-                else:
-                    text = tpl.format(data=data_fmt, ora=ap_time)
-                
+                parts = name.split() if name else []
+                nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
+                text = _render_reminder(reminder_type, 'wa' if channel == 'whatsapp' else 'sms',
+                                        nome=nome, data=data_fmt, ora=ap_time)
+
                 stats['simulated_actions'].append({
                     'patient_id': pid,
                     'patient_name': name,
@@ -941,13 +981,9 @@ def _recovery_message(patient_name: str, ap_date: str, ap_time: str, reminder_ty
     """Genera il testo usato sia dall'anteprima sia dall'invio effettivo."""
     parts = patient_name.split() if patient_name else []
     nome = parts[-1] if len(parts) > 1 else (parts[0] if parts else 'paziente')
-    if reminder_type == '24h':
-        data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
-        return REMINDER_MESSAGES['24h']['wa'].format(nome=nome, data=data_fmt, ora=ap_time)
-    return (
-        f"Ciao {nome}! Oggi alle {ap_time} hai un appuntamento dal dentista "
-        "(Studio Dr. Di Martino). A presto!"
-    )
+    data_fmt = datetime.strptime(ap_date, '%Y-%m-%d').strftime('%d/%m')
+    return _render_reminder('24h' if reminder_type == '24h' else 'recovery_today', 'wa',
+                            nome=nome, data=data_fmt, ora=ap_time)
 
 
 def run_missed_whatsapp_reminders(

@@ -79,7 +79,7 @@ const navigation: NavItem[] = [
     iconName: 'Settings',
     items: [
       { name: 'Scheduler', to: '/settings/scheduler', iconName: 'Clock', allowedRoles: ['admin', 'dottore'] },
-      { name: 'Template SMS', to: '/settings/template', iconName: 'MessageSquare', allowedRoles: ['admin'] },
+      { name: 'Template Messaggi', to: '/settings/template', iconName: 'MessageSquare', allowedRoles: ['admin'] },
       { name: 'Automazioni', to: '/settings/automazioni', iconName: 'Zap', allowedRoles: ['admin'] },
       { name: 'WhatsApp Reminder', to: '/settings/evolution', iconName: 'Phone'},
       { name: 'SEO', to: '/settings/seo', iconName: 'Search', allowedRoles: ['admin','dottore'] },
