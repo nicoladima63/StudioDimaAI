@@ -211,7 +211,7 @@ const CalendarSettings: React.FC = () => {
         setMinute(parseInt(m, 10));
       }
       
-      setWeeksToSync(settings.calendar_weeks_to_sync ?? 3);
+      setWeeksToSync(settings.calendar_sync_weeks_to_sync ?? 3);
       
       // Carica database mode
       const dbResponse = await environmentService.getServiceEnvironment('database');

@@ -25,7 +25,8 @@ export interface SchedulerSettings {
     calendar_sync_times: string[];
     calendar_studio_blu_id: string;
     calendar_studio_giallo_id: string;
-    calendar_weeks_to_sync?: number; 
+    calendar_weeks_to_sync?: number; // chiave inviata in salvataggio
+    calendar_sync_weeks_to_sync?: number; // chiave restituita dal server in lettura
 }
 
 export interface LogEntry {
